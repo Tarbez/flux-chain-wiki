@@ -95,7 +95,7 @@ const KIT = {
 const L = {
   tabs: { session: 'Session', wallet: 'Wallet', keys: 'Signing keys', contacts: 'Contacts', network: 'Network' },
   signIn: 'Sign in', create: 'Create identity',
-  chooseKit: /^(Sign in with your Auth Kit|Select your Auth Kit)$/,
+  chooseKit: /^(Choose FXN ID file|Choose your FXN ID file|Sign in with your Auth Kit|Select your Auth Kit)$/,
   signedOutTitle: 'Sign in to DEFXN', identityId: /^identity id$/i, copyGhost: 'Copy identity ID', copyWallet: 'Copy wallet address', copyKey: 'Copy public key',
   send: 'Send FXN', refresh: 'Refresh', verify: 'Verify identity'
 };
@@ -291,9 +291,9 @@ async function signedOut(browser, base) {
     check(links.includes('bundledeployer') && links.includes('account/domains'), `the two ways on (bundle deployer, domains) are visible links: ${JSON.stringify(links)}`);
     check(await account(page).locator('a[href="/admin"]').isVisible(), 'the publishing link points at /admin (local development only)');
     /* the jargon is explained where it first appears (Phase 2): "What is an Auth Kit?" opens in place */
-    await account(page).getByRole('button', { name: 'What is an Auth Kit?' }).click();
+    await account(page).getByRole('button', { name: 'What is an FXN ID file?' }).click();
     const explained = await visibleText(account(page));
-    check(/recovery file/i.test(explained) && /never uploaded/i.test(explained) && /Ghost ID/.test(explained), '"What is an Auth Kit?" says what it is, that it stays on the device, and what developers call the identity ID');
+    check(/FXN ID file/i.test(explained) && /never uploaded/i.test(explained) && /Ghost ID/.test(explained), '"What is an Auth Kit?" says what it is, that it stays on the device, and what developers call the identity ID');
   });
 
   await step('2 sign-in / create toggle', async () => {
@@ -459,14 +459,14 @@ async function signedIn(browser, base) {
     /* network switching */
     const options = account(page).getByRole('option');
     check(await options.count() === 2, `two networks are offered (${await options.count()})`);
-    check(await options.filter({ hasText: 'Production' }).getAttribute('aria-selected') === 'true', 'Production is the selected network');
+    check(await options.filter({ hasText: 'Public devnet' }).getAttribute('aria-selected') === 'true', 'Public devnet (the public node; nothing is live) is the selected network');
     const before = wire.urls.length;
     await options.filter({ hasText: 'Local devnet' }).click();
     await until(() => wire.urls.slice(before).includes('ws://127.0.0.1:19501/ws'), 'choosing Local devnet reconnects to ws://127.0.0.1:19501/ws', 15000);
     check(await page.evaluate(() => localStorage.getItem('defxn.dense-wire.network.v1')) === 'ws://127.0.0.1:19501/ws', 'the chosen network is remembered in this browser');
     check(await options.filter({ hasText: 'Local devnet' }).getAttribute('aria-selected') === 'true', 'Local devnet shows as selected');
-    await options.filter({ hasText: 'Production' }).click();
-    await until(() => wire.urls[wire.urls.length - 1] === 'wss://nodes.defxn.com/ws', 'choosing Production goes back to the production socket', 15000);
+    await options.filter({ hasText: 'Public devnet' }).click();
+    await until(() => wire.urls[wire.urls.length - 1] === 'wss://nodes.defxn.com/ws', 'choosing Public devnet goes back to the public node socket', 15000);
   });
 
   await step('8 send', async () => {
@@ -682,7 +682,7 @@ async function signedIn(browser, base) {
     check(await tab(page, L.tabs.contacts).count() === 0 || !(await tab(page, L.tabs.contacts).first().isVisible()), 'no Contacts tab without the Auth Kit');
     check(await tab(page, L.tabs.wallet).isVisible() && await tab(page, L.tabs.network).isVisible(), 'Wallet and Network stay available for a saved identity');
     await tab(page, L.tabs.wallet).click();
-    check(/Unlock your Auth Kit to read your FXN balance/.test(await visibleText(account(page))), 'the wallet says why there is no balance (unlock first)');
+    check(/Choose your FXN ID file to read your FXN balance/.test(await visibleText(account(page))), 'the wallet says why there is no balance (unlock first)');
     check(await account(page).getByRole('button', { name: L.send, exact: true }).isDisabled(), 'Send FXN is disabled without the Auth Kit');
     check(wire.lines.filter((l) => l.startsWith('NATIVE_BALANCE')).length > 0, '(the wallet had read balances while unlocked)');
     await tab(page, L.tabs.session).click();
@@ -712,9 +712,9 @@ async function rememberedInProduction(browser, base) {
     check(await sessionState(page) === 'remembered', 'a reload keeps the identity but not the signer');
     const text = await visibleText(account(page));
     check(/Identity saved · not signed in/i.test(text), `the status says "Identity saved · not signed in" (${text.replace(/\s+/g, ' ').slice(0, 160)})`);
-    check(/Your identity is saved here\. Your Auth Kit is not saved on this device\./.test(text), 'the lede says the Auth Kit is not saved on this device');
-    check(/Select your Auth Kit again/i.test(text), 'the Session view asks for the Auth Kit again');
-    check(await account(page).getByRole('button', { name: /^Select your Auth Kit$/ }).isVisible(), 'the sign-in button reads "Select your Auth Kit"');
+    check(/Your identity is saved here\. Your FXN ID file is not kept on this device\./.test(text), 'the lede says the Auth Kit is not saved on this device');
+    check(/Choose your FXN ID file again/i.test(text), 'the Session view asks for the Auth Kit again');
+    check(await account(page).getByRole('button', { name: /^Choose your FXN ID file$/ }).isVisible(), 'the sign-in button reads "Select your Auth Kit"');
     check(await account(page).locator('[data-account-forget]').isVisible(), '"Forget saved details" is offered');
   });
   await page.close();

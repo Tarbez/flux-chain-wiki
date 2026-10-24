@@ -1,4 +1,7 @@
-/* DEFXN mockup app: home's identity chain, a helix of glass blocks that winds up to a lit person block
+/* Moved to js/world/ (2026-10-24, the 3D port; the mockup loads it from here). It draws only if home has a
+   .idcard [data-helix] box (the mockup's home, or a site home marked [data-world-home]) when it loads.
+
+   DEFXN mockup app: home's identity chain, a helix of glass blocks that winds up to a lit person block
    (direction board "Record descent", card "Identity chain" and storyboard 04, 2026-10-24).
 
    Where it draws. In the one world (chains-scene.js), on the canvas under the page, glued to the box
@@ -27,7 +30,7 @@
   var S = window.DEFXNScene;
   if (!S || !S.ok || !S.world) return;
   var W = S.world, k = W.k, THREE = W.THREE, ease = W.ease, clamp01 = ease.clamp01;
-  var home = document.querySelector('.view[data-view="home"]'), box = home && home.querySelector('.idcard [data-helix]');
+  var home = document.querySelector('.view[data-view="home"], [data-world-home]'), box = home && home.querySelector('.idcard [data-helix]');
   if (!box) return;
   var card = box.closest('.idcard'), TAU = Math.PI * 2, PI = Math.PI;
 
@@ -289,7 +292,7 @@
     spin.go(spin.to + PI, 820, now);
   });
   /* a click opens the identity chain's page (the box carries data-ui, so the click picks no ring behind the card) */
-  box.addEventListener('click', function () { location.hash = '#/ring?i=identity-1'; });
+  box.addEventListener('click', function () { S.open('ring', { i: 'identity-1' }); });
 
   /* the box can move without the world moving (a layout change, a transition, a scroll): draw again */
   var lastRect = '';
@@ -312,7 +315,7 @@
   var LM = new THREE.Matrix4(), FB = new THREE.Matrix4(), FP = new THREE.Matrix4(), dbg = { blocks: B.map(function () { return new THREE.Matrix4(); }), on: B.map(function () { return false; }), person: new THREE.Matrix4(), pOn: false };
   W.after(function (ms, now) {
     if (!homeFirst && W.view() === 'home') { homeFirst = true; onHomeFirst(); }
-    var cardOn = home.classList.contains('on') || home.classList.contains('out'), hw = W.homeW();
+    var cardOn = home.classList.contains('on') || home.classList.contains('out') || (home.hasAttribute('data-world-home') && !home.closest('[hidden]')), hw = W.homeW();
     var r = box.getBoundingClientRect();
     if (!cardOn || r.width < 8 || r.height < 8 || r.bottom < 0 || r.top > innerHeight) { showAll(false); return; }
     showAll(true);

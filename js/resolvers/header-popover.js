@@ -11,9 +11,12 @@ var ArkHeaderPopover = (function () {
     var trigger = root.querySelector('[data-ark-part="popover-trigger"]');
     var panel = root.querySelector('[data-ark-part="popover-panel"]');
     var old = spec.trigger;
+    /* never carried: the new node's own Ark part, and a skin's marks (data-ark-skin-*, js/ark/skin-parts.js's
+       data-defxn-part). Copied, they outlived the skin: its undo clears the nodes it marked, and the old button is gone. */
+    var SKIN_OWNED = /^data-(ark-part|ark-skin.*|defxn-part)$/;
     function carry(from, to, skip) {
       Array.prototype.slice.call(from.attributes).forEach(function (attr) {
-        if (skip.indexOf(attr.name) < 0) to.setAttribute(attr.name, attr.value);
+        if (skip.indexOf(attr.name) < 0 && !SKIN_OWNED.test(attr.name)) to.setAttribute(attr.name, attr.value);
       });
     }
     carry(spec.wrap, root, ['class']);

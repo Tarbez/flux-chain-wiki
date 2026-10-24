@@ -151,6 +151,8 @@ approximation. It is the only two-way message boundary in the editor. Both direc
 | `defxn-cms-preview-element-motion-command` / `-preview` | `patch` / `key` | edits / plays an element's in/out animation |
 | `defxn-cms-preview-make-component` | -- (`js/admin/toolbar.js`) | captures the selection as a component |
 | `defxn-cms-preview-highlight-point` | `id` (`js/admin/library.js`) | outlines an insertion point |
+| `defxn-cms-preview-skin` | `sample` (`''`, `27`, `263` or `512`), `policy` (the draft skin policy) | the Skin lab: applies that sample card's skin on the page with the draft policy in place of the published one, or takes the skin off for `''`; no remount |
+| `defxn-cms-preview-skin-focus` | `selector` (`''` clears) | outlines the first element that matches, with one class (`defxn-skin-focus`), for a moment |
 
 **Preview -> editor** (posted by `js/main.js`; handled in `js/admin/bridge.js`'s one listener):
 
@@ -162,6 +164,7 @@ approximation. It is the only two-way message boundary in the editor. Both direc
 | `defxn-cms-preview-layout-change` / `-layout-replace` / `-layout-history` | a patch or the whole layout; undo/redo availability | applies it to the editor's layout draft |
 | `defxn-cms-preview-components-replace` / `-states-replace` / `-states-showing` | the whole draft; which state each group shows | adopts the draft |
 | `defxn-cms-preview-canvas-transitions-replace` / `-element-motion-replace` | the whole draft | adopts the draft |
+| `defxn-cms-skin-report` | `sample`, `on`, `family`, `report` (Ark UI's skin report), `ruleKeys` (each reported part's rules name, so `card` takes `CARD`'s switches), `offered` (the rules the card sends, whatever part wears them), `codeAllow` (the site's table, `DefxnSkinParts.ALLOW`), `error` | the Skin lab redraws its rows from the canvas's own report |
 | `defxn-cms-preview-notice` | `message` | toast (a refusal that says what it needs) |
 | `defxn-cms-preview-context-menu` | `open` | hides the toolbar while the preview's menu is open |
 | `defxn-cms-preview-enter-canvas-mode` | -- | opens the Background popover |
@@ -251,9 +254,9 @@ Field rows come from the shared `ctlField` / `ctlSelectField` (`js/admin/control
 
 `ArkAdminStore.drafts()` in `js/admin/store.js` is the one list of what the editor saves,
 in save order: 4 per-item drafts (`manifests`, `articles`, `assets`, `secrets`: one file per
-id under `js/content/<dir>/` plus an index) and 9 single-object drafts (`meshSettings`,
+id under `js/content/<dir>/` plus an index) and 11 single-object drafts (`meshSettings`,
 `theme`, `settingsDefaults`, `seo`, `layout`, `components`, `states`, `canvasTransitions`,
-`elementMotion`: one `js/content/<file>-data.js` each). Each entry names its content module
+`elementMotion`, `world`, `skinPolicy`: one `js/content/<file>-data.js` each; `world` and `skinPolicy` are written as FLX records and previewed by messages of their own). Each entry names its content module
 (`global`), its label, and -- for single drafts that key anything by page or route --
 `byItem` / `byRoute`. It exists because Save once wrote 13 drafts while the publish archive,
 built from its own list, carried 8.
@@ -959,7 +962,7 @@ the drafts in `versions-glue.js`. The history lives in the connected project fol
   `legacy/<hash>.flx` -- marks that the old `head.flx` pointer was carried into `heads/`.
 - `head.flx` is legacy and read-only: histories before 2026-10-18 kept one mutable pointer.
 - A `<hash>` is SHA-256 of the value's `JSON.stringify` form; files hold the value in ARK's
-  structured-state FLX grammar (`js/admin/vendor/flx-state-grammar.js`), exact to the byte,
+  structured-state FLX grammar (`js/vendor/flx-state-grammar.js`, shared with the public site since 2026-10-24), exact to the byte,
   so every read re-derives the address and refuses a mismatch.
 - Records link backwards (`prev`, `joins`); a restore or an import is a new record
   (`restoredFrom`, `importedFrom`), never a rewrite. Heads are derived: a record nothing else
@@ -1034,6 +1037,7 @@ is imported with `A.later(name)`. Shared mutable state is one object, `A.state`
 | `panels.js` | where every form panel is mounted (Media, Vault, Theme view, the sheet: Page fields and Mesh), `refreshPanels()`, `openPageFields()`, `openMeshSheet()`, `itemForRoute()` |
 | `toolbar-sections.js`, `toolbar.js` | the toolbar taxonomy and section builders; the toolbar shell |
 | `library.js`, `sitemap.js`, `design-check.js` | the Library tab; the Sitemap view; the Design check |
+| `skin-lab.js` | More > Skin lab: a sample card's skin on the canvas, one row per part from Ark UI's report, one switch per part and rule; edits the draft skin policy (`js/content/skin-policy.js`) |
 | `mesh.js`, `project.js` | the Mesh view (drawn into the sheet) and Publish; the project folder and account menu |
 | `versions-glue.js` | the drafts <-> `ArkVersions` / `versions-panel.js` glue, and the root search files |
 | `admin.js` | starts the editor: the save shortcut, the unsaved-work warning, `window.ArkAdminApp`, the first load |

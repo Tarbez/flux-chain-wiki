@@ -10,8 +10,10 @@ After any change here, run this in `docs/home-redesign/nft/`:
 node make-layers.mjs
 ```
 
-It writes `layers-bundle.js` and `builders-bundle.js`, which the card pages read. It stops and
-names the fix when a file breaks a rule below.
+It writes `layers-bundle.js`, which the design pages read. It also writes the site's files, at the
+site root: `js/nft/skin-bundle.js` (the table), `js/nft/art-bundle.js` (the 3D settings) and one file
+per chrome drawing in `js/nft/chrome/` (see "Skin rules for Ark UI"). Builders live in
+`js/nft/builders/`, and a page loads a builder file only when a card uses one of its builders. It stops and names the fix when a file breaks a rule below.
 
 ## File names
 
@@ -101,6 +103,22 @@ card fills in the field. The fields are `genesisId`, `identity`, `name`, `status
 Add `data-char="0"` to show only the first character of a field, `data-char="1"` the second, and so
 on. Use `font-family="JetBrains Mono, monospace"` and a font size in card units: 13 matches the
 labels.
+
+## Skin rules for Ark UI
+
+A site that uses Ark UI gets the card as a skin recipe (`js/nft/skin-recipe.js` at the site root,
+`DefxnSkin.recipe`). It runs on `js/nft/skin-bundle.js`, which `make-layers.mjs` also writes, and loads
+the six chrome drawings a card wears from `js/nft/chrome/`. The recipe gives the
+tokens, the chrome as plain SVG data, and rules from closed sets. A frame's rules are measured from its
+drawing: `frame` is `full`, `corners`, `bracket` or `ticket`, and `edge` is `cut`, `soft` or `square`.
+Where the measurement reads a frame wrong, declare them on the frame's root:
+
+```
+<svg ... data-slot="frame" data-rule-frame="full" data-rule-edge="cut">
+```
+
+`make-layers.mjs` refuses any other value. Rules come from the elements a card wears, never from its
+rarity.
 
 ## Review: keep elements that break the design out
 

@@ -16,6 +16,7 @@
   var S = window.DEFXNScene;
   if (!S || !S.ok || !S.world) return;
   var W = S.world, k = W.k, THREE = W.THREE, V = W.V, ease = W.ease, clamp01 = ease.clamp01, win = W.win, N = W.N;
+  var grow = W.grow, num = W.num, anchorAt = W.anchorAt, follower = W.follower;
   var LIFT = k.LIFT, TAU = Math.PI * 2, PI = Math.PI;
   var I = window.DEFXN_IDENTITY || { name: '', devices: [] };
   var M = new THREE.Matrix4(), M2 = new THREE.Matrix4(), M3 = new THREE.Matrix4(), T = new THREE.Matrix4(), ZERO = new THREE.Matrix4().makeScale(1e-4, 1e-4, 1e-4);
@@ -29,19 +30,6 @@
     return (out || M2).copy(F).multiply(T);
   }
   function pt(F, x, y, z) { return new THREE.Vector3(x, y, z).applyMatrix4(F); }
-  function grow(w, a, b) { var u = clamp01((w - a) / (b - a)); return u <= 0 ? 1e-4 : u < 1 ? ease.out(u) : 1; }
-  function num(s, lo, hi) { var n = parseInt(s, 10); return isNaN(n) ? lo : Math.min(hi, Math.max(lo, n)); }
-  function anchorAt(out, x, y, z, s) { out.pos.set(x, y - (LIFT + .5) * s, z); out.quat.identity(); out.s = s; }
-  function follower(n, tau) {
-    var f = { v: new Float32Array(n), last: 0 };
-    f.step = function (now, want) {
-      var dt = f.last ? Math.min(64, now - f.last) : 16, a = k.reduced ? 1 : 1 - Math.exp(-dt / (tau || 140)), moving = false;
-      f.last = now;
-      for (var i = 0; i < n; i++) { var t = want(i), d = t - f.v[i]; if (Math.abs(d) > .002) { f.v[i] += d * a; moving = true; } else f.v[i] = t; }
-      if (moving) { k.wake(60); k.moved(60); }
-    };
-    return f;
-  }
 
   /* ---------- tones ---------- */
   var col = new THREE.Color(), quiet = new THREE.Color(), teal = new THREE.Color(), slate = new THREE.Color(), dark = new THREE.Color(), graphite = new THREE.Color();

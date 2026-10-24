@@ -44,8 +44,9 @@ for (let i = 1; i <= 6; i++) assert(how.fields['STEP' + i] && how.fields['BODY' 
 // was on this page until 2026-10-19; it must not come back in any form.
 assert(!Object.values(how.fields).some((field) => /quorum|375 times a second|three attestations/i.test(field.value)), 'the retired certified-fabric path is not presented on the deploy page');
 
-assert.equal(manifest('download').title, 'Run DEFXN from source');
-assert(value('download', 'DECK').includes('Public repository URLs and packaged downloads are not yet verified'));
+/* 2026-10-24: /download was "Run DEFXN from source". The browser rebrand and the journey fix made it lead with the browser. The owner then named that product DEFXN Grid (2026-10-24), so the page leads with DEFXN Grid, which has no public download, and the miner steps stay below. */
+assert.equal(manifest('download').title, 'Get DEFXN Grid');
+assert(value('download', 'DECK').includes('no download address is published'));
 assert.equal(manifest('deploy').title, 'Create or join a network');
 /* the deck leads with what a named network does, then its limit (ledger recheck 2026-10-21: it opened with a list
    of what networks do not do); the limit is still said */

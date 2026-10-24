@@ -41,7 +41,7 @@ import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import { normalizeName } from '../../../bundle-deploy/src/name-record.js';
-import { buildMarkerFields, publicMarkerSigningMessage, submitSignedMarker, verifyMarkerSignature }
+import { buildMarkerFields, publicMarkerSigningMessage, submitSignedMarker, markerSignatureVerifies }
   from '../../../bundle-deploy/src/public-marker.js';
 import { decodeSite, encodeSite, siteProblems } from './site-bundle.mjs';
 
@@ -327,7 +327,8 @@ export function createPublisher({ name = DEFAULT_NAME, statusBase = 'http://127.
       throw new PublishRefusal('No signed public marker was supplied.', 'a marker object with the owner\'s signature over markerSigningMessage.', 'sign prepare\'s markerSigningMessage and attach it as marker.signature, then publish again.');
     }
     const { signature: markerSignature, ...markerFields } = signedMarker;
-    if (!verifyMarkerSignature(markerFields, markerSignature)) {
+    /* awaited: Ed25519 verification is async (bundle-deploy's public-marker.js); the retired sync verifier threw on every call */
+    if (!(await markerSignatureVerifies(markerFields, markerSignature))) {
       throw new PublishRefusal('The public marker signature does not verify against its owner key.', 'a valid Ed25519 signature over the marker signing message.', 'sign again with the owner key, over exactly prepare\'s markerSigningMessage.', 403);
     }
     const cid = markerFields.cid;

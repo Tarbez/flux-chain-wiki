@@ -62,7 +62,7 @@
   });
 
   /* the apps the page offers, in the order a visitor meets them (their words and addresses are DOWNLOAD.APP.<KEY>.*) */
-  var APPS = ['CLI', 'DESKTOP', 'BROWSER', 'MOBILE'];
+  var APPS = ['BROWSER', 'MOBILE', 'DESKTOP', 'CLI'];
   /* the one case rule for a label a manifest authored in capitals (js/ark/page-kit.js) */
   function sentence(text) { return ArkUI.sentenceCase(text); }
 
@@ -156,7 +156,8 @@
         crumbs: [{ label: 'Home', href: 'route:zero' }, { label: manifest.title }],
         /* no eyebrow: "RUN DEFXN / FROM SOURCE" repeated the breadcrumb above it (first-visit audit 2026-10-22, P2) */
         title: copy('TITLE'),
-        actions: [{ label: guide.label, href: guide.href, tone: 'secondary' }],
+        /* the one thing a newcomer can do today: the browser has no public download, the FXN ID is made on this site */
+        actions: [{ label: guide.label, href: guide.href, tone: 'secondary' }, { label: 'Create your FXN ID', href: 'route:account', tone: 'primary' }],
         depth: {
           /* the apps first (the owner's call 2026-10-22: this is the download page for the CLI, the desktop apps and the
              mobile apps), then running from source. An app's card links its download once DOWNLOAD.APP.<KEY>.URL holds an

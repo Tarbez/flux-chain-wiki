@@ -109,6 +109,9 @@ const index0 = fs.readFileSync('index.html', 'utf8');
   {
     const env = boot(), { w, doc } = env;
     const a = lazy(env, 'products-trigger', 'Resolutions');
+    /* an NFT skin on before the first press (js/ark/skin-site.js): the part map's and the skin layer's marks */
+    a.trigger.setAttribute('data-ark-part', 'BUTTON'); a.trigger.setAttribute('data-defxn-part', '');
+    a.trigger.setAttribute('data-ark-skin-edge', 'soft'); a.trigger.setAttribute('data-ark-skin-done', '1');
     a.trigger.focus();
     a.trigger.click();
     await tick();
@@ -125,6 +128,9 @@ const index0 = fs.readFileSync('index.html', 'utf8');
     assert.equal(p.trigger.getAttribute('data-ark-layout-key'), 'id:products-trigger', 'the layout key the editor stamped moved with it');
     assert.equal(p.trigger.getAttribute('style'), 'rotate: 5deg', 'and so did a CMS style on it');
     assert.equal(p.trigger.getAttribute('type'), 'button');
+    /* copied, a skin's marks outlived the skin: its undo clears the nodes it marked, and the old button is gone (found 2026-10-24 on the real navbar) */
+    assert.equal(p.trigger.getAttribute('data-ark-part'), 'popover-trigger', 'the block button keeps its own Ark part, never the plain button\'s');
+    assert.deepEqual([...p.trigger.attributes].map((x) => x.name).filter((n) => /^data-(ark-skin|defxn-part)/.test(n)), [], 'no skin mark is carried to the block button');
     /* the block's root takes the wrapper's place: same tag, same classes, same neighbours */
     assert.equal(a.wrap.isConnected, false, 'the plain wrapper left the page');
     assert.equal(p.root.tagName, 'DIV'); assert(p.root.classList.contains('header-products'), "the wrapper's class moved (the row fit and the kit's nav style find it)");

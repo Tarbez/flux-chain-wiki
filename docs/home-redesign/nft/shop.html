@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="../../../css/nft-card.css">
 <style>
   :root{--page:180 5% 7%;--panel:180 5% 9%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%;
     --t0:0 0% 70%;--t1:168 70% 55%;--t2:268 80% 72%;--t3:40 95% 62%}
@@ -61,7 +61,7 @@
   .flag{position:absolute;top:10px;left:10px;z-index:1;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 6px;border-radius:3px;background:hsl(var(--page) / .85);color:hsl(var(--page-strong))}
   .flag.is-try{color:hsl(var(--honey))}
   /* the detail */
-  .detail{border-left:1px solid hsl(var(--page-line) / .08);display:grid;grid-template-rows:auto auto auto auto minmax(0,1fr);gap:10px;padding:12px 16px;min-height:0;overflow:auto}
+  .detail{border-left:1px solid hsl(var(--page-line) / .08);display:grid;grid-template-rows:auto auto auto auto auto minmax(0,1fr);align-content:start;gap:10px;padding:12px 16px;min-height:0;overflow:auto}
   .views{display:flex;gap:4px}
   .views button{flex:1;background:none;border:1px solid hsl(var(--page-line) / .14);border-radius:4px;padding:6px 0;cursor:pointer;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
   .views button[aria-pressed="true"]{background:hsl(var(--page-line) / .09);color:hsl(var(--page-strong));border-color:hsl(var(--page-line) / .35)}
@@ -76,6 +76,7 @@
   .facts .shapes{font-size:11.5px}
   .acts{display:flex;gap:8px}
   .acts button,.acts a{flex:1;text-align:center;text-decoration:none;cursor:pointer;border-radius:4px;padding:9px 10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;border:1px solid hsl(var(--page-line) / .35);background:none;color:hsl(var(--page-strong))}
+  .acts[hidden]{display:none}
   .acts .is-main{background:hsl(var(--page-strong));color:hsl(var(--page));border-color:hsl(var(--page-strong))}
   .acts button:disabled{opacity:.4;cursor:default}
   .loadout{border-top:1px solid hsl(var(--page-line) / .1);padding-top:10px;display:grid;gap:8px;align-content:start}
@@ -107,6 +108,7 @@
   <aside class="rail" aria-label="Filters">
     <div><h2>World</h2><ul id="layersWorld"></ul></div>
     <div><h2>Interface</h2><ul id="layersUi"></ul></div>
+    <div><h2>Sets</h2><ul id="sets"></ul></div>
     <div><h2>Rarity</h2><div class="tiers" id="tiers"></div></div>
     <div><h2>Order</h2><select id="sort" aria-label="Order">
       <option value="rare">Rarest first</option><option value="cheap">Price, low to high</option><option value="dear">Price, high to low</option><option value="name">Name</option>
@@ -125,6 +127,7 @@
     <div class="view" id="view"></div>
     <div class="facts" id="facts"></div>
     <div class="acts"><button type="button" id="try" class="is-main">Try on</button><button type="button" id="untry">Take off</button></div>
+    <div class="acts" id="setActs" hidden><button type="button" id="trySet">Try on the whole set</button></div>
     <div class="loadout" aria-label="Your loadout">
       <h3><span>Your loadout</span><span id="loadCount"></span></h3>
       <ul id="loadList"></ul>
@@ -137,15 +140,20 @@
 </main>
 <p class="note"><b>Sample data.</b> Prices follow the proposed rule: an element costs its odds times 1 FXN. Nothing is sold or charged, and nothing on this page is live.</p>
 
-<script src="../mark-data.js"></script>
-<script src="../vendor/three-r180-defxn.js"></script>
+<script src="../../../js/ark/mark-data.js"></script>
+<script src="../../../js/vendor/three-r180-defxn.js"></script>
 <script src="layers-bundle.js"></script>
-<script src="cards-data.js"></script>
-<script src="traits.js"></script>
-<script src="art3d.js"></script>
-<script src="builders-bundle.js"></script>
-<script src="card.js"></script>
-<script src="card-record.js"></script>
+<script src="../../../js/nft/cards-data.js"></script>
+<script src="../../../js/nft/traits.js"></script>
+<script src="../../../js/nft/art3d.js"></script>
+<script src="../../../js/nft/card-chrome.js"></script>
+<script src="../../../js/nft/card.js"></script>
+<script src="../../../js/nft/scene.js"></script>
+<script src="../../../js/nft/card-record.js"></script>
+<script src="../../../js/nft/grid-look.js"></script>
+<script src="../../../js/nft/timeline.js"></script>
+<script src="../../../js/nft/skin-package.js"></script>
+<script src="../../../js/nft/skin-recipe.js"></script>
 <script src="world.js"></script>
 <script src="thumbs.js"></script>
 <script>
@@ -159,6 +167,21 @@
     item: q.get('item') || '', view: 'alone', pal: q.get('pal') || '', skin: T.skinOf({ skin: q.get('skin') || '' }) };
   var ALL = [];
   T.LAYERS.forEach(function (l) { l.elements.forEach(function (e) { ALL.push(e); }); });
+  /* SETS: chrome pieces drawn together, named "<Set> <Piece>" (Corner, Frame, Tag, Strip, Rule, Sigil).
+     A set is listed only when it has a piece in all six chrome layers. */
+  var PIECE = { corner: 'Corner', frame: 'Frame', tag: 'Tag', ornament: 'Strip', divider: 'Rule', emblem: 'Sigil' }, SETS = {};
+  ALL.forEach(function (e) {
+    var m = PIECE[e.layer] && e.name.match(new RegExp('^(.+) ' + PIECE[e.layer] + '$'));
+    if (m) (SETS[m[1]] = SETS[m[1]] || {})[e.layer] = e;
+  });
+  Object.keys(SETS).forEach(function (k) { if (Object.keys(SETS[k]).length < 6 || Object.keys(SETS[k]).some(function (l) { return SETS[k][l].held; })) delete SETS[k]; });
+  // a set's price: its six pieces at the proposed rule, less any piece the card was born with
+  function setPrice(name) {
+    var t = T.pick(Object.assign({}, record || {}, { skin: '' })), bornEls = t.genesis ? T.elementsOf(t.genesis) : [];
+    return Object.keys(SETS[name]).reduce(function (sum, k) { var x = SETS[name][k]; return sum + (bornEls.indexOf(x) >= 0 ? 0 : T.price(x)); }, 0);
+  }
+  function setOf(e) { var m = PIECE[e.layer] && e.name.match(new RegExp('^(.+) ' + PIECE[e.layer] + '$')); return m && SETS[m[1]] ? m[1] : ''; }
+  state.set = q.get('set') || '';
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function layerOf(e) { return T.LAYERS.filter(function (l) { return l.key === e.layer; })[0]; }
   function idOf(e) { return e.layer + '/' + e.name; }
@@ -188,6 +211,7 @@
   function save() {
     var o = new URLSearchParams();
     if (state.layer) o.set('layer', state.layer);
+    if (state.set) o.set('set', state.set);
     if (state.tiers.length) o.set('tier', state.tiers.join(','));
     if (state.q) o.set('q', state.q);
     if (state.sort !== 'rare') o.set('sort', state.sort);
@@ -204,7 +228,7 @@
     var li = el('li'), b = el('button'); b.type = 'button';
     b.appendChild(el('span', null, label)); b.appendChild(el('small', null, String(count)));
     b.setAttribute('aria-pressed', String(state.layer === key));
-    b.addEventListener('click', function () { state.layer = state.layer === key && key ? '' : key; drawRail(); drawGrid(); save(); });
+    b.addEventListener('click', function () { state.layer = state.layer === key && key ? '' : key; state.set = ''; drawRail(); drawGrid(); save(); });
     li.appendChild(b); return li;
   }
   function drawRail() {
@@ -212,6 +236,14 @@
     w.textContent = ''; u.textContent = '';
     w.appendChild(layerButton('', 'All', ALL.length));
     T.LAYERS.forEach(function (l) { (WORLD.indexOf(l.key) >= 0 ? w : u).appendChild(layerButton(l.key, l.name, l.elements.length)); });
+    var st = document.getElementById('sets'); st.textContent = '';
+    Object.keys(SETS).sort().forEach(function (name) {
+      var li = el('li'), btn = el('button'); btn.type = 'button';
+      btn.appendChild(el('span', null, name)); btn.appendChild(el('small', null, setPrice(name) + ' FXN'));
+      btn.setAttribute('aria-pressed', String(state.set === name));
+      btn.addEventListener('click', function () { state.set = state.set === name ? '' : name; if (state.set) state.layer = ''; drawRail(); drawGrid(); save(); });
+      li.appendChild(btn); st.appendChild(li);
+    });
     var t = document.getElementById('tiers'); t.textContent = '';
     T.TIERS.forEach(function (name, i) {
       var b = el('button', null, name); b.type = 'button'; b.style.setProperty('--tc', TIER_C[i]);
@@ -226,7 +258,7 @@
   function list() {
     var s = state.q.trim().toLowerCase();
     var out = ALL.filter(function (e) {
-      return !e.held && (!state.layer || e.layer === state.layer) && (!state.tiers.length || state.tiers.indexOf(e.tier) >= 0) &&
+      return !e.held && (!state.set || setOf(e) === state.set) && (!state.layer || e.layer === state.layer) && (!state.tiers.length || state.tiers.indexOf(e.tier) >= 0) &&
         (!s || e.name.toLowerCase().indexOf(s) >= 0 || layerOf(e).name.toLowerCase().indexOf(s) >= 0);
     });
     var by = { rare: function (a, b) { return a.share - b.share; }, cheap: function (a, b) { return T.price(a) - T.price(b); },
@@ -290,6 +322,9 @@
     row.appendChild(el('span', null, bornWith ? 'Yours: born with it' : T.price(e) + ' FXN'));
     facts.appendChild(row);
     facts.appendChild(el('span', 'shapes', 'In a site: ' + (W.SHAPES[e.layer] || '')));
+    var setName = setOf(e), sa = document.getElementById('setActs'), tb = document.getElementById('trySet');
+    sa.hidden = !setName;
+    if (setName) tb.textContent = 'Try on the whole ' + setName + ' set, ' + setPrice(setName) + ' FXN';
     var tryB = document.getElementById('try'), off = document.getElementById('untry');
     tryB.disabled = bornWith || wearing; tryB.textContent = bornWith ? 'Born with it' : wearing ? 'Trying on' : 'Try on';
     off.disabled = !wearing || bornWith;
@@ -346,6 +381,12 @@
     });
     drawDetail(); drawLoadout(); save();
   }
+  document.getElementById('trySet').addEventListener('click', function () {
+    var e = find(state.item), name = e && setOf(e);
+    if (!name) return;
+    Object.keys(SETS[name]).forEach(function (k) { state.skin[k] = SETS[name][k].name; });
+    changed();
+  });
   document.getElementById('try').addEventListener('click', function () { var e = find(state.item); if (!e) return; state.skin[e.layer] = e.name; changed(); });
   document.getElementById('untry').addEventListener('click', function () { var e = find(state.item); if (!e) return; delete state.skin[e.layer]; changed(); });
   document.getElementById('wear').addEventListener('click', function (ev) { if (this.getAttribute('aria-disabled') === 'true') ev.preventDefault(); });

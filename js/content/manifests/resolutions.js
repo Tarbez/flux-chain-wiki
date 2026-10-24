@@ -24,13 +24,13 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "A resolution is a job DEFXN does for you, such as hosting a website. Choose what you want to resolve: the mesh is the database, the host and the cloud, with encrypted peer-to-peer hosting that replaces yearly renewals with permanence."
+      "value": "A resolution is a job a resolver can do, such as publishing a site or settling a payment. These are twenty ideas for what to build. Each page says which pieces work on devnet, which are being built, and which are only ideas. Everything runs on a development network."
     },
     "PROMISE": {
       "label": "Promise line",
       "kind": "line",
       "section": "Page",
-      "value": "No database · No hosting · No fees · No cloud"
+      "value": "Development network only · Proposals, not products"
     },
     "START": {
       "label": "Card link (an arrow is added)",
@@ -60,7 +60,7 @@ ArkManifest.define({
       "label": "Menu heading over the resolutions you can use today",
       "kind": "line",
       "section": "Products menu",
-      "value": "Ready to use today"
+      "value": "Works on devnet"
     },
     "MEGA.MORE": {
       "label": "Menu heading over every other resolver",
@@ -72,7 +72,7 @@ ArkManifest.define({
       "label": "Menu intro",
       "kind": "text",
       "section": "Products menu",
-      "value": "A resolution combines a named resolver with signed records, so the mesh can find, run, and verify an outcome."
+      "value": "A resolution is a job done by a resolver: signed records go in and a signed result comes out."
     },
     "MEGA.ALL": {
       "label": "Menu link to every resolution (an arrow is added)",
@@ -126,7 +126,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your website",
-      "value": "Publish straight to the mesh: no database, no hosting, no cloud."
+      "value": "Publish a site as a signed bundle. The Bundle Deployer is being built and is not released."
     },
     "CONTENT.TITLE": {
       "label": "Title",
@@ -138,7 +138,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your content",
-      "value": "Publish once and keep it addressable and permanent on the mesh."
+      "value": "Idea, not built. Sign what you publish so readers can see who published it and what changed."
     },
     "FILES.TITLE": {
       "label": "Title",
@@ -150,7 +150,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your files",
-      "value": "Store and share files through encrypted peer-to-peer hosting."
+      "value": "Idea, not built. Encrypt files to keys you hold and share them as addressed pieces."
     },
     "DEPLOYMENTS.TITLE": {
       "label": "Title",
@@ -162,7 +162,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your deployments",
-      "value": "Ship signed bundles to the mesh instead of to a server you rent."
+      "value": "Sign an exact release so anyone can check what is running. The Bundle Deployer is being built and is not released."
     },
     "PAYMENTS.TITLE": {
       "label": "Title",
@@ -174,7 +174,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your payments",
-      "value": "Settle value between partners in FXN, the DEFXN coin."
+      "value": "Idea, not built. Settle a transfer in FXN and keep a signed receipt on each side. A design preview shows it with sample data."
     },
     "FINANCE.TITLE": {
       "label": "Title",
@@ -186,7 +186,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your personal finance",
-      "value": "Keep your own books and balances under your own keys."
+      "value": "Idea, not built. Keep your own books as signed records you can inspect. A design preview shows it with sample data."
     },
     "COMMUNITY.TITLE": {
       "label": "Title",
@@ -198,7 +198,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your community",
-      "value": "Grow a community whose members are partners, not tenants."
+      "value": "Idea, not built. Give members their own signed identity and history, with membership rules anyone can read."
     },
     "COMMUNICATIONS.TITLE": {
       "label": "Title",
@@ -210,7 +210,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your communications",
-      "value": "Talk over encrypted peer-to-peer channels that you control."
+      "value": "Idea, not built. Send messages encrypted to the recipient’s keys."
     },
     "COLLABORATIONS.TITLE": {
       "label": "Title",
@@ -222,7 +222,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your collaborations",
-      "value": "Work together on shared records that every partner can check."
+      "value": "Idea, not built. Record each contribution as a signed change and agree the shared state without a central owner."
     },
     "GOVERNANCE.TITLE": {
       "label": "Title",
@@ -234,7 +234,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your governance",
-      "value": "Write your network’s rules and decide on them together."
+      "value": "Set an approval threshold, collect signatures and record when the change applies. The DAO runs as a resolver chain on the development network."
     },
     "INTELLIGENCE.TITLE": {
       "label": "Title",
@@ -246,7 +246,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your intelligence",
-      "value": "Run intelligence next to your data, on the mesh."
+      "value": "Idea, not built. Run agreed logic next to the data and return a result with the records it used."
     },
     "DATA.TITLE": {
       "label": "Title",
@@ -258,7 +258,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your data",
-      "value": "The mesh is the database: query it instead of hosting it."
+      "value": "Write signed records and read them back from the network instead of running a database server."
     },
     "ALGORITHMS.TITLE": {
       "label": "Title",
@@ -270,7 +270,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your algorithms",
-      "value": "Publish algorithms as resolvers that anyone can call and check."
+      "value": "Publish deterministic logic as a resolver so anyone can run it and check the result."
     },
     "INFORMATION.TITLE": {
       "label": "Title",
@@ -282,7 +282,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your information",
-      "value": "Make information findable by name and traceable to its source."
+      "value": "Idea, not built. Give information a stable address and a signed source trail."
     },
     "RULES.TITLE": {
       "label": "Title",
@@ -294,7 +294,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your rules and patterns",
-      "value": "Encode rules and patterns once; every resolver applies them the same way."
+      "value": "Write a rule as resolver logic so every party applies it the same way."
     },
     "NETWORK.TITLE": {
       "label": "Title",
@@ -306,7 +306,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your network",
-      "value": "Create or join a named network that scales itself as partners join."
+      "value": "Create or join a named network. Today the name groups miners for discovery and isolates nothing else."
     },
     "ENCRYPTIONS.TITLE": {
       "label": "Title",
@@ -318,7 +318,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your encryptions",
-      "value": "Keep the keys yourself; the mesh only carries what you encrypt."
+      "value": "Idea, not built. Encrypt before information leaves your machine, with keys you hold."
     },
     "AUTOMATION.TITLE": {
       "label": "Title",
@@ -330,7 +330,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your automation",
-      "value": "Let agreements trigger work across the mesh on their own."
+      "value": "Idea, not built. Run a permitted action when signed evidence satisfies a rule."
     },
     "PRODUCTIVITY.TITLE": {
       "label": "Title",
@@ -342,7 +342,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your productivity",
-      "value": "Replace subscriptions with tools that live on the mesh."
+      "value": "Idea, not built. Build tools around shared signed records instead of per-seat subscriptions."
     },
     "LOGISTICS.TITLE": {
       "label": "Title",
@@ -354,7 +354,7 @@ ArkManifest.define({
       "label": "One line",
       "kind": "text",
       "section": "Resolve your logistics",
-      "value": "Track what moves, who holds it and what was agreed."
+      "value": "Idea, not built. Sign each handoff of an item to keep a shared custody trail."
     },
     "NOTE": {
       "label": "Status note",

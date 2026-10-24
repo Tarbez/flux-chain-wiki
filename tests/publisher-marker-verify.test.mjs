@@ -38,9 +38,10 @@ test('a forged public marker is refused with 403; a genuine one passes the signa
   const cid = 'bafkreigh2akiscaildcqabsyg3dfr6chu3fgpregiymsck7e7aqa4s52zy';
   const marker = buildMarkerFields({ cid, contentType: 'application/octet-stream', ownerPublicKey: owner.publicKeyB64, now: Date.parse('2026-10-21T12:00:00.000Z') });
   const publisher = createPublisher({ name: 'marker-check.fxn', miner: { statusBase: 'http://127.0.0.1:9', pinBase: 'http://127.0.0.1:9', key: 'k' } });
-  await assert.rejects(publisher.publish({ ...marker, signature: stranger.sign(publicMarkerSigningMessage(marker)) }),
+  /* the host's call shape (scripts/publish-host.mjs: publisher.publish({ marker, record })): the signed marker rides in `marker` */
+  await assert.rejects(publisher.publish({ marker: { ...marker, signature: stranger.sign(publicMarkerSigningMessage(marker)) } }),
     (error) => error.status === 403 && /public marker signature does not verify/.test(error.message));
-  await assert.rejects(publisher.publish({ ...marker, signature: owner.sign(publicMarkerSigningMessage(marker)) }),
+  await assert.rejects(publisher.publish({ marker: { ...marker, signature: owner.sign(publicMarkerSigningMessage(marker)) } }),
     (error) => !/signature does not verify|verifyMarkerSignature is retired/.test(error.message), 'a genuine marker gets past the signature check');
 });
 
@@ -73,7 +74,7 @@ test('publisher_never_posts_a_name_record', async () => {
     assert.equal(prepared.cid, 'bafy-release');
     assert.equal(prepared.record, undefined, 'no names/* record is drafted');
     assert.equal(prepared.binding.kind, 'KDOMREC2');
-    const result = await publisher.publish({ ...prepared.marker, signature: owner.sign(new TextEncoder().encode(prepared.markerSigningMessage)) });
+    const result = await publisher.publish({ marker: { ...prepared.marker, signature: owner.sign(new TextEncoder().encode(prepared.markerSigningMessage)) } });
     assert.deepEqual([result.released, result.named, result.cid], [true, false, 'bafy-release']);
     assert.deepEqual(asked, ['defxn.fxn'], 'the name is read from dense-wire only');
     assert.ok(seen.every((line) => line.includes('/api/v0/')), `only the pin API was called: ${seen.join(', ')}`);

@@ -29,7 +29,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const KERNEL = join(HERE, '../../../defxn-defi-rs');
 const CAPS = join(KERNEL, 'dense-wire/capabilities');
-const OUT = join(HERE, 'capabilities-data.js');
+const OUT = join(HERE, '../../js/content/capabilities-data.js');
 /* the site's banned vocabulary, read from the test that enforces it (docs/deprecated.md) */
 const VOCAB_TEST = join(HERE, '../../tests/no-deprecated-vocabulary.cjs');
 

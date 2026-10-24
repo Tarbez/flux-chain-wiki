@@ -1,0 +1,89 @@
+/* In one minute on the 3D world (js/pages/world-minute.js). It stands on the frame and the shared parts in
+   css/world-measure.css (.wp-*) and adds what only it uses: the sentence, the nine ticks with their progress line, the
+   controls, and the card layer over the right of the stage.
+   Motion is transform and clip only (the owner's law: no fades, no cuts). Colours are the site's HSL-channel tokens, and
+   the card layer and its small site pane read them, so a sample skin dresses the pane through the same tokens.
+   Nothing here runs a frame: the progress line is one CSS animation that pauses with the clock. */
+
+.wp-minute .wm-count { margin: 0 0 calc(8px * var(--g)); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.wp-minute .wm-say { margin: 0; font: 600 clamp(22px, 2.5vw, 30px)/1.28 var(--font-display, var(--font-sans)); letter-spacing: -.01em; color: hsl(var(--text-strong)); min-height: 3.9em; }
+.wp-minute .wm-say > span { display: block; }
+
+/* the nine ticks: a track each, the open one fills while the beat plays */
+.wm-ticks { list-style: none; margin: calc(14px * var(--g)) 0 0; padding: 0; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; }
+.wm-ticks li { min-width: 0; }
+.wm-ticks button { position: relative; display: block; width: 100%; height: 24px; padding: 0; border: 0; background: none; cursor: pointer; }
+.wm-ticks button::before { content: ''; position: absolute; left: 0; right: 0; top: 10px; height: 3px; border-radius: 2px; background: hsl(var(--text-faint) / .55); transition: background .4s var(--glide); }
+.wm-ticks button:hover::before { background: hsl(var(--text-muted)); }
+.wm-ticks button:focus-visible { outline: 2px solid hsl(var(--text-strong)); outline-offset: 2px; border-radius: 3px; }
+.wm-ticks i { position: absolute; left: 0; right: 0; top: 10px; height: 3px; border-radius: 2px; background: hsl(var(--signal)); transform: scaleX(0); transform-origin: left; }
+.wm-ticks .done i { transform: none; }
+.wm-ticks .on i { animation: wm-fill var(--beat, 6s) linear forwards; }
+.wm-ticks[data-state="paused"] .on i { animation-play-state: paused; }
+@keyframes wm-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* the controls: quiet, so Next stays the one action */
+.wm-bar { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: calc(8px * var(--g)); }
+.wm-btn { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 8px 3px 8px 3px; border: 1px solid hsl(var(--border-default)); background: none; color: hsl(var(--text-strong)); font: 500 13px/1 var(--font-sans); cursor: pointer; }
+.wm-btn svg { width: 12px; height: 12px; }
+.wm-btn:hover:not(:disabled) { border-color: hsl(var(--text-muted)); }
+.wm-btn:disabled { color: hsl(var(--text-faint)); cursor: default; }
+.wm-btn:focus-visible { outline: 2px solid hsl(var(--text-strong)); outline-offset: 2px; }
+.wm-btn[hidden] { display: none; }
+.wm-hint { margin: calc(10px * var(--g)) 0 0; font-size: 10.5px; letter-spacing: .12em; color: hsl(var(--text-faint)); }
+
+/* ---------------------------------------------------------------- the card layer: the right of the stage, never over the grid */
+.wp-minute .wp-stage { overflow: visible; }
+.wm-card { position: absolute; right: 1%; top: 50%; width: min(42%, 440px); display: grid; gap: 10px; pointer-events: auto;
+  transform: translate(36px, -50%); clip-path: inset(0 0 0 100%); transition: clip-path .9s var(--glide), transform .9s var(--glide); }
+.wm-card[data-shown="true"] { transform: translate(0, -50%); clip-path: inset(-60px -40px -60px -60px); }
+.wm-stack { position: relative; aspect-ratio: 10 / 7; transform-style: preserve-3d; transform: perspective(1100px) rotateX(var(--rx, 5deg)) rotateY(var(--ry, -9deg)); transition: transform .6s var(--glide); }
+.wm-art, .wm-chrome { position: absolute; inset: 0; transform-style: preserve-3d; }
+.wm-l { position: absolute; inset: 0; transform: translateZ(calc(var(--i) * 46px - 90px)); transition: transform 1s var(--glide) .45s; }
+.wm-l canvas { display: block; width: 100%; height: 100%; }
+.wm-card.joined .wm-l { transform: translateZ(calc(var(--i) * 7px)); }
+.wm-p { position: absolute; transform: translate3d(var(--dx, 0), var(--dy, 0), 90px); transition: transform .9s var(--glide) calc(var(--i) * 80ms); color: hsl(var(--text-strong)); }
+.wm-p svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.wm-card.joined .wm-p { transform: none; }
+.wm-p[data-piece="frame"] { inset: 0; --dy: 18%; }
+.wm-p[data-piece^="corner"] { width: 9%; aspect-ratio: 1; --dx: -30%; --dy: -30%; }
+.wm-p[data-piece="corner"] { left: 0; top: 0; }
+.wm-p[data-piece="corner-tr"] { right: 0; top: 0; scale: -1 1; --dx: 30%; }
+.wm-p[data-piece="corner-bl"] { left: 0; bottom: 0; scale: 1 -1; --dy: 30%; }
+.wm-p[data-piece="corner-br"] { right: 0; bottom: 0; scale: -1 -1; --dx: 30%; --dy: 30%; }
+.wm-p[data-piece="tag"] { left: 5%; top: 5%; width: 34%; height: 9%; --dx: -24%; }
+.wm-p[data-piece="ornament"] { left: 5%; bottom: 14%; width: 38%; height: 8%; --dy: 70%; }
+.wm-p[data-piece="divider"] { left: 4%; right: 4%; top: 60%; height: 3%; --dx: 24%; }
+.wm-p[data-piece="emblem"] { right: 5%; bottom: 6%; width: 12%; aspect-ratio: 1; --dx: 40%; --dy: 40%; }
+.wm-cap { margin: 0; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.wm-pieces { margin: 0; font-size: 12px; line-height: 1.45; color: hsl(var(--text-muted)); max-width: 40ch; }
+.wm-card[data-ready="true"] .wm-pieces { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }   /* read by a screen reader once the art stands */
+.wm-card[data-failed="true"] .wm-stack { display: none; }
+
+/* the sample site pane (beat 8): it takes the card's tokens, through DefxnSkinSite.preview, on this element only */
+.wm-site { display: grid; gap: 6px; padding: 12px 14px; border-radius: 10px 3px 10px 3px; background: hsl(var(--surface)); color: hsl(var(--text)); box-shadow: inset 0 0 0 1px hsl(var(--border-default));
+  clip-path: inset(0 0 100% 0); max-height: 0; padding-block: 0; overflow: hidden; transition: clip-path .8s var(--glide), max-height .8s var(--glide), padding .8s var(--glide); }
+.wm-card[data-site="true"] .wm-site { clip-path: inset(-20px); max-height: 160px; padding-block: 12px; }
+.wm-site h3 { margin: 0; font: 600 14px/1.2 var(--font-mono); color: hsl(var(--text-strong)); }
+.wm-site p { margin: 0; font-size: 13px; line-height: 1.4; color: hsl(var(--text)); }
+.wm-site button { justify-self: start; height: 30px; padding: 0 14px; border: 0; border-radius: 6px 2px 6px 2px; background: hsl(var(--primary)); color: hsl(var(--text-inverse)); font: 600 13px/1 var(--font-sans); }
+
+/* a short screen: the sheet tightens */
+@container cb (max-height: 600px) {
+  .wp-minute .wm-say { min-height: 0; font-size: 22px; }
+  .wm-hint { display: none; }
+}
+@media (max-width: 900px) {
+  .wp-minute .wp-stage { height: 280px; }
+  .wm-card { width: min(80%, 360px); }
+  .wm-hint { display: none; }
+}
+
+/* reduced motion: the same beats, still. The card is assembled, the sequence is stepped by hand */
+@media (prefers-reduced-motion: reduce) {
+  .wm-card, .wm-stack, .wm-l, .wm-p, .wm-site, .wm-ticks button::before { transition: none; }
+  .wm-ticks .on i { animation: none; transform: none; }
+  .wm-card .wm-l { transform: translateZ(calc(var(--i) * 7px)); }
+  .wm-card .wm-p { transform: none; }
+  .wm-stack { transform: none; }
+}

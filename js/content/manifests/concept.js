@@ -22,7 +22,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Choose what your network shares, how an agreement closes, or who may approve a change. Each question opens its explanation, limits, and source evidence."
+      "value": "DEFXN is the kernel of the grid. FXN is its first chain and that chain’s coin. Pick a question: what your network shares, how an agreement closes, or who may approve a change. Each page gives the answer, its limits and its source evidence."
     },
     "ICEBERG": {
       "label": "Iceberg description (for screen readers)",

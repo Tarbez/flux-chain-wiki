@@ -328,7 +328,11 @@ function vocabularies(html, loaded, cache) {
   const shellList = new Set(shellFiles(html));
   const perModule = new Map();
   for (const [name, module] of loaded.modules) perModule.set(name, vocabularyOf([...module.scripts], cache).files);
-  const common = [...perModule.values()].reduce((all, files) => all.filter((f) => files.includes(f)));
+  /* what every module loads: the shared libraries. A page that stands on the 3D world (home and the intro load no
+     Ark blocks, js/world/world-host.js) is left out of the intersection, or it would be empty and every library
+     would be read as that module's own words. */
+  const withBlocks = [...perModule.values()].filter((files) => files.includes('js/ark/blocks.js'));
+  const common = withBlocks.reduce((all, files) => all.filter((f) => files.includes(f)));
   const specific = new Map();
   for (const [name, files] of perModule) specific.set(name, vocabularyOf(files.filter((f) => !shellList.has(f) && !common.includes(f)), new Map()).vocabulary);
   const anySpecific = new Vocabulary();
@@ -345,7 +349,10 @@ export function derive({ html = read('index.html'), loaded = loadCatalog(), dom 
   if (!dom) throw new Error('derive() needs dom, the classes each module renders: await collectDom() first (or read it from a test that already rendered the routes)');
   const cache = new Map();
   const order = loaded.order && loaded.order.length ? loaded.order.slice() : indexSheets(html).map((s) => s.file);
-  const sheets = new Map(order.filter((f) => fs.existsSync(path.join(ROOT, f))).map((f) => [f, parseSheet(read(f))]));
+  /* a sheet a script links itself (lazySheets) is that script's, not a route's: left out of every list, even when it
+     carries a global rule (css/nft-card.css's :root palette would otherwise put the card's sheet on every route) */
+  const lazy = lazySheets(loaded, html);
+  const sheets = new Map(order.filter((f) => !lazy.has(f) && fs.existsSync(path.join(ROOT, f))).map((f) => [f, parseSheet(read(f))]));
   const { specific, shellOwned } = vocabularies(html, loaded, cache);
   const perModule = new Map(), why = new Map();
   for (const [name, module] of loaded.modules) {
@@ -458,6 +465,19 @@ export function renderIndex(html, result, version) {
 
 export function pageAssetVersion() { return /var pageAssetVersion = '([^']+)'/.exec(read('js/ark/page-loader.js'))[1]; }
 
+/* Sheets a page script links itself, when it shows a part only some visits need (ArkUI.loadSheet('css/...') with a
+   literal path; js/ark/profile-card.js loads the NFT card's sheet that way). No route needs them on load, so they are
+   in no derived list; they are used, so they are not orphans. Read from the scripts the catalog's routes load and the
+   scripts the shell (index.html) loads on every route (js/ark/skin-site.js links the card skin's own sheet). */
+export function lazySheets(loaded = loadCatalog(), html = read('index.html')) {
+  const out = new Set(), cache = new Map(), scripts = new Set(shellFiles(html));
+  for (const module of loaded.modules.values()) module.scripts.forEach((file) => scripts.add(file));
+  for (const file of vocabularyOf([...scripts], cache).files) {
+    for (const m of cache.get(file).matchAll(/ArkUI\.loadSheet\(\s*['"]((?:css|assets\/kit)\/[\w.-]+\.css)['"]/g)) out.add(m[1]);
+  }
+  return out;
+}
+
 /* ---------- checks ---------- */
 export async function problems({ html = read('index.html'), catalogText = read('js/pages/catalog.js'), dom } = {}) {
   const found = [];
@@ -477,7 +497,7 @@ export async function problems({ html = read('index.html'), catalogText = read('
     found.push(`index.html links [${linked.filter((f) => !result.shared.includes(f)).join(', ')}] that do not belong there and lacks [${result.shared.filter((f) => !linked.includes(f)).join(', ')}] (or links them out of cascade order): run node scripts/page-styles.mjs --write`);
   }
   if (linked[linked.length - 1] !== 'css/components.css') found.push(`css/components.css must be the last stylesheet index.html links (it decides interactive paint), not ${linked[linked.length - 1]}`);
-  const claimed = new Set([...result.shared, ...Object.values(result.modules).flat()]);
+  const claimed = new Set([...result.shared, ...Object.values(result.modules).flat(), ...lazySheets(loaded, html)]);
   for (const f of files) if (!claimed.has(f)) found.push(`${f} is orphaned: no page module needs it, index.html does not link it and no other document does. Delete it, or give a page the class it styles`);
   return found;
 }

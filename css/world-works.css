@@ -1,0 +1,96 @@
+/* The redesign's How it works pages and /trace on the 3D world (js/pages/world-works.js). They stand on the frame and
+   the shared parts in css/world-measure.css (.wp-*); this sheet adds what only they use: the chapter strip, the numbered
+   steps, the layer rows, the five segments under a stage, and the trace list.
+   Ported from docs/home-redesign (concept-views.css, home-mockup.html) on the site's tokens, as HSL channels. */
+
+/* How it works, in four chapters: where you are, and the way to the next */
+.wp .chapters { display: flex; flex-wrap: nowrap; overflow: hidden; padding-top: 2px; gap: 4px 14px; margin: calc(10px * var(--g)) 0 0; padding-bottom: calc(10px * var(--g)); border-bottom: 1px solid hsl(var(--border-default)); }
+.wp .chapters a { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; font: 500 12px/1.3 var(--font-sans); color: hsl(var(--text-muted)); text-decoration: none; transition: color .2s; }
+.wp .chapters a span { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font: 600 10px/1 var(--font-mono); border: 1px solid hsl(var(--border-default)); }
+.wp .chapters a:hover, .wp .chapters a[aria-current="page"] { color: hsl(var(--text-strong)); }
+.wp .chapters a[aria-current="page"] span { border-color: hsl(var(--signal)); color: hsl(var(--signal)); }
+
+.wp .cbody { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; margin-top: calc(12px * var(--g)); }
+.wp .cbody .aside { margin-top: auto; }
+
+/* the numbered steps: every row stays, the open one shows its words; a done step shows a check */
+.wp .story { list-style: none; margin: calc(14px * var(--g)) 0 0; padding: 0; display: grid; gap: 2px; align-content: start; min-height: 0; }
+.wp .cbody .story { margin-top: 0; }
+.wp .story a, .wp .story button { width: 100%; display: grid; grid-template-columns: 30px 1fr; gap: 4px 12px; align-items: center; padding: calc(7px * var(--g)) 8px; border: 0; border-radius: 8px;
+  background: none; color: hsl(var(--text-muted)); text-align: left; cursor: pointer; font: inherit; text-decoration: none; transition: background .2s, color .2s; }
+.wp .story a:hover, .wp .story button:hover { color: hsl(var(--text-strong)); }
+.wp .story .n { position: relative; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 12px/1 var(--font-mono); border: 1px solid hsl(var(--border-default)); transition: border-color .5s, color .5s; }
+.wp .story .n svg { position: absolute; width: 12px; height: 12px; opacity: 0; transform: scale(.4); transition: transform .45s var(--glide), opacity .2s; }
+.wp .story .n i { font-style: normal; transition: transform .45s var(--glide); }
+.wp .story b { font: 600 15px/1.3 var(--font-sans); }
+.wp .story .say { grid-column: 2; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .6s var(--glide); }
+.wp .story .say > span { overflow: hidden; font-size: 14px; line-height: 1.5; color: hsl(var(--text)); }
+.wp .story [aria-current="step"] { background: hsl(var(--signal) / .07); color: hsl(var(--text-strong)); }
+.wp .story [aria-current="step"] .n { border-color: hsl(var(--signal)); color: hsl(var(--signal)); }
+.wp .story [aria-current="step"] .say { grid-template-rows: 1fr; }
+.wp .story .done .n { border-color: hsl(var(--signal) / .5); color: hsl(var(--signal)); }
+.wp .story .done .n svg { opacity: 1; transform: none; }
+.wp .story .done .n i { transform: scale(0); }
+
+/* rows you pick: a layer */
+.wp .rows-pick { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.wp .rows-pick a { display: grid; gap: 4px; padding: 9px 12px; border-radius: 8px; border-left: 2px solid transparent; color: hsl(var(--text-muted)); text-decoration: none; transition: background .2s, color .2s; }
+.wp .rows-pick a:hover { color: hsl(var(--text-strong)); background: hsl(var(--text-strong) / .03); }
+.wp .rows-pick a[aria-current="true"] { border-left-color: hsl(var(--signal)); background: hsl(var(--signal) / .07); color: hsl(var(--text-strong)); }
+.wp .rows-pick b { font: 600 15px/1.3 var(--font-sans); }
+.wp .rows-pick .say { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--glide); }
+.wp .rows-pick .say > span { overflow: hidden; font-size: 14px; line-height: 1.5; color: hsl(var(--text)); }
+.wp .rows-pick .say em { display: block; margin-top: 6px; font-style: normal; color: hsl(var(--text-strong)); }
+.wp .rows-pick [aria-current="true"] .say { grid-template-rows: 1fr; }
+
+/* How a result is made: five segments under the stage */
+.wp-segs { justify-self: center; display: flex; align-items: center; gap: 6px; background: hsl(var(--canvas) / .74); border-radius: 999px; padding: 5px 14px;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); }
+.wp-segs button { width: 46px; height: 22px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; align-items: center; }
+.wp-segs button::before { content: ''; height: 3px; border-radius: 2px; background: hsl(var(--text-faint) / .6); transition: background .5s var(--glide); }
+.wp-segs button.on::before { background: hsl(var(--signal)); }
+.wp-segs button:hover::before { background: hsl(var(--text-muted)); }
+.wp-segs .mono { margin-left: 14px; font-size: 10px; letter-spacing: .2em; color: hsl(var(--text-muted)); }
+.wp-resolve .story { min-height: 0; }
+
+/* Trace a record: the chain from newest to first; the chosen record in the ember colour */
+.wp .trace { list-style: none; margin: calc(10px * var(--g)) 0 0; padding: 0; display: grid; gap: 1px; }
+.wp .trace a { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 0 10px; padding: calc(5px * var(--g)) 10px; border-radius: 8px 3px 8px 3px; text-decoration: none; transition: background-color .2s; }
+.wp .trace a:hover { background: hsl(var(--text-strong) / .04); }
+.wp .trace a[aria-current="true"] { background: hsl(var(--ember) / .1); box-shadow: inset 2px 0 0 hsl(var(--ember)); }
+.wp .trace .n { grid-row: span 3; align-self: start; padding-top: 2px; font-size: 11px; letter-spacing: .1em; color: hsl(var(--text-muted)); }
+.wp .trace a[aria-current="true"] .n { color: hsl(var(--ember)); }
+.wp .trace b { font: 500 15px/1.3 var(--font-sans); color: hsl(var(--text-strong)); }
+.wp .trace small { font-size: 12px; line-height: 1.35; color: hsl(var(--text-muted)); }
+.wp .trace small.to { color: hsl(var(--text-faint)); }
+
+/* a short page: the steps and the chapter strip tighten */
+@container cb (max-height: 600px) {
+  .wp-life .sheet-lede { display: none; }
+  .wp .story { gap: 0; }
+  .wp .story a, .wp .story button { padding-top: 4px; padding-bottom: 4px; }
+  .wp .story .n { width: 26px; height: 26px; }
+  .wp .story b { font-size: 14px; }
+  .wp .story .say > span { font-size: 13px; line-height: 1.4; }
+  .wp .rows-pick a { padding: 6px 10px; }
+  .wp .rows-pick .say > span { font-size: 13px; line-height: 1.4; }
+  .wp .trace small.to { display: none; }
+}
+@container cb (max-height: 500px) {
+  .wp .chapters { margin-top: 6px; padding-bottom: 6px; }
+  .wp .chapters a { font-size: 11px; }
+  .wp .story .n { width: 24px; height: 24px; }
+  .wp .story a, .wp .story button { grid-template-columns: 26px 1fr; padding-top: 4px; padding-bottom: 4px; }
+  .wp .story .say > span { font-size: 12.5px; }
+  .wp .cbody .aside { display: none; }
+}
+@media (max-width: 900px) {
+  .wp .chapters { flex-wrap: wrap; overflow: visible; }
+  .wp-segs { flex-wrap: wrap; justify-content: center; }
+  .wp-segs button { height: 44px; width: 52px; }
+  .wp-segs .mono { flex-basis: 100%; text-align: center; margin: 4px 0 0; }
+  .wp .story a, .wp .story button { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wp .story .say, .wp .rows-pick .say, .wp .story .n svg, .wp .story .n i { transition: none; }
+}

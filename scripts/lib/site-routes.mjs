@@ -17,7 +17,7 @@ export function readSiteRoutes(root) {
   load('js/content/resolutions.js');
   load('js/content/site-pages.js');
   load('js/pages/catalog.js');
-  // A page's aliases (old addresses such as /experiments/lab, /monitor) are served the shell too,
+  // A page's aliases (old addresses such as /explorer, /monitor) are served the shell too,
   // so the router can open the page they now name instead of the host answering 404.
   return new Set(Object.values(context.ArkUI.pageCatalog).flatMap(entry=>[entry.path, ...(entry.aliases || []).filter(alias=>alias.startsWith('/'))]));
 }

@@ -69,7 +69,7 @@ function lazyHeaderPopover(spec) {
    module, and a wallet module that fails to load (no module support, a
    file: URL) must not take the rest of the header down with it -- a
    mount that fails just hides its own control. */
-var HEADER_WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261016-listbox1';
+var HEADER_WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261024-devnet1';
 var headerWalletModulePromise = null;
 function loadHeaderWalletModule() {
   if (!headerWalletModulePromise) {
@@ -94,7 +94,7 @@ function shortNetworkLabel(url, knownNetworks) {
  *  `#primary-navigation`, so it is reachable and visible at every
  *  header width, not just when the hamburger menu happens to be open.
  *  The trigger's own label always shows the CURRENT network (e.g.
- *  "Production"/"Local devnet"), kept in sync with every other mounted
+ *  "Public devnet"/"Local devnet"), kept in sync with every other mounted
  *  network control on the page (the account page's Wallet tab included)
  *  via `mountNetworkSelect`'s own cross-select `defxn-network-changed`
  *  event -- switching here updates there and back, live, no reload. */
@@ -666,7 +666,7 @@ ArkUI.register('RHEADER_V1', {
       link.href = href;
       link.classList.add('nav-route-link');
       link.dataset.navRoute = key;
-      if(ArkUI.actionIcon)ArkUI.actionIcon(link,key.indexOf('lifecycle')===0?'cycle':key.indexOf('article/')===0?'document':key.indexOf('concept/')===0?'layers':({explorer:'network',account:'account',download:'terminal',deploy:'terminal',about:'overview',learnings:'document',lab:'model',proximity:'model',dao:'authority'}[key]||'open'));
+      if(ArkUI.actionIcon)ArkUI.actionIcon(link,key.indexOf('lifecycle')===0?'cycle':key.indexOf('article/')===0?'document':key.indexOf('concept/')===0?'layers':({explorer:'network',account:'account',download:'terminal',deploy:'terminal',about:'overview',learnings:'document',dao:'authority'}[key]||'open'));
       if (stage) link.classList.add('nav-lifecycle-stage');
       return link;
     }

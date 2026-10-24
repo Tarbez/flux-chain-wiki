@@ -1,4 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
-  <title>Fold Corner: an L with its corner folded in like a dog-eared page: the flap lies inside the bend and its crease is the accent (sheet 25, the Fold set)</title>
-  <path d="M1 72V17M17 1H72" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0.85"/><path d="M17 1L17 17L1 17" fill="var(--line)" fill-opacity="0.32" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><path d="M17 1L1 17" fill="none" stroke="var(--acc)" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linecap="round"/><path d="M1 72H6M72 1V6" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
-</svg>

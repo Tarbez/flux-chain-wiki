@@ -22,7 +22,7 @@ Written for: the owner, and the agents who do the work. Owner decisions, 2026-10
 
 - **Stored state is FLX** (workspace AGENTS.md). Every new draft is saved as FLX records, in the grammar of `js/admin/vendor/flx-state-grammar.js`. The site loads it from `file://`, so the record text travels inside one JS call, `ArkWorld.define("<FLX>")`. The bytes are FLX, never a JSON object. The existing JSON drafts are not rewritten in this merge.
 - **One shell.** The site keeps its own header and its own router. Its page presence and its CMS stay too. The redesign's header, footer and router are retired as each view moves.
-- **Centralize.** Three.js is vendored once, under `js/ark/vendor/`. The ring kit becomes one module set under `js/world/`. Nothing is copied into two places.
+- **Centralize.** Three.js is vendored once, at `js/vendor/three-r180-defxn.js`. The ring kit becomes one module set under `js/world/`. Nothing is copied into two places.
 - **Security policy and budgets.** `tests/security.cjs` pins the policy, and it stays unchanged. Three.js loads lazily. Any budget exemption is the owner's decision.
 - **Motion laws.** No idle frame loop. Transitions are motion only. Reduced motion is respected.
 - **Copy and design laws.** Copy check 5/5. Pages fit 1280x720 and 1440x900. One dominant action.
@@ -46,7 +46,7 @@ The 14th row in `DRAFTS` is `{ key: 'world', kind: 'single', global: 'ArkWorld',
 ## Phases
 
 1. **Ground.**
-   - Vendor Three.js under `js/ark/vendor/`.
+   - Three.js and the mark already sit at their public paths (`js/vendor/`, `js/ark/mark-data.js`). The FLX grammar moves from `js/admin/vendor/` to `js/ark/vendor/`, so the site can read the World draft. tests/versions.cjs and admin-app.html follow it.
    - Move the ring kit, the scene and the stages to `js/world/`.
    - Add the `ArkWorld` content module and its FLX serializer, with tests that check the FLX round trip exactly.
 2. **The world under the site.**
@@ -57,7 +57,28 @@ The 14th row in `DRAFTS` is `{ key: 'world', kind: 'single', global: 'ArkWorld',
    - Their words move into page manifests.
    - Old pages that a view replaces are retired. Every other page stays, over the world.
 4. **CMS World panel.** The draft, the preview message and the Studio sub-view.
-5. **NFT skins.** The site takes a visitor's card skin through the NFT engine's token contract and `data-nft` marks. This waits for the NFT session's answer: which tokens, which marks, where the card comes from, and where the engine lives (SDK or ark-ui).
+5. **NFT skins.** Contract from the NFT session (defxn-30), 2026-10-24. It is a sample-only contract: the owner has not confirmed the card's design or its data fields.
+   - **Loading:** the engine (`docs/home-redesign/nft/nft-engine.js`) is loaded by path, in the NFT session's fixed order. No copy and no fork. It is not promoted to the SDK or ark-ui until the owner agrees.
+   - **Where it applies:** `DefxnEngine.enter(wrapper, record, { world: false })` on a site wrapper, never on `<html>`, because the site's theme writes `data-theme` there. No inline styles go on that wrapper while a skin is on.
+   - **Tokens a skin sets:** `--canvas --surface --raised --nested --overlay --text-strong --text --text-muted --text-faint --text-inverse --primary --accent --complement --role --badge --border-subtle --border-default --border-strong`.
+   - **What the site maps:** under `[data-theme="nft"]`, `--border` comes from `--border-default` and `--signal` from `--accent`.
+   - **Never skinned:** the chain kinds, the networks, `--reference`, or the meaning tokens.
+   - **Repaint:** the world listens for `defxn:skin` on the wrapper (it bubbles) and repaints once.
+   - **Marks (`data-nft`):**
+     - `panel` for the rail and sheet cards
+     - `button data-primary` for the main action, `button` for second actions
+     - `heading` for section heads
+     - `name` and `avatar` for the account
+     - `card` for the identity card spot
+   - **Never marked:** forms, navigation and tabs, anything whose colour carries meaning, the Sample notes, the 3D canvas.
+   - **The visitor's card:** no lookup from an FXN ID to a card exists, so the merge builds no lookup and no store. The card and its skin ride in the address. A real signed card (a KASSET1-based resolver record) is the owner's decision.
+   - **Reserved names:**
+     - globals: `DEFXN_LAYERS*`, `DEFXN_REVIEW`, `DEFXN_CARDS`, `DEFXN_TRAITS`, `Art3D`, `DefxnCard`, `DefxnWorld`, `DefxnThumbs`, `DefxnEngine`, `DefxnCardRecord`, `DefxnReviewRecord`, `DefxnGLB`
+     - class prefixes: `.nft-`, `.w-`, `.th-`
+     - the event `defxn:skin`
+     - `data-theme="nft"`
+   - **Never shown on the real site:** sample record 009 (it carries a .eth name).
+   - **File moves (done 2026-10-24, agreed with the NFT session):** Three.js is now at `js/vendor/three-r180-defxn.js` and the DEFXN mark at `js/ark/mark-data.js`. There is one copy of each. The NFT session changed the `nft/` references itself.
 6. **Gates.**
    - npm test and npm run test:browser
    - check:pages and check:ark

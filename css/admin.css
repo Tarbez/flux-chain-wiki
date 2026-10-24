@@ -354,6 +354,46 @@ legend { padding: 0 4px; margin-left: -4px; }
 .relief-field label { font-size: 12px; color: hsl(var(--text-strong)); }
 .relief-field output { font: 500 11px/1.4 var(--mono); color: hsl(var(--text-muted)); }
 .relief-field input[type="range"] { width: 100%; accent-color: hsl(var(--reference)); }
+/* the 3D world panel (js/admin/world.js): a slider with its exact number beside the label; a camera
+   field left empty is dimmed (the page keeps its own camera) */
+#studioRoot .cms-world .world-knob .relief-field-head { align-items: center; }
+#studioRoot .cms-world .world-knob .relief-field-head label { flex: 1 1 auto; min-width: 0; }
+#studioRoot .cms-world .world-knob input.world-num { flex: 0 0 84px; width: 84px; min-width: 0; padding: 3px 6px; text-align: right; font: 500 11px/1.4 var(--mono); }
+.world-knob input[type="range"].unset { opacity: .45; }
+.world-knob > .btn.small { margin-top: 4px; }
+.world-flag { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.world-flag input[type="checkbox"] { width: 34px; height: 18px; accent-color: hsl(var(--reference)); }
+/* the Skin lab (js/admin/skin-lab.js): a picker, the parts that took rules, one switch per part and rule. The list
+   scrolls inside its own box so the panel fits one screen. A rule Ark UI took back is "review" (drift); a colour
+   taken back is danger, calm but plain. */
+#studioRoot .cms-skin .skin-pick-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; align-items: center; margin: 12px 0 0; }
+#studioRoot .cms-skin .skin-pick-row label { margin: 0; font-size: 12px; color: hsl(var(--text-strong)); }
+.cms-skin .skin-note { margin: 12px 0 8px; }
+.cms-skin .skin-note[data-tone="danger"] { color: hsl(var(--danger)); }
+.cms-skin .skin-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }
+.cms-skin .skin-filter button { border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-pill); background: transparent; color: hsl(var(--text-muted)); padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+.cms-skin .skin-filter button[aria-pressed="true"] { background: hsl(var(--reference-100)); color: hsl(var(--text-strong)); font-weight: 600; }
+.cms-skin .skin-filter button[data-tone="review"] { border-color: hsl(var(--drift) / .6); }
+.cms-skin .skin-parts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: max(140px, calc(100vh - 550px)); overflow: auto; overscroll-behavior: contain; }
+.cms-skin .skin-part { border: 1px solid hsl(var(--border-soft)); border-radius: var(--radius-sm); background: hsl(var(--surface)); }
+.cms-skin .skin-part[data-broken="true"] { border-color: hsl(var(--drift) / .65); background: hsl(var(--drift) / .08); }
+.cms-skin .skin-part-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; width: 100%; padding: 6px 10px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.cms-skin .skin-part-head:hover { background: hsl(var(--raised)); }
+.cms-skin .skin-part-key { font: 600 12px/1.4 var(--mono); color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
+.cms-skin .skin-part-count { font: 500 11px/1.4 var(--mono); color: hsl(var(--text-muted)); white-space: nowrap; }
+.cms-skin .skin-rules { list-style: none; margin: 0; padding: 0 10px 6px; }
+.cms-skin .skin-rule { display: grid; grid-template-columns: 70px minmax(0, 1fr) 34px; gap: 8px; align-items: center; padding: 3px 0; border-top: 1px dashed hsl(var(--border-soft)); }
+.cms-skin .skin-rule-name { margin: 0; font: 500 11px/1.4 var(--mono); color: hsl(var(--text)); }
+.cms-skin .skin-rule-state { font-size: 12px; line-height: 1.35; color: hsl(var(--text-muted)); overflow-wrap: anywhere; }
+.cms-skin .skin-rule[data-tone="applied"] .skin-rule-state { color: hsl(var(--text-strong)); }
+.cms-skin .skin-rule[data-tone="taken"] .skin-rule-state { color: hsl(var(--drift)); font-weight: 600; }
+.cms-skin .skin-rule[data-tone="colours"] .skin-rule-state { color: hsl(var(--danger)); font-weight: 600; }
+.cms-skin .skin-rule[data-tone="off"] .skin-rule-state { font-style: italic; }
+.cms-skin .skin-rule input[type="checkbox"] { width: 34px; height: 18px; accent-color: hsl(var(--reference)); }
+.cms-skin .skin-tokens { margin: 10px 0 0; font-size: 12px; }
+.cms-skin .skin-tokens summary { cursor: pointer; color: hsl(var(--text-muted)); }
+.cms-skin .skin-token { margin: 4px 0 0; font-size: 11.5px; color: hsl(var(--text-muted)); overflow-wrap: anywhere; }
+.cms-skin .skin-token code { font: 500 11px/1.4 var(--mono); color: hsl(var(--text)); }
 fieldset.relief { background: hsl(var(--nested) / .5); }
 
 .theme-core .theme-select-row {

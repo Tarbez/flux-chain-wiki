@@ -38,7 +38,7 @@ const os = require('node:os');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const FLX = require('../js/admin/vendor/flx-state-grammar.js');
+const FLX = require('../js/vendor/flx-state-grammar.js');
 const ArkVersions = require('../js/admin/versions.js');
 
 /* ---- a File System Access-shaped folder over a real directory, instrumented ----
@@ -120,8 +120,8 @@ function fsDir(abs, rel, io, F = fs) {
 /* ---- 1. the vendored grammar is the canonical one, byte for byte ---- */
 const CANONICAL = path.resolve(__dirname, '..', '..', 'ark-browser', 'src', 'shared', 'flx-state-grammar.js');
 if (fs.existsSync(CANONICAL)) {
-  assert(fs.readFileSync(CANONICAL).equals(fs.readFileSync(path.join(__dirname, '..', 'js', 'admin', 'vendor', 'flx-state-grammar.js'))),
-    'js/admin/vendor/flx-state-grammar.js has drifted from ' + CANONICAL + '. To fix: cp that file over the vendored copy (never edit the copy).');
+  assert(fs.readFileSync(CANONICAL).equals(fs.readFileSync(path.join(__dirname, '..', 'js', 'vendor', 'flx-state-grammar.js'))),
+    'js/vendor/flx-state-grammar.js has drifted from ' + CANONICAL + '. To fix: cp that file over the vendored copy (never edit the copy).');
 } else {
   console.log('note: canonical grammar not in this checkout (' + CANONICAL + '); the byte-identity check was not run');
 }
@@ -681,7 +681,7 @@ function single(file, global, extra) {
 
   /* ---- 4. wiring: the app loads the grammar before the store, and Save/Publish/preview use it ---- */
   const html = fs.readFileSync('admin-app.html', 'utf8');
-  const order = ['js/admin/vendor/flx-state-grammar.js', 'js/admin/versions.js', 'js/admin/versions-panel.js', 'js/admin/admin.js'].map((src) => html.indexOf(`<script src="${src}" defer>`));
+  const order = ['js/vendor/flx-state-grammar.js', 'js/admin/versions.js', 'js/admin/versions-panel.js', 'js/admin/admin.js'].map((src) => html.indexOf(`<script src="${src}" defer>`));
   assert(order.every((i) => i > 0) && order.every((i, n) => !n || i > order[n - 1]), 'admin-app.html loads grammar -> store -> panel -> admin.js, in that order');
   assert(html.includes('id="versionsNav"') && html.includes('id="versionsPanel"'), 'the Versions button and panel are in the persistent header/document');
   const admin = require('./lib/admin-source.cjs').ADMIN;

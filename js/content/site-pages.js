@@ -34,9 +34,9 @@ var ArkSitePages = (function () {
   ];
   var PAGES = [
     { key: 'zero', path: '/', label: 'Home', seoId: 'home', journey: 'understand' },
+    { key: 'intro', path: '/intro', label: 'Enter the grid', seoId: 'home', journey: null, note: 'The first page of a fresh visit: the network from above, and one card that opens home' },
     { key: 'about', path: '/about', label: 'Overview', journey: 'understand', lead: true },
     { key: 'resolutions', path: '/resolutions', label: 'Resolutions', journey: 'build', lead: true, note: 'Every thing you can resolve on the mesh, one page each' },
-    { key: 'proximity', path: '/experiments', label: 'Interactive model', journey: 'preview', lead: true },
     { key: 'learnings', path: '/learnings', label: 'Notes', journey: 'read', lead: true, note: 'Choose an architectural question' },
     { key: 'explorer', path: '/explore', label: 'Mesh Explorer', journey: 'prove' },
     { key: 'palette', path: '/palette', label: 'Interface palette', journey: 'preview' },
@@ -49,9 +49,13 @@ var ArkSitePages = (function () {
     { key: 'bundledeployer', path: '/bundle-deployer', label: 'FXN Bundle Deployer', journey: 'build' },
     { key: 'treasury', path: '/treasury', label: 'Treasury preview', journey: 'preview' },
     { key: 'deposits', path: '/deposits', label: 'Deposit preview', journey: 'preview' },
-    { key: 'stats', path: '/stats', label: 'Mesh performance', journey: 'prove', lead: true },
-    { key: 'stats/gpu', path: '/stats/gpu', label: 'GPU benchmark detail', journey: 'prove' },
-    { key: 'stats/ledger', path: '/stats/ledger', label: 'Ledger benchmark detail', journey: 'prove' },
+    /* The stats section (2026-10-24, owner: "/measured is where we show capabilities, benchmarks, live data"): one 3D stage,
+       inner pages. It replaces /stats, /stats/gpu, /stats/ledger and /measured, whose keys stay in js/pages/catalog.js
+       as redirects. Its week pages are not listed here: they come from STATS_RUNS below, one per week that holds a run. */
+    { key: 'stats/now', path: '/stats/now', label: 'Network now', journey: 'prove', lead: true },
+    { key: 'stats/ceiling', path: '/stats/ceiling', label: 'Tested ceiling', journey: 'prove' },
+    { key: 'stats/capabilities', path: '/stats/capabilities', label: 'Capabilities, measured', journey: 'prove' },
+    { key: 'stats/resolver', path: '/stats/resolver', label: 'Resolver, measured', journey: 'prove' },
     { key: 'deployment', path: '/how-deployment-works', label: 'Deploy a resolver', journey: 'understand', note: 'Six steps, from a grammar to a chain; the earlier agreement chapters stay beside it' },
     { key: 'how/ask', path: '/how-deployment-works/ask', label: 'State the request', journey: 'understand' },
     { key: 'how/work', path: '/how-deployment-works/work', label: 'Agree on the terms', journey: 'understand' },
@@ -64,11 +68,63 @@ var ArkSitePages = (function () {
     { key: 'lifecycle/fulfillment', path: '/lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle', short: 'Fulfillment', journey: 'understand' },
     { key: 'lifecycle/receipt', path: '/lifecycle/receipt', label: 'Receipt / Agreement lifecycle', short: 'Receipt', journey: 'understand' },
     { key: 'chain', path: '/chain', label: 'Every identity, its own chain', journey: 'understand' },
+    /* the redesign's views (docs/home-redesign/home-mockup.html), each on its own 3D view (js/world/world-host.js VIEW_OF).
+       Pages A: your chain and the identity flow (js/pages/world-chain.js, js/pages/world-identity.js) */
+    { key: 'chain/record', path: '/chain/record', label: 'Revisions', journey: 'understand' },
+    { key: 'chain/open', path: '/chain/open', label: 'Record', journey: 'understand' },
+    { key: 'chain/links', path: '/chain/links', label: 'Connections', journey: 'understand' },
+    { key: 'identity', path: '/identity', label: 'Your FXN ID', journey: 'understand' },
+    { key: 'identity/sign', path: '/identity/sign', label: 'Signing in', journey: 'understand' },
+    { key: 'identity/safe', path: '/identity/safe', label: 'Security', journey: 'understand' },
+    { key: 'identity/you', path: '/identity/you', label: 'Your identity', journey: 'understand' },
+    /* Pages B: the network's numbers and how it works (js/pages/world-measure.js, js/pages/world-works.js) */
+    { key: 'fxn', path: '/fxn', label: 'FXN supply', journey: 'understand' },
+    { key: 'ring', path: '/ring', label: 'A chain of the network', journey: 'understand' },
+    { key: 'works', path: '/how-it-works', label: 'In one minute', journey: 'understand' },
+    { key: 'works/resolve', path: '/how-it-works/resolve', label: 'How a result is made', journey: 'understand' },
+    { key: 'works/layers', path: '/how-it-works/layers', label: 'Three layers', journey: 'understand' },
+    { key: 'works/life', path: '/how-it-works/life', label: 'Life of a resolver', journey: 'understand' },
+    { key: 'trace', path: '/trace', label: 'Trace a record', journey: 'understand' },
     { key: 'concept', path: '/concept', label: 'The operating model', journey: 'understand', note: 'Choose the mechanism you want to inspect' },
     { key: 'dao', path: '/dao', label: 'How DEFXN is governed', journey: 'understand' },
-    { key: 'download', path: '/download', label: 'Run DEFXN from source', journey: 'run', lead: true },
+    { key: 'download', path: '/download', label: 'Get DEFXN Grid', journey: 'run', lead: true },
     { key: 'deploy', path: '/deploy', label: 'Create or join a network', journey: 'run' }
   ];
+  /* The dated runs the stats section can show with their figures, and the only source of its week pages. A run is listed
+     here when js/content/stats-highlights.js (window.ArkStatsHighlights) holds its figures, because a week page must
+     show numbers it can trace. The dates are repeated from that file so that a headless context (the sitemap, the
+     server's route list) can derive the routes without it; tests/world-stats.cjs fails when the two disagree, and when a
+     run is filed there that is missing here. A week is an ISO 8601 week (Monday to Sunday). Nothing is scheduled yet:
+     a week page exists because a run was filed in that week, never because the week has begun. */
+  var STATS_RUNS = [
+    { record: 'BENCH-012', date: '2026-10-10' },
+    { record: 'BENCH-013', date: '2026-10-10' },
+    { record: 'INFRA-001', date: '2026-10-12' },
+    { record: 'BENCH-015', date: '2026-10-15' }
+  ];
+  function utcDay(iso) { var p = String(iso).split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+  function isoDate(ms) { return new Date(ms).toISOString().slice(0, 10); }
+  /* ISO 8601: the week belongs to the year of its Thursday; week 1 holds the year's first Thursday */
+  function isoWeek(iso) {
+    var day = utcDay(iso), dow = (new Date(day).getUTCDay() + 6) % 7, monday = day - dow * 864e5, thursday = monday + 3 * 864e5;
+    var year = new Date(thursday).getUTCFullYear(), jan1 = Date.UTC(year, 0, 1);
+    return { year: year, number: Math.floor((thursday - jan1) / 864e5 / 7) + 1, from: isoDate(monday), to: isoDate(monday + 6 * 864e5) };
+  }
+  /* the weeks that hold a run, oldest first: [{ number, year, key, path, from, to, runs: [{ record, date }] }] */
+  function statsWeeks() {
+    var byNumber = {};
+    STATS_RUNS.forEach(function (run) {
+      var w = isoWeek(run.date), id = w.year + '-' + w.number;
+      (byNumber[id] = byNumber[id] || { number: w.number, year: w.year, from: w.from, to: w.to, runs: [] }).runs.push({ record: run.record, date: run.date });
+    });
+    return Object.keys(byNumber).map(function (id) {
+      var w = byNumber[id]; w.key = 'stats/week-' + w.number; w.path = '/stats/week-' + w.number; return w;
+    }).sort(function (a, b) { return a.year - b.year || a.number - b.number; });
+  }
+  statsWeeks().forEach(function (w, i) {
+    var after = PAGES.findIndex(function (r) { return r.key === 'stats/resolver'; }) + 1 + i;
+    PAGES.splice(after, 0, { key: w.key, path: w.path, label: 'Week ' + w.number + ' runs', journey: 'prove' });
+  });
   /* Routes derived from content registries (js/pages/catalog.js catalogContentRoutes and the
      resolutions loop): their journey comes from what kind of route they are, not a row. */
   var FAMILIES = [
@@ -90,6 +146,9 @@ var ArkSitePages = (function () {
     pages: function () { return copy(PAGES); },
     families: function () { return copy(FAMILIES); },
     row: function (key) { var r = row(key); return r ? copy(r) : null; },
+    statsRuns: function () { return copy(STATS_RUNS); },
+    statsWeeks: function () { return copy(statsWeeks()); },
+    isoWeek: isoWeek,
     journeyOf: journeyOf
   };
 })();

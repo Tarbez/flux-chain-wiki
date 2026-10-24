@@ -90,7 +90,7 @@ var ArkVersionsPanel = (function () {
        raw lines stay, under the row's Developer details. */
     var DRAFT_NAMES = { manifests: 'pages', articles: 'articles', assets: 'images', secrets: 'private items', meshSettings: 'Publishing settings',
       theme: 'Site colours', settingsDefaults: 'Visitor settings defaults', seo: 'Search & sharing', layout: 'Page layout', components: 'Components',
-      states: 'States', canvasTransitions: 'Page transition', elementMotion: 'Animations' };
+      states: 'States', canvasTransitions: 'Page transition', elementMotion: 'Animations', world: '3D world', skinPolicy: 'Skin policy' };
     function humanChanges(rec) {
       if (rec.kind === 'publish') return 'Published the site';
       var names = [], seen = {};

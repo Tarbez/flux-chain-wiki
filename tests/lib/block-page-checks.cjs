@@ -60,7 +60,8 @@ async function assertServerRender(route, pageId, { idPrefix } = {}) {
   const page = doc.querySelector(`[data-ark-page="${pageId}"]`);
   assert(page, route + ': the page is in the server HTML');
   const css = fs.readFileSync(path.join(ROOT, 'css/ark-blocks.css'), 'utf8');
-  const blockEls = [...page.querySelectorAll('[data-ark-block], [data-ark-block] *')].filter((el) => !el.closest('[data-ark-slot]'));
+  /* the shared sign-in bundle (ark-ui 0.2.19, "keep me signed in") hides its own parts with hidden + an inline display, inside the page's [data-account-auth] host; its markup is the bundle's, not a block's */
+  const blockEls = [...page.querySelectorAll('[data-ark-block], [data-ark-block] *')].filter((el) => !el.closest('[data-ark-slot]') && !el.closest('[data-account-auth]'));
   assert(blockEls.length > 20, route + ': blocks are server-rendered');
   const styled = blockEls.filter((el) => el.hasAttribute('style')).map((el) => el.tagName + '.' + el.className);
   assert.deepEqual(styled, [], route + ': no block element carries a style attribute (its slot content may)');

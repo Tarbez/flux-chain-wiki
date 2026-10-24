@@ -49,7 +49,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Mesh operations, a set of named operators, decides changes to the shared substrate every network runs on. Each network’s DAO, its own named signers, decides changes to that one network. Neither group can act for the other."
+      "value": "Mesh operations, a named group of operators, decides changes to the shared base that every network runs on. Each network’s DAO (a group of named signers who vote) decides changes to that one network. Neither group can act for the other."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -61,7 +61,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "An earlier substrate policy in source describes seven operators: 4-of-7 for ordinary admission, 5-of-7 for economic or runtime changes, 3-of-7 to pause, and 5-of-7 to unpause. It governs the shared substrate, not a network’s decisions, and it is not how a resolver changes."
+      "value": "An earlier base policy in source names seven operators. Four must sign for ordinary admission, five for economic or runtime changes, three to pause and five to unpause. It governs the shared base, not a network’s decisions, and it is not how a resolver changes."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -121,7 +121,7 @@ ArkManifest.define({
       "label": "Point 6 text",
       "kind": "text",
       "section": "Point 6",
-      "value": "The key its creator named at launch, or nobody. A resolver launched immutable can never change. An upgrade is a new signed declaration that sits beside the old one; records signed under the old rules stay valid."
+      "value": "The key its creator named at launch, or nobody. A resolver launched immutable can never change. An upgrade is a new signed declaration that sits beside the old one. Records signed under the old rules stay valid."
     },
     "POINT7.TITLE": {
       "label": "Point 7 title",

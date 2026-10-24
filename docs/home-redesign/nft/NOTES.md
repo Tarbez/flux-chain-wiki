@@ -77,7 +77,7 @@ elements.html now shows, under each element, what that element shapes in the sit
 ## shop.html: every element, by itself
 
 1. **What is this page about?** Every element of every layer, each drawn alone, with its rarity tier and its proposed price.
-2. **What is the one dominant action?** Try on. It is the filled button by the picked element; once the loadout has a pick, Wear on card is the filled button under it.
+2. **What is the one dominant action?** Try on. It is the filled button by the picked element. Once the loadout has a pick, Wear on card is the filled button under it.
 3. **What does the user need to know right now?** What the element looks like alone, what it costs, and how rare it is.
 4. **What can stay hidden?** How the element looks on the card and in a site: two buttons above the large view show them on request.
 5. **What is repeated elsewhere?** The elements page shows the same elements on the card. The shop shows them alone, which is what a buyer looks at first.
@@ -99,3 +99,16 @@ elements.html now shows, under each element, what that element shapes in the sit
 8. **Does leaving preserve state?** Yes. Decisions are kept as a draft in this browser until the review file is saved, and the header says so.
 9. **Does returning preserve context?** The category is in the address. The draft returns with the browser.
 10. **What if the system is wrong or fails silently?** An element the page cannot measure says "Could not be measured". A review line that names an element no folder has any more is reported by make-layers.mjs and dropped, so a rename never stops the build. A review file this grammar did not write is refused with the reason.
+
+## primitives.html: every Ark UI part in a card's skin
+
+1. **What is this page about?** How a card's skin changes every Ark UI part the defxn site ships: the 29 blocks of Ark UI's registry and its two behaviour pieces.
+2. **What is the one dominant action?** Pick who visits: the site's own look or one of the three sample cards. The picked choice is the only filled button.
+3. **What does the user need to know right now?** Each part as Ark UI draws it, and under it what it took from the card and what Ark UI took back.
+4. **What can stay hidden?** The other groups. The rail shows one of Ark UI's own groups at a time, or all parts.
+5. **What is repeated elsewhere?** The world and the avatar also show on the site's pages and on the profile. Here they sit behind every part at once.
+6. **What exists only because the data has it?** The rule line under each part. It reads Ark UI's own report, so it says what happened, not what was asked for.
+7. **What can be removed without changing the decision?** Nothing more. The parts are drawn at two thirds of their size so a group fits in view.
+8. **Does leaving preserve state?** The card is in the address (?skin-sample=263). The group is not.
+9. **Does returning preserve context?** Yes for the card, through the address.
+10. **What if the system is wrong or fails silently?** A block Ark UI refuses says so in its tile. A card that does not go on says why in the status line. A rule Ark UI takes back is named under the part, with nothing hidden.

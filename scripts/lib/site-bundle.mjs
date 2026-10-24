@@ -59,9 +59,14 @@ export function siteDrafts(root = defaultProjectRoot) {
 }
 const singleDrafts = (root) => siteDrafts(root).filter((d) => d.kind === 'single');
 
+/* What a draft's `needs` may expect of a browser and a bare vm context does not have: the FLX
+   grammar (js/vendor/flx-state-grammar.js, which the World draft reads its records with) turns
+   text into UTF-8 bytes and back with TextEncoder/TextDecoder. Nothing else is lent. */
+const BROWSER_CODEC = { TextEncoder, TextDecoder };
+
 /* The project's own content code, run in a sandbox with nothing but what it needs. */
 function loadContentCode(root) {
-  const context = vm.createContext({ console, document: { write() {} } });
+  const context = vm.createContext({ console, document: { write() {} }, ...BROWSER_CODEC });
   const files = ['js/content/manifest.js', 'js/content/learnings.js', 'js/content/assets.js', 'js/content/secrets.js'];
   for (const d of singleDrafts(root)) for (const file of [...(d.needs || []), `js/content/${d.file}.js`]) if (!files.includes(file)) files.push(file);
   files.push('js/admin/store.js');
@@ -72,7 +77,7 @@ function loadContentCode(root) {
 
 /* One single-object draft as the site loads it: its prerequisites, its module, its data file. */
 function readSingle(root, d) {
-  const context = vm.createContext({});
+  const context = vm.createContext({ ...BROWSER_CODEC });
   for (const file of [...(d.needs || []), `js/content/${d.file}.js`, `js/content/${d.file}-data.js`]) vm.runInContext(read(root, file), context, { filename: file });
   return JSON.parse(JSON.stringify(vm.runInContext(`${d.global}.get()`, context)));
 }

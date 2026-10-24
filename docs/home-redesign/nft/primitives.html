@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ark UI in a skin</title>
+<link rel="icon" href="data:,">
+<!-- DEFXN identity card: every Ark UI part the defxn site ships, in a card's skin.
+
+     Each block comes from Ark UI's own registry and is drawn from Ark UI's own example
+     (ArkKit.describeArkBlocks, in the full kit js/ark/vendor/ark-kit.js: the public kit drops the
+     examples). Nothing here lists a block by hand. The two behaviour pieces that are not blocks (a
+     toggle group and the confirm dialog) are the kit's own functions.
+
+     The skin goes on through the SITE's own code, js/ark/skin-site.js (DefxnSkinSite.apply): the
+     site's part table (js/ark/skin-parts.js), its policy, its locks, its contrast rules, Ark UI's skin
+     layer, and the card's art around the page (js/nft/scene.js). The mock header uses the class names
+     the site's part table maps, so the navbar parts are dressed as on the site.
+     This page only gives that code the site's two loaders (ArkUI.loadScript, ArkUI.loadSheet),
+     reading from the site root.
+
+     Sample data: the three cards are the review samples. Nothing here is live. -->
+<link rel="stylesheet" href="../../../css/themes.css">
+<link rel="stylesheet" href="../../../css/flux-themes.css">
+<link rel="stylesheet" href="../../../assets/kit/defxn-fonts.css">
+<link rel="stylesheet" href="../../../assets/kit/defxn-components.css">
+<link rel="stylesheet" href="../../../css/ark-blocks.css">
+<link rel="stylesheet" href="../../../css/skin-site.css">
+<link rel="stylesheet" href="../../../css/nft-card.css">
+<link rel="stylesheet" href="../../../css/components.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font-family: var(--font-sans, system-ui, sans-serif); overflow: hidden; }
+  .pg-tool { display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 20px; box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas)); font: 500 12px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); position: relative; z-index: 3; }
+  .pg-tool b { color: hsl(var(--text-strong)); font-weight: 600; }
+  .pg-visit { display: flex; gap: 4px; }
+  .pg-visit button { font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 7px 10px; border-radius: 6px; border: 1px solid hsl(var(--border-default)); background: transparent; color: hsl(var(--text)); cursor: pointer; }
+  .pg-visit button[aria-pressed="true"] { background: hsl(var(--text-strong)); color: hsl(var(--canvas)); border-color: transparent; }
+  .pg-state { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-family: var(--font-sans, system-ui, sans-serif); font-size: 13px; }
+  .pg-note { color: hsl(var(--text-faint)); }
+
+  #scene { position: relative; height: calc(100% - 48px); isolation: isolate; display: flex; flex-direction: column; }
+  #scene > header, #scene > main { position: relative; z-index: 1; }
+  .pg-head { display: flex; align-items: center; gap: 22px; padding: 12px 24px; border-bottom: 1px solid hsl(var(--border-default)); background: hsl(var(--canvas) / .72); backdrop-filter: blur(8px); }
+  .pg-word { font: 600 14px/1 var(--font-mono, monospace); letter-spacing: .3em; color: hsl(var(--text-strong)); }
+  .pg-head nav { display: flex; gap: 18px; font-size: 14px; }
+  .pg-head nav a, .pg-head .header-account-link { color: hsl(var(--text)); text-decoration: none; font-size: 14px; }
+  .pg-head .ark-cta { padding: 8px 14px; border-radius: 8px; font: 500 14px/1 var(--font-sans, system-ui); }
+  .pg-grow { flex: 1; }
+  .pg-head .header-account-link { display: inline-flex; align-items: center; gap: 8px; }
+  .pg-head .native-icon { width: 18px; height: 18px; }
+
+  .pg-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 196px 1fr; }
+  .pg-cats { display: flex; flex-direction: column; gap: 2px; padding: 18px 12px; border-right: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas) / .72); }
+  .pg-cats button { display: flex; justify-content: space-between; gap: 8px; padding: 9px 10px; border: 0; border-radius: 6px; background: transparent; color: hsl(var(--text)); font: 500 14px/1.2 var(--font-sans, system-ui); text-align: left; cursor: pointer; }
+  .pg-cats button span { color: hsl(var(--text-muted)); font-family: var(--font-mono, monospace); font-size: 12px; }
+  .pg-cats button[aria-pressed="true"] { background: hsl(var(--surface)); color: hsl(var(--text-strong)); box-shadow: inset 2px 0 0 hsl(var(--primary)); }
+  /* the scroll pane holds a flow of columns: the flow's own height is free, so its columns balance */
+  .pg-grid { min-height: 0; overflow: auto; padding: 18px 22px 40px; }
+  .pg-flow { columns: 3 300px; column-gap: 16px; }
+  .pg-tile { break-inside: avoid; margin: 0 0 16px; min-width: 0; padding: 14px 16px 12px; border-radius: 10px; border: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas) / .86); backdrop-filter: blur(6px); }
+  .pg-tile-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 12px; font-size: 13px; color: hsl(var(--text-muted)); }
+  .pg-tile-head b { color: hsl(var(--text-strong)); font-weight: 600; }
+  .pg-tile-head code { font: 12px var(--font-mono, monospace); color: hsl(var(--text-faint)); }
+  /* every part at two thirds of its size, so a whole group fits in view; zoom keeps the layout real */
+  .pg-tile-body { zoom: .68; }
+  .pg-tile-rules { margin: 12px 0 0; font: 12px/1.4 var(--font-mono, monospace); color: hsl(var(--text-muted)); }
+  .pg-tile-rules:empty { display: none; }
+  .pg-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 8px; border: 1px solid hsl(var(--border-default)); }
+  .pg-seg button { padding: 7px 12px; border: 0; border-radius: 6px; background: transparent; color: hsl(var(--text)); font: 500 14px var(--font-sans, system-ui); }
+  .pg-seg button[aria-pressed="true"] { background: hsl(var(--surface)); color: hsl(var(--text-strong)); }
+  @media (max-width: 720px) {
+    body { overflow-x: hidden; overflow-y: auto; }
+    .pg-tool { flex-wrap: wrap; height: auto; padding: 10px 16px; gap: 8px 12px; }
+    .pg-visit { flex-wrap: wrap; }
+    .pg-visit button, .pg-cats button { white-space: nowrap; }
+    .pg-state { order: 3; flex-basis: 100%; }
+    .pg-head { flex-wrap: wrap; gap: 10px 16px; padding: 10px 16px; }
+    .pg-head nav { order: 3; flex-basis: 100%; }
+    #scene { height: auto; }
+    .pg-main { grid-template-columns: minmax(0, 1fr); }
+    .pg-tile-body { overflow-x: auto; }
+    .pg-cats { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid hsl(var(--border-subtle)); }
+    .pg-grid { padding: 16px; overflow: visible; }
+    .pg-flow { columns: 1; }
+    .pg-tile-body { zoom: .85; }
+  }
+</style>
+</head>
+<body>
+<div class="pg-tool">
+  <b>Ark UI in a card's skin</b>
+  <div class="pg-visit" role="group" aria-label="Visit as">
+    <button type="button" data-visit="" aria-pressed="true">Site look</button>
+    <button type="button" data-visit="27" aria-pressed="false">Card 27</button>
+    <button type="button" data-visit="263" aria-pressed="false">Card 263</button>
+    <button type="button" data-visit="512" aria-pressed="false">Card 512</button>
+  </div>
+  <div class="pg-visit" role="group" aria-label="Whose rules">
+    <button type="button" data-rules="site" aria-pressed="true">Site's table</button>
+    <button type="button" data-rules="card" aria-pressed="false">Card's own rules</button>
+  </div>
+  <span class="pg-state" role="status" aria-live="polite"></span>
+  <span class="pg-note">Sample data</span>
+</div>
+<div id="scene">
+  <header class="ark-header pg-head">
+    <span class="pg-word">DEFXN</span>
+    <nav aria-label="Main"><a class="nav-route-link" href="#">Products</a><a class="nav-route-link" href="#">Network</a><a class="nav-route-link" href="#">Docs</a></nav>
+    <span class="pg-grow"></span>
+    <a class="ark-cta palette-solid" href="#">Run DEFXN</a>
+    <a class="header-account-link" href="#"><svg class="native-icon" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="6.5" r="3.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3 16c.8-3 3.2-4.6 6-4.6s5.2 1.6 6 4.6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>Account</a>
+  </header>
+  <main class="pg-main">
+    <nav class="pg-cats" aria-label="Kinds of part"></nav>
+    <section class="pg-grid" aria-label="Ark UI parts"><div class="pg-flow"></div></section>
+  </main>
+</div>
+
+<script src="../../../js/ark/vendor/engines.js"></script>
+<script src="../../../js/ark/vendor/ark-kit.js"></script>
+<script src="../../../js/ark/vendor/ark-kit-forms.js"></script>
+<script src="../../../js/ark/vendor/ark-kit-popover.js"></script>
+<script src="../../../js/ark/vendor/ark-kit-figures.js"></script>
+<script>
+  /* the site's two loaders, as js/ark/page-loader.js has them, reading from the site root */
+  (function () {
+    var ROOT = '../../../', scripts = {}, sheets = {};
+    window.ArkUI = window.ArkUI || {};
+    if (!ArkUI.loadScript) ArkUI.loadScript = function (url) {
+      if (!/^js\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.js$/.test(url)) return Promise.reject(new Error('Invalid page asset ' + url));
+      return scripts[url] || (scripts[url] = new Promise(function (resolve, reject) {
+        var s = document.createElement('script'); s.src = ROOT + url;
+        s.onload = function () { resolve(); };
+        s.onerror = function () { delete scripts[url]; s.remove(); reject(new Error('Could not load ' + url)); };
+        document.head.appendChild(s);
+      }));
+    };
+    if (!ArkUI.loadSheet) ArkUI.loadSheet = function (file) {
+      if (document.querySelector('link[href="' + ROOT + file + '"]')) return Promise.resolve();
+      return sheets[file] || (sheets[file] = new Promise(function (resolve) {
+        var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = ROOT + file;
+        l.onload = l.onerror = function () { resolve(); };
+        document.head.appendChild(l);
+      }));
+    };
+  })();
+</script>
+<script src="../../../js/vendor/flx-state-grammar.js"></script>
+<script src="../../../js/nft/grid-look.js"></script>
+<script src="../../../js/nft/timeline.js"></script>
+<script src="../../../js/ark/skin-parts.js"></script>
+<script src="../../../js/ark/skin-site.js"></script>
+<script>
+(function () {
+  'use strict';
+  var K = window.ArkKit, SITE = window.DefxnSkinSite;
+  var grid = document.querySelector('.pg-grid'), flow = document.querySelector('.pg-flow'), cats = document.querySelector('.pg-cats'), state = document.querySelector('.pg-state');
+  if (!K || !K.describeArkBlocks || !SITE) { state.textContent = 'Ark UI or the site\'s skin code did not load. Reload the page.'; return; }
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function hrefOf(v) { return /^url:/.test(v || '') ? v.slice(4) : /^(route|doc):/.test(v || '') ? '#' : v; }
+
+  /* ---------- every part: the registry's blocks, in its own groups, from its own examples ---------- */
+  var blocks = K.describeArkBlocks(), groups = [], byGroup = {};
+  blocks.forEach(function (b) {
+    if (!byGroup[b.category]) { byGroup[b.category] = []; groups.push(b.category); }
+    byGroup[b.category].push(b);
+  });
+  var behaviour = [
+    { name: 'toggle-group', label: 'Toggle group', make: toggleGroup },
+    { name: 'confirm', label: 'Confirm dialog', make: confirmButton }
+  ];
+  function title(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function tile(name, label, body) {
+    var t = el('article', 'pg-tile'), head = el('header', 'pg-tile-head');
+    t.setAttribute('data-block', name);
+    head.appendChild(el('b', null, label)); head.appendChild(el('code', null, name));
+    t.appendChild(head);
+    var box = el('div', 'pg-tile-body'); box.appendChild(body); t.appendChild(box);
+    t.appendChild(el('p', 'pg-tile-rules'));
+    return t;
+  }
+  function blockTile(b) {
+    var body;
+    try { body = K.renderArkBlock({ block: b.name, props: b.example || {} }, { document: document, onInvalid: 'throw', resolveHref: hrefOf }); }
+    catch (err) { body = el('p', null, 'Ark UI did not draw this block: ' + err.message); }
+    return tile(b.name, b.label, body);
+  }
+  function toggleGroup() {
+    var seg = el('div', 'pg-seg'), names = ['Day', 'Week', 'Month'];
+    seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'Range');
+    var buttons = names.map(function (n, i) { var b = el('button', null, n); b.type = 'button'; b.setAttribute('aria-pressed', String(i === 0)); seg.appendChild(b); return b; });
+    if (K.createArkToggleGroup && K.createArkDomHost) {
+      var host = K.createArkDomHost(document), refs = buttons.map(function (b) { return host.bind(b, 'pg-seg'); });
+      K.createArkToggleGroup(host, { rootRef: host.bind(seg, 'pg-seg'), itemRefs: refs, selectedRefs: [refs[0]] });
+    }
+    return seg;
+  }
+  function confirmButton() {
+    var b = el('button', 'cta', 'Remove the draft');
+    b.type = 'button';
+    b.addEventListener('click', function () {
+      K.arkConfirm({ title: 'Remove this draft?', message: 'The draft goes away. The published page stays as it is.', confirmLabel: 'Remove', cancelLabel: 'Keep it', tone: 'danger' });
+    });
+    return b;
+  }
+
+  /* ---------- the groups: one shown at a time ---------- */
+  var shown = 'all';
+  function paint() {
+    flow.textContent = '';
+    var list = shown === 'all' ? blocks : shown === 'behaviour' ? [] : byGroup[shown];
+    list.forEach(function (b) { flow.appendChild(blockTile(b)); });
+    if (shown === 'all' || shown === 'behaviour') behaviour.forEach(function (p) { flow.appendChild(tile(p.name, p.label, p.make())); });
+    grid.scrollTop = 0;
+    Array.prototype.forEach.call(cats.children, function (c) { c.setAttribute('aria-pressed', String(c.getAttribute('data-group') === shown)); });
+    setTimeout(describe, 60);
+  }
+  function catButton(key, label, count) {
+    var b = el('button'); b.type = 'button'; b.setAttribute('data-group', key);
+    b.appendChild(document.createTextNode(label)); b.appendChild(el('span', null, String(count)));
+    b.addEventListener('click', function () { shown = key; paint(); });
+    cats.appendChild(b);
+  }
+  catButton('all', 'All parts', blocks.length + behaviour.length);
+  groups.forEach(function (g) { catButton(g, title(g), byGroup[g].length); });
+  catButton('behaviour', 'Behaviour', behaviour.length);
+  grid.addEventListener('click', function (e) { var a = e.target.closest && e.target.closest('a[href]'); if (a) e.preventDefault(); });
+
+  /* ---------- the skin: the site's own apply, or the card's own rules on every part ----------
+     "Site's table" is exactly what the site does (DefxnSkinSite.apply). "Card's own rules" puts the same
+     card on, then sends its whole rule set and its per-part layouts to every part Ark UI knows
+     (DefxnSkin.arkSkin with keys), so Ark UI's kind table decides what each part takes. */
+  var art = null;   // the panel art on the page header block, in "card's own rules"
+  function clearArt() { if (art) { art.remove(); art = null; } }
+  // the second beat: once the pieces have arrived, the art loads, paints and draws in
+  function panelArt(on, arrivalTl) {
+    clearArt();
+    var host = grid.querySelector('.pg-tile[data-block="hero"] .pg-tile-body > *');
+    if (!host || !on) return Promise.resolve(null);
+    return SITE.art().then(function () { return window.ArkUI.loadScript('js/nft/scene.js'); }).then(function () {
+      if (mode !== 'card' || !wearing) return null;
+      clearArt();
+      art = window.DefxnScene.panel(host, on);
+      return art.ready.then(function () {
+        var t = arrivalTl && arrivalTl.tracks.filter(function (x) { return x.target === 'art'; });
+        return t && t.length && window.DefxnTimeline ? window.DefxnTimeline.play(host, { version: 1, tracks: t }) : null;
+      });
+    }).catch(function (e) { console.error('The panel art did not paint: ' + e.message); return null; });
+  }
+  function gridLine(on) {
+    var g = on && on.gridLook && on.gridLook.params;
+    return g ? ' The grid would take ' + g.detail + ', ' + g.texture + ' texture, edge hue ' + Math.round(g.edgeHue) + '.' : '';
+  }
+  var wearing = '', visiting = false, mode = new URLSearchParams(location.search).get('rules') === 'card' ? 'card' : 'site';
+  function cardRules() {
+    var K2 = window.ArkKitSkin, on = SITE.active ? SITE.active() : null, scene = document.getElementById('scene');
+    if (mode !== 'card' || !K2 || !on) return null;
+    var keys = Array.from(K2.arkSkinPartKeys()).concat(Object.keys(K2.ARK_SKIN_BLOCK_PARTS || {}));
+    var skin = window.DefxnSkin.arkSkin(on, { keys: keys, root: scene, derive: K2.deriveSkinTokens });
+    K2.removeArkSkin(scene);
+    var res = K2.applyArkSkin(scene, skin, { locks: window.DefxnSkinParts.LOCKS });
+    var rec = window.DefxnSkin.samples().filter(function (r) { return Number(r.genesisId) === Number(wearing); })[0];
+    // the card's own arrival, in two beats: its pieces first, on a free page, then its art once painted.
+    // Loading and painting the 3D art blocks the page, so it waits for the pieces to finish.
+    // (window.__arrival and window.__artArrival are for the audit.)
+    var pieces = on.arrival ? { version: 1, tracks: on.arrival.tracks.filter(function (x) { return x.target !== 'art'; }) } : null;
+    var first = pieces && window.DefxnTimeline ? window.DefxnTimeline.play(scene, pieces) : Promise.resolve(null);
+    window.__arrival = first.catch(function (e) { console.error(e.message); return null; });
+    window.__artArrival = window.__arrival.then(function () { return panelArt(rec, on.arrival); });
+    scene.dispatchEvent(new CustomEvent('defxn:skin', { bubbles: true, detail: { on: true, fromCard: true, record: on.record, theme: { vars: skin.tokens } } }));
+    return res;
+  }
+  // under each tile, the rules its parts took from the card and the ones Ark UI took back, as Ark UI's
+  // report says. A report part names one sample selector and a count, so its elements are found by
+  // its key as well, the way Ark UI matches a rule key: data-ark-part, ignoring case and punctuation.
+  function squash(v) { return String(v || '').replace(/[^A-Za-z0-9]/g, '').toUpperCase(); }
+  function describe() {
+    var rep = SITE.report && SITE.report(), scene = document.getElementById('scene'), took = new Map(), back = new Map(), byKey = {};
+    Array.prototype.forEach.call(scene.querySelectorAll('[data-ark-part]'), function (e) { var k = squash(e.getAttribute('data-ark-part')); (byKey[k] = byKey[k] || []).push(e); });
+    function add(map, tileEl, words) { var s = map.get(tileEl) || {}; words.forEach(function (w) { s[w] = true; }); map.set(tileEl, s); }
+    if (wearing && rep && rep.parts) rep.parts.forEach(function (p) {
+      // only what Ark UI took back after trying it; a rule a part's kind never takes is not news
+      var r = p.rules || {}, kept = Object.keys(r.applied || {}).map(function (k) { return k + ' ' + r.applied[k]; }), lost = (r.reverted || []).map(function (x) { return typeof x === 'string' ? x : x.rule || JSON.stringify(x); });
+      if (!kept.length && !lost.length) return;
+      var els = (byKey[squash(p.key)] || []).slice();
+      try { Array.prototype.forEach.call(scene.querySelectorAll(p.selector), function (e) { if (els.indexOf(e) < 0) els.push(e); }); } catch (err) { /* a selector Ark UI could not write back */ }
+      els.forEach(function (e) { var t = e.closest('.pg-tile'); if (!t) return; if (kept.length) add(took, t, kept); if (lost.length) add(back, t, lost); });
+    });
+    Array.prototype.forEach.call(grid.querySelectorAll('.pg-tile'), function (t) {
+      var line = t.querySelector('.pg-tile-rules'), k = Object.keys(took.get(t) || {}), b = Object.keys(back.get(t) || {});
+      line.textContent = !wearing ? '' : (k.length ? 'Took: ' + k.join(', ') + '.' : 'Took the colours only.') + (b.length ? ' Taken back: ' + b.join(', ') + '.' : '');
+    });
+  }
+  function visit(n) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-visit]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-visit') === n)); });
+    var url = new URL(location.href);
+    if (n) url.searchParams.set('skin-sample', n); else url.searchParams.delete('skin-sample');
+    history.replaceState(null, '', url);
+    wearing = n;
+    clearArt();
+    if (!n) { SITE.remove(); state.textContent = 'The site\'s own look.'; describe(); return; }
+    state.textContent = 'Putting on card ' + n + '.';
+    visiting = true;
+    SITE.sample(n).then(SITE.apply).then(function (res) {
+      visiting = false;
+      if (wearing !== n) return;
+      res = cardRules() || res;
+      var on = SITE.active ? SITE.active() : null;
+      state.textContent = 'Wearing card ' + n + (on && on.palette ? ': ' + on.palette : '') + '. ' + (res && res.applied ? res.applied.length : 0) + ' parts took the skin.' + gridLine(on);
+      describe();
+    }).catch(function (err) { visiting = false; state.textContent = 'Card ' + n + ' did not go on: ' + err.message; });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-visit]'), function (b) { b.addEventListener('click', function () { visit(b.getAttribute('data-visit')); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-rules]'), function (b) {
+    b.setAttribute('aria-pressed', String(b.getAttribute('data-rules') === mode));
+    b.addEventListener('click', function () {
+      mode = b.getAttribute('data-rules');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-rules]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      var url = new URL(location.href); if (mode === 'card') url.searchParams.set('rules', 'card'); else url.searchParams.delete('rules'); history.replaceState(null, '', url);
+      if (wearing) visit(wearing);
+    });
+  });
+
+  paint();
+  var first = new URLSearchParams(location.search).get('skin-sample') || '';
+  // skin-site.js puts a ?skin-sample on by itself; here only the buttons follow it
+  Array.prototype.forEach.call(document.querySelectorAll('[data-visit]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-visit') === first)); });
+  wearing = first;
+  state.textContent = first ? 'Putting on card ' + first + '.' : 'The site\'s own look.';
+  // a card put on by the address (skin-site.js reads ?skin-sample) is reported here too
+  document.addEventListener('defxn:skin', function (e) {
+    if (!e.detail || !e.detail.on || !wearing) return;
+    var on = SITE.active ? SITE.active() : null;
+    if (/^Putting on/.test(state.textContent)) {
+      state.textContent = 'Wearing card ' + wearing + (on && on.palette ? ': ' + on.palette : '') + '.' + gridLine(on);
+      if (mode === 'card' && !e.detail.fromCard && !visiting) setTimeout(cardRules, 0);
+    }
+    setTimeout(describe, 60);
+  });
+})();
+</script>
+</body>
+</html>

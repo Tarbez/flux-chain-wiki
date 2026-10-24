@@ -55,7 +55,6 @@
 <link rel="stylesheet" href="css/brand-identity.css?v=20261014-living2" />
 <link rel="stylesheet" href="css/how-overview.css?v=20261020-w4">
 <link rel="stylesheet" href="css/authorization-dialog.css?v=20261006-system1">
-<link rel="stylesheet" href="css/download.css?v=20261020-w4">
 <link rel="stylesheet" href="css/home-swiss.css?v=20261020-w4" />
 <link rel="stylesheet" href="assets/kit/defxn-marks.data.css?v=20261019-kit1" />
 <!-- Ark UI blocks (@deadark/ark-ui/blocks, copied by scripts/build-ark-vendor.cjs): the only styling
@@ -64,6 +63,7 @@
      scripts; the blocks' JS is lazy (ArkUI.blockScripts, js/pages/catalog.js). Then the frame a
      page built from blocks sits in (js/ark/blocks.js ArkUI.page). Before components.css, which is
      last. -->
+<link rel="stylesheet" href="css/world.css?v=20261024-tags1" />
 <link rel="stylesheet" href="css/ark-blocks.css?v=20261020-w5ark" />
 <link rel="stylesheet" href="css/components.css?v=20261020-w4" />
 </head>
@@ -125,6 +125,10 @@
 <script src="js/content/canvas-transitions-data.js" defer></script>
 <script src="js/content/element-motion.js" defer></script>
 <script src="js/content/element-motion-data.js" defer></script>
+<!-- The 3D world's editable numbers (js/content/world.js): FLX records of the structured-state grammar, then the saved draft. The world itself loads after first paint (js/world/world-host.js). -->
+<script src="js/vendor/flx-state-grammar.js" defer></script>
+<script src="js/content/world.js" defer></script>
+<script src="js/content/world-data.js" defer></script>
 
 <!-- 2. runtime: atomizer -> flux parser -> prop readers -> registry/renderer -->
 <script src="js/content/manifest.js" defer></script>
@@ -160,10 +164,10 @@
 <script src="js/pages/catalog.js?v=20261020-w4" defer></script>
 <script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/min/manifest.js?v=bccbd065" defer></script>
-<script src="js/ark/page-loader.js?v=20261020-w5" defer></script>
+<script src="js/min/manifest.js?v=a129b2dc" defer></script>
+<script src="js/ark/page-loader.js?v=20261024-c1" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
-<script src="js/ark/panel-continuity.js?v=20261014-launch1" defer></script>
+<script src="js/ark/panel-continuity.js?v=20261024-world1" defer></script>
 <script src="js/ark/page-router.js?v=20261003-lifecycle103" defer></script>
 
 <!-- 3. the grain painter the halo resolver calls -->
@@ -175,7 +179,7 @@
 <script src="js/resolvers/halo.js" defer></script>
 <script src="js/resolvers/veil.js" defer></script>
 <script src="assets/kit/defxn-product.js?v=20261020-w4" defer></script>
-<script src="js/resolvers/header.js?v=20261019-shell1" defer></script>
+<script src="js/resolvers/header.js?v=20261024-devnet1" defer></script>
 <script src="js/resolvers/nav.js?v=2" defer></script>
 <script src="js/resolvers/body.js" defer></script>
 <script src="js/resolvers/blocks/rblock-text-v1.js" defer></script>
@@ -198,7 +202,12 @@
 <script src="js/content/mesh-settings.js" defer></script>
 <script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/halo/shaders.js" defer></script>
-<script src="js/zero-webgl.js?v=20261019-settle1" defer></script>
+<!-- The 3D world under every page. It loads Three.js and its own files after first paint; js/zero-webgl.js below is its fallback. -->
+<script src="js/world/world-host.js?v=20261024-w4" defer></script>
+<!-- NFT skins (docs/home-redesign/SKIN-CONTRACT.md): the site's part map and its one skin entry. Ark UI's skin chunk and the card recipe load only when a skin is applied. -->
+<script src="js/ark/skin-parts.js?v=20261024-s5" defer></script>
+<script src="js/ark/skin-site.js?v=20261024-s6" defer></script>
+<script src="js/zero-webgl.js?v=20261024-w1" defer></script>
 <script src="js/hero-motion.js?v=20261020-w4" defer></script>
 <script src="js/lattice.js?v=20261020-w4" defer></script>
 <script src="js/settings/panel.js?v=20261020-theme-ids" defer></script>

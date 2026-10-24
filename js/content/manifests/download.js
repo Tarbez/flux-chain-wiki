@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "download",
-  "title": "Run DEFXN from source",
+  "title": "Get DEFXN Grid",
   "route": "/download",
   "group": "page",
   "meta": {
@@ -12,13 +12,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Start a local miner from a trusted checkout."
+      "value": "DEFXN Grid has no public download yet."
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The source packages define a runnable miner and network CLI. Public repository URLs and packaged downloads are not yet verified here, so start from an owner-approved checkout. Five steps: check the runtime, install the checkout, verify the process, know what success proves, then join a named network."
+      "value": "DEFXN Grid opens DEFXN sites and holds your FXN ID. Its build targets macOS only, and no download address is published. You can create your FXN ID on this site now. The five steps on this page are for people who run a miner: start one from an owner-approved checkout."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -126,7 +126,7 @@ ArkManifest.define({
       "label": "flux-miner (command line): what it is",
       "kind": "text",
       "section": "Apps",
-      "value": "A miner without a window. It runs your machine's share of the DEFXN network from a terminal."
+      "value": "A miner without a window. It runs your machine’s share of the network from a terminal. Not public yet: run it from source below."
     },
     "APP.CLI.URL": {
       "label": "flux-miner (command line): download address (https://..., empty until published)",
@@ -150,7 +150,7 @@ ArkManifest.define({
       "label": "Flux Miner Desktop: what it is",
       "kind": "text",
       "section": "Apps",
-      "value": "The same miner with a desktop window."
+      "value": "The same miner with a desktop window. Not public yet."
     },
     "APP.DESKTOP.URL": {
       "label": "Flux Miner Desktop: download address (https://..., empty until published)",
@@ -159,49 +159,49 @@ ArkManifest.define({
       "value": ""
     },
     "APP.BROWSER.NAME": {
-      "label": "ARK Browser: name",
+      "label": "DEFXN Grid: name",
       "kind": "line",
       "section": "Apps",
-      "value": "ARK Browser"
+      "value": "DEFXN Grid"
     },
     "APP.BROWSER.PLATFORMS": {
-      "label": "ARK Browser: systems",
+      "label": "DEFXN Grid: systems",
       "kind": "line",
       "section": "Apps",
-      "value": "Desktop"
+      "value": "macOS"
     },
     "APP.BROWSER.TEXT": {
-      "label": "ARK Browser: what it is",
+      "label": "DEFXN Grid: what it is",
       "kind": "text",
       "section": "Apps",
-      "value": "A desktop browser for DEFXN sites."
+      "value": "Opens DEFXN sites and holds your FXN ID. Windows and Linux builds are not made yet."
     },
     "APP.BROWSER.URL": {
-      "label": "ARK Browser: download address (https://..., empty until published)",
+      "label": "DEFXN Grid: download address (https://..., empty until published)",
       "kind": "line",
       "section": "Apps",
       "value": ""
     },
     "APP.MOBILE.NAME": {
-      "label": "DEFXN Browser: name",
+      "label": "DEFXN Grid for phones: name",
       "kind": "line",
       "section": "Apps",
-      "value": "DEFXN Browser"
+      "value": "DEFXN Grid for phones"
     },
     "APP.MOBILE.PLATFORMS": {
-      "label": "DEFXN Browser: systems",
+      "label": "DEFXN Grid for phones: systems",
       "kind": "line",
       "section": "Apps",
       "value": "iOS · Android"
     },
     "APP.MOBILE.TEXT": {
-      "label": "DEFXN Browser: what it is",
+      "label": "DEFXN Grid for phones: what it is",
       "kind": "text",
       "section": "Apps",
-      "value": "A browser for DEFXN sites that also runs a full mesh node on your phone."
+      "value": "Opens DEFXN sites and runs a node on your phone. Built and run on one iPhone and one Android phone. It is in no store yet."
     },
     "APP.MOBILE.URL": {
-      "label": "DEFXN Browser: download address (https://..., empty until published)",
+      "label": "DEFXN Grid for phones: download address (https://..., empty until published)",
       "kind": "line",
       "section": "Apps",
       "value": ""

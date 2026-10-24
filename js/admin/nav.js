@@ -28,6 +28,18 @@
   /* ---- the repaint after a draft changed -------------------------------------------------
      Every form calls it (it was the Content sidebar's list): the header (lens, views, the
      Theme view's dirty dot), the one Save button, and the rail's Pages tree with its dots. */
+  /* the World view's own unsaved dot, in the same menu; the World panel calls it on every edit */
+  function syncWorldDot() {
+    var worldBtn = $('viewWorldBtn'); if (!worldBtn) return;
+    var worldDot = worldBtn.querySelector('.dot'); if (worldDot) worldDot.remove();
+    if (A.worldDirty()) worldBtn.appendChild(h('span', { class: 'dot', role: 'img', 'aria-label': 'Unsaved 3D world changes', title: 'Unsaved 3D world changes' }));
+  }
+  /* the Skin lab's own unsaved dot, in the same menu; the lab calls it on every edit */
+  function syncSkinDot() {
+    var skinBtn = $('viewSkinBtn'); if (!skinBtn) return;
+    var skinDot = skinBtn.querySelector('.dot'); if (skinDot) skinDot.remove();
+    if (A.skinPolicyDirty()) skinBtn.appendChild(h('span', { class: 'dot', role: 'img', 'aria-label': 'Unsaved skin policy changes', title: 'Unsaved skin policy changes' }));
+  }
   function renderList() {
     syncLensButtons();
     /* Site style is in the More menu: its unsaved dot shows on More too, so it is seen closed */
@@ -36,6 +48,7 @@
       var dot = btn.querySelector('.dot'); if (dot) dot.remove();
       if (themeDirty() || settingsDefaultsDirty()) btn.appendChild(h('span', { class: 'dot', role: 'img', 'aria-label': 'Unsaved Site style changes', title: 'Unsaved Site style changes' }));
     });
+    syncWorldDot(); syncSkinDot();
     syncHeader(); refreshSaveButton(); renderPages();
   }
 
@@ -94,6 +107,6 @@
     new ResizeObserver(publish).observe(bar, { box: 'border-box' });
     publish();
   })();
-  A.provide({ renderList: renderList, select: select, selectArticle: selectArticle,
+  A.provide({ syncWorldDot: syncWorldDot, syncSkinDot: syncSkinDot, renderList: renderList, select: select, selectArticle: selectArticle,
       selectAsset: selectAsset, selectMesh: selectMesh, selectSecret: selectSecret, setLens: setLens });
 })();

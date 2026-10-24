@@ -26,8 +26,8 @@ import { bannedWords } from './make-capabilities.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const RESOLVERS = join(HERE, '../../../defxn-defi-rs/dense-wire/resolvers');
 const CONCEPT = join(HERE, 'defxn-concept.html');
-const CAPABILITIES = join(HERE, 'capabilities-data.js');
-const OUT = join(HERE, 'resolvers-data.js');
+const CAPABILITIES = join(HERE, '../../js/content/capabilities-data.js');
+const OUT = join(HERE, '../../js/content/resolvers-data.js');
 
 function sentence(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function unhex(h) { return Buffer.from(h, 'hex').toString('utf8'); }

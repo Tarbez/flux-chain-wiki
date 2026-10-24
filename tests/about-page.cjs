@@ -75,6 +75,8 @@ const reshaped = {
   'page:/section:1/div:1/div:1': 'the hero\'s actions: "See how DEFXN works" reads "Deploy a resolver", the one name of the page it opens',
   'page:/section:1/div:1/div:1/a:2': '"See how DEFXN works" reads "Deploy a resolver", the one name of the page it opens (home\'s "See how DEFXN works" opens /about)'
 };
+/* content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): these words were rewritten to what is true; each key keeps its element */
+for (const key of ['page:/section:1/div:1/p:2', 'page:/section:1/section:1/div:1/div:1', 'page:/section:1/section:1/div:1/div:1/button:2', 'page:/section:1/section:1/div:2/svg:1', 'page:/section:1/section:1/div:2/svg:1/g:4', 'page:/section:1/section:1/div:2/svg:1/g:4/g:2', 'page:/section:1/section:1/div:2/svg:1/g:4/g:2/text:1', 'page:/section:1/section:1/div:3', 'page:/section:1/section:1/div:3/strong:1', 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:1/p:2', 'page:/section:2/div:2/details:1/div:1/section:1/div:1/article:3/p:2', 'page:/section:2/div:2/details:1/div:1/section:2/h3:1', 'page:/section:2/div:2/details:1/div:1/section:2/p:1', 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/h3:1', 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:1/p:2', 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/h3:1', 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:2/p:2', 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/h3:1', 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:3/p:2', 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/h3:1', 'page:/section:2/div:2/details:1/div:1/section:2/div:1/article:4/p:2', 'page:/section:2/div:2/details:1/div:1/section:3/h3:1', 'page:/section:2/div:2/details:1/div:1/section:4/h3:1', 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/h3:1', 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:1/p:2', 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/h3:1', 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:2/p:2', 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3/h3:1', 'page:/section:2/div:2/details:1/div:1/section:4/div:1/article:3/p:2', 'page:/footer:1/h2:1']) reshaped[key] = 'reworded in the content audit: the old words promised no fees, no hosting and a self-scaling network, which nothing proves';
 const retired = {
   'page:/section:1': 'the hero section held the copy and the layer figure; the copy is the hero block, the figure the first view',
   'page:/section:2': 'the section that held the one "More" disclosure; the disclosure became the views',
@@ -144,7 +146,7 @@ if (require.main === module) (async () => {
   assert(seen.arrows.every((a) => a.endsWith(':in')), 'both hero links are in-site, and say so (no external arrow on an internal route)');
   /* the first view's name is in the case the other five use (it was the one tab in capitals: first-visit walk 2026-10-22) */
   assert.deepEqual(seen.views, ['Three bounded layers', 'How it works', 'The promise', 'What you can resolve', 'Who it is for', 'Evidence & verification']);
-  assert.deepEqual(seen.layers, ['Directory', 'FXN chain', 'Governance'], 'one choice per layer');
+  assert.deepEqual(seen.layers, ['Directory', 'Chains', 'Governance'], 'one choice per layer');
   assert.deepEqual(seen.evidence, ['What the source establishes.', 'How to verify it.']);
   assert.equal(seen.slabs, 3, 'three slabs drawn');
   assert.equal(seen.accents, 1, 'colour is data: exactly one accent record, on the FXN chain layer');
@@ -152,7 +154,7 @@ if (require.main === module) (async () => {
   assert(/Current source boundary/i.test(seen.boundary) && /remain unverified/.test(seen.boundary), 'the source boundary is in sight');
   assert.equal(seen.groups.length, 5, 'resolutions are five counted groups, not a link per resolution');
   for (const route of ['resolutions', 'deployment', 'resolver', 'concept', 'zero', 'explorer', 'download']) assert(seen.links.includes(route), 'still links ' + route);
-  for (const words of ['State it. Resolve it. Check it.', 'No database. No hosting. No fees. No cloud.', 'One mesh. Every part of your work resolved on it.', 'A network of partners, not a platform.', 'See what resolves on the mesh.', 'READ DEFXN STATUS', 'EXPLORE THE DEFXN MODEL', 'Discovery finds the network.'])
+  for (const words of /* content audit 2026-10-24: the four headings that promised "no fees" and "every part of your work" were rewritten to what is true */ ['State it. Resolve it. Check it.', 'A site as a signed bundle, not a rented server.', 'Twenty ideas for what a resolver can do.', 'A kernel, the chains on it, and the people who sign.', 'See the resolver chains.', 'READ DEFXN STATUS', 'EXPLORE THE DEFXN MODEL', 'Discovery finds the network.'])
     assert(seen.all.includes(words), 'still says: ' + words);
   assert.equal(seen.refused, 0, 'no block was refused');
   assert.equal(seen.insert, 1, 'the CMS insertion anchor is still there');

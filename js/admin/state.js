@@ -67,6 +67,17 @@
      exact draft-replace-then-save-on-next-Save-click pipeline. */
   state.elementMotionDraft = window.ArkElementMotion ? ArkElementMotion.get() : { version: 1, routes: {} };
   state.elementMotionSaved = window.ArkElementMotion ? JSON.stringify(ArkElementMotion.sanitize(state.elementMotionDraft)) : JSON.stringify(state.elementMotionDraft);
+  /* The 3D world under every page (js/content/world.js): light, camera per route, flight and word
+     timings, the first-visit story, exits. Edited in Design > World (js/admin/world.js) and
+     previewed live in the canvas by its own message (notifyPreviewWorld, js/admin/bridge.js);
+     the same draft/saved/dirty shape as the other single drafts. */
+  state.worldDraft = window.ArkWorld ? ArkWorld.get() : { version: 1 };
+  state.worldSaved = window.ArkWorld ? JSON.stringify(ArkWorld.sanitize(state.worldDraft)) : JSON.stringify(state.worldDraft);
+  /* The skin policy (js/content/skin-policy.js): which rules a card skin may put on which part of the site.
+     Edited in the Skin lab (js/admin/skin-lab.js), previewed on the canvas by its own message
+     (notifyPreviewSkin, js/admin/bridge.js); the same draft/saved/dirty shape as the world. */
+  state.skinPolicyDraft = window.ArkSkinPolicy ? ArkSkinPolicy.get() : { version: 1, allow: {}, families: {}, contrast: [] };
+  state.skinPolicySaved = window.ArkSkinPolicy ? JSON.stringify(ArkSkinPolicy.sanitize(state.skinPolicyDraft)) : JSON.stringify(state.skinPolicyDraft);
   /* the shared relief tuning and each page's shape images (js/content/mesh-settings.js),
      edited in a page's Shape tab (js/admin/shapes.js) */
   state.meshDraft = (window.ArkMeshSettings && ArkMeshSettings.get()) || (window.ArkMeshSettings && ArkMeshSettings.defaults()) || { tuning: {}, pages: {} };
@@ -143,7 +154,8 @@
   /* ---- the canvas view ------------------------------------------------------------------
      device: the breakpoint edited (an index into DEVICES, js/admin/canvas.js); live: Live
      (the page as a visitor uses it) instead of Edit; view: 'design' (the canvas), 'map'
-     (the sitemap) or 'theme' (Theme & defaults docked beside the canvas, which stays live).
+     (the sitemap) 'theme' (Theme & defaults docked beside the canvas, which stays live) or 'world' (the 3D world's
+     controls docked beside the canvas).
      Set by the header's controls (js/admin/header.js) and setView()
      (js/admin/sitemap.js); the device the canvas opens on is chosen by js/admin/canvas.js
      (initialDevice: the last explicit choice, else this screen's own breakpoint). */
@@ -191,11 +203,15 @@
   function statesDirty() { return JSON.stringify(window.ArkStates ? ArkStates.sanitize(state.statesDraft) : state.statesDraft) !== state.statesSaved; }
   function canvasTransitionsDirty() { return JSON.stringify(window.ArkCanvasTransitions ? ArkCanvasTransitions.sanitize(state.canvasTransitionsDraft) : state.canvasTransitionsDraft) !== state.canvasTransitionsSaved; }
   function elementMotionDirty() { return JSON.stringify(window.ArkElementMotion ? ArkElementMotion.sanitize(state.elementMotionDraft) : state.elementMotionDraft) !== state.elementMotionSaved; }
+  function skinPolicyDirty() { return JSON.stringify(window.ArkSkinPolicy ? ArkSkinPolicy.sanitize(state.skinPolicyDraft) : state.skinPolicyDraft) !== state.skinPolicySaved; }
+  function worldDirty() { return JSON.stringify(window.ArkWorld ? ArkWorld.sanitize(state.worldDraft) : state.worldDraft) !== state.worldSaved; }
   if (window.ArkMeshSettings) ArkMeshSettings.pages().forEach(function (p) { state.shapeIds.push(p.id); state.shapeLabels[p.id] = p.label; });
-  /* Shape pages are keyed by the catalog module id (zero, proximity, lab, about, concept), not
+  /* Shape pages are keyed by the catalog module id (zero, about, concept), not
      the manifest id: 'home' the manifest is 'zero' the shape page; 'about' and 'concept' happen
-     to already match. Pages with no manifest at all (proximity, lab -- the Demo/Lab pages) have
-     no other editor, so they keep a shape entry of their own instead of being orphaned. */
+     to already match. A page with no manifest at all would have no other editor, so it keeps a
+     shape entry of its own instead of being orphaned. (The proximity and lab entries left with
+     the /experiments page, the owner deleted it 2026-10-24; their saved data stays in
+     js/content/mesh-settings-data.js, saved CMS data is never rewritten.) */
   function shapePageId(manifestId) { return manifestId === 'home' ? 'zero' : manifestId; }
   function hasShape(manifestId) { return state.shapeIds.indexOf(shapePageId(manifestId)) >= 0; }
   function orphanShapeIds() {
@@ -225,7 +241,7 @@
      elementMotion each already have a real dirty-check function, just never OR'd in here --
      so a dirty state/canvas-transition/element-motion draft left currentDirty() (and the
      Revert button's enabled state, its only remaining reader) falsely reporting clean. */
-  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'secret' ? dirtyS(state.secretCurrent) : state.kind === 'design' ? (themeDirty() || settingsDefaultsDirty()) : state.kind === 'studio' ? (layoutDirty() || componentsDirty() || statesDirty() || canvasTransitionsDirty() || elementMotionDirty()) : state.kind === 'mesh' || state.kind === 'seo' ? false : dirty(state.current) || seoDirty(); }
+  function currentDirty() { return state.kind === 'article' ? dirtyA(state.aCurrent) : state.kind === 'asset' ? dirtyI(state.assetCurrent) : state.kind === 'secret' ? dirtyS(state.secretCurrent) : state.kind === 'design' ? (themeDirty() || settingsDefaultsDirty() || worldDirty()) : state.kind === 'studio' ? (layoutDirty() || componentsDirty() || statesDirty() || canvasTransitionsDirty() || elementMotionDirty()) : state.kind === 'mesh' || state.kind === 'seo' ? false : dirty(state.current) || seoDirty(); }
   /* Step 5: anyDirty() backed the Publish gate and the beforeunload warning on all 13 real
      drafts except these 3 -- states/canvasTransitions/elementMotion each already have their
      own real dirty-check function (statesDirty()/canvasTransitionsDirty()/
@@ -249,5 +265,5 @@
       componentsDirty: componentsDirty, currentDirty: currentDirty, dirty: dirty, dirtyA: dirtyA,
       dirtyI: dirtyI, dirtyS: dirtyS, elementMotionDirty: elementMotionDirty, hasShape: hasShape,
       layoutDirty: layoutDirty, orphanShapeIds: orphanShapeIds, shapePageId: shapePageId, state: state,
-      statesDirty: statesDirty });
+      statesDirty: statesDirty, worldDirty: worldDirty, skinPolicyDirty: skinPolicyDirty });
 })();

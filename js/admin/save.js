@@ -15,7 +15,7 @@
   var A = window.ArkAdmin; if (!A) return;   /* js/admin/core.js did not start the editor (no locked page around it) */
   var state = A.state, layoutDirty = A.layoutDirty, download = A.download,
       componentsDirty = A.componentsDirty, statesDirty = A.statesDirty,
-      canvasTransitionsDirty = A.canvasTransitionsDirty, elementMotionDirty = A.elementMotionDirty,
+      canvasTransitionsDirty = A.canvasTransitionsDirty, elementMotionDirty = A.elementMotionDirty, worldDirty = A.worldDirty, skinPolicyDirty = A.skinPolicyDirty,
       dirty = A.dirty, clone = A.clone, dirtyA = A.dirtyA, dirtyI = A.dirtyI, dirtyS = A.dirtyS,
       status = A.status, toast = A.toast, notice = A.notice, anyDirty = A.anyDirty;
   /* defined by files loaded after this one: resolved when called */
@@ -94,6 +94,19 @@
         if (state.cdirs) await ArkAdminStore.saveElementMotion(state.cdirs.content, state.elementMotionDraft);
         else download('element-motion-data.js', ArkElementMotion.serialize(state.elementMotionDraft));
         state.elementMotionDraft = ArkElementMotion.sanitize(state.elementMotionDraft); state.elementMotionSaved = JSON.stringify(state.elementMotionDraft); ArkElementMotion.define(state.elementMotionDraft);
+      } },
+      /* the 3D world: FLX records, never JSON (ArkWorld.serialize). define() last, like the others,
+         so the editor's own module holds what is saved. */
+      world: { draft: function () { return state.worldDraft; }, set: function (v) { state.worldDraft = v; }, saved: function () { return state.worldSaved; }, dirty: worldDirty, save: async function () {
+        if (state.cdirs) await ArkAdminStore.saveWorld(state.cdirs.content, state.worldDraft);
+        else download('world-data.js', ArkWorld.serialize(state.worldDraft));
+        state.worldDraft = ArkWorld.sanitize(state.worldDraft); state.worldSaved = JSON.stringify(state.worldDraft); ArkWorld.define(state.worldDraft);
+      } },
+      /* the skin policy (Skin lab): FLX records too (ArkSkinPolicy.serialize) */
+      skinPolicy: { draft: function () { return state.skinPolicyDraft; }, set: function (v) { state.skinPolicyDraft = v; }, saved: function () { return state.skinPolicySaved; }, dirty: skinPolicyDirty, save: async function () {
+        if (state.cdirs) await ArkAdminStore.saveSkinPolicy(state.cdirs.content, state.skinPolicyDraft);
+        else download('skin-policy-data.js', ArkSkinPolicy.serialize(state.skinPolicyDraft));
+        state.skinPolicyDraft = ArkSkinPolicy.sanitize(state.skinPolicyDraft); state.skinPolicySaved = JSON.stringify(state.skinPolicyDraft); ArkSkinPolicy.define(state.skinPolicyDraft);
       } }
     };
     if (!Object.prototype.hasOwnProperty.call(handles, key)) throw new Error('js/admin/store.js lists the "' + key + '" draft, but js/admin/save.js has no editor handles for it (singleDraftHandle), so it could not be saved, published or versioned. Add its handles there.');
@@ -200,7 +213,7 @@
 
     // every single-object draft -- js/content/<file>-data.js -- in the order js/admin/store.js
     // lists them, each through its own attempt(): mesh settings, theme, site-wide defaults, SEO,
-    // layout, components, states, canvas transitions, element animation (singleDraftHandle()).
+    // layout, components, states, canvas transitions, element animation, world (singleDraftHandle()).
     var singles = ArkAdminStore.drafts('single');
     for (var n = 0; n < singles.length; n++) {
       var single = singles[n], handle;

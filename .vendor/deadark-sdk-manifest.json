@@ -1,8 +1,8 @@
 {
   "package": "@deadark/sdk",
-  "version": "0.2.43",
-  "tarball": ".vendor/deadark-sdk-0.2.43.tgz",
-  "sha256": "c1e86e3e2d249189adc1b2b6063242bb2a0e92ad74d1150b9b584ff1bb038599",
+  "version": "0.2.48",
+  "tarball": ".vendor/deadark-sdk-0.2.48.tgz",
+  "sha256": "36652224ff5b91be5b979a21024082e97cf68d6fa72592350e19bfbeaed34ed3",
   "sdkRoot": "../../design/deadark-sdk",
-  "updatedAt": "2026-10-20T19:33:02.375Z"
+  "updatedAt": "2026-10-24T10:00:22.711Z"
 }

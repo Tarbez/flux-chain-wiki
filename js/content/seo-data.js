@@ -56,7 +56,7 @@ ArkSEO.define({
     },
     "references": {
       "title": "Reference resolvers — DEFXN",
-      "description": "Inspect source-backed reference evidence and its limits. Separate documented behavior from verified live operation before choosing an operator path.",
+      "description": "No reference resolver is published yet. This page says what a reference needs and points to the resolver chains you can inspect today.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -86,7 +86,7 @@ ArkSEO.define({
     },
     "about": {
       "title": "Overview — DEFXN",
-      "description": "DEFXN is a self-scaling fractal network where everyone is a business partner. The mesh is the database, the host and the cloud: no database, no hosting, no fees, no cloud.",
+      "description": "DEFXN is the kernel of the grid. FXN is its first chain and that chain’s coin. It runs on a development network today, and nothing is live.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -96,7 +96,7 @@ ArkSEO.define({
     },
     "resolutions": {
       "title": "Resolutions for the mesh — DEFXN",
-      "description": "Resolve your website, payments, data, governance, communications and more on the DEFXN mesh, with encrypted peer-to-peer hosting and permanence instead of renewals.",
+      "description": "Twenty ideas for what a DEFXN resolver can do, from publishing a site to settling a payment. Each page separates what works on devnet, what is being built and what is only an idea.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -106,7 +106,7 @@ ArkSEO.define({
     },
     "resolutions/website": {
       "title": "Resolve your website — DEFXN",
-      "description": "Publish a signed website bundle to the DEFXN mesh without a database, hosting plan, cloud account, or yearly renewal.",
+      "description": "Publish a site as a signed bundle. The Bundle Deployer that does this is not released, so this is a plan.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -116,7 +116,7 @@ ArkSEO.define({
     },
     "resolutions/content": {
       "title": "Resolve your content — DEFXN",
-      "description": "Publish named, signed content to the DEFXN mesh so it remains addressable, traceable to its origin, and independent of a platform.",
+      "description": "Idea, not built. Sign what you publish so readers can see who published it and what changed.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -126,7 +126,7 @@ ArkSEO.define({
     },
     "resolutions/files": {
       "title": "Resolve your files — DEFXN",
-      "description": "Encrypt, distribute, and retrieve verifiable files through peer storage while keeping access under keys you control.",
+      "description": "Idea, not built. Encrypt files to keys you hold and share them as addressed pieces. No file product is released.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -136,7 +136,7 @@ ArkSEO.define({
     },
     "resolutions/deployments": {
       "title": "Resolve your deployments — DEFXN",
-      "description": "Package and sign an exact release, then publish its addressable bundle to the mesh instead of a rented deployment server.",
+      "description": "Sign an exact release so anyone can check what is running. The Bundle Deployer is not released yet.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -146,7 +146,7 @@ ArkSEO.define({
     },
     "resolutions/payments": {
       "title": "Resolve your payments — DEFXN",
-      "description": "Describe direct partner settlement in an agreement and retain a signed receipt both sides can independently verify.",
+      "description": "Idea, not built. Settle a transfer in FXN and keep a signed receipt on each side.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -156,7 +156,7 @@ ArkSEO.define({
     },
     "resolutions/finance": {
       "title": "Resolve your personal finance — DEFXN",
-      "description": "Keep inspectable books and balances under your keys, reconciling changes from partner agreements and signed receipts.",
+      "description": "Idea, not built. Keep your own books as signed records you can inspect.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -166,7 +166,7 @@ ArkSEO.define({
     },
     "resolutions/community": {
       "title": "Resolve your community — DEFXN",
-      "description": "Build a community whose members retain identity and history while shared membership rules remain explicit and checkable.",
+      "description": "Idea, not built. Give members their own signed identity and history, with membership rules anyone can read.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -176,7 +176,7 @@ ArkSEO.define({
     },
     "resolutions/communications": {
       "title": "Resolve your communications — DEFXN",
-      "description": "Establish encrypted peer channels and resolve shared conversation records without placing message custody in a platform.",
+      "description": "Idea, not built. Send messages encrypted to the recipient’s keys, with no platform holding them.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -186,7 +186,7 @@ ArkSEO.define({
     },
     "resolutions/collaborations": {
       "title": "Resolve your collaborations — DEFXN",
-      "description": "Coordinate shared work through signed changes and resolve the agreed state without a central application owner.",
+      "description": "Idea, not built. Record each contribution as a signed change and agree the shared state without a central owner.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -196,7 +196,7 @@ ArkSEO.define({
     },
     "resolutions/governance": {
       "title": "Resolve your governance — DEFXN",
-      "description": "Write decision rules before a vote, gather the required approvals, and activate an outcome with its evidence attached.",
+      "description": "Set an approval threshold, collect signatures and record when a change applies. The DAO runs as a resolver chain on the development network.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -206,7 +206,7 @@ ArkSEO.define({
     },
     "resolutions/intelligence": {
       "title": "Resolve your intelligence — DEFXN",
-      "description": "Run agreed intelligence beside relevant mesh data and return a claim with evidence that participating partners can check.",
+      "description": "Idea, not built. Run agreed logic next to the data and return a result with the records it used.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -216,7 +216,7 @@ ArkSEO.define({
     },
     "resolutions/data": {
       "title": "Resolve your data — DEFXN",
-      "description": "Write signed, addressed records, replicate them through peers, and query the mesh instead of maintaining a database server.",
+      "description": "Write signed records and read them back from the network instead of running a database server.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -226,7 +226,7 @@ ArkSEO.define({
     },
     "resolutions/algorithms": {
       "title": "Resolve your algorithms — DEFXN",
-      "description": "Publish deterministic algorithms as named resolvers so anyone can run the logic and check the resulting claim.",
+      "description": "Publish deterministic logic as a resolver so anyone can run it and check the result.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -236,7 +236,7 @@ ArkSEO.define({
     },
     "resolutions/information": {
       "title": "Resolve your information — DEFXN",
-      "description": "Give information a stable address and preserve its source trail so the current claim remains findable and inspectable.",
+      "description": "Idea, not built. Give information a stable address and a signed source trail.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -246,7 +246,7 @@ ArkSEO.define({
     },
     "resolutions/rules": {
       "title": "Resolve your rules and patterns — DEFXN",
-      "description": "Express rules as deterministic resolver logic, agree on a named version, and apply it consistently with retained evidence.",
+      "description": "Write a rule as resolver logic so every party applies it the same way.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -256,7 +256,7 @@ ArkSEO.define({
     },
     "resolutions/network": {
       "title": "Resolve your network — DEFXN",
-      "description": "Create or join a named network, participate from a local node, and discover peers as the network grows.",
+      "description": "Create or join a named network. Today the name groups miners for discovery and isolates nothing else.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -266,7 +266,7 @@ ArkSEO.define({
     },
     "resolutions/encryptions": {
       "title": "Resolve your encryptions — DEFXN",
-      "description": "Choose who may read, encrypt before information enters the mesh, and keep decryption under the required partner keys.",
+      "description": "Idea, not built. Encrypt before information leaves your machine, with keys you hold.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -276,7 +276,7 @@ ArkSEO.define({
     },
     "resolutions/automation": {
       "title": "Resolve your automation — DEFXN",
-      "description": "Define a permitted action, bind it to an agreement, and run it when verifiable evidence satisfies the rule.",
+      "description": "Idea, not built. Run a permitted action when signed evidence satisfies a rule.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -286,7 +286,7 @@ ArkSEO.define({
     },
     "resolutions/productivity": {
       "title": "Resolve your productivity — DEFXN",
-      "description": "Build repeatable work around shared records and resolvers while keeping the resulting work under partner control.",
+      "description": "Idea, not built. Build tools around shared signed records instead of per-seat subscriptions.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -296,7 +296,7 @@ ArkSEO.define({
     },
     "resolutions/logistics": {
       "title": "Resolve your logistics — DEFXN",
-      "description": "Name items and expected movements, sign each custody handoff, and resolve responsibility from a shared trail.",
+      "description": "Idea, not built. Sign each handoff of an item to keep a shared custody trail.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -356,7 +356,7 @@ ArkSEO.define({
     },
     "spec": {
       "title": "Benchmark evidence and limits — DEFXN",
-      "description": "Six benchmark records are verified at stated boundaries; the rest remain partial, historical or superseded. A result counts only with its workload, environment, method and raw evidence.",
+      "description": "Six benchmark records are verified at stated boundaries. The rest remain partial, historical or superseded. A result counts only with its workload, environment, method and raw evidence.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -366,7 +366,7 @@ ArkSEO.define({
     },
     "download": {
       "title": "Run from source — DEFXN",
-      "description": "Start a local miner from an owner-approved source checkout. Follow prerequisites and verification steps; public binaries remain unverified.",
+      "description": "Start a local miner from an owner-approved source checkout. Follow prerequisites and verification steps. Public binaries remain unverified.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -404,16 +404,6 @@ ArkSEO.define({
       "aiSummary": "",
       "aiBlocked": false
     },
-    "proximity": {
-      "title": "Interactive model — DEFXN",
-      "description": "An illustrative model of threshold agreement, authority, lifecycle and network boundaries. Hands-on controls; not live network data or a benchmark.",
-      "ogImage": "",
-      "canonical": "",
-      "schemaType": "",
-      "noindex": false,
-      "aiSummary": "",
-      "aiBlocked": false
-    },
     "learnings": {
       "title": "Protocol notes — DEFXN",
       "description": "Read technical notes on agreement execution, named networks, and authority. Pair historical explanations with current source and evidence boundaries.",
@@ -426,7 +416,7 @@ ArkSEO.define({
     },
     "explorer": {
       "title": "Mesh Explorer — DEFXN",
-      "description": "Inspect live, bounded records and health from a local Flux Miner. Connection and operator access are explicit; no fixture data is shown as live evidence.",
+      "description": "Inspect live, bounded records and health from a local Flux Miner. Connection and operator access are explicit. No fixture data is shown as live evidence.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -506,7 +496,7 @@ ArkSEO.define({
     },
     "stats/gpu": {
       "title": "GPU benchmark detail — DEFXN",
-      "description": "Why a rented RTX PRO 6000 box was fast: its CPU. The protocol never addresses the GPU; it is signatures and hashing, measured and corrected.",
+      "description": "Why a rented RTX PRO 6000 box was fast: its CPU. The protocol never addresses the GPU. It is signatures and hashing, measured and corrected.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -617,6 +607,156 @@ ArkSEO.define({
     "lifecycle/receipt": {
       "title": "Receipt: close the evidence trail — DEFXN",
       "description": "Trace a policy-bound verification outcome back to fulfillment and intent. A receipt is not universal truth, settlement, or production-readiness evidence.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "chain/record": {
+      "title": "Your chain: revisions — DEFXN",
+      "description": "Step through the sample records on a chain and see each one’s revision. The records are samples, not live data.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "chain/open": {
+      "title": "Your chain: one record — DEFXN",
+      "description": "Open one sample record: its content, details, signature and history. The record is a sample, not live data.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "chain/links": {
+      "title": "Your chain: connections — DEFXN",
+      "description": "See what a sample record links to, what links to it and who signed it. The records are samples, not live data.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "identity": {
+      "title": "Your FXN ID — DEFXN",
+      "description": "An FXN ID is one key file, .auth.fxn, that identifies you on every network. The file stays on your device and is never uploaded.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "identity/sign": {
+      "title": "Signing in — DEFXN",
+      "description": "How a site asks your FXN ID to sign, in three steps. Your key never leaves your device. The site only receives a signature.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "identity/safe": {
+      "title": "Keeping your FXN ID safe — DEFXN",
+      "description": "What keeps your FXN ID key safe today, with the state of each protection.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "identity/you": {
+      "title": "Your identity — DEFXN",
+      "description": "A sample identity: the chain a key file starts and what it holds. Nothing on the page is live.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "measured": {
+      "title": "Measured — DEFXN",
+      "description": "The capabilities and resolvers DEFXN lists, with the checked cases for each and the dated benchmark runs. Absent measurements show as not measured, never as zero.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "fxn": {
+      "title": "FXN supply — DEFXN",
+      "description": "The owner’s decisions on FXN’s starting supply, release rules and fee split. Most of these rules are not in code yet, and nothing is live.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "ring": {
+      "title": "A chain of the network — DEFXN",
+      "description": "The kinds of chain in DEFXN: identity, resolver, token ledger, pool and network chains, on the DEFXN kernel. The picture shows kinds, not live chains.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "works": {
+      "title": "How it works, in one minute — DEFXN",
+      "description": "Five ideas: every identity has a chain, a resolver signs its results, other computers keep copies and anyone can check.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "works/resolve": {
+      "title": "How a result is made — DEFXN",
+      "description": "An illustrated swap: two parties sign, a resolver checks and signs the result, copies are stored and anyone can check. It shows no live state.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "works/layers": {
+      "title": "Three layers — DEFXN",
+      "description": "The DEFXN kernel, the capabilities and the resolvers, with the one rule each layer keeps. It shows no live state.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "works/life": {
+      "title": "Life of a resolver — DEFXN",
+      "description": "Build, launch, choose who can change it, serve and inspect: a resolver’s path from grammar to a served chain. It shows no live state.",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "trace": {
+      "title": "Trace a record — DEFXN",
+      "description": "Follow a sample chain from its newest record back to genesis and check each signature on the way. The chain is a sample.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",

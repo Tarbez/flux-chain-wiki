@@ -14,7 +14,7 @@
    window.ArkAuthKitCreatePanel.mount(container, opts) renders the
    two-stage wizard (form -> recovery phrase + download) into `container`
    and returns { reset() }. `opts.onDownloaded(filename)` fires once the
-   real .auth.flx file has been saved, so the caller can return to its own
+   real .auth.fxn file has been saved, so the caller can return to its own
    import/unlock view -- this module never signs anyone in itself; the
    existing, already-proven import path does that, the same way creating
    a wallet and then restoring it from its own backup proves the backup
@@ -38,13 +38,14 @@
       if (stage === 'form') {
         container.innerHTML =
           '<form class="' + formClass + '" data-auth-kit-create-form>' +
-            '<label>Display name<input type="text" name="displayName" maxlength="80" required autofocus></label>' +
-            '<label>Recovery phrase' +
+            '<label>Your name<input type="text" name="displayName" maxlength="80" required autofocus></label>' +
+            '<label>Recovery words' +
               '<select name="wordCount"><option value="24" selected>24 words</option><option value="12">12 words</option></select>' +
             '</label>' +
-            '<label>PIN<input type="password" name="pin" inputmode="numeric" placeholder="6–12 digits" required></label>' +
-            '<label>Optional password<input type="password" name="password"></label>' +
-            '<button class="' + actionClass + '" type="submit">Create identity</button>' +
+            '<label>PIN<input type="password" name="pin" inputmode="numeric" placeholder="8–12 digits" autocomplete="new-password" required></label>' +
+            '<label>Password (optional)<input type="password" name="password" autocomplete="new-password"></label>' +
+            '<p class="account-hint">Use 8–12 PIN digits, or 6–12 digits with a password. You type them each time you open the file.</p>' +
+            '<button class="' + actionClass + '" type="submit">Create my FXN ID</button>' +
           '</form><div class="' + resultClass + '" data-auth-kit-create-result hidden></div>';
         var form = container.querySelector('[data-auth-kit-create-form]');
         var result = container.querySelector('[data-auth-kit-create-result]');
@@ -58,7 +59,7 @@
             result.hidden = false; result.className = resultClass + ' error'; result.textContent = 'Use 8–12 PIN digits alone, or 6–12 digits with a password.'; return;
           }
           if (!displayName) return;
-          result.hidden = false; result.className = resultClass; result.textContent = 'Creating your identity…';
+          result.hidden = false; result.className = resultClass; result.textContent = 'Making your FXN ID…';
           (window.ArkAuthKitCreate ? window.ArkAuthKitCreate.create({
             displayName: displayName, wordCount: Number(data.get('wordCount')) === 12 ? 12 : 24, pin: pin, password: password,
           }) : Promise.reject(new Error('js/admin/vendor/auth-kit-create.js did not load.'))).then(function (created) {
@@ -70,22 +71,25 @@
       } else if (stage === 'recovery') {
         var words = kit.mnemonic.split(' ');
         container.innerHTML =
-          '<p class="lead">Write down these ' + words.length + ' words and keep them safe. You will need them to recover your identity.</p>' +
+          '<p class="lead">Write these ' + words.length + ' words on paper, in order. They bring your identity back if you lose the file. Anyone who has them can open it, so never photograph or paste them.</p>' +
           '<ol class="auth-word-grid">' + words.map(function (w, i) { return '<li><small>' + (i + 1) + '</small><strong></strong></li>'; }).join('') + '</ol>' +
-          '<button class="' + actionClass + '" type="button" data-auth-kit-create-download>Download Auth Kit</button>' +
+          '<label class="auth-word-confirm"><input type="checkbox" data-auth-kit-create-written> I wrote the words down</label>' +
+          '<button class="' + actionClass + '" type="button" data-auth-kit-create-download disabled>Save FXN ID file</button>' +
           '<div class="' + resultClass + '" data-auth-kit-create-download-result hidden></div>';
         var items = container.querySelectorAll('.auth-word-grid li strong');
         words.forEach(function (w, i) { items[i].textContent = w; });
-        container.querySelector('[data-auth-kit-create-download]').addEventListener('click', function () {
-          var filename = (kit.displayName.trim().toLowerCase().replace(/[^a-z0-9._]+/g, '-').replace(/^-+|-+$/g, '') || 'flux-identity') + '.auth.flx';
+        var written = container.querySelector('[data-auth-kit-create-written]'), saveButton = container.querySelector('[data-auth-kit-create-download]');
+        written.addEventListener('change', function () { saveButton.disabled = !written.checked; });
+        saveButton.addEventListener('click', function () {
+          var filename = (kit.displayName.trim().toLowerCase().replace(/[^a-z0-9._]+/g, '-').replace(/^-+|-+$/g, '') || 'fxn-id') + '.auth.fxn';
           var blob = new Blob([kit.authKit], { type: 'application/vnd.flux.auth-kit' });
           var url = URL.createObjectURL(blob);
           var anchor = document.createElement('a'); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
           var result = container.querySelector('[data-auth-kit-create-download-result]');
           result.hidden = false; result.className = resultClass + ' ok';
-          result.textContent = 'Auth Kit saved. Use it to sign in.';
+          result.textContent = 'FXN ID file saved as ' + filename + '. Keep it, and keep the words apart from it. Next, choose the file under Sign in.';
           stage = 'done'; kit = null;
-          if (opts.onDownloaded) setTimeout(function () { opts.onDownloaded(filename); }, 2200);
+          if (opts.onDownloaded) setTimeout(function () { opts.onDownloaded(filename); }, 6000);
         });
       }
     }

@@ -30,12 +30,13 @@
      boot      on entry, each piece steps in once in the card's look; then everything stops
    opts.world / hud / loadout / cursor: false leaves that piece out (a page with its own 3D world keeps
    it). The root hears "defxn:skin" (detail { on, record, theme }) when a skin lands and when it leaves.
-   Meaning colours (--live, --trust, --drift, --warning, --danger, --hidden, --reference) stay the site's.
+   Meaning colours (DefxnSkin.MEANING) and opts.locked stay the site's. Tokens go into ONE scoped rule,
+   [data-defxn-skin="<id>"], and nothing writes an inline style on the wrapper (skin contract v2).
    Nothing loops: the world is drawn once, the lean follows the pointer and stops with it, and the boot
    ends. With prefers-reduced-motion there is no boot and no lean.
 
    Nothing is sent anywhere: the card is drawn from its record, in the page. Needs world.js and what it
-   needs (card.js, art3d.js, traits.js, the layer bundles). */
+   needs (card.js, art3d.js, traits.js, the layer bundles), and js/nft/scene.js for the world. */
 (function () {
   'use strict';
 
@@ -71,22 +72,20 @@
     }
     switch (kind) {
       case 'panel': {
-        var pos = node.style.position;
-        if (getComputedStyle(node).position === 'static') node.style.position = 'relative';
+        if (getComputedStyle(node).position === 'static') node.classList.add('nft-pos');
         // the card's frame and corners replace the panel's own border (restored on leave by keepAttrs)
-        if (th.chrome.frame || th.chrome.corner) { node.style.borderColor = 'transparent'; node.style.boxShadow = 'none'; node.style.outline = 'none'; }
+        if (th.chrome.frame || th.chrome.corner) node.classList.add('nft-edge');   // the card's frame is its border
         var deco = W.dress(node, th, { scale: parseFloat(node.getAttribute('data-nft-scale')) || 0.34 });
-        undo.push(function () { if (deco.parentNode) deco.parentNode.removeChild(deco); node.style.position = pos; });
+        undo.push(function () { if (deco.parentNode) deco.parentNode.removeChild(deco); });
         break;
       }
       case 'button': {
         var primary = node.hasAttribute('data-primary');
         if (!primary && th.chrome.corner) {
-          var p0 = node.style.position;
-          if (getComputedStyle(node).position === 'static') node.style.position = 'relative';
-          node.style.borderColor = 'transparent';              // the corners are its border
+          if (getComputedStyle(node).position === 'static') node.classList.add('nft-pos');
+          node.classList.add('nft-edge');                       // the corners are its border
           var d = W.dress(node, th, { frame: false, scale: 0.26, inset: 0 });
-          undo.push(function () { if (d.parentNode) d.parentNode.removeChild(d); node.style.position = p0; });
+          undo.push(function () { if (d.parentNode) d.parentNode.removeChild(d); });
         }
         break;
       }
@@ -120,8 +119,17 @@
     return undo;
   }
 
-  // tokens a skin never sets: their colour says something true about the site (Ark UI meaning tokens)
-  var MEANING = ['--live', '--trust', '--drift', '--warning', '--danger', '--hidden', '--reference'];
+  // tokens a skin never sets: their colour says something true about the site. The list lives in
+  // skin-recipe.js (DefxnSkin.MEANING); a product adds its own with opts.locked (Ark UI's locks).
+  var SKIN_N = 0;
+  // a skin's rule, scoped to the wrapper by its data-defxn-skin id: no inline style on the wrapper
+  function scopedRule(id, decls) {
+    var st = document.createElement('style');
+    st.setAttribute('data-defxn-skin', id);
+    st.textContent = '[data-defxn-skin="' + id + '"]{' + decls.join(';') + '}';
+    document.head.appendChild(st);
+    return st;
+  }
 
   // the site hears a skin land or leave on its root: event "defxn:skin", detail { on, record, theme }
   function announce(root, on, record, th) {
@@ -131,22 +139,27 @@
     root.dispatchEvent(ev);
   }
 
-  function reskin(root, record) {
+  function reskin(root, record, opts) {
+    opts = opts || {};
     restore(root);
     var traits = T.pick(record), th = W.theme(traits, record), undo = [keepAttrs(root)];
-    // 1. the tokens, in the SDK's names: channels, and the hsl() wrappers the SDK also writes.
-    //    Colours that carry MEANING stay the site's own: a skin never sets them (MEANING below).
-    Object.keys(th.vars).forEach(function (k) {
-      if (MEANING.indexOf(k) >= 0) return;
-      var before = root.style.getPropertyValue(k);
-      root.style.setProperty(k, th.vars[k]);
-      undo.push(function () { if (before) root.style.setProperty(k, before); else root.style.removeProperty(k); });
-      if (/^--[a-z-]+$/.test(k) && !/^--w-/.test(k)) {
-        var wrap = '--color-' + k.slice(2), was = root.style.getPropertyValue(wrap);
-        root.style.setProperty(wrap, 'hsl(var(' + k + '))');
-        undo.push(function () { if (was) root.style.setProperty(wrap, was); else root.style.removeProperty(wrap); });
-      }
+    // 1. the tokens, in the SDK's names: channels, and the hsl() wrappers the SDK also writes, in ONE
+    //    scoped rule (skin contract v2). Meaning tokens and the product's locked tokens are skipped,
+    //    and the console names each locked one.
+    var id = 's' + (++SKIN_N), vars = window.DefxnSkin.siteTokens(th.vars, opts.locked), decls = [];
+    (opts.locked || []).forEach(function (k) { if (k in th.vars) console.info('The NFT skin leaves ' + k + ' to the site: the site locks it.'); });
+    Object.keys(vars).forEach(function (k) {
+      decls.push(k + ':' + vars[k]);
+      if (/^--[a-z-]+$/.test(k) && !/^--w-/.test(k)) decls.push('--color-' + k.slice(2) + ':hsl(var(' + k + '))');
     });
+    if (getComputedStyle(root).position === 'static' && opts.game) decls.push('position:relative');
+    var rule = scopedRule(id, decls), prevSkin = root.getAttribute('data-defxn-skin');
+    root.setAttribute('data-defxn-skin', id);
+    undo.push(function () {
+      if (rule.parentNode) rule.parentNode.removeChild(rule);
+      if (prevSkin == null) root.removeAttribute('data-defxn-skin'); else root.setAttribute('data-defxn-skin', prevSkin);
+    });
+    th._skinId = id; th._rule = rule;
     var theme0 = root.getAttribute('data-theme');
     root.setAttribute('data-theme', 'nft');
     root.classList.add('w-world');
@@ -157,7 +170,7 @@
       if (u) undo = undo.concat(u);
     });
     if (STATE) STATE.set(root, undo.reverse()); else root._nftUndo = undo.reverse();
-    announce(root, true, record, th);
+    if (!opts.quiet) announce(root, true, record, th);
     return th;
   }
 
@@ -170,46 +183,16 @@
   }
 
   /* ---------- game mode ---------- */
-  var A = window.Art3D, NS = 'http://www.w3.org/2000/svg';
+  var NS = 'http://www.w3.org/2000/svg';
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   var TIER_HUE = ['0 0% 70%', '168 70% 55%', '268 80% 72%', '40 95% 62%'];   // Common, Rare, Epic, Legendary
-  var ART = ['backdrop', 'aura', 'signal', 'particles', 'mark'];
 
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
 
-  // the world: the card's 3D art behind the whole site, drawn once per size
+  // the world: the card's 3D art behind the whole site, drawn once per size (js/nft/scene.js)
   function world(root, th, record) {
-    var bg = el('div', 'nft-world'), cv = el('canvas'), picks = { palette: th.picks.palette };
-    bg.setAttribute('aria-hidden', 'true');
-    ART.forEach(function (k) { picks[k] = th.picks[k]; });
-    bg.appendChild(cv); root.insertBefore(bg, root.firstChild);
-    var model = null, last = '';
-    function draw() {
-      if (!model || !bg.clientWidth) return;
-      var dpr = Math.min(1.5, window.devicePixelRatio || 1), w = Math.round(bg.clientWidth * dpr), h = Math.round(bg.clientHeight * dpr), k = w + 'x' + h;
-      if (k === last) return;
-      last = k;
-      A.schedule(function () {
-        var t = { art: el('canvas'), glow: el('canvas') }, aspect = w / h;
-        A.paint(t, model, w, h, { x: 0.05, y: 0.26 }, { object: true, aspect: aspect, zoom: 0.92, shift: 350 * aspect * 0.34 });
-        cv.width = w; cv.height = h;
-        var x = cv.getContext('2d'); x.drawImage(t.art, 0, 0);
-        x.globalCompositeOperation = 'screen'; x.globalAlpha = 0.8; x.drawImage(t.glow, 0, 0);
-        bg.classList.add('is-drawn');
-      });
-    }
-    A.loadMark().then(function (mark) { return A.build(mark, window.DEFXN_TRAITS.keyOf(record), picks); }).then(function (m) { model = m; draw(); });
-    var ro = window.ResizeObserver ? new ResizeObserver(function () { draw(); }) : null;
-    if (ro) ro.observe(bg);
-    // the lean: the world moves a little against the pointer, eased by CSS, and stops with it
-    function lean(e) {
-      if (reduce && reduce.matches) return;
-      var r = root.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width - 0.5, ny = (e.clientY - r.top) / r.height - 0.5;
-      bg.style.transform = 'translate(' + (-nx * 18).toFixed(1) + 'px,' + (-ny * 12).toFixed(1) + 'px) scale(1.04)';
-    }
-    function rest() { bg.style.transform = ''; }
-    root.addEventListener('pointermove', lean); root.addEventListener('pointerleave', rest);
-    return function () { if (ro) ro.disconnect(); root.removeEventListener('pointermove', lean); root.removeEventListener('pointerleave', rest); if (bg.parentNode) bg.parentNode.removeChild(bg); if (model) A.dispose(model); };
+    // the demo's world keeps the faint mark (all five art layers); a site's default leaves it out
+    return window.DefxnScene.world(root, record, { picks: th.picks, only: window.DefxnScene.ART, leanOn: root }).remove;
   }
 
   // the HUD: the corner at the four corners of the site, and the identity line at the top
@@ -256,17 +239,15 @@
     var svg = C.chromeSvg(th.chrome.emblem, record, th.traits);
     svg.setAttribute('xmlns', NS); svg.setAttribute('width', '22'); svg.setAttribute('height', '25');
     var url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(svg));
-    var before = root.style.cursor;
-    root.style.cursor = 'url("' + url + '") 11 12, crosshair';
-    return function () { root.style.cursor = before; };
+    th._rule.textContent += '[data-defxn-skin="' + th._skinId + '"]{cursor:url("' + url + '") 11 12, crosshair}';
+    return function () {};                                  // the rule goes with the skin
   }
 
   // opts.world / hud / loadout / cursor: false leaves that piece out. A page that has its own 3D world
   // passes world: false, and keeps its world, repainted in the skin's colours on "defxn:skin".
   function enter(root, record, opts) {
     opts = opts || {};
-    var th = reskin(root, record), undo = (STATE ? STATE.get(root) : root._nftUndo) || [];
-    if (getComputedStyle(root).position === 'static') { root.style.position = 'relative'; }
+    var th = reskin(root, record, { locked: opts.locked, game: true, quiet: true }), undo = (STATE ? STATE.get(root) : root._nftUndo) || [];
     var more = [];
     if (opts.world !== false) more.push(world(root, th, record));
     if (opts.hud !== false) more.push(hud(root, th, record));
@@ -285,6 +266,7 @@
     // undo the game pieces first, then the reskin (the list runs from its start)
     var all = more.reverse().concat(undo);
     if (STATE) STATE.set(root, all); else root._nftUndo = all;
+    announce(root, true, record, th);
     return th;
   }
 
@@ -292,11 +274,11 @@
   var css = [
     // the world sits under the site's content inside the root's own stacking context: no child of the
     // site changes its position or z-index
+    '.nft-pos{position:relative}',
+    '.nft-edge,.nft-edge:hover{border-color:transparent!important;box-shadow:none!important}',
     '.nft-game{isolation:isolate}',
-    '.nft-world{position:absolute!important;z-index:-1!important;inset:-14px;pointer-events:none;opacity:0;transition:opacity .9s ease-out,transform .6s cubic-bezier(.2,.7,.2,1)}',
-    '.nft-world.is-drawn{opacity:.62}',
-    '.nft-world canvas{width:100%;height:100%;display:block}',
-    '.nft-world::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 20% 30%,hsl(var(--canvas) / .92),hsl(var(--canvas) / .35) 60%,transparent)}',
+    // the world's look is in css/nft-card.css (js/nft/scene.js); here only its place under the site
+    '.nft-game > .nft-world{position:absolute!important;z-index:-1!important}',
     '.nft-game [data-nft="panel"]{background:hsl(var(--surface) / .78)!important;backdrop-filter:blur(6px)}',
     '.nft-hud{position:absolute!important;z-index:3!important;inset:0;pointer-events:none}',
     '.nft-hud-corner{position:absolute;width:64px;height:64px;overflow:visible}',

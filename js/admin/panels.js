@@ -25,7 +25,7 @@
   /* which file draws each panel: what a placeholder names as missing */
   var OWNER = { renderPageFields: 'js/admin/editor.js', renderArticleFields: 'js/admin/articles.js',
     renderMediaPanel: 'js/admin/assets.js', renderVaultPanel: 'js/admin/secrets.js',
-    renderThemePanel: 'js/admin/design.js', renderShapesPanel: 'js/admin/shapes.js',
+    renderThemePanel: 'js/admin/design.js', renderWorldPanel: 'js/admin/world.js', renderSkinLabPanel: 'js/admin/skin-lab.js', renderShapesPanel: 'js/admin/shapes.js',
     renderMeshEditor: 'js/admin/mesh.js' };
 
   /* ---- mounting ------------------------------------------------------------------------- */
@@ -72,6 +72,11 @@
     mountPanel($('themePanel'), 'renderThemePanel', [], 'Theme & defaults');
     mountPanel($('shapesPanel'), 'renderShapesPanel', [], 'Shape images and their tuning');
   }
+
+  /* ---- the World view (setView('world'), js/admin/sitemap.js): the 3D world's controls ---- */
+  function mountWorldView() { mountPanel($('worldPanel'), 'renderWorldPanel', [], 'The 3D world'); }
+  /* ---- the Skin lab view (setView('skin')): card skins tried on the real page ---- */
+  function mountSkinView() { mountPanel($('skinPanel'), 'renderSkinLabPanel', [], 'The Skin lab'); }
 
   /* ---- THE sheet ------------------------------------------------------------------------ */
   var sheet = { key: '', anchor: null, transient: false, item: null };
@@ -139,7 +144,7 @@
   }
   document.addEventListener('keydown', function (e) {
     if ((e.key !== 'End' && e.key !== 'Home') || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (!e.target.closest || !e.target.closest('#sheet, #themeView, #studioLeft')) return;
+    if (!e.target.closest || !e.target.closest('#sheet, #themeView, #worldView, #skinView, #studioLeft')) return;
     if (moveCaret(e.target, e.key, e.shiftKey)) e.preventDefault();
   });
 
@@ -196,6 +201,7 @@
      a page form edits, and an open Page fields sheet follows it -- or closes, if a shortcut
      opened it for the page that was showing. */
   function pageFieldsFollow(path) {
+    if (A.worldFollow) A.worldFollow(path);   /* the World view's "This page" follows the canvas */
     var item = itemForRoute(path);
     if (item && (state.kind === 'page' || state.kind === 'article')) {
       state.kind = item.kind;
@@ -215,6 +221,6 @@
   }
 
   A.provide({ closeSheet: closeSheet, itemForRoute: itemForRoute, mountRailPane: mountRailPane,
-      mountThemeView: mountThemeView, openMeshSheet: openMeshSheet, openPageFields: openPageFields,
+      mountThemeView: mountThemeView, mountWorldView: mountWorldView, mountSkinView: mountSkinView, openMeshSheet: openMeshSheet, openPageFields: openPageFields,
       pageFieldsFollow: pageFieldsFollow, refreshPanels: refreshPanels });
 })();

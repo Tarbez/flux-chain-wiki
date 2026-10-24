@@ -13,7 +13,7 @@
    WHICH FILES -- derived, never listed. The catalog (js/pages/catalog.js, loaded the way
    scripts/lib/site-routes.mjs loads it) names every script the page loader fetches. Of those, a
    file is built unless one of these says it should not be:
-     - it lives where another pipeline owns it: js/ark/vendor/ and js/admin/ (the Ark bundles,
+     - it lives where another pipeline owns it: js/vendor/ (third-party code as released: Three.js), js/ark/vendor/ and js/admin/ (the Ark bundles,
        the editor and the Auth Kit bundles are esbuild output already), or js/content/articles/
        (written by the CMS publisher: a build step beside it would leave a published article's
        served copy stale until someone rebuilt, so an article is always served as saved);
@@ -49,7 +49,9 @@ const INDEX_HTML = 'index.html';
 /* The script tag index.html carries for the manifest; the build rewrites its ?v=. */
 const MANIFEST_TAG = /(<script src="js\/min\/manifest\.js\?v=)([0-9a-f]{8})(" defer><\/script>)/;
 const TARGET = 'es2020'; // the floor the pages already need: they use ?. and ??
-const OTHER_PIPELINES = ['js/ark/vendor/', 'js/admin/', 'js/content/articles/', MIN_DIR + '/'];
+/* js/vendor/ is third-party code kept as released: Three.js (js/vendor/three-r180-defxn.js, 724 KB) is already minified, and the 3D world
+   loads it by path (js/world/world-host.js), not through a route. Should a route ever list it, it is served as written. */
+const OTHER_PIPELINES = ['js/ark/vendor/', 'js/admin/', 'js/vendor/', 'js/content/articles/', MIN_DIR + '/'];
 const GENERATED_HEADER = /\b(?:generated (?:by|from)|do not edit)\b/i;
 const WORTH_BUILDING = 0.95; // built only when the minified copy is under this share of the source
 

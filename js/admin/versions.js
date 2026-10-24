@@ -30,7 +30,7 @@
 
    A <hash> is SHA-256 of the value's JSON.stringify form (AGENTS.md: JSON
    is the hashing form, not the storage form). Each file holds the value
-   in ARK's structured-state FLX grammar (vendor/flx-state-grammar.js,
+   in ARK's structured-state FLX grammar (js/vendor/flx-state-grammar.js,
    vendored byte-identical from ark-browser/src/shared/flx-state-grammar.js),
    whose round trip is exact to the byte against JSON.stringify -- so every
    read re-derives the address and refuses a file that does not match it.
@@ -73,7 +73,7 @@
    changed leaves), so a draft added to the CMS later needs no new code.
    ===================================================================== */
 (function (root, factory) {
-  if (typeof module === 'object' && module.exports) module.exports = factory(require('./vendor/flx-state-grammar.js'));
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('../vendor/flx-state-grammar.js'));
   else root.ArkVersions = factory(root.ARK_FLX_STATE);
 })(typeof globalThis !== 'undefined' ? globalThis : this, function (FLX) {
   'use strict';

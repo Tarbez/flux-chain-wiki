@@ -6,8 +6,6 @@
     var store = new ArkEngines.FluxMemoryStore({ historyLimit: 40, timelineLimit: 80 });
     var pages = {
       zero: { mesh: 'zero', dissolve: 0, depth: 0 },
-      proximity: { mesh: 'proximity', dissolve: .5, depth: 1 },
-      lab: { mesh: 'proximity', dissolve: .5, depth: 1 },
       learnings: { mesh: 'zero', dissolve: 0, depth: 0 },
       about: { mesh: 'zero', dissolve: 0, depth: 0 },
       concept: { mesh: 'zero', dissolve: 0, depth: 0 },
@@ -219,6 +217,17 @@
       if (immediate || (!active && wasHidden)) {
         el.hidden = !active;
         return Promise.resolve();
+      }
+      /* a world page (js/world/world-host.js ArkUI.worldRise): its words rise and leave by transform and clip, with the
+         timings of ArkWorld.motion, and nothing fades */
+      if (el.classList && el.classList.contains('world-page') && ArkUI.worldRise && typeof el.animate === 'function') {
+        el.hidden = false;
+        var rise = ArkUI.worldRise(el, active);
+        running.set(el, rise.animations);
+        return rise.done.then(function () {
+          if (revisions.get(el) !== revision) return;
+          el.hidden = !active; el.inert = !active; el.setAttribute('aria-hidden', String(!active)); stop(el);
+        });
       }
       var items = targets(el);
       var canStagger = items.length && items.every(function (item) { return typeof item.animate === 'function'; });

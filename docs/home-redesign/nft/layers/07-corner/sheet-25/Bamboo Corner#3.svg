@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Bamboo Corner: two bamboo stalks lashed together at the bend, each ringed at a node, with a leaf on each arm in the accent (sheet 25, the Bamboo set)</title>
+  <path d="M3 1V90M9 1V90M9 3H90M9 9H90" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M3 1H9M3 90H9M90 3V9" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0.7"/><path d="M3 3L9 9M9 3L3 9" fill="none" stroke="var(--dim)" stroke-width="1.2" vector-effect="non-scaling-stroke"/><path d="M1.4 45H10.6M1.4 47H10.6M45 1.4V10.6M47 1.4V10.6" fill="none" stroke="var(--ink)" stroke-width="1.1" vector-effect="non-scaling-stroke" opacity="0.85"/><path d="M50 10Q59.82 20.7 78 17Q64.68 10.78 50 10Z" fill="var(--acc)"/><path d="M10 50Q20.66 58.84 17 76Q10.8 63.73 10 50Z" fill="var(--acc)" opacity="0.55"/>
+</svg>

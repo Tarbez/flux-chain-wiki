@@ -57,7 +57,7 @@ async function check(route, { reshaped = [], retired = [], reworded = [], inspec
       refused: page.querySelectorAll('[data-ark-block-refused]').length,
       insert: page.querySelectorAll('[data-ark-insert="main"]').length,
       h1: [...page.querySelectorAll('h1')].map((h) => h.id),
-      hiddenByStyle: [...page.querySelectorAll('[style*="display: none"], [style*="display:none"]')].filter((el) => !el.closest('[data-ark-slot]')).length,
+      hiddenByStyle: [...page.querySelectorAll('[style*="display: none"], [style*="display:none"]')].filter((el) => !el.closest('[data-ark-slot]') && !el.closest('[data-account-auth]')).length, /* the shared sign-in bundle toggles its own parts with hidden + display (ark-ui 0.2.19 "keep me signed in", journey audit 2026-10-24) */
       badHrefs: [...page.querySelectorAll('a[href]')].map((a) => a.getAttribute('href')).filter((h) => !/^(\/|#|https?:\/\/)/.test(h)),
       terms: page.querySelectorAll('[data-ark-part="term"][data-term]').length
     };

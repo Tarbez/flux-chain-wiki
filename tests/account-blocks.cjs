@@ -33,6 +33,12 @@ const ROOT = checks.ROOT;
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 const reshaped = [
+  /* journey audit 2026-10-24: these elements keep their keys and now say FXN ID (see reworded) */
+  [/^page:\/div:1\/header:1\/div:1\/svg:1(\/text:2)?$/, 'the map\'s node and label read FXN ID; the key stays on them'],
+  [/^page:\/div:1\/section:1\/section:1\/div:1\/div:1\/div:1\/section:1\/div:1\/p:1$/, 'the bundle\'s file line says FXN ID file (.auth.fxn)'],
+  [/^page:\/div:1\/section:1\/section:1\/div:2\/(h2|p):1$/, 'the create callout says "Create your FXN ID." and what the person gets'],
+  [/^page:\/div:1\/section:1\/section:2\/div:1\/div:2\/p:2$/, 'the public-key hint says FXN ID file'],
+  [/^page:\/div:1\/section:1\/section:3\/div:1\/p:1$/, 'the contacts empty state says FXN ID file'],
   [/^page:\/div:1$/, 'the dashboard shell: the same grid (identity | card, rail underneath), now holding blocks'],
   [/^page:\/div:1\/header:1$/, 'the identity column: the hero, the map figure and the identity details'],
   [/^page:\/div:1\/header:1\/div:1$/, 'the map is Ark\'s figure, with a caption that says what it shows'],
@@ -75,6 +81,12 @@ const retired = [
 ];
 /* leaves of the old page whose words are no longer on the page, with the reason */
 const reworded = [
+  /* journey audit 2026-10-24 (docs/journey/END-TO-END-2026-10-24.md): the person-facing name is "FXN ID" and the file is .auth.fxn (the shared bundle said so from ark-ui 0.2.17; this page followed). The first of these
+     is the line that failed before the audit: the census still held the bundle's old ".auth.flx" sentence. */
+  [/^page:\/div:1\/section:1\/section:1\/div:1\/div:1\/div:1\/section:1\/div:1\/p:1$/, 'the bundle\'s file line reads "Choose your FXN ID file (.auth.fxn). It stays on this device and is never uploaded." (it read "recovery file (.auth.flx)")'],
+  [/^page:\/div:1\/header:1\/div:1(\/svg:1(\/text:2)?)?$/, 'the map\'s node reads "FXN ID" (it read "AUTH KIT")'],
+  [/^page:\/div:1\/section:1\/section:2\/div:1\/div:2\/p:2$/, '"You never need to share your FXN ID file or PIN" (it said Auth Kit)'],
+  [/^page:\/div:1\/section:1\/section:3\/div:1\/p:1$/, '"Choose your FXN ID file to invite or respond to identities." (it said Unlock your Auth Kit)'],
   [/^page:\/div:1\/header:1\/div:2\/div:2\/h1:1\/span:[12]$/, '"Your keys." "Your world." was the old two-tone heading; the heading is "Sign in to DEFXN"'],
   [/^id:account-title$/, 'the old heading'],
   [/^page:\/div:1\/header:1\/div:2\/div:2\/span:1$/, 'the old status line'],
@@ -142,7 +154,7 @@ const reworded = [
   assert.deepEqual(seen.offstage.sort(), ['contacts', 'defi', 'keys', 'mesh'], 'signed out, the wallet, keys, contacts and network views wait offstage');
   assert(seen.ways.includes('bundledeployer') && seen.ways.includes('account/domains'), 'the two ways on are links while signed out (they were display:none)');
   assert(/Credits/.test(seen.credits) && /Not built yet/.test(seen.credits) && !/Coming soon|\b0\b/.test(seen.credits), 'Credits is Ark\'s "Not built yet" stat, never "Coming soon" or 0');
-  assert(/recovery file/.test(seen.explain) && /Ghost ID/.test(seen.explain), '"What is an Auth Kit?" says what it is and that developers call the identity ID the Ghost ID');
+  assert(/FXN ID file/.test(seen.explain) && /Ghost ID/.test(seen.explain), '"What is an FXN ID file?" says what it is and that developers call the identity ID the Ghost ID');
   assert(/Ghost ID/.test(seen.developer) && /root key/.test(seen.developer), '"Developer details" names the Ghost ID and the root key');
   for (const block of ['hero', 'figure', 'facts', 'tabs', 'stats', 'actions', 'disclosure', 'callout', 'form', 'list', 'status-line']) assert(seen.blocks.includes(block), `the page uses Ark's ${block} block`);
 

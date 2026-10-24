@@ -9,8 +9,8 @@
    1. The committed lists are coherent: index.html links exactly ArkUI.pageStyles.shared, in cascade
       order, with css/components.css last; every module's list is in cascade order and holds nothing
       index.html already links; every catalog route carries its module's list.
-   2. No stylesheet is orphaned: every file in css/ and assets/kit/ is shared, some module's own, or
-      linked by another document (the editor). An orphan is weight nobody loads or a page that lost
+   2. No stylesheet is orphaned: every file in css/ and assets/kit/ is shared, some module's own, linked by a page
+      script itself when it shows a part (ArkUI.loadSheet), or linked by another document (the editor). An orphan is weight nobody loads or a page that lost
       its sheet -- both are silent.
    3. The parser and the selector reading behave (named cases, each with the reason it exists).
    4. The loader (js/ark/page-loader.js) links a route's sheets in cascade order, waits for them before
@@ -51,7 +51,12 @@ const ROOT = path.resolve(__dirname, '..');
   assert.deepEqual([...context.ArkUI.pageCatalog['concept/draft'].styles], styles.modules.theory, 'a draft theory route carries the theory list');
 
   /* ---- 2. no stylesheet is orphaned ---- */
-  const claimed = new Set([...styles.shared, ...Object.values(styles.modules).flat()]);
+  /* a sheet a page script links itself when it shows a part (ArkUI.loadSheet with a literal path: css/nft-card.css for the
+     NFT card on /account) is used, and in no route's list: its :root palette had put it on every route */
+  const lazy = tool.lazySheets();
+  assert.ok(lazy.has('css/nft-card.css'), 'the NFT card\'s sheet is read as one js/ark/profile-card.js links itself');
+  assert.deepEqual([...lazy].filter((file) => styles.shared.includes(file) || Object.values(styles.modules).flat().includes(file)), [], 'a sheet a script links itself is in no route list');
+  const claimed = new Set([...styles.shared, ...Object.values(styles.modules).flat(), ...lazy]);
   /* the editor's sheets (css/admin.css, css/studio-embed.css) are linked by admin*.html and are not the public site's to place */
   assert.deepEqual([...tool.editorSheets()].sort().filter((file) => claimed.has(file)), [], 'no editor sheet is also claimed by the public site');
   const orphans = tool.sheetFiles().filter((file) => !claimed.has(file));

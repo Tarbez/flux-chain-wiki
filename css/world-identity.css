@@ -1,0 +1,78 @@
+/* THE IDENTITY PAGES: /identity, /identity/sign, /identity/safe, /identity/you (js/pages/world-identity.js).
+   They stand on the frame of css/world-chain.css (.wc: the crumbs, the stage, the slab, the nine-step strip, the foot) and add
+   only what is their own: what one key opens, the three steps of a sign-in, the safeguards, and the identity at a glance.
+   Ported from docs/home-redesign (identity-flow.css, concept-views.css), on the site's own tokens, as HSL channel tokens.
+   A picked step or safeguard opens its words in place (a grid-row height, never a fade). Fits 1280x720 and 1440x900 with
+   no page scroll. */
+
+.wi-body { margin-top: 14px; display: flex; flex-direction: column; min-height: 0; flex: 1; }
+.wc-idsign .wi-body, .wc-idsafe .wi-body { margin-top: 12px; }
+
+/* step 1: what one key opens */
+.wi-opens { list-style: none; margin: 0; padding: 0; display: grid; }
+.wi-opens li { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 9px 0; border-top: 1px solid hsl(var(--border-default)); }
+.wi-opens li:first-child { border-top: 0; }
+.wi-opens b { font: 600 14px/1.4 var(--font-sans); color: hsl(var(--text-strong)); }
+.wi-opens span { font-size: 13.5px; line-height: 1.5; color: hsl(var(--text)); }
+
+/* steps 2 and 3: one pick open at a time */
+.wi-story, .wi-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; align-content: start; }
+.wi-story a, .wi-rows a { display: grid; gap: 4px 12px; align-items: center; width: 100%; padding: 8px 10px; border-radius: 8px; color: hsl(var(--text-muted)); transition: background .2s, color .2s; }
+.wi-story a { grid-template-columns: 30px 1fr; }
+.wi-rows a { grid-template-columns: minmax(0, 1fr); border-left: 2px solid transparent; }
+.wi-story a:hover, .wi-rows a:hover { color: hsl(var(--text-strong)); background: hsl(var(--text-strong) / .03); }
+.wi-story a[aria-current="step"], .wi-rows a[aria-current="true"] { background: hsl(var(--signal) / .07); color: hsl(var(--text-strong)); }
+.wi-rows a[aria-current="true"] { border-left-color: hsl(var(--signal)); }
+.wi-story .n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 12px/1 var(--font-mono); border: 1px solid hsl(var(--border-default)); transition: border-color .5s, color .5s; }
+.wi-story [aria-current="step"] .n { border-color: hsl(var(--signal)); color: hsl(var(--signal)); }
+.wi-story .done .n { border-color: hsl(var(--signal) / .5); color: hsl(var(--text-strong)); }
+.wi-story b, .wi-rows b { font: 600 15px/1.3 var(--font-sans); }
+.wi-rows b .state { margin-left: 8px; }
+.wi-story .say, .wi-rows .say { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s var(--glide); }
+.wi-story .say { grid-column: 2; }
+.wi-story .say > span, .wi-rows .say > span { overflow: hidden; font-size: 14px; line-height: 1.5; color: hsl(var(--text)); }
+.wi-story [aria-current="step"] .say, .wi-rows [aria-current="true"] .say { grid-template-rows: 1fr; }
+
+/* security: what the person does */
+.wi-tips { margin-top: 10px; padding-top: 8px; border-top: 1px solid hsl(var(--border-default)); }
+.wi-tips h3 { margin: 0; font: 500 10px/1.6 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.wi-tips ul { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.wi-tips li { position: relative; padding-left: 16px; font-size: 13px; line-height: 1.45; color: hsl(var(--text)); }
+.wi-tips li::before { content: ''; position: absolute; left: 2px; top: .55em; width: 6px; height: 6px; border-radius: 1px 3px; background: hsl(var(--primary)); }
+
+/* step 4: your identity at a glance */
+.wc-idyou .wi-body .wc-strip { margin-top: 0; }
+.wi-you { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; row-gap: 4px; }
+.wi-you section { display: grid; gap: 4px; padding: 8px 0; border-top: 1px solid hsl(var(--border-default)); align-content: start; }
+.wi-you section.wide { grid-column: 1 / -1; }
+.wi-you h3 { margin: 0; font-size: 10px; color: hsl(var(--text-muted)); font-weight: 500; }
+.wi-you p { margin: 0; font-size: 14px; line-height: 1.45; color: hsl(var(--text)); }
+.wi-you p b { color: hsl(var(--text-strong)); font-weight: 600; }
+.wi-you p small { margin-left: 6px; font: 500 11px/1 var(--font-mono); letter-spacing: .06em; color: hsl(var(--text-muted)); }
+.wi-you p.small { font-size: 12.5px; color: hsl(var(--text-muted)); }
+
+@media (max-height: 860px) and (min-width: 901px) {
+  .wi-body { margin-top: 10px; }
+  .wi-opens li { padding: 7px 0; }
+  .wi-story a, .wi-rows a { padding: 6px 10px; }
+  .wi-you section { padding: 6px 0; }
+}
+@media (max-height: 760px) and (min-width: 901px) {
+  .wi-body { margin-top: 8px; }
+  .wi-opens li { padding: 5px 0; }
+  .wi-opens span { font-size: 13px; line-height: 1.4; }
+  .wi-story a, .wi-rows a { padding: 4px 8px; }
+  .wi-story .say > span, .wi-rows .say > span { font-size: 13px; line-height: 1.4; }
+  .wi-tips { margin-top: 6px; padding-top: 6px; }
+  .wi-tips li { font-size: 12.5px; line-height: 1.35; }
+  .wi-you section { padding: 4px 0; }
+  .wi-you p { font-size: 13px; line-height: 1.35; }
+}
+@media (max-width: 900px) {
+  .wi-opens li { grid-template-columns: 1fr; gap: 2px; }
+  .wi-you { grid-template-columns: minmax(0, 1fr); }
+  .wi-story a, .wi-rows a { padding: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wi-story .say, .wi-rows .say, .wi-story .n { transition: none; }
+}

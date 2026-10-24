@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The mesh is the database, the host and the cloud. What you build resolves on the mesh instead of on servers you rent."
+      "value": "DEFXN is the kernel of the grid. FXN is its first chain and that chain’s coin. A resolver turns signed records into a result that anyone can check. Everything here runs on a development network, and nothing is live."
     },
     "CONTEXT": {
       "label": "Supporting explanation disclosure",
@@ -78,13 +78,13 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Each network gets a named ID so it can be found. Today that partitions miner presence only; isolating accounts, records and treasury is not built yet."
+      "value": "Each network gets a named ID so it can be found. Today that partitions miner presence only. Isolating accounts, records and treasury is not built yet."
     },
     "POINT2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Point 2",
-      "value": "FXN chain: one signed chain per identity."
+      "value": "Chains: one signed chain per identity."
     },
     "POINT2.TEXT": {
       "label": "Text",
@@ -126,7 +126,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "Run DEFXN from a trusted source revision, record the miner status response, then inspect the signed records on each holder’s chain. A successful local run proves that environment only; it does not establish production readiness."
+      "value": "Run DEFXN from a trusted source revision, record the miner status response, then inspect the signed records on each holder’s chain. A successful local run proves that environment only. It does not establish production readiness."
     },
     "NEXT": {
       "label": "Onward link (an arrow is added)",
@@ -186,67 +186,67 @@ ArkManifest.define({
       "label": "Promise label",
       "kind": "line",
       "section": "Promise",
-      "value": "RESOLVE YOUR WEBSITE"
+      "value": "WHAT IS NOT BUILT YET"
     },
     "PROMISE.TITLE": {
       "label": "Promise heading",
       "kind": "line",
       "section": "Promise",
-      "value": "No database. No hosting. No fees. No cloud."
+      "value": "A site as a signed bundle, not a rented server."
     },
     "PROMISE.TEXT": {
       "label": "Promise text",
       "kind": "text",
       "section": "Promise",
-      "value": "With encrypted peer-to-peer hosting, yearly renewals become permanence."
+      "value": "Publishing a site this way is planned. The Bundle Deployer is not released, and public hosting is not established."
     },
     "NO1.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Promise",
-      "value": "No database"
+      "value": "Records, not a database server"
     },
     "NO1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Promise",
-      "value": "Records live on the mesh and are queried where they are."
+      "value": "Data is written as signed records on a chain per identity, and other computers keep copies. You do not run a database server for it."
     },
     "NO2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Promise",
-      "value": "No hosting"
+      "value": "Nodes serve, not a rented host"
     },
     "NO2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Promise",
-      "value": "Encrypted peer-to-peer hosting serves what you publish."
+      "value": "Computers that run the store role serve what you publish. The development fleet does this today. A public network does not exist yet."
     },
     "NO3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Promise",
-      "value": "No fees"
+      "value": "Fees are decided, not set"
     },
     "NO3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Promise",
-      "value": "No server bills or platform cuts between you and your partners."
+      "value": "Running work will cost FXN. A fee splits between the computers that do the work and a network fund, and the owner’s figure is 65% and 35%. No price is set."
     },
     "NO4.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Promise",
-      "value": "No cloud"
+      "value": "Your key, not an account"
     },
     "NO4.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Promise",
-      "value": "No rented region, account or vendor to lock you in."
+      "value": "You sign with a key you hold, so no vendor account stands between you and your records. Nodes still have to run somewhere."
     },
     "PILLARS.LABEL": {
       "label": "Pillars label",
@@ -258,37 +258,37 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Pillars",
-      "value": "Self-scaling fractal network"
+      "value": "One kernel, many chains"
     },
     "PILLAR1.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Pillars",
-      "value": "Every network can hold networks of its own, so the mesh grows by repeating one pattern at every scale."
+      "value": "DEFXN is the base chain kernel. Network chains such as FXN run on it, and every identity and every resolver has a chain of its own."
     },
     "PILLAR2.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Pillars",
-      "value": "Everyone is our business partner"
+      "value": "Everyone signs for themselves"
     },
     "PILLAR2.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Pillars",
-      "value": "Builders, miners and members take part in the same agreements. Value moves between partners, not through a platform."
+      "value": "Builders, node operators and users each sign their own records. An agreement links the records of the parties to it, and no platform account sits between them."
     },
     "PILLAR3.TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Pillars",
-      "value": "The DEFXN coin: FXN"
+      "value": "FXN: the first chain and its coin"
     },
     "PILLAR3.TEXT": {
       "label": "Text",
       "kind": "text",
       "section": "Pillars",
-      "value": "The unit partners use to settle agreements and reward the miners who keep the mesh running."
+      "value": "FXN is the first network chain on the kernel, and the kernel itself has no currency. The coin is for settling work and paying the computers that do it. Its supply and release rules are in the dense-wire code, checked 2026-10-24."
     },
     "RESOLVE.LABEL": {
       "label": "Resolutions label",
@@ -300,7 +300,7 @@ ArkManifest.define({
       "label": "Resolutions heading",
       "kind": "line",
       "section": "Resolutions",
-      "value": "One mesh. Every part of your work resolved on it."
+      "value": "Twenty ideas for what a resolver can do."
     },
     "RESOLVE.ALL": {
       "label": "Link to all resolutions (an arrow is added)",
@@ -336,7 +336,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Flow",
-      "value": "You state what you need: a site, a payment, a rule, a file."
+      "value": "You send a signed record in the resolver’s grammar."
     },
     "FLOW2.TITLE": {
       "label": "Heading",
@@ -360,7 +360,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Flow",
-      "value": "The signed result lands on the mesh, where every partner can find and check it."
+      "value": "Other computers store the signed result. Anyone can follow its signatures back and check them."
     },
     "FLOW.LINK": {
       "label": "Link to the resolver guide (an arrow is added)",
@@ -384,13 +384,13 @@ ArkManifest.define({
       "label": "Heading: what DEFXN is",
       "kind": "line",
       "section": "Page",
-      "value": "A network of partners, not a platform."
+      "value": "A kernel, the chains on it, and the people who sign."
     },
     "CLOSE.TITLE": {
       "label": "Closing heading",
       "kind": "line",
       "section": "Page",
-      "value": "See what resolves on the mesh."
+      "value": "See the resolver chains."
     }
   }
 });

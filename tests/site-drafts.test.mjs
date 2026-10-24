@@ -9,7 +9,7 @@
    1. there is ONE draft list (js/admin/store.js ArkAdminStore.drafts()), and Save's handles,
       Save's files and Publish's routes are each exactly that list -- a 14th draft added to
       the list without a handle fails here by name;
-   2. all 13 drafts, the five populated NON-default (a dropped default reads back as the same
+   2. all 15 drafts, the five populated NON-default (a dropped default reads back as the same
       default, so defaults alone cannot see the defect), survive encode -> decode deep-equal
       AND byte-identical under JSON.stringify (the hashing form);
    3. they survive the real reader path -- writeProject() (what `pull-site --write` runs) into
@@ -35,8 +35,8 @@ const FIVE = ['settingsDefaults', 'components', 'states', 'canvasTransitions', '
 const drafts = siteDrafts();
 const keys = drafts.map((d) => d.key);
 const singles = drafts.filter((d) => d.kind === 'single');
-assert.equal(drafts.length, 13, 'the editor has 13 drafts');
-assert.equal(new Set(keys).size, 13, 'no draft is listed twice');
+assert.equal(drafts.length, 15, 'the editor has 15 drafts');
+assert.equal(new Set(keys).size, 15, 'no draft is listed twice');
 assert.deepEqual(drafts.filter((d) => d.kind === 'items').map((d) => d.key), ['manifests', 'articles', 'assets', 'secrets'], 'the 4 per-id drafts');
 for (const key of FIVE) assert(singles.some((d) => d.key === key), `${key} (one of the five once missing from publish) is in the one list`);
 for (const d of singles) {
@@ -65,7 +65,7 @@ assert(/function siteFromState\(\) \{[\s\S]{0,1500}ArkAdminStore\.drafts\(\)\.fo
 const store = read('js/admin/store.js');
 for (const d of singles) assert(store.includes(`write(contentDir, '${d.file}-data.js', ${d.global}.serialize(`), `Save writes ${d.key} to js/content/${d.file}-data.js with ${d.global}.serialize -- the file and bytes writeProject() writes for a pull`);
 
-/* ---- 2. all 13, five of them populated, survive the archive exactly ---- */
+/* ---- 2. all 15, five of them populated, survive the archive exactly ---- */
 const site = readProject();
 assert.deepEqual(Object.keys(site), keys, 'readProject() gives every draft, in the list order');
 Object.assign(site, populatedDrafts(root));
@@ -80,7 +80,7 @@ for (const d of singles) {
   assert.deepStrictEqual(routes.get(d.key).payload, site[d.key], `the ${d.key} route holds the draft itself`);
 }
 const decoded = decodeSite(bytes);
-assert.deepEqual(Object.keys(decoded), keys, 'decodeSite() gives back all 13 drafts, in the list order');
+assert.deepEqual(Object.keys(decoded), keys, 'decodeSite() gives back all 15 drafts, in the list order');
 assert.deepStrictEqual(decoded, site, 'decode(encode(site)) deep-equals the site');
 assert.equal(JSON.stringify(decoded), JSON.stringify(site), 'and is byte-identical under JSON.stringify (the hashing form)');
 for (const key of keys) assert.equal(JSON.stringify(decoded[key]), JSON.stringify(site[key]), `${key} is byte-identical after the round trip`);

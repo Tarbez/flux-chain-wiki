@@ -27,7 +27,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "For each change, the policy names the signers who may approve that one change. Once enough of them sign, their signatures are published as evidence. Their say ends with that change."
+      "value": "For each change, the policy names who may approve it. When enough of them sign, their signatures are published as evidence. Their authority ends with that change."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -45,7 +45,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "The object's CID, next sequence number, authority registry root, and active policy CID bind the selection to this transition."
+      "value": "Four inputs tie the approving group to this one change: the object’s CID, its next sequence number, the root of the authority registry and the CID of the active policy."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -57,7 +57,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "The active policy states how many eligible approvals are required. A public claim must identify that policy and show the collected threshold evidence."
+      "value": "The active policy says how many approvals are needed. A public claim must name that policy and show the approvals collected."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -69,7 +69,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "The resulting evidence identifies the object, transition, policy, eligible cell, and approvals so another participant can inspect the decision."
+      "value": "The published certificate names the object, the change, the policy, the eligible group and the approvals. Another participant can inspect the decision."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -81,7 +81,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "After the bounded decision, the cell has no continuing mandate. A later transition derives authority again from its own inputs."
+      "value": "After the decision, the group has no standing mandate. The next change picks its approvers again from its own inputs."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -93,7 +93,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "A certificate for one CID sequence cannot authorize another object, network, policy, or transition. Presence in the mesh does not grant authority."
+      "value": "A certificate for one object and sequence number cannot approve another object, network, policy or change. Being on the mesh does not give authority."
     },
     "STATUS.TITLE": {
       "label": "Status heading",
@@ -105,7 +105,7 @@ ArkManifest.define({
       "label": "Status text",
       "kind": "text",
       "section": "Evidence",
-      "value": "Authority policy structure and threshold concepts are documented in source. Independent production activation remains unverified."
+      "value": "The structure of authority policy and its thresholds are documented in source. Independent production use is not verified."
     },
     "LIMIT.TITLE": {
       "label": "Limitation heading",
@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "A cell cannot reuse its certificate for another transition, replace mesh-operations governance, govern a network DAO, or turn a signature into semantic truth."
+      "value": "An approving group cannot reuse its certificate for another change, replace mesh-operations governance, or govern a network DAO. A signature does not make a claim true."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",

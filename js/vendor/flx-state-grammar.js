@@ -66,8 +66,16 @@
   }
 
   // UTF-8 <-> hex without Buffer, so the same file runs in the renderer.
+  //
+  // Exact, not lenient (2026-10-21 review, M1): a string JSON.stringify keeps must come back unchanged
+  // or be refused, never silently altered. TextEncoder turns a lone surrogate into U+FFFD, so such a
+  // string is refused here by name (UTF-8 cannot hold it). TextDecoder's default drops a leading BOM
+  // and replaces invalid bytes, so it runs with ignoreBOM (keep U+FEFF) and fatal (refuse bad bytes).
+  const WELL_FORMED = (text) => (typeof text.isWellFormed === 'function' ? text.isWellFormed() : !/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(text))
   function toHex(text) {
-    const bytes = new TextEncoder().encode(String(text))
+    text = String(text)
+    if (!WELL_FORMED(text)) throw new TypeError('a string with a lone surrogate cannot be stored: UTF-8 cannot hold it (JSON.stringify would write it as a \\u escape)')
+    const bytes = new TextEncoder().encode(text)
     let out = ''
     for (const byte of bytes) out += byte.toString(16).padStart(2, '0')
     return out
@@ -76,7 +84,11 @@
   function fromHex(hex) {
     const bytes = new Uint8Array(hex.length / 2)
     for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.slice(i * 2, i * 2 + 2), 16)
-    return new TextDecoder().decode(bytes)
+    try {
+      return new TextDecoder('utf-8', { ignoreBOM: true, fatal: true }).decode(bytes)
+    } catch {
+      throw new Error(`"${hex.slice(0, 32)}" is not the hex of UTF-8 text`)
+    }
   }
 
   // JSON.stringify's view of a value, so storage keeps exactly what JSON would have kept.
@@ -100,11 +112,12 @@
 
     if (Array.isArray(value)) {
       if (!value.length) { records.push(path.concat('A0').join('-')); return }
-      value.forEach((item, index) => {
-        const v = normalize(item, String(index), value)
+      // By index, not forEach: forEach skips holes, and JSON.stringify writes a hole as null.
+      for (let index = 0; index < value.length; index++) {
+        const v = normalize(value[index], String(index), value)
         const storable = v !== undefined && typeof v !== 'function' && typeof v !== 'symbol'
         encodeValue(storable ? v : null, records, path.concat('I' + index))
-      })
+      }
       return
     }
 
@@ -149,9 +162,19 @@
 
   // Document text -> value. Throws on any record the grammar cannot read: a damaged file is
   // reported, never half-loaded.
+  //
+  // And on any body encodeState could not have written (2026-10-22 review, row 18): a duplicate path
+  // (the later record silently won), a leaf and a container at one path, a root leaf after records,
+  // sparse or out-of-order array indices (I5 alone read as five nulls and "a"), number text that is
+  // not the shortest round-trip form ("0x10" read as 16, "abc" as null, " 7 " as 7), an empty line.
+  // One structural rule covers them all, with no list of cases to keep complete: the value read back
+  // must encode to exactly the records it was read from, in the same order.
   function decodeState(text) {
-    const lines = String(text).split('\n').filter((line) => line.length)
+    const lines = String(text).split('\n')
+    if (lines[lines.length - 1] === '') lines.pop()
     if (!lines.length) return undefined
+    const empty = lines.indexOf('')
+    if (empty !== -1) throw new Error(`record ${empty + 1} is an empty line (encodeState never writes one)`)
     const rootBox = {}
     for (const line of lines) {
       const boxes = line.split('-').map(readBox)
@@ -174,7 +197,17 @@
       }
       setOwn(holder, key, leafValue(leaf))
     }
-    return rootBox.v
+    const value = rootBox.v
+    // The canonical check. encodeState refuses nothing decodeState can build (no lone surrogate
+    // survives fromHex, no BigInt is built), so any difference is the body's, never the encoder's.
+    const again = encodeState(value).split('\n')
+    again.pop()
+    const at = lines.findIndex((line, i) => line !== again[i])
+    if (at !== -1 || again.length !== lines.length) {
+      const where = at === -1 ? lines.length : at
+      throw new Error(`record ${where + 1} ("${String(lines[where] ?? '').slice(0, 48)}") is not what encodeState writes for the value these records describe (a duplicate or conflicting path, a sparse or out-of-order index, or non-canonical number text)`)
+    }
+    return value
   }
 
   return { LABELS, readBox, encodeState, decodeState }

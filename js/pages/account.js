@@ -160,7 +160,7 @@
   }
 
   /* The Auth Kit -> identity -> wallet -> publishing map, the figure block's live part. */
-  var MAP_SVG = '<svg viewBox="0 0 560 168" role="presentation"><path class="account-map-route account-map-route-main" d="M78 84H213C252 84 253 35 294 35H380"/><path class="account-map-route" d="M213 84C252 84 253 133 294 133H468"/><path class="account-map-route" d="M380 35C418 35 420 84 458 84H514"/><circle class="account-map-origin" cx="50" cy="84" r="27"/><circle class="account-map-node" cx="213" cy="84" r="6"/><circle class="account-map-node" cx="380" cy="35" r="6"/><circle class="account-map-node" cx="294" cy="133" r="6"/><circle class="account-map-node" cx="458" cy="84" r="6"/><text class="account-map-you" data-ark-label x="50" y="88" text-anchor="middle">YOU</text><text data-ark-label x="200" y="68" text-anchor="end">AUTH KIT</text><text data-ark-label x="393" y="20">IDENTITY</text><text data-ark-label x="307" y="151">WALLET</text><text data-ark-label x="514" y="68" text-anchor="end">PUBLISH</text></svg>';
+  var MAP_SVG = '<svg viewBox="0 0 560 168" role="presentation"><path class="account-map-route account-map-route-main" d="M78 84H213C252 84 253 35 294 35H380"/><path class="account-map-route" d="M213 84C252 84 253 133 294 133H468"/><path class="account-map-route" d="M380 35C418 35 420 84 458 84H514"/><circle class="account-map-origin" cx="50" cy="84" r="27"/><circle class="account-map-node" cx="213" cy="84" r="6"/><circle class="account-map-node" cx="380" cy="35" r="6"/><circle class="account-map-node" cx="294" cy="133" r="6"/><circle class="account-map-node" cx="458" cy="84" r="6"/><text class="account-map-you" data-ark-label x="50" y="88" text-anchor="middle">YOU</text><text data-ark-label x="200" y="68" text-anchor="end">FXN ID</text><text data-ark-label x="393" y="20">IDENTITY</text><text data-ark-label x="307" y="151">WALLET</text><text data-ark-label x="514" y="68" text-anchor="end">PUBLISH</text></svg>';
 
   /* The views of the account card, by value. `signin` and `create` exist only while signed out. */
   var TAB_LABEL = { signin: 'Sign in', create: 'Create identity', session: 'Session', defi: 'Wallet', keys: 'Signing keys', contacts: 'Contacts', mesh: 'Network' };
@@ -257,6 +257,7 @@
       var refs = {};                       // rendered block roots, by name
       var views = {};                      // the persistent view nodes, moved into whichever tabs exist
       var cardHost = null, tabsEl = null, tabsValues = [], railEl = null, identityWrap = null, mapWrap = null, offstage = null;
+      var nftSample = null, profileCard = null;   // the NFT card (js/ark/profile-card.js): a review sample named in the address
       var lastProps = Object.create(null); // props each live block was last painted with
       var wallet = { symbol: 'FXN', logo: null, balance: null, display: '—', message: 'Sign in to check', key: '' };
       var mesh = null;
@@ -297,12 +298,12 @@
         /* the same parts in every state (a block patched with another SHAPE would replace its children, and a pin or
            an id on one is lost): the status detail is always there, the verification detail once there is an identity */
         if (!next) return { eyebrow: 'Your identity', title: 'Sign in to DEFXN', density: 'compact',
-          lede: 'Sign in with your Auth Kit: the recovery file you keep on your own device. It opens your identity, wallet, domains and publishing, and it is never uploaded.',
+          lede: 'Choose your FXN ID file to sign in. It stays on your device, is never uploaded, and opens your identity, wallet, domains and publishing. No file yet? Open Create identity.',
           meta: [{ label: 'Status', value: 'Signed out' }] };
         var unlocked = !!session.isUnlocked();
         return { eyebrow: 'Your identity', title: plainLine(next.displayName || 'Your account', 48), density: 'compact',
-          lede: unlocked ? 'Your identity is ready across the DEFXN world.' : 'Your identity is saved here. Your Auth Kit is not saved on this device.',
-          meta: [{ label: 'Status', value: plainLine(statusText(next), 64) }, { label: 'Verification', value: unlocked ? 'Identity verified.' : 'Unlock your Auth Kit to continue.' }] };
+          lede: unlocked ? 'Your identity is ready across the DEFXN world.' : 'Your identity is saved here. Your FXN ID file is not kept on this device.',
+          meta: [{ label: 'Status', value: plainLine(statusText(next), 64) }, { label: 'Verification', value: unlocked ? 'Identity verified.' : 'Choose your FXN ID file to continue.' }] };
       }
       function identityProps(next) {
         return { label: 'Identity details', columns: 1, items: [
@@ -328,8 +329,8 @@
         /* a callout, not a heading: the tab already names the view, and a second title as big as the page's
            would be the two-H1 defect this conversion removed. drift = it waits on you; success = done. */
         return { tone: next ? (unlocked || authenticated ? 'success' : 'drift') : 'info',
-          title: next ? (authenticated ? 'Signed in.' : (unlocked ? 'Ready.' : 'Select your Auth Kit again')) : 'Open your account',
-          body: next ? (authenticated ? 'Publishing is available. Unlock your Auth Kit when you need to approve a signature.' : unlocked ? 'Secure access is available for this session.' : 'Choose your Auth Kit to restore secure access.') : 'Choose your Auth Kit file to unlock your account on this device.' };
+          title: next ? (authenticated ? 'Signed in.' : (unlocked ? 'Ready.' : 'Choose your FXN ID file again')) : 'Open your account',
+          body: next ? (authenticated ? 'Publishing is available. Each signature opens a review first.' : unlocked ? 'Secure access is available for this session.' : 'Choose your FXN ID file to restore secure access.') : 'Choose your FXN ID file to open your account on this device.' };
       }
       function walletStats() {
         var fxn = { label: plainLine(wallet.symbol || 'FXN', 48), format: 'plain' };
@@ -384,7 +385,7 @@
          unlocked key reads "No reading" with why, never a dash and never 0. */
       function railProps() {
         var unlocked = !!(identity && session.isUnlocked());
-        var locked = { kind: 'unavailable', reason: 'Unlock your Auth Kit to read this.' };
+        var locked = { kind: 'unavailable', reason: 'Choose your FXN ID file to read this.' };
         function count(label, value, action, extra) {
           var tile = { label: label, action: action };
           if (value == null) tile.absent = locked; else tile.value = String(value);
@@ -486,8 +487,8 @@
         views.forget = forget;
         var storage = pin(el('div'), SESSION + '/div:1/p:2', true); storage.setAttribute('data-account-notices', '');
         node.appendChild(storage);
-        node.appendChild(make({ block: 'disclosure', id: 'account-explain', was: WAS['account-explain'], props: { more: 'What is an Auth Kit?', less: 'Hide this',
-          content: 'An Auth Kit is the recovery file (.auth.flx) that holds your keys. It stays on this device and is never uploaded.\n\nYour identity ID, which developer tools call your Ghost ID, is the public name your Auth Kit unlocks.' } }));
+        node.appendChild(make({ block: 'disclosure', id: 'account-explain', was: WAS['account-explain'], props: { more: 'What is an FXN ID file?', less: 'Hide this',
+          content: 'An FXN ID file (.auth.fxn) holds the keys that sign for you. It stays on this device and is never uploaded.\n\nYour identity ID, which developer tools call your Ghost ID, is the public name your FXN ID file opens.' } }));
         var ways = pin(el('div', 'account-cms'), SESSION + '/div:1/div:2', true);
         refs.ways = make({ block: 'actions', id: 'account-ways', props: waysProps(), was: localEditing() ? Object.assign({ 'button#3': SESSION + '/div:1/div:2/a:3' }, WAS['account-ways']) : WAS['account-ways'] }); remember('ways', waysProps());
         ways.appendChild(refs.ways);
@@ -501,7 +502,7 @@
       function buildCreate() {
         var node = pin(el('div', 'account-create'), SESSION + '/div:2', true);
         node.setAttribute('data-account-create-view', '');
-        node.appendChild(make({ block: 'callout', id: 'account-create-head', props: { tone: 'info', title: 'Create your identity.', body: 'Make a new Auth Kit for your account.' }, was: WAS['account-create-head'] }));
+        node.appendChild(make({ block: 'callout', id: 'account-create-head', props: { tone: 'info', title: 'Create your FXN ID.', body: 'You get a key file and recovery words. The file stays on this device. The words bring your identity back if you lose the file.' }, was: WAS['account-create-head'] }));
         var holder = pin(el('div'), SESSION + '/div:2/div:1'); holder.setAttribute('data-account-create', '');
         node.appendChild(holder);
         return node;
@@ -522,7 +523,7 @@
         refs.balances = make({ block: 'stats', id: 'account-balances', props: walletStats(), was: WAS['account-balances'] }); remember('balances', walletStats());
         refs.pubkey = make({ block: 'facts', id: 'account-pubkey', props: keyProps(), was: WAS['account-pubkey'] }); remember('pubkey', keyProps());
         home.appendChild(refs.balances); home.appendChild(refs.pubkey);
-        home.appendChild(pin(el('p', 'account-hint', 'Share this public key to receive FXN. You never need to share your Auth Kit or PIN.'), WALLET + '/div:1/div:2/p:2', true));
+        home.appendChild(pin(el('p', 'account-hint', 'Share this public key to receive FXN. You never need to share your FXN ID file or PIN.'), WALLET + '/div:1/div:2/p:2', true));
         refs.walletRow = make({ block: 'actions', id: 'account-wallet-row', props: walletRowProps(), was: WAS['account-wallet-row'] }); remember('walletRow', walletRowProps());
         home.appendChild(refs.walletRow);
         node.appendChild(home);
@@ -606,6 +607,27 @@
         keys.setAttribute('data-account-panel', 'keys'); keys.setAttribute('aria-label', 'Signing wallets');
         return keys;
       }
+      /* The NFT card: the card drawn by the NFT session's renderer, a line that says it is a sample, and one switch that puts
+         the card's look on the whole site or takes it off (js/ark/profile-card.js, js/ark/skin-site.js). It takes the
+         map's place, at the map's height, so the page still fits 1280x720. */
+      function buildNft() {
+        var node = el('section', 'account-nft'), art = el('div', 'account-nft-art'), side = el('div', 'account-nft-side');
+        node.setAttribute('aria-label', 'Your card');
+        profileCard = DefxnProfileCard.open(art, nftSample);
+        side.appendChild(el('p', 'account-nft-kicker')).textContent = 'Sample card ' + nftSample;
+        refs.nftNote = side.appendChild(el('p', 'account-nft-note'));
+        refs.nftNote.textContent = 'No card is linked to an FXN ID yet.';
+        refs.nftWear = make({ block: 'actions', id: 'account-nft-wear', props: wearProps() }); remember('nftWear', wearProps());
+        side.appendChild(refs.nftWear);
+        profileCard.onChange(function () { paint('nftWear', wearProps()); });
+        profileCard.ready.catch(function (error) { refs.nftNote.textContent = 'The card did not load (' + error.message + '). Reload the page to try again.'; });
+        node.appendChild(art); node.appendChild(side);
+        return node;
+      }
+      function wearProps() {
+        var on = !!(profileCard && profileCard.wearing());
+        return { label: 'Card look', items: [{ label: on ? 'Use the site\u2019s look' : 'Wear this card\u2019s look', action: 'nft-wear', tone: 'secondary' }] };
+      }
       /* The glance rail: Ark's interactive stats (each tile opens the view that owns its number), and the way to the explorer. */
       function buildRail() {
         var node = el('aside', 'account-rail');
@@ -664,15 +686,18 @@
           var left = pin(el('div', 'account-hero'), HERO, true);
           refs.hero = make({ block: 'hero', id: 'account-headline', props: heroProps(identity), was: WAS['account-headline'] }); remember('hero', heroProps(identity));
           left.appendChild(refs.hero);
+          nftSample = typeof DefxnProfileCard !== 'undefined' ? DefxnProfileCard.fromAddress() : null;
+          if (nftSample) left.appendChild(buildNft());
           mapWrap = el('div', 'account-map');
           mapWrap.appendChild(make({ block: 'figure', id: 'account-map', was: WAS['account-map'], props: { kind: 'illustration', slot: 'account-map', aspect: 'auto', labelMin: '12',
-            caption: 'How it fits together: your Auth Kit opens your identity, your wallet and publishing.' } }));
-          mapWrap.hidden = !!identity;
+            caption: 'How it fits together: your FXN ID file opens your identity, your wallet and publishing.' } }));
+          mapWrap.hidden = !!identity || !!nftSample;
           left.appendChild(mapWrap);
           identityWrap = pin(el('div', 'account-identity'), STATE, true);
           /* On a phone the identity details fold behind a press (Ark's disclosure, foldBelow 'phone'): the page
-             was 1.7x the viewport signed in, past the 1.6x fold budget; wider they are always in sight. */
-          refs.fold = make({ block: 'disclosure', id: 'account-identity-fold', props: { foldBelow: 'phone', more: 'Show identity details', less: 'Hide identity details', blocks: [
+             was 1.7x the viewport signed in, past the 1.6x fold budget; wider they are always in sight. With the NFT card
+             in the column they fold at every size: the card pushed the identity ID below the fold at 1280x720. */
+          refs.fold = make({ block: 'disclosure', id: 'account-identity-fold', props: { foldBelow: nftSample ? 'always' : 'phone', more: 'Show identity details', less: 'Hide identity details', blocks: [
             { block: 'facts', id: 'account-identity', props: identityProps(identity), was: WAS['account-identity'] },
             { block: 'actions', id: 'account-copy', props: copyProps(), was: WAS['account-copy'] }] } });
           refs.identity = refs.fold.querySelector('#account-identity'); remember('identity', identityProps(identity));
@@ -703,6 +728,7 @@
         /* every press that means something to the page raises ark:action (Ark's actions, forms, lists, stats); `item` is a list row's id */
         actions: {
           'copy-ghost': function () { copyIdentityField('ghost'); },
+          'nft-wear': function () { profileCard.wear(!profileCard.wearing()).catch(function (error) { refs.nftNote.textContent = 'The look did not change (' + error.message + '). Reload the page to try again.'; }); },
           'copy-wallet': function () { copyIdentityField('wallet'); },
           'forget': function () { session.signOut(); },
           'wallet-send': function () { showWallet('send'); },
@@ -1407,7 +1433,7 @@
         } else if (createPanelHandle) { createPanelHandle.reset(); }
       }
 
-      var chooseKitWords = /^(Choose Auth Kit|Unlock Auth Kit|Select Auth Kit|Sign in with your Auth Kit|Select your Auth Kit)$/;
+      var chooseKitWords = /^(Choose Auth Kit|Unlock Auth Kit|Select Auth Kit|Sign in with your Auth Kit|Select your Auth Kit|Choose FXN ID file)$/;
       function renderIdentity(next) {
         identity = next;
         var unlocked = !!(identity && session.isUnlocked());
@@ -1421,12 +1447,12 @@
           cardHost.replaceChildren(buildTabs(state, unlocked ? 'defi' : (identity ? 'session' : 'signin')));
         }
         identityWrap.hidden = !identity;
-        mapWrap.hidden = !!identity;
+        mapWrap.hidden = !!identity || !!nftSample;
         railEl.hidden = !unlocked;
         if (unlocked && window.ArkUI && window.ArkUI.meshDirectory) { loadContacts(false); startContactsPolling(); }
-        else { resetContacts(unlocked ? '' : 'Unlock your Auth Kit to invite or respond to identities.'); stopContactsPolling(); }
+        else { resetContacts(unlocked ? '' : 'Choose your FXN ID file to invite or respond to identities.'); stopContactsPolling(); }
         if (unlocked) loadWallet();
-        else resetWallet(identity ? 'Unlock your Auth Kit to read your FXN balance.' : undefined);
+        else resetWallet(identity ? 'Choose your FXN ID file to read your FXN balance.' : undefined);
         renderKeys();
         paint('hero', heroProps(identity));
         paint('identity', identityProps(identity));
@@ -1436,7 +1462,7 @@
         paint('cmsStatus', cmsStatusProps());
         var chooseKit = views.session.querySelector('[data-account-auth] button');
         if (chooseKit && chooseKitWords.test((chooseKit.textContent || '').trim())) {
-          chooseKit.textContent = identity && !unlocked ? 'Select your Auth Kit' : 'Sign in with your Auth Kit';
+          chooseKit.textContent = identity && !unlocked ? 'Choose your FXN ID file' : 'Choose FXN ID file';
           chooseKit.setAttribute('aria-label', chooseKit.textContent);
         }
         views.forget.hidden = !identity || unlocked;
@@ -1461,15 +1487,15 @@
         event.preventDefault();
         openTab('session');
         result('cmsStatus', identity
-          ? 'Unlock your Auth Kit before opening the publishing tools.'
-          : 'Sign in with your Auth Kit before opening the publishing tools.');
+          ? 'Choose your FXN ID file before opening the publishing tools.'
+          : 'Choose your FXN ID file before opening the publishing tools.');
         var pin = session.container.querySelector('input:not([type="file"])');
         if (pin && pin.focus) { pin.focus(); return; }
         var unlock = session.container.querySelector('button');
         if (unlock && unlock.click) unlock.click();
         else if (unlock && unlock.focus) unlock.focus();
       }
-      page.arkDispose = function () { generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); window.clearTimeout(copyTimer); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); };
+      page.arkDispose = function () { generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); window.clearTimeout(copyTimer); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); if (profileCard) profileCard.close(); };
       return page;
     }
   };

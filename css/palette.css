@@ -26,3 +26,7 @@
  #scene .palette-shades {grid-template-columns:repeat(4,minmax(0,1fr));}
  #scene .palette-tones {grid-template-columns:repeat(6,minmax(0,1fr));}
 }
+
+/* The Parts tab (js/pages/palette.js partsFigure): every Ark UI block, one group per tab; a long group scrolls in its own box. */
+#scene .palette-parts { max-height: min(60vh, 620px); overflow: auto; padding-right: 8px; }
+#scene .palette-parts-note { color: hsl(var(--text-muted)); }

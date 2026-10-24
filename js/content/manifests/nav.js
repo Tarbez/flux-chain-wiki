@@ -25,10 +25,10 @@ ArkManifest.define({
       "value": "Deploy"
     },
     "RUN": {
-      "label": "Header link: run DEFXN",
+      "label": "Header link: get the browser (/download)",
       "kind": "line",
       "section": "Header links",
-      "value": "Run DEFXN"
+      "value": "Get DEFXN Grid"
     },
     "MESH": {
       "label": "Header link: mesh explorer",
@@ -84,12 +84,6 @@ ArkManifest.define({
       "section": "Header links",
       "value": "Overview"
     },
-    "WORK": {
-      "label": "Header link: spec",
-      "kind": "line",
-      "section": "Header links",
-      "value": "Interactive model"
-    },
     "DEPLOY": {
       "label": "Header link: deploy a network",
       "kind": "line",
@@ -106,7 +100,7 @@ ArkManifest.define({
       "label": "Header link: download",
       "kind": "line",
       "section": "Header links",
-      "value": "Run DEFXN"
+      "value": "Get DEFXN Grid"
     },
     "BRAND.NAME": {
       "label": "Wordmark",
@@ -118,19 +112,13 @@ ArkManifest.define({
       "label": "Line under the wordmark",
       "kind": "line",
       "section": "Brand",
-      "value": "QUERY IT, DON'T GUESS AT IT"
+      "value": "SIGNED RECORDS · DEVNET"
     },
     "BACK.ZERO": {
       "label": "Back to home (an arrow is added)",
       "kind": "line",
       "section": "Back button",
       "value": "BACK HOME"
-    },
-    "BACK.EXPERIMENTS": {
-      "label": "Back to experiments",
-      "kind": "line",
-      "section": "Back button",
-      "value": "EXPERIMENTS"
     },
     "BACK.NOTES": {
       "label": "Back to the notes",

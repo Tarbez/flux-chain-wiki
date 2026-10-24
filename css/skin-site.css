@@ -1,0 +1,18 @@
+/* The card's art around the page while a visitor wears a card (js/ark/skin-site.js). The art is the NFT session's
+   js/nft/scene.js, with its own rules in css/nft-card.css. Linked only when a skin goes on (ArkUI.loadSheet).
+
+   The world: the card's backdrop, aura, signal and particles as the page's background, only where the ring world is
+   off (the owner: the NFT background never alters the core 3D grid). It stands in the ring world's box, with a solid
+   base in the page's own colour. It comes and goes by a clip, like the pages' words
+   (js/world/world-host.js): never a fade, never a cut. Its own fade-in is turned off here for the same reason.
+   The clip only opens once the art has painted. */
+#scene .card-world { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: hsl(var(--canvas)); clip-path: inset(100% 0 0 0); }
+#scene .card-world[data-shown="true"] { clip-path: inset(0); }
+#scene .card-world .nft-world { transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
+#scene .card-world .nft-world.is-drawn { opacity: var(--nft-world-a, .62); }
+/* home's labels name the rings the card's world now covers: they wait under it with the rings */
+#scene:has(.card-world[data-shown="true"]) .world-tags { visibility: hidden; }
+
+/* The avatar: the card's art cut square, in the account button's icon place. The button keeps its words and its name. */
+.header-account-avatar { display: inline-block; flex: none; width: 22px; height: 22px; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px hsl(var(--border-default)); }
+.header-account-link[data-card-avatar] > .native-icon { display: none; }

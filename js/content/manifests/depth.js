@@ -27,7 +27,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "One signed trail records what was requested, offered, accepted, produced, and checked. Each record sits on its writer’s own FXN chain and cites the relevant prior record by CID, so an auditor can follow the path across the participants’ chains."
+      "value": "One signed trail records what was requested, offered, accepted, produced and checked. Each record sits on its writer’s own chain. It cites the record before it by CID, a fingerprint of that record’s bytes. An auditor can follow the trail across every party’s chain."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -45,7 +45,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "The requester signs a specific desired outcome. The record makes the request addressable, but no provider is committed yet."
+      "value": "The requester signs the exact outcome they want. The request can now be found by its address, but no provider has promised anything."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -57,7 +57,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "A provider proposes terms and references the intent CID. The offer is inspectable, but it is not an agreement until the terms are accepted."
+      "value": "A provider proposes terms and cites the request by its CID. Anyone can inspect the offer. It is not an agreement until the terms are accepted."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -69,7 +69,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "The participating peers sign the accepted terms on their own chains. Unrelated work never waits behind this agreement in one global lane."
+      "value": "The parties sign the accepted terms, each on their own chain. Unrelated work does not wait behind this agreement."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -81,7 +81,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "The provider links result evidence to the agreement. Recording fulfillment does not prove that every downstream system has settled."
+      "value": "The provider links evidence of the result to the agreement. Recording this does not show that every other system has settled."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -93,7 +93,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "The verifying participant closes the trail under identified checker and authority rules. A receipt is evidence of that decision, not universal truth or a legal settlement."
+      "value": "The party who verifies closes the trail under named checker and authority rules. A receipt is evidence of that decision. It is not universal truth or a legal settlement."
     },
     "STATUS.TITLE": {
       "label": "Status heading",
@@ -105,7 +105,7 @@ ArkManifest.define({
       "label": "Status text",
       "kind": "text",
       "section": "Evidence",
-      "value": "The intent-to-receipt lifecycle and the agreements resolver’s inspection contract are implemented in source. A complete public production run is not registered here."
+      "value": "The path from request to receipt, and the agreements resolver’s inspection contract, are built in source. No complete public production run is registered here."
     },
     "LIMIT.TITLE": {
       "label": "Limitation heading",
@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "The lifecycle does not by itself prove automated admission, economic settlement, production activation, or the semantic truth of a signed claim."
+      "value": "The lifecycle does not by itself prove automatic admission, payment, production use, or that a signed claim is true."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",

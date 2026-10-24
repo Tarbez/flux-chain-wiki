@@ -167,6 +167,8 @@
   function refreshRevertButtons(root) {
     Array.prototype.forEach.call((root || document).querySelectorAll('[data-revert]'), function (revert) {
       var at = revert.dataset.revert.indexOf(':'), kind = revert.dataset.revert.slice(0, at), id = revert.dataset.revert.slice(at + 1);
+      if (kind === 'world') { refuse(revert, A.worldDirty() ? '' : 'Nothing to revert: the 3D world matches what is saved.'); return; }
+      if (kind === 'skinPolicy') { refuse(revert, A.skinPolicyDirty() ? '' : 'Nothing to revert: the skin policy matches what is saved.'); return; }
       if (kind === 'design') { refuse(revert, A.themeDirty() || A.settingsDefaultsDirty() ? '' : 'Nothing to revert: Site style matches what is saved.'); return; }
       refuse(revert, neverSaved(kind, id) ? 'Not saved yet: there is no saved version to revert to.' : itemDirty(kind, id) ? '' : 'Nothing to revert: this matches its saved copy.');
     });
@@ -532,6 +534,8 @@
     if (kind === 'asset') { revertAsset(id); return; }
     if (kind === 'secret') { revertSecret(id); return; }
     if (kind === 'design') { revertDesign(); return; }
+    if (kind === 'world') { A.revertWorld(); return; }
+    if (kind === 'skinPolicy') { A.revertSkinPolicy(); return; }
     if (kind !== 'page') return;
     if (window.ArkMeshSettings) state.meshDraft = ArkMeshSettings.get() || ArkMeshSettings.defaults();
     if (window.ArkTheme) state.themeDraft = ArkTheme.get() || ArkTheme.defaults();

@@ -9,7 +9,7 @@
    and the card cannot disagree. The banner and the avatar are cuts of the card's own 3D art, built
    and painted once by art3d.js.
 
-     palette    --primary from --b (the light), --accent from --c, --complement from --a. Surfaces
+     palette    --primary and --role from --b (the light), --accent and --complement from --c. Surfaces
                 stay near-black, as on the card. --live is the Minted green, used only for Minted.
      corner     three corners of every panel, placed as on the card, and the corners of outline buttons
      frame      the frame of every panel. Each side is cut in five bands: the ends and the middle keep
@@ -36,14 +36,15 @@
      SHAPES[layerKey]                 one line: what the layer shapes
 
    Nothing here runs an idle frame loop. The art is painted once per card and cut again only when a
-   box changes size. Needs, in order: ../mark-data.js, ../vendor/three-r180-defxn.js, layers-bundle.js,
-   cards-data.js, traits.js, art3d.js, builders-bundle.js, card.js. */
+   box changes size. Needs, in order: js/ark/mark-data.js, js/vendor/three-r180-defxn.js, layers-bundle.js,
+   js/nft/cards-data.js, js/nft/traits.js, js/nft/art3d.js, js/nft/card-chrome.js, js/nft/card.js,
+   js/nft/skin-recipe.js (js/ paths are at the site root). Styles: css/nft-card.css. */
 (function () {
   'use strict';
 
   var T = window.DEFXN_TRAITS, A = window.Art3D, C = window.DefxnCard;
   if (!T || !A || !C || !C.chromeSvg) {
-    throw new Error('world.js needs traits.js, art3d.js and card.js loaded before it. ' +
+    throw new Error('world.js needs js/nft/traits.js, js/nft/art3d.js and js/nft/card.js loaded before it. ' +
       'Load them in the order card.html uses, then world.js.');
   }
   var NS = 'http://www.w3.org/2000/svg';
@@ -73,37 +74,12 @@
     return e;
   }
   function report(err) { console.error(err && err.message ? err.message : String(err)); }
-  function rootVar(name, fallback) {
-    return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
-  }
-
-  /* ---------- colour ---------- */
-  function chan(s) {                        // "200 80% 60%" -> [200, 80, 60]
-    var p = String(s || '').trim().split(/\s+/);
-    return [parseFloat(p[0]) || 0, parseFloat(p[1]) || 0, parseFloat(p[2]) || 0];
-  }
-  function hsl(c) { return +c[0].toFixed(1) + ' ' + +c[1].toFixed(1) + '% ' + +c[2].toFixed(1) + '%'; }
-  function rgb(c) {
-    var h = c[0] / 360, s = c[1] / 100, l = c[2] / 100;
-    function f(n) { var k = (n + h * 12) % 12, a = s * Math.min(l, 1 - l); return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); }
-    return [f(0), f(8), f(4)];
-  }
-  function luminance(c) {
-    var v = rgb(c).map(function (x) { return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
-    return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
-  }
-  function contrast(a, b) { return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); }
-
-  // the chrome colours exactly as the card fills them: one probe drawing through DefxnCard.chromeSvg
-  var KEYS = ['ink', 'dim', 'line', 'faint', 'rule', 'acc', 'acc2', 'state'];
-  var PROBE = { name: 'colour probe', file: 'world.js', kind: 'chrome',
-    svg: '<svg xmlns="' + NS + '" viewBox="0 0 1 1">' + KEYS.map(function (k) { return '<g data-k="' + k + '" fill="var(--' + k + ')"/>'; }).join('') + '</svg>' };
-  function coloursOf(record, traits) {
-    if (C.colours) return C.colours(record, traits);        // card.js shares them directly
-    var svg = C.chromeSvg(PROBE, record, traits), out = {};
-    KEYS.forEach(function (k) { out[k] = svg.querySelector('[data-k="' + k + '"]').getAttribute('fill'); });
-    return out;
-  }
+  // colour helpers and the token derivation live in skin-recipe.js (DefxnSkin): one copy for the card,
+  // world.js, nft-engine.js and Ark UI
+  var S = window.DefxnSkin;
+  if (!S) throw new Error('world.js needs skin-recipe.js: load it after card.js and before world.js.');
+  var rootVar = S.colour.rootVar, chan = S.colour.chan, hsl = S.colour.hsl, luminance = S.colour.luminance, contrast = S.colour.contrast;
+  function coloursOf(record, traits) { return C.colours(record, traits); }
 
   /* ---------- the theme ---------- */
   var DRAWS = /<(rect|path|line|circle|ellipse|polygon|polyline|text|use|image)\b/i;
@@ -111,23 +87,7 @@
 
   function theme(traits, record) {
     record = record || {};
-    var picks = traits.picks, pal = (picks.palette && picks.palette.attrs) || {};
-    var a = chan(pal.a || '0 0% 100%'), b = pal.b ? chan(pal.b) : a, c = pal.c ? chan(pal.c) : b;
-    var hue = b[0], sat = Math.min(8, b[1] * 0.08);
-    function surface(l) { return hsl([hue, sat, l]); }
-    // text on a primary fill: whichever of near-black or white reads better on it
-    var dark = [hue, Math.min(40, b[1]), 7], lb = luminance(b);
-    var inverse = contrast(lb, luminance(dark)) >= contrast(lb, 1) ? hsl(dark) : '0 0% 98%';
-    var colours = coloursOf(record, traits);
-    var vars = {
-      '--canvas': surface(3.6), '--surface': surface(5.4), '--raised': surface(8.4), '--nested': surface(11.5), '--overlay': surface(6.8),
-      '--text-strong': rootVar('--nft-ink', '0 0% 97%'), '--text': '0 0% 80%', '--text-muted': rootVar('--nft-muted', '180 2% 56%'),
-      '--text-faint': '180 2% 40%', '--text-inverse': inverse,
-      '--primary': hsl(b), '--accent': hsl(c), '--complement': hsl(a),
-      '--live': rootVar('--nft-live', '156 76% 54%'), '--role': hsl(a), '--badge': hsl(b),
-      '--border-subtle': '0 0% 100% / 0.075', '--border-default': '0 0% 100% / 0.16', '--border-strong': '0 0% 100% / 0.42'
-    };
-    KEYS.forEach(function (k) { vars['--w-' + k] = colours[k]; });
+    var picks = traits.picks, vars = S.tokens(traits, record), colours = coloursOf(record, traits);
     var chrome = {};
     CHROME.forEach(function (slot) { chrome[slot] = drawn(picks[slot]); });
     return {
@@ -537,57 +497,11 @@
     return ul;
   }
 
-  /* ---------- the art: banner and avatar ---------- */
-  // the card's art painted once (art3d.js), then cut. Cached per record and art mix.
-  var arts = {};
-  function art(th, only, width) {
-    var picks = { palette: th.picks.palette };
-    (only || ART_LAYERS).forEach(function (k) { if (th.picks[k]) picks[k] = th.picks[k]; });
-    var w = width || 1400, sig = T.keyHex(th.record) + '|' + Object.keys(picks).sort().map(function (k) { return k + ':' + (picks[k] && picks[k].name); }).join('|') + '|' + w;
-    if (arts[sig]) return arts[sig];
-    return (arts[sig] = A.loadMark().then(function (mark) { return A.build(mark, th.key, picks); }).then(function (model) {
-      return new Promise(function (resolve, reject) {
-        A.schedule(function () {
-          try {
-            var t = { art: document.createElement('canvas'), glow: document.createElement('canvas') }, h = Math.round(w * 0.7);
-            A.paint(t, model, w, h, A.REST);
-            var out = document.createElement('canvas');
-            out.width = w; out.height = h;
-            var x = out.getContext('2d');
-            x.drawImage(t.art, 0, 0);
-            x.globalCompositeOperation = 'screen';
-            x.globalAlpha = parseFloat(rootVar('--nft-glow-a', '.8')) || 0.8;
-            x.drawImage(t.glow, 0, 0);
-            resolve(out);
-          } catch (err) { reject(err); }
-        });
-      });
-    }));
-  }
-  // the cuts, in card units (the card is 1000 x 700; the mark's box is x 480-880, y 84-630)
-  var AVATAR = { x: 380, y: 57, w: 600, h: 600 };
-  function bannerCut(ratio) {
-    var cw = 1250, ch = cw / ratio;
-    if (ch > 540) { ch = 540; cw = ch * ratio; }
-    if (ch < 150) { ch = 150; cw = ch * ratio; }
-    return { x: 1000 + cw * 0.03 - cw, y: 357 - ch / 2, w: cw, h: ch };
-  }
-  function paintCut(cv, src, cut, w, h, fadeRight) {
-    var dpr = Math.min(2, window.devicePixelRatio || 1), pw = Math.round(w * dpr), ph = Math.round(h * dpr);
-    if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
-    var x = cv.getContext('2d'), k = src.width / 1000, fx = pw / cut.w, fy = ph / cut.h;
-    x.clearRect(0, 0, pw, ph);
-    var sx0 = Math.max(0, cut.x), sy0 = Math.max(0, cut.y), sx1 = Math.min(1000, cut.x + cut.w), sy1 = Math.min(700, cut.y + cut.h);
-    if (sx1 <= sx0 || sy1 <= sy0) return;
-    x.drawImage(src, sx0 * k, sy0 * k, (sx1 - sx0) * k, (sy1 - sy0) * k, (sx0 - cut.x) * fx, (sy0 - cut.y) * fy, (sx1 - sx0) * fx, (sy1 - sy0) * fy);
-    if (fadeRight && cut.x + cut.w > 940) {          // the art ends at the card's edge: fade it out there
-      var g = x.createLinearGradient((940 - cut.x) * fx, 0, (1000 - cut.x) * fx, 0);
-      g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,1)');
-      x.globalCompositeOperation = 'destination-out';
-      x.fillStyle = g; x.fillRect((940 - cut.x) * fx, 0, pw, ph);
-      x.globalCompositeOperation = 'source-over';
-    }
-  }
+  /* ---------- the art: banner and avatar ----------
+     The painting is js/nft/scene.js (DefxnScene), the same code a site uses for its world and avatar.
+     world.js adds only its boxes and corners. */
+  var SC = window.DefxnScene;
+  if (!SC) throw new Error('world.js needs js/nft/scene.js: load it after js/nft/card.js and before world.js.');
   function avatar(th, size, opts) {
     opts = opts || {};
     var box = el('span', 'w-avatar'), cv = el('canvas');
@@ -600,40 +514,21 @@
       corners(deco, th, size * 0.3 / 120, Math.round(size * 0.05), opts.cornerElement);
       box.appendChild(deco);
     }
-    art(th, opts.only, opts.artWidth).then(function (src) { fit(cv, function (w, h) { paintCut(cv, src, AVATAR, w, h, false); }); }).catch(report);
+    SC.cardArt(th.record, th.picks, opts.only || ART_LAYERS, opts.artWidth || 1400).then(function (src) { fit(cv, function (w, h) { SC.cut(cv, src, SC.AVATAR, w, h); }); }).catch(report);
     return box;
   }
-  // the art's model for a set of layers, built once
-  var models = {};
-  function modelOf(th, only) {
-    var picks = { palette: th.picks.palette };
-    (only || ART_LAYERS).forEach(function (k) { if (th.picks[k]) picks[k] = th.picks[k]; });
-    var sig = T.keyHex(th.record) + '|' + Object.keys(picks).sort().map(function (k) { return k + ':' + (picks[k] && picks[k].name); }).join('|');
-    return models[sig] || (models[sig] = A.loadMark().then(function (mark) { return A.build(mark, th.key, picks); }));
-  }
   // the banner: the art drawn with a wide camera (Art3D.paint aspect), so the whole mark sits in the
-  // strip with its backdrop, aura, signal and particles around it
+  // strip with its backdrop, aura, signal and particles around it (DefxnScene.VIEWS.banner)
   function banner(th, opts) {
     opts = opts || {};
     var box = el('div', 'w-banner'), cv = el('canvas');
     box.setAttribute('role', 'img');
     box.setAttribute('aria-label', opts.label || 'Banner drawn from the card art');
     box.appendChild(cv);
-    modelOf(th, opts.only).then(function (model) {
+    SC.model(th.record, th.picks, opts.only || ART_LAYERS).then(function (model) {
       fit(cv, function (w, h) {
-        A.schedule(function () {
-          var dpr = Math.min(2, window.devicePixelRatio || 1), pw = Math.max(1, Math.round(w * dpr)), ph = Math.max(1, Math.round(h * dpr));
-          var t = { art: document.createElement('canvas'), glow: document.createElement('canvas') };
-          // the mark a little larger than the strip is tall, set right of centre as on the card, so the
-          // backdrop and the aura fill the rest of the strip
-          var aspect = pw / ph, zoom = 1.15;
-          A.paint(t, model, pw, ph, { x: 0.06, y: 0.22 }, { object: true, aspect: aspect, zoom: zoom, shift: 350 * aspect / zoom * 0.42 });
-          if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
-          var x = cv.getContext('2d');
-          x.clearRect(0, 0, pw, ph); x.drawImage(t.art, 0, 0);
-          x.globalCompositeOperation = 'screen'; x.globalAlpha = parseFloat(rootVar('--nft-glow-a', '.8')) || 0.8;
-          x.drawImage(t.glow, 0, 0); x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
-        });
+        var dpr = Math.min(2, window.devicePixelRatio || 1), pw = Math.max(1, Math.round(w * dpr)), ph = Math.max(1, Math.round(h * dpr));
+        SC.painted(model, function () { return SC.paintWide(cv, model, pw, ph, SC.VIEWS.banner); }).catch(report);
       });
     }).catch(report);
     return box;

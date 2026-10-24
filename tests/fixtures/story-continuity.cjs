@@ -8,6 +8,8 @@
 module.exports = {
  "/concept/purpose": {
   "reshaped": {
+   "page:/div:1/div:1/aside:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
+   "page:/div:1/div:1/aside:1/p:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
    "id:purpose-title": "the question names the site, DEFXN, not \"Flux\" (first-visit audit 2026-10-22, P1)",
    "page:/div:1/div:1/div:1/p:1": "the short answer says first what a network is for; its \"does not\" list is the limit, in Evidence (first-visit audit 2026-10-22, P1)",
    "page:/nav:3": "the hero action is the next question of the sequence (first-visit audit 2026-10-22, P1: the setup link left before the page said what it is for); the old action is a quiet link in Evidence",
@@ -30,6 +32,9 @@ module.exports = {
  },
  "/concept/depth": {
   "reshaped": {
+   "page:/div:1/div:1/div:1/p:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
+   "page:/div:1/div:1/aside:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
+   "page:/div:1/div:1/aside:1/p:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
    "page:/nav:1/span:1": "the breadcrumb names the sheet \"Checkable agreements\": \"Agreement lifecycle\" is /lifecycle's name (first-visit audit 2026-10-22, P1)",
    "id:depth-title": "the sheet is \"Checkable agreements\", its question \"How does an agreement become checkable?\": \"Agreement lifecycle\" is /lifecycle's name (first-visit audit 2026-10-22, P1)",
    "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
@@ -50,6 +55,8 @@ module.exports = {
  },
  "/concept/practice": {
   "reshaped": {
+   "page:/div:1/div:1/aside:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
+   "page:/div:1/div:1/aside:1/p:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
    "id:practice-title": "the question in problem words, \"Who can approve a change?\" (first-visit audit 2026-10-22, P1)",
    "page:/div:1/div:1/div:1/p:1": "the short answer in plain words; \"authority cell\" stays in Step by step (first-visit audit 2026-10-22, P1)",
    "page:/nav:3": "the hero action says where it goes, \"See who can change what\" (first-visit audit 2026-10-22, P1: \"Compare governance rosters\" was a fifth undefined term)",
@@ -72,6 +79,7 @@ module.exports = {
  },
  "/concept/notes": {
   "reshaped": {
+   "page:/div:1/div:1/div:1/p:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
    "page:/nav:3": "the hero action is the next question; \"Compare governance rosters\" was /concept/practice's action too (first-visit audit 2026-10-22, P2); /dao is a quiet link in Evidence",
    "page:/nav:3/a:1": "the hero action is the next question (first-visit audit 2026-10-22, P2)",
    "page:/nav:1": "the breadcrumb is Ark's: Home / Overview / Operating model / this page (Overview since 2026-10-22, the same trail as /concept)",
@@ -92,6 +100,8 @@ module.exports = {
  },
  "/concept/studio": {
   "reshaped": {
+   "page:/div:1/div:1/div:1/p:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
+   "page:/div:1/div:1/aside:1/p:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
    "page:/div:1/div:1/aside:1/strong:1": "the status is titled \"Status / Partial\" like its siblings; CAP-003 moved to the limit in Evidence (first-visit audit 2026-10-22, P2)",
    "page:/div:1/div:1/aside:1": "the same status callout, titled \"Status / Partial\" (first-visit audit 2026-10-22, P2)",
    "page:/nav:3": "the hero action is the next question of the sequence (first-visit audit 2026-10-22, P1: the setup link left before the page said what it is for); the old action is a quiet link in Evidence",
@@ -508,6 +518,7 @@ module.exports = {
  },
  "/concept": {
   "reshaped": {
+   "page:/p:1": "content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): the words were rewritten in plain words or to what is true; the element keeps its key",
    "page:/nav:2": "the question-group tabs: \"Inspect evidence & activation\" is \"Evidence & activation\" (first-visit audit 2026-10-22, P2)",
    "page:/div:1/article:1": "the card reads its sheet's question, reworded in its manifest: \"What does a DEFXN network do today?\" (first-visit audit 2026-10-22, P1)",
    "page:/div:1/article:1/a:1": "the card title is its sheet's question, reworded in its manifest (first-visit audit 2026-10-22, P1)",

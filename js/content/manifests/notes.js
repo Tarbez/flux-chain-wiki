@@ -27,7 +27,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Approval records consent under a policy. Activation is the separate step that applies the approved change after its required readiness and safety gates succeed."
+      "value": "Approval records who agreed, under a policy. Activation is a separate step: it applies the approved change after its readiness and safety checks pass."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -45,7 +45,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "The decision record identifies the policy, eligible roster, required threshold, and collected approvals. It does not by itself prove the change is running."
+      "value": "The decision record names the policy, the eligible people, the number of approvals needed and the approvals collected. It does not show that the change is running."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -57,7 +57,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Activation evidence must identify the approved action, target environment, applied revision, responsible actor or process, and observation time."
+      "value": "Activation evidence must name the approved action, the target environment, the revision applied, who or what applied it, and when it was observed."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -69,7 +69,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Independent-host role readiness, hostile testing, and signed soak evidence are separate from the approval signatures and must not be inferred from them."
+      "value": "Three checks are separate from the approval signatures: readiness on independent hosts, hostile testing, and signed soak evidence (a long run under load). Do not infer one from the others."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -81,7 +81,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "The source policy makes pausing easier than unpausing. That difference limits recovery risk; it does not prove any particular production environment is active."
+      "value": "In the source policy, pausing is easier than unpausing. That lowers the risk of recovery mistakes. It does not show that any production system is active."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -93,7 +93,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "If the applied revision, environment, observation time, or readiness artifacts are absent, report activation as Unverified rather than treating signatures as a live switch."
+      "value": "If the revision, environment, observation time or readiness evidence is missing, report activation as Unverified. Do not treat signatures as proof that a change is live."
     },
     "STATUS.TITLE": {
       "label": "Status heading",
@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "Do not infer runtime activation, economic settlement, or production readiness from a completed set of approval signatures alone."
+      "value": "Do not infer that a change is running, paid for or ready for production from a full set of approval signatures."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",

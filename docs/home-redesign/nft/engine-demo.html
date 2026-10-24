@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="card.css">
+<link rel="stylesheet" href="../../../css/nft-card.css">
 <style>
   /* the demo page around the site */
   :root{--page:180 5% 7%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%}
@@ -29,7 +29,7 @@
   .visit button{font:inherit;letter-spacing:inherit;text-transform:inherit;color:hsl(var(--page-strong));background:none;cursor:pointer;
     border:1px solid hsl(var(--page-line) / .3);border-radius:3px;padding:7px 11px}
   .visit button[aria-pressed="true"]{background:hsl(var(--page-strong));color:hsl(var(--page));border-color:hsl(var(--page-strong))}
-  .visit .who{margin-left:auto;text-transform:none;letter-spacing:.04em;color:hsl(var(--honey))}
+  .visit .who{margin-left:auto;text-transform:none;letter-spacing:.04em;color:hsl(var(--honey));min-width:0;flex:1 1 0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .note{margin:0;font-size:11.5px}
   .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
 
@@ -146,14 +146,20 @@
 
 <p class="note"><b>Sample data.</b> The visitors are sample cards. Nothing is sent and nothing on this page is live.</p>
 
-<script src="../mark-data.js"></script>
-<script src="../vendor/three-r180-defxn.js"></script>
+<script src="../../../js/ark/mark-data.js"></script>
+<script src="../../../js/vendor/three-r180-defxn.js"></script>
 <script src="layers-bundle.js"></script>
-<script src="cards-data.js"></script>
-<script src="traits.js"></script>
-<script src="art3d.js"></script>
-<script src="builders-bundle.js"></script>
-<script src="card.js"></script>
+<script src="../../../js/nft/cards-data.js"></script>
+<script src="../../../js/nft/traits.js"></script>
+<script src="../../../js/nft/art3d.js"></script>
+<script src="../../../js/nft/card-chrome.js"></script>
+<script src="../../../js/nft/card.js"></script>
+<script src="../../../js/nft/scene.js"></script>
+<script src="../../../js/nft/card-record.js"></script>
+<script src="../../../js/nft/grid-look.js"></script>
+<script src="../../../js/nft/timeline.js"></script>
+<script src="../../../js/nft/skin-package.js"></script>
+<script src="../../../js/nft/skin-recipe.js"></script>
 <script src="world.js"></script>
 <script src="nft-engine.js"></script>
 <script>

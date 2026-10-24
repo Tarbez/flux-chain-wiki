@@ -1,0 +1,64 @@
+/* THE 3D WORLD UNDER EVERY PAGE (js/world/world-host.js).
+   The canvas stands in the shell beside the persistent layer, behind the routed pages and the site's own header and
+   footer. This sheet carries only what the world itself needs: the tokens it reads, its layer, the
+   labels it places and the rule that hides the old particle relief while the world loads and runs. A page's own
+   look is in css/world-pages.css. The header, the menu and the footer are not styled here. */
+
+/* Tokens the world reads (js/world/ring-kit.js readTheme). Added once, here, as HSL channels like every
+   other token. The chain kinds, the networks and --ember are never skinned. Everything else it reads
+   (--canvas, --text*, --signal) is the site's own. */
+:root {
+  --chain-identity: 210 18% 72%;
+  --chain-network: 168 40% 40%;
+  --chain-token: 38 26% 46%;
+  --chain-other: 200 6% 34%;
+  --chain-resolver: 204 34% 48%;
+  --chain-pool: 282 20% 56%;
+  --chain-ledger: 164 48% 44%;
+  --net-fxn: 168 40% 40%;
+  --net-deark: 24 42% 50%;
+  --net-cr3tv: 340 28% 56%;
+  --ember: 24 96% 56%;
+  --record: 38 22% 88%;
+  --glide: cubic-bezier(.22, .7, .18, 1);
+}
+
+/* the world's layer: the whole viewport, under the pages. It takes no pointer: the page above hears the
+   pointer and the world reads it from the window (ring-kit.js). */
+.world-layer { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.world-layer > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* while the world is up, the particle relief, the signal grid and the old glows stay out of sight.
+   They keep loading (the lifecycle pages ask the grid for its clock); they just draw nothing here. */
+html[data-world="loading"] .ark-layer-persistent > canvas[role="presentation"],
+html[data-world="on"] .ark-layer-persistent > canvas[role="presentation"],
+html[data-world="loading"] .zero-webgl, html[data-world="on"] .zero-webgl,
+html[data-world="loading"] .lattice, html[data-world="on"] .lattice,
+html[data-world="loading"] .defxn-brand-field, html[data-world="on"] .defxn-brand-field { opacity: 0 !important; animation: none !important; transition: none !important; }
+html[data-world="loading"] #scene .hero-alive .ark-layer-persistent::before, html[data-world="on"] #scene .hero-alive .ark-layer-persistent::before,
+html[data-world="loading"] #scene .hero-alive .ark-layer-persistent::after, html[data-world="on"] #scene .hero-alive .ark-layer-persistent::after { content: none !important; }
+
+/* labels on the 3D (home's ground logo and two networks): placed by the host, never fade, they wipe in */
+.world-tags { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+/* Only the current view's labels show. Each view keeps its own layer in #scene after the camera leaves it, and world-host.js
+   marks only the current one .here; without this, every view visited left its labels over the next page (18 stray labels
+   over /stats after five pages, 2026-10-24). A reading page has no layer of its own, so it shows none. */
+.world-tags:not(.here) { visibility: hidden; }
+.world-tags .tag { position: absolute; left: 0; top: 0; display: grid; gap: 2px; max-width: 13em; padding: 5px 9px 6px; border-radius: 6px 2px 6px 2px;
+  font: 400 12px/1.35 var(--font-sans); color: hsl(var(--text-muted)); text-shadow: 0 0 10px hsl(var(--canvas)), 0 0 3px hsl(var(--canvas));
+  background: hsl(var(--canvas) / .82); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  clip-path: inset(0 100% 0 0); transition: clip-path .6s var(--glide); }
+.world-tags .tag b { font: 500 10px/1.4 var(--font-mono); letter-spacing: .18em; text-transform: uppercase; color: hsl(var(--text-strong)); }
+.world-tags .tag.small { font-size: 11px; text-align: left; }
+.world-tags .tag.small b { font-size: 9px; letter-spacing: .14em; }
+.world-tags .tag.seen { clip-path: inset(-26px -26px -26px -12px); }
+.world-tags .tag::before { content: ''; position: absolute; width: 1px; background: hsl(var(--text-faint)); }
+.world-tags .tag::after { content: ''; position: absolute; width: 7px; height: 7px; border: 1.5px solid hsl(var(--signal)); border-radius: 2px; background: hsl(var(--canvas)); }
+.world-tags .tag[data-at="above"]::before { left: 0; top: 100%; height: 11px; }
+.world-tags .tag[data-at="above"]::after { left: -4px; top: calc(100% + 10px); }
+.world-tags .tag[data-at="below"]::before { left: 0; bottom: 100%; height: 11px; }
+.world-tags .tag[data-at="below"]::after { left: -4px; bottom: calc(100% + 10px); }
+.world-tags .tag.small::before { left: 50%; }
+.world-tags .tag.small::after { left: calc(50% - 4px); }
+@media (max-width: 900px), (prefers-reduced-motion: reduce) { .world-tags .tag { transition: none; } }
+@media (max-width: 900px) { .world-tags { display: none; } }

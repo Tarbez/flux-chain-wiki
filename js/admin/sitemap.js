@@ -2,7 +2,7 @@
    ADMIN EDITOR · SITEMAP (js/admin/sitemap.js)
    ---------------------------------------------------------------------
    Owns: the Sitemap view -- the page tree by address, links drawn on demand, problems
-   flagged, its zoom -- and setView(), the switch between the Canvas, Sitemap and Theme views.
+   flagged, its zoom -- and setView(), the switch between the Canvas, Sitemap, Theme and World views.
    Must not: read links from anywhere but realLinkIndex() (the real manifests).
    ===================================================================== */
 (function () {
@@ -11,7 +11,7 @@
   var state = A.state, $ = A.$, realLinkIndex = A.realLinkIndex, ic = A.ic, openRoute = A.openRoute,
       layoutStage = A.layoutStage, syncHeader = A.syncHeader, schedule = A.schedule;
   /* defined by files loaded after this one: resolved when called */
-  var mountThemeView = A.later('mountThemeView');
+  var mountThemeView = A.later('mountThemeView'), mountWorldView = A.later('mountWorldView'), mountSkinView = A.later('mountSkinView');
 
   /* =========================================================================
      Sitemap: page tree by address, links on demand, problems flagged
@@ -127,23 +127,27 @@
     }, { passive: false });
     applyMapZoom();
   }
-  /* The three views of the one site: 'design' (the canvas), 'map' (this sitemap) and 'theme'
+  /* The four views of the one site: 'design' (the canvas), 'map' (this sitemap), 'theme'
      (the site-wide settings docked beside the canvas, which stays live so a colour or a font
-     shows on the real page as it is picked; js/admin/panels.js mounts them). */
+     shows on the real page as it is picked) 'world' (the 3D world's controls, docked the
+     same way; js/admin/panels.js mounts them) and 'skin' (the Skin lab, docked the same way). */
   function setView(v) {
-    if (v !== 'design' && v !== 'map' && v !== 'theme') return;
+    if (v !== 'design' && v !== 'map' && v !== 'theme' && v !== 'world' && v !== 'skin') return;
+    if (state.view === 'skin' && v !== 'skin' && A.skinLabLeave) A.skinLabLeave();   /* the review skin does not stay on the canvas you edit */
     /* Site style docks on the right edge, the edge the docked overlays (Page settings, Publishing
        status, Version history: level 'sheet', js/admin/overlay.js) float over. Chosen while one of
        them was open, it opened UNDER it -- at 1500px the dock [1060,1500] lay beneath Versions
        [1080,1500] and showed as a 20px sliver, so choosing it seemed to do nothing (2026-10-19;
        tests/cms-site-style-not-under-sheet.cjs, tests/browser/versions.mjs). What the person just
        chose is the one on top: choosing Site style closes them, as their close button would. */
-    if (v === 'theme' && A.overlay) A.overlay.closeLevel('sheet', 'view');
+    if ((v === 'theme' || v === 'world' || v === 'skin') && A.overlay) A.overlay.closeLevel('sheet', 'view');
     state.view = v;
-    $('shell').classList.toggle('mapview', v === 'map'); $('shell').classList.toggle('themeview', v === 'theme');
-    $('designView').hidden = v === 'map'; $('mapView').hidden = v !== 'map'; $('themeView').hidden = v !== 'theme';
+    $('shell').classList.toggle('mapview', v === 'map'); $('shell').classList.toggle('themeview', v === 'theme' || v === 'world' || v === 'skin');
+    $('designView').hidden = v === 'map'; $('mapView').hidden = v !== 'map'; $('themeView').hidden = v !== 'theme'; $('worldView').hidden = v !== 'world'; $('skinView').hidden = v !== 'skin';
     if (v === 'map') { mapFocus = state.cmsCurrentRoute; mapZoom = 1; renderSitemap(); } else layoutStage();
     if (v === 'theme') mountThemeView();
+    if (v === 'world') mountWorldView();
+    if (v === 'skin') mountSkinView();
     syncHeader(); schedule();
   }
   A.provide({ renderSitemap: renderSitemap, setView: setView });

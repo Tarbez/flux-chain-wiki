@@ -150,4 +150,7 @@
   ArkUI.pageNeedsBlocks = needsBlocks;
   /* One script by its site path, once (js/ark/blocks.js loads the live chunk through it). */
   ArkUI.loadScript = loadScript;
+  /* One stylesheet by its site path, once, at its place in the cascade: the own sheet of a part a page shows only
+     sometimes (js/ark/profile-card.js, the NFT card). scripts/page-styles.mjs counts a literal path passed here as used. */
+  ArkUI.loadSheet = loadSheet;
 })();

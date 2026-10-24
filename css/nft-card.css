@@ -1,0 +1,156 @@
+/* DEFXN identity card (js/nft/card.js). One card, drawn at any width: every size below is in card units, where
+   the card is 1000 units wide and 700 tall (the reference is 343 x 240 px, 1.43 : 1). A unit is
+   0.1cqw, so the card keeps every proportion at any size its box gives it.
+   The palette is HSL channels, as in kit.css, so it can be re-tuned here in one place. */
+:root{
+  --nft-body:180 8% 3%;          /* the card: near-black, #050606 to #0a0b0b */
+  --nft-line:0 0% 100%;          /* hairlines: the edge, the inner frame, the brackets, the divider */
+  --nft-edge-a:.35;
+  --nft-frame-a:.075;
+  --nft-bracket-a:.42;
+  --nft-rule-a:.16;
+  --nft-ink:0 0% 97%;            /* values and the wordmark */
+  --nft-muted:180 2% 56%;        /* labels and the footer lines */
+  --nft-live:156 76% 54%;        /* "Minted": #2fe39a */
+  --nft-art-hi:0 0% 100%;        /* brightest art pixel; the art's greys are steps down from it */
+  --nft-glow-a:.8;               /* the glow at rest; it lifts to 1 on hover */
+  /* The card's own fonts. A page that does not load them (the defxn site serves only its three SDK
+     slots, and its policy blocks outside fonts) falls back to that page's sans and mono slots. */
+  --nft-font-display:"Inter Tight",var(--font-sans,"Inter",system-ui),sans-serif;
+  --nft-font-mono:"JetBrains Mono",var(--font-mono,ui-monospace),monospace;
+}
+
+.nft-box{container-type:inline-size;width:100%}
+.nft{
+  --u:.1cqw;
+  box-sizing:border-box;position:relative;isolation:isolate;overflow:hidden;
+  width:100%;aspect-ratio:1000 / 700;
+  background:hsl(var(--nft-body));
+  border:0;                      /* no edge of its own: the frame layer (08-frame) draws the card's whole edge */
+  border-radius:calc(var(--u) * 30);
+  color:hsl(var(--nft-ink));
+  font-family:var(--nft-font-mono);
+  -webkit-font-smoothing:antialiased;
+}
+.nft *{box-sizing:border-box}
+
+/* the art: two canvases, the card's size. The 3D art (art3d.js) and its glow on top of it. */
+.nft-art,.nft-glow{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.nft-art{z-index:0}
+.nft-glow{z-index:2;mix-blend-mode:screen;opacity:var(--nft-glow-a)}
+
+/* Rules that reach plain elements (b, p, small, dt, dd, img, svg, text) start with .nft, so a host
+   site's own general rules (a site that shows the card with nft-engine.js) cannot reach them. */
+
+/* the chrome: flat drawings from the chrome layers (layers/07-corner and on), one box per slot.
+   A slot's box is its drawing's viewBox in card units; layers/README.md lists them. */
+.nft-chrome{position:absolute;z-index:3;display:block;overflow:visible;pointer-events:none}
+.nft-chrome.frame{inset:0;width:100%;height:100%}
+.nft-chrome.corner{width:calc(var(--u) * 120);height:calc(var(--u) * 120)}
+.nft-chrome.corner.tl{top:calc(var(--u) * 28);left:calc(var(--u) * 28)}
+.nft-chrome.corner.tr{top:calc(var(--u) * 28);right:calc(var(--u) * 28);transform:scaleX(-1)}
+.nft-chrome.corner.bl{bottom:calc(var(--u) * 28);left:calc(var(--u) * 28);transform:scaleY(-1)}
+.nft-chrome.tag{z-index:4;top:calc(var(--u) * 282);left:calc(var(--u) * 56);width:calc(var(--u) * 360);height:calc(var(--u) * 50)}
+.nft-chrome.ornament{z-index:4;top:calc(var(--u) * 478);left:calc(var(--u) * 56);width:calc(var(--u) * 360);height:calc(var(--u) * 80)}
+.nft-chrome.divider{z-index:4;top:calc(var(--u) * 568);left:calc(var(--u) * 56);width:calc(var(--u) * 360);height:calc(var(--u) * 24)}
+.nft .nft-chrome text{font-family:var(--nft-font-mono)}
+
+
+.nft-text{position:absolute;z-index:4;margin:0}
+.nft-label{display:block;font:400 calc(var(--u) * 13)/1 var(--nft-font-mono);letter-spacing:.24em;
+  text-transform:uppercase;color:hsl(var(--nft-muted));white-space:nowrap}
+
+/* top left: the mark and the wordmark */
+.nft-brand{top:calc(var(--u) * 50);left:calc(var(--u) * 56);display:flex;align-items:center;gap:calc(var(--u) * 17)}
+.nft .nft-brand img{display:block;height:calc(var(--u) * 63);width:auto;filter:invert(1)}
+.nft .nft-brand b{font:800 calc(var(--u) * 29)/1 var(--nft-font-display);letter-spacing:.2em;text-transform:uppercase;
+  color:hsl(var(--nft-ink));margin-right:-.2em}
+
+/* top right: the genesis number */
+.nft-gid{top:calc(var(--u) * 54);right:calc(var(--u) * 56);text-align:right}
+.nft-gid .nft-label{margin-right:-.24em}
+.nft .nft-gid b{display:block;margin-top:calc(var(--u) * 10);font:500 calc(var(--u) * 27)/1 var(--nft-font-mono);
+  letter-spacing:.08em;margin-right:-.08em;color:hsl(var(--nft-ink))}
+
+/* left column: who it is */
+.nft-who{top:calc(var(--u) * 182);left:calc(var(--u) * 56)}
+.nft .nft-who b{display:block;margin-top:calc(var(--u) * 13);font:500 calc(var(--u) * 27)/1 var(--nft-font-mono);
+  letter-spacing:.04em;color:hsl(var(--nft-ink));white-space:nowrap}
+.nft .nft-who small{display:block;margin-top:calc(var(--u) * 12);font:400 calc(var(--u) * 14)/1 var(--nft-font-mono);
+  letter-spacing:.08em;text-transform:lowercase;color:hsl(var(--nft-muted));white-space:nowrap}
+
+/* left column: the facts, one value column for every row */
+.nft-facts{top:calc(var(--u) * 350);left:calc(var(--u) * 56);display:grid;
+  grid-template-columns:calc(var(--u) * 132) auto;row-gap:calc(var(--u) * 19);align-items:center}
+.nft .nft-facts dt,.nft .nft-facts dd{margin:0;font:400 calc(var(--u) * 13)/1 var(--nft-font-mono);letter-spacing:.2em;
+  text-transform:uppercase;white-space:nowrap}
+.nft .nft-facts dt{color:hsl(var(--nft-muted))}
+.nft .nft-facts dd{color:hsl(var(--nft-ink));font-weight:500}
+.nft .nft-facts dd.is-live{display:flex;align-items:center;gap:calc(var(--u) * 10);color:hsl(var(--nft-live))}
+.nft-dot{flex:none;width:calc(var(--u) * 9);height:calc(var(--u) * 9);border-radius:50%;background:hsl(var(--nft-live));
+  box-shadow:0 0 calc(var(--u) * 6) hsl(var(--nft-live) / .9),0 0 calc(var(--u) * 16) hsl(var(--nft-live) / .45)}
+
+/* footer: the emblem and the two lines */
+.nft-foot{top:calc(var(--u) * 606);left:calc(var(--u) * 56);display:flex;align-items:center;gap:calc(var(--u) * 16)}
+.nft .nft-foot svg{position:static;display:block;flex:none;width:calc(var(--u) * 30);height:calc(var(--u) * 34)}
+.nft .nft-foot p{margin:0;font:400 calc(var(--u) * 11.5)/1.75 var(--nft-font-mono);letter-spacing:.2em;text-transform:uppercase;
+  color:hsl(var(--nft-muted));white-space:nowrap}
+
+/* bottom right: the serial in its corner bracket */
+.nft-serial{bottom:calc(var(--u) * 34);right:calc(var(--u) * 34);padding:calc(var(--u) * 9) calc(var(--u) * 10) calc(var(--u) * 7) calc(var(--u) * 12);
+  font:400 calc(var(--u) * 13)/1 var(--nft-font-mono);letter-spacing:.16em;color:hsl(var(--nft-muted));
+  border:0 solid hsl(var(--nft-line) / var(--nft-bracket-a));border-right-width:1px;border-bottom-width:1px}
+
+/* while the 3D loads, a faint outline of the mark holds its place, so the card is never blank */
+.nft-ghost{position:absolute;z-index:0;left:48%;top:12%;width:40%;height:78%;pointer-events:none;
+  background:var(--nft-mark-img) center / 100% 100% no-repeat;filter:invert(1);opacity:.07;transition:opacity .35s ease-out}
+.nft:not(.is-wait) .nft-ghost{opacity:0}
+
+/* the object view: the words and chrome step aside, the art turns under the pointer */
+.nft-hint{position:absolute;z-index:5;left:50%;top:calc(var(--u) * 26);transform:translateX(-50%);white-space:nowrap;pointer-events:none;
+  padding:calc(var(--u) * 7) calc(var(--u) * 12);border-radius:calc(var(--u) * 14);background:hsl(var(--nft-body) / .82);
+  font:400 calc(var(--u) * 12)/1 var(--nft-font-mono);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--nft-muted));opacity:0}
+.nft.is-object{cursor:grab;touch-action:none}
+.nft.is-object.is-turning{cursor:grabbing}
+.nft.is-object .nft-text,.nft.is-object .nft-chrome,.nft.is-object .nft-ghost{opacity:0}
+.nft.is-object .nft-hint{opacity:1}
+.nft.is-object:focus-visible{outline:1px solid hsl(var(--nft-line) / .5);outline-offset:3px}
+@media (prefers-reduced-motion:no-preference){
+  .nft-text,.nft-chrome,.nft-hint{transition:opacity .3s ease-out}
+}
+
+/* the one-time build-in: the art fades and rises into place, the words fade up. It ends; nothing loops. */
+@media (prefers-reduced-motion:no-preference){
+  .nft.is-new .nft-art,.nft.is-new .nft-glow{animation:nft-art-in .45s cubic-bezier(.2,.7,.2,1) backwards}
+  .nft.is-new .nft-text{animation:nft-text-in .35s ease-out backwards}
+  .nft.is-new .nft-gid,.nft.is-new .nft-who{animation-delay:.08s}
+  .nft.is-new .nft-facts,.nft.is-new .nft-foot,.nft.is-new .nft-serial{animation-delay:.16s}
+  /* on hover the 3D art tilts (card.js) and the glow lifts; both stop when the pointer does */
+  .nft-glow{transition:opacity .35s ease-out}
+}
+.nft:hover .nft-glow{opacity:1}
+@keyframes nft-art-in{from{opacity:0;transform:translateY(calc(var(--u) * 8))}to{opacity:1;transform:none}}
+@keyframes nft-text-in{from{opacity:0;transform:translateY(calc(var(--u) * 6))}to{opacity:1;transform:none}}
+
+/* the card's art as a page's scene (js/nft/scene.js). The WORLD fills the box the site gives it, a
+   little past its edges so the lean never shows an edge, and fades in once it is painted. The
+   vignette is the page's own --canvas colour, strongest on the words' side, so text stays readable:
+   measured on the three samples at 1280x720 and 1440x900, muted 12 px text keeps 4.5 : 1 or more
+   against the brightest pixel behind the text column. --nft-world-a sets how strong the world shows. */
+.nft-world{position:absolute;inset:-14px;pointer-events:none;opacity:0;transition:opacity .9s ease-out,transform .6s cubic-bezier(.2,.7,.2,1)}
+.nft-world.is-drawn{opacity:var(--nft-world-a,.62)}
+.nft-world canvas{width:100%;height:100%;display:block}
+.nft-world::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 90% at 20% 30%,hsl(var(--canvas) / .97),hsl(var(--canvas) / .55) 60%,transparent)}
+.nft-avatar-art{display:block;width:100%;height:100%}
+@media (prefers-reduced-motion:reduce){.nft-world{transition:none}}
+
+/* the PANEL art (js/nft/scene.js, DefxnScene.panel): the card's 3D layers as a still behind one panel's
+   content. The host is isolated, so the art sits under its children without moving them. The fade in the
+   page's own --canvas colour is strongest on the left, where a panel's words start. --nft-panel-a sets how
+   strong the art shows. */
+.nft-has-art{isolation:isolate}
+.nft-pos{position:relative}
+.nft-panel-art{position:absolute;inset:0;z-index:-1;overflow:hidden;border-radius:inherit;pointer-events:none;opacity:0}
+.nft-panel-art.is-drawn{opacity:var(--nft-panel-a,.55)}
+.nft-panel-art canvas{width:100%;height:100%;display:block}
+.nft-panel-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,hsl(var(--canvas) / .96) 0%,hsl(var(--canvas) / .78) 38%,hsl(var(--canvas) / .2) 78%,transparent)}

@@ -6,6 +6,7 @@
      2 #/idsign?s=1..3  signing in: an app asks, you approve, the key is never uploaded
      3 #/idsafe?s=0..2  security: local by design; what is built and what is partial
      4 #/idyou          your identity: a sample name and devices, your key's state
+     (the 3D of steps 1 to 4 and 9 is js/world/identity-stages.js; this file is the words and the DOM)
      5 #/chain          your chain                  (the existing page)
      6 #/record         its revisions               (the existing page)
      7 #/open           one record                  (the existing page)

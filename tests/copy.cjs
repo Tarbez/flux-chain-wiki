@@ -22,13 +22,13 @@ ArkUI.buildChainFlow=()=>({element:node(),restore(){},dispose(){}});
 // home-flow.js's own data (stubbed here for the same reason buildChainFlow is: it names no copy keys).
 ArkUI.chainCases=[{id:'swaps',label:'Swaps'},{id:'transfers',label:'Transfers'},{id:'staking',label:'Staking'},{id:'governance',label:'Governance'}];
 vm.runInContext(fs.readFileSync('js/ark/dash-kit.js','utf8'),context);
-/* Home and /about are pages of Ark blocks (ArkUI.page, js/ark/blocks.js): their words are copy:KEY
+/* /about is a page of Ark blocks (ArkUI.page, js/ark/blocks.js): their words are copy:KEY
    values in a spec. The stub keeps each spec so every key it names is checked below. */
 const specs=[];
 ArkUI.page=(spec)=>{specs.push(spec);return node();};
 vm.runInContext(fs.readFileSync('js/content/evidence-registry.js','utf8'),context);
-vm.runInContext(fs.readFileSync('js/pages/home.js','utf8'),context);
-context.ArkUI.pageModules.zero.mount({appendChild(){}});
+// Home and the intro are not block pages any more (they stand on the 3D world, js/world/world-host.js): their keys are checked by
+// tests/world-pages.cjs, which reads the roles their copy() helper names.
 vm.runInContext(fs.readFileSync('js/pages/about.js','utf8'),context);
 specs.push(context.ArkUI.pageModules.about.spec(vm.runInContext("ArkManifest.get('about')",context),[]));
 const {ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0}=vm.runInContext('({ArkCopy,ArkFlux,ArkManifest,F_SCENE_RZERO_V0})',context);
@@ -61,7 +61,7 @@ for(const file of ['js/pages/concept.js','js/pages/sheet.js','js/pages/theory.js
 }
 for(const key of named) assert(ArkCopy.has(key),key+' is named in code but no manifest defines it');
 // Every copy:KEY a block page's spec names resolves (a missing one would refuse the block).
-assert.equal(specs.length,2,'home and /about each built one spec');
+assert.equal(specs.length,1,'/about built one spec (home and the intro name their keys through copy(), tests/world-pages.cjs)');
 for(const spec of specs) for(const m of JSON.stringify(spec).matchAll(/"copy:([A-Z0-9.]+)"/g)) { named.add(m[1]); assert(ArkCopy.has(m[1]),'copy:'+m[1]+' is named by a page spec but no manifest defines it'); }
 // Words are never written in a page or the shell where a key belongs.
 for(const [file,literal] of [['js/pages/concept.js','Go beneath'],['js/pages/about.js','Care is part'],['js/resolvers/header.js','INDEPENDENT STUDIO'],['js/hero-motion.js','Curiosity is our'],['js/hero-motion.js','BACK TO ZERO'],['js/pages/home.js','Explore the experiments']])

@@ -1544,6 +1544,56 @@
     try { window.dispatchEvent(new CustomEvent('ark-site-defaults-preview', { detail: ArkSiteDefaults.get() })); }
     catch (error) { if (window.console) console.error('[ark] settings defaults preview failed', error); }
   }
+  /* ---- the Skin lab's half of the canvas (js/admin/skin-lab.js) -------------------------------
+     cmsSkin.key is the sample plus the policy last applied: the editor sends again after every load and ready,
+     and a repeat is answered with the report, not applied again. Applies run one after another, and only the
+     newest of a quick run (a toggle clicked twice) is applied. */
+  var cmsSkin = { key: '', sample: '', seq: 0, chain: Promise.resolve(), listening: false, focusTimer: 0 };
+  function cmsSkinRelay(error) {
+    var site = window.DefxnSkinSite, parts = window.DefxnSkinParts, recipe = site && site.active(), offered = {};
+    /* what the card sends, whatever part wears it: the rules that are not keep or none (DefxnSkinParts.rulesFor decides the parts) */
+    if (recipe && recipe.rules) Object.keys(recipe.rules).forEach(function (rule) { var v = recipe.rules[rule]; if (v && v !== 'keep' && v !== 'none') offered[rule] = v; });
+    /* each part's rules name (DefxnSkinSite.ruleKey: card -> CARD), so the editor's switches reach Ark UI's lower-case block parts too */
+    var report = (site && site.report()) || null, ruleKeys = {};
+    if (report && site.ruleKey) report.parts.forEach(function (p) { ruleKeys[p.key] = site.ruleKey(p.key); });
+    try {
+      window.parent.postMessage({ type: 'defxn-cms-skin-report', sample: cmsSkin.sample, on: !!recipe, family: recipe ? recipe.family || null : null,
+        report: report, ruleKeys: ruleKeys, offered: offered, codeAllow: parts ? parts.ALLOW : {}, error: error || '' }, location.origin);
+    } catch (e) { /* the editor is gone */ }
+  }
+  function cmsSkinFocus(selector) {
+    clearTimeout(cmsSkin.focusTimer);
+    Array.prototype.forEach.call(document.querySelectorAll('.defxn-skin-focus'), function (el) { el.classList.remove('defxn-skin-focus'); });
+    if (!selector || typeof selector !== 'string') return;
+    var el = null;
+    try { el = document.querySelector(selector); } catch (e) { return; }
+    if (!el) return;
+    if (!document.getElementById('defxn-skin-focus-style')) {
+      var style = document.createElement('style'); style.id = 'defxn-skin-focus-style';
+      style.textContent = '.defxn-skin-focus{outline:2px solid hsl(var(--reference,215 90% 62%))!important;outline-offset:3px}';
+      document.head.appendChild(style);
+    }
+    el.classList.add('defxn-skin-focus');
+    if (el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    cmsSkin.focusTimer = setTimeout(function () { el.classList.remove('defxn-skin-focus'); }, 2500);
+  }
+  function cmsPreviewSkin(data) {
+    var site = window.DefxnSkinSite;
+    if (!site) { cmsSkinRelay('The skin module is not loaded on this page.'); return; }
+    if (!cmsSkin.listening) { cmsSkin.listening = true; document.addEventListener('ark:skin-report', function () { cmsSkinRelay(); }); }
+    var sample = String(data.sample || ''), policy = data.policy && typeof data.policy === 'object' ? data.policy : {};
+    if (!sample) { cmsSkin.key = ''; cmsSkin.sample = ''; cmsSkin.seq++; cmsSkinFocus(''); site.remove(); cmsSkinRelay(); return; }
+    var key = sample + '\n' + JSON.stringify(policy);
+    if (key === cmsSkin.key && site.active()) { cmsSkinRelay(); return; }
+    var mine = ++cmsSkin.seq;
+    cmsSkin.chain = cmsSkin.chain.then(function () {
+      if (mine !== cmsSkin.seq) return null;
+      cmsSkin.key = key; cmsSkin.sample = sample;
+      return site.sample(sample).then(function (record) { return site.apply(record, { policy: policy }); })
+        .then(function () { if (mine === cmsSkin.seq) cmsSkinRelay(); })
+        .catch(function (e) { cmsSkin.key = ''; if (mine === cmsSkin.seq) cmsSkinRelay(String(e && e.message || e)); });
+    });
+  }
   /* named so a state held back during an inline edit can be applied once it ends (cmsEndInline) */
   function cmsOnMessage(event) {
     if (event.origin !== location.origin) return;
@@ -1555,6 +1605,20 @@
     if (data.type === 'defxn-cms-preview-state') cmsCopyIndexCache = null;   /* new drafts: new words to bind */
     if (data.type === 'defxn-cms-preview-lens' && event.source === window.parent && cmsPreviewQuery) { cmsSetLens(data.lens); return; }
     if (data.type === 'defxn-cms-preview-site-defaults' && event.source === window.parent && cmsPreviewQuery) { cmsPreviewSiteDefaults(data.settingsDefaults); return; }
+    /* The 3D world draft from the editor's Design > World panel (js/admin/world.js): the plain
+       sanitized value, applied in place. ArkWorld.define() sanitizes it again and tells the world
+       (ArkWorld.onChange), which repaints -- no remount, no reload. Same origin and same parent
+       as the other preview messages (checked above and here). */
+    if (data.type === 'defxn-cms-preview-world' && event.source === window.parent && cmsPreviewQuery) {
+      if (window.ArkWorld && data.world && typeof data.world === 'object') ArkWorld.define(data.world);
+      return;
+    }
+    /* The Skin lab (js/admin/skin-lab.js): one review sample's skin, with the editor's DRAFT policy, applied in
+       place -- DefxnSkinSite takes the draft in place of the published one for that apply, and removes the
+       skin for ''. Same origin and same parent as the world message above. The report goes back as
+       'defxn-cms-skin-report' (cmsSkinRelay). The press on a part row outlines that part's first element. */
+    if (data.type === 'defxn-cms-preview-skin' && event.source === window.parent && cmsPreviewQuery) { cmsPreviewSkin(data); return; }
+    if (data.type === 'defxn-cms-preview-skin-focus' && event.source === window.parent && cmsPreviewQuery) { cmsSkinFocus(data.selector); return; }
     if (data.type === 'flux-chain-preview-theme' && data.theme) {
       if (!window.ArkTheme) return;
       /* editor preview only: show the theme whose colours are being edited (on the public page

@@ -27,7 +27,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "A named network lets a group of miners find each other. Every miner started with the same network ID announces itself in the same place. That is all a network separates today; what it does not separate is under Evidence."
+      "value": "A named network is a name that miners can start with. Miners that start with the same name announce themselves in the same place, so they can find each other. That is all a network separates today. What it does not separate is listed under Evidence."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -45,7 +45,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Miners configured with the same network ID announce into the same presence namespace. That is useful coordination, but it is not admission, authorization, or proof of trust."
+      "value": "Miners started with the same network ID announce themselves in the same place. This helps them find each other. It does not admit anyone, give anyone authority, or show that a miner can be trusted."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -57,7 +57,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "flux-network network create <name> returns a new ID or selects an existing matching ID. Starting a miner with that ID participates in its presence namespace."
+      "value": "The command flux-network network create <name> returns a new network ID, or the ID of an existing network with that name. A miner started with that ID joins that network’s place."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -69,7 +69,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "A network with no listed miners may still exist but be idle or undiscovered. The directory is not an authoritative registry of members."
+      "value": "A network that lists no miners may still exist. Its miners may be idle or not yet found. The list is not a complete record of members."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -81,7 +81,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "Selecting a network ID does not create a DAO, admit an identity, or grant authority. Those claims require their own policy and evidence."
+      "value": "Choosing a network ID does not create a DAO (a group of signers who vote), admit an identity, or give anyone authority. Each of those needs its own policy and evidence."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -93,7 +93,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "A public example needs a network identifier, source or manifest location, observation date, and inspectable artifact before this site describes it as active."
+      "value": "This site calls a network active only when it has a network ID, a source or manifest location, an observation date and an artifact you can inspect."
     },
     "STATUS.TITLE": {
       "label": "Status heading",
@@ -105,7 +105,7 @@ ArkManifest.define({
       "label": "Status text",
       "kind": "text",
       "section": "Evidence",
-      "value": "The create/list command contract and miner-presence namespace are implemented in source. A complete independent live run is not registered in this audit."
+      "value": "The create and list commands, and the shared place where miners announce themselves, are built in source. No complete independent live run is registered in this audit."
     },
     "LIMIT.TITLE": {
       "label": "Limitation heading",
@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "A named network currently isolates only miner-presence discovery. Network IDs do not scope accounts, identities, DAOs, arbitrary records, or treasuries. A network is not an authoritative membership list or security boundary; do not use its ID as one."
+      "value": "A named network currently isolates only miner-presence discovery, which is how miners find each other. A network ID does not scope accounts, identities, DAOs, records or treasuries. It is not an authoritative membership list or security boundary. Do not use it as one."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",

@@ -12,8 +12,8 @@
 
    opts.palette: the palette element the piece is shown in (default: the Glass palette, so accents
    show). opts.record: the record whose fields a tag or ornament shows (default: a Preview record).
-   Each tile is drawn once and kept, per element, palette and size. Needs traits.js, art3d.js,
-   builders-bundle.js and card.js. */
+   Each tile is drawn once and kept, per element, palette and size. Needs js/nft/traits.js, js/nft/art3d.js,
+   js/nft/card-chrome.js and js/nft/card.js. */
 (function () {
   'use strict';
 

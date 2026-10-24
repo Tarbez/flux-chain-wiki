@@ -141,8 +141,8 @@
     }
     function url(page) { return ArkUI.route.href(catalog[page].path); }
     /* An address -> the catalog key that answers it: its path, a bare key ('#concept'), or one of
-       the entry's `aliases` (old addresses kept working: /explorer, /monitor, /work,
-       /experiments/lab -- declared on the entry in js/pages/catalog.js, not listed here). An
+       the entry's `aliases` (old addresses kept working: /explorer, /monitor --
+       declared on the entry in js/pages/catalog.js, not listed here). An
        address nothing answers resolves to 'notfound', which names it; until 2026-10-19 it
        resolved to Home, so a mistyped or retired URL silently showed the home page
        (docs/ux-audit/pages.md P8; regressions: tests/page-router.cjs,

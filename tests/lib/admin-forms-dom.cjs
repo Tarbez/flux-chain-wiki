@@ -4,7 +4,7 @@
    Loads the real content modules the forms read (manifests, articles, images, encrypted items,
    SEO, mesh settings, theme, the page catalog, the reference docs) and the real editor files
    core -> notice -> overlay -> ark-host -> state -> controls -> save -> editor -> articles -> assets -> secrets -> design -> seo ->
-   shapes, in admin-app.html's order. What the SHELL's files would provide (the canvas bridge,
+   shapes -> world, in admin-app.html's order. What the SHELL's files would provide (the canvas bridge,
    the rail, the header popovers, versions) is a stub that records its calls, so a test can see
    what a form asked the canvas to do.
    Not a test itself (scripts/run-tests.mjs only runs tests/*.cjs|mjs at the top level). */
@@ -25,6 +25,8 @@ function bootForms() {
   Object.defineProperty(window, 'parent', { value: { ArkGate: { identity: () => null } }, configurable: true });
   if (!window.crypto || !window.crypto.subtle) Object.defineProperty(window, 'crypto', { value: require('node:crypto').webcrypto, configurable: true });
   const run = (rel) => window.eval(read(rel) + '\n//# sourceURL=' + rel);
+  /* jsdom has no text codec; the FLX grammar (js/vendor/flx-state-grammar.js, read by the World draft) needs one */
+  window.TextEncoder = TextEncoder; window.TextDecoder = TextDecoder;
   window.eval('var ArkUI = window.ArkUI || {};');
   for (const rel of ['js/content/manifest.js']) run(rel);
   window.eval('var ArkManifestIds = ' + JSON.stringify(ids('js/content/manifests/index.js', 'ArkManifestIds')) + ';');
@@ -38,7 +40,7 @@ function bootForms() {
   for (const rel of ['js/content/theme.js', 'js/content/theme-data.js', 'js/content/settings-defaults.js', 'js/content/settings-defaults-data.js',
     'js/content/layout.js', 'js/content/layout-data.js', 'js/content/components.js', 'js/content/components-data.js',
     'js/content/states.js', 'js/content/states-data.js', 'js/content/canvas-transitions.js', 'js/content/canvas-transitions-data.js',
-    'js/content/element-motion.js', 'js/content/element-motion-data.js', 'js/content/mesh-settings.js', 'js/content/mesh-settings-data.js',
+    'js/content/element-motion.js', 'js/content/element-motion-data.js', 'js/vendor/flx-state-grammar.js', 'js/content/world.js', 'js/content/world-data.js', 'js/content/skin-policy.js', 'js/content/skin-policy-data.js', 'js/content/mesh-settings.js', 'js/content/mesh-settings-data.js',
     'js/content/learnings.js', 'js/content/article-index.js', 'js/content/site-pages.js', 'js/content/seo.js', 'js/content/seo-data.js', 'js/pages/catalog.js',
     'js/ark/reference-docs.js', 'js/admin/store.js', 'js/admin/vendor/tweetnacl.js', 'js/admin/crypto.js']) run(rel);
   /* every article body, as loadBodies() would fetch them */
@@ -53,14 +55,14 @@ function bootForms() {
   /* what the shell, the bridge and the versions glue provide: recorded, never drawn */
   window.ArkAdmin.provide({
     notifyPreviewState: record('notifyPreviewState'), notifyPreviewMesh: record('notifyPreviewMesh'),
-    notifyPreviewAssets: record('notifyPreviewAssets'), notifyPreviewTheme: record('notifyPreviewTheme'),
+    notifyPreviewAssets: record('notifyPreviewAssets'), notifyPreviewTheme: record('notifyPreviewTheme'), notifyPreviewWorld: record('notifyPreviewWorld'), notifyPreviewSkin: record('notifyPreviewSkin'), postSkinFocus: record('postSkinFocus'), syncSkinDot: record('syncSkinDot'), openRoute: record('openRoute'), syncWorldDot: record('syncWorldDot'),
     reloadPreview: record('reloadPreview'), syncCmsPreview: record('syncCmsPreview'), refreshPanels: record('refreshPanels'),
     postCmsPreviewState: record('postCmsPreviewState'), setView: record('setView'), openPop: record('openPop'), closePop: record('closePop'),
     schedule: record('schedule'), studioRoutes: () => [], recordVersion: async () => '', writeSearchFiles: async () => [],
     removeRestoredExtras: async () => {}, writeRestoredOrder: async () => {}, restoreRemovalsPending: () => false, restoreReorderPending: () => false
   });
   for (const rel of ['js/admin/state.js', 'js/admin/controls.js', 'js/admin/save.js', 'js/admin/editor.js', 'js/admin/articles.js',
-    'js/admin/assets.js', 'js/admin/secrets.js', 'js/admin/design.js', 'js/admin/seo.js', 'js/admin/shapes.js']) run(rel);
+    'js/admin/assets.js', 'js/admin/secrets.js', 'js/admin/design.js', 'js/admin/seo.js', 'js/admin/shapes.js', 'js/admin/world.js', 'js/admin/skin-lab.js']) run(rel);
   window.ArkAdmin.adoptArticles(); window.ArkAdmin.state.articlesReady = true;
   return { dom, window, document: window.document, A: window.ArkAdmin, state: window.ArkAdmin.state, calls };
 }

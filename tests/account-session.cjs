@@ -149,8 +149,8 @@ const who = { displayName: 'preview-user', identityId: 'identity-test', publicKe
   assert.equal(reloaded.ArkUI.accountSession.current(), null, 'restored display metadata grants no signing authority');
   assert.equal(reloaded.ArkUI.accountSession.isUnlocked(), false);
   assert.match(text(restored.querySelector('#account-headline')), /not signed in/);
-  assert.match(text(restored.querySelector('#account-headline')), /Auth Kit is not saved/);
-  assert.equal(text(restored.querySelector('#account-session-head [data-ark-part="alert-title"]')), 'Select your Auth Kit again');
+  assert.match(text(restored.querySelector('#account-headline')), /FXN ID file is not kept on this device/);
+  assert.equal(text(restored.querySelector('#account-session-head [data-ark-part="alert-title"]')), 'Choose your FXN ID file again');
   assert.deepEqual(tabs(restored), ['Session', 'Wallet', 'Network'], 'a saved identity has the views it can know: Keys and Contacts need the unlocked key');
   assert.deepEqual(pins(restored), [CARD + '/nav:1/button:1', CARD + '/nav:1/button:2', CARD + '/nav:1/button:5'], 'Wallet and Network keep their old buttons\' keys');
   assert.equal(selected(restored), 'Session');

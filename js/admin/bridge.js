@@ -143,11 +143,17 @@
      whole site is rebuilt from the drafts (siteFromState()) when it is sent, so the canvas
      never receives a stale copy of a draft another edit changed. */
   const CANVAS_OWNED = new Set(['layout', 'components', 'states', 'canvasTransitions', 'elementMotion']);
+  /* Drafts the canvas applies LIVE, by a message of their own, and never by a remount: the 3D
+     world (notifyPreviewWorld below). Like CANVAS_OWNED they stay out of the signature, so a
+     slider drag does not re-send the whole site and remount the page under it. Unlike
+     CANVAS_OWNED the editor owns them, so they ride the full state too (siteFromState) for
+     Publish and versions; the canvas ignores that copy and takes the world from its own message. */
+  const LIVE_ONLY = new Set(['world', 'skinPolicy']);
   let sentSignature = '', feedTimer = 0;
   function contentSignature(site) {
     const out = {};
     Object.keys(site || {}).forEach((key) => {
-      if (CANVAS_OWNED.has(key)) return;
+      if (CANVAS_OWNED.has(key) || LIVE_ONLY.has(key)) return;
       /* an image's bytes are compared by length and tail, not stringified whole on every key press */
       out[key] = key === 'assets' ? (site.assets || []).map((a) => Object.assign({}, a, { dataBase64: a && a.dataBase64 ? a.dataBase64.length + ':' + a.dataBase64.slice(-48) : '' })) : site[key];
     });
@@ -214,6 +220,51 @@
   }
   function notifyPreviewMesh() { postToCanvas({ type: 'flux-chain-preview-mesh', settings: state.meshDraft }); }
   function notifyPreviewTheme() { postToCanvas({ type: 'flux-chain-preview-theme', theme: state.themeDraft }); }
+  /* The 3D world, live and without a remount: the plain sanitized value (never FLX text; the
+     canvas's ArkWorld.define takes a value or text) as 'defxn-cms-preview-world'. Coalesced over
+     60 ms so a dragged slider sends the latest value, not every pixel of it; the draft is read
+     when the timer fires, so a send can never carry a stale one. A past version shown from the
+     Versions panel shows its own world (or none, when that version predates it). */
+  let worldTimer = 0;
+  function worldToSend(draft) {
+    const value = state.versionPreviewSite ? state.versionPreviewSite.world : (draft || state.worldDraft);
+    return window.ArkWorld && value && typeof value === 'object' ? ArkWorld.sanitize(value) : null;
+  }
+  function postWorldNow(draft) {
+    if (!state.cmsConnected || !cmsPreview.contentWindow) return;
+    const world = worldToSend(draft); if (!world) return;
+    try { cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-world', world }, window.location.origin); } catch (error) { /* between routes: the load handler sends it again */ }
+  }
+  function notifyPreviewWorld(draft) {
+    clearTimeout(worldTimer);
+    worldTimer = setTimeout(() => postWorldNow(draft), 60);
+  }
+  /* The Skin lab (js/admin/skin-lab.js), live and without a remount: which review sample is on ('' for the
+     site's own look) and the draft policy, as 'defxn-cms-preview-skin'. The canvas answers with
+     'defxn-cms-skin-report' (the report of what each part took), handled below. Coalesced like the world, and
+     the draft is read when the timer fires. Sent again after a load or a ready, because a remount drops the
+     skin; the canvas skips an apply it already holds. A past version shown from the Versions panel previews
+     its own policy. Pressing a part in the lab asks the canvas to outline it: 'defxn-cms-preview-skin-focus'. */
+  let skinTimer = 0;
+  function skinToSend() {
+    const value = state.versionPreviewSite ? state.versionPreviewSite.skinPolicy : state.skinPolicyDraft;
+    return window.ArkSkinPolicy ? ArkSkinPolicy.sanitize(value && typeof value === 'object' ? value : {}) : null;
+  }
+  function postSkinNow(force) {
+    if (!state.cmsConnected || !cmsPreview.contentWindow) return;
+    const sample = state.skinChoice || '';
+    if (!sample && !force) return;
+    const policy = skinToSend(); if (!policy) return;
+    try { cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-skin', sample, policy }, window.location.origin); } catch (error) { /* between routes: the load handler sends it again */ }
+  }
+  function notifyPreviewSkin() {
+    clearTimeout(skinTimer);
+    skinTimer = setTimeout(() => postSkinNow(true), 60);
+  }
+  function postSkinFocus(selector) {
+    if (!state.cmsConnected || !cmsPreview.contentWindow) return;
+    try { cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-skin-focus', selector: String(selector || '') }, window.location.origin); } catch (error) { /* the page is changing */ }
+  }
   function postCmsPreviewMode() {
     if (!state.cmsConnected || !cmsPreview.contentWindow) return;
     cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-mode', mode: state.live ? 'live' : 'edit' }, window.location.origin);
@@ -328,7 +379,7 @@
       historyCanvasReset();
     }
   }
-  cmsPreview.addEventListener('load', () => { navigating = false; postCmsPreviewState(); postCmsPreviewMode(); postCmsPreviewLens(); layoutStage(); });
+  cmsPreview.addEventListener('load', () => { navigating = false; postCmsPreviewState(); postCmsPreviewMode(); postCmsPreviewLens(); postWorldNow(); postSkinNow(); layoutStage(); });
 
   /* Step 2 merge ("admin.js" below is the editor as it was then: one file): this used to be two listeners in two documents --
      admin-studio.html's own "window.addEventListener('message', ...)" (below, for messages
@@ -392,6 +443,7 @@
   window.addEventListener('message', (event) => {
     if (event.origin !== window.location.origin || !event.data) return;
     if (event.source !== cmsPreview.contentWindow) return;
+    if (event.data.type === 'defxn-cms-skin-report') { if (A.skinReport) A.skinReport(event.data); return; }
     if (event.data.points) state.cmsInsertPoints = event.data.points;
     /* the selection's commands (js/main.js cmsSelectionCommands: the right-click menu's list), for the toolbar's More menu */
     if (Array.isArray(event.data.commands)) state.cmsSelectionCommands = event.data.commands;
@@ -404,6 +456,8 @@
       /* the canvas shows the page asked for: a "not saved yet" banner for it has nothing left to say */
       if (notice && event.data.path && event.data.path === state.cmsCurrentRoute && !state.cmsWantedRoute) notice.close('route-refused');
       postCmsPreviewLens();
+      postWorldNow();   /* the remount may have rebuilt the world from the saved file: show the draft again */
+      postSkinNow();    /* and a remount drops the skin on the canvas: the canvas skips an apply it still holds */
       /* the remount rebuilt the selected elements; the preview reports what is selected NOW
          (regression: tests/cms-selection-survives-remount.cjs) -- without it the toolbar kept
          editing a selection the page no longer had */
@@ -498,7 +552,7 @@
       postCmsElementMotionPreview: postCmsElementMotionPreview, postCmsLayoutCommand: postCmsLayoutCommand,
       postCmsLayoutOperation: postCmsLayoutOperation, postCmsLayoutReset: postCmsLayoutReset,
       notifyPreviewAssets: notifyPreviewAssets, notifyPreviewMesh: notifyPreviewMesh,
-      notifyPreviewState: notifyPreviewState, notifyPreviewTheme: notifyPreviewTheme,
+      notifyPreviewState: notifyPreviewState, notifyPreviewTheme: notifyPreviewTheme, notifyPreviewWorld: notifyPreviewWorld, notifyPreviewSkin: notifyPreviewSkin, postSkinFocus: postSkinFocus,
       postCmsPreviewLens: postCmsPreviewLens, previewShowsDrafts: previewShowsDrafts,
       refreshCanvasSite: refreshCanvasSite, reloadPreview: reloadPreview,
       postCmsPreviewMode: postCmsPreviewMode, postCmsPreviewState: postCmsPreviewState,

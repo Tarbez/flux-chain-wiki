@@ -50,7 +50,8 @@ const WIRE_TIMEOUT_MS = 15000;
    and still bounded by index.html's own CSP connect-src, so no choice
    here can reach a host that CSP does not already allow. */
 export const KNOWN_NETWORKS = [
-  { id: "production", label: "Production", url: "wss://nodes.defxn.com/ws" },
+  /* the public node: nothing is live, so it is the public devnet. The id stays "production": browsers saved it as their choice. */
+  { id: "production", label: "Public devnet", url: "wss://nodes.defxn.com/ws" },
   { id: "local-devnet", label: "Local devnet", url: "ws://127.0.0.1:19501/ws" },
 ];
 const NETWORK_STORAGE_KEY = "defxn.dense-wire.network.v1";

@@ -78,6 +78,8 @@
             <button type="button" class="menu-item" id="viewCanvasBtn" aria-pressed="true" data-view="design" title="The page, edited in place"><svg class="ic" aria-hidden="true"><use href="#i-design"/></svg><span>The page</span></button>
             <button type="button" class="menu-item" id="viewMapBtn" aria-pressed="false" data-view="map" title="Every page and how they link"><svg class="ic" aria-hidden="true"><use href="#i-sitemap"/></svg><span>Site map</span></button>
             <button type="button" class="menu-item" id="viewThemeBtn" aria-pressed="false" data-view="theme" title="Colours, fonts, background, search defaults -- beside the live page"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg><span>Site style</span></button>
+            <button type="button" class="menu-item" id="viewWorldBtn" aria-pressed="false" data-view="world" title="The 3D world under every page: light, camera, motion, intro -- beside the live page"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg><span>3D world</span></button>
+            <button type="button" class="menu-item" id="viewSkinBtn" aria-pressed="false" data-view="skin" title="Try a sample card skin on the real page and choose which rules each part may take -- beside the live page"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg><span>Skin lab</span></button>
           </div>
         </div>
         <div class="menu-group" role="group" aria-label="This page and the site">
@@ -288,6 +290,18 @@
       <div id="themePanel" class="panel-mount"></div>
       <div id="shapesPanel" class="panel-mount"></div>
     </aside>
+
+    <!-- The World view: the 3D world's controls docked beside the live canvas (same dock as the
+         Theme view; js/admin/world.js draws the panel from ArkWorld.knobs()). -->
+    <aside class="dock theme-dock" id="worldView" aria-label="The 3D world" hidden>
+      <div id="worldPanel" class="panel-mount"></div>
+    </aside>
+
+    <!-- The Skin lab view: a sample card's skin tried on the real page, and the policy of which rules each part
+         may take (same dock as the World view; js/admin/skin-lab.js). -->
+    <aside class="dock theme-dock" id="skinView" aria-label="Skin lab" hidden>
+      <div id="skinPanel" class="panel-mount"></div>
+    </aside>
   </div>
 
   <footer class="studio-statusbar" id="studioStatus" aria-live="off"></footer>
@@ -344,6 +358,13 @@
 <script src="js/content/canvas-transitions-data.js" defer></script>
 <script src="js/content/element-motion.js" defer></script>
 <script src="js/content/element-motion-data.js" defer></script>
+<!-- ARK's structured-state FLX grammar, vendored byte-identical from
+     flux/ark-browser/src/shared/flx-state-grammar.js (tests/versions.cjs fails on drift). It sits in js/vendor/,
+     not js/admin/vendor/, because the public site reads FLX drafts with it too (the World draft, 2026-10-24).
+     Before js/content/world.js: a saved world's data file decodes FLX when it loads (ArkWorld.define threw here when it came later). -->
+<script src="js/vendor/flx-state-grammar.js" defer></script>
+<script src="js/content/world.js" defer></script>
+<script src="js/content/world-data.js" defer></script>
 <script src="js/content/mesh-settings.js" defer></script>
 <script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/admin/env.js" defer></script>
@@ -363,9 +384,9 @@
 <script src="js/admin/publish.js" defer></script>
 <script src="js/admin/authorization-view.js" defer></script>
 <script src="js/admin/vendor/flux-elements.js" defer></script>
-<!-- ARK's structured-state FLX grammar, vendored byte-identical from
-     flux/ark-browser/src/shared/flx-state-grammar.js (tests/versions.cjs fails on drift). -->
-<script src="js/admin/vendor/flx-state-grammar.js" defer></script>
+<!-- after the grammar: the skin policy's data file decodes FLX when it loads -->
+<script src="js/content/skin-policy.js" defer></script>
+<script src="js/content/skin-policy-data.js" defer></script>
 <script src="js/admin/versions.js" defer></script>
 <script src="js/admin/versions-panel.js" defer></script>
 <!-- THE EDITOR, one file per concern (js/admin/core.js states the module contract;
@@ -388,6 +409,8 @@
 <script src="js/admin/design.js" defer></script>
 <script src="js/admin/seo.js" defer></script>
 <script src="js/admin/shapes.js" defer></script>
+<script src="js/admin/world.js" defer></script>
+<script src="js/admin/skin-lab.js" defer></script>
 <script src="js/admin/studio.js" defer></script>
 <script src="js/admin/bridge.js" defer></script>
 <script src="js/admin/history.js" defer></script>

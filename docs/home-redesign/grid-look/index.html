@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grid look prototype</title>
+<style>
+  :root { --canvas: 220 25% 4%; --text-strong: 150 30% 96%; --text: 210 18% 80%; --text-muted: 200 8% 62%; --signal: 165 58% 52%;
+    --border: 0 0% 100% / .14; --surface: 220 22% 8%; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: hsl(var(--canvas)); color: hsl(var(--text)); font: 14px/1.45 "JetBrains Mono", ui-monospace, Menlo, monospace; overflow: hidden; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+  .words { position: fixed; left: 6vw; top: 14vh; width: min(30vw, 420px); }
+  .words h1 { margin: 0 0 14px; font: 600 clamp(26px, 3.2vw, 44px)/1.08 system-ui, sans-serif; color: hsl(var(--text-strong)); letter-spacing: -.01em; }
+  .words p { margin: 0; font: 16px/1.55 system-ui, sans-serif; color: hsl(var(--text)); }
+  body.bare .words { display: none; }
+  .panel { position: fixed; left: 6vw; bottom: 5vh; width: 340px; padding: 14px; border: 1px solid hsl(0 0% 100% / .14); border-radius: 12px; background: hsl(var(--surface) / .72); backdrop-filter: blur(14px); }
+  .panel h2 { margin: 0 0 10px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); font-weight: 500; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  button { font: inherit; font-size: 12px; color: hsl(var(--text-strong)); background: hsl(0 0% 100% / .06); border: 1px solid hsl(0 0% 100% / .16); border-radius: 8px; padding: 7px 11px; cursor: pointer; }
+  button[aria-pressed="true"] { background: hsl(var(--signal) / .2); border-color: hsl(var(--signal) / .7); }
+  button:focus-visible { outline: 2px solid hsl(var(--signal)); outline-offset: 2px; }
+  dl { margin: 12px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 11px; color: hsl(var(--text-muted)); }
+  dt { color: hsl(var(--text-muted)); } dd { margin: 0; color: hsl(var(--text)); text-align: right; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-left: 4px; vertical-align: -1px; }
+  body.bare .panel { display: none; }
+</style>
+</head>
+<body>
+<canvas id="gl" aria-label="A ring of glass cubes"></canvas>
+<div class="words"><h1>Your chain, in plain sight.</h1><p>Every record is signed and kept. Choose one to open it.</p></div>
+<section class="panel" aria-label="Grid look">
+  <h2>Grid look</h2>
+  <div class="row" id="picks">
+    <button data-look="default" aria-pressed="true">Default</button>
+    <button data-look="27" aria-pressed="false">Card 27</button>
+    <button data-look="263" aria-pressed="false">Card 263</button>
+    <button data-look="512" aria-pressed="false">Card 512</button>
+  </div>
+  <dl id="vals"></dl>
+</section>
+<script src="../../../js/ark/mark-data.js"></script>
+<script src="../../../js/vendor/three-r180-defxn.js"></script>
+<script src="../../../js/nft/skin-bundle.js"></script>
+<script src="../../../js/nft/cards-data.js"></script>
+<script src="../../../js/nft/traits.js"></script>
+<script src="../../../js/nft/art3d.js"></script>
+<script src="grid-look.js"></script>
+</body>
+</html>

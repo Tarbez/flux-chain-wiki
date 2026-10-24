@@ -34,7 +34,7 @@ import { chromium } from 'playwright';
 import { openPageFields, openRailTab, designView, siteStyleTab, openVersions, SITE, copySite, startHost, fakeFolder, appFrame, clickHeader, until as untilFor, gotoEditor, answerArkDialog } from './harness.mjs';
 
 const require = createRequire(import.meta.url);
-const FLX = require('../../js/admin/vendor/flx-state-grammar.js');
+const FLX = require('../../js/vendor/flx-state-grammar.js');
 const ArkVersions = require('../../js/admin/versions.js');
 
 const args = process.argv.slice(2);

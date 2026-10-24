@@ -136,7 +136,7 @@ ArkManifest.define({
       "label": "Main button",
       "kind": "line",
       "section": "Links",
-      "value": "Run DEFXN from source"
+      "value": "Get DEFXN Grid"
     },
     "BACK": {
       "label": "Back link",
@@ -154,13 +154,13 @@ ArkManifest.define({
       "label": "Essential boundary",
       "kind": "text",
       "section": "Story",
-      "value": "Launched is not served: a resolver with no announcing provider answers nothing. The explorer and deployer run on the development network today; public hosting is not established."
+      "value": "Launched is not served: a resolver with no announcing provider answers nothing. The explorer and deployer run on the development network today. Public hosting is not established."
     },
     "FABRIC.NETWORK": {
       "label": "Network fabric explanation",
       "kind": "line",
       "section": "Story",
-      "value": "A name for miner presence; not a resolver chain."
+      "value": "A name for miner presence. Not a resolver chain."
     },
     "FABRIC.LOGIC": {
       "label": "Logic fabric explanation",
@@ -250,7 +250,7 @@ ArkManifest.define({
       "label": "Card 3 text",
       "kind": "text",
       "section": "Deploy cards",
-      "value": "A provider proves and announces it; every record it admits shows in the explorer."
+      "value": "A provider proves and announces it. Every record it admits shows in the explorer."
     },
     "SIMPLE.CAUTION.TITLE": {
       "label": "Caution disclosure title",
@@ -400,7 +400,7 @@ ArkManifest.define({
       "label": "Boundary",
       "kind": "text",
       "section": "Simple story",
-      "value": "Launched is not served: a resolver with no announcing provider answers nothing. Explore and Deploy run on the development network today; public hosting is not established."
+      "value": "Launched is not served: a resolver with no announcing provider answers nothing. Explore and Deploy run on the development network today. Public hosting is not established."
     },
     "SIMPLE.CONTEXT": {
       "label": "Context disclosure",
@@ -676,7 +676,7 @@ ArkManifest.define({
       "label": "Ask why 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "DEFXN refers to data by what it is, not where it is stored. A server link can change or disappear; a content ID always means the same bytes."
+      "value": "DEFXN refers to data by what it is, not where it is stored. A server link can change or disappear. A content ID always means the same bytes."
     },
     "CHAPTER.ASK.WHY2.TITLE": {
       "label": "Ask why 2 title",
@@ -748,7 +748,7 @@ ArkManifest.define({
       "label": "Work why 3 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "An agreement fixes what the result will be checked against. It does not prove the work happened or that anyone has been paid; that is the next step."
+      "value": "An agreement fixes what the result will be checked against. It does not prove the work happened or that anyone has been paid. That is the next step."
     },
     "CHAPTER.CHECK.WHY1.TITLE": {
       "label": "Check why 1 title",

@@ -33,7 +33,7 @@
   /* A product's state, said in words beside its name ("Ready" was painted in --primary, the
      identity colour, where /resolvers paints deployed green: docs/ux-audit/pages-ux-b.md
      cross-page #8). The tab's first line says what each state means. */
-  var STATUS = { ready: { label: 'Ready' }, building: { label: 'Building' } };
+  var STATUS = { ready: { label: 'Works on devnet' }, building: { label: 'Building' } };
   var STEP_NAMES = ['Define', 'Publish', 'Resolve'];
 
   function words(role) { return ArkCopy.text('RESOLUTIONS.' + role); }
@@ -197,7 +197,7 @@
            product keeps five products inside a phone's fold, where cards took two screens */
         /* "Products", not "Ready now": the list holds products still being built too, each row saying which
            (first-visit audit 2026-10-22, P0); the first line says what the two words mean */
-        { value: 'ready', label: 'Products · ' + shelf.ready.length, content: 'Ready: usable today. Building: in source, not released.', blocks: [
+        { value: 'ready', label: 'Products · ' + shelf.ready.length, content: 'Works on devnet: built and running on devnet. Building: in source, not released.', blocks: [
           { block: 'accordion', props: { label: short(item) + ' products', multiple: true, headingLevel: 3, items: shelf.ready.map(function (product) {
             var target = product.page && ArkUI.pageCatalog[product.page] ? product.page : null;
             var row = { value: product.key, title: product.name + ' · ' + (STATUS[product.status] || STATUS.building).label, content: product.line };

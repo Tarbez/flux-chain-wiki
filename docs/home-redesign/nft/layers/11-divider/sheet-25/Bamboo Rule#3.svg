@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Bamboo Rule: a long bamboo stalk ringed at both ends and at the centre, where one leaf in the accent and one grey leaf grow (sheet 25, the Bamboo set)</title>
+  <path d="M1 10H359M1 14H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M1 10V14M359 10V14" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M7 8.6V15.4M9 8.6V15.4M351 8.6V15.4M353 8.6V15.4M179 8.6V15.4M181 8.6V15.4" fill="none" stroke="var(--ink)" stroke-width="1.1" vector-effect="non-scaling-stroke" opacity="0.85"/><path d="M182 15Q191.57 23.37 208 21Q195.47 15.95 182 15Z" fill="var(--acc)"/><path d="M178 9Q171.04 1.69 158 3Q167.5 7.68 178 9Z" fill="var(--line)"/>
+</svg>

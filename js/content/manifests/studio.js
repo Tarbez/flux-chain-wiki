@@ -27,7 +27,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "A network name or directory row is not sufficient evidence. Verification records the command contract, network ID, source revision, participating processes or hosts, observation time, and current isolation boundary."
+      "value": "A network name or a directory row is not enough evidence. To verify a network, record the command and its result, the network ID, the source revision, which processes or hosts took part, when you looked, and what the network ID does not separate today."
     },
     "CTA": {
       "label": "Link on the theory page",
@@ -45,7 +45,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Capture the exact flux-network and flux-miner revisions and versions. A command copied from another release is not evidence for the installed build."
+      "value": "Record the exact flux-network and flux-miner revisions and versions. A command copied from another release is not evidence for the build you installed."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -57,7 +57,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Preserve the create-or-select output, the chosen network ID, peer configuration, and whether the directory found an existing entry."
+      "value": "Keep the output of create-or-select, the network ID you chose, the peer settings, and whether the directory already had that entry."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -69,7 +69,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Show presence discovery from outside the process that announced it. A local configuration value alone does not prove participation."
+      "value": "Show a miner being found from outside the process that announced it. A setting on your own machine does not prove participation."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -81,7 +81,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 4",
-      "value": "Directory output is best-effort presence. It does not prove admission, trusted membership, a DAO roster, or authority."
+      "value": "Directory output shows who has announced themselves. It does not prove admission, trusted membership, a DAO roster or authority."
     },
     "POINT5.TITLE": {
       "label": "Heading",
@@ -93,7 +93,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 5",
-      "value": "Every network result must state, beside it, what the network ID does not isolate today. The Networks page lists it."
+      "value": "Print the limit next to every network result: what the network ID does not separate today. The Networks page lists it."
     },
     "STATUS.TITLE": {
       "label": "Status heading",
@@ -105,7 +105,7 @@ ArkManifest.define({
       "label": "Status text",
       "kind": "text",
       "section": "Evidence",
-      "value": "The network command contract is source-backed. A complete independent live create-and-participate artifact remains pending."
+      "value": "The network commands are built in source. A complete independent run that creates a network and joins it is still pending."
     },
     "LIMIT.TITLE": {
       "label": "Limitation heading",
@@ -117,7 +117,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "Named networks remain evidence pending until their identifiers, sources, observation dates, and artifacts are registered. The evidence registry tracks this as CAP-003."
+      "value": "Named networks stay unverified until their IDs, sources, observation dates and artifacts are registered. The evidence registry tracks this as CAP-003."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",

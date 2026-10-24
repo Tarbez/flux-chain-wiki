@@ -13,7 +13,7 @@
               about than six drifting copies.
      pages    which two images (by js/content/assets.js id) each page
               uses, keyed by the page id SurfaceMotion.forPage/zero-webgl.js
-              already use ('zero', 'proximity', 'lab', 'about', 'concept').
+              already use ('zero', 'about', 'concept'; the retired 'proximity' and 'lab' keys stay in the data file, saved CMS data is never rewritten).
               A page with no primary image keeps its original built-in
               shape entirely (zero-webgl.js checks pages[page].primary).
 
@@ -92,8 +92,6 @@ var ArkMeshSettings = (function () {
      yet, so a page id absent from this list just keeps its built-in shape. */
   var PAGES = [
     { id: 'zero', label: 'Home' },
-    { id: 'proximity', label: 'Interactive model' },
-    { id: 'lab', label: 'Interactive model controls' },
     { id: 'about', label: 'About' },
     { id: 'concept', label: 'Theory' }
   ];

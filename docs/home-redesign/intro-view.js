@@ -5,6 +5,7 @@
    action: a click leaves for home (#/), the camera dives from the overview into the network, and the card
    grows toward you and closes to its centre as it goes (motion only: a scale and a wipe, never a fade).
    A fresh load at the site's root opens here; inside the site, "#/" is home as before.
+   The stage moved to js/world/intro-stage.js (2026-10-24, the 3D port); this file is the card and its words.
    Counts come from the data files, never typed: network chains (network-data.js), capabilities and
    resolvers (their manifests' files), products (the brief). */
 (function () {
@@ -36,18 +37,4 @@
     '<span class="cta intro-go"><span class="say">Explore the network ' + ARROW + '</span></span>' +
     '<small class="intro-note mono">Counted from the data files · all on a devnet · nothing is live</small>' +
     '</a></div></section>');
-
-  /* the stage: the overview from above (#/idvalue's camera, a little higher), nothing of its own to draw */
-  var S = window.DEFXNScene;
-  if (!S || !S.ok || !S.world) return;
-  var W = S.world, V = W.V, ELEV = 72, D2R = Math.PI / 180;
-  S.stage({
-    name: 'intro',
-    /* aimed in front of the kernel, so the ground logo sits in the upper part of the screen, above the card */
-    target: function (f, asp) { return { aim: V(0, 0, 9), dist: W.fit(66, 72 * Math.sin(ELEV * D2R) + 2, asp, .96), elev: ELEV, yaw: 0, tilt: 1.4, n: 0 }; },
-    set: function () {},
-    pose: function () {},
-    anchor: function (out) { out.pos.set(0, 0, 0); out.quat.identity(); out.s = 1; },
-    tags: function () { return []; }
-  });
 })();

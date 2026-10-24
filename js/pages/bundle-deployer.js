@@ -86,7 +86,7 @@
       { insert: 'main', was: WAS.insert },
       { block: 'pager', id: 'bundledeployer-pager', was: WAS['bundledeployer-pager'], props: { label: 'Continue',
         prev: { label: copy('BACK'), href: 'route:' + manifest.meta.back },
-        next: { label: 'Run DEFXN from source', href: 'route:download' },
+        next: { label: 'Get DEFXN Grid', href: 'route:download' },
         related: [{ label: 'Resolve your deployments', href: 'route:resolutions/deployments' }, { label: pageLabel('deployment'), href: 'route:deployment' }] } }
     ];
   }

@@ -49,7 +49,9 @@ var ArkAdminStore = (function () {
     { key: 'components', kind: 'single', global: 'ArkComponents', label: 'Components', file: 'components', title: 'Components', byRoute: ['routes', 'spots'] },
     { key: 'states', kind: 'single', global: 'ArkStates', label: 'States', file: 'states', title: 'State groups', byRoute: ['routes'] },
     { key: 'canvasTransitions', kind: 'single', global: 'ArkCanvasTransitions', label: 'Page transition', file: 'canvas-transitions', title: 'Canvas transitions' },
-    { key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation', file: 'element-motion', title: 'Element animation', byRoute: ['routes'] }
+    { key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation', file: 'element-motion', title: 'Element animation', byRoute: ['routes'] },
+    { key: 'world', kind: 'single', global: 'ArkWorld', label: 'World', file: 'world', title: '3D world', needs: ['js/vendor/flx-state-grammar.js'], byRoute: ['views', 'exits'] },
+    { key: 'skinPolicy', kind: 'single', global: 'ArkSkinPolicy', label: 'Skin policy', file: 'skin-policy', title: 'Skin policy', needs: ['js/vendor/flx-state-grammar.js'] }
   ];
   /* a copy, so no caller can edit the list for everyone else */
   function drafts(kind) {
@@ -285,9 +287,22 @@ var ArkAdminStore = (function () {
     await write(contentDir, 'element-motion-data.js', ArkElementMotion.serialize(whole));
   }
 
+  /* The 3D world under every page (js/content/world.js): a single file too. Its text is FLX
+     records inside one ArkWorld.define("...") call -- never JSON (workspace law, stored state
+     is FLX). */
+  async function saveWorld(contentDir, whole) {
+    await write(contentDir, 'world-data.js', ArkWorld.serialize(whole));
+  }
+
+  /* The skin policy (js/content/skin-policy.js): which rules a card skin may put on which part of the
+     site. A single file too, FLX records inside one ArkSkinPolicy.define("...") call, never JSON. */
+  async function saveSkinPolicy(contentDir, whole) {
+    await write(contentDir, 'skin-policy-data.js', ArkSkinPolicy.serialize(whole));
+  }
+
   return { drafts: drafts, forgetItem: forgetItem, indexText: indexText, manifestsDir: manifestsDir, save: save, remove: remove, writeIndex: writeIndex,
            contentDirs: contentDirs, saveArticle: saveArticle, removeArticle: removeArticle,
            assetsDir: assetsDir, indexTextAssets: indexTextAssets, saveAsset: saveAsset, removeAsset: removeAsset,
            secretsDir: secretsDir, indexTextSecrets: indexTextSecrets, saveSecret: saveSecret, removeSecret: removeSecret,
-           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme, saveSettingsDefaults: saveSettingsDefaults, saveSeo: saveSeo, saveSearchFiles: saveSearchFiles, saveLayout: saveLayout, saveComponents: saveComponents, saveStates: saveStates, saveCanvasTransitions: saveCanvasTransitions, saveElementMotion: saveElementMotion };
+           saveMeshSettings: saveMeshSettings, saveTheme: saveTheme, saveSettingsDefaults: saveSettingsDefaults, saveSeo: saveSeo, saveSearchFiles: saveSearchFiles, saveLayout: saveLayout, saveComponents: saveComponents, saveStates: saveStates, saveCanvasTransitions: saveCanvasTransitions, saveElementMotion: saveElementMotion, saveWorld: saveWorld, saveSkinPolicy: saveSkinPolicy };
 })();

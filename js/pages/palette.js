@@ -297,7 +297,9 @@
         was: WAS['palette-hero'] },
       { block: 'tabs', id: 'palette-views', was: WAS['palette-views'], props: { label: 'Palette views', variant: 'segmented', items: [
         { value: 'components', label: 'Components', blocks: [
-          { block: 'figure', props: { kind: 'live', slot: 'components', caption: 'The site\'s action paints in the active theme: solid for the main call to action once per view, soft when it repeats, quiet for secondary actions, choice for tabs and pickers, and the text link.' } }
+          { block: 'figure', props: { kind: 'live', slot: 'components', caption: 'The site\'s action paints in the active theme: solid for the main call to action once per view, soft when it repeats, quiet for secondary actions, choice for tabs and pickers, and the text link.' } },
+          /* after the paints, so this tab's saved layout keys keep their places; tabs take at most 7 items, so the parts are here, not a tab of their own */
+          { block: 'figure', props: { kind: 'live', slot: 'parts', caption: 'Every Ark UI block, drawn from its own example and grouped as Ark UI groups them. A card skin dresses them as it dresses the site: add ?skin-sample=27, 263 or 512 to the address.' } }
         ] }
         ].concat(HUE_ROLES.map(function (entry) { return { value: entry[0], label: entry[1], blocks: role(entry) }; })).concat([
         { value: 'tokens', label: 'Tokens', blocks: [
@@ -330,8 +332,39 @@
     ];
   }
 
+  /* Every Ark UI part (the owner, 2026-10-24: "we need all the primitive Ark UI examples shown"). The blocks come from Ark UI's
+     own registry (ArkKit.describeArkBlocks) and each draws its own example (js/ark/vendor/ark-kit-examples.js, loaded only
+     here: the public kit drops the examples to keep every other page light). They are grouped by Ark UI's categories, so a
+     block Ark UI adds shows here with nothing listed by hand. The forms, popover and figures chunks register their blocks
+     first. Each group is one tab; a group longer than the screen scrolls inside its own box. */
+  function partsFigure() {
+    var box = document.createElement('div'), note = document.createElement('p'), B = ArkUI.blocks;
+    box.className = 'palette-parts'; note.className = 'palette-parts-note'; note.textContent = 'Loading every Ark UI part.';
+    box.appendChild(note);
+    [B.formsScript, B.popoverScript, B.figuresScript, 'js/ark/vendor/ark-kit-examples.js'].reduce(function (chain, file) {
+      return chain.then(function () { return file ? ArkUI.loadScript(file) : null; });
+    }, Promise.resolve()).then(function () {
+      if (B.sync) B.sync();
+      var examples = (window.ArkKitExamples && ArkKitExamples.ARK_BLOCK_EXAMPLES) || {}, groups = {}, order = [];
+      ArkKit.describeArkBlocks().forEach(function (d) {
+        if (!examples[d.name]) return;
+        var c = d.category || 'other';
+        if (!groups[c]) { groups[c] = []; order.push(c); }
+        groups[c].push(d.name);
+      });
+      box.replaceChildren(B.render({ block: 'tabs', id: 'palette-parts-groups', props: { label: 'Ark UI part groups', variant: 'segmented', items: order.map(function (c) {
+        return { value: c, label: c.charAt(0).toUpperCase() + c.slice(1) + ' ' + groups[c].length, blocks: [].concat.apply([], groups[c].map(function (name) {
+          return [{ block: 'section-header', props: { title: name, level: 3 } }, { block: name, id: 'palette-part-' + name, props: examples[name] }];
+        })) };
+      }) } }));
+    }).catch(function (error) {
+      note.textContent = 'The parts did not load (' + error.message + '). Reload the page to try again.';
+    });
+    return box;
+  }
+
   function slots() {
-    var out = { components: components, neutrals: neutrals, meaning: meaning, borders: borders, 'type-slots': slotsFigure, 'type-scale': scaleFigure };
+    var out = { components: components, neutrals: neutrals, meaning: meaning, borders: borders, 'type-slots': slotsFigure, 'type-scale': scaleFigure, parts: partsFigure };
     ROLES.forEach(function (entry) {
       out['shades-' + entry[0]] = function () { return shades(entry[0]); };
       out['tones-' + entry[0]] = function () { return tones(entry[0]); };

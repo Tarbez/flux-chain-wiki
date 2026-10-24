@@ -126,7 +126,11 @@ const ROUTES = {
       /* 2026-10-21 ("/download hand-built", DN7/P8): the hand-built step buttons became Ark's actions row,
          with /deploy's words and tones */
       [/^page:\/nav:1\/button:1(\/span:1)?$/, '"← Previous" is Ark\'s "Previous step" button (the words /deploy\'s way through uses); its label keeps the inner key'],
-      [/^id:source-step-2$/, 'step 2 names the miner once (see reworded)']
+      [/^id:source-step-2$/, 'step 2 names the miner once (see reworded)'],
+      /* journey audit 2026-10-24: the heading and deck lead with the browser (see reworded); the guide link is the hero's second action */
+      [/^id:download-title$/, 'the heading names the browser state; its key stays on the h1'],
+      [/^page:\/header:1\/p:1$/, 'the deck opens with the browser and the FXN ID; its key stays on the deck'],
+      [/^page:\/nav:1\/a:1$/, 'the guide link keeps its key; "Create your FXN ID" is the hero\'s new primary action after it']
     ],
     retired: [
       [/^page:\/header:1\/div:1\/a:1$/, 'the phone-only duplicate of the guide link ("Operator guide →"); the hero\'s one guide action serves every width'],
@@ -143,7 +147,11 @@ const ROUTES = {
       [/^page:\/header:1\/div:1\/p:1$/, 'the eyebrow is gone (see retired); its words are the breadcrumb\'s last item, "Run DEFXN from source"'],
       /* first-visit audit 2026-10-22 (P1): one piece of software had three names (DEFXN, ark-miner-cli, flux-miner/ark-miner);
          step 2 says once that the DEFXN miner is the flux-miner command, and the legacy-alias sentence is gone */
-      [/^id:source-step-2$/, 'step 2 ends "The DEFXN miner is the flux-miner command." (it ended "The package exposes flux-miner; ark-miner is a legacy alias.")']
+      [/^id:source-step-2$/, 'step 2 ends "The DEFXN miner is the flux-miner command." (it ended "The package exposes flux-miner; ark-miner is a legacy alias.")'],
+      /* journey audit 2026-10-24 (docs/journey/END-TO-END-2026-10-24.md): a newcomer arrives here to get the browser, and no download exists.
+         The heading names that state; the miner steps stay below it, introduced by the deck as the page for people who run a miner. */
+      [/^id:download-title$/, '"Start a local miner from a trusted checkout." reads "DEFXN Grid has no public download yet." (named FXN Browser until the owner renamed it, 2026-10-24): the page leads with the browser, the miner steps follow in the deck'],
+      [/^page:\/header:1\/p:1$/, 'the deck opens with the browser and the FXN ID, then points to the miner steps']
     ]
   }
 };

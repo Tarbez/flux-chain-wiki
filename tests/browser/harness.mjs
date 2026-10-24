@@ -459,7 +459,7 @@ export const ACCOUNT_MENU_IDS = ['connect', 'who', 'signOut'];
    screen; the More menu (#accountMenu behind #accountBtn) holds the views, this page's search &
    sharing, the page transition, version history, publishing status and the account; the canvas
    strip (#canvasTools) holds #devices, #mode, #bpNote and #btnCheck (Design tips, Edit style only). */
-export const MORE_MENU_IDS = ['viewCanvasBtn', 'viewMapBtn', 'viewThemeBtn', 'btnPageSeo', 'backgroundBtn', 'versionsNav', 'meshNav', ...ACCOUNT_MENU_IDS];
+export const MORE_MENU_IDS = ['viewCanvasBtn', 'viewMapBtn', 'viewThemeBtn', 'viewWorldBtn', 'viewSkinBtn', 'btnPageSeo', 'backgroundBtn', 'versionsNav', 'meshNav', ...ACCOUNT_MENU_IDS];
 export async function openAccountMenu(app) {
   if (await app.evaluate(() => document.getElementById('accountMenu').hidden)) await app.click('#accountBtn');
   await app.locator('#accountMenu').waitFor({ state: 'visible', timeout: scaled(5000) });
@@ -526,9 +526,9 @@ export async function setLens(app, lens) {
   if ((await app.locator('#' + id).getAttribute('aria-pressed')) !== 'true') await app.click('#' + id);
   await app.waitForFunction((b) => document.getElementById(b).getAttribute('aria-pressed') === 'true', id, { timeout: scaled(15000) });
 }
-/* the view: 'canvas' | 'map' | 'theme', from wherever the editor is (in either lens) */
+/* the view: 'canvas' | 'map' | 'theme' | 'world', from wherever the editor is (in either lens) */
 export async function designView(app, view) {
-  const id = { canvas: 'viewCanvasBtn', map: 'viewMapBtn', theme: 'viewThemeBtn' }[view];
+  const id = { canvas: 'viewCanvasBtn', map: 'viewMapBtn', theme: 'viewThemeBtn', world: 'viewWorldBtn', skin: 'viewSkinBtn' }[view];
   if (!id) throw new Error('no view named ' + view);
   if ((await app.locator('#' + id).getAttribute('aria-pressed')) !== 'true') await clickHeader(app, id);
   await app.waitForFunction((b) => document.getElementById(b).getAttribute('aria-pressed') === 'true', id, { timeout: scaled(15000) });

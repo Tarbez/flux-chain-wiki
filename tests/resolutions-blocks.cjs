@@ -41,6 +41,7 @@ const ICON = /\/(a|button):\d+\/svg:\d+(\/(path|circle|rect|line|polyline|g):\d+
 const ICON_REASON = 'an icon js/hero-motion.js drew inside the old breadcrumb link; Ark\'s breadcrumb draws none';
 const T = 'page:/div:1/section:1/div:2/div:1/(a|div):\\d+';
 const DETAIL = [
+  ['reshaped', /^page:\/div:1\/section:1\/div:2\/div:1\/(a|div):\d+\/span:[12]$/, 'content audit 2026-10-24: a product whose status or line changed to what is true (names, gateway, agreements, monitor, networks, explorer); the tile keeps its key'],
   ['reshaped', /^page:\/div:1\/header:1$/, 'the intro became the hero; who it is for and the problem moved to the facts below it'],
   ['reshaped', /^page:\/div:1\/header:1\/p:1$/, 'the position "06 / 20 · Value & finance" reads "Resolution 6 of 20 · Value & finance" (the story pages\' "<sequence> · n of N")'],
   ['reshaped', /^page:\/div:1\/header:1\/div:1$/, 'the actions row keeps the main action; the deeper page beside it is a related page in the pager now, so the hero keeps one row of buttons on a phone'],
@@ -60,12 +61,13 @@ const DETAIL = [
   ['retired', /^page:\/div:1$/, 'the two-column workspace wrapper; a block page stacks its blocks in the page root'],
   ['retired', /^page:\/div:1\/section:1\/div:1\/button:[12]\/span:1$/, 'the count is part of the tab\'s one label now ("Ready · 3"); an Ark tab has no inner element to carry it'],
   ['retired', new RegExp('^' + T + '/span:1/(strong|span):1$'), 'the name and the state are one row title now ("Auth Kit · Ready"), which keeps the head\'s key'],
-  ['retired', /^page:\/div:1\/section:1\/p:1\/span:[12]$/, 'its words ("Ready: usable today", "Building: in source, not released") are one line, the Ready now tab\'s first, which keeps the legend\'s key']
+  ['retired', /^page:\/div:1\/section:1\/p:1\/span:[12]$/, 'its words ("Works on devnet: built and running on devnet", "Building: in source, not released") are one line, the Ready now tab\'s first, which keeps the legend\'s key']
 ];
 const INDEX = [
   ['reshaped', /^page:\/header:1$/, 'the header became the hero; the deck is the disclosure after it'],
   /* first-visit audit 2026-10-22 (P1) */
   ['reshaped', /^page:\/header:1\/div:1\/p:2$/, 'the deck opens with what a resolution is ("A resolution is a job DEFXN does for you..."); the partner line is gone'],
+  ['reshaped', /^page:\/section:1\/div:2\/div:2\/a:[234]\/span:2(\/span:1)?$/, 'content audit 2026-10-24: the Content, Files and Deployments card lines were rewritten to drop "permanent", "peer-to-peer hosting" and "a server you rent", which nothing proves'],
   ['reshaped', /^page:\/section:1\/div:2\/div:2\/a:1\/span:2(\/span:1)?$/, 'the Website card\'s line reads "no database, no hosting, no cloud": "no fees" had no condition'],
   ['reshaped', /^page:\/header:1\/div:1\/p:1$/, 'the eyebrow ends with the stat triplet now: "DEFXN / RESOLUTIONS · 20 resolutions · 05 domains · 01 mesh"'],
   ['reshaped', /^page:\/header:1\/dl:1$/, 'the stat triplet (pages-ux-b.md /resolutions P2, a row of its own) is the eyebrow\'s tail, whose text carries this key'],
@@ -95,6 +97,12 @@ function expectFor(route, census) {
 /* Leaf words of the old page that are on the new page in another form, with the reason (every
    other leaf's words must be in the new page's text). */
 const REWORDED = [
+  /* content audit 2026-10-24 (owner decision defxn-70): the status word "Ready" became "Works on devnet", and the legend line says what it means */
+  [/^page:\/div:1\/section:1\/div:2\/div:1\/(a|div):\d+\/span:1\/span:1$/, 'the product status word reads "Works on devnet" where it read "Ready"'],
+  [/^page:\/div:1\/section:1\/p:1\/span:1$/, 'the legend reads "Works on devnet: built and running on devnet" where it read "Ready: usable today"'],
+  [/^page:\/div:1\/section:1\/div:2\/div:1\/(a|div):\d+\/span:2$/, 'content audit 2026-10-24: a product tile line was rewritten to what is true (gateway, names, agreements, monitor, explorer, networks)'],
+  /* content audit 2026-10-24 (docs/content/CONTENT-AUDIT-2026-10-24.md): each card's one line was rewritten to what is true (no "permanent", no "hosting" claims) */
+  [/^page:\/section:1\/div:2\/div:2\/a:\d\/span:2\/span:1$/, 'a resolution card line, reworded in the content audit'],
   [/^page:\/div:1\/header:1\/p:1$/, 'the position reads "Resolution 6 of 20" instead of "06 / 20"'],
   [/^page:\/section:1\/div:2\/div:1\/div:1\/p:1$/, 'the domain\'s "01 / 05" is its place in the tab list'],
   [/^(page:\/section:1\/div:1\/button:\d\/span:1|page:\/section:1\/div:2\/div:2\/a:\d\/span:1)$/, 'a list number: the place of the tab or card in its list'],
@@ -145,8 +153,8 @@ const REWORDED = [
         const item = ArkResolutions.find(route.split('/').pop()), shelf = ArkResolutionProducts.forResolution(item.key);
         const all = ArkResolutions.all(), at = all.findIndex((x) => x.slug === item.slug);
         words.push(item.title, item.text, ArkResolutions.shortName(item.title), ArkResolutions.groupFor(item.group).title, 'All resolutions');
-        words.push(shelf.audience, shelf.problem, 'For', 'Problem', 'Products', 'usable today', 'Building', 'in source, not released', 'Product ideas', 'proposed, not built');
-        for (const p of shelf.ready) { words.push(p.name, p.line, p.status === 'ready' ? 'Ready' : 'Building'); if (p.page && window.ArkUI.pageCatalog[p.page]) words.push('Open ' + p.name); }
+        words.push(shelf.audience, shelf.problem, 'For', 'Problem', 'Products', 'built and running on devnet', 'Building', 'in source, not released', 'Product ideas', 'proposed, not built');
+        for (const p of shelf.ready) { words.push(p.name, p.line, p.status === 'ready' ? 'Works on devnet' : 'Building'); if (p.page && window.ArkUI.pageCatalog[p.page]) words.push('Open ' + p.name); }
         shelf.ideas.forEach((idea, i) => words.push(idea.name, 'Idea 0' + (i + 1), 'not built yet', idea.audience.slice(1), idea.problem, idea.product, ...idea.builds.map((b) => b.name)));
         words.push('How it resolves', 'The shift', item.shift.slice(1), 'Instead of', item.old.slice(1), ...item.steps, 'Define', 'Publish', 'Resolve');
         /* the hero's one action (js/pages/resolutions.js mainAction, first-visit audit 2026-10-22 P0): Start here unless its

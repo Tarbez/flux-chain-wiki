@@ -18,19 +18,13 @@ assert.equal(manifests[0].meta.next, 'deployment', 'the primary journey does not
 assert.equal(manifests[1].meta.next, 'deployment');
 assert.equal(manifests[2].meta.next, 'download');
 
-const home = fs.readFileSync('js/pages/home.js', 'utf8');
-/* Since 2026-10-19 home is a page of Ark blocks (js/pages/home.js, tests/home-blocks.cjs): the Learn
-   CTA is the hero's primary action, its target the manifest's LEARN.HREF. */
-/* the owner's call 2026-10-22: "See how DEFXN works", to the plain overview (/about), not the technical walkthrough */
-assert(home.includes("{ label: 'See how DEFXN works', href: link('LEARN.HREF'), tone: 'primary' }"), 'the Learn CTA is the hero\'s primary action');
+/* Home stands on the 3D world since 2026-10-24 (js/pages/home.js, tests/world-pages.cjs): its hero action is "Explore a record" (HOME.WORLD.CTA)
+   and its "Understand" action reaches the overview. The old Learn CTA is gone with the block hero; its manifest field stays, as the overview's address. */
 assert.equal(vm.runInContext("ArkManifest.get('home').fields['LEARN.HREF'].value", context), 'route:about', 'the Learn CTA opens the overview');
 // The pressure-test link's destination is now a manifest field of kind 'link' (js/content/manifest.js),
 // resolved through js/ark/dash-kit.js's linkEl rather than a hardcoded literal/explicit dataset assignment.
-assert(home.includes("{ label: 'Go deeper into the resolver model', href: link('PRESSURETEST.HREF')"), 'the Pressure-test link opens the resolver guide');
 assert.equal(vm.runInContext("ArkManifest.get('home').fields['PRESSURETEST.HREF'].value", context), 'route:resolver');
 assert(fs.readFileSync('js/resolvers/header.js', 'utf8').includes("['NAV.OVERVIEW', 'about']"), 'overview remains reachable in shared navigation');
-assert(/\['Walk the chain', ?'chain'\]/.test(home), 'the chain walkthrough remains reachable in the Explore audience resources');
-assert(!home.includes("signal.className = 'home-signal-map'"), 'the decorative signal diagram no longer competes with the decision path');
 
 const catalogSource = fs.readFileSync('js/pages/catalog.js', 'utf8');
 for (const id of ['resolver', 'references', 'deployment']) {

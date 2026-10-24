@@ -4,6 +4,9 @@
    one draw call at rest, and two additional delayed traces during transitions. */
 (function () {
   'use strict';
+  /* The 3D world (js/world/world-host.js) stands under every page now. This relief is its fallback: it runs
+     only when the world cannot start (no WebGL 2, a failed load), and the host then loads this file again. */
+  if (window.ArkWorldHost && window.ArkWorldHost.owns()) return;
 
   var scene = document.querySelector('#scene > [data-pattern="F-SCENE-RZERO_V0"]');
   var persistent = scene && scene.querySelector('[data-ark-layer="persistent"]');

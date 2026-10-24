@@ -24,7 +24,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const BRIEF = join(HERE, 'defxn-concept.html');
-const OUT = join(HERE, 'concept-data.js');
+const OUT = join(HERE, '../../js/content/concept-data.js');
 
 const ENT = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&nbsp;': ' ', '&middot;': '·' };
 export function text(html) {

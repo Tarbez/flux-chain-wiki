@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>True Site Skinning</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap">
+<style>
+/* Layout: one reading column with a quiet contents rail on wide screens; the site's own three font slots. */
+:root{
+  --bg:#f6f5f2; --surface:#ffffff; --raised:#efede8; --fg:#1d1f22; --muted:#5b6066; --faint:#8a8f95;
+  --line:#dcd9d2; --accent:#a4501c; --accent-soft:#f3e3d6; --ok:#2f7a55; --warn:#9a6a12;
+  --display:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d0f10; --surface:#14171a; --raised:#1a1e21; --fg:#e7e5e0; --muted:#a3a7ab; --faint:#767b80;
+  --line:#2a2f33; --accent:#e59a62; --accent-soft:#2b1d14; --ok:#6cc79a; --warn:#e2b45c; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0d0f10; --surface:#14171a; --raised:#1a1e21; --fg:#e7e5e0; --muted:#a3a7ab; --faint:#767b80;
+  --line:#2a2f33; --accent:#e59a62; --accent-soft:#2b1d14; --ok:#6cc79a; --warn:#e2b45c; color-scheme:dark }
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--fg);font:16px/1.62 var(--sans);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;padding-top:40px;font:12px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase}
+nav.toc a{display:block;padding:5px 0;color:var(--muted);text-decoration:none;border-left:2px solid transparent;padding-left:10px}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--fg);border-left-color:var(--accent)}
+main{min-width:0;max-width:72ch}
+header.top{padding:40px 0 8px}
+.eyebrow{font:500 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font:600 clamp(32px,5vw,46px)/1.08 var(--display);margin:10px 0 14px;text-wrap:balance}
+h2{font:600 26px/1.2 var(--display);margin:56px 0 14px;text-wrap:balance;scroll-margin-top:24px}
+h3{font:600 18px/1.3 var(--sans);margin:32px 0 10px}
+p{margin:0 0 14px}
+.meta{font:13px/1.55 var(--mono);color:var(--muted)}
+.meta b{color:var(--fg);font-weight:500}
+code{font:13.5px var(--mono);background:var(--raised);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+a{color:var(--accent)}
+ul,ol{margin:0 0 16px;padding-left:22px}
+li{margin:0 0 8px}
+li::marker{color:var(--faint)}
+.answer{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:22px 24px;margin:24px 0 0}
+.answer h2{margin-top:0;font-size:20px}
+.moves{display:grid;gap:12px;margin:14px 0 0;padding:0;list-style:none;counter-reset:m}
+.moves li{counter-increment:m;display:grid;grid-template-columns:28px 1fr;gap:10px;margin:0}
+.moves li::before{content:counter(m);font:600 13px/26px var(--mono);text-align:center;width:26px;height:26px;border-radius:50%;background:var(--accent-soft);color:var(--accent)}
+.tbl{overflow-x:auto;margin:10px 0 20px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;vertical-align:top;padding:10px 12px;border-bottom:1px solid var(--line)}
+th{font:500 11.5px/1.4 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--raised)}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.story{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:10px;counter-reset:s}
+.story li{counter-increment:s;display:grid;grid-template-columns:40px 1fr;gap:12px;margin:0;padding:12px 14px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.story li::before{content:counter(s,decimal-leading-zero);font:500 13px/1.7 var(--mono);color:var(--accent)}
+.story li.guard{border-color:var(--accent)}
+.chain{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 20px;font:12.5px/1.3 var(--mono)}
+.chain span{padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.chain i{font-style:normal;color:var(--faint)}
+.chain span.k{border-color:var(--accent);color:var(--accent)}
+.state{display:inline-block;font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 7px;border-radius:999px;border:1px solid currentColor;margin-right:6px;vertical-align:1px}
+.state.ok{color:var(--ok)} .state.no{color:var(--warn)}
+.decisions{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:14px;counter-reset:d}
+.decisions>li{counter-increment:d;margin:0;padding:16px 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.decisions>li>b{display:block;font:600 16px/1.35 var(--sans);margin-bottom:8px}
+.decisions>li>b::before{content:counter(d) ". ";color:var(--accent)}
+.opt{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.opt li{margin:0;padding:9px 12px;border-radius:7px;background:var(--raised);font-size:15px}
+.opt li.pick{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.pickchip{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-right:6px}
+.why{display:block;color:var(--muted);font-size:14px;margin-top:3px}
+.rules li{margin-bottom:6px}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr);gap:0} nav.toc{display:none}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <a href="#answer">The answer</a><a href="#today">What works</a><a href="#missing">What is missing</a><a href="#experience">The experience</a>
+  <a href="#package">The package</a><a href="#identity">Wearing</a><a href="#navbar">The navbar</a><a href="#verify">Verification</a>
+  <a href="#elements">New elements</a><a href="#timelines">Timelines</a><a href="#networks">Networks</a><a href="#wear-buy">Wear and buy</a>
+  <a href="#risks">Risks</a><a href="#phases">Phases</a><a href="#decisions">Decisions</a><a href="#rules">Rules kept</a>
+</nav>
+<main>
+<header class="top">
+  <div class="eyebrow">DEFXN · identity card · audit and plan</div>
+  <h1>True site skinning, held by your identity</h1>
+  <p class="meta"><b>Written for:</b> the owner, the defxn site session, the genesis session and the Ark UI owner. <b>Status:</b> 2026-10-24, by the NFT session, reviewed by the site session. Decisions 1 and 2 taken by the owner the same day. Every card here is a sample. No real card exists yet. The same text is in <code>docs/home-redesign/nft/SKIN-AUDIT.md</code>.</p>
+</header>
+
+<section class="answer" id="answer" aria-labelledby="answer-h">
+  <h2 id="answer-h">The answer first</h2>
+  <p><b>Today</b> a sample card dresses the defxn site from end to end: colours, chrome on 38 Ark UI parts, the account avatar, the profile card, and the Skin lab. A visitor wears it only by a review address or the profile switch, and nothing is kept.</p>
+  <p><b>Missing</b> are a real card held by an identity, a consent step, a kept choice, a check that the site is genuine, layouts for the navbar, new kinds of element, and motion timelines.</p>
+  <p><b>Three moves make it real:</b></p>
+  <ol class="moves">
+    <li><span>The skin travels as a small signed <b>package</b> held by the identity: tokens, six drawings and rules. It is about 2 KB compressed. A site needs no NFT code to wear it.</span></li>
+    <li><span>The <b>identity decides</b> where the skin goes. The broker hands the package only to a site whose name record verifies, and only after the person says yes.</span></li>
+    <li><span>The <b>trusted parts</b>, the identity bar and the site's seal, are drawn outside any skin. A skin can never forge them, and a phishing copy cannot show them.</span></li>
+  </ol>
+</section>
+
+<h2 id="today">What works today</h2>
+<p class="meta">Built and measured on 2026-10-24: headless Chrome, Apple M2, local server, gzip -9.</p>
+<div class="tbl"><table>
+<thead><tr><th>Piece</th><th>Where</th><th>State</th></tr></thead>
+<tbody>
+<tr><td>Card to skin recipe</td><td><code>js/nft/skin-recipe.js</code></td><td>Tokens, six chrome drawings, rules measured from the drawings. 471 of 471 drawings pass Ark UI's sanitizer.</td></tr>
+<tr><td>Ark UI skin layer</td><td><code>js/ark/vendor/ark-kit-skin.js</code></td><td>Applies tokens, chrome and per-part rules, with exact undo and a contrast gate.</td></tr>
+<tr><td>Part map and policy</td><td><code>js/ark/skin-parts.js</code></td><td>Which part may take which rule, per card family. Edited in the CMS Skin lab, stored as FLX.</td></tr>
+<tr><td>Wearing</td><td><code>js/ark/skin-site.js</code></td><td>A review address or the profile switch. Nothing is kept.</td></tr>
+<tr><td>Card on the profile</td><td><code>js/ark/profile-card.js</code></td><td>The card in 3D, exact unmount, no idle frames.</td></tr>
+<tr><td>Avatar</td><td><code>js/nft/scene.js</code></td><td>The card's art cut square in the account button.</td></tr>
+<tr><td>Card world</td><td><code>js/nft/scene.js</code></td><td>A still image. By the owner's rule it shows only where the ring world, the grid's core 3D, is off.</td></tr>
+<tr><td>Every Ark part, on the real site</td><td><code>/palette</code>, Components tab</td><td>All 29 Ark blocks from Ark UI's own examples, grouped by Ark's categories, from a 4.2 KB lazy chunk. Under card 263, 23 parts took rules.</td></tr>
+<tr><td>Every Ark part, for review</td><td><code>nft/primitives.html</code></td><td>The same blocks plus 2 behaviour pieces, with what each part took and what Ark UI took back.</td></tr>
+<tr><td>Cover check</td><td>Ark UI 0.2.20</td><td>A piece that would cover text or a control is taken back, and a full frame falls back to corners, each with its reason.</td></tr>
+<tr><td>One source of part rules</td><td><code>DefxnSkinParts.ALLOW</code></td><td>The site's table decides which part takes which rule.</td></tr>
+</tbody></table></div>
+<p>Under card 263 the gallery found that 13 of 31 parts take colours only, because the site's table gives them no chrome yet. Ark UI also falls back by itself: a full frame on a card, a stat or a figure becomes corners, because it would cover their content.</p>
+
+<h2 id="missing">What is missing</h2>
+<div class="tbl"><table>
+<thead><tr><th>Gap</th><th>Why it matters</th><th>Needs first</th></tr></thead>
+<tbody>
+<tr><td>A real card held by an identity</td><td>Every skin is a sample.</td><td>Decided: a <code>KASSET1</code> object, still on a branch</td></tr>
+<tr><td>A card lookup for a signed-in identity</td><td>A site cannot find the visitor's card.</td><td>The card record</td></tr>
+<tr><td>Consent to wear</td><td>A site must not restyle itself as someone without their yes.</td><td>The broker's existing yes-per-site step</td></tr>
+<tr><td>A kept choice</td><td>A reload drops the skin today.</td><td>The card record, kept as FLX in the identity</td></tr>
+<tr><td>A check of the card's signature</td><td>A forged card could pass as someone's.</td><td>The card record and the one shared verifier</td></tr>
+<tr><td>A visible check that the site is genuine</td><td>A visitor sees no proof of who runs the page.</td><td>A name record target for the site's key and origins</td></tr>
+<tr><td>A trusted surface a page cannot draw</td><td>Anything inside the page can be copied by a phishing page.</td><td>A name-proof state in the Ark browser's own chrome</td></tr>
+<tr><td>Layouts and density</td><td>The navbar cannot become the visitor's navbar.</td><td>The owner's review on the gallery page</td></tr>
+<tr><td>New kinds of element</td><td>A card dresses only six kinds of part.</td><td>An extension hook in Ark UI's closed sets</td></tr>
+<tr><td>Motion timelines</td><td>Elements cannot move together or become animated components.</td><td>A timeline grammar in FLX</td></tr>
+<tr><td>One skin client for every site</td><td>A second DEFXN site would copy the site's code.</td><td>The skin package</td></tr>
+<tr><td>A cover check that follows changes</td><td>It runs when a skin goes on, not when a popover opens. Under card 512 a menu frame line crosses text. Ark UI is fixing it.</td><td>Ark UI's re-check on open and resize</td></tr>
+<tr><td>FLX for the CMS motion and component stores</td><td>Four stores still write JSON.</td><td>The world store's pattern</td></tr>
+</tbody></table></div>
+
+<h2 id="experience">The experience we aim for</h2>
+<ol class="story">
+  <li><span><b>You open a DEFXN site,</b> for example <code>radio.fxn</code>. It shows its own look. At the end of its navbar sits your identity bar, drawn by your Ark browser, or on the plain web by the broker in its own frame. It names the site as its name record proves it: the name, verified, and who published this build.</span></li>
+  <li><span><b>You press your card.</b> Three choices appear: wear my card here, always wear it on verified DEFXN sites, or wear my look without saying who I am.</span></li>
+  <li><span><b>You say yes.</b> The broker hands the site your signed skin package. The site checks the signature with the one shared verifier.</span></li>
+  <li><span><b>The site transforms once.</b> Its colours change and its parts take the card's chrome. The navbar takes your card's arrangement once layouts are on. Your avatar appears. Your card's arrival timeline plays once and stops. The ring world stays as it is.</span></li>
+  <li><span><b>The content stays the site's.</b> You change how it looks, never where its links go.</span></li>
+  <li class="guard"><span><b>On a copy</b> at a look-alike address there is no DEFXN name record. The identity bar says so, the broker refuses to sign you in or hand over your card, and your card never appears. The refusal is the protection. The missing card is the warning you can see.</span></li>
+  <li><span><b>"Use the site's look"</b> puts the site back exactly as it was.</span></li>
+</ol>
+
+<h2 id="package">The skin travels as a package, not as code</h2>
+<p>A skin is data the NFT engine derives once. A site needs only Ark UI's skin layer and the package.</p>
+<div class="tbl"><table>
+<thead><tr><th>Measured, cards 27 / 263 / 512</th><th>Size</th></tr></thead>
+<tbody>
+<tr><td>The card's record line (<code>DFXNCARD1-...</code>)</td><td class="num">66 / 98 / 98 characters</td></tr>
+<tr><td>The whole skin package: tokens, six drawings, rules</td><td class="num">2,160 / 1,957 / 1,749 B gzip</td></tr>
+<tr><td>Ark UI's skin layer, which every wearing site loads</td><td class="num">66,041 B gzip</td></tr>
+<tr><td>The NFT files a site loads today to make the package</td><td class="num">about 36 KB gzip</td></tr>
+<tr><td>The card world as a still JPEG at 1440×900</td><td class="num">54,756 / 58,268 / 60,269 B</td></tr>
+<tr><td>The 3D engine that paints the world now</td><td class="num">about 213 KB gzip + builders, 208–353 ms paint</td></tr>
+</tbody></table></div>
+<ul>
+  <li><b>Derived, never authored.</b> Anyone can derive the package again from the record line and the public layer table. A site checks the identity's signature, and any DEFXN node can re-derive the package to audit it.</li>
+  <li><b>Drawings go by address.</b> Each chrome drawing already has a content hash, so a package can name six hashes and every site shares one cache.</li>
+  <li><b>Stills replace the engine</b> wherever 3D is not the content: about 55 KB of picture instead of about 213 KB of engine, and nothing to paint.</li>
+  <li><b>Storage is FLX:</b> one grammar of records, proposed label <code>DFXNSKIN1</code>, held by the identity next to the card.</li>
+</ul>
+
+<h2 id="identity">Wearing from the identity</h2>
+<p>Today the broker shares a public key and a display name with a site only after the person says yes to that exact origin. The yes lasts for that tab and that identity, and it carries no card. <code>KASSET1</code>, a unique-object capability with one owner, one content pointer, mint, transfer and burn, is built on a branch and not yet committed.</p>
+<ol>
+  <li><b>The card is a <code>KASSET1</code> object.</b> Its owner is the identity's key, and its pointer is the card record. Ownership comes with the capability.</li>
+  <li><b>The worn skin is a public record by the owner,</b> naming the package's content address. A new skin appends a record that supersedes the old one, which is never rewritten.</li>
+  <li><b>Private choices go in the Vault:</b> where to always wear, the nav preferences, and whether to say who you are.</li>
+  <li><b>The broker's reply gains a card.</b> After the yes it returns the card's id and the package address. The site checks the bytes against the address and the ownership with the one verifier.</li>
+  <li><b>"My look only"</b> returns the package alone, without the key or the name. A rare card is still recognisable, and the sheet says so.</li>
+</ol>
+
+<h2 id="navbar">The visitor's navbar, holding the site's data</h2>
+<ul>
+  <li><b>The site's zone</b> keeps the site's brand, routes and products, from the site's own data. The card may change the arrangement, the density and the chrome. It never changes a destination, a label or the reading order.</li>
+  <li><b>The identity zone</b> holds the avatar, the name, the site's seal and the wear switch. It is a locked part that no skin reaches. The site session confirms it fits: the lock lives in the skin's own part map, so the header's size budget is untouched.</li>
+</ul>
+<p>It needs three things: the owner's review of Ark UI's existing layouts on the gallery page, the site's table turning layout and density on part by part, and a small nav preference record kept by the identity in FLX. Every preference points at the site's own data, so it cannot add a destination.</p>
+
+<h2 id="verify">Verification, and a self-certified verification grid</h2>
+<p>The aim: a visitor's own client proves which site it is on, and a page cannot fake that proof.</p>
+<p class="meta">One working chain exists today, on the server:</p>
+<div class="chain" aria-label="The gateway's chain from a name to checked bytes">
+  <span>host name</span><i>to</i><span>.fxn name</span><i>to</i><span class="k">signed proof, one verifier</span><i>to</i><span>blake3_cid target</span><i>to</i><span>bytes that hash to it</span>
+</div>
+<p>What is missing: no record binds a name to its site, because dense-wire has no site-key or allowed-origin target. The broker trusts any <code>*.defxn.com</code> origin by a pattern. No visitor sees a seal or a name-proof state anywhere. The audit also found three defects. The site session fixed the first: the CMS publish script called a retired check that threw on every publish. Two stay open: the site's copy of the record builders writes old record kinds, and the gateway's pinned genesis key is empty in this checkout, which needs your key.</p>
+<h3>What to build, in the order that protects people first</h3>
+<ol>
+  <li><b>Bind a name to its site:</b> two new dense-wire targets, the site's public key and its allowed origins, returned by the one verifier. No new store, claim path or verifier.</li>
+  <li><b>The broker gates by name.</b> It answers an origin only when a verified record lists it. A phishing page then gets no signature, key, name or card, whatever it looks like. The protection does not depend on people noticing.</li>
+  <li><b>The client checks what it shows.</b> The Ark browser fetches by content address, checks the hash, keeps the proof with the page, and shows the result in its own address bar:<br>
+    <span class="state ok">name verified</span> with its build and owner &nbsp; <span class="state no">build does not match</span> &nbsp; <span class="state no">no DEFXN name</span></li>
+  <li><b>The identity bar lives outside the page:</b> browser chrome in the Ark browser, and the broker's own window for anything that signs on the plain web.</li>
+  <li><b>A personal seal.</b> The identity bar draws a seal from a secret in the person's Vault and the verified name, using an emblem, a corner and a palette from the person's own card. Each person learns their own seal per site, and a page cannot compute it. The seal is a cue. The refusal is the gate.</li>
+  <li><b>The verification grid.</b> Signed statements about names in the planned Attestations resolver: official site of, impersonates, reported as a scam. Each is signed and can be retracted. Each reader chooses whose keys count: by default the network's committees, the people you follow, and you.</li>
+  <li><b>Look-alike names are refused</b> at the one claim path when public claims open, by their confusable skeleton.</li>
+  <li><b>Provenance, never a verdict.</b> For scams and propaganda the client shows signed facts with their signers. It never shows a conclusion the system did not reach, and there is no hidden list.</li>
+  <li><b>A skin can never forge trust.</b> The seal and the identity zone are locked parts, and a site wears only a package whose card verifies.</li>
+</ol>
+
+<h2 id="elements">New elements, and elements that become components</h2>
+<ul>
+  <li><b>Map element kinds to part kinds,</b> such as surface, list, control, rule and heading, so no per-part list is written.</li>
+  <li><b>New slots go through the same pipeline:</b> a layer folder, the owner's review, then the shop. Candidates are a control shape, a loader that stops when loading ends, a pointer for non-text areas, and a badge shape.</li>
+  <li><b>Shaped by people:</b> a piece made in the CMS 3D studio becomes an element file signed by its maker, goes through review, then the shop.</li>
+  <li><b>Ark UI opens its closed sets by an extension hook,</b> so a new value is added once, with its invariant tests.</li>
+</ul>
+
+<h2 id="timelines">Timelines from the 3D studio</h2>
+<ul>
+  <li><b>Tracks and keyframes.</b> A track targets a card piece or a part kind and one property from a closed set: move, turn, scale, clip or the drawing of a line. A trigger starts it: wearing, arriving, hover, press or focus.</li>
+  <li><b>Rails.</b> Every timeline ends. The site has no fades, so it moves and clips. Reduced motion jumps to the last frame. Nothing flashes more than three times a second, and no control's hit area moves while it can be pressed.</li>
+  <li><b>Player and storage.</b> The browser's own animation engine plays it, and the 3D engine draws only while it runs. It is stored as FLX records, proposed label <code>DFXNTL1</code>, and can be sold as an element.</li>
+  <li><b>A component</b> is an Ark part, the pieces that dress it, its rules and its timeline. For example, an Arcade button with a cut edge, a 120 ms press, and an emblem that pulses once on hover.</li>
+</ul>
+
+<h2 id="networks">Across DEFXN, Dead Ark and CR3TV</h2>
+<ul>
+  <li>defxn carries the shared capabilities and the core resolvers. Dead Ark and CR3TV are app-chains that sign with defxn's Identity resolver, so one identity can wear one card on all three.</li>
+  <li>The skin client moves into the SDK beside Ark UI's skin layer, and every product syncs it. A site's part policy is already FLX, so its signed manifest can carry it, and no site copies another's table.</li>
+  <li><b>Dead Ark:</b> the Ark browser is the trusted surface for the identity bar, the seal and the name-proof state.</li>
+  <li><b>CR3TV:</b> a creator's channel wears the creator's card, and an official-channel mark becomes a signed attestation.</li>
+</ul>
+
+<h2 id="wear-buy">Why people wear, and buy</h2>
+<p>A worn card is seen by its wearer on every verified site, and by others wherever a profile shows. Every element is a shop item with a price derived from its odds. A site can say what a visitor wears, and one tap opens the shop at that element. Buying needs a verified balance source, which is not connected yet. Once live, measure from signed records only: how many visitors wear a card, how many wearers open the shop, and how many shop visits buy.</p>
+
+<h2 id="risks">Risks, and how the design answers them</h2>
+<div class="tbl"><table>
+<thead><tr><th>Risk</th><th>Answer</th></tr></thead>
+<tbody>
+<tr><td>A scam site copies a famous card's look</td><td>A look proves nothing. Only the seal outside the page and the broker's refusal protect.</td></tr>
+<tr><td>A rare card tracks its wearer</td><td>The site's own look is the default, wearing asks per site, and "my look only" says a rare card is still recognisable.</td></tr>
+<tr><td>A skin attacks the page</td><td>No CSS and no script in a skin, closed rule sets, the sanitizer, locked parts and the contrast gate.</td></tr>
+<tr><td>A skin hurts reading or use</td><td>Both contrast rules, no reordering, hit areas and focus rings kept, reduced motion, no flashing.</td></tr>
+<tr><td>Attestation spam</td><td>Readers choose whose keys count. Every label shows its signer, and its signer can retract it.</td></tr>
+<tr><td>The ring world changes</td><td>The card world never covers it, and the ring world never takes the card's colours.</td></tr>
+<tr><td>A piece covers content after a change</td><td>Ark UI takes it back when a skin goes on, and adds re-checks on open and resize.</td></tr>
+<tr><td>Two sites made to look alike</td><td>The look proves nothing. The seal and the identity zone stay outside every skin.</td></tr>
+</tbody></table></div>
+
+<h2 id="phases">Phases</h2>
+<div class="tbl"><table>
+<thead><tr><th>Phase</th><th>Delivers</th><th>Depends on</th></tr></thead>
+<tbody>
+<tr><td>0. Done</td><td>Sample skins on the site, profile card, avatar, Skin lab, the gallery of every part</td><td>–</td></tr>
+<tr><td>1. Real cards</td><td>Card objects, the skin package, the broker's card reply, the signature check, Vault choices, a kept wear. The two open defects closed first.</td><td><code>KASSET1</code> merged from its branch</td></tr>
+<tr><td>2. Verification</td><td>Site key and origin targets, the broker's gate by name, the Ark browser's name-proof state and identity bar, the personal seal</td><td>The names and Ark browser sessions</td></tr>
+<tr><td>3. The visitor's navbar</td><td>Layouts reviewed and turned on part by part, the nav preference record, the locked identity zone</td><td>The owner's review and Ark UI</td></tr>
+<tr><td>4. Motion and components</td><td>The timeline grammar and player, the studio's track editor, new element kinds, signed contributor elements</td><td>The CMS 3D studio and Ark UI</td></tr>
+<tr><td>5. The verification grid</td><td>Attestation records about names, reader policies per network, multi-node freshness, the confusable refusal, the SDK skin client for Dead Ark and CR3TV</td><td>The Attestations and Standing resolvers, the SDK owner</td></tr>
+</tbody></table></div>
+
+<h2 id="decisions">Decisions for the owner</h2>
+<ol class="decisions">
+  <li><b>What is a real card?</b>
+    <ul class="opt">
+      <li class="pick"><span class="pickchip">Decided</span>A <code>KASSET1</code> object. Its id is the mint record's address, its owner is the identity's key, and its pointer is the card record. Ownership, transfer and burning come with it.</li>
+    </ul></li>
+  <li><b>Does the ring world take the card's colours?</b>
+    <ul class="opt">
+      <li class="pick"><span class="pickchip">Decided</span>Never. The ring world stays as you made it, and the card shows in the chrome, the avatar and the profile.<span class="why">The site session makes the one change in the ring world's code.</span></li>
+    </ul></li>
+  <li><b>Where do layouts start?</b>
+    <ul class="opt">
+      <li class="pick"><span class="pickchip">My pick</span>The mega dropdown and tabs first, for cards that wear a whole set.<span class="why">Those parts have designed layouts already, and a set keeps them coherent.</span></li>
+      <li>Every card at once.</li>
+    </ul></li>
+  <li><b>Offer "my look only"?</b>
+    <ul class="opt">
+      <li class="pick"><span class="pickchip">My pick</span>Yes, with the note that a rare card is still recognisable.</li>
+      <li>No: wearing always says who you are.</li>
+    </ul></li>
+  <li><b>Whose attestations count by default?</b>
+    <ul class="opt">
+      <li class="pick"><span class="pickchip">My pick</span>The network's committees, the people you follow, and you.</li>
+      <li>Only the people you follow.</li>
+    </ul></li>
+  <li><b>The card's brand fonts on the site</b>
+    <ul class="opt">
+      <li class="pick"><span class="pickchip">My pick</span>The site's own fonts, keeping three font slots.</li>
+      <li>The card's own two fonts, hosted by the site.</li>
+    </ul></li>
+</ol>
+
+<h2 id="rules">The rules this plan keeps</h2>
+<ul class="rules">
+  <li>Stored state is FLX. The package, the timelines and the choices are FLX records, never JSON.</li>
+  <li>One name system. Every proof goes through dense-wire's one verifier, with no new store or claim path.</li>
+  <li>Derive, do not author. Packages, rules and prices come from the layer table and the drawings.</li>
+  <li>Nothing idles. Every timeline ends, and the 3D engine draws only on demand.</li>
+  <li>A refusal names the failure, the missing proof and the remedy.</li>
+  <li>The client never shows a conclusion the system did not reach.</li>
+  <li>The ring world, the grid's core 3D, stays as the owner made it.</li>
+</ul>
+
+<footer>Sample data: no real card, balance or attestation exists yet. Every size above was measured on 2026-10-24; nothing is estimated.</footer>
+</main>
+</div>
+
+</html>

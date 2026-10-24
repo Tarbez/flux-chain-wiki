@@ -12,20 +12,20 @@ var ArkResolutionProducts = (function () {
   'use strict';
 
   var products = {
-    names: { name: '.fxn names', status: 'ready', page: 'account/domains', line: 'A signed name like studio.fxn that points at your site, app or identity.' },
-    gateway: { name: 'Site gateway', status: 'ready', page: null, line: 'Opens any .fxn site at label.defxn.com after checking its owner’s signature.' },
-    code: { name: 'Code manager', status: 'ready', page: null, line: 'Edit a deployed site’s code and content; access comes from the signed owner record.' },
+    names: { name: '.fxn names', status: 'building', page: 'account/domains', line: 'A signed name like studio.fxn that points at your site, app or identity. Only the genesis key can claim names until a public access gate exists.' },
+    gateway: { name: 'Site gateway', status: 'building', page: null, line: 'Opens a .fxn site at label.defxn.com after checking its owner’s signature. Names cannot be claimed in public yet, so few sites can use it.' },
+    code: { name: 'Code manager', status: 'ready', page: null, line: 'Edit a deployed site’s code and content. Access comes from the signed owner record.' },
     packages: { name: 'Mesh packages', status: 'ready', page: null, line: 'Publish and install signed packages from the mesh instead of one registry.' },
     deployer: { name: 'Bundle Deployer', status: 'building', page: 'bundledeployer', line: 'Review a site or app locally, then publish it as one signed bundle.' },
     authkit: { name: 'Auth Kit', status: 'ready', page: 'account', line: 'Your keys and recovery phrase, held by you. No password on a server.' },
-    broker: { name: 'Identity broker', status: 'ready', page: null, line: 'Unlock once; every defxn site can ask that one identity to sign.' },
+    broker: { name: 'Identity broker', status: 'ready', page: null, line: 'Sign in once. Every defxn site can ask that one identity to sign.' },
     wallet: { name: 'FXN and credits', status: 'building', page: 'account', line: 'Signed value transfers and usage credits. Balances start at genesis.' },
-    agreements: { name: 'Agreements resolver', status: 'ready', page: 'lifecycle', line: 'Each side signs terms, work and receipt on its own chain; the resolver links them.' },
+    agreements: { name: 'Agreements resolver', status: 'building', page: 'lifecycle', line: 'Each side signs terms, work and receipt on its own chain. The resolver links them. Built in source. It is the earlier path, not the current direction.' },
     resolvers: { name: 'Resolvers', status: 'ready', page: 'resolver', line: 'Publish logic at an address so anyone can run it and get the same claim.' },
-    explorer: { name: 'Mesh Explorer', status: 'ready', page: 'explorer', line: 'Read any public record on the mesh and check who signed it.' },
-    networks: { name: 'Named networks', status: 'ready', page: 'deploy', line: 'Create or join a network by name; it grows as nodes join.' },
+    explorer: { name: 'Mesh Explorer', status: 'ready', page: 'explorer', line: 'Read records from a development-network node and check who signed them.' },
+    networks: { name: 'Named networks', status: 'ready', page: 'deploy', line: 'Create or join a network by name. Today the name groups miners for discovery and isolates nothing else.' },
     dao: { name: 'Network DAO', status: 'building', page: 'dao', line: 'A roster, a threshold and signed decisions for one network.' },
-    monitor: { name: 'Mesh monitor', status: 'ready', page: 'stats', line: 'Live health, latency and throughput of the nodes you rely on.' },
+    monitor: { name: 'Mesh monitor', status: 'building', page: 'explorer', line: 'Health and throughput of nodes, read in Explore on the development network.' },
     treasury: { name: 'Treasury', status: 'building', page: 'treasury', line: 'Shared funds that move only under the group’s agreed rules.' }
   };
 
@@ -40,7 +40,7 @@ var ArkResolutionProducts = (function () {
       ready: ['names', 'gateway', 'code', 'packages', 'deployer'],
       ideas: [
         idea('Shopfront.fxn', 'Small shops selling a handful of products', 'Store builders charge monthly and take a cut of every sale.', 'A one-page store under a .fxn name. Checkout is an FXN transfer agreement, so buyer and seller each keep a signed receipt.', ['names', 'gateway', 'agreements', 'wallet']),
-        idea('Forever portfolio', 'Designers, photographers and students', 'The portfolio disappears the month the plan is not renewed.', 'Drop a folder in, get a signed site at your name. Each update is a new version; older versions still resolve for anyone who linked them.', ['deployer', 'names', 'gateway']),
+        idea('Forever portfolio', 'Designers, photographers and students', 'The portfolio disappears the month the plan is not renewed.', 'Drop a folder in, get a signed site at your name. Each update is a new version. Older versions still resolve for anyone who linked them.', ['deployer', 'names', 'gateway']),
         idea('Client preview links', 'Freelancers and small agencies', 'Staging servers and shared passwords for every client review.', 'Every change in the code manager publishes a signed preview at its own name. The client approves by signing, and the approval is on record.', ['code', 'gateway', 'broker'])
       ]
     },
@@ -49,7 +49,7 @@ var ArkResolutionProducts = (function () {
       problem: 'A platform changes its rules, links break and the archive or audience is gone.',
       ready: ['code', 'gateway', 'names', 'explorer'],
       ideas: [
-        idea('Signed newsletter', 'Independent writers', 'The email provider owns the list and can suspend it overnight.', 'Posts publish to the mesh under your name; readers follow your identity, not a provider. Paid issues unlock with an FXN transfer.', ['names', 'gateway', 'authkit', 'wallet']),
+        idea('Signed newsletter', 'Independent writers', 'The email provider owns the list and can suspend it overnight.', 'Posts publish to the mesh under your name. Readers follow your identity, not a provider. Paid issues unlock with an FXN transfer.', ['names', 'gateway', 'authkit', 'wallet']),
         idea('Provenance badge', 'Journalists and researchers', 'Readers cannot tell who wrote a piece or what changed after publication.', 'Each article carries a signed publication record. One click shows the author’s key and every revision since.', ['explorer', 'authkit', 'code']),
         idea('Unpullable podcast feed', 'Podcasters', 'A host deletion or policy strike takes the whole back catalogue offline.', 'The feed resolves from a .fxn name and episodes are addressed files, so any participating node can serve them.', ['names', 'gateway', 'deployer'])
       ]
@@ -169,7 +169,7 @@ var ArkResolutionProducts = (function () {
       problem: 'Links break, sources go missing and nobody can see what changed.',
       ready: ['names', 'gateway', 'code', 'explorer'],
       ideas: [
-        idea('Docs with history', 'Product and support teams', 'Customers follow an old answer that changed without notice.', 'Docs live at a name; each revision is signed and anyone can compare versions.', ['code', 'gateway', 'names']),
+        idea('Docs with history', 'Product and support teams', 'Customers follow an old answer that changed without notice.', 'Docs live at a name. Each revision is signed and anyone can compare versions.', ['code', 'gateway', 'names']),
         idea('Source trail', 'Fact-checkers', 'A claim gets repeated until nobody knows where it started.', 'Each claim links to signed statements about its source, back to the original.', ['explorer', 'authkit']),
         idea('Permanent citations', 'Students, lawyers and librarians', 'Cited web pages vanish within a few years.', 'Cite a mesh address instead. It keeps resolving to the exact page that was cited.', ['names', 'gateway'])
       ]
@@ -199,7 +199,7 @@ var ArkResolutionProducts = (function () {
       problem: 'The provider holds the keys, so privacy depends on its policy.',
       ready: ['authkit', 'broker'],
       ideas: [
-        idea('Recovery circle', 'Individuals', 'Losing the only copy of a key means losing everything.', 'Recovery is split between people you trust; any three of five can restore your key together.', ['authkit', 'dao']),
+        idea('Recovery circle', 'Individuals', 'Losing the only copy of a key means losing everything.', 'Recovery is split between people you trust. Any three of five can restore your key together.', ['authkit', 'dao']),
         idea('Time-boxed sharing', 'Doctors, lawyers and accountants', 'Shared files stay readable long after the job is done.', 'Encrypt to a recipient for a set window. Access ends with the agreement, and the access is on record.', ['authkit', 'agreements']),
         idea('Access report', 'Small clinics and practices', 'Audits ask who could read what, and nobody can prove it.', 'A checked report of which keys could open which records, and when.', ['authkit', 'explorer', 'resolvers'])
       ]
@@ -221,7 +221,7 @@ var ArkResolutionProducts = (function () {
       ideas: [
         idea('One sign-in', 'Small teams', 'Every tool needs its own account and password reset.', 'One identity signs into every mesh tool through the broker. No per-app accounts.', ['broker', 'authkit']),
         idea('Shared task board', 'Freelancers and their clients', 'Status lives in whichever tool the client happens to prefer.', 'Each task is a signed record both sides see, and done means both signed it.', ['agreements', 'explorer']),
-        idea('Forms to your records', 'Small businesses', 'Form builders hold your customers’ answers on their servers.', 'A form published at your name; every answer is encrypted to your key.', ['gateway', 'names', 'authkit'])
+        idea('Forms to your records', 'Small businesses', 'Form builders hold your customers’ answers on their servers.', 'A form published at your name. Every answer is encrypted to your key.', ['gateway', 'names', 'authkit'])
       ]
     },
     LOGISTICS: {
