@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Asterism Corner: a constellation round the bend: seven stars joined by thin lines, the large star in the bend in the accent (sheet 26, the Asterism set: a star chart: four-point stars joined by lines that stop short of them, the brightest star in the accent)</title>
+  <path d="M95.85 5.61L74.73 11.24M65.29 11.16L45 5.42M34.88 4.92L17.13 8.12M8.12 17.13L4.92 34.88M5.42 45L11.16 65.29M11.24 74.73L5.61 95.85" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.6"/>
+  <path d="M100 2.1L100.54 3.96L102.4 4.5L100.54 5.04L100 6.9L99.46 5.04L97.6 4.5L99.46 3.96Z" fill="var(--dim)"/>
+  <path d="M70 9.3L70.72 11.78L73.2 12.5L70.72 13.22L70 15.7L69.28 13.22L66.8 12.5L69.28 11.78Z" fill="var(--ink)"/>
+  <path d="M40 0.4L40.81 3.19L43.6 4L40.81 4.81L40 7.6L39.19 4.81L36.4 4L39.19 3.19Z" fill="var(--ink)"/>
+  <path d="M9.5 2.5L11.08 7.92L16.5 9.5L11.08 11.08L9.5 16.5L7.92 11.08L2.5 9.5L7.92 7.92Z" fill="var(--acc)"/>
+  <path d="M4 36.4L4.81 39.19L7.6 40L4.81 40.81L4 43.6L3.19 40.81L0.4 40L3.19 39.19Z" fill="var(--ink)"/>
+  <path d="M12.5 66.8L13.22 69.28L15.7 70L13.22 70.72L12.5 73.2L11.78 70.72L9.3 70L11.78 69.28Z" fill="var(--ink)"/>
+  <path d="M4.5 97.6L5.04 99.46L6.9 100L5.04 100.54L4.5 102.4L3.96 100.54L2.1 100L3.96 99.46Z" fill="var(--dim)"/>
+</svg>

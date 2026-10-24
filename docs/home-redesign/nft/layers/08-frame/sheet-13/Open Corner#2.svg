@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Open Corner: an open frame with no top-left corner, its two loose ends capped by small ticks, the right side drawn as one tall bright bracket, and a short accent bar at the middle of the left edge (sheet 13, 11)</title>
+  <path d="M100 16H922M16 100V668A16 16 0 0 0 32 684H922" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M100 11V21M11 100H21" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M930 16H968A16 16 0 0 1 984 32V668A16 16 0 0 1 968 684H930M930 12V20M930 680V688" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="12.5" y="318" width="7" height="64" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="14.5" y="320" width="3" height="60" fill="var(--acc)"/>
+</svg>

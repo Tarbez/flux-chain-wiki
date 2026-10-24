@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s5-plus-grid">
+  <title>Plusgrid: a far dot grid with pixel plus signs on it, a mint plus at its centre</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g data-sketch="" fill="#fff"><path d="M576 253 h-8 v-2 h8z M572 249 v8 h-2 v-8z M680 357 h-12 v-3 h12z M676 351 v12 h-3 v-12z" fill="#7dffc4"/><circle cx="602" cy="253" r="1.5"/><circle cx="628" cy="253" r="1.5"/><circle cx="654" cy="253" r="1.5"/><circle cx="602" cy="279" r="1.5"/><circle cx="628" cy="279" r="1.5"/><circle cx="654" cy="279" r="1.5"/></g>
+</svg>

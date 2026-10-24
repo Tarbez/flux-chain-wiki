@@ -1,0 +1,6 @@
+/* Plasma: magenta light, a cyan glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 312 30% 92%;
+  --b: 312 80% 72%;
+  --c: 186 90% 56%;
+}

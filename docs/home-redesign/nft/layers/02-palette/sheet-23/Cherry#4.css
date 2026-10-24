@@ -1,0 +1,6 @@
+/* Cherry: cherry light, a leaf green accent. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 348 20% 90%;
+  --b: 348 70% 70%;
+  --c: 150 46% 52%;
+}

@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DEFXN Concept Brief</title>
+<meta name="description" content="DEFXN for the designer: what it is, how it works, its products, and the rules every screen follows.">
+<!-- Written 2026-10-23 for the designer, from the sources listed in section 15. Every number and state here
+     comes from a named source. When a source changes, change this page from it; never the other way round. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --canvas:150 24% 5%; --surface:150 20% 7%; --raised:150 16% 10%; --border:150 12% 15%;
+  --text-strong:140 20% 96%; --text:208 24% 80%; --text-muted:200 12% 64%; --text-faint:160 10% 40%;
+  --primary:83 87% 66%; --primary-ink:150 40% 5%;
+  --signal:166 62% 52%; --identity:205 12% 76%; --network:168 44% 39%; --token:200 6% 44%;
+  --record:38 22% 88%; --warn:38 80% 62%; --off:200 6% 52%;
+  --font-display:"Inter Tight","Inter",system-ui,sans-serif;
+  --font-sans:"Inter",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --canvas:60 12% 97%; --surface:60 10% 94%; --raised:0 0% 100%; --border:150 8% 84%;
+    --text-strong:150 30% 8%; --text:200 14% 22%; --text-muted:200 8% 38%; --text-faint:200 6% 52%;
+    --primary:83 70% 34%; --primary-ink:0 0% 100%; --signal:166 62% 32%;
+    --identity:205 14% 46%; --network:168 44% 32%; --token:200 6% 56%; --record:38 22% 72%; --warn:32 80% 40%; --off:200 6% 56%;
+  }
+}
+:root[data-theme="dark"]{ color-scheme:dark }
+:root[data-theme="light"]{
+  --canvas:60 12% 97%; --surface:60 10% 94%; --raised:0 0% 100%; --border:150 8% 84%;
+  --text-strong:150 30% 8%; --text:200 14% 22%; --text-muted:200 8% 38%; --text-faint:200 6% 52%;
+  --primary:83 70% 34%; --primary-ink:0 0% 100%; --signal:166 62% 32%;
+  --identity:205 14% 46%; --network:168 44% 32%; --token:200 6% 56%; --record:38 22% 72%; --warn:32 80% 40%; --off:200 6% 56%;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:24px}
+body{margin:0;background:hsl(var(--canvas));color:hsl(var(--text));font:16px/1.6 var(--font-sans);-webkit-font-smoothing:antialiased}
+a{color:hsl(var(--text-strong));text-decoration-color:hsl(var(--primary));text-underline-offset:3px}
+a:hover,a:focus-visible{color:hsl(var(--primary))}
+:focus-visible{outline:2px solid hsl(var(--primary));outline-offset:2px}
+code,.mono{font-family:var(--font-mono);font-size:.86em}
+.mono{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:hsl(var(--text-muted))}
+code{background:hsl(var(--surface));border:1px solid hsl(var(--border));border-radius:4px;padding:1px 5px;overflow-wrap:anywhere}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1fr;gap:0}
+@media (min-width:1000px){.wrap{grid-template-columns:220px minmax(0,1fr);gap:56px;padding:0 32px}}
+nav.toc{display:none}
+@media (min-width:1000px){
+  nav.toc{display:block;position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding:40px 0}
+  nav.toc ol{list-style:none;margin:12px 0 0;padding:0;counter-reset:t}
+  nav.toc li{counter-increment:t}
+  nav.toc a{display:flex;gap:10px;padding:5px 0;color:hsl(var(--text-muted));text-decoration:none;font-size:14px}
+  nav.toc a::before{content:counter(t,decimal-leading-zero);font:11px var(--font-mono);color:hsl(var(--text-faint));padding-top:3px}
+  nav.toc a:hover{color:hsl(var(--text-strong))}
+}
+main{min-width:0;padding:40px 0 96px}
+header.top{padding:24px 0 40px;border-bottom:1px solid hsl(var(--border))}
+.eyebrow{display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:hsl(var(--primary))}
+h1,h2,h3{font-family:var(--font-display);color:hsl(var(--text-strong));letter-spacing:-.02em;line-height:1.15}
+h1{font-size:clamp(34px,5vw,56px);margin:16px 0 16px;font-weight:700}
+h1 .dim,h2 .dim{color:hsl(var(--text-faint))}
+h2{font-size:clamp(24px,3vw,32px);margin:0 0 8px;font-weight:700}
+h3{font-size:18px;margin:32px 0 8px;font-weight:600}
+.lede{font-size:19px;max-width:62ch;color:hsl(var(--text))}
+p{max-width:70ch;margin:0 0 14px}
+section{padding:56px 0 8px;border-bottom:1px solid hsl(var(--border))}
+section:last-of-type{border-bottom:0}
+.num{font:12px var(--font-mono);color:hsl(var(--primary));letter-spacing:.14em}
+.meta{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:20px}
+.meta div{display:flex;flex-direction:column;gap:2px}
+.meta b{color:hsl(var(--text-strong));font-weight:500;font-size:15px}
+
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;margin:20px 0;border-top:1px solid hsl(var(--border))}
+.facts>div{padding:14px 16px 14px 0;border-bottom:1px solid hsl(var(--border))}
+.facts dt{font:11px var(--font-mono);text-transform:uppercase;letter-spacing:.14em;color:hsl(var(--text-muted))}
+.facts dd{margin:4px 0 0;color:hsl(var(--text-strong));font-size:15px}
+.facts dd small{display:block;color:hsl(var(--text-muted));font-size:13px}
+
+.callout{border-left:2px solid hsl(var(--primary));padding:4px 0 4px 16px;margin:20px 0;max-width:70ch}
+.callout.warn{border-color:hsl(var(--warn))}
+.callout b{color:hsl(var(--text-strong))}
+
+ol.steps{list-style:none;padding:0;margin:20px 0;counter-reset:s;max-width:72ch}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:12px;padding:12px 0;border-top:1px solid hsl(var(--border))}
+ol.steps>li::before{content:counter(s);width:28px;height:28px;border:1px solid hsl(var(--border));border-radius:50%;display:grid;place-items:center;font:12px var(--font-mono);color:hsl(var(--text-strong))}
+ol.steps b{color:hsl(var(--text-strong))}
+ul.plain{padding-left:18px;max-width:70ch}
+ul.plain li{margin:4px 0}
+
+.tbl{overflow-x:auto;margin:16px 0 24px;border:1px solid hsl(var(--border));border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid hsl(var(--border))}
+th{font:11px var(--font-mono);text-transform:uppercase;letter-spacing:.12em;color:hsl(var(--text-muted));background:hsl(var(--surface));white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td:first-child{color:hsl(var(--text-strong));font-weight:500;white-space:nowrap}
+td.n{font-family:var(--font-mono);text-align:right;white-space:nowrap}
+
+.tag{display:inline-block;font:10.5px var(--font-mono);text-transform:uppercase;letter-spacing:.1em;padding:2px 7px;border-radius:999px;border:1px solid hsl(var(--border));color:hsl(var(--text-muted));white-space:nowrap}
+.tag.built{border-color:hsl(var(--signal)/.6);color:hsl(var(--signal))}
+.tag.part{border-color:hsl(var(--warn)/.6);color:hsl(var(--warn))}
+.tag.dec{border-color:hsl(var(--identity)/.6);color:hsl(var(--identity))}
+.tag.no{color:hsl(var(--off))}
+
+.lanes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:20px 0}
+.lane{border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));padding:18px}
+.lane h3{margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.lane>p{font-size:14px;color:hsl(var(--text-muted));margin-bottom:10px}
+.lane ul{list-style:none;margin:0;padding:0}
+.lane li{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px 0;border-top:1px solid hsl(var(--border));font-size:14px}
+.lane li b{color:hsl(var(--text-strong));font-weight:600}
+.lane li span{grid-column:1/-1;color:hsl(var(--text-muted))}
+.lane li em{font-style:normal;font:12px var(--font-mono);color:hsl(var(--text-faint))}
+
+figure{margin:24px 0;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));padding:20px;overflow-x:auto}
+figure svg{display:block;min-width:640px;width:100%;height:auto}
+figcaption{margin-top:12px;font-size:13px;color:hsl(var(--text-muted))}
+svg text{font-family:var(--font-sans);fill:hsl(var(--text))}
+svg .t-strong{fill:hsl(var(--text-strong));font-weight:600}
+svg .t-mono{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;fill:hsl(var(--text-muted))}
+svg .box{fill:hsl(var(--raised));stroke:hsl(var(--border))}
+svg .ln{stroke:hsl(var(--text-faint));fill:none}
+svg .hot{stroke:hsl(var(--primary));fill:none}
+svg .dot{fill:hsl(var(--primary))}
+
+.two{display:grid;grid-template-columns:1fr;gap:24px}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.swatches{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 20px}
+.sw{display:flex;align-items:center;gap:10px;font-size:13px;min-width:200px}
+.sw i{width:28px;height:28px;border-radius:6px;border:1px solid hsl(var(--border));flex:none}
+.sw code{background:none;border:0;padding:0}
+
+.theme{position:fixed;right:16px;bottom:16px;font:12px var(--font-mono);background:hsl(var(--raised));color:hsl(var(--text-strong));border:1px solid hsl(var(--border));border-radius:999px;padding:8px 14px;cursor:pointer;min-height:36px}
+@media print{nav.toc,.theme{display:none}.wrap{display:block}section{break-inside:avoid-page}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <span class="mono">DEFXN brief</span>
+  <ol>
+    <li><a href="#minute">In one minute</a></li>
+    <li><a href="#words">The words</a></li>
+    <li><a href="#how">How a result is made</a></li>
+    <li><a href="#world">The world of chains</a></li>
+    <li><a href="#layers">Three layers</a></li>
+    <li><a href="#life">Life of a resolver</a></li>
+    <li><a href="#products">The products</a></li>
+    <li><a href="#identity">Identity and names</a></li>
+    <li><a href="#nodes">Nodes</a></li>
+    <li><a href="#money">FXN and money</a></li>
+    <li><a href="#measured">What is measured</a></li>
+    <li><a href="#state">What exists today</a></li>
+    <li><a href="#design">Design rules</a></li>
+    <li><a href="#home">The home redesign</a></li>
+    <li><a href="#sources">Sources</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="top">
+  <p class="mono eyebrow">For the designer · concept brief</p>
+  <h1>DEFXN. <span class="dim">How it works, and what it makes.</span></h1>
+  <p class="lede">This page explains DEFXN to a designer. It covers the idea, the parts, the products and the rules every screen follows. Read sections 1 to 3 first. They hold the whole idea.</p>
+  <div class="meta">
+    <div><span class="mono">Written</span><b>23 October 2026</b></div>
+    <div><span class="mono">Network state</span><b>Devnet only. Nothing is public yet.</b></div>
+    <div><span class="mono">Rule for this page</span><b>Every number names its source</b></div>
+  </div>
+</header>
+
+<!-- 1 -->
+<section id="minute">
+  <p class="num">01</p>
+  <h2>In one minute</h2>
+  <p>DEFXN is a network where every result is signed. A signed result can be checked by anyone, at any time, with no trust in a company.</p>
+  <ol class="steps">
+    <li><div><b>Every identity has its own chain.</b> A person, a team or an app keeps its own history of signed records.</div></li>
+    <li><div><b>Every token keeps its own ledger.</b> Each token has its own history of who held how much.</div></li>
+    <li><div><b>Resolvers do the work and sign the result.</b> A resolver is a rulebook. It reads signed records, applies its rules, and signs what follows from them. That signature is the result.</div></li>
+    <li><div><b>Other computers keep a copy.</b> They store the signed result as it is. They do not redo the work.</div></li>
+    <li><div><b>Anyone can check.</b> A person who wants proof follows the signatures back to the start.</div></li>
+  </ol>
+  <p><b>FXN</b> is the first chain, and its coin is FXN. Builders launch their own resolvers. Computers that run resolvers or store data earn from that work. DAOs govern each network with public rules.</p>
+  <div class="callout"><b>The one sentence for the home page today:</b> "Every identity has its own chain. Every token keeps its own ledger. Resolvers do the work and sign the result. Other computers keep a copy."</div>
+</section>
+
+<!-- 2 -->
+<section id="words">
+  <p class="num">02</p>
+  <h2>The words</h2>
+  <p>Use these words with these meanings only. One word has one meaning. The glossary in the repo holds the full list.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Word</th><th>What it means</th><th>Draw it as</th></tr></thead>
+    <tbody>
+      <tr><td>Identity</td><td>One key that signs. A person, a team or an app. Each identity has its own chain.</td><td>A ring of record tiles</td></tr>
+      <tr><td>Chain</td><td>One signed history that only grows. A new record links to the one before it. Nothing is rewritten.</td><td>A line or ring of tiles</td></tr>
+      <tr><td>Record</td><td>One signed entry on a chain. It is small, packed text in a fixed grammar, with the signature last.</td><td>One tile</td></tr>
+      <tr><td>Grammar</td><td>The rules a record must follow to be accepted: which fields it has and what each may hold.</td><td>A shape the tile must fit</td></tr>
+      <tr><td>Resolver</td><td>A rulebook with its own chain. It reads records, applies its rules and signs the result. Builders launch their own.</td><td>A hub that records flow into</td></tr>
+      <tr><td>Resolution</td><td>One use of a resolver: records in, a signed result out.</td><td>An arrow ending in a signed tile</td></tr>
+      <tr><td>Capability</td><td>A shared, tested building block (signer, custody, escrow, ledger...). Resolvers are built from capabilities.</td><td>A small block with a test count</td></tr>
+      <tr><td>Checked cases</td><td>The named tests a capability must pass. Any computer that runs it must pass them first.</td><td>A count, or a list of names</td></tr>
+      <tr><td>Provider</td><td>A computer that runs a resolver for others. It must prove it passes the checked cases.</td><td>A node with a proof badge</td></tr>
+      <tr><td>Replica</td><td>A computer that stores a signed result as it is. It does not judge or redo it.</td><td>A copy, not a judge</td></tr>
+      <tr><td>Launched</td><td>On the network's launch list, with its own chain.</td><td>Dashed outline</td></tr>
+      <tr><td>Served</td><td>Launched, and at least one provider runs it now.</td><td>Solid outline</td></tr>
+      <!-- owner, 2026-10-24: "DEFXN is not the chain. It is simply the base chain kernel, and it knows no currency. FXN is the first chain." -->
+      <tr><td>DEFXN</td><td>The base chain kernel. Every network chain runs on it. It knows no currency.</td><td>The logo in the ground</td></tr>
+      <tr><td>FXN</td><td>The first chain on the DEFXN kernel, and that chain's coin. Credits are a separate unit (section 10).</td><td>Its own network ring</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout warn"><!-- ALLOW-DEPRECATED-TERM: this line lists the retired words so the designer can avoid them --><b>Never use these words, in any screen or doc:</b> committee, consensus, validator, quorum, finality (and finalize, finalized), block time, TPS as a headline, accepted/s, proof-of-work, proof-of-stake, gas fee, block reward. A test in the repo fails on them. They describe how other networks work. Here, one resolver signs, and its signature is the result.</div>
+</section>
+
+<!-- 3 -->
+<section id="how">
+  <p class="num">03</p>
+  <h2>How a result is made</h2>
+  <p>This is the core of DEFXN. It has five steps. There is no sixth step. The example is a swap: two people trade one token for another.</p>
+  <figure>
+    <svg viewBox="0 0 900 230" role="img" aria-labelledby="f1t">
+      <title id="f1t">Two signed intents go into a resolver, which signs one result. Copies go to several computers. An auditor follows the signatures.</title>
+      <rect class="box" x="20" y="40" width="150" height="56" rx="6"/><text class="t-strong" x="36" y="64">Alice signs</text><text x="36" y="84" font-size="12">"I give 10 A for B"</text>
+      <rect class="box" x="20" y="128" width="150" height="56" rx="6"/><text class="t-strong" x="36" y="152">Bob signs</text><text x="36" y="172" font-size="12">"I give B for 10 A"</text>
+      <path class="ln" d="M170 68 C210 68 220 112 262 112M170 156 C210 156 220 112 262 112"/>
+      <rect x="262" y="70" width="190" height="84" rx="8" fill="hsl(var(--raised))" stroke="hsl(var(--primary))"/>
+      <text class="t-strong" x="280" y="98">Resolver</text><text x="280" y="118" font-size="12">checks signatures and rules,</text><text x="280" y="136" font-size="12">clears the batch at one price</text>
+      <path class="hot" d="M452 112 H520"/><circle class="dot" cx="520" cy="112" r="4"/>
+      <rect x="528" y="84" width="140" height="56" rx="6" fill="hsl(var(--record))"/><text x="544" y="108" font-weight="600" style="fill:hsl(var(--primary-ink))">Signed result</text><text x="544" y="126" font-size="12" style="fill:hsl(var(--primary-ink))">this is the truth</text>
+      <path class="ln" d="M668 112 H700 M700 50 V174 M700 50 H730 M700 112 H730 M700 174 H730"/>
+      <rect class="box" x="730" y="34" width="140" height="32" rx="6"/><text x="744" y="55" font-size="12">copy, stored</text>
+      <rect class="box" x="730" y="96" width="140" height="32" rx="6"/><text x="744" y="117" font-size="12">copy, stored</text>
+      <rect class="box" x="730" y="158" width="140" height="32" rx="6"/><text x="744" y="179" font-size="12">copy, stored</text>
+      <text class="t-mono" x="20" y="22">1 · TWO SIGN</text><text class="t-mono" x="262" y="22">2 · RESOLVE</text><text class="t-mono" x="528" y="22">3 · SIGN THE RESULT</text><text class="t-mono" x="730" y="22">4 · STORE</text>
+      <text class="t-mono" x="262" y="214">5 · ANYONE CHECKS BY FOLLOWING THE SIGNATURES BACK</text>
+    </svg>
+    <figcaption>Illustration of the relationships. It shows no live state.</figcaption>
+  </figure>
+  <ol class="steps">
+    <li><div><b>Two parties sign their intent.</b> Each intent is a record. Its last field is the signature.</div></li>
+    <li><div><b>A resolver resolves.</b> It checks every signature in one batch, refuses replays, and clears all swaps in the batch at one price. Your place in the batch does not change your price.</div></li>
+    <li><div><b>The resolver signs the result.</b> That signature is the result. Nothing has to happen later to make it true.</div></li>
+    <li><div><b>Other computers store the signed result.</b> They do not check it again and do not redo it. Storing is their whole job.</div></li>
+    <li><div><b>Anyone can check it.</b> They follow the signatures back. For a swap this takes three signature checks.</div></li>
+  </ol>
+  <p><b>Trust is a choice you make before you send.</b> A signature shows who signed. It does not show that the rulebook is good. So each resolver shows three public facts: its grammar, the capabilities it is built from, and who can change it. Screens must show these three facts wherever a person decides to use a resolver.</p>
+</section>
+
+<!-- 4 -->
+<section id="world">
+  <p class="num">04</p>
+  <h2>The world of chains</h2>
+  <p>This is what the 3D scene on the home page draws. It has three kinds of chain.</p>
+  <div class="facts">
+    <div><dt>Identity chains</dt><dd>One per identity<small>Your own records: posts, files, grants, votes. Color token <code>--chain-identity</code>.</small></dd></div>
+    <div><dt>Native network chains</dt><dd>One per network coin<small>FXN lives on the FXN chain, the first chain. DARO lives on the DeArk chain. CR3 lives on the CR3TV chain. Color <code>--chain-network</code>.</small></dd></div>
+    <div><dt>Token ledgers</dt><dd>One per token<small>A token made on the launchpad lives inside one native chain and keeps its own history. Color <code>--chain-token</code>.</small></dd></div>
+  </div>
+  <figure>
+    <svg viewBox="0 0 900 260" role="img" aria-labelledby="f2t">
+      <title id="f2t">The FXN hub in the middle. Identity rings, network rings and token ledgers around it, linked by references.</title>
+      <circle cx="450" cy="130" r="38" fill="none" stroke="hsl(var(--signal))" stroke-width="2"/><text class="t-strong" x="450" y="135" text-anchor="middle">FXN</text>
+      <g fill="none" stroke-width="2">
+        <circle cx="200" cy="80" r="40" stroke="hsl(var(--identity))"/><circle cx="170" cy="190" r="30" stroke="hsl(var(--identity))"/>
+        <circle cx="700" cy="70" r="36" stroke="hsl(var(--network))"/><circle cx="740" cy="180" r="30" stroke="hsl(var(--network))"/>
+        <circle cx="360" cy="225" r="20" stroke="hsl(var(--token))"/><circle cx="560" cy="228" r="18" stroke="hsl(var(--token))"/>
+      </g>
+      <path class="ln" stroke-dasharray="3 4" d="M240 86 L412 124M200 190 L414 140M664 78 L488 122M710 176 L487 140M378 218 L425 160M545 220 L478 158"/>
+      <text class="t-mono" x="140" y="30">IDENTITY · YOUR CHAIN</text><text class="t-mono" x="650" y="22">NETWORK · DEFXN · DEARK · CR3TV</text>
+      <text class="t-mono" x="330" y="258">TOKEN LEDGERS</text>
+    </svg>
+    <figcaption>Illustration of the model. The home 3D uses the same three kinds, plus resolvers on stems around the hub.</figcaption>
+  </figure>
+  <div class="callout warn"><b>One known gap.</b> Today the launchpad code still gives each new token a chain of its own. The model above is the owner's decision (15 October 2026). Draw the model. Do not say tokens are chains.</div>
+</section>
+
+<!-- 5 -->
+<section id="layers">
+  <p class="num">05</p>
+  <h2>Three layers</h2>
+  <p>DEFXN is built in three layers. Each layer has one rule.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Layer</th><th>What it holds</th><th>Its one rule</th></tr></thead>
+    <tbody>
+      <tr><td>Base chain kernel (DEFXN)</td><td>Grammar checks, one chain per signer, copies to several computers, the list of providers, and the launch list of every chain, resolver and capability.</td><td>It never learns what a business record means. It knows no currency.</td></tr>
+      <tr><td>Capabilities</td><td>Shared, tested building blocks with no network or disk access of their own.</td><td>Each one is launched once, with its checked cases and a hash of its source code.</td></tr>
+      <tr><td>Resolvers</td><td>Rulebooks, each on its own chain, built from capabilities plus their own grammar.</td><td>A resolver names its building blocks. It never contains its own copy.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>The 13 capabilities launched today</h3>
+  <p>This list is read from each capability's own manifest. "Checked cases" is the number of named tests it must pass. Speed per capability is not measured yet.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Capability</th><th>What it does, in plain words</th><th>Checked cases</th></tr></thead>
+    <tbody>
+      <tr><td>Attest</td><td>A signed claim about something, which only its author can take back.</td><td class="n">7</td></tr>
+      <tr><td>Custody</td><td>Who holds how much, worked out from signed receipts.</td><td class="n">27</td></tr>
+      <tr><td>Delegation</td><td>A list of keys and roles, and limited grants from one key to another.</td><td class="n">7</td></tr>
+      <tr><td>Edge</td><td>A typed link from one thing to another, with an optional short reason.</td><td class="n">4</td></tr>
+      <tr><td>Escrow</td><td>Locks one amount for a set time, then returns or releases it.</td><td class="n">6</td></tr>
+      <tr><td>Ledger</td><td>Balances for each network's own native token, worked out from its events.</td><td class="n">7</td></tr>
+      <tr><td>Lineage</td><td>Replace or take back a record. The old one stays on file.</td><td class="n">9</td></tr>
+      <tr><td>Mark</td><td>One statement per signer, such as an endorsement or a vote.</td><td class="n">5</td></tr>
+      <tr><td>Multisig</td><td>Several signers out of a set must sign before an action counts.</td><td class="n">4</td></tr>
+      <tr><td>Receipt</td><td>A chain of steps, each one countersigned by the named owner.</td><td class="n">4</td></tr>
+      <tr><td>Recompute</td><td>Works a claim out again from its evidence: it holds, it is refuted, or it cannot be checked.</td><td class="n">2</td></tr>
+      <tr><td>Seal</td><td>Access to sealed content, with key rotation when access is taken away.</td><td class="n">5</td></tr>
+      <tr><td>Signer</td><td>The history of which key signs for an identity, and the handover to a new key.</td><td class="n">6</td></tr>
+    </tbody>
+  </table></div>
+  <p>Total: 13 capabilities and 93 checked cases. Source: <code>flux/defxn-defi-rs/dense-wire/capabilities/&lt;name&gt;/capability-manifest.flx</code>.</p>
+
+  <h3>The first-party resolvers</h3>
+  <p>The network team builds these 15 resolvers. Builders add their own the same way.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Resolver</th><th>What a person can do with it</th></tr></thead>
+    <tbody>
+      <tr><td>Custody</td><td>Hold FXN, send it, lock it for a time, and check that a payment is real.</td></tr>
+      <tr><td>Balance</td><td>Get a signed statement of one holder's balance.</td></tr>
+      <tr><td>Domain</td><td>Claim, move, buy and look up a <code>.fxn</code> name.</td></tr>
+      <tr><td>Records</td><td>Set where a name points, and read its history.</td></tr>
+      <tr><td>DAO</td><td>Found a group of signers with a rule for how many must sign. Link a treasury to it.</td></tr>
+      <tr><td>Treasury</td><td>Spend shared funds only after the DAO's signers approve.</td></tr>
+      <tr><td>Stake</td><td>Lock FXN as a bond that backs one chain, and release it later.</td></tr>
+      <tr><td>Slash</td><td>Prove that a provider signed two different histories, and take its bond.</td></tr>
+      <tr><td>Payout</td><td>Pay a computer once for proven work.</td></tr>
+      <tr><td>Service pool</td><td>A creator sells work in rounds at a fixed FXN price, paid out by milestone.</td></tr>
+      <tr><td>Attest</td><td>File a claim about an item, with its method. Read who said what.</td></tr>
+      <tr><td>Audit</td><td>File an audit of a resolver or capability. Post and claim bounties for findings.</td></tr>
+      <tr><td>ACL</td><td>Store who may access what.</td></tr>
+      <tr><td>Compute</td><td>Check that a computer did the work it was paid for.</td></tr>
+      <tr><td>Storage</td><td>Check that a computer still holds the data it was paid to keep.</td></tr>
+    </tbody>
+  </table></div>
+  <p>No resolver has a price yet. Each offer says "none today". Source: <code>flux/defxn-defi-rs/dense-wire/resolvers/*/offer-manifest.txt</code>.</p>
+</section>
+
+<!-- 6 -->
+<section id="life">
+  <p class="num">06</p>
+  <h2>Life of a resolver</h2>
+  <p>This is the builder's path. Products in section 7 cover each step.</p>
+  <figure>
+    <svg viewBox="0 0 900 140" role="img" aria-labelledby="f3t">
+      <title id="f3t">Build in Resolver Studio, launch in Deploy, a provider proves and serves it, anyone inspects it in Explore.</title>
+      <g>
+        <rect class="box" x="10" y="40" width="190" height="60" rx="6"/><text class="t-strong" x="26" y="66">1 · Build</text><text x="26" y="86" font-size="12">Resolver Studio</text>
+        <rect class="box" x="235" y="40" width="190" height="60" rx="6"/><text class="t-strong" x="251" y="66">2 · Launch</text><text x="251" y="86" font-size="12">Deploy · one signed record</text>
+        <rect class="box" x="460" y="40" width="190" height="60" rx="6" stroke-dasharray="4 3"/><text class="t-strong" x="476" y="66">3 · Prove and serve</text><text x="476" y="86" font-size="12">a provider passes the cases</text>
+        <rect class="box" x="685" y="40" width="200" height="60" rx="6"/><text class="t-strong" x="701" y="66">4 · Inspect</text><text x="701" y="86" font-size="12">Explore · checked in the page</text>
+      </g>
+      <path class="hot" d="M200 70H235M425 70H460M650 70H685"/>
+      <text class="t-mono" x="235" y="124">REFUSED IF THE GRAMMAR DOES NOT COMPILE</text>
+      <text class="t-mono" x="460" y="24">NO PROVIDER = LAUNCHED, NOT SERVED</text>
+    </svg>
+  </figure>
+  <ol class="steps">
+    <li><div><b>Build.</b> The builder picks capabilities and writes the grammar for the records the resolver accepts. Resolver Studio is a canvas of nodes for this. A resolver can also wait on another resolver's result, for example "when the payment is confirmed, give access".</div></li>
+    <li><div><b>Launch.</b> One signed launch record gives the resolver its own chain. The builder sees the exact record before signing. The network refuses a launch that uses a capability that is not launched.</div></li>
+    <li><div><b>Choose who can change it.</b> With no control key the resolver can never change. With a control key, only that key can sign an upgrade. An upgrade adds a new version. The old one stays on the line.</div></li>
+    <li><div><b>Serve.</b> A provider runs it after it passes the checked cases of every capability inside. Until then the resolver is launched but not served.</div></li>
+    <li><div><b>Inspect.</b> Explore shows every resolver: its grammar, its parts, its providers and its whole history. The page checks every signature itself.</div></li>
+  </ol>
+  <div class="callout"><b>Design note.</b> "Launched" and "served" are two different states. Show them differently: a dashed outline for launched, a solid one with a proof badge for served.</div>
+</section>
+
+<!-- 7 -->
+<section id="products">
+  <p class="num">07</p>
+  <h2>The products</h2>
+  <p>DEFXN has 26 products in 7 groups, plus the home site <code>defxn.com</code>. They share one design kit. Each product still gets its own look and its own signature picture.</p>
+  <div class="callout warn"><b>No product is public yet.</b> The addresses below are where each product will live. "Building" and "Planned" come from the product catalog. A dash means the catalog sets no stage.</div>
+
+  <div class="lanes">
+    <div class="lane"><h3>Build <span class="mono">code</span></h3><p>Design and hold what you make.</p><ul>
+      <li><b>Repo</b><em>repo.defxn.com</em><span>Find a code repository by its address and open it on your machine.</span></li>
+      <li><b>Code</b><em>—</em><span>Edit a repository in the browser. Your key signs every change.</span></li>
+      <li><b>DB Studio</b><em>building</em><span>Design a record type and browse your own records. No server account.</span></li>
+      <li><b>Grammar</b><em>—</em><span>Every record field letter and which resolver owns it.</span></li>
+      <li><b>Resolver Studio</b><em>building</em><span>Build a resolver on a canvas of nodes, then launch it in Deploy.</span></li>
+    </ul></div>
+    <div class="lane"><h3>Ship <span class="mono">ship</span></h3><p>Name it and release it exactly.</p><ul>
+      <li><b>Domains</b><em>domains.defxn.com</em><span>Look up a <code>.fxn</code> name: who owns it and where it points.</span></li>
+      <li><b>Bundles</b><em>building</em><span>Approve a site bundle, store it on the network and point your name at it.</span></li>
+      <li><b>Packages</b><em>registry.defxn.com</em><span>Publish and install signed packages by exact version.</span></li>
+      <li><b>Remote</b><em>planned</em><span>Put exact versions together into a test setup and collect tester feedback.</span></li>
+    </ul></div>
+    <div class="lane"><h3>Network <span class="mono">resolve</span></h3><p>Launch resolvers and run the network.</p><ul>
+      <li><b>Deploy</b><em>deploy.defxn.com</em><span>Launch or upgrade a resolver, or a capability, after you review the exact record.</span></li>
+      <li><b>Explore</b><em>explore.defxn.com</em><span>Every resolver and capability with its full history, checked in the page.</span></li>
+      <li><b>Node</b><em>nodes.defxn.com</em><span>Keep a browser tab open to help run the network. No install. Pay for nodes is not built yet.</span></li>
+      <li><b>Storage</b><em>building</em><span>Rent out disk space. The computer stores only data it cannot read.</span></li>
+      <li><b>Claims</b><em>—</em><span>Read what a node holds and its verdict on every record, failed ones too.</span></li>
+    </ul></div>
+    <div class="lane"><h3>Govern <span class="mono">govern</span></h3><p>Found a network's DAO and run it by rules.</p><ul>
+      <li><b>DAO</b><em>dao.defxn.com</em><span>A list of signers, a rule for how many must sign, and signed decisions.</span></li>
+      <li><b>Treasury</b><em>treasury.defxn.com</em><span>Shared funds that move only under the DAO's rules.</span></li>
+      <li><b>Genesis</b><em>genesis.defxn.com</em><span>Create a network's starting FXN supply, once. Shows every future release date.</span></li>
+    </ul></div>
+    <div class="lane"><h3>Social &amp; live <span class="mono">social</span></h3><p>Talk, publish, play and listen.</p><ul>
+      <li><b>Inbox</b><em>building</em><span>Signed notifications to your key, sorted by topic and sender.</span></li>
+      <li><b>Posts</b><em>building</em><span>Posts in content types you define yourself as grammars.</span></li>
+      <li><b>Play</b><em>building</em><span>Turn-based games. Every move is signed in your tab.</span></li>
+      <li><b>Radio</b><em>radio.defxn.com</em><span>Live radio and video from person to person. Stations announce on the chain.</span></li>
+    </ul></div>
+    <div class="lane"><h3>Assets <span class="mono">assets</span></h3><p>Permanent assets anyone can check.</p><ul>
+      <li><b>PVA</b><em>pva.defxn.com</em><span>Permanent Verifiable Assets: what they are and where they are kept.</span></li>
+      <li><b>Collections</b><em>collections.defxn.com</em><span>Browse collections and each item's signed history.</span></li>
+      <li><b>Market</b><em>market.defxn.com</em><span>List and buy collection items.</span></li>
+      <li><b>Books</b><em>books.defxn.com</em><span>Read PVA papers, each one permanent and checkable.</span></li>
+    </ul></div>
+    <div class="lane"><h3>DeFi <span class="mono">defi</span></h3><p>Launch and trade tokens.</p><ul>
+      <li><b>Flux Launch</b><em>—</em><span>Launch a token on a price curve, trade it, and move it into a pool when the curve is complete.</span></li>
+    </ul></div>
+  </div>
+
+  <h3>Resolvers that power products</h3>
+  <p>Five social and data products each run on their own resolver.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Resolver</th><th>Powers</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>Notify</td><td>Inbox</td><td>Signed pings to a key, or sealed messages only the receiver can open.</td></tr>
+      <tr><td>Games</td><td>Play</td><td>Every move is a signed record. Achievements are worked out from the moves.</td></tr>
+      <tr><td>Content</td><td>Posts</td><td>A new content type is a published grammar, not new code.</td></tr>
+      <tr><td>Data</td><td>DB Studio</td><td>Typed rows, checked against each table's own grammar. One chain per table.</td></tr>
+      <tr><td>Streams</td><td>Radio</td><td>Stations announce on the chain. Sound and video go person to person.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Network chains run on the DEFXN kernel, each with its own coin and its own genesis. <b>FXN</b> (coin FXN) is the first. <b>DeArk</b> (coin DARO) and <b>CR3TV</b> (coin CR3) run on it too.</p>
+</section>
+
+<!-- 8 -->
+<section id="identity">
+  <p class="num">08</p>
+  <h2>Identity and names</h2>
+  <div class="two">
+    <div>
+      <h3>FXN ID</h3>
+      <!-- checked 2026-10-24 against flux/fxn-auth/bin/fxn-id.mjs, docs/FXN_ID_SECRET_KEY_v0.md, js/admin/auth.js (ark-ui 0.2.19) and js/broker/broker.js. data-k names each paragraph for the pages that quote it. -->
+      <p data-k="file">FXN ID is a person's identity. It is one key file, <code>.auth.fxn</code>, for every network. The file stays on the person's device. It is never uploaded.</p>
+      <p data-k="sign">Apps sign in the browser. The server never holds the key. Every app that asks for a signature shows the full request: what will be signed, for which network, and for how long.</p>
+      <p data-k="share">A site learns who you are only after you choose "Share". A yes lasts for that tab and that identity only. It is never stored. Every signature still opens the full review, with the exact site and the exact bytes.</p>
+      <p data-k="secret">The file holds no Secret Key. The Secret Key is a 128-bit key that the FXN ID gate holds in pieces: 5 gate nodes, and any 3 of them release it. The file alone is useless to a thief.</p>
+      <p data-k="factors">The gate releases the Secret Key only for the right factors: a PIN, an optional password, an optional key word and one of nine icons. The PIN has 6 to 12 digits, or 8 or more with no password. Three wrong tries lock the Secret Key for 24 hours on every gate node.</p>
+      <p data-k="kit">The Emergency Kit holds the Secret Key and the recovery phrase. It is shown once, when the identity is made, after you type your consent. It opens the file when the gate is down or locked. Keep it offline. Never photograph it or paste it anywhere.</p>
+      <p data-k="memory">By default, on a page where you open your FXN ID file yourself, the signing key lives only in that tab's memory. A reload drops it. The defxn.com identity window keeps the key in its own tab for every defxn site. One sign-in serves them all, and closing that window signs you out everywhere. The defxn sites remember your name and public key across reloads, never the key itself. A remembered identity cannot sign until you open the key again.</p>
+      <p data-k="session">After the file opens, you choose how long this browser keeps your identity: only this tab, or 1, 3, 7 or 14 days. With a time chosen, a reload brings it back without the file. The panel shows the end date and a Forget now button, and Sign out deletes it too. The browser never keeps your PIN, password, key word, icon or Secret Key. Until the time runs out, a harmful script on that site could sign as you. On a shared or public device, choose Only this tab. In the terminal, <code>fxn-id open --remember</code> keeps a session in the macOS Keychain for 1, 3, 7 or 14 days.</p>
+      <p data-k="nobody">Nobody ever needs your PIN, password, key word, icon or Secret Key. That includes support. Only the sign-in box asks for them.</p>
+      <p data-k="gate"><span class="tag part">Partial</span> Web sign-in does not ask the gate yet. It opens the file with the Secret Key from your Emergency Kit, typed with your PIN, password, key word and icon. The gate nodes all run on one computer today.</p>
+    </div>
+    <div>
+      <h3><code>.fxn</code> names</h3>
+      <p>A name is flat: <code>radio.fxn</code>, never <code>radio.defxn.fxn</code>. One system owns every name: the Domain resolver. Other parts only read it and check the proof.</p>
+      <p>The owner can move a name. The new owner signs too. A name can be sold for FXN.</p>
+      <p><span class="tag part">Partial</span> Until a public access gate exists, only the network's genesis key can claim new names. The first claim wins.</p>
+      <p>Only a network's genesis key can file the network and mint its coin. A test key is never used on mainnet.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="nodes">
+  <p class="num">09</p>
+  <h2>Nodes</h2>
+  <p>A node is a computer that helps run the network. There are three ways to run one.</p>
+  <div class="facts">
+    <div><dt>Browser tab</dt><dd>nodes.defxn.com<small>Any phone or computer browser. No install. The tab checks signatures itself.</small></dd></div>
+    <div><dt>Phone app</dt><dd>DEFXN mobile<small>iOS and Android shells around the same node. Runs on test phones.</small></dd></div>
+    <div><dt>Server</dt><dd>The <code>fxn</code> download<small>One download, several parts: chain, resolver hosts, relay, store. Each part restarts alone.</small></dd></div>
+  </div>
+  <p>A node picks its roles. It can host a chain, run resolvers it has proved, store data, or relay traffic. The chain decides what may run. A node runs nothing that is not on the chain.</p>
+  <p><span class="tag part">Partial</span> The <code>fxn</code> download is in progress. Nodes are not paid yet.</p>
+</section>
+
+<!-- 10 -->
+<section id="money">
+  <p class="num">10</p>
+  <h2>FXN and money</h2>
+  <p>These are owner decisions. Most are not in code yet. Show a rule as a rule. Never show a number as live until it is.</p>
+
+  <h3>Three kinds of money</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Kind</th><th>What it is</th><th>Can it move?</th></tr></thead>
+    <tbody>
+      <tr><td>Network coins</td><td>FXN, DARO, CR3. Each lives on its own native chain.</td><td>Yes. Trade, send, give.</td></tr>
+      <tr><td>Credits</td><td>Money to spend inside apps and networks, for features and AI. Bought only with the network's coin.</td><td>No. Bound to one identity.</td></tr>
+      <tr><td>App tokens</td><td>One per shipped app, named after the app. Each trades against its network's coin.</td><td>Yes. None is registered yet.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>FXN starting supply <span class="tag dec">Decided</span></h3>
+  <p>1,000,000,000 FXN, fixed on the chain. Three groups:</p>
+  <figure>
+    <svg viewBox="0 0 900 96" role="img" aria-labelledby="f4t">
+      <title id="f4t">Public 68 percent, team 15 percent, operations 17 percent.</title>
+      <rect x="0" y="20" width="612" height="36" fill="hsl(var(--signal))"/>
+      <rect x="612" y="20" width="135" height="36" fill="hsl(var(--identity))"/>
+      <rect x="747" y="20" width="153" height="36" fill="hsl(var(--token))"/>
+      <text x="12" y="43" style="fill:hsl(var(--primary-ink))" font-weight="600">Public 68%</text>
+      <text x="622" y="43" style="fill:hsl(var(--primary-ink))" font-weight="600">Team 15%</text>
+      <text x="757" y="43" style="fill:hsl(var(--primary-ink))" font-weight="600">Operations 17%</text>
+      <text class="t-mono" x="0" y="80">MINING 47 · INVESTING FUND 3 · PUBLIC SALE 10 · SERVICE FUND 5 · BUYBACK 3</text>
+      <text class="t-mono" x="612" y="12">CREATOR 9 · CO-FOUNDER 6</text>
+    </svg>
+  </figure>
+  <ul class="plain">
+    <li><b>Mining (47%)</b> is paid out on the chain over many years, for measured storage and compute work. The payout gets smaller over time but never reaches zero. Fees then become the main reward.</li>
+    <li><b>Every other group</b> sits in DAO safes and is released over time. Team: the first eighth at day 90, all by day 720. Operations: monthly over 3 years.</li>
+    <li><b>The service fund and buyback</b> need time, a DAO vote for each spend, and a cap per 30 days. So nobody, the team included, can move the price with them.</li>
+    <li><b>Public sale (10%):</b> 0.34 EUR per FXN, in phases over the first year. At most 50,000 FXN per identity. Buys in a phase's first hour fill together. Buyers get 25% at once and the rest monthly over 6 months. Payments go straight to a DAO safe, and every credit names the outside payment so anyone can check it.</li>
+  </ul>
+  <div class="callout"><b>The owner's principle:</b> fair by design, not by hope. Every rule that stops abuse is enforced by the chain. Copy shows the rules and the numbers. Copy never says "fair" or "safe" about itself.</div>
+
+  <h3>Fees <span class="tag dec">Decided</span></h3>
+  <ul class="plain">
+    <li>The cost of running work: 65% goes to the computers, 35% to the network fund.</li>
+    <li>A resolver owner sets a price. 15% of it pays for builder programs: rewards, contests, grants and bounties. A DAO vote can lower the 15%. Nothing can raise it.</li>
+    <li>No price is set yet. Any price on a screen today must say "Example numbers. The network has not set its prices yet."</li>
+  </ul>
+</section>
+
+<!-- 11 -->
+<section id="measured">
+  <p class="num">11</p>
+  <h2>What is measured</h2>
+  <p>Only these numbers may appear on screens. Each one comes with its source and its limit.</p>
+  <h3>BENCH-012 · one batch of swaps · 10 October 2026</h3>
+  <div class="facts">
+    <div><dt>Swaps per batch</dt><dd>256</dd></div>
+    <div><dt>Time per batch</dt><dd>13.874 ms</dd></div>
+    <div><dt>Size of one signed result</dt><dd>180 bytes</dd></div>
+    <div><dt>Cost to check one</dt><dd>3 signature checks</dd></div>
+  </div>
+  <p>All 15,360 swaps cleared at one price per batch. Copies reached all 10 storing computers, and 60 of 60 checks passed.</p>
+  <h3>BENCH-013 · the fleet, all 10 nodes at once · 10 October 2026</h3>
+  <div class="facts">
+    <div><dt>Swaps</dt><dd>643,632 swaps/s</dd></div>
+    <div><dt>Transfers</dt><dd>69,895 transfers/s</dd></div>
+    <div><dt>Stored results</dt><dd>6,044,992 records/s</dd></div>
+  </div>
+  <p><b>Limit:</b> no network time is inside these runs. They measure how fast the nodes resolve, not how fast a result reaches you. Sending a result to 10 computers takes 449 ms today.</p>
+  <h3>Rules for numbers on screens</h3>
+  <ul class="plain">
+    <li>A rate names what it counts: swaps/s, transfers/s, records/s. A bare "per second" is wrong.</li>
+    <li>A fleet number is a sum of real runs. It is never one node's number multiplied.</li>
+    <li>"Not measured yet" is different from 0. Use a dash or those words. Never show 0 for something nobody measured.</li>
+    <li>Never invent live activity: no fake tickers, no fake counters, no "Live" badge.</li>
+  </ul>
+</section>
+
+<!-- 12 -->
+<section id="state">
+  <p class="num">12</p>
+  <h2>What exists today</h2>
+  <p>Everything runs on a devnet, a test network. Nothing is public. Use these four labels.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Part</th><th>State</th><th>Boundary</th></tr></thead>
+    <tbody>
+      <tr><td>Signed records, one chain per identity</td><td><span class="tag built">Built</span></td><td>Measured in BENCH-012.</td></tr>
+      <tr><td>Resolver launch and upgrade</td><td><span class="tag part">Partial</span></td><td>Runs on the devnet. Not production.</td></tr>
+      <tr><td>Capabilities and checked cases</td><td><span class="tag part">Partial</span></td><td>Built in code with tests. 18 manifests exist.</td></tr>
+      <tr><td>Grammar checks on every record</td><td><span class="tag part">Partial</span></td><td>10 of 12 first-party grammars are checked.</td></tr>
+      <tr><td>Deploy and Explore</td><td><span class="tag part">Partial</span></td><td>Run locally. Not hosted in public.</td></tr>
+      <tr><td><code>.fxn</code> names</td><td><span class="tag part">Partial</span></td><td>Genesis key claims only.</td></tr>
+      <tr><td>Node download and node pay</td><td><span class="tag part">Partial</span></td><td>In progress. Nodes are not paid yet.</td></tr>
+      <tr><td>Genesis, sale and fees</td><td><span class="tag dec">Decided</span></td><td>Owner decisions. Mostly not in code.</td></tr>
+      <tr><td>One deployer for sites, apps and databases</td><td><span class="tag no">Not built</span></td><td>Planned.</td></tr>
+      <tr><td>Audit bounties as a launch rule</td><td><span class="tag no">Not built</span></td><td>Planned.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The live list is <code>flux/defxn/docs/STATUS.md</code>. Read it before you show any state on a screen.</p>
+</section>
+
+<!-- 13 -->
+<section id="design">
+  <p class="num">13</p>
+  <h2>Design rules</h2>
+  <p>The owner's laws apply to every screen. The full text is in two files: <code>docs/PRODUCT-DESIGN-LAWS.md</code> (70 laws) and <code>docs/COPY-LAWS.md</code>.</p>
+  <div class="two">
+    <div>
+      <h3>Layout</h3>
+      <ul class="plain">
+        <li>One idea per page. One main action per view.</li>
+        <li>Working screens fit 1280x720 and 1440x900 with no scroll.</li>
+        <li>Other pages are at most 1.6 screens tall, on desktop and on a phone.</li>
+        <li>Depth replaces length: open a thing to see more of it, instead of making the page longer.</li>
+        <li>No marketing inside a product.</li>
+        <li>Phone first. Text at least 16px. Tap targets at least 44px.</li>
+      </ul>
+      <h3>Motion</h3>
+      <ul class="plain">
+        <li>Every animation stops when it is done. Nothing loops while the page is idle.</li>
+        <li>Motion shows a real change. It never fakes activity.</li>
+        <li>Between pages: one continuous move. No fade-outs and no cuts.</li>
+        <li>Respect "reduce motion".</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Copy</h3>
+      <ul class="plain">
+        <li>Name the reader first. Answer their first question first.</li>
+        <li>Say what happens, not how it should feel.</li>
+        <li>One idea per sentence.</li>
+        <li>No machine sentence shapes. <code>docs/COPY-LAWS.md</code> lists them.</li>
+        <li>Never invent proof.</li>
+        <li>A refusal names what failed, what is missing, and how to fix it.</li>
+      </ul>
+      <h3>Color</h3>
+      <ul class="plain">
+        <li>Color means something. Everything else is neutral.</li>
+        <li>One accent color is for the main action only.</li>
+        <li>Each chain kind has its own quiet color (section 4).</li>
+        <li>Colors are tokens. A new brand changes the token values, never the pages.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Two type and color systems exist. Pick one.</h3>
+  <div class="two">
+    <div>
+      <p><b>Home redesign mockup</b> (this folder). The owner asked to keep these.</p>
+      <div class="swatches">
+        <div class="sw"><i style="background:hsl(83 87% 66%)"></i><span>Lime · main action<br><code>83 87% 66%</code></span></div>
+        <div class="sw"><i style="background:hsl(150 24% 5%)"></i><span>Canvas<br><code>150 24% 5%</code></span></div>
+        <div class="sw"><i style="background:hsl(166 62% 52%)"></i><span>Signal · the mark's glow<br><code>166 62% 52%</code></span></div>
+        <div class="sw"><i style="background:hsl(38 22% 88%)"></i><span>Record tile · bone<br><code>38 22% 88%</code></span></div>
+      </div>
+      <p>Type: Inter Tight (headlines), Inter (text), JetBrains Mono (labels).</p>
+    </div>
+    <div>
+      <p><b>Product kit</b> (<code>flux/defxn-product-kit</code>). All 26 products use it.</p>
+      <p>Palette: the Ember family, with teal for the main action. Type: Albert Sans and IBM Plex Mono. No serif.</p>
+      <p>Shared grammar: flat panels with hairlines, a dot before each eyebrow line, a two-tone headline, mono uppercase labels, fact grids, pill tabs, numbered steps, and a dash for a missing value.</p>
+    </div>
+  </div>
+  <div class="callout warn"><b>Open decision for the owner.</b> The home mockup and the product kit use different fonts and accent colors. One of them must become the brand. The designer should ask the owner which one before drawing new screens.</div>
+
+  <h3>Marks</h3>
+  <p>The DEFXN mark is in <code>flux/defxn-product-kit/brand/marks/defxn-mark.png</code>. Each product gets a symmetric emblem made on a grid of cells. The owner rejected stock icons and letter monograms for product marks.</p>
+</section>
+
+<!-- 14 -->
+<section id="home">
+  <p class="num">14</p>
+  <h2>The home redesign</h2>
+  <p>The mockup in this folder is one app with four views. The 3D world stays on screen and moves between them.</p>
+  <ol class="steps">
+    <li><div><b>Home.</b> The network as rings around the FXN hub. Your own chain is one ring. A rail on the right lists the 13 capabilities and their checked cases.</div></li>
+    <li><div><b>Your chain.</b> Your ring rises. A page opens out of your tile and lists your records.</div></li>
+    <li><div><b>A record.</b> The page moves to one record: its text, who signed it, the versions before it, and the next record.</div></li>
+    <li><div><b>Open record.</b> The tile grows into a card with tabs: details, connections and history.</div></li>
+  </ol>
+  <p>Open it at <a href="home-mockup.html">home-mockup.html</a>. It needs a local web server, because the 3D files load as scripts. With the defxn static server on port 4631, open <code>http://localhost:4631/docs/home-redesign/home-mockup.html</code>.</p>
+</section>
+
+<!-- 15 -->
+<section id="sources">
+  <p class="num">15</p>
+  <h2>Sources</h2>
+  <p>This page was written from these files on 23 October 2026. If a file disagrees with this page, the file is right.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Topic</th><th>File</th></tr></thead>
+    <tbody>
+      <tr><td>Current state</td><td><code>flux/defxn/docs/STATUS.md</code></td></tr>
+      <tr><td>How a result is made</td><td><code>flux/defxn/docs/whitepaper.md</code></td></tr>
+      <tr><td>Resolvers and layers</td><td><code>flux/defxn/docs/protocol/resolvers.md</code></td></tr>
+      <tr><td>Words</td><td><code>flux/defxn/docs/glossary.md</code>, <code>flux/defxn/docs/deprecated.md</code></td></tr>
+      <tr><td>Products</td><td><code>flux/defxn-product-kit/dist/products.json</code></td></tr>
+      <tr><td>Capabilities</td><td><code>flux/defxn-defi-rs/dense-wire/capabilities/</code></td></tr>
+      <tr><td>Resolver offers</td><td><code>flux/defxn-defi-rs/dense-wire/resolvers/</code></td></tr>
+      <tr><td>Names</td><td><code>docs/DEFXN-NAMES-ONE-SYSTEM.md</code></td></tr>
+      <tr><td>Nodes</td><td><code>docs/FXN-NODE-ARCHITECTURE-2026-10-23.md</code></td></tr>
+      <tr><td>Genesis and fairness</td><td><code>flux/defxn-defi-rs/dense-wire/docs/design/fxn-fairness-by-design.md</code></td></tr>
+      <tr><td>Fees</td><td><code>flux/defxn-defi-rs/dense-wire/docs/design/workflow-compute-pricing-plan.md</code></td></tr>
+      <tr><td>Measurements</td><td><code>flux/defxn/docs/evidence/registry.md</code> (BENCH-012, BENCH-013)</td></tr>
+      <tr><td>Brand and color</td><td><code>flux/defxn/docs/brand/DEFXN.md</code>, <code>flux/defxn-product-kit/README.md</code></td></tr>
+      <tr><td>Design and copy laws</td><td><code>docs/PRODUCT-DESIGN-LAWS.md</code>, <code>docs/COPY-LAWS.md</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+</main>
+</div>
+<button class="theme" type="button" id="theme">Light / dark</button>
+<script>
+(function () {
+  var root = document.documentElement, key = 'defxn-brief-theme';
+  try { var saved = localStorage.getItem(key); if (saved) root.dataset.theme = saved; } catch (e) {}
+  document.getElementById('theme').addEventListener('click', function () {
+    var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem(key, root.dataset.theme); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

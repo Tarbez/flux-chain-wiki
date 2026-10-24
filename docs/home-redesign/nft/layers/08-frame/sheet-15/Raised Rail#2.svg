@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Raised Rail: a rounded frame broken at the top centre, where a raised bright bar floats between two short dotted runs, with a small slot cut in the middle of each side (sheet 15, 23)</title>
+  <path d="M380 20H36A16 16 0 0 0 20 36V342M20 358V664A16 16 0 0 0 36 680H964A16 16 0 0 0 980 664V358M980 342V36A16 16 0 0 0 964 20H620" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/><path d="M20 342H25M20 358H25M980 342H975M980 358H975" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/><path d="M388 20H446M554 20H612" fill="none" stroke="var(--dim)" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="0 6" vector-effect="non-scaling-stroke"/><path d="M458 13H542" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,91 @@
+/* DEFXN home mockup: the Measured rail (rail-capabilities.js), redesigned 2026-10-23.
+   The page's own grammar: mono uppercase labels, dark glass cards on hairlines, graphite bars,
+   teal only on the capability in focus, no lime (the hero holds the one action). One corner scale:
+   10px for cards, 6px for tiles inside them. Loaded after the page styles, so these rules win. */
+.rail{--rx-r:10px;--rx-t:6px;--rx-gap:max(10px,calc(1.5vh / var(--s, 1)))}
+.rail-head p{white-space:normal}
+.rail-head p span{font-size:11.5px;letter-spacing:.02em}
+.rail-head p span:empty{display:none}
+.rail{padding-top:max(22px,calc(4vh / var(--s, 1)))}
+.rx-grid button{height:28px}
+
+/* a row with a mono label on the left and a quiet note on the right */
+.rx-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;min-width:0}
+.rx-row h3{margin:0;font-size:10px;letter-spacing:.2em;color:hsl(var(--text-strong));font-weight:500;white-space:nowrap}
+.rx-src,.rx-count{font:500 10px/1.3 var(--font-mono);letter-spacing:.06em;color:hsl(var(--text-muted));text-align:right;min-width:0}
+.rx-src{text-transform:uppercase;letter-spacing:.1em}
+
+/* dark glass cards: a hairline, a faint top light, the rail's blur behind */
+.rx-fleet,.rx-focus{position:relative;margin-top:var(--rx-gap);padding:12px 14px;border-radius:var(--rx-r);
+  background:linear-gradient(180deg,hsl(var(--text-strong) / .045),hsl(var(--text-strong) / .015) 60%),hsl(var(--canvas) / .55);
+  box-shadow:inset 0 0 0 1px hsl(var(--border)),inset 0 1px 0 hsl(var(--text-strong) / .06)}
+
+/* the fleet run: four rows, each named by what it counts; the figure and its unit on the right */
+.rx-tiles{margin:8px 0 0;display:grid;gap:1px;border-radius:var(--rx-t);overflow:hidden;box-shadow:inset 0 0 0 1px hsl(var(--border) / .7)}
+.rx-tiles div{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:5px 9px;background:hsl(var(--text-strong) / .025);min-width:0}
+.rx-tiles div + div{box-shadow:0 -1px 0 hsl(var(--border) / .7)}
+.rx-tiles dt{font:500 9.5px/1.2 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--text-muted));white-space:nowrap}
+.rx-tiles dd{margin:0;display:flex;align-items:baseline;gap:5px;white-space:nowrap;min-width:0}
+.rx-tiles b{font:600 15px/1.1 var(--font-mono);letter-spacing:-.02em;color:hsl(var(--text-strong));font-variant-numeric:tabular-nums}
+.rx-tiles span{display:inline-block;min-width:68px;font:400 10.5px/1 var(--font-mono);color:hsl(var(--text-muted))}
+.rx-when{margin:7px 0 0;font-size:9.5px;letter-spacing:.12em;color:hsl(var(--text-muted))}
+
+/* capabilities: the strip of shares, then every capability as a tile */
+.rx-caps{margin-top:var(--rx-gap);display:flex;flex-direction:column;flex:none}
+.rx-fleet,.rx-focus,.rail-head{flex:none}
+.rx-stack{display:flex;gap:2px;height:8px;margin-top:9px}
+.rx-stack i{display:block;min-width:2px;border-radius:2px;background:hsl(var(--text-faint) / .7);transition:background-color .2s}
+.rx-stack i.on{background:hsl(var(--signal))}
+.rx-grid{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.rx-grid button{position:relative;width:100%;height:30px;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 8px 2px;
+  border:0;border-radius:var(--rx-t);background:hsl(var(--text-strong) / .03);box-shadow:inset 0 0 0 1px hsl(var(--border) / .75);
+  color:hsl(var(--text));cursor:pointer;text-align:left;overflow:hidden;transition:background-color .2s,box-shadow .2s,color .2s}
+.rx-grid button:hover{background:hsl(var(--text-strong) / .06);color:hsl(var(--text-strong))}
+.rx-grid button[aria-pressed="true"]{background:hsl(var(--signal) / .09);box-shadow:inset 0 0 0 1px hsl(var(--signal) / .55);color:hsl(var(--text-strong))}
+.rx-n{font:500 12px/1 var(--font-sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rx-c{font:500 11px/1 var(--font-mono);color:hsl(var(--text-muted));font-variant-numeric:tabular-nums}
+.rx-grid button[aria-pressed="true"] .rx-c{color:hsl(var(--signal))}
+.rx-bar{position:absolute;left:8px;right:8px;bottom:4px;height:2px;border-radius:1px;background:hsl(var(--text-faint) / .3)}
+.rx-bar i{display:block;height:100%;border-radius:1px;background:hsl(var(--text-muted) / .7);transition:background-color .2s}
+.rx-grid button[aria-pressed="true"] .rx-bar i{background:hsl(var(--signal))}
+.rx-grid button:focus-visible{outline:2px solid hsl(var(--reference));outline-offset:2px}
+
+/* in focus: the brief's words, the cases, the speed not measured */
+.rx-kicker{margin:0;font-size:9.5px;letter-spacing:.2em;color:hsl(var(--text-muted))}
+.rx-kicker::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:hsl(var(--signal));margin-right:8px;vertical-align:1px}
+.rx-name{margin:5px 0 0;font:600 18px/1.15 var(--font-display);letter-spacing:-.01em;color:hsl(var(--text-strong))}
+.rx-line{margin:4px 0 0;font-size:13px;line-height:1.45;color:hsl(var(--text))}
+.rx-facts{margin:9px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-top:8px;border-top:1px solid hsl(var(--border))}
+.rx-facts dt{font:500 9.5px/1.3 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--text-muted))}
+.rx-facts dd{margin:3px 0 0;font:600 15px/1.2 var(--font-mono);color:hsl(var(--text-strong));font-variant-numeric:tabular-nums}
+.rx-facts dd span{font-weight:400;font-size:11px;color:hsl(var(--text-muted))}
+.rx-facts .rx-none{font:500 12.5px/1.3 var(--font-sans);color:hsl(var(--text-muted))}
+.rx-cases{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:3px}
+.rx-cases li{position:relative;padding-left:14px;font-size:11.5px;line-height:1.4;color:hsl(var(--text-muted));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rx-cases li::before{content:'';position:absolute;left:0;top:.5em;width:6px;height:6px;border:1.5px solid hsl(var(--signal) / .6);border-radius:50%}
+.rx-focus.swap > *{animation:reveal .5s var(--glide) both}
+.rx-focus.swap > :nth-child(2){animation-delay:.04s}.rx-focus.swap > :nth-child(3){animation-delay:.08s}
+.rx-focus.swap > :nth-child(4){animation-delay:.12s}.rx-focus.swap > :nth-child(5){animation-delay:.16s}
+
+.rail .all{margin-top:auto;padding-top:var(--rx-gap);flex:none}
+/* the case name shows only where there is room for it */
+@media (max-height:959px){.rx-cases{display:none}}
+
+/* short screens: the same rail, tighter; the case names go first */
+@media (max-height:760px) and (min-width:901px){
+  .rail{--rx-gap:8px}
+  .rx-fleet,.rx-focus{padding:9px 12px}
+  .rx-tiles{margin-top:6px}.rx-tiles div{padding:3px 8px}.rx-tiles b{font-size:13.5px}.rx-tiles span{min-width:58px;font-size:10px}.rx-when{margin-top:5px}
+  .rx-grid button{height:24px}.rx-grid{gap:3px}.rx-stack{margin-top:7px;height:6px}
+  .rx-cases{display:none}
+  .rx-name{font-size:16px;margin-top:0}.rx-line{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rx-kicker,.rx-stack{display:none}.rx-grid{margin-top:7px}
+  .rx-grid button{padding:0 6px 2px}.rx-n{font-size:11px}.rx-c{font-size:10px}.rx-bar{left:6px;right:6px;bottom:3px}
+  .rx-facts{margin-top:7px;padding-top:6px}.rx-facts dd{font-size:14px}
+}
+/* a phone: the rail is a section under the hero */
+@media (max-width:900px){
+  .rx-grid button{height:40px}
+  .rx-n{font-size:13px}
+}
+@media (prefers-reduced-motion:reduce){.rx-focus.swap > *{animation:none}.rx-stack i,.rx-grid button,.rx-bar i{transition:none}}

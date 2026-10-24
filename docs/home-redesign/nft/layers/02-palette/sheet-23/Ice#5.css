@@ -1,0 +1,6 @@
+/* Ice: pale ice light, a periwinkle glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 200 18% 94%;
+  --b: 200 80% 84%;
+  --c: 228 72% 74%;
+}

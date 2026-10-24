@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Reticle: a target: an amber circle, a crosshair, a centre square, a dotted ring (sheet 9, piece 10)</title>
+  <circle cx="15" cy="17" r="8.5" fill="none" stroke="var(--acc)" stroke-width="3.6" opacity="0.2"/>
+  <circle cx="15" cy="17" r="8.5" fill="none" stroke="var(--acc)" stroke-width="1.2"/>
+  <path d="M15 6V12M15 22V28M4 17H10M20 17H26" fill="none" stroke="var(--ink)" stroke-width="0.9" opacity="0.8"/>
+  <rect x="13.6" y="15.6" width="2.8" height="2.8" fill="var(--ink)"/>
+  <circle cx="27.56" cy="20.36" r="0.6" fill="var(--dim)"/>
+  <circle cx="26.26" cy="23.5" r="0.6" fill="var(--dim)"/>
+  <circle cx="24.19" cy="26.19" r="0.6" fill="var(--dim)"/>
+  <circle cx="21.5" cy="28.26" r="0.6" fill="var(--dim)"/>
+  <circle cx="18.36" cy="29.56" r="0.6" fill="var(--dim)"/>
+  <circle cx="11.64" cy="29.56" r="0.6" fill="var(--dim)"/>
+  <circle cx="8.5" cy="28.26" r="0.6" fill="var(--dim)"/>
+  <circle cx="5.81" cy="26.19" r="0.6" fill="var(--dim)"/>
+  <circle cx="3.74" cy="23.5" r="0.6" fill="var(--dim)"/>
+  <circle cx="2.44" cy="20.36" r="0.6" fill="var(--dim)"/>
+  <circle cx="2.44" cy="13.64" r="0.6" fill="var(--dim)"/>
+  <circle cx="3.74" cy="10.5" r="0.6" fill="var(--dim)"/>
+  <circle cx="5.81" cy="7.81" r="0.6" fill="var(--dim)"/>
+  <circle cx="8.5" cy="5.74" r="0.6" fill="var(--dim)"/>
+  <circle cx="11.64" cy="4.44" r="0.6" fill="var(--dim)"/>
+  <circle cx="18.36" cy="4.44" r="0.6" fill="var(--dim)"/>
+  <circle cx="21.5" cy="5.74" r="0.6" fill="var(--dim)"/>
+  <circle cx="24.19" cy="7.81" r="0.6" fill="var(--dim)"/>
+  <circle cx="26.26" cy="10.5" r="0.6" fill="var(--dim)"/>
+  <circle cx="27.56" cy="13.64" r="0.6" fill="var(--dim)"/>
+  <rect x="0.6" y="15.8" width="2.4" height="2.4" fill="var(--dim)"/>
+  <rect x="27" y="15.8" width="2.4" height="2.4" fill="var(--dim)"/>
+</svg>

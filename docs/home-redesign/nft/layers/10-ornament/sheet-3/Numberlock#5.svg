@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Numberlock: the genesis ID as three digit boxes, with small up and down arrows (sheet-3, 10)</title>
+  <g transform="translate(0 8)">
+    <text x="0" y="12" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="2" fill="var(--dim)">GENESIS ID</text>
+    <line x1="90" y1="8.5" x2="250" y2="8.5" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    <g fill="var(--faint)" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke">
+      <rect x="0.5" y="22.5" width="34" height="40" rx="2"/>
+      <rect x="42.5" y="22.5" width="34" height="40" rx="2"/>
+      <rect x="84.5" y="22.5" width="34" height="40" rx="2"/>
+    </g>
+    <g font-family="JetBrains Mono, monospace" font-size="22" font-weight="500" fill="var(--ink)" text-anchor="middle">
+      <text x="17.5" y="50.5" data-field="genesisId" data-char="0">0</text>
+      <text x="59.5" y="50.5" data-field="genesisId" data-char="1">0</text>
+      <text x="101.5" y="50.5" data-field="genesisId" data-char="2">9</text>
+    </g>
+    <path d="M130 36.5 134.5 32 139 36.5M130 48.5 134.5 53 139 48.5" fill="none" stroke="var(--acc)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

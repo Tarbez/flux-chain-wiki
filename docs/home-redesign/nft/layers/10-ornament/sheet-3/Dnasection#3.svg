@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Dnasection: a notched DNA tab on a hairline, then the card's DNA beside an accent bar, closed by three slashes (sheet-3, 09)</title>
+  <g transform="translate(0 9)">
+    <path d="M0 8H34L46 24H0Z" fill="var(--faint)"/>
+    <path d="M0.5 23.5V8.5H34L45 23.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    <line x1="0" y1="23.5" x2="350" y2="23.5" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    <text x="8" y="20" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="2" fill="var(--dim)">DNA</text>
+    <rect x="0" y="36" width="3" height="22" fill="var(--acc)"/>
+    <text x="12" y="52" font-family="JetBrains Mono, monospace" font-size="13" font-weight="500" letter-spacing="0.6" fill="var(--ink)" data-field="dna">0·0·0·0·0·0·0·0·0·0·0·0</text>
+    <path d="M328 54 333 42M335 54 340 42M342 54 347 42" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  </g>
+</svg>

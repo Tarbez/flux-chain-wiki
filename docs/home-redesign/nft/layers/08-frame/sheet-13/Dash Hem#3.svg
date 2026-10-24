@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Dash Hem: a rounded frame whose top centre runs in dots, with a row of accent dashes along the bottom centre and an accent bar high on the left edge (sheet 13, 23)</title>
+  <path d="M600 16H968A16 16 0 0 1 984 32V668A16 16 0 0 1 968 684H600M400 684H32A16 16 0 0 1 16 668V32A16 16 0 0 1 32 16H400" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M400 16H600" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 4"/>
+  <path d="M400 684H600" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="397" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="421" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="445" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="469" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="493" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="517" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="541" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="565" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="589" y="682.5" width="14" height="3" fill="var(--acc)"/>
+  <rect x="12.5" y="58" width="7" height="58" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="14.5" y="60" width="3" height="54" fill="var(--acc)"/>
+</svg>

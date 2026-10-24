@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Asterism Rule: a faint rule ending in a star at each side, three joined stars at its centre, the middle one in the accent (sheet 26, the Asterism set: a star chart: four-point stars joined by lines that stop short of them, the brightest star in the accent)</title>
+  <path d="M9 12H151" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M209 12H351" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M164.34 8.48L173.17 10.46M186.83 13.54L195.66 15.52" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.6"/>
+  <path d="M160 4.9L160.59 6.91L162.6 7.5L160.59 8.09L160 10.1L159.41 8.09L157.4 7.5L159.41 6.91Z" fill="var(--ink)"/>
+  <path d="M180 6L181.36 10.64L186 12L181.36 13.36L180 18L178.64 13.36L174 12L178.64 10.64Z" fill="var(--acc)"/>
+  <path d="M200 13.9L200.59 15.91L202.6 16.5L200.59 17.09L200 19.1L199.41 17.09L197.4 16.5L199.41 15.91Z" fill="var(--ink)"/>
+  <path d="M3.5 9L4.18 11.32L6.5 12L4.18 12.68L3.5 15L2.82 12.68L0.5 12L2.82 11.32Z" fill="var(--ink)"/>
+  <path d="M356.5 9L357.18 11.32L359.5 12L357.18 12.68L356.5 15L355.82 12.68L353.5 12L355.82 11.32Z" fill="var(--ink)"/>
+</svg>

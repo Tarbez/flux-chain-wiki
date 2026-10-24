@@ -1,0 +1,6 @@
+/* Sunset: salmon light, a violet dusk glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 20 30% 90%;
+  --b: 8 100% 76%;
+  --c: 280 60% 72%;
+}

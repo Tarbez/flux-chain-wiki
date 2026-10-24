@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Ghost Point: a chamfered bracket with a dot on the corner point where its two arms would meet, the arms running on as short faint lines (sheet 12, corners 01)</title>
+  <path d="M5.5 44V17L17 5.5H44" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M5.5 50V64M50 5.5H64" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="5.5" cy="5.5" r="1.6" fill="var(--ink)"/>
+</svg>

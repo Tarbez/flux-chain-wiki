@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Triple Cell: three bracketed cells: the genesis ID, the serial and the network, each under its label (sheet 8)</title>
+  <path d="M0.5 6.5V0.5H6.5M105.5 0.5H111.5V6.5M111.5 43.5V49.5H105.5M6.5 49.5H0.5V43.5" fill="none" stroke="var(--acc)" stroke-opacity="0.2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M0.5 6.5V0.5H6.5M105.5 0.5H111.5V6.5M111.5 43.5V49.5H105.5M6.5 49.5H0.5V43.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <rect x="104.5" y="4.5" width="3" height="3" fill="var(--acc)"/>
+  <text x="11" y="19" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="1.8" fill="var(--dim)">GENESIS</text>
+  <text x="11" y="39" font-family="JetBrains Mono, monospace" font-size="15" letter-spacing="1.2" fill="var(--ink)" data-field="genesisId" font-weight="500">GENESISID</text>
+  <path d="M124.5 6.5V0.5H130.5M229.5 0.5H235.5V6.5M235.5 43.5V49.5H229.5M130.5 49.5H124.5V43.5" fill="none" stroke="var(--acc)" stroke-opacity="0.2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M124.5 6.5V0.5H130.5M229.5 0.5H235.5V6.5M235.5 43.5V49.5H229.5M130.5 49.5H124.5V43.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <rect x="228.5" y="4.5" width="3" height="3" fill="var(--acc)"/>
+  <text x="135" y="19" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="1.8" fill="var(--dim)">SERIAL</text>
+  <text x="135" y="39" font-family="JetBrains Mono, monospace" font-size="15" letter-spacing="1.2" fill="var(--ink)" data-field="serial" font-weight="500">SERIAL</text>
+  <path d="M248.5 6.5V0.5H254.5M353.5 0.5H359.5V6.5M359.5 43.5V49.5H353.5M254.5 49.5H248.5V43.5" fill="none" stroke="var(--acc)" stroke-opacity="0.2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M248.5 6.5V0.5H254.5M353.5 0.5H359.5V6.5M359.5 43.5V49.5H353.5M254.5 49.5H248.5V43.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <rect x="352.5" y="4.5" width="3" height="3" fill="var(--acc)"/>
+  <text x="259" y="19" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="1.8" fill="var(--dim)">NETWORK</text>
+  <text x="259" y="39" font-family="JetBrains Mono, monospace" font-size="15" letter-spacing="1.2" fill="var(--ink)" data-field="network" font-weight="500">NETWORK</text>
+</svg>

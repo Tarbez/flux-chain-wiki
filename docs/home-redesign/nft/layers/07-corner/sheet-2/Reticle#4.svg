@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Reticle: a small square at the corner point with the two arms passing through it like a crosshair</title>
+  <path d="M2 2h9v9h-9z" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--ink)"/>
+  <path d="M0 6.5H34M6.5 0V34" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M38 5.75h1.5v1.5h-1.5zM42 5.75h1.5v1.5h-1.5zM46 5.75h1.5v1.5h-1.5zM50 5.75h1.5v1.5h-1.5zM54 5.75h1.5v1.5h-1.5zM58 5.75h1.5v1.5h-1.5zM62 5.75h1.5v1.5h-1.5zM66 5.75h1.5v1.5h-1.5zM70 5.75h1.5v1.5h-1.5zM74 5.75h1.5v1.5h-1.5z" fill="var(--line)"/>
+  <path d="M5.75 38h1.5v1.5h-1.5zM5.75 42h1.5v1.5h-1.5zM5.75 46h1.5v1.5h-1.5zM5.75 50h1.5v1.5h-1.5zM5.75 54h1.5v1.5h-1.5zM5.75 58h1.5v1.5h-1.5zM5.75 62h1.5v1.5h-1.5z" fill="var(--line)"/>
+</svg>

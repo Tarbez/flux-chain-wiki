@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Notch Block: a solid block with a V notch in its left and right sides and a square window at its centre holding an accent dot (sheet 12, micrographics 01)</title>
+  <path d="M7 8.5H23V14L20 17L23 20V25.5H7V20L10 17L7 14ZM12 12.5V21.5H18V12.5Z" fill="var(--dim)" fill-rule="evenodd"/>
+  <circle cx="15" cy="17" r="1.5" fill="var(--acc)"/>
+</svg>

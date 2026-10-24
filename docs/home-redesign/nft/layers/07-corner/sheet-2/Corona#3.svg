@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Corona: a small octagon at the corner point in the accent colour with short rays round it; the arms run out of it</title>
+  <path d="M11.7 9.53L9.53 11.7L6.47 11.7L4.3 9.53L4.3 6.47L6.47 4.3L9.53 4.3L11.7 6.47Z" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--acc)"/>
+  <path d="M11.96 11.96L13.23 13.23M4.04 11.96L2.77 13.23M2.4 8L0.6 8M4.04 4.04L2.77 2.77M8 2.4L8 0.6M11.96 4.04L13.23 2.77" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--acc)"/>
+  <path d="M13.6 8H44M8 13.6V44" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M48 7.25h1.5v1.5h-1.5zM52 7.25h1.5v1.5h-1.5zM56 7.25h1.5v1.5h-1.5zM60 7.25h1.5v1.5h-1.5zM64 7.25h1.5v1.5h-1.5zM68 7.25h1.5v1.5h-1.5zM72 7.25h1.5v1.5h-1.5zM76 7.25h1.5v1.5h-1.5zM80 7.25h1.5v1.5h-1.5z" fill="var(--line)"/>
+  <path d="M7.25 48h1.5v1.5h-1.5zM7.25 52h1.5v1.5h-1.5zM7.25 56h1.5v1.5h-1.5zM7.25 60h1.5v1.5h-1.5zM7.25 64h1.5v1.5h-1.5zM7.25 68h1.5v1.5h-1.5zM7.25 72h1.5v1.5h-1.5z" fill="var(--line)"/>
+</svg>

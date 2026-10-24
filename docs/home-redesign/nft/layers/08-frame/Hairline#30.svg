@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Hairline: the reference card's edge and inner frame</title>
+  <rect x="0.5" y="0.5" width="999" height="699" rx="30" fill="none" stroke="var(--line)" stroke-opacity="0.83" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="18" y="18" width="964" height="664" rx="16" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

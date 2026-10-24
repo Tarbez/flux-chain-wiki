@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="cage">
+  <title>Cage</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g data-sketch=""><ellipse cx="680" cy="110" rx="235" ry="60" transform="rotate(0 680 357)" fill="none" stroke="#fff" stroke-width="3"/><ellipse cx="680" cy="610" rx="235" ry="60" transform="rotate(0 680 357)" fill="none" stroke="#fff" stroke-width="3"/><line x1="460" y1="110" x2="460" y2="610" stroke="#fff" stroke-width="2"/><line x1="515" y1="110" x2="515" y2="610" stroke="#fff" stroke-width="2"/><line x1="570" y1="110" x2="570" y2="610" stroke="#fff" stroke-width="2"/><line x1="625" y1="110" x2="625" y2="610" stroke="#fff" stroke-width="2"/><line x1="680" y1="110" x2="680" y2="610" stroke="#fff" stroke-width="2"/><line x1="735" y1="110" x2="735" y2="610" stroke="#fff" stroke-width="2"/><line x1="790" y1="110" x2="790" y2="610" stroke="#fff" stroke-width="2"/><line x1="845" y1="110" x2="845" y2="610" stroke="#fff" stroke-width="2"/><line x1="900" y1="110" x2="900" y2="610" stroke="#fff" stroke-width="2"/></g>
+</svg>

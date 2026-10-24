@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Capsule Rule: the rule with a short thick accent capsule set in it right of centre, a dot before it (sheet 10, 07-01)</title>
+  <path d="M0 12.5H212" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="220" cy="12.5" r="1.5" fill="var(--ink)"/>
+  <path d="M232 12.5H268" fill="none" stroke="var(--acc)" stroke-width="7" stroke-linecap="round" opacity="0.1"/>
+  <path d="M232 12.5H268" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M278 12.5H360" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

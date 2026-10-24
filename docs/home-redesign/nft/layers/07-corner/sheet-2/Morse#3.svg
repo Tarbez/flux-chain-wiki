@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Morse: broken thick bars down the left arm and a short thick bar on the top arm, then thin lines and dots</title>
+  <path d="M0 0h2.5v10h-2.5z" fill="var(--line)"/>
+  <path d="M0 13h2.5v6h-2.5z" fill="var(--line)"/>
+  <path d="M0 22h2.5v3h-2.5z" fill="var(--line)"/>
+  <path d="M2.5 0h11.5v2.5h-11.5z" fill="var(--line)"/>
+  <path d="M17 1.25H44M1.25 28V48" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M48 0.5h1.5v1.5h-1.5zM52 0.5h1.5v1.5h-1.5zM56 0.5h1.5v1.5h-1.5zM60 0.5h1.5v1.5h-1.5zM64 0.5h1.5v1.5h-1.5zM68 0.5h1.5v1.5h-1.5zM72 0.5h1.5v1.5h-1.5zM76 0.5h1.5v1.5h-1.5z" fill="var(--line)"/>
+  <path d="M0.5 52h1.5v1.5h-1.5zM0.5 56h1.5v1.5h-1.5zM0.5 60h1.5v1.5h-1.5zM0.5 64h1.5v1.5h-1.5zM0.5 68h1.5v1.5h-1.5zM0.5 72h1.5v1.5h-1.5z" fill="var(--line)"/>
+</svg>

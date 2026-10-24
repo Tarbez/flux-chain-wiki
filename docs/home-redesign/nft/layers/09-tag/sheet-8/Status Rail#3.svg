@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Status Rail: a glowing status dot and the status, then a line that ends in three dots (sheet 8)</title>
+  <circle cx="7.5" cy="25" r="7.5" fill="var(--state)" fill-opacity="0.22"/>
+  <circle cx="7.5" cy="25" r="3.5" fill="var(--state)"/>
+  <text x="22" y="29.6" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--ink)" data-field="status" font-weight="500">STATUS</text>
+  <path d="M170 25H318" fill="none" stroke="var(--acc)" stroke-opacity="0.18" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M170 25H318" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <circle cx="328" cy="25" r="1.4" fill="var(--line)"/>
+  <circle cx="338" cy="25" r="1.4" fill="var(--line)"/>
+  <circle cx="348" cy="25" r="1.8" fill="var(--acc)"/>
+</svg>

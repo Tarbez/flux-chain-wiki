@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Neon: a rounded frame in the accent colour with a soft glow, broken by a short gap near each corner of the top and bottom edges (sheet 10, 02-02)</title>
+  <path d="M18 668V32A14 14 0 0 1 32 18H66M80 18H920M934 18H968A14 14 0 0 1 982 32V668A14 14 0 0 1 968 682H934M920 682H80M66 682H32A14 14 0 0 1 18 668" fill="none" stroke="var(--acc)" stroke-width="9" opacity="0.04"/>
+  <path d="M18 668V32A14 14 0 0 1 32 18H66M80 18H920M934 18H968A14 14 0 0 1 982 32V668A14 14 0 0 1 968 682H934M920 682H80M66 682H32A14 14 0 0 1 18 668" fill="none" stroke="var(--acc)" stroke-width="3.5" opacity="0.12"/>
+  <path d="M18 668V32A14 14 0 0 1 32 18H66M80 18H920M934 18H968A14 14 0 0 1 982 32V668A14 14 0 0 1 968 682H934M920 682H80M66 682H32A14 14 0 0 1 18 668" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0.85"/>
+</svg>

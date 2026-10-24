@@ -1,0 +1,112 @@
+/* DEFXN mockup: the concept's own pages (concept-views.js), the chapter strip of How it works,
+   the brief's four state labels, and the definitions of the brief's words.
+   Loaded after the page styles. Colours are the kit's tokens; sizes follow the page's scale. */
+
+body[data-view="minute"] .scrim .page,body[data-view="layers"] .scrim .page,body[data-view="life"] .scrim .page,
+body[data-view="products"] .scrim .page,body[data-view="identity"] .scrim .page,body[data-view="nodes"] .scrim .page,
+body[data-view="status"] .scrim .page{opacity:1}
+
+/* How it works, in four chapters: where you are, and the way to the next */
+.chapters{display:flex;flex-wrap:wrap;gap:4px 14px;margin:10px 0 0;padding:0 0 10px;border-bottom:1px solid hsl(var(--border))}
+.chapters a{display:inline-flex;align-items:center;gap:7px;font:500 12px/1.3 var(--font-sans);color:hsl(var(--text-muted));transition:color .2s}
+.chapters a span{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font:600 10px/1 var(--font-mono);border:1px solid hsl(var(--border))}
+.chapters a:hover{color:hsl(var(--text-strong))}
+.chapters a[aria-current="page"]{color:hsl(var(--text-strong))}
+.chapters a[aria-current="page"] span{border-color:hsl(var(--signal));color:hsl(var(--signal))}
+
+.cview .cbody{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.cview .story{margin-top:0;flex:none}
+.cview .story a{width:100%;display:grid;grid-template-columns:30px 1fr;gap:4px 12px;align-items:center;padding:7px 8px;border-radius:8px;color:hsl(var(--text-muted));transition:background .2s,color .2s}
+.cview .story a:hover{color:hsl(var(--text-strong))}
+.cview .story [aria-current="step"]{background:hsl(var(--signal) / .07);color:hsl(var(--text-strong))}
+.cview .story [aria-current="step"] .n{border-color:hsl(var(--signal));color:hsl(var(--signal))}
+.cview .story [aria-current="step"] .say{grid-template-rows:1fr}
+.cview .story .done .n{border-color:hsl(var(--signal) / .5);color:hsl(var(--text-strong))}
+.cview .aside{margin-top:auto}
+
+/* rows you pick: a layer, a way to run a node */
+.rows-pick{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.rows-pick a{display:grid;gap:4px;padding:9px 12px;border-radius:8px;border-left:2px solid transparent;color:hsl(var(--text-muted));transition:background .2s,color .2s}
+.rows-pick a:hover{color:hsl(var(--text-strong));background:hsl(var(--text-strong) / .03)}
+.rows-pick a[aria-current="true"]{border-left-color:hsl(var(--signal));background:hsl(var(--signal) / .07);color:hsl(var(--text-strong))}
+.rows-pick b{font:600 15px/1.3 var(--font-sans)}
+.rows-pick b small{margin-left:8px;font:500 11px/1 var(--font-mono);letter-spacing:.06em;color:hsl(var(--text-muted))}
+.rows-pick .say{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s var(--glide)}
+.rows-pick .say > span{overflow:hidden;font-size:14px;line-height:1.5;color:hsl(var(--text))}
+.rows-pick .say em{display:block;margin-top:6px;font-style:normal;color:hsl(var(--text-strong))}
+.rows-pick [aria-current="true"] .say{grid-template-rows:1fr}
+
+/* products: each with an empty slot for its emblem */
+.lanes{margin-top:0}
+.prods{list-style:none;margin:0;padding:0;display:grid;gap:2px;flex:1;min-height:0;overflow:auto}
+.prods li{display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:start;padding:8px 4px;border-top:1px solid hsl(var(--border))}
+.prods li:first-child{border-top:0}
+.prods b{font:600 15px/1.3 var(--font-sans);color:hsl(var(--text-strong));margin-right:8px}
+.prods em{font:500 11px/1 var(--font-mono);font-style:normal;letter-spacing:.04em;color:hsl(var(--text-muted))}
+.prods small{display:block;margin-top:4px;font-size:13px;line-height:1.45;color:hsl(var(--text))}
+.emblem{width:40px;height:40px;border-radius:11px;border:1.5px dashed hsl(var(--text-faint));background:hsl(var(--canvas) / .35)}
+
+/* the brief's four state labels */
+.state{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font:600 10px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;
+  vertical-align:1px;color:hsl(var(--text));box-shadow:inset 0 0 0 1px hsl(var(--border));white-space:nowrap}
+.state[data-state="built"]{color:hsl(var(--state-built));box-shadow:inset 0 0 0 1px hsl(var(--state-built) / .55)}
+.state[data-state="partial"]{color:hsl(var(--state-partial));box-shadow:inset 0 0 0 1px hsl(var(--state-partial) / .55)}
+.state[data-state="decided"]{color:hsl(var(--state-decided));box-shadow:inset 0 0 0 1px hsl(var(--state-decided) / .55)}
+.state[data-state="not-built"],.state[data-state="none"],.state[data-state="planned"]{color:hsl(var(--text-muted));box-shadow:inset 0 0 0 1px hsl(var(--border))}
+.state[data-state="building"]{color:hsl(var(--state-partial));box-shadow:inset 0 0 0 1px hsl(var(--state-partial) / .55)}
+.cview .para{margin:0;font-size:14px;line-height:1.55;color:hsl(var(--text));max-width:60ch}
+.cview .para .state{margin-right:6px}
+.states{list-style:none;margin:0;padding:0;display:grid;gap:0;flex:1;min-height:0;overflow:auto}
+.states li{display:grid;grid-template-columns:84px 1fr;gap:10px;align-items:baseline;padding:5px 0;border-top:1px solid hsl(var(--border))}
+.states li:first-child{border-top:0}
+.states .state{justify-self:start}
+.states b{font:600 13.5px/1.3 var(--font-sans);color:hsl(var(--text-strong));margin-right:6px}
+.states small{display:inline;font-size:12.5px;line-height:1.4;color:hsl(var(--text-muted))}
+.states small em{font-style:normal;color:hsl(var(--state-partial))}
+
+/* the brief's words: a quiet dotted line; the meaning on hover or focus */
+.term{border-bottom:1px dotted hsl(var(--text-muted));cursor:help;transition:border-color .2s,color .2s}
+.term:hover,.term:focus-visible{color:hsl(var(--text-strong));border-bottom-color:hsl(var(--signal));outline:0}
+.card .term{border-bottom-color:hsl(var(--ink) / .45)}
+.term-pop{position:fixed;left:0;top:0;z-index:30;max-width:290px;padding:10px 12px;border-radius:8px;pointer-events:none;
+  background:hsl(var(--raised));box-shadow:0 0 0 1px hsl(var(--border)),0 10px 30px hsl(var(--canvas) / .6);
+  font:400 13px/1.45 var(--font-sans);color:hsl(var(--text));clip-path:inset(0 0 100% 0);transition:clip-path .22s var(--glide)}
+.term-pop b{display:block;margin-bottom:3px;font:600 10px/1.3 var(--font-mono);letter-spacing:.16em;text-transform:uppercase;color:hsl(var(--signal))}
+.term-pop.on{clip-path:inset(-4px)}
+@media (prefers-reduced-motion:reduce){.term-pop{transition:none}.rows-pick .say{transition:none}}
+@media (max-height:760px) and (min-width:901px){.chapters{margin-top:6px;padding-bottom:6px}.chapters a{font-size:11px}.rows-pick a{padding:6px 10px}.prods li{padding:6px 4px}}
+
+.cview .sheet-lede[hidden]{display:none}
+/* one line on desktop; a phone lets the chapters wrap (it ran 58px past the screen) */
+@media (min-width:901px){.chapters{flex-wrap:nowrap;overflow:hidden}.chapters a{white-space:nowrap}}
+
+/* products: four rows fit with the group chips */
+.prods li{padding:6px 4px;gap:10px;grid-template-columns:34px 1fr}
+.prods .emblem,.emblem{width:34px;height:34px;border-radius:9px}
+.prods small{font-size:12.5px;margin-top:2px}
+/* status has no story to show in 3D: its page is wider, its rows in two columns */
+@media (min-width:901px){
+  .view[data-view="status"] .chain-body{grid-template-columns:minmax(0,1fr) min(820px,58vw)}
+  .view[data-view="status"] .states{grid-template-columns:1fr 1fr;column-gap:22px;align-content:start}
+  .view[data-view="status"] .states li:nth-child(2){border-top:0}
+}
+
+/* FXN, Money tab: the brief's three kinds of money, and which ones move (audit 4, fix 213) */
+.money{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:0}
+.money li{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline;padding:10px 0;border-top:1px solid hsl(var(--border))}
+.money li:first-child{border-top:0}
+.money b{font:600 15px/1.3 var(--font-sans);color:hsl(var(--text-strong))}
+.money p{grid-column:1 / -1;margin:0;font-size:13.5px;line-height:1.5;color:hsl(var(--text));max-width:60ch}
+
+/* products: one row each; the chosen product opens its line (no scroll in the list) */
+.prods li{display:block;padding:0}
+.prods a{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;padding:6px 6px;border-radius:8px;border-left:2px solid transparent;transition:background .2s}
+.prods a:hover{background:hsl(var(--text-strong) / .03)}
+.prods a[aria-current="true"]{border-left-color:hsl(var(--signal));background:hsl(var(--signal) / .06)}
+.prods .say{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s var(--glide)}
+.prods .say > small{overflow:hidden}
+.prods a[aria-current="true"] .say{grid-template-rows:1fr}
+.prods{overflow:visible}
+
+/* why the one action asks for an identity (FXN page, fix 215): one quiet line under the foot */
+.sheet-foot .cta-why{flex-basis:100%;margin-top:2px;font:500 11px/1.4 var(--font-mono);letter-spacing:.06em;color:hsl(var(--text-muted))}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Coupler: a connector: an amber hexagon, a rule broken by a double slash, an amber square (sheet 9, piece 26)</title>
+  <path d="M7 6L12.2 9V15L7 18L1.8 15V9Z" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linejoin="round" opacity="0.16"/>
+  <path d="M7 6L12.2 9V15L7 18L1.8 15V9Z" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M18 12.5H171M189 12.5H342" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M174.5 17L178.5 8M180.5 17L184.5 8" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="346.5" y="6.5" width="11" height="11" fill="var(--acc)" opacity="0.14"/>
+  <rect x="348.5" y="8.5" width="7" height="7" fill="var(--acc)"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Corner Number: the genesis ID large inside a heavy accent corner bracket, then a short leader line under the label GENESIS ID, ending in a small dot (sheet 22)</title>
+  <path d="M1.2 34V1.2H34" fill="none" stroke="var(--acc)" stroke-width="2.4" stroke-linejoin="miter"/>
+  <text x="12" y="58" font-family="JetBrains Mono, monospace" font-size="42" font-weight="500" letter-spacing="1" fill="var(--ink)" data-field="genesisId">000</text>
+  <path d="M124 44.5H176" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="181" cy="44.5" r="2.4" fill="var(--acc)"/>
+  <text x="124" y="37" font-family="JetBrains Mono, monospace" font-size="8.5" letter-spacing="2.6" fill="var(--dim)">GENESIS ID</text>
+</svg>

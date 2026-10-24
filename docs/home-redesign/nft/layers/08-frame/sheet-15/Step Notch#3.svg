@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Step Notch: a frame with small bevelled corners and a square notch stepped in at the middle of the left and right edges, the notch floor drawn bright (sheet 15, 09)</title>
+  <path d="M34 18H966L982 34V322H975V378H982V666L966 682H34L18 666V378H25V322H18V34Z" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/><path d="M25 322V378M975 322V378" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--ink)"/>
+</svg>

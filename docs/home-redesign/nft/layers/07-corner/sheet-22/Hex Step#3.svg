@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Hex Step: a corner with one square step cut into its bend, the step in the accent, and a small accent hexagon node at the end of the top arm (sheet 22)</title>
+  <path d="M5.5 78V17H17V5.5H77" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+  <path d="M5.5 17H17V5.5" fill="none" stroke="var(--acc)" stroke-width="1.6" stroke-linejoin="miter"/>
+  <path d="M89.2 5.5L86.6 10L81.4 10L78.8 5.5L81.4 1L86.6 1Z" fill="var(--acc)" fill-opacity="0.18" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="84" cy="5.5" r="1.7" fill="var(--acc)"/>
+  <path d="M2 78H9" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

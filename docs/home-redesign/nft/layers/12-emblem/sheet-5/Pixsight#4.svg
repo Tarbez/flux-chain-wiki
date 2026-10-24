@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Pixsight: a pixel crosshair with dashed arms and a mint plus at the centre</title>
+  <path d="M13.8 1h2.4v2.4h-2.4zM13.8 6h2.4v2.4h-2.4zM13.8 30.6h2.4v2.4h-2.4zM13.8 25.6h2.4v2.4h-2.4zM1 15.8h2.4v2.4h-2.4zM6 15.8h2.4v2.4h-2.4zM26.6 15.8h2.4v2.4h-2.4zM21.6 15.8h2.4v2.4h-2.4z" fill="var(--dim)"/>
+  <path d="M13.8 15.8h2.4v2.4h-2.4zM10.8 15.8h2.4v2.4h-2.4zM16.8 15.8h2.4v2.4h-2.4zM13.8 12.8h2.4v2.4h-2.4zM13.8 18.8h2.4v2.4h-2.4z" fill="var(--acc)"/>
+</svg>

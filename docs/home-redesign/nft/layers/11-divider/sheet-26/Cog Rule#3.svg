@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Cog Rule: a faint rule through a small gear with an accent hub, a short rack at each end (sheet 26, the Cog set: machine gears: toothed wheels and racks, the hub of the main wheel in the accent)</title>
+  <path d="M0.5 12H170" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M190 12H359.5" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M180 5.8A6.2 6.2 0 0 1 181.11 5.9L182.37 3.32A9 9 0 0 1 184.46 4.18L183.53 6.9A6.2 6.2 0 0 1 184.38 7.62A6.2 6.2 0 0 1 185.1 8.47L187.82 7.54A9 9 0 0 1 188.68 9.63L186.1 10.89A6.2 6.2 0 0 1 186.2 12A6.2 6.2 0 0 1 186.1 13.11L188.68 14.37A9 9 0 0 1 187.82 16.46L185.1 15.53A6.2 6.2 0 0 1 184.38 16.38A6.2 6.2 0 0 1 183.53 17.1L184.46 19.82A9 9 0 0 1 182.37 20.68L181.11 18.1A6.2 6.2 0 0 1 180 18.2A6.2 6.2 0 0 1 178.89 18.1L177.63 20.68A9 9 0 0 1 175.54 19.82L176.47 17.1A6.2 6.2 0 0 1 175.62 16.38A6.2 6.2 0 0 1 174.9 15.53L172.18 16.46A9 9 0 0 1 171.32 14.37L173.9 13.11A6.2 6.2 0 0 1 173.8 12A6.2 6.2 0 0 1 173.9 10.89L171.32 9.63A9 9 0 0 1 172.18 7.54L174.9 8.47A6.2 6.2 0 0 1 175.62 7.62A6.2 6.2 0 0 1 176.47 6.9L175.54 4.18A9 9 0 0 1 177.63 3.32L178.89 5.9A6.2 6.2 0 0 1 180 5.8Z" fill="var(--faint)" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <circle cx="180" cy="12" r="2.4" fill="var(--acc)"/>
+  <path d="M0.5 12H4.5V7.5H8.5V12H12.5V7.5H16.5V12H20.5V7.5H24.5V12H26" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M334 12H338V7.5H342V12H346V7.5H350V12H354V7.5H358V12H359.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

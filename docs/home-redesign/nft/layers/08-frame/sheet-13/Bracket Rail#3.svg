@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Bracket Rail: bright rounded brackets at the top-right and both bottom corners, the top-left left open, faint top and bottom lines between them, and dotted lines running just inside the left and right edges (sheet 13, 21)</title>
+  <path d="M930 14H970A16 16 0 0 1 986 30V74M986 626V670A16 16 0 0 1 970 686H930M74 686H30A16 16 0 0 1 14 670V626" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M60 14H918M84 686H918" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M22 40V660M978 40V660" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 4"/>
+</svg>

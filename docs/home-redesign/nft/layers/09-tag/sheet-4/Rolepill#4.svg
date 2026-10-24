@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Rolepill: a pill outline with a glowing cyan dot and the role spaced wide (sheet-4, 07; the role stands in for the status word, which the facts already show)</title>
+  <rect x="0.5" y="10.5" width="146" height="27" rx="13.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="17" cy="24" r="6.5" fill="var(--acc)" opacity="0.22"/><circle cx="17" cy="24" r="3" fill="var(--acc)"/>
+  <text x="32" y="28.5" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="3.6" fill="var(--ink)" data-field="role">MEMBER</text>
+</svg>

@@ -1,0 +1,6 @@
+/* Ash: cool grey. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 210 16% 92%;
+  --b: 210 40% 78%;
+  --c: 215 30% 70%;
+}

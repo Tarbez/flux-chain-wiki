@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Chevron X: an X built from four chevrons that point at the centre, so each arm runs as two parallel strokes, with an accent diamond in the middle (sheet 22)</title>
+  <path d="M6.5 5L15 13.5L23.5 5M3 8.5L11.5 17L3 25.5M27 8.5L18.5 17L27 25.5M6.5 29L15 20.5L23.5 29" fill="none" stroke="var(--dim)" stroke-width="2" stroke-linejoin="miter"/>
+  <path d="M15 14.9 L17.1 17 L15 19.1 L12.9 17Z" fill="var(--acc)"/>
+</svg>

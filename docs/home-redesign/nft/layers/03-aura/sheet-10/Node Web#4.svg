@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s10-node-web">
+  <title>Node Web: a network of small glass cubes and points around the mark, each joined to its nearest neighbours, one hub glowing in the accent (sheet 10, 12-01)</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g fill="none" stroke="#fff" stroke-width="2" data-sketch=""><path d="M470 120L560 60L640 90M900 160L960 260L920 380M450 520L520 620L640 640M900 560L960 480"/><circle cx="470" cy="120" r="8"/><circle cx="960" cy="260" r="8"/><circle cx="520" cy="620" r="8"/></g>
+</svg>

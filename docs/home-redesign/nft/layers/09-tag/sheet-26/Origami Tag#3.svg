@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Origami Tag: a ribbon banner whose two tails fold behind it, the folds in the accent: the role, a small folded triangle, then the status (sheet 26, the Origami set: folded paper: creases, a dog-eared flap and accordion pleats, the underside of a fold in the accent)</title>
+  <path d="M0.5 15.5H14V42.5H0.5L6.5 29Z" fill="var(--faint)" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+  <path d="M252.5 15.5H239V42.5H252.5L246.5 29Z" fill="var(--faint)" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+  <path d="M14 36.5L14 42.5L8 36.5Z" fill="var(--acc)" fill-opacity="0.55"/>
+  <path d="M239 36.5L239 42.5L245 36.5Z" fill="var(--acc)" fill-opacity="0.55"/>
+  <path d="M14 7.5H239V36.5H14Z" fill="var(--faint)" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+  <text x="25" y="26.4" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="1.8" font-weight="500" fill="var(--ink)" data-field="role">ROLE</text>
+  <path d="M126 17.5L126 26.5L134 26.5Z" fill="var(--state)"/>
+  <text x="140" y="26.4" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="1.8" fill="var(--state)" data-field="status">STATUS</text>
+</svg>

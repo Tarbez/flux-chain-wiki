@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Strata: three stacked flat layers seen from above: a solid accent top sheet over two open chevron edges (sheet 22)</title>
+  <path d="M15 4 L27.6 10.6 L15 17.2 L2.4 10.6Z" fill="var(--acc)"/>
+  <path d="M2.6 16.4L15 22.9L27.4 16.4" fill="none" stroke="var(--dim)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M2.6 22.2L15 28.7L27.4 22.2" fill="none" stroke="var(--dim)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+</svg>

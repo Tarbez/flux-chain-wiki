@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Stepbend: a rounded pixel corner, the bend made of stepped pixels, the arm tips mint</title>
+  <path d="M12 0h3.4v3.4h-3.4zM16 0h3.4v3.4h-3.4zM20 0h3.4v3.4h-3.4zM24 0h3.4v3.4h-3.4zM28 0h3.4v3.4h-3.4zM32 0h3.4v3.4h-3.4zM36 0h3.4v3.4h-3.4zM0 12h3.4v3.4h-3.4zM0 16h3.4v3.4h-3.4zM0 20h3.4v3.4h-3.4zM0 24h3.4v3.4h-3.4zM0 28h3.4v3.4h-3.4zM0 32h3.4v3.4h-3.4zM0 36h3.4v3.4h-3.4zM8 0h3.4v3.4h-3.4zM4 4h3.4v3.4h-3.4zM8 4h3.4v3.4h-3.4zM4 8h3.4v3.4h-3.4zM0 8h3.4v3.4h-3.4z" fill="var(--line)"/>
+  <path d="M40 0h3.4v3.4h-3.4zM0 40h3.4v3.4h-3.4z" fill="var(--acc)"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Role Pill: the role beside a dotted circle in a rounded outline (sheet 7, item 11)</title>
+  <rect x="0.5" y="10.5" width="117.4" height="24" rx="12" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="20" cy="22.5" r="0.7" fill="var(--dim)"/>
+  <circle cx="18.83" cy="25.33" r="0.7" fill="var(--dim)"/>
+  <circle cx="16" cy="26.5" r="0.7" fill="var(--dim)"/>
+  <circle cx="13.17" cy="25.33" r="0.7" fill="var(--dim)"/>
+  <circle cx="12" cy="22.5" r="0.7" fill="var(--dim)"/>
+  <circle cx="13.17" cy="19.67" r="0.7" fill="var(--dim)"/>
+  <circle cx="16" cy="18.5" r="0.7" fill="var(--dim)"/>
+  <circle cx="18.83" cy="19.67" r="0.7" fill="var(--dim)"/>
+  <text x="68.4" text-anchor="middle" y="26.9" font-family="JetBrains Mono, monospace" font-size="12" font-weight="500" letter-spacing="2.4" fill="var(--ink)" data-field="role">ROLE</text>
+</svg>

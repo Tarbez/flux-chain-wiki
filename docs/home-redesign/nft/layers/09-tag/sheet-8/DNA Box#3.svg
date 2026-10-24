@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>DNA Box: the card's DNA in a rounded box, after a DNA label and a cyan tick (sheet 8)</title>
+  <path d="M6.5 9.5H353.5A6 6 0 0 1 359.5 15.5V34.5A6 6 0 0 1 353.5 40.5H6.5A6 6 0 0 1 0.5 34.5V15.5A6 6 0 0 1 6.5 9.5Z" fill="none" stroke="var(--acc)" stroke-opacity="0.16" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M6.5 9.5H353.5A6 6 0 0 1 359.5 15.5V34.5A6 6 0 0 1 353.5 40.5H6.5A6 6 0 0 1 0.5 34.5V15.5A6 6 0 0 1 6.5 9.5Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <text x="14" y="29" font-family="JetBrains Mono, monospace" font-size="10.5" letter-spacing="2.1" fill="var(--dim)">DNA</text>
+  <path d="M48 17.5V32.5" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <text x="58" y="29.2" font-family="JetBrains Mono, monospace" font-size="11.5" letter-spacing="0.6" fill="var(--ink)" data-field="dna">DNA</text>
+</svg>

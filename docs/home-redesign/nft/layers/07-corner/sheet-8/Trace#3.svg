@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Trace: a circuit trace: a drop down the left, a cyan square node, a 45-degree jog and a dashed tail (sheet 8)</title>
+  <path d="M2.5 15V66M5 12.5H22L32 2.5H84" fill="none" stroke="var(--acc)" stroke-opacity="0.22" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M2.5 15V66M5 12.5H22L32 2.5H84" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <path d="M88 2.5H92M96 2.5H100M104 2.5H108M112 2.5H116" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <rect x="-2" y="8" width="9" height="9" fill="var(--acc)" fill-opacity="0.2"/>
+  <rect x="0" y="10" width="5" height="5" fill="var(--acc)"/>
+</svg>

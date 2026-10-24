@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Hatch Ticket: a slanted ticket holding the role, with a block of accent hatching //// at each end (sheet 22)</title>
+  <path d="M40 13.5H188L180 36.5H32Z" fill="var(--faint)" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+  <path d="M8 13L11.2 13L3.2 37L0 37ZM14.4 13L17.6 13L9.6 37L6.4 37ZM20.8 13L24 13L16 37L12.8 37ZM27.2 13L30.4 13L22.4 37L19.2 37ZM33.6 13L36.8 13L28.8 37L25.6 37ZM191.2 13L194.4 13L186.4 37L183.2 37ZM197.6 13L200.8 13L192.8 37L189.6 37ZM204 13L207.2 13L199.2 37L196 37ZM210.4 13L213.6 13L205.6 37L202.4 37ZM216.8 13L220 13L212 37L208.8 37Z" fill="var(--acc)"/>
+  <text x="110" y="29.4" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2.4" font-weight="500" fill="var(--ink)" text-anchor="middle" data-field="role">ROLE</text>
+</svg>

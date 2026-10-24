@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Micro Set: a hatch block, three small squares, a triangle, an accent triangle pointing down, upright bars and three hexagons (sheet 12, micrographics 03)</title>
+  <path d="M8 28H14L6 44H0Z" fill="var(--ink)"/><path d="M19 28H25L17 44H11Z" fill="var(--ink)"/><path d="M30 28H36L28 44H22Z" fill="var(--ink)"/><path d="M41 28H47L39 44H33Z" fill="var(--dim)"/><path d="M52 28H58L50 44H44Z" fill="var(--dim)"/>
+  <rect x="78" y="33" width="6" height="6" fill="var(--ink)"/>
+  <rect x="90.5" y="33.5" width="5" height="5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="102.5" y="33.5" width="5" height="5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M134 44L142 29L150 44Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M166 29H182L174 44Z" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M204 28V44M213 28V44M217 28V44M226 28V44" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M256 28L262.93 32L262.93 40L256 44L249.07 40L249.07 32Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M280 28L286.93 32L286.93 40L280 44L273.07 40L273.07 32Z" fill="var(--dim)" fill-opacity="0.3" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M304 28L310.93 32L310.93 40L304 44L297.07 40L297.07 32Z" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M322 36H360" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

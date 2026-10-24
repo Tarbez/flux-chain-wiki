@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Tick Gate: a rounded frame broken at the top and bottom centres, each gap holding a cluster of four short ticks, with a short accent bar at the middle of each side (sheet 13, 08)</title>
+  <path d="M528 16H968A16 16 0 0 1 984 32V668A16 16 0 0 1 968 684H528M472 684H32A16 16 0 0 1 16 668V32A16 16 0 0 1 32 16H472" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M482 11V21M482 679V689M494 11V21M494 679V689M506 11V21M506 679V689M518 11V21M518 679V689" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="12.5" y="324" width="7" height="52" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="14.5" y="326" width="3" height="48" fill="var(--acc)"/>
+  <rect x="980.5" y="324" width="7" height="52" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="982.5" y="326" width="3" height="48" fill="var(--acc)"/>
+</svg>

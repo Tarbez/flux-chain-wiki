@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Star Sight: a crosshair whose arms stop short of a glowing centre dot, four short diagonal ticks around it (sheet 10, 09-01)</title>
+  <path d="M1.5 17H10M20 17H28.5M15 3V12M15 22V31" fill="none" stroke="var(--ink)" stroke-width="1" opacity="0.8"/>
+  <path d="M9.7 11.7L11.5 13.5M20.3 11.7L18.5 13.5M9.7 22.3L11.5 20.5M20.3 22.3L18.5 20.5" fill="none" stroke="var(--dim)" stroke-width="1"/>
+  <circle cx="15" cy="17" r="4.6" fill="var(--ink)" opacity="0.08"/>
+  <circle cx="15" cy="17" r="3.12" fill="var(--ink)" opacity="0.22"/>
+  <circle cx="15" cy="17" r="1.9" fill="var(--ink)"/>
+  <circle cx="15" cy="17" r="0.9" fill="var(--acc)"/>
+</svg>

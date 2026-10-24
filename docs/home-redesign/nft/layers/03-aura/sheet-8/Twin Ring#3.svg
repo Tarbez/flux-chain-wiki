@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s8-twin-ring">
+  <title>Twin Ring: two thin overlapping rings around the mark with short cyan dashes at both sides (sheet 8)</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g data-sketch=""><ellipse cx="680" cy="320" rx="212" ry="74" fill="none" stroke="#fff" stroke-width="2"/><ellipse cx="680" cy="394" rx="212" ry="74" fill="none" stroke="#fff" stroke-width="2"/><path d="M444 320H452M456 320H464M896 320H904M908 320H916M444 394H452M456 394H464M896 394H904M908 394H916" stroke="#6ef" stroke-width="3"/></g>
+</svg>

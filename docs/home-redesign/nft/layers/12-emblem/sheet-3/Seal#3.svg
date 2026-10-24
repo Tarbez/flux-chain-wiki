@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Seal: a small accent hexagon inside four corner brackets (sheet-3, 24, without the claim)</title>
+  <path d="M1.5 8V2.5H7M23 2.5H28.5V8M28.5 26V31.5H23M7 31.5H1.5V26" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M15 10.5 20.63 13.75V20.25L15 23.5 9.37 20.25V13.75Z" fill="none" stroke="var(--acc)" stroke-width="1.4" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,6 @@
+/* Violet: purple. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 262 64% 88%;
+  --b: 268 84% 70%;
+  --c: 292 70% 64%;
+}

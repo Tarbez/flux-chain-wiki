@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Ticked: an L bracket with a short cyan L inside it (sheet-4, 01)</title>
+  <path d="M0.5 18.5V0.5H18.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M6 13V6H13" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

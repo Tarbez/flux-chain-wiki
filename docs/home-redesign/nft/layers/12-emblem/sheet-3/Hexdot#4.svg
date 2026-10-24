@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Hexdot: the footer hexagon with the status dot inside, green only when the card is Minted (sheet-3, 06)</title>
+  <path d="M15 1.5 28 9v16L15 32.5 2 25V9Z" fill="none" stroke="var(--dim)" stroke-width="1.4" stroke-linejoin="round"/>
+  <circle cx="15" cy="17" r="6.5" fill="var(--state)" opacity=".18"/>
+  <circle cx="15" cy="17" r="3.4" fill="var(--state)"/>
+</svg>

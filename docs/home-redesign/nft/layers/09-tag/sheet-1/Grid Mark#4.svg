@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Grid Mark: a 3 x 3 grid of squares with a dot in each, the centre in the accent, dashed cross lines, and the card's mark (reference sheet 1, #23)</title>
+  <rect x="10.5" y="11" width="7" height="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="13" y="13.5" width="2" height="2" fill="var(--dim)"/>
+  <rect x="20.5" y="11" width="7" height="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="23" y="13.5" width="2" height="2" fill="var(--dim)"/>
+  <rect x="30.5" y="11" width="7" height="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="33" y="13.5" width="2" height="2" fill="var(--dim)"/>
+  <rect x="10.5" y="21" width="7" height="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="13" y="23.5" width="2" height="2" fill="var(--dim)"/>
+  <rect x="20.5" y="21" width="7" height="7" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="23" y="23.5" width="2" height="2" fill="var(--acc)"/>
+  <rect x="30.5" y="21" width="7" height="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="33" y="23.5" width="2" height="2" fill="var(--dim)"/>
+  <rect x="10.5" y="31" width="7" height="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="13" y="33.5" width="2" height="2" fill="var(--dim)"/>
+  <rect x="20.5" y="31" width="7" height="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="23" y="33.5" width="2" height="2" fill="var(--dim)"/>
+  <rect x="30.5" y="31" width="7" height="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="33" y="33.5" width="2" height="2" fill="var(--dim)"/>
+  <path d="M0 25H7M41 25H62M24 2V8M24 42V48" fill="none" stroke="var(--line)" stroke-dasharray="2 2.5" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="72" y="29.5" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--dim)">MARK</text>
+  <text x="128" y="29.5" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--ink)" data-field="mark">GLITCH</text>
+</svg>

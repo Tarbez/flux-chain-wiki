@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Left Tab: a rounded frame whose top edge rises into a long tab over its left half, a faint line under the tab, a row of accent ticks at the top right, a dotted right edge and a short accent bar low on that edge (sheet 13, 07)</title>
+  <path d="M982 666A16 16 0 0 1 966 682H34A16 16 0 0 1 18 666V36A16 16 0 0 1 34 20H52L60 12H412L420 20H966A16 16 0 0 1 982 36" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M60 20H412" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M982 36V666" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 4"/>
+  <rect x="899.2" y="12.5" width="1.6" height="5" fill="var(--acc)"/>
+  <rect x="907.2" y="12.5" width="1.6" height="5" fill="var(--acc)"/>
+  <rect x="915.2" y="12.5" width="1.6" height="5" fill="var(--acc)"/>
+  <rect x="923.2" y="12.5" width="1.6" height="5" fill="var(--acc)"/>
+  <rect x="931.2" y="12.5" width="1.6" height="5" fill="var(--acc)"/>
+  <rect x="939.2" y="12.5" width="1.6" height="5" fill="var(--acc)"/>
+  <rect x="947.2" y="12.5" width="1.6" height="5" fill="var(--acc)"/>
+  <rect x="978.5" y="594" width="7" height="48" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="980.5" y="596" width="3" height="44" fill="var(--acc)"/>
+</svg>

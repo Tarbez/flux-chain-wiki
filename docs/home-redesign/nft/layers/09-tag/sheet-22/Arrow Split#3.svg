@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Arrow Split: a tag split in two: a tinted accent cell holding the network ends in an arrow point that nests into the notch of an outline cell holding the role (sheet 22)</title>
+  <path d="M0.5 13.5H96L107 25L96 36.5H0.5Z" fill="var(--acc)" fill-opacity="0.22" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+  <path d="M103 13.5H230.5V36.5H103L114 25Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+  <text x="12" y="29.4" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2.4" font-weight="500" fill="var(--ink)" data-field="network">NETWORK</text>
+  <text x="125" y="29.4" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2.4" fill="var(--dim)" data-field="role">ROLE</text>
+</svg>

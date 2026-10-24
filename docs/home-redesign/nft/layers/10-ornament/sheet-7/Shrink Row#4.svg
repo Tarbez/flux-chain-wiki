@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Shrink Row: a row of circles shrinking from large to a dot (sheet 7, item 20)</title>
+  <circle cx="13.5" cy="40" r="13" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="48.5" cy="40" r="10" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="78" cy="40" r="7.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="103" cy="40" r="5.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="124.5" cy="40" r="4" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="143.1" cy="40" r="2.6" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="159.1" cy="40" r="1.4" fill="var(--ink)"/>
+</svg>

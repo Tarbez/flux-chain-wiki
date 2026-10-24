@@ -1,0 +1,6 @@
+/* Mustard: ochre light, a violet accent. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 46 22% 88%;
+  --b: 46 62% 54%;
+  --c: 262 56% 72%;
+}

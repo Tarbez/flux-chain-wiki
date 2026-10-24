@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Hook Corners: heavy accent rounded corners at the top right and bottom left, fine white corners at the other two, a dotted top edge held between two ticks, dotted side edges and a solid bottom edge (sheet 13, 09)</title>
+  <path d="M16 64V32A16 16 0 0 1 32 16H56M984 636V668A16 16 0 0 1 968 684H944" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M64 16H936" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 5"/>
+  <path d="M64 11V21M936 11V21" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M16 74V626M984 74V626" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 5"/>
+  <path d="M64 684H936" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M944 16H968A16 16 0 0 1 984 32V64M56 684H32A16 16 0 0 1 16 668V636" fill="none" stroke="var(--acc)" stroke-width="8" opacity="0.12" stroke-linecap="round"/>
+  <path d="M944 16H968A16 16 0 0 1 984 32V64M56 684H32A16 16 0 0 1 16 668V636" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

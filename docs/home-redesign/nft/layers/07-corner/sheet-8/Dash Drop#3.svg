@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Dash Drop: a top line that turns down at its right end into a short column of stacked cyan dashes (sheet 8)</title>
+  <path d="M0.5 12V0.5H96.5V3" fill="none" stroke="var(--acc)" stroke-opacity="0.22" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M0.5 12V0.5H96.5V3" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <path d="M96.5 6V8.6M96.5 11V13.6M96.5 16V18.6" fill="none" stroke="var(--acc)" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M96.5 6V8.6M96.5 11V13.6M96.5 16V18.6" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+</svg>

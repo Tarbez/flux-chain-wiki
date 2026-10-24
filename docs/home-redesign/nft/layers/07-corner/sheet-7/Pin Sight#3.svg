@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Pin Sight: a crosshair, four short arms around a small square outline, at the corner point (sheet 7, item 06)</title>
+  <path d="M7.5 7.5h5v5h-5z" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M10 0.5V5M10 15V19.5M0.5 10H5M15 10H19.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

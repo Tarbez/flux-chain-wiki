@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Venn: two overlapping circles on a broken vertical axis, a small square at each side</title>
+  <circle cx="11.5" cy="17" r="7.5" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/>
+  <circle cx="18.5" cy="17" r="7.5" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/>
+  <path d="M15 1V4M15 7V10M15 24V27M15 30V33" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/>
+  <rect x="0" y="16" width="2" height="2" fill="var(--dim)"/>
+  <rect x="28" y="16" width="2" height="2" fill="var(--dim)"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Facet: a faint frame cut at the top-left and bottom-right corners only, each cut bright with a dot at both ends, short accent runs on the side edges (sheet 12, corners 02)</title>
+  <path d="M78 18H982V622L922 682H18V78Z" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M18 150V78L78 18H150M982 550V622L922 682H850" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M982 112V190M18 510V588" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="18" cy="78" r="2.2" fill="var(--ink)"/>
+  <circle cx="78" cy="18" r="2.2" fill="var(--ink)"/>
+  <circle cx="982" cy="622" r="2.2" fill="var(--ink)"/>
+  <circle cx="922" cy="682" r="2.2" fill="var(--ink)"/>
+</svg>

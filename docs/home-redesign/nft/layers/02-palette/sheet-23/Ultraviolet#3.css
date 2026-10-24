@@ -1,0 +1,6 @@
+/* Ultraviolet: blue violet light, things glow green under it. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 250 28% 92%;
+  --b: 248 90% 78%;
+  --c: 158 84% 50%;
+}

@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>DEFXN card elements</title>
+<!-- Every element of every layer folder (layers/, bundled by make-layers.mjs), one card each. Each
+     card is the reference card's DNA with ONE element swapped, on one fixed SAMPLE record, so the only
+     change from card to card is the element named under it. These are previews, not cards: they
+     belong to no genesis number. The counts at the top are derived from the bundle. Cards render as
+     they scroll into view. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="card.css">
+<style>
+  :root{--page:180 5% 7%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%}
+  html,body{margin:0}
+  body{background:hsl(var(--page));color:hsl(var(--page-text));font:400 13px/1.55 var(--nft-font-mono);padding:28px 16px 48px}
+  main{max-width:1440px;margin:0 auto}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:8px}
+  h1{margin:0;font:800 22px/1 var(--nft-font-display);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--page-strong))}
+  header nav{display:flex;gap:18px}
+  header a{color:hsl(var(--page-text));text-decoration:none;border-bottom:1px solid hsl(var(--page-line) / .2);letter-spacing:.16em;text-transform:uppercase;font-size:11px}
+  .sum{display:flex;gap:28px;flex-wrap:wrap;margin:18px 0 6px;padding:12px 0;border-top:1px solid hsl(var(--page-line) / .12);border-bottom:1px solid hsl(var(--page-line) / .12)}
+  .sum div{display:grid;gap:4px}
+  .sum span{font-size:10px;letter-spacing:.2em;text-transform:uppercase}
+  .sum b{font-weight:500;color:hsl(var(--page-strong));font-size:15px;letter-spacing:.04em}
+  .sum .key b{color:hsl(var(--honey))}
+  .note{margin:0 0 8px;font-size:12px}
+  .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+  section{margin-top:22px}
+  h2{margin:0 0 10px;font:500 12px/1 var(--nft-font-mono);letter-spacing:.24em;text-transform:uppercase;color:hsl(var(--page-strong))}
+  h2 small{color:hsl(var(--page-text));font-size:11px;letter-spacing:.14em;margin-left:10px}
+  .what{margin:-4px 0 10px;font-size:11.5px}
+  .row{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+  figure{margin:0}
+  .slot{aspect-ratio:1000 / 700;border-radius:3%;background:hsl(180 8% 3%)}
+  figcaption{margin-top:6px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;display:flex;justify-content:space-between;gap:8px}
+  figcaption b{color:hsl(var(--page-strong));font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* under each element: what it shapes in the site (world.js), drawn when the card is */
+  .shapes{margin-top:6px;height:76px;border-radius:4px;background:hsl(180 8% 3%)}
+  .shapes .w-sample{height:76px;min-height:0;padding:8px 9px;gap:4px}
+  .shapes .w-sample .w-banner{height:76px}
+  .shapes .w-sample .w-panel{min-height:54px}
+  @media (max-width:1100px){.row{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  @media (max-width:700px){.row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Card elements</h1>
+    <nav><a href="index.html">All sample cards</a><a href="card.html?new">New card</a></nav>
+  </header>
+  <div class="sum" id="sum"></div>
+  <p class="note"><b>Sample data.</b> One made-up record. Each card swaps one element into the reference card's mix. These previews belong to no genesis number. Under each card is what that element shapes in the site. Add <code>?palette=Glass</code> to the address to see them in another palette.</p>
+  <div id="layers"></div>
+</main>
+<script src="../mark-data.js"></script>
+<script src="../vendor/three-r180-defxn.js"></script>
+<script src="layers-bundle.js"></script>
+<script src="cards-data.js"></script>
+<script src="traits.js"></script>
+<script src="art3d.js"></script>
+<script src="builders-bundle.js"></script>
+<script src="card.js"></script>
+<script src="world.js"></script>
+<script>
+(function () {
+  var T = window.DEFXN_TRAITS, ref = window.DEFXN_CARDS[0];
+  var base = { genesisId: '000', identity: '0x4E1...A07C', name: 'sample.fxn', status: 'Preview', role: 'Member',
+    network: 'DEFXN', joined: '24 OCT 2026', serial: '00', tagline: ref.tagline };
+
+  var elements = 0, common = 1, rarest = 1;
+  T.LAYERS.forEach(function (l) {
+    var s = l.elements.map(function (e) { return e.share / 100; });
+    elements += s.length; common /= Math.max.apply(null, s); rarest /= Math.min.apply(null, s);
+  });
+  var n = T.words;
+  [['Layers', T.LAYERS.length], ['Elements', elements], ['Mixes', n(T.CAP)], ['Most common mix', '1 in ' + n(common)],
+   ['Rarest mix', '1 in ' + n(rarest)], ['Mixes given twice', 'none', 'key']].forEach(function (c) {
+    var d = document.createElement('div'), sp = document.createElement('span'), b = document.createElement('b');
+    if (c[2]) d.className = c[2];
+    sp.textContent = c[0]; b.textContent = c[1]; d.appendChild(sp); d.appendChild(b);
+    document.getElementById('sum').appendChild(d);
+  });
+
+  // ?only=sheet-4 shows only the elements in sub-folders of that name; ?layer=03-aura shows one layer;
+  // ?palette=Glass draws every preview in that palette, so the accent colours show
+  var q = new URLSearchParams(location.search), only = q.get('only'), oneLayer = q.get('layer'), pal = q.get('palette');
+  var host = document.getElementById('layers'), jobs = [];
+  T.LAYERS.forEach(function (layer) {
+    if (oneLayer && layer.folder !== oneLayer && layer.key !== oneLayer) return;
+    var list = layer.elements.filter(function (e) { return !only || e.file.indexOf(only + '/') === 0; });
+    if (!list.length) return;
+    var sec = document.createElement('section'), h = document.createElement('h2'), sm = document.createElement('small'), row = document.createElement('div');
+    h.textContent = layer.name; sm.textContent = list.length + ' elements · ' + layer.folder; h.appendChild(sm);
+    row.className = 'row'; sec.appendChild(h);
+    if (window.DefxnWorld) { var what = document.createElement('p'); what.className = 'what'; what.textContent = 'In the site: ' + window.DefxnWorld.SHAPES[layer.key]; sec.appendChild(what); }
+    sec.appendChild(row); host.appendChild(sec);
+    list.slice().sort(function (a, b) { return b.weight - a.weight || a.name.localeCompare(b.name); }).forEach(function (e) {
+      var rec = Object.assign({}, base, { traits: Object.assign({}, ref.traits) });
+      if (pal) rec.traits.palette = pal;
+      rec.traits[layer.key] = e.name;
+      var fig = document.createElement('figure'), box = document.createElement('div'), cap = document.createElement('figcaption'), shapes = document.createElement('div');
+      var nm = document.createElement('b'), sh = document.createElement('span');
+      box.className = 'slot'; nm.textContent = e.name; nm.title = layer.folder + '/' + e.file; sh.textContent = Math.round(e.share * 10) / 10 + '%';
+      shapes.className = 'shapes'; shapes.title = window.DefxnWorld ? window.DefxnWorld.SHAPES[layer.key] : '';
+      cap.appendChild(nm); cap.appendChild(sh); fig.appendChild(box); fig.appendChild(cap); fig.appendChild(shapes); row.appendChild(fig);
+      jobs.push({ box: box, rec: rec, shapes: shapes, layer: layer.key, element: e });
+    });
+  });
+  // render a card, and what its element shapes in the site, when it comes near the screen, once
+  function go(job) {
+    if (job.done) return;
+    job.done = true; job.box.className = ''; window.DefxnCard.render(job.box, job.rec);
+    if (!window.DefxnWorld) return;
+    try { job.shapes.appendChild(window.DefxnWorld.sample(job.layer, job.element, job.rec)); }
+    catch (err) { console.error('What ' + job.element.file + ' shapes in the site did not draw: ' + err.message); }
+  }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); go(en.target._job); } });
+    }, { rootMargin: '600px 0px' });
+    jobs.forEach(function (j) { j.box._job = j; io.observe(j.box); });
+  } else jobs.forEach(go);
+})();
+</script>
+</body>
+</html>

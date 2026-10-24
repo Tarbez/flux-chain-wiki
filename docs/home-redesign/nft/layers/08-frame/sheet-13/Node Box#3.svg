@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Node Box: a square frame joined at each corner by a small hollow square node, with short accent bars at the middle of the side edges and an accent dash on the bottom edge near the right (sheet 13, 18)</title>
+  <path d="M22.5 18H977.5M982 22.5V677.5M977.5 682H22.5M18 677.5V22.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M13.5 13.5H22.5V22.5H13.5ZM977.5 13.5H986.5V22.5H977.5ZM977.5 677.5H986.5V686.5H977.5ZM13.5 677.5H22.5V686.5H13.5Z" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="14.5" y="332" width="7" height="36" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="16.5" y="334" width="3" height="32" fill="var(--acc)"/>
+  <rect x="978.5" y="332" width="7" height="36" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="980.5" y="334" width="3" height="32" fill="var(--acc)"/>
+  <rect x="902" y="678.5" width="48" height="7" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="904" y="680.5" width="44" height="3" fill="var(--acc)"/>
+</svg>

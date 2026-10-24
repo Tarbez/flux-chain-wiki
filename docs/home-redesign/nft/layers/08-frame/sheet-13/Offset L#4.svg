@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Offset L: a plain rounded frame with a small accent plus tucked into the top-right and bottom-left corners, bright L marks just outside the top-left and bottom-right corners, and dotted runs along the inside of the side edges (sheet 13, 01)</title>
+  <path d="M30 14H970A16 16 0 0 1 986 30V670A16 16 0 0 1 970 686H30A16 16 0 0 1 14 670V30A16 16 0 0 1 30 14Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M10.5 44V10.5H44M989.5 656V689.5H956" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M21 140V560M979 140V560" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 5"/>
+  <rect x="974" y="21.5" width="7" height="2" fill="var(--acc)"/><rect x="976.5" y="19" width="2" height="7" fill="var(--acc)"/>
+  <rect x="19" y="676.5" width="7" height="2" fill="var(--acc)"/><rect x="21.5" y="674" width="2" height="7" fill="var(--acc)"/>
+</svg>

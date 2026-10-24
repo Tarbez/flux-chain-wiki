@@ -1,0 +1,6 @@
+/* Harbor: blue light, amber lamps. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 214 30% 90%;
+  --b: 214 84% 72%;
+  --c: 40 94% 58%;
+}

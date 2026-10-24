@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Netcell: a mint filled cell, the network and a pixel dot grid</title>
+  <path d="M0 12h26v26h-26z" fill="var(--acc)"/>
+  <rect x="26.5" y="12.5" width="122" height="25" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="38" y="29.5" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--ink)" font-weight="500" style="text-transform:uppercase"><tspan data-field="network">NETWORK</tspan></text>
+  <path d="M131 18.5h2.5v2.5h-2.5zM135.5 18.5h2.5v2.5h-2.5zM140 18.5h2.5v2.5h-2.5zM131 23h2.5v2.5h-2.5zM135.5 23h2.5v2.5h-2.5zM140 23h2.5v2.5h-2.5zM131 27.5h2.5v2.5h-2.5zM135.5 27.5h2.5v2.5h-2.5zM140 27.5h2.5v2.5h-2.5z" fill="var(--dim)"/>
+</svg>

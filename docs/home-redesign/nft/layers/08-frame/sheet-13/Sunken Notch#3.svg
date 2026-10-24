@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Sunken Notch: a frame with rounded top corners and cut bottom corners, its top edge dipping into a trapezoid notch at the centre that holds a row of accent dots, and an accent bar at the middle of each side (sheet 13, 14)</title>
+  <path d="M14 30A16 16 0 0 1 30 14H430L442 24H558L570 14H970A16 16 0 0 1 986 30V662L962 686H38L14 662Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="470" cy="18.6" r="1.7" fill="var(--acc)"/>
+  <circle cx="485" cy="18.6" r="1.7" fill="var(--acc)"/>
+  <circle cx="500" cy="18.6" r="1.7" fill="var(--acc)"/>
+  <circle cx="515" cy="18.6" r="1.7" fill="var(--acc)"/>
+  <circle cx="530" cy="18.6" r="1.7" fill="var(--acc)"/>
+  <rect x="10.5" y="320" width="7" height="60" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="12.5" y="322" width="3" height="56" fill="var(--acc)"/>
+  <rect x="982.5" y="320" width="7" height="60" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="984.5" y="322" width="3" height="56" fill="var(--acc)"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Scope: a plain corner with a ring-and-crosshair scope in the accent colour inside the bend</title>
+  <path d="M0.5 40V0.5H40" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <circle cx="11" cy="11" r="5" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--acc)"/>
+  <path d="M11 4V8.5M11 13.5V18M4 11H8.5M13.5 11H18" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--acc)"/>
+  <path d="M44 0h1.5v1.5h-1.5zM48 0h1.5v1.5h-1.5zM52 0h1.5v1.5h-1.5zM56 0h1.5v1.5h-1.5zM60 0h1.5v1.5h-1.5zM64 0h1.5v1.5h-1.5zM68 0h1.5v1.5h-1.5zM72 0h1.5v1.5h-1.5z" fill="var(--line)"/>
+  <path d="M0 44h1.5v1.5h-1.5zM0 48h1.5v1.5h-1.5zM0 52h1.5v1.5h-1.5zM0 56h1.5v1.5h-1.5zM0 60h1.5v1.5h-1.5zM0 64h1.5v1.5h-1.5z" fill="var(--line)"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Shaperow: a diamond, a circle, a triangle and a square, each with a cyan dot (sheet-4, 21)</title>
+  <path d="M45 27L58 40L45 53L32 40Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="135" cy="40" r="12.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M225 26.5L238 49L212 49Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="303" y="28" width="24" height="24" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="45" cy="40" r="2" fill="var(--acc)"/><circle cx="135" cy="40" r="2" fill="var(--acc)"/><circle cx="225" cy="41.5" r="2" fill="var(--acc)"/><circle cx="315" cy="40" r="2" fill="var(--acc)"/>
+</svg>

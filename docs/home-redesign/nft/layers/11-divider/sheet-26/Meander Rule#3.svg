@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Meander Rule: two faint lines closed at both ends, three Greek keys at the centre, the middle one in the accent (sheet 26, the Meander set: the Greek key: square key hooks drawn in 1 px lines, one key in the accent)</title>
+  <path d="M0.5 3.5H359.5" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M0.5 20.5H359.5" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M0.5 3.5V20.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M359.5 3.5V20.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M157.5 18L157.5 6L169.5 6L169.5 15L163.5 15L163.5 12L166.5 12L166.5 9L160.5 9L160.5 18L172.5 18" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M172.5 18L172.5 6L184.5 6L184.5 15L178.5 15L178.5 12L181.5 12L181.5 9L175.5 9L175.5 18L187.5 18" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M187.5 18L187.5 6L199.5 6L199.5 15L193.5 15L193.5 12L196.5 12L196.5 9L190.5 9L190.5 18L202.5 18" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M202.5 18V6" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

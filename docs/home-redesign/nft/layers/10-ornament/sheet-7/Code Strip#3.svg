@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Code Strip: a barcode with the network and genesis ID spaced out under it (sheet 7, item 27)</title>
+  <rect x="0" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="2.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="5.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="9.5" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="14.5" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="19.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="23.5" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="29.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="33.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="36.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="39" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="43.5" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="48" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="54" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="57.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="61.5" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="67.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="71.5" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="75.5" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="79" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="84" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="90" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="95" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="100" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="102.5" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="106.5" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="110" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="113" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="119" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="123" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="126.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="129" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="134" y="12" width="2" height="34" fill="var(--dim)"/>
+  <rect x="138" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="143" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="147" y="12" width="3" height="34" fill="var(--dim)"/>
+  <rect x="152" y="12" width="1" height="34" fill="var(--dim)"/>
+  <rect x="154.5" y="12" width="1" height="34" fill="var(--dim)"/>
+  <text x="0" y="64" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="7" fill="var(--dim)"><tspan data-field="network">NETWORK</tspan>-<tspan data-field="genesisId">ID</tspan></text>
+</svg>

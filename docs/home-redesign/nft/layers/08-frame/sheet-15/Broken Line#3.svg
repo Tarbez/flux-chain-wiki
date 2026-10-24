@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Broken Line: a rectangle broken by short gaps near each corner and by a wider gap at the top centre, the centre gap closed by two small ticks (sheet 15, 12)</title>
+  <path d="M18 72V18H72M82 18H468M532 18H918M928 18H982V72M982 82V618M982 628V682H928M918 682H82M72 682H18V628M18 618V82" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/><path d="M468 13V23M532 13V23" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--ink)"/>
+</svg>

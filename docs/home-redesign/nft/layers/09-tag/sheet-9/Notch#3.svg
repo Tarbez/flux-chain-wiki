@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Notch: a notched box with the status and the status dot (sheet 9, piece 25)</title>
+  <path d="M0.5 8.5H178L190.5 21V41.5H13L0.5 29Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M168 8.5H178L190.5 21V29" fill="none" stroke="var(--acc)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.06"/>
+  <path d="M168 8.5H178L190.5 21V29" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.22"/>
+  <path d="M168 8.5H178L190.5 21V29" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linecap="square"/>
+  <text x="14" y="20.5" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="2.2" fill="var(--dim)">STATUS</text>
+  <text x="14" y="35.5" font-family="JetBrains Mono, monospace" font-size="12.5" letter-spacing="2.4" fill="var(--ink)" data-field="status" font-weight="500">STATUS</text>
+  <circle cx="170" cy="31" r="6.5" fill="var(--state)" opacity="0.07"/>
+  <circle cx="170" cy="31" r="4.69" fill="var(--state)" opacity="0.25"/>
+  <circle cx="170" cy="31" r="3.2" fill="var(--state)"/>
+</svg>

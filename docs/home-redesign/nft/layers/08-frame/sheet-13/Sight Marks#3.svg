@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Sight Marks: a square frame with white plus marks on its left corners and small target rings with an accent centre on its right corners, the left edge dotted (sheet 13, 25)</title>
+  <path d="M26 18H976M26 682H976M982 24V676" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M18 26V674" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 5"/>
+  <path d="M11 18H25M18 11V25" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M11 682H25M18 675V689" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="982" cy="18" r="6" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="982" cy="682" r="6" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="982" cy="18" r="1.8" fill="var(--acc)"/>
+  <circle cx="982" cy="682" r="1.8" fill="var(--acc)"/>
+</svg>

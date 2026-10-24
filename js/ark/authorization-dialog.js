@@ -104,6 +104,11 @@
       cancelButton.addEventListener('click', function () { if (!busy()) finish(false); });
       backdrop.addEventListener('mousedown', function (event) { if (event.target === backdrop && !busy()) finish(false); });
       dialog.addEventListener('keydown', function (event) { if (busy() && event.key === 'Escape') event.stopPropagation(); }, true);
+      // Escape closes the element itself (flux-elements' close() fires
+      // flux-dismiss). Without this the review vanished but its promise never
+      // settled: the caller waited forever and its button stayed disabled.
+      // Cancelling signs nothing, like the Cancel button.
+      dialog.addEventListener('flux-dismiss', function () { if (!busy()) finish(false); });
       approveButton.addEventListener('click', function () {
         dialog.state = 'signing';
         close.disabled = true; cancelButton.disabled = true; approveButton.disabled = true;

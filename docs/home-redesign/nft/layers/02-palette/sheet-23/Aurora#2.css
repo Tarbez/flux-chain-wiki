@@ -1,0 +1,6 @@
+/* Aurora: green sky light, a violet glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 124 28% 90%;
+  --b: 124 60% 68%;
+  --c: 284 70% 72%;
+}

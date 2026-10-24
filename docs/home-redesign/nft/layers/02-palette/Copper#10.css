@@ -1,0 +1,6 @@
+/* Copper: white blocks, copper light. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 0 0% 100%;
+  --b: 28 82% 64%;
+  --c: 26 92% 60%;
+}

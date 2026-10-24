@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>NFT engine demo</title>
+<!-- An example site that loads nft-engine.js and enters GAME MODE for a visitor (DefxnEngine.enter):
+     the visitor's 3D world behind the site, a HUD, a loadout of the card's twelve layers, the card's
+     emblem as the cursor, and a one-time boot. card.html links here with its record and skin
+     ("Enter a site as this card"), and the loadout links back to card.html with the skin drawer open.
+     The original note: an example site that loads nft-engine.js. It is written only with Ark UI's colour tokens
+     (@deadark/sdk theme names: --canvas, --surface, --primary, --accent ...) and marks the places a
+     visitor may show with data-nft. A guest sees the site's own look. A visitor with a card sees the
+     site reskinned in that card: the engine sets the tokens and dresses each marked element.
+     The bar above the site switches who visits. Sample data: nothing is sent and nothing is live. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="card.css">
+<style>
+  /* the demo page around the site */
+  :root{--page:180 5% 7%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%}
+  html,body{margin:0}
+  body{background:hsl(var(--page));color:hsl(var(--page-text));font:400 13px/1.5 "JetBrains Mono",ui-monospace,monospace;
+    min-height:100svh;box-sizing:border-box;padding:14px 16px;display:grid;grid-template-rows:auto 1fr auto;gap:12px}
+  .visit{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+  .visit b{color:hsl(var(--page-strong));font-weight:500;margin-right:6px}
+  .visit button{font:inherit;letter-spacing:inherit;text-transform:inherit;color:hsl(var(--page-strong));background:none;cursor:pointer;
+    border:1px solid hsl(var(--page-line) / .3);border-radius:3px;padding:7px 11px}
+  .visit button[aria-pressed="true"]{background:hsl(var(--page-strong));color:hsl(var(--page));border-color:hsl(var(--page-strong))}
+  .visit .who{margin-left:auto;text-transform:none;letter-spacing:.04em;color:hsl(var(--honey))}
+  .note{margin:0;font-size:11.5px}
+  .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+
+  /* THE SITE: written only with Ark UI tokens. These are its own (guest) values. */
+  .site{--canvas:200 9% 6%;--surface:200 8% 9%;--raised:200 7% 12%;--nested:200 6% 15%;--overlay:200 7% 10%;
+    --text-strong:0 0% 96%;--text:210 10% 80%;--text-muted:210 6% 60%;--text-faint:210 5% 42%;--text-inverse:200 12% 8%;
+    --border-subtle:0 0% 100% / .07;--border-default:0 0% 100% / .14;--border-strong:0 0% 100% / .3;
+    --primary:168 52% 48%;--accent:38 80% 60%;--complement:210 30% 70%;--live:156 76% 54%;
+    font-family:Inter,system-ui,sans-serif;color:hsl(var(--text));background:hsl(var(--canvas));
+    border:1px solid hsl(var(--page-line) / .14);border-radius:10px;overflow:hidden;display:grid;grid-template-rows:auto auto 1fr;min-height:0;
+    transition:background-color .35s ease-out,color .35s ease-out,opacity .2s ease-out}
+  .site.is-switching{opacity:.25}
+  .site *{box-sizing:border-box}
+  .s-top{display:flex;align-items:center;gap:26px;padding:12px 22px;border-bottom:1px solid hsl(var(--border-subtle));background:hsl(var(--surface))}
+  .s-brand{font:800 15px/1 "Inter Tight",Inter,sans-serif;letter-spacing:.06em;color:hsl(var(--text-strong))}
+  .s-nav{display:flex;gap:20px;font-size:13px;color:hsl(var(--text-muted))}
+  .s-nav a{color:inherit;text-decoration:none}
+  .s-nav a.is-here{color:hsl(var(--text-strong));border-bottom:1px solid hsl(var(--primary));padding-bottom:3px}
+  .s-me{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:hsl(var(--text-strong))}
+  .s-btn{font:500 12px/1 Inter,sans-serif;letter-spacing:.04em;padding:9px 14px;border-radius:4px;cursor:pointer;
+    color:hsl(var(--text-strong));background:transparent;border:1px solid hsl(var(--border-strong));transition:background-color .35s,color .35s,border-color .35s}
+  .s-btn[data-primary]{background:hsl(var(--primary));border-color:hsl(var(--primary));color:hsl(var(--text-inverse))}
+  .s-hero{position:relative;padding:18px 22px 14px;display:grid;gap:10px;border-bottom:1px solid hsl(var(--border-subtle))}
+  .s-banner{position:absolute;inset:0;opacity:.95;pointer-events:none}
+  .s-banner .w-banner{position:absolute;inset:0}
+  .s-hero > *:not(.s-banner){position:relative}
+  .s-hero h1{margin:0;font:700 26px/1.1 "Inter Tight",Inter,sans-serif;color:hsl(var(--text-strong));display:flex;align-items:center;gap:14px}
+  .s-hero p{margin:0;color:hsl(var(--text-muted));font-size:13.5px;max-width:52ch}
+  .s-badges{display:flex;gap:8px;align-items:center;min-height:26px}
+  .s-chip{font:500 11px/1 "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;padding:6px 9px;border-radius:999px;border:1px solid hsl(var(--border-default));color:hsl(var(--text-muted))}
+  .s-main{display:grid;grid-template-rows:auto auto auto;gap:14px;padding:16px 22px 18px;min-height:0;align-content:start}
+  .s-div{height:22px;display:flex;align-items:center}
+  .s-div hr{flex:1;border:0;border-top:1px solid hsl(var(--border-default));margin:0}
+  .s-div > .w-divider{flex:1;height:22px}
+  .s-row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;min-height:0}
+  .s-cardbox{max-width:430px}
+  .s-cardbox .nft-box{width:100%}
+  .s-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .s-panel{background:hsl(var(--surface));border:1px solid hsl(var(--border-default));border-radius:8px;padding:16px 18px;display:grid;gap:10px;align-content:start;min-height:150px;transition:background-color .35s,border-color .35s}
+  .s-panel h2{margin:0;font:600 15px/1.2 Inter,sans-serif;color:hsl(var(--text-strong));display:flex;align-items:center;gap:12px}
+  .s-panel ul{margin:0;padding:0;list-style:none;display:grid;gap:7px;font-size:13.5px}
+  .s-panel li{display:flex;align-items:center;gap:9px}
+  .s-panel li::before{content:"";width:5px;height:5px;border-radius:50%;background:hsl(var(--text-faint))}
+  .s-panel ul.nft-on li::before{display:none}
+  .s-panel .acts{display:flex;gap:8px;flex-wrap:wrap}
+  .s-panel p{margin:0;font-size:13px;color:hsl(var(--text-muted))}
+  /* who shows: a guest, or a visitor with a card */
+  .w-world .for-guest{display:none}
+  .site:not(.w-world) .for-visitor{display:none}
+  @media (max-width:900px){.s-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="visit" role="group" aria-label="Visit the site as">
+  <b>Visit as</b>
+  <button type="button" data-visit="guest" aria-pressed="true">Guest</button>
+  <button type="button" data-visit="9" aria-pressed="false">Card 009</button>
+  <button type="button" data-visit="27" aria-pressed="false">Card 027</button>
+  <button type="button" data-visit="263" data-skin="palette:Copper|aura:Orbit|corner:Bevel" aria-pressed="false">Card 263, skinned</button>
+  <button type="button" data-visit="next" aria-pressed="false">Next card</button>
+  <span class="who" id="who" aria-live="polite">A guest sees the site's own look.</span>
+</div>
+
+<div class="site" id="site">
+  <header class="s-top">
+    <span class="s-brand">Example site</span>
+    <nav class="s-nav" aria-label="Example site"><a href="#" class="is-here">Home</a><a href="#">Names</a><a href="#">Records</a></nav>
+    <div class="s-me">
+      <button type="button" class="s-btn for-guest">Sign in</button>
+      <span class="for-visitor" data-nft="avatar" data-size="30"></span>
+      <span class="for-visitor" data-nft="name" data-glyph="14"></span>
+    </div>
+  </header>
+  <section class="s-hero">
+    <div class="s-banner for-visitor" data-nft="banner"></div>
+    <h1 data-nft="heading" data-orn-height="24"><span class="for-guest">Welcome</span><span class="for-visitor" id="hello">Welcome back</span></h1>
+    <p class="for-guest">This site is open to anyone. A visitor who brings a card sees it in that card's look.</p>
+    <div class="s-badges for-visitor">
+      <span data-nft="badge" data-field="role"><span class="s-chip">Role</span></span>
+      <span data-nft="badge" data-field="status"><span class="s-chip">Status</span></span>
+    </div>
+  </section>
+  <main class="s-main">
+    <div class="s-div" data-nft="divider"><hr></div>
+    <div class="s-grid">
+      <section class="s-panel" data-nft="panel">
+        <h2 data-nft="heading" data-orn-height="16">Names</h2>
+        <ul data-nft="bullets"><li class="for-visitor" id="myname">Your name</li><li>Names you follow</li></ul>
+      </section>
+      <section class="s-panel" data-nft="panel">
+        <h2 data-nft="heading" data-orn-height="16">Records</h2>
+        <ul data-nft="bullets"><li>Notes</li><li>Files</li><li>Links</li></ul>
+      </section>
+      <section class="s-panel" data-nft="panel">
+        <h2 data-nft="heading" data-orn-height="16">Settings</h2>
+        <p>Your look on this site comes from your card.</p>
+        <div class="acts"><button type="button" class="s-btn" data-nft="button" data-primary>Save</button><button type="button" class="s-btn" data-nft="button">Cancel</button></div>
+      </section>
+    </div>
+    <div class="s-row">
+      <section class="s-panel" data-nft="panel">
+        <h2 data-nft="heading" data-orn-height="16">Your card</h2>
+        <p class="for-guest">A visitor who brings a card sees it here, and the whole site takes its look.</p>
+        <div class="s-cardbox for-visitor" data-nft="card"></div>
+      </section>
+      <section class="s-panel" data-nft="panel">
+        <h2 data-nft="heading" data-orn-height="16">About this site</h2>
+        <p>This site loads nft-engine.js. It names where a visitor may show, and the visitor's card fills those places: the colours, the panel frames and corners, the heading strips, the dividers, the badges, the bullets, the avatar and the banner.</p>
+        <ul data-nft="bullets"><li>A guest sees the site's own look.</li><li>Every card shows a look of its own.</li><li>Leaving puts the site's look back.</li></ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<p class="note"><b>Sample data.</b> The visitors are sample cards. Nothing is sent and nothing on this page is live.</p>
+
+<script src="../mark-data.js"></script>
+<script src="../vendor/three-r180-defxn.js"></script>
+<script src="layers-bundle.js"></script>
+<script src="cards-data.js"></script>
+<script src="traits.js"></script>
+<script src="art3d.js"></script>
+<script src="builders-bundle.js"></script>
+<script src="card.js"></script>
+<script src="world.js"></script>
+<script src="nft-engine.js"></script>
+<script>
+(function () {
+  var T = window.DEFXN_TRAITS, E = window.DefxnEngine, site = document.getElementById('site'), who = document.getElementById('who');
+  var next = 264, buttons = document.querySelectorAll('[data-visit]');
+  var FIELDS = ['genesisId', 'identity', 'name', 'status', 'role', 'network', 'joined', 'serial'];
+  // the card page's link back: the same record and skin in card.html, with the skin drawer open
+  function cardHref(r) {
+    var q = new URLSearchParams();
+    FIELDS.forEach(function (f) { if (r[f]) q.set(f, r[f]); });
+    if (r.tagline) q.set('tagline', r.tagline.join('|'));
+    if (r.skin) q.set('skin', r.skin);
+    q.set('open', 'skin');
+    return 'card.html?' + q.toString();
+  }
+  function enterAs(r, label) {
+    document.getElementById('myname').textContent = r.name;
+    var th = E.enter(site, r, { loadoutHref: cardHref(r) }), t = th.traits;
+    who.textContent = (label || r.name) + ' visits: ' + t.picks.palette.name + ' colours, ' + t.picks.corner.name + ' corners, ' + t.picks.frame.name + ' frames' + (t.skinned ? ', wearing a skin.' : '.');
+  }
+  function visit(btn) {
+    Array.prototype.forEach.call(buttons, function (b) { b.setAttribute('aria-pressed', String(b === btn)); });
+    var v = btn.getAttribute('data-visit');
+    site.classList.add('is-switching');
+    setTimeout(function () {
+      if (v === 'guest') {
+        E.leave(site);
+        document.getElementById('myname').textContent = 'Your name';
+        who.textContent = 'A guest sees the site’s own look.';
+      } else {
+        var n = v === 'next' ? next++ : +v, r = T.sampleRecord(n);
+        if (btn.getAttribute('data-skin')) r.skin = btn.getAttribute('data-skin');
+        enterAs(r);
+      }
+      requestAnimationFrame(function () { site.classList.remove('is-switching'); });
+    }, 180);
+  }
+  Array.prototype.forEach.call(buttons, function (b) { b.addEventListener('click', function () { visit(b); }); });
+  // arriving from the card page: enter as that card, in the skin it wears
+  var q = new URLSearchParams(location.search);
+  if (FIELDS.some(function (f) { return q.has(f); })) {
+    var r = {};
+    FIELDS.forEach(function (f) { r[f] = q.get(f) || ''; });
+    r.tagline = q.has('tagline') ? q.get('tagline').split('|') : (window.DEFXN_CARDS[0] || {}).tagline;
+    if (q.get('skin')) r.skin = q.get('skin');
+    Array.prototype.forEach.call(buttons, function (b) { b.setAttribute('aria-pressed', 'false'); });
+    enterAs(r, r.name + ', from the card page,');
+  }
+})();
+</script>
+</body>
+</html>

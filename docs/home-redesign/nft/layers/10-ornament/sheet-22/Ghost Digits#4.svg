@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Ghost Digits: the genesis ID as a digit display over faint unlit 8s, a thick accent underline with a tick under each place, and the label GENESIS ID on a long rule (sheet 22)</title>
+  <text x="0" y="54" font-family="JetBrains Mono, monospace" font-size="46" font-weight="500" letter-spacing="4" fill="var(--rule)">888</text>
+  <text x="0" y="54" font-family="JetBrains Mono, monospace" font-size="46" font-weight="500" letter-spacing="4" fill="var(--ink)" data-field="genesisId">000</text>
+  <rect x="0" y="61" width="90.8" height="2.6" fill="var(--acc)"/>
+  <path d="M13.8 66V70.5M45.4 66V70.5M77 66V70.5" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M98.8 62.3H360" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="102.8" y="57" font-family="JetBrains Mono, monospace" font-size="8.5" letter-spacing="2.6" fill="var(--dim)">GENESIS ID</text>
+</svg>

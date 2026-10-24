@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Girder: a double line over a faint fill, held between two solid end caps like a girder (sheet 22)</title>
+  <rect x="5" y="8.5" width="350" height="7" fill="var(--faint)"/>
+  <path d="M5 8.5H355" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M5 15.5H355" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="0" y="3" width="3.6" height="18" fill="var(--dim)"/>
+  <rect x="356.4" y="3" width="3.6" height="18" fill="var(--dim)"/>
+  <rect x="0" y="10.2" width="3.6" height="3.6" fill="var(--acc)"/>
+  <rect x="356.4" y="10.2" width="3.6" height="3.6" fill="var(--acc)"/>
+</svg>

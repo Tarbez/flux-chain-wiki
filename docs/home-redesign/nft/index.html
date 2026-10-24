@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>DEFXN identity cards</title>
+<!-- The review page: nine SAMPLE cards from cards-data.js, so the owner can see how the glitch art
+     changes with the record. The reference card comes first and largest. Each card opens card.html
+     with its record in the URL, the same way real data will reach it. "New card" opens card.html
+     with a fresh sample record, so the art's layers can be reviewed one card at a time. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="card.css">
+<style>
+  :root{--page:180 5% 7%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%}
+  html,body{margin:0}
+  body{background:hsl(var(--page));color:hsl(var(--page-text));font:400 13px/1.55 var(--nft-font-mono);padding:32px 16px 48px}
+  main{max-width:1440px;margin:0 auto}
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:24px}
+  h1{margin:0;font:800 22px/1 var(--nft-font-display);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--page-strong))}
+  .note{margin:0;max-width:62ch;font-size:12px;border-left:2px solid hsl(var(--honey) / .7);padding-left:12px}
+  .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+  .acts{display:flex;align-items:center;gap:16px;letter-spacing:.16em;text-transform:uppercase;font-size:11px}
+  .acts a{color:hsl(var(--page-strong));text-decoration:none;border:1px solid hsl(var(--page-line) / .35);border-radius:3px;padding:9px 14px}
+  .acts a:hover,.acts a:focus-visible{border-color:hsl(var(--page-line) / .7)}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;align-items:start}
+  .grid a{display:block;text-decoration:none;color:inherit;border-radius:3%;outline-offset:4px}
+  .grid a:focus-visible{outline:1px solid hsl(var(--page-line) / .7)}
+  .grid a:first-child{grid-column:span 2;grid-row:span 2}
+  .grid figcaption{margin-top:8px;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .grid figure{margin:0}
+  @media (max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:560px){.grid{grid-template-columns:minmax(0,1fr)}.grid a:first-child{grid-column:auto;grid-row:auto}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>DEFXN identity cards</h1>
+    <p class="note"><b>Sample data.</b> Card 009 copies your reference card word for word.
+      The other eight records are made up. Each genesis number gets its own mix of layer
+      elements, never given to another number. Nothing on this page is live.</p>
+    <p class="acts"><a href="shop.html">Shop</a> <a href="engine-demo.html">Engine demo</a> <a href="world.html?genesisId=27&amp;view=others">World</a> <a href="elements.html">Elements</a> <a href="card.html?new">New card</a></p>
+  </header>
+  <div class="grid" id="grid"></div>
+</main>
+<script src="../mark-data.js"></script>
+<script src="../vendor/three-r180-defxn.js"></script>
+<script src="layers-bundle.js"></script>
+<script src="cards-data.js"></script>
+<script src="traits.js"></script>
+<script src="art3d.js"></script>
+<script src="builders-bundle.js"></script>
+<script src="card.js"></script>
+<script>
+(function () {
+  var FIELDS = ['genesisId', 'identity', 'name', 'status', 'role', 'network', 'joined', 'serial'];
+  var grid = document.getElementById('grid');
+  window.DEFXN_CARDS.forEach(function (record, i) {
+    var q = new URLSearchParams();
+    FIELDS.forEach(function (f) { q.set(f, record[f]); });
+    q.set('tagline', record.tagline.join('|'));
+    var link = document.createElement('a');
+    link.href = 'card.html?' + q.toString();
+    var fig = document.createElement('figure');
+    var box = document.createElement('div');
+    var cap = document.createElement('figcaption');
+    var t = window.DEFXN_TRAITS.pick(record);
+    cap.textContent = (i === 0 ? 'Reference ' : 'Sample ') + record.genesisId + ' · ' + t.picks.mark.name + ' · ' + t.picks.palette.name + ' · ' + t.picks.aura.name;
+    fig.appendChild(box); fig.appendChild(cap); link.appendChild(fig); grid.appendChild(link);
+    window.DefxnCard.render(box, record);
+  });
+})();
+</script>
+</body>
+</html>

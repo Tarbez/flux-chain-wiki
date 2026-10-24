@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Dotline: a corner bracket of dashed pixel dots, the corner dot mint</title>
+  <path d="M6 0h3v3h-3zM0 6h3v3h-3zM12 0h3v3h-3zM0 12h3v3h-3zM18 0h3v3h-3zM0 18h3v3h-3zM24 0h3v3h-3zM0 24h3v3h-3zM30 0h3v3h-3zM0 30h3v3h-3zM36 0h3v3h-3zM0 36h3v3h-3zM42 0h3v3h-3zM0 42h3v3h-3z" fill="var(--line)"/>
+  <path d="M0 0h4v4h-4z" fill="var(--acc)"/>
+</svg>

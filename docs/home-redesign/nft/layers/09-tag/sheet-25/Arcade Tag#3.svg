@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Arcade Tag: a label with a shallow arched top and a keystone at its crown in the accent: the role, a twin column, the status (sheet 25, the Arcade set)</title>
+  <path d="M0.5 45.5V14.5A614.09 614.09 0 0 1 210 14.5V45.5Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><path d="M102.75 9.5L101.5 1.5L109 1.5L107.75 9.5Z" fill="var(--acc)"/><path d="M103 18V42M107.5 18V42" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" opacity="0.6"/><text x="14" y="34" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2" font-weight="500" fill="var(--ink)" data-field="role">ROLE</text><text x="118" y="34" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="1.8" fill="var(--state)" data-field="status">STATUS</text>
+</svg>

@@ -1,0 +1,8 @@
+/* Amber: grey blocks, amber light (sheet 9, the amber HUD). Copper's light is redder and Gold tints
+   the blocks gold; here the blocks stay a near-neutral grey and only the light and the accents are
+   amber. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 30 6% 88%;
+  --b: 38 100% 62%;
+  --c: 33 100% 55%;
+}

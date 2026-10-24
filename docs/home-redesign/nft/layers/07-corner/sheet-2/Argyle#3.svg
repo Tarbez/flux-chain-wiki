@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Argyle: a checker diamond of small pixels at the corner point, with the arms running out of its middle</title>
+  <path d="M0.3 6.3h2.4v2.4h-2.4zM3.3 3.3h2.4v2.4h-2.4zM3.3 9.3h2.4v2.4h-2.4zM6.3 0.3h2.4v2.4h-2.4zM6.3 6.3h2.4v2.4h-2.4zM6.3 12.3h2.4v2.4h-2.4zM9.3 3.3h2.4v2.4h-2.4zM9.3 9.3h2.4v2.4h-2.4zM12.3 6.3h2.4v2.4h-2.4z" fill="var(--line)"/>
+  <path d="M18 7.5H48M7.5 18V48" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M52 6.75h1.5v1.5h-1.5zM56 6.75h1.5v1.5h-1.5zM60 6.75h1.5v1.5h-1.5zM64 6.75h1.5v1.5h-1.5zM68 6.75h1.5v1.5h-1.5zM72 6.75h1.5v1.5h-1.5zM76 6.75h1.5v1.5h-1.5zM80 6.75h1.5v1.5h-1.5z" fill="var(--line)"/>
+  <path d="M6.75 52h1.5v1.5h-1.5zM6.75 56h1.5v1.5h-1.5zM6.75 60h1.5v1.5h-1.5zM6.75 64h1.5v1.5h-1.5zM6.75 68h1.5v1.5h-1.5zM6.75 72h1.5v1.5h-1.5z" fill="var(--line)"/>
+</svg>

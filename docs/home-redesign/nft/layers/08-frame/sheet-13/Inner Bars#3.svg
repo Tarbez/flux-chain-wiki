@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Inner Bars: a rounded frame with four accent bars floating just inside it: small ones at the top and bottom centres, a long one at the middle of the left edge and a short one high on the right edge (sheet 13, 13)</title>
+  <path d="M31 15H969A16 16 0 0 1 985 31V669A16 16 0 0 1 969 685H31A16 16 0 0 1 15 669V31A16 16 0 0 1 31 15Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="476" y="17.5" width="48" height="7" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="478" y="19.5" width="44" height="3" fill="var(--acc)"/>
+  <rect x="476" y="675.5" width="48" height="7" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="478" y="677.5" width="44" height="3" fill="var(--acc)"/>
+  <rect x="17.5" y="278" width="7" height="144" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="19.5" y="280" width="3" height="140" fill="var(--acc)"/>
+  <rect x="975.5" y="48" width="7" height="56" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="977.5" y="50" width="3" height="52" fill="var(--acc)"/>
+</svg>

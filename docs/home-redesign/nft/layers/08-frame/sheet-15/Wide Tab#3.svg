@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Wide Tab: a rounded frame whose top edge steps up into a wide centre tab, with a thick bright bar at the middle of the left and right edges (sheet 15, 10)</title>
+  <path d="M36 20H392V12H608V20H964A16 16 0 0 1 980 36V664A16 16 0 0 1 964 680H36A16 16 0 0 1 20 664V36A16 16 0 0 1 36 20Z" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/><rect x="18" y="318" width="4" height="64" rx="2" fill="var(--ink)"/><rect x="978" y="318" width="4" height="64" rx="2" fill="var(--ink)"/>
+</svg>

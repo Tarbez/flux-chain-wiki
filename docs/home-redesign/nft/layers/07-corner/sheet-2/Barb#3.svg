@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Barb: a chamfered corner with a small arrowhead on the cut pointing out to the corner point</title>
+  <path d="M0.5 34V10L10 0.5H34" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M1.5 1.5L7.5 3.5L3.5 7.5Z" fill="var(--ink)"/>
+  <path d="M38 0.5h4M45 0.5h4M52 0.5h4M59 0.5h4M66 0.5h4" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M0.5 38v4M0.5 45v4M0.5 52v4M0.5 59v4" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+</svg>

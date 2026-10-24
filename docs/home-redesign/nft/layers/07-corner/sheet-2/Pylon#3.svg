@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Pylon: a thick bar with a cut top as the left arm and a dotted top arm</title>
+  <path d="M0 8.5L3.5 5V38H0Z" fill="var(--line)"/>
+  <path d="M6 0.5H24" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M28 0h1.5v1.5h-1.5zM32 0h1.5v1.5h-1.5zM36 0h1.5v1.5h-1.5zM40 0h1.5v1.5h-1.5zM44 0h1.5v1.5h-1.5zM48 0h1.5v1.5h-1.5zM52 0h1.5v1.5h-1.5zM56 0h1.5v1.5h-1.5zM60 0h1.5v1.5h-1.5zM64 0h1.5v1.5h-1.5zM68 0h1.5v1.5h-1.5zM72 0h1.5v1.5h-1.5zM76 0h1.5v1.5h-1.5zM80 0h1.5v1.5h-1.5z" fill="var(--line)"/>
+  <path d="M1.75 42V96" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--faint)"/>
+</svg>

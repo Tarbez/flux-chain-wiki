@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Chainlink: two rounded links joined on a diagonal (sheet-3, 07)</title>
+  <g transform="rotate(-45 15 17)" fill="none" stroke-width="1.4">
+    <rect x="3" y="13" width="15" height="8" rx="4" stroke="var(--dim)"/>
+    <rect x="12" y="13" width="15" height="8" rx="4" stroke="var(--acc)"/>
+  </g>
+</svg>

@@ -1,0 +1,6 @@
+/* Graphite: silver grey light, one orange spark. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 0 0% 84%;
+  --b: 200 10% 91%;
+  --c: 24 86% 60%;
+}

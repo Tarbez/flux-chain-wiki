@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Dot Hatch: a dotted frame with a hatched triangle in the top-right and bottom-left corners, a dot at the inner end of each (sheet 12, corners 03)</title>
+  <rect x="18" y="18" width="964" height="664" fill="none" stroke="var(--line)" stroke-dasharray="1 6" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M926 18L982 74M934 18L982 66M942 18L982 58M950 18L982 50M958 18L982 42M966 18L982 34M974 18L982 26M18 626L74 682M18 634L66 682M18 642L58 682M18 650L50 682M18 658L42 682M18 666L34 682M18 674L26 682" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M918 18L982 82M18 618L82 682" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="982" cy="82" r="2" fill="var(--ink)"/>
+  <circle cx="18" cy="618" r="2" fill="var(--ink)"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s6-dial">
+  <title>Dial: a ring of radial tick marks lying flat around the mark, a longer tick every fifth</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g data-sketch="" fill="none" stroke="#fff" stroke-width="1"><ellipse cx="710" cy="357" rx="262" ry="84" stroke-dasharray="1 8"/><ellipse cx="710" cy="357" rx="244" ry="78"/></g>
+</svg>

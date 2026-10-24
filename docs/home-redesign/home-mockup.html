@@ -1,0 +1,1407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>DEFXN home mockup</title>
+<link rel="icon" type="image/png" href="../../assets/kit/defxn-icon.png">
+<!--
+  DEFXN home redesign: look-only mockup (2026-10-22, one app since 2026-10-23). Not the site.
+  It shows the new home and the three pages behind it so the owner can confirm the look before
+  anything is built or merged. The real build is Ark blocks in js/pages/home.js, words in
+  js/content/manifests/home.js, and the brand values in the SDK theme (@deadark/sdk/theme).
+  Nothing in the defxn repo outside this folder is touched until the owner says to merge.
+
+  ONE APP, FOUR VIEWS (owner, 2026-10-23: "insanely smooth between the pages, no fade in and
+  out, no cuts"). A page load is a cut, so the four pages are views of this one page:
+    #/                      home: the network
+    #/chain?r=<record>      your chain, after board A1
+    #/record?r=<record>     one record, its versions and the next record, after board A7
+    #/open?r=<record>&tab=  the record opened: the tile becomes the card, after boards C1-C9
+  The address holds the view, record and tab, so Back, Forward and links work, and leaving and
+  returning keep state (law 21). chain.html, record.html and record-open.html forward here.
+  Between views the 3D camera flies through one world (chains-scene.js) and the words wipe out
+  and in with it (clip and slide, never a fade).
+
+  SHARED KIT: kit.css (tokens, header, footer, .cta, .more), kit-ui.js (header, footer, mockup
+  bar, crumbs, network map), ring-kit.js (the 3D), network-data.js (the network, from the owner's
+  network picture), records-sample.js (SAMPLE records from the owner's boards), mark-data.js (the
+  DEFXN mark, copied from flux/defxn/assets/kit/defxn-mark.png), app.js (views and address).
+
+  AUDIT 2026-10-23 (docs/PRODUCT-DESIGN-LAWS.md, docs/COPY-LAWS.md, rules R01-R52 as pasted):
+  - R03, laws 2 and 50: lime belongs to each view's one action. Earn FXN, the text links and
+    View benchmark are light text on a faint rule, lime on hover.
+  - R17: the scene is calm grays and one teal family; the teal also marks the DEFXN mark and
+    your chain. The owner asked for less bright colour (2026-10-23).
+  - Law 49 and R51: each kind in the scene has a label, on the owner's network picture's callout
+    spots, with a leader to what it names. The kinds are DEFXN's real model (brand brief
+    2026-10-23): the FXN chain (the hub, under the mark), network chains, identity chains, token
+    ledgers, and resolvers (the cubes). The picture's first labels (data, application, governance
+    chains) named kinds DEFXN does not have, so they went (copy law 8). No ring is a named real
+    chain. The labels replace the old topology card (C03: one idea, one home).
+  - Truth (brand brief 2026-10-23: nothing is live yet; the owner tests on a devnet): the rail's
+    "Live · hourly test" tag is gone (BENCH-013 is one dated run), the footer says DEFXN runs on a
+    devnet for now, and the lede says what DEFXN does: identities have chains, tokens keep
+    ledgers, resolvers do the work and sign it, other computers keep a copy.
+  - R33: the scene re-reads the theme tokens and repaints when the theme changes.
+  - Opened pages (owner 2026-10-23: "make them feel like the ui"): the chain and record pages and
+    the card use the product kit's grammar (flux/defxn-product-kit/src/product.css): dot eyebrow,
+    one two-tone headline, mono uppercase metadata, fact grids between hairlines, rows with a
+    square mark, pill tabs, numbered steps, a dash for anything missing. The page is the 3D tile
+    that opened; it glides from the chain page to the record page, then folds into the tile that
+    becomes the card. Earlier versions and the next record live once, in the record's facts.
+  - Law 55: every motion says where something came from: the network builds out from the hub,
+    the camera flies down into your ring, the ring re-forms into your records, the record's tile
+    becomes its card. All of it settles; no idle frame loop.
+  - Law 3: each view fits 1280x720 and 1440x900 with no scroll (measured 2026-10-23).
+  - Copy law 8: every record line is SAMPLE text copied from the owner's boards; a field the
+    boards do not give says "not in this sample".
+
+  REDUCTION TEST (home):
+  1. About: many chains joined as one network, and you start with your own.
+  2. Dominant action: Create your identity.
+  3. Know now: every identity has its own chain and every token its own ledger; resolvers do the
+     work and sign it; other computers keep a copy. The rail shows one dated benchmark run.
+  4. Hidden until asked: what it means, the chain comparison, the full benchmark, your chain.
+  5. Repeated elsewhere: nothing; the kind labels live only in the scene.
+  6. Only because the database has it: BENCH-013 and "10 nodes" in the rail head.
+  7. Removable without changing the decision: nothing further.
+  8. Leaving preserves state: the address holds the view and record.
+  9. Returning preserves context: yes; the scene builds once per visit and then is still.
+  10. If the system fails: no WebGL removes the scene; every view, link and the card still work.
+  The chain, record and open views carry their own answers in app.js.
+
+  MEASURED RAIL (rail-capabilities.js, owner 2026-10-23: "we are going to have far more
+  capabilities and that's what we measure"; a capability is not a product or a resolver): every
+  capability launched on chain (capabilities-data.js, generated by make-capabilities.mjs from
+  flux/defxn-defi-rs/dense-wire/capabilities/<name>/capability-manifest.flx). Each shows what is
+  measured today: its checked cases (conformance vectors), with three named; throughput per
+  capability is "not measured yet". The fleet's BENCH-013 run (one run, 10 nodes) sits on top.
+  Case names that hold a banned word (tests/no-deprecated-vocabulary.cjs) are left out.
+
+  INNER PAGES, ENRICHED AND ADDED (2026-10-23, second pass; owner: "enrich and create new pages,
+  at least 5 ... the animation, the motion, the timing, the speed and the performance are critical").
+  Nine views now, one world. The concept brief (defxn-concept.html) is the source for every idea:
+    chain     + your key at the ring's centre, chain links with a gap at the start, a plain line on
+                what a chain is, oldest date, a Signed / Not signed mark per record
+    record    + a timeline under the 3D: one dot per record, placed by its date
+    open      + Content (panel 04's decisions, steps, questions), Signature, History tabs; the
+                card's one action is See connections. Connections grew into its own page.
+    links     NEW. The ring unrolls into a line; links to / linked from / earlier / related / key
+    resolve   NEW. How a result is made, five steps; a swap; the 3D plays each step's change once
+    resolvers NEW. 15 first-party resolvers (resolvers-data.js, make-resolvers.mjs, derived from
+                dense-wire/resolvers/*/composition.txt); each names its capabilities by a dotted line
+    measured  NEW. One column per capability, one cube per checked case; BENCH-012 and BENCH-013
+                with their limit (capabilities-data.js "runs", every figure from its record)
+    fxn       NEW. The supply as 100 tiles round the mark (1% each); Fees regroups them 65/35
+  AUDIT, own work, before the owner's (2026-10-23): a browser harness measured every view at
+  1280x720, 1440x900 and 390x844 (scratchpad audit.mjs): no page scroll on desktop, nothing clipped,
+  no console error, no banned word, 0 frame requests while idle. Flights run at 60 fps (p95 frame
+  16.8 ms, 1440x900, Apple M2). Fixed on the way: a wake during a frame queued a second frame
+  (ring-kit.js, now one frame is ever queued); words chosen on a page held their place when you
+  left it (the swap animation is released on leave); stages floated into the network rings (raised,
+  and the network steps back further); the FXN ring crossed the mark (the mark now rises into it).
+  Truth: BENCH-012's batch time is 13.874 ms (the record), not the brief's 8.920. The home rail's
+  "71,249 ops/s" is in no record (owner to decide). The capability manifests now give 18
+  capabilities and 201 checked cases; the pages read the generated file, so they say so.
+  Known limits: Who can change a resolver is not in its manifest, so the page says that. Five new
+  capabilities (challenge, commit, object, quota, xdomain) have no plain words in the brief yet; the
+  page shows their crate's own line. Phones hide the 3D labels.
+
+  AUDIT 2 (2026-10-23, FIXES-2026-10-23.md, 90 fixes; owner: "the chain page animation and the 3D
+  is not good enough", "the open page background should become bigger"):
+    chain   the owner's board 02: a tight ring of the 5 records round your key, filling the stage;
+            entry in order (slots fold, records rise and turn out, links join oldest first, the key
+            rises with one ring of light, one bead runs the chain, then the page opens); a soft
+            light under the chosen record; turn arrows and "1 of 5" under the ring; Records and
+            Activity tabs; hover names a tile and lights its row, a row lifts its tile.
+    open    the card is min(1180px, 88vw) by up to 640px, drawn by one mesh whose corners keep
+            their size as it widens; the tile comes to you and swings as it widens; neighbours
+            step back and darken; Content beside a facts column; one sliding tab pill.
+    all     flight length follows the camera's travel, with a crane arc on long flights; the
+            words start when the page opens (the scene is asked before the view shows, since a
+            box read after "on" started the words with the old wait); the page hugs its words,
+            is darker, has a thin rim and turns slightly as it glides; 3D labels have a leader
+            and come on in story order; a hover tag names what a click does.
+  Measured after the fixes: every route passes at 1280x720, 1440x900 and 390x844; 0 frame
+  requests while idle; flights p95 16.8 ms (1440x900, Apple M2).
+
+  AUDIT 3 (2026-10-23, FIXES-2-polish-responsive.md, 40 fixes; owner: "the layout is not
+  responsive... polish, spacing, motion, 3D quality"). Measured at nine sizes, 1024x768 to 2560x1440,
+  820x1180 and 390x844:
+    scale   one number --s (kit-ui.js): 1 at 1440x900 and below, up to 1.6 at 2560x1440. The root
+            is zoomed by it and the CSS divides its viewport units by it, so a big screen shows
+            the 1440 page, larger. At 1440 and below nothing changed, the home page included.
+    fold    an inner page's body and its sheet are size containers: a short sheet tightens one
+            spacing scale (4 to 32 px), folds chips behind "Show all", cases behind "+N more" and
+            the lede to fewer lines; a narrow sheet wraps its strip; a wide sheet (tablet) takes
+            two columns. Menu opens a sheet on tablets and phones; the mockup bar is a pill.
+    labels  3D labels are placed in story order: one that would cover another, or the page, tries
+            its other side, then wipes out; on a small stage it shows its title only; each wipes
+            in from its leader's side. The harness now fails any overlap.
+    found   rules written as [data-view="x"] also matched <body data-view="x">, so the shown page's
+            rules leaked into every view and changed a page's width after the 3D had measured it
+            (now .view[data-view]); a hidden view, held to one screen's height, was measured
+            squeezed, so the page tile landed 181px above its words on a tablet (now measured as
+            shown); the card's words came in before the card had widened (now after).
+    3D      shadows fit the view's area; big screens draw a pixel per pixel (4.2 million cap) at
+            p95 16.8 ms (2560x1440); the page slab is darker glass with a gloss and an edge sheen;
+            a resize eases the camera over 240 ms; a scrolled page never lets the slab drift.
+  The network (home) also changed in this round, by the coordinator: every ring has a set kind
+  (identity, resolver, token ledger, pool, network), the named networks DeArk (DARO) and CR3TV (CR3),
+  and the hub is the DEFXN chain (coin FXN), with FXN's ledger as a small teal ring inside it. Every
+  ring is clickable on home, lifts as a whole and has an empty logo slot; it opens its own view,
+  #/ring?i=<id> (ring-view.js, ring-view.css). Dimming is per ring, so a ring with its own page
+  stays lit, and the kind labels keep the spot that lands in the open screen.
+
+  Rebuilt 2026-10-22 after another session's rsync deleted this folder
+  (docs/node-production-build-2026-10-21/out/INCIDENT-2026-10-22-main-trees-overwritten.md).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="kit.css?v=20261023m">
+<style>
+/* Shared tokens, base, header, footer, .cta and .more live in kit.css. */
+:root{--glide:cubic-bezier(.22,.7,.18,1)}
+
+/* ---------- views: one place, one view at a time ---------- */
+.views{position:relative;z-index:1;flex:1 0 auto;display:grid;min-height:0}
+/* desktop: one screen, always (law 3). The views take exactly the room between header and footer;
+   a long list scrolls inside its own panel, never the page. */
+@media (min-width:901px){
+  body{height:calc(100svh / var(--s))}
+  .views{flex:1 1 0;grid-template-rows:minmax(0,1fr)}
+  .view.hero{min-height:0}
+  .rail,.lead{min-height:0}
+  /* an inner page takes exactly the room between header and footer, so its stage and page fit it */
+  .view.page{align-self:stretch;min-height:0;height:100%}
+  .chain-body{min-height:0}
+  .chain-body > *{min-height:0}
+}
+.view{grid-area:1 / 1;min-width:0;min-height:0;visibility:hidden;pointer-events:none}
+.view.on,.view.out{visibility:visible}
+.view.on{pointer-events:auto}
+/* a view that is not shown takes no more height than the screen, so a tall view never stretches the others */
+.view:not(.on):not(.out){max-height:calc(calc(100svh / var(--s)) - 108px);overflow:hidden}
+/* measured by the scene before it is shown: laid out as it will stand (app.js asShown) */
+.view.measuring:not(.on):not(.out){max-height:none;overflow:visible}
+.view.page{align-self:start;min-height:calc(calc(100svh / var(--s)) - 112px)}
+.view.page{--d:1s}
+/* No fades, no cuts: words wipe and slide with the camera. Out: up and away. In: up into place,
+   once the camera is on its way (--d), one after another (--i). */
+.rise{transform:translateY(16px);clip-path:inset(0 0 100% 0);
+  transition:transform .55s var(--glide),clip-path .55s var(--glide)}
+.view.on .rise{transform:none;clip-path:inset(-24px -60px -24px -60px);transition-delay:calc(var(--d,.6s) + var(--i,0) * 40ms)}
+.view.out .rise{transform:translateY(-22px);clip-path:inset(0 0 100% 0);transition-duration:.32s;transition-delay:calc(var(--i,0) * 18ms)}   /* audit 4: leave fast, so no thin strip of a word stays while the camera moves */
+/* How it works and the identity flow are sequences (MOTION-SPEC.md): between two of their steps the
+   words move with the camera's pan. Next: they leave to the left and arrive from the right. Back: the
+   other way. app.js sets data-dir only for two steps of one sequence. */
+body[data-dir="next"] .view:not(.on):not(.out) .rise{transform:translateX(34px);clip-path:inset(0 0 0 100%)}
+body[data-dir="back"] .view:not(.on):not(.out) .rise{transform:translateX(-34px);clip-path:inset(0 100% 0 0)}
+body[data-dir="next"] .view.out .rise{transform:translateX(-34px);clip-path:inset(0 100% 0 0)}
+body[data-dir="back"] .view.out .rise{transform:translateX(34px);clip-path:inset(0 0 0 100%)}
+body.first .view.on .rise{--d:.12s}
+.rail.rise{transform:translateX(56px);clip-path:inset(0 0 0 100%)}
+.view.out .rail.rise{transform:translateX(56px);clip-path:inset(0 0 0 100%)}
+/* a new record in the same view: its words wipe in again */
+@keyframes reveal{from{transform:translateY(12px);clip-path:inset(0 0 100% 0)}to{transform:none;clip-path:inset(-24px -60px)}}
+.swap{animation:reveal .6s var(--glide) both;animation-delay:calc(var(--i,0) * 45ms + .1s)}
+@media (prefers-reduced-motion:reduce){.rise,.view.on .rise,.view.out .rise{transition:none}.swap{animation:none}}
+
+/* the scene's dimming, per view: eased, not cut */
+.scrim{position:fixed;inset:0;z-index:0;pointer-events:none}
+.scrim i{position:absolute;inset:0;opacity:0;transition:opacity 1.2s var(--glide)}
+.scrim .home{background:linear-gradient(90deg,hsl(var(--canvas) / .95) 0,hsl(var(--canvas) / .88) 28%,hsl(var(--canvas) / .62) 41%,hsl(var(--canvas) / 0) 53%),
+    linear-gradient(0deg,hsl(var(--canvas) / .9) 0,hsl(var(--canvas) / .55) 10%,hsl(var(--canvas) / 0) 24%)}
+.scrim .page{background:linear-gradient(0deg,hsl(var(--canvas) / .92) 0,hsl(var(--canvas) / .6) 22%,hsl(var(--canvas) / 0) 40%)}
+.scrim .open{background:radial-gradient(ellipse at 50% 55%,hsl(var(--canvas) / 0) 38%,hsl(var(--canvas) / .55) 100%)}
+body[data-view="home"] .scrim .home,body[data-view="chain"] .scrim .page,body[data-view="record"] .scrim .page,body[data-view="links"] .scrim .page,
+body[data-view="resolve"] .scrim .page,body[data-view="resolvers"] .scrim .page,body[data-view="measured"] .scrim .page,body[data-view="fxn"] .scrim .page,body[data-view="open"] .scrim .open{opacity:1}
+body.no-scene .scrim,body.no-scene .callouts{display:none}
+
+/* kind labels in the scene, after the owner's network picture; placed by the scene each frame */
+.callouts{position:fixed;inset:0;z-index:1;pointer-events:none}
+.callout{position:absolute;left:0;top:0;display:flex;gap:10px;align-items:flex-start;margin:-7px 0 0 -7px;
+  font:500 10px/1.45 var(--font-mono);letter-spacing:.22em;text-transform:uppercase;color:hsl(var(--text-strong));white-space:nowrap;
+  clip-path:inset(0 100% 0 0);transition:clip-path .7s var(--glide)}
+.callout i{width:14px;height:14px;flex:none;border:1.5px solid hsl(var(--text-muted));border-radius:3px;display:grid;place-items:center;background:hsl(var(--canvas) / .7)}
+.callout i::after{content:'';width:5px;height:5px;border-radius:1px;background:hsl(var(--text-strong))}
+.callout[data-kind="network"] i,.callout[data-kind="fxn"] i{border-color:hsl(var(--signal))}
+.callout[data-kind="network"] i::after,.callout[data-kind="fxn"] i::after{background:hsl(var(--signal))}
+/* the FXN chain's label sits centred over the mark */
+.callout[data-kind="fxn"]{margin:-26px 0 0;transform:translateX(-50%)}
+.callout span{display:block;max-width:9em;white-space:normal;text-shadow:0 0 10px hsl(var(--canvas))}
+body[data-view="home"] .callout.seen{clip-path:inset(-6px -6px -6px -6px);transition-delay:.9s}
+body.first[data-view="home"] .callout.seen{transition-delay:3.4s}
+
+/* ---------- home ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) clamp(360px,calc(29vw / var(--s)),440px)}
+.lead{position:relative;padding:max(36px,calc(8vh / var(--s))) 64px 0 72px;display:flex;flex-direction:column;min-width:0;isolation:isolate}
+.lead::before{content:'';position:absolute;inset:0;z-index:-2;
+  background-image:radial-gradient(circle,hsl(var(--text-faint) / .55) 1px,transparent 1.3px);background-size:26px 26px;
+  mask-image:linear-gradient(90deg,#000 0,#000 38%,transparent 62%)}
+body.no-scene .rail{-webkit-backdrop-filter:none;backdrop-filter:none}
+.copy{pointer-events:none;display:flex;flex-direction:column;flex:1}
+.copy a,.copy button{pointer-events:auto}
+/* the hero's words can be read and selected: they take the pointer, and data-ui keeps a click on them from picking a ring behind */
+.copy .eyebrow,.copy h1,.copy .lede{pointer-events:auto;user-select:text;-webkit-user-select:text;cursor:text}
+/* the words' boxes end where the words end, so the 3D behind them (the tower, a site card) still takes hover and click */
+.view[data-view="home"] h1,.view[data-view="home"] .eyebrow{width:fit-content}
+
+.eyebrow{display:flex;align-items:center;gap:16px;color:hsl(var(--text));font-size:12px;margin:0 0 max(16px,calc(3vh / var(--s)))}
+.eyebrow i{width:10px;height:10px;border:2px solid hsl(var(--text-faint));flex:none}
+.eyebrow .dash{width:66px;height:1px;background:hsl(var(--text-faint))}
+.hero h1{margin:0;font:800 min(calc(4.7vw / var(--s)),calc(7.4vh / var(--s)),76px)/.97 var(--font-display);letter-spacing:-.045em;color:hsl(var(--text-strong));
+  text-shadow:0 0 18px hsl(var(--canvas)),0 0 4px hsl(var(--canvas))}
+.hero h1 b{font-weight:inherit;display:block;white-space:nowrap}
+.hero h1 span{color:hsl(var(--primary));display:block;white-space:nowrap}
+.lede{text-shadow:0 0 14px hsl(var(--canvas)),0 0 3px hsl(var(--canvas));margin:max(18px,calc(3.6vh / var(--s))) 0 0;font-size:min(calc(1.25vw / var(--s)),calc(2.1vh / var(--s)),18px);line-height:1.6;color:hsl(var(--text));max-width:30em}
+.lede span{display:block}
+
+.copy .cta{margin-top:max(22px,calc(4.4vh / var(--s)));align-self:flex-start}
+/* home's primary claim is the benchmark rail (owner, 2026-10-24); the kind labels show on hover, not as a legend */
+.callouts{display:none}
+/* the rail's action is the page's one main action; it takes the full rail width */
+/* the Measured rail is back on home (owner, 2026-10-24); its action is the page's one filled action */
+.rail .cta.rail-cta{margin-top:auto;align-self:stretch;flex:none}
+.rail .cta.rail-cta .say{flex:1;justify-content:space-between}
+/* the three things you can do: icon above, then a word and a line (record descent board) */
+.hero .paths{margin-top:max(24px,calc(4.4vh / var(--s)));border-top:0;padding:0;grid-template-columns:repeat(3,minmax(0,1fr));max-width:560px}
+.hero .paths a{flex-direction:column;gap:10px;padding:0 20px}
+.hero .paths a svg{width:26px;height:26px;color:hsl(var(--text-strong))}
+.hero .paths b{font-size:16px}
+.all:hover{color:hsl(var(--reference));border-color:hsl(var(--reference))}
+
+.paths{margin-top:auto;border-top:1px solid hsl(var(--border));display:grid;grid-template-columns:repeat(3,1fr);padding:max(14px,calc(2.4vh / var(--s))) 0 max(16px,calc(2.8vh / var(--s)))}
+.paths a{display:flex;align-items:flex-start;gap:16px;padding:0 24px;border-left:1px solid hsl(var(--border))}
+.paths a:first-child{border-left:0;padding-left:0}
+.paths svg{color:hsl(var(--text-strong));flex:none;margin-top:2px;width:28px;height:28px}
+.paths b svg{width:14px;height:12px;margin:0}
+.paths b{display:flex;align-items:center;gap:12px;font:500 17px/1.2 var(--font-sans);color:hsl(var(--text-strong))}
+.paths small{display:block;margin-top:5px;font-size:14px;color:hsl(var(--text-muted))}
+.paths a:hover b{color:hsl(var(--reference))}
+
+/* Measured rail */
+.rail{position:relative;padding:max(30px,calc(6vh / var(--s))) 36px max(20px,calc(3.4vh / var(--s))) 64px;display:flex;flex-direction:column;z-index:1;
+  background:hsl(var(--canvas) / .72);-webkit-backdrop-filter:blur(18px) saturate(1.15);backdrop-filter:blur(18px) saturate(1.15)}
+.rail-line{position:absolute;left:0;top:0;width:60px;height:100%;color:hsl(var(--border));pointer-events:none}
+.rail-head{display:grid;grid-template-columns:24px 1fr;gap:4px 14px;align-items:center;padding-bottom:max(10px,calc(2vh / var(--s)));border-bottom:1px solid hsl(var(--border))}
+.rail-head i{width:12px;height:12px;border:2px solid hsl(var(--text-faint))}
+.rail-head .mono{color:hsl(var(--text-strong));font-size:12px;letter-spacing:.32em}
+.rail-head p{grid-column:2;margin:4px 0 0;white-space:nowrap;font:400 min(15px,calc(1.1vw / var(--s)))/1.3 var(--font-sans);color:hsl(var(--text-strong))}
+.rail-head p span{display:block;margin-top:3px;font-family:var(--font-mono);font-size:12px;color:hsl(var(--text-muted));white-space:normal}
+.all{align-self:flex-start;margin-top:12px;display:flex;align-items:center;gap:12px;font:500 13px/1 var(--font-mono);
+  color:hsl(var(--text-strong));padding-bottom:8px;border-bottom:1px solid hsl(var(--text-faint))}
+
+/* Capabilities: every capability launched on chain, and what is measured of each */
+.fleet{margin:max(12px,calc(1.8vh / var(--s))) 0 0;padding:10px 0 12px;display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;
+  border-top:1px solid hsl(var(--border));border-bottom:1px solid hsl(var(--border))}
+.fleet dt{grid-column:1 / -1;font-size:10px;letter-spacing:.16em;color:hsl(var(--text-muted))}
+.fleet dd{margin:0;display:flex;align-items:baseline;gap:6px;white-space:nowrap;min-width:0}
+.fleet b{font:600 17px/1.1 var(--font-mono);color:hsl(var(--text-strong));letter-spacing:-.02em}
+.fleet span{font:400 11px/1 var(--font-mono);color:hsl(var(--text-muted))}
+.caps{list-style:none;margin:0;padding:max(6px,calc(.9vh / var(--s))) 0 2px;flex:1;min-height:0;overflow:auto}
+.caps button{width:100%;display:grid;grid-template-columns:92px 1fr 30px;align-items:center;gap:10px;padding:3px 6px;
+  background:none;border:0;border-left:2px solid transparent;color:hsl(var(--text));cursor:pointer;text-align:left}
+.caps button:hover{background:hsl(var(--text-strong) / .04);color:hsl(var(--text-strong))}
+.caps button[aria-pressed="true"]{border-left-color:hsl(var(--signal));background:hsl(var(--signal) / .07);color:hsl(var(--text-strong))}
+.cap-n{font:500 13px/1.2 var(--font-sans)}
+.cap-bar{height:6px;background:hsl(var(--text-faint) / .3);border-radius:3px;overflow:hidden}
+.cap-bar i{display:block;height:100%;background:hsl(var(--signal) / .8);border-radius:3px}
+.cap-c{font:500 12px/1 var(--font-mono);color:hsl(var(--text-muted));text-align:right}
+.cap-focus{padding:max(10px,calc(1.6vh / var(--s))) 0 4px;border-top:1px solid hsl(var(--border))}
+.cap-kicker{margin:0;font-size:10px;letter-spacing:.2em;color:hsl(var(--text-muted))}
+.cap-kicker::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:hsl(var(--signal));margin-right:8px;vertical-align:1px}
+.cap-name{margin:4px 0 0;font:600 18px/1.2 var(--font-display);color:hsl(var(--text-strong))}
+.cap-line{margin:4px 0 0;font-size:13px;line-height:1.45;color:hsl(var(--text))}
+.cap-facts{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 16px}
+.cap-facts div{display:contents}
+.cap-facts dt{font:500 10px/1.6 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--text-muted))}
+.cap-facts dd{margin:0;font:500 13px/1.4 var(--font-mono);color:hsl(var(--text-strong))}
+.cap-facts .cap-none{color:hsl(var(--text-muted))}
+.cap-cases{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:3px}
+.cap-cases li{position:relative;padding-left:14px;font-size:12px;line-height:1.4;color:hsl(var(--text-muted))}
+.cap-cases li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border:1.5px solid hsl(var(--signal) / .7);border-radius:50%}
+.cap-focus.swap > *{animation:reveal .55s var(--glide) both}
+.cap-focus.swap > :nth-child(2){animation-delay:.04s}.cap-focus.swap > :nth-child(3){animation-delay:.08s}
+.cap-focus.swap > :nth-child(4){animation-delay:.12s}.cap-focus.swap > :nth-child(5){animation-delay:.16s}
+
+/* ---------- chain, record, open: one page shape ---------- */
+.page{display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:28px 48px 26px}
+.page-top{display:flex;justify-content:space-between;align-items:flex-start}
+.stage{position:relative;min-height:240px}
+.turn{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;
+  background:hsl(var(--canvas) / .4);border:1px solid hsl(var(--border));color:hsl(var(--text-strong));cursor:pointer;transition:border-color .3s}
+.turn:hover{border-color:hsl(var(--text-muted))}
+.turn svg{width:16px;height:14px}
+/* under the ring: newer, the count, older (fix 11) */
+.turns{justify-self:center;display:flex;align-items:center;gap:18px}
+.turns .mono{min-width:5.5em;text-align:center;font-size:11px;letter-spacing:.2em;color:hsl(var(--text-muted))}
+/* ---------- the opened pages, in the product kit's grammar (flux/defxn-product-kit/src/product.css):
+   flat hairline panels, a dot eyebrow, one two-tone headline, mono uppercase metadata, fact grids
+   between hairlines, rows with a square mark and a mono facts line, pill tabs, numbered steps,
+   a dash for anything missing. Fonts stay the mockup's (owner, 2026-10-23). ---------- */
+.eyebrow-dot{margin:0;display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.14em;color:hsl(var(--text-muted))}
+.eyebrow-dot::before{content:'';width:7px;height:7px;border-radius:50%;background:hsl(var(--signal))}
+.two{margin:10px 0 0;font:600 clamp(26px,calc(3.3vh / var(--s)),34px)/1.1 var(--font-display);letter-spacing:-.035em;color:hsl(var(--text-strong))}
+.two span{color:hsl(var(--text-muted))}
+.meta-line{margin:8px 0 0;font-size:12px;letter-spacing:.1em;color:hsl(var(--text-muted))}
+
+/* chain and record: the 3D on the left, the page on the right. The page has no fill of its own:
+   the 3D tile that opened is its surface. */
+.chain-body{display:grid;grid-template-columns:minmax(0,1fr) min(520px,calc(40vw / var(--s)));gap:36px;min-height:0}
+.chain-body .stage{min-height:0}
+.sheet-slot{align-self:center;height:auto;max-height:min(600px,100%);min-height:0;display:flex;flex-direction:column}
+.sheet{min-height:0;max-height:100%;display:flex;flex-direction:column;padding:28px 30px 24px;color:hsl(var(--text))}
+body.no-scene .sheet,body.no-webgl .sheet{background:hsl(var(--raised));border-radius:12px}
+.strip{margin:18px 0 0;padding:12px 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+  border-top:1px solid hsl(var(--border));border-bottom:1px solid hsl(var(--border))}
+.strip div{display:grid;gap:4px;min-width:0}
+.strip dt{font:500 11px/1.2 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--text-muted))}
+.strip dd{margin:0;font:600 16px/1.2 var(--font-display);color:hsl(var(--text-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recs{list-style:none;margin:10px 0 0;padding:0;flex:1;min-height:0;overflow:auto}
+.recs a{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:10px 10px;border-radius:8px;
+  border:1px solid transparent;color:hsl(var(--text-strong))}
+.recs li + li a{margin-top:2px}
+.recs a:hover{background:hsl(var(--text-strong) / .04)}
+.recs a[aria-current="true"]{border-color:hsl(var(--signal) / .5);background:hsl(var(--signal) / .07)}
+.recs .mk{width:44px;height:44px;border-radius:9px;display:grid;place-items:center;background:hsl(var(--text-strong) / .05);
+  box-shadow:inset 0 0 0 1px hsl(var(--border));color:hsl(var(--text-muted))}
+.recs a[aria-current="true"] .mk{color:hsl(var(--signal));box-shadow:inset 0 0 0 1px hsl(var(--signal) / .5)}
+.recs .mk svg{width:22px;height:22px}
+.recs b{display:block;font:600 16px/1.25 var(--font-sans)}
+.recs small{display:block;margin-top:4px;font:500 11px/1.2 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-muted));
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recs .go{width:14px;height:12px;color:hsl(var(--text-faint))}
+.sheet-foot{display:flex;align-items:center;gap:28px;margin-top:16px;padding-top:14px;border-top:1px solid hsl(var(--border));flex-wrap:wrap}
+.sheet-lede{margin:16px 0 0;font-size:16px;line-height:1.55;color:hsl(var(--text));max-width:36em}
+.sheet-lede.none{color:hsl(var(--text-muted))}
+.facts{margin:16px 0 0;padding:12px 0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:10px 18px;
+  border-top:1px solid hsl(var(--signal) / .2);border-bottom:1px solid hsl(var(--signal) / .2)}
+.facts dt{font:500 11px/1.5 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--text-muted))}
+.facts dd{margin:0;font:500 15px/1.4 var(--font-sans);color:hsl(var(--text-strong))}
+.view[data-view="record"] .sheet .sheet-foot{margin-top:auto}
+
+.facts a{color:hsl(var(--text-strong));border-bottom:1px solid hsl(var(--text-faint))}
+.facts a:hover{color:hsl(var(--reference));border-color:hsl(var(--reference))}
+
+/* open: the card has no fill of its own; the 3D record tile under it is its background.
+   Ink on the record colour; the same grammar as the pages, in ink. */
+.card-slot{align-self:center;justify-self:center;width:min(780px,calc(86vw / var(--s)));aspect-ratio:1.85;max-height:calc(64vh / var(--s))}
+.card{--ink:var(--record-ink);width:100%;height:100%;display:flex;flex-direction:column;
+  padding:clamp(18px,3.2%,30px) clamp(22px,4.2%,40px);color:hsl(var(--ink))}
+body.no-scene .card,body.no-webgl .card{background:hsl(var(--record));border-radius:22px}
+.card a,.card button{color:inherit}
+.card-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.pill{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:999px;border:1px solid hsl(var(--ink) / .22);font:500 14px/1 var(--font-sans)}
+.pill:hover{background:hsl(var(--ink) / .06)}
+.pill svg{width:14px;height:12px}
+.card-kind{font-size:11px;letter-spacing:.14em;opacity:.7}
+.card-kind::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:hsl(var(--ink));margin-right:8px;vertical-align:1px}
+.card .two{margin-top:clamp(10px,calc(2vh / var(--s)),18px);color:hsl(var(--ink))}
+.card .two span{color:hsl(var(--ink) / .5)}
+.card .meta-line{color:hsl(var(--ink) / .62)}
+.tabs{display:inline-flex;align-self:flex-start;gap:4px;margin-top:clamp(12px,calc(2vh / var(--s)),18px);padding:4px;border-radius:999px;border:1px solid hsl(var(--ink) / .16);background:hsl(var(--ink) / .04)}
+.tabs button{background:none;border:0;height:32px;padding:0 16px;border-radius:999px;font:500 14px/1 var(--font-sans);opacity:.68;cursor:pointer}
+.tabs button[aria-selected="true"]{opacity:1;background:hsl(var(--ink));color:hsl(var(--record))}
+.tabs button:hover{opacity:1}
+.panel{flex:1;min-height:0;overflow:auto;padding-top:clamp(12px,calc(2vh / var(--s)),18px);font-size:15px;line-height:1.55}
+.panel[hidden]{display:none}
+.details{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:start}
+.details p{margin:0;max-width:34em;font-size:16px}
+.card .facts{margin:0;padding:10px 0;border-color:hsl(var(--ink) / .16);grid-template-columns:max-content max-content}
+.card .facts dt{color:hsl(var(--ink) / .58)}.card .facts dd{color:hsl(var(--ink));font-weight:600}
+.rows{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rows li{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:14px;padding:8px 10px;border-radius:8px;border:1px solid hsl(var(--ink) / .12)}
+.rows .mk{width:40px;height:40px;border-radius:8px;display:grid;place-items:center;background:hsl(var(--ink) / .06)}
+.rows .mk svg{width:20px;height:20px}
+.rows b{font-weight:600}.rows small{display:block;margin-top:2px;font:500 11px/1.2 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.6}
+.rows .go{width:16px;height:14px;opacity:.6}
+.steps{list-style:none;margin:0;padding:0;display:grid;gap:6px;counter-reset:st}
+.steps li{counter-increment:st;display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:12px;padding:6px 0}
+.steps li::before{content:counter(st);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  font:600 13px/1 var(--font-mono);border:1px solid hsl(var(--ink) / .3)}
+.steps b{font-weight:600}.steps time{font:500 12px/1 var(--font-mono);letter-spacing:.08em;opacity:.62;text-transform:uppercase}
+.none{opacity:.65;margin:0}
+
+/* ---------- inner pages, enriched (2026-10-23): same grammar, more depth ---------- */
+.stage-col{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0;gap:10px}
+.stage-note{margin:0;justify-self:center;font-size:10px;letter-spacing:.2em;color:hsl(var(--text-muted))}
+.sheet-lede.tight{margin-top:10px;font-size:14px;line-height:1.5;color:hsl(var(--text))}
+.strip.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.recs .st{font:500 10px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;padding:5px 8px;border-radius:999px;
+  color:hsl(var(--signal));box-shadow:inset 0 0 0 1px hsl(var(--signal) / .45)}
+.recs a{grid-template-columns:44px 1fr auto auto}
+.recs .st.none{color:hsl(var(--text-faint));box-shadow:inset 0 0 0 1px hsl(var(--border))}
+
+/* the chain's timeline under the record: one dot per record, placed by its date */
+.timeline{position:relative;height:66px;margin:0 7%}
+.timeline::before{content:'';position:absolute;left:0;right:0;top:33px;height:1px;background:hsl(var(--border))}
+.timeline a{position:absolute;top:33px;transform:translate(-50%,-50%);display:grid;place-items:center;width:30px;height:30px}
+.timeline a i{width:9px;height:9px;border-radius:50%;background:hsl(var(--text-faint));transition:transform .5s var(--glide),background .5s}
+.timeline a[aria-current="true"] i{background:hsl(var(--signal));transform:scale(1.5);box-shadow:0 0 0 4px hsl(var(--signal) / .18)}
+.timeline a span{position:absolute;bottom:26px;white-space:nowrap;font:500 10px/1.35 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:hsl(var(--text-muted));text-align:center}
+.timeline a.low span{bottom:auto;top:26px}
+.timeline a[aria-current="true"] span{color:hsl(var(--text-strong))}
+.timeline a:hover span{color:hsl(var(--reference))}
+
+/* links: the legend under the scene */
+.legend{list-style:none;margin:0;padding:0;justify-self:center;display:flex;flex-wrap:wrap;gap:8px 22px;font-size:10px;letter-spacing:.16em;color:hsl(var(--text-muted))}
+.legend li{display:flex;align-items:center;gap:8px}
+.legend i{display:block;width:22px;height:8px}
+.legend .lg-link{height:4px;border-radius:2px;background:hsl(var(--chain-other))}
+.legend .lg-dots{background:radial-gradient(circle,hsl(var(--text-muted)) 1.4px,transparent 1.8px) 0 50%/6px 8px repeat-x}
+.legend .lg-ghost{width:12px;height:12px;border-radius:3px;background:hsl(var(--record) / .26)}
+.legend .lg-key{width:12px;height:12px;border-radius:50%;border:1.5px solid hsl(var(--signal))}
+.groups{margin:14px 0 0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:0 18px;flex:1;min-height:0;align-content:start}
+.groups dt{padding:11px 0;font:500 11px/1.5 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--text-muted));border-top:1px solid hsl(var(--border))}
+.groups dd{margin:0;padding:8px 0;border-top:1px solid hsl(var(--border));display:grid;gap:4px;min-width:0}
+.groups dt:first-of-type,.groups dt:first-of-type + dd{border-top:0}
+.groups a,.groups span.row{display:grid;grid-template-columns:32px 1fr;gap:12px;align-items:center;padding:3px 0;color:hsl(var(--text-strong))}
+.groups a:hover b{color:hsl(var(--reference))}
+.groups .mk{width:32px;height:32px;border-radius:7px;display:grid;place-items:center;background:hsl(var(--text-strong) / .05);box-shadow:inset 0 0 0 1px hsl(var(--border));color:hsl(var(--text-muted))}
+.groups .mk svg{width:18px;height:18px}
+.groups b{display:block;font:600 14px/1.25 var(--font-sans)}
+.groups small{display:block;margin-top:2px;font:500 10px/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:hsl(var(--text-muted))}
+.groups .none{font-size:14px;color:hsl(var(--text-muted));opacity:1;padding:6px 0}
+
+/* how a result is made: the five steps, the chosen one open */
+.story{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:2px;flex:1;min-height:0;align-content:start}
+.story button{width:100%;display:grid;grid-template-columns:30px 1fr;gap:4px 12px;align-items:center;padding:7px 8px;border:0;border-radius:8px;
+  background:none;color:hsl(var(--text-muted));text-align:left;cursor:pointer;font:inherit}
+.story button:hover{color:hsl(var(--text-strong))}
+.story .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:600 12px/1 var(--font-mono);border:1px solid hsl(var(--border));transition:border-color .5s,color .5s}
+.story b{font:600 15px/1.3 var(--font-sans)}
+.story .say{grid-column:2;display:grid;grid-template-rows:0fr;transition:grid-template-rows .6s var(--glide)}
+.story .say > span{overflow:hidden;font-size:14px;line-height:1.5;color:hsl(var(--text))}
+.story [aria-current="step"]{background:hsl(var(--signal) / .07);color:hsl(var(--text-strong))}
+.story [aria-current="step"] .n{border-color:hsl(var(--signal));color:hsl(var(--signal))}
+.story [aria-current="step"] .say{grid-template-rows:1fr}
+.story .done .n{border-color:hsl(var(--signal) / .5);color:hsl(var(--text-strong))}
+.aside{margin:12px 0 0;padding-top:12px;border-top:1px solid hsl(var(--border));font-size:13px;line-height:1.5;color:hsl(var(--text-muted))}
+.aside a{color:hsl(var(--text-strong));border-bottom:1px solid hsl(var(--text-faint));white-space:nowrap}
+.aside a:hover{color:hsl(var(--reference));border-color:hsl(var(--reference))}
+.sheet-foot button.more{background:none;border:0;border-bottom:1px solid hsl(var(--text-faint));padding:0 0 7px;font:inherit;font-size:14px;cursor:pointer}
+.sheet-foot .more[aria-disabled="true"]{opacity:.4;pointer-events:none}
+.more[hidden]{display:none}
+
+/* pickers: small pills in a wrap; the chosen one in teal */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chips button,.chips a{height:28px;padding:0 11px;border-radius:999px;border:1px solid hsl(var(--border));background:none;cursor:pointer;
+  font:500 12px/1 var(--font-sans);color:hsl(var(--text));display:inline-flex;align-items:center;gap:6px}
+.chips button:hover,.chips a:hover{border-color:hsl(var(--text-muted));color:hsl(var(--text-strong))}
+.chips [aria-pressed="true"]{border-color:hsl(var(--signal) / .7);background:hsl(var(--signal) / .1);color:hsl(var(--text-strong))}
+.chips small{font:500 10px/1 var(--font-mono);color:hsl(var(--text-muted))}
+.facts.plain{border-color:hsl(var(--border));margin-top:12px;padding:8px 0;gap:7px 18px}
+.facts.plain dd{font-size:14px}
+.facts .muted{color:hsl(var(--text-muted))}
+.facts .chips{margin:0}
+.strip dd.muted{color:hsl(var(--text-muted));font-family:var(--font-sans);font-weight:500;font-size:14px}
+
+/* tabs on the dark page: the card's pill tabs, in the page's own ink */
+.tabs.dark{border-color:hsl(var(--border));background:hsl(var(--text-strong) / .03);margin-top:12px}
+.tabs.dark button{color:hsl(var(--text-strong))}
+.tabs.dark button[aria-selected="true"]{background:hsl(var(--text-strong));color:hsl(var(--canvas))}
+.panel.dark{padding-top:4px;display:flex;flex-direction:column;flex:1;min-height:0;overflow:visible}
+.panel.dark[hidden]{display:none}
+.runs{display:grid;gap:14px;margin-top:10px}
+.run h3{margin:0;font:600 15px/1.3 var(--font-sans);color:hsl(var(--text-strong))}
+.run .mono{display:block;margin-top:3px;font-size:10px;letter-spacing:.14em;color:hsl(var(--text-muted))}
+.run dl{margin:8px 0 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px 14px;padding:8px 0;border-top:1px solid hsl(var(--border));border-bottom:1px solid hsl(var(--border))}
+.run dt{font:500 10px/1.3 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:hsl(var(--text-muted))}
+.run dd{margin:3px 0 0;font:600 16px/1.1 var(--font-mono);color:hsl(var(--text-strong));letter-spacing:-.02em;white-space:normal}
+.run dd{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:4px}
+.run dd span{white-space:nowrap;margin-left:0}
+.run dd span{font:400 11px/1 var(--font-mono);color:hsl(var(--text-muted));margin-left:4px;letter-spacing:0}
+.run p{margin:6px 0 0;font-size:12px;line-height:1.45;color:hsl(var(--text-muted))}
+.limit{margin:0;font-size:13px;line-height:1.5;color:hsl(var(--text))}
+.rules{margin:0;border-top:1px solid hsl(var(--border));padding-top:8px;font-size:12px;line-height:1.45;color:hsl(var(--text))}
+.rules b{display:block;font:500 10px/1.6 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--text-muted))}
+
+/* FXN: the parts of the supply, grouped; the chosen part's rule below */
+.parts{display:grid;grid-template-columns:1.25fr 1fr;gap:0 22px;margin-top:12px}
+.parts section{display:grid;gap:2px;align-content:start}
+.parts h3{margin:0 0 4px;display:flex;justify-content:space-between;font:500 11px/1.6 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:hsl(var(--text-muted));border-bottom:1px solid hsl(var(--border));padding-bottom:4px}
+.parts h3 + h3,.parts section + section h3{margin-top:0}
+.parts .gap{height:10px}
+.parts button{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:4px 8px;border:0;border-left:2px solid transparent;background:none;cursor:pointer;
+  font:500 14px/1.3 var(--font-sans);color:hsl(var(--text));text-align:left}
+.parts button b{font:600 13px/1 var(--font-mono);color:hsl(var(--text-strong))}
+.parts button:hover{color:hsl(var(--text-strong));background:hsl(var(--text-strong) / .04)}
+.parts button[aria-pressed="true"]{border-left-color:hsl(var(--signal));background:hsl(var(--signal) / .08);color:hsl(var(--text-strong))}
+.rule{margin:12px 0 0;padding-top:10px;border-top:1px solid hsl(var(--border))}
+.rule p{margin:4px 0 0;font-size:14px;line-height:1.5;color:hsl(var(--text))}
+.rule .mono{margin:0;font-size:10px;letter-spacing:.16em;color:hsl(var(--text-muted))}
+
+/* the card, enriched: tabs and the one action on one bar; content in columns */
+.card-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:clamp(12px,calc(2vh / var(--s)),18px)}
+.card-bar .tabs{margin-top:0}
+.cta.ink{background:hsl(var(--ink));color:hsl(var(--record))}
+.cta.ink .say{gap:14px}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.cols h3{margin:0 0 8px;font:500 11px/1.4 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;opacity:.62}
+.cols ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.cols li{position:relative;padding-left:16px;font-size:15px;line-height:1.4}
+.cols li::before{content:'';position:absolute;left:0;top:.55em;width:6px;height:6px;border-radius:1px;background:hsl(var(--ink) / .5)}
+.sig{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:start}
+.sig .seal{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;border:1.5px solid hsl(var(--ink) / .5)}
+.sig .seal svg{width:24px;height:24px}
+.sig p{margin:0;max-width:40em}
+.sig p + p{margin-top:8px;opacity:.72;font-size:14px}
+/* #/intro: the intro preset page (intro-view.js). The network from above, one card near the centre; a click
+   leaves for home: the card grows toward you and closes to its centre while the camera dives (owner, 2026-10-24) */
+.view.introv{position:relative;display:grid;place-items:end center;padding-bottom:max(20px,6vh);min-height:0}
+.intro-stage{position:absolute;inset:0;pointer-events:none}
+.intro-slot{position:relative;z-index:1;width:min(560px,calc(100vw - 32px))}
+.intro-card{display:grid;gap:12px;padding:28px 32px 22px;border-radius:16px 5px 16px 5px;color:inherit;
+  background:linear-gradient(180deg,hsl(var(--text-strong) / .06),hsl(var(--text-strong) / .015) 60%),hsl(var(--canvas) / .8);
+  -webkit-backdrop-filter:blur(16px) saturate(1.1);backdrop-filter:blur(16px) saturate(1.1);
+  box-shadow:inset 0 0 0 1px hsl(var(--border)),inset 0 1px 0 hsl(var(--text-strong) / .07),0 30px 60px -30px hsl(var(--canvas))}
+.intro-card .two{margin:0}
+.intro-lede{margin:0;font-size:15px;line-height:1.55;color:hsl(var(--text));max-width:44ch}
+.intro-strip{margin:4px 0 0;grid-template-columns:repeat(4,minmax(0,1fr))}
+.intro-go{align-self:start;justify-self:start;margin-top:6px}
+.intro-note{font-size:9.5px;letter-spacing:.14em;color:hsl(var(--text-faint))}
+.intro-card:hover .intro-go{filter:brightness(1.08)}
+.intro-card:focus-visible{outline:2px solid hsl(var(--text-strong));outline-offset:4px}
+/* in: it rises from below like every page; out: it grows toward you and closes to its centre (the zoom) */
+.view[data-view="intro"] .intro-card.rise{transform:translateY(18px) scale(.97);clip-path:inset(0 0 100% 0 round 16px 5px)}
+.view[data-view="intro"].on .intro-card.rise{transform:none;clip-path:inset(-40px round 16px 5px)}
+.view[data-view="intro"].out .intro-card.rise{transform:scale(1.45);clip-path:inset(48% 48% 48% 48% round 16px 5px);transition-duration:.6s;transition-delay:0s}
+@media (max-width:640px){.intro-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.intro-card{padding:22px 20px 18px}}
+/* short screens: a slimmer card, so the ground logo still shows above it (1280x720) */
+@media (max-height:760px) and (min-width:901px){
+  .view.introv{padding-bottom:14px}
+  .intro-card{gap:8px;padding:18px 24px 14px}.intro-card .two{font-size:26px}
+  .intro-lede{font-size:14px}.intro-strip{padding:8px 0}.intro-note{display:none}}
+
+/* #/trace: the chain from newest to first record (trace-view.js) */
+.trace{list-style:none;margin:calc(10px * var(--g, 1)) 0 0;padding:0;display:grid;gap:1px}
+.trace a{display:grid;grid-template-columns:40px minmax(0,1fr);gap:0 10px;padding:5px 10px;border-radius:8px 3px 8px 3px;transition:background-color .2s}
+.trace a:hover{background:hsl(var(--text-strong) / .04)}
+.trace a[aria-current="true"]{background:hsl(var(--ember) / .1);box-shadow:inset 2px 0 0 hsl(var(--ember))}
+.trace .n{grid-row:span 3;align-self:start;padding-top:2px;font-size:11px;letter-spacing:.1em;color:hsl(var(--text-muted))}
+.trace a[aria-current="true"] .n{color:hsl(var(--ember))}
+.trace b{font:500 15px/1.3 var(--font-sans);color:hsl(var(--text-strong))}
+.trace small{font-size:12px;line-height:1.35;color:hsl(var(--text-muted))}
+.trace small.to{color:hsl(var(--text-faint))}
+/* the record's anatomy: its fields in order, the signature last (fix 104) */
+.anat{margin:0 0 16px}
+.anat ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.3fr);gap:4px}
+.anat li{position:relative;display:grid;gap:2px;padding:8px 10px;border:1px solid hsl(var(--border));border-radius:6px 2px 6px 2px;background:hsl(var(--surface) / .6);min-width:0;
+  transform:translateY(0);animation:anat-in .5s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * 45ms)}
+.anat li span{font:500 10px/1 var(--font-mono);color:hsl(var(--text-faint))}
+.anat li span svg{width:12px;height:12px}
+.anat li b{font:500 10px/1.3 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:hsl(var(--text-muted))}
+.anat li small{font-size:12px;line-height:1.3;color:hsl(var(--text-strong));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.anat li.last{border-color:hsl(var(--primary) / .55);background:hsl(var(--primary) / .08)}
+.anat li.last span{color:hsl(var(--primary))}
+.anat figcaption{margin-top:8px;font-size:12px;line-height:1.45;color:hsl(var(--text-muted));max-width:60ch}
+@keyframes anat-in{from{transform:translateY(10px)}}
+@media (prefers-reduced-motion:reduce){.anat li{animation:none}}
+@media (max-width:640px){.anat ol{grid-template-columns:repeat(2,minmax(0,1fr))}.anat li.last{grid-column:1 / -1}}
+dt .n{color:hsl(var(--text-faint));font-weight:400}
+
+/* labels on the 3D: placed by the scene; they wipe in, never fade */
+.tags{position:fixed;inset:0;z-index:1;pointer-events:none}
+.tag{position:absolute;left:0;top:0;display:grid;gap:2px;max-width:13em;padding:0 0 0 10px;border-left:1.5px solid hsl(var(--text-faint));
+  font:400 12px/1.35 var(--font-sans);color:hsl(var(--text-muted));text-shadow:0 0 10px hsl(var(--canvas)),0 0 3px hsl(var(--canvas));
+  clip-path:inset(0 100% 0 0);transition:clip-path .6s var(--glide)}
+.tag b{font:500 10px/1.4 var(--font-mono);letter-spacing:.18em;text-transform:uppercase;color:hsl(var(--text-strong))}
+.tag.lit{border-left-color:hsl(var(--signal))}
+.tag.lit b,.tag.hot b{color:hsl(var(--signal))}
+.tag.hot{border-left-color:hsl(var(--signal))}
+.tag.small{font-size:11px;border-left:0;padding:0;text-align:center}
+.tag.small b{font-size:9px;letter-spacing:.14em}
+.tags.here .tag.seen{clip-path:inset(-6px -12px -6px -6px)}
+/* home's 3D labels sit over a busy scene: each gets a small dark plate so its words read on any ring (record descent) */
+.tags[data-for="home"] .tag,.tags[data-for="home"] .tag.small{padding:5px 9px 6px;border-left:0;text-align:left;border-radius:6px 2px 6px 2px;
+  background:hsl(var(--canvas) / .82);box-shadow:inset 0 0 0 1px hsl(var(--border) / .8);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+body.no-scene .tags,body.no-webgl .tags,body.no-scene .stage-note,body.no-webgl .stage-note,body.no-scene .legend,body.no-webgl .legend{display:none}
+
+/* short screens: a slimmer top so every inner page still fits one screen (law 3) */
+@media (max-height:760px) and (min-width:901px){
+  .page{padding:16px 40px 14px}
+  .minimap{width:76px;height:62px}
+  .sheet{padding:20px 26px 16px}
+  .sheet-lede{margin-top:10px;font-size:15px}
+  .recs a{padding:4px 10px;grid-template-columns:36px 1fr auto auto}.recs .mk{width:34px;height:34px}.recs .mk svg{width:18px;height:18px}
+  .recs b{font-size:15px}.recs small{margin-top:2px}
+  .sheet-lede.tight{font-size:13px;margin-top:8px}
+  .chips{gap:5px;margin-top:10px}.chips button,.chips a{height:25px;padding:0 9px;font-size:11.5px}
+  .facts.plain{margin-top:8px;padding:6px 0;gap:5px 16px}
+  .two{font-size:28px}
+  .runs{gap:8px}
+  .tabs.dark{margin-top:8px;padding:3px}.tabs.dark button{height:28px;font-size:13px}
+  .panel.dark .two{margin-top:6px}
+  .eyebrow-dot{font-size:11px}
+  .timeline{height:56px}.timeline::before,.timeline a,.timeline .tl-hi{top:28px}
+  .story{min-height:calc(5 * 36px + 60px)}
+  .cases q:nth-child(3){display:none}
+  .sched{height:18px;margin-top:6px}.rule{margin-top:8px;padding-top:8px}.rule p{font-size:13px}
+  .story button{padding:5px 8px}
+  .facts{margin-top:10px;padding:8px 0;gap:6px 18px}
+  .sheet-foot{margin-top:10px;padding-top:10px}
+  .strip{margin-top:12px;padding:9px 0}
+  .run p{display:none}
+}
+
+/* ---------- audit 2 (2026-10-23): the chain redesign, the bigger card, labels, hover ---------- */
+/* the chain: the ring gets the room, the page is the board's fact card and list (fixes 2, 15) */
+@media (min-width:901px){.view[data-view="chain"] .chain-body{grid-template-columns:minmax(0,1fr) min(440px,calc(36vw / var(--s)))}}
+.tab-line{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+.tab-line .tabs{margin-top:0}
+.view[data-view="chain"] .sheet-slot,.view[data-view="measured"] .sheet-slot{max-height:100%}
+.view[data-view="chain"] .two{margin-top:0}
+.view[data-view="chain"] .recs a{padding:5px 10px}.view[data-view="chain"] .recs .mk{width:36px;height:36px}.view[data-view="chain"] .recs .mk svg{width:18px;height:18px}
+.view[data-view="chain"] .recs a{grid-template-columns:36px 1fr auto auto}
+.next-row{margin:10px 0 0;white-space:nowrap;overflow:hidden;font-size:13px;color:hsl(var(--text-muted));display:flex;gap:10px;align-items:baseline}
+.next-row a{color:hsl(var(--text-strong));border-bottom:1px solid hsl(var(--text-faint))}
+.next-row a:hover{color:hsl(var(--reference));border-color:hsl(var(--reference))}
+.next-row .mono{font-size:10px;letter-spacing:.16em}
+.recs.activity li{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;padding:8px 10px;color:hsl(var(--text-strong))}
+.recs.activity time{font:500 11px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-muted))}
+.recs[hidden]{display:none}
+.recs a.hot{background:hsl(var(--text-strong) / .05)}
+/* "Not signed" reads at 4.5:1: muted words on a dashed edge (fix 14) */
+.recs .st.none{color:hsl(var(--text-muted));box-shadow:none;border:1px dashed hsl(var(--text-faint))}
+
+/* the sliding pill behind the chosen tab (fix 22) */
+.tabs{position:relative}
+.tabs .tab-pill{position:absolute;top:4px;left:0;height:calc(100% - 8px);width:0;border-radius:999px;background:hsl(var(--ink, var(--text-strong)));
+  transition:transform .5s var(--glide),width .5s var(--glide);pointer-events:none;z-index:0}
+.tabs.dark .tab-pill{background:hsl(var(--text-strong))}
+.tabs button{position:relative;z-index:1;transition:color .35s}
+.tabs.slides button[aria-selected="true"]{background:none}
+.card .tabs.slides button[aria-selected="true"]{color:hsl(var(--record))}
+.tabs.dark.slides button[aria-selected="true"]{color:hsl(var(--canvas))}
+@media (prefers-reduced-motion:reduce){.tabs .tab-pill{transition:none}}
+/* a tab's words wipe in from the side you came from (fix 23) */
+@keyframes from-right{from{transform:translateX(26px);clip-path:inset(0 0 0 100%)}to{transform:none;clip-path:inset(-20px -40px)}}
+@keyframes from-left{from{transform:translateX(-26px);clip-path:inset(0 100% 0 0)}to{transform:none;clip-path:inset(-20px -40px)}}
+.panel.in-right{animation:from-right .55s var(--glide) both}.panel.in-left{animation:from-left .55s var(--glide) both}
+@media (prefers-reduced-motion:reduce){.panel.in-right,.panel.in-left{animation:none}}
+
+/* the bigger card (fixes 17, 24, 25) */
+.card-slot{width:min(1180px,calc(88vw / var(--s)));height:100%;max-height:640px;aspect-ratio:auto}
+.card{padding:clamp(20px,calc(3.2vh / var(--s)),32px) clamp(26px,calc(3.4vw / var(--s)),48px)}
+.card .two{font-size:clamp(30px,calc(4.6vh / var(--s)),42px)}
+.card-top{gap:18px}
+.card-path{margin-right:auto;font-size:13px;color:hsl(var(--ink) / .62)}
+.card-path b{color:hsl(var(--ink));font-weight:600}
+.card-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:clamp(20px,calc(3vw / var(--s)),44px);padding-top:clamp(12px,calc(2vh / var(--s)),20px)}
+.card-panels{min-height:0;display:grid}
+.card-panels .panel{grid-area:1/1;padding-top:0}
+.card-facts{margin:0;padding:0 0 0 22px;border-left:1px solid hsl(var(--ink) / .14);display:grid;grid-template-columns:1fr;gap:12px;align-content:start}
+.card-facts div{display:grid;gap:3px}
+.card-facts dt{font:500 10px/1.4 var(--font-mono);letter-spacing:.16em;text-transform:uppercase;color:hsl(var(--ink) / .58)}
+.card-facts dd{margin:0;font:600 15px/1.35 var(--font-sans);color:hsl(var(--ink))}
+.card-facts a{border-bottom:1px solid hsl(var(--ink) / .3)}
+.card .cols li{font-size:16px}
+.view[data-view="open"] .page-top .crumbs{visibility:hidden}
+
+/* the card, redesigned (2026-10-23, owner: "huge and half empty, cheap"): dark glass like the page,
+   angular, sized to its content, with structure: a header band, a band for the tabs and the action,
+   the content, and a facts rail on the right edged in teal. Light ink on the dark card. */
+.card{--ink:var(--text-strong);--cx:clamp(26px,calc(3.4vw / var(--s)),48px);padding-left:var(--cx);padding-right:var(--cx);height:auto}
+.card-slot{height:auto;max-height:calc(80vh / var(--s));display:flex;align-items:stretch}
+.card .card-bar{margin:clamp(12px,calc(2vh / var(--s)),18px) calc(-1 * var(--cx)) 0;padding:10px var(--cx);
+  border-top:1px solid hsl(var(--text-strong) / .08);border-bottom:1px solid hsl(var(--text-strong) / .08);background:hsl(var(--text-strong) / .025)}
+.card .card-bar .tabs{margin-top:0}
+.card .tabs button[aria-selected="true"],.card .tabs.slides button[aria-selected="true"]{color:hsl(var(--canvas))}
+.card .two span{color:hsl(var(--text-muted))}
+.card-body{flex:none;padding-top:clamp(16px,calc(2.4vh / var(--s)),24px);padding-bottom:4px}
+.card-facts{padding:14px 18px;border-left:1px solid hsl(var(--signal) / .45);background:hsl(var(--text-strong) / .03)}
+.card-facts dt{color:hsl(var(--text-muted))}
+.card .cols h3{color:hsl(var(--signal));opacity:1}
+.card .cols li::before{background:hsl(var(--signal) / .7);border-radius:0}
+.card-kind{color:hsl(var(--text-muted))}
+.card-kind::before{background:hsl(var(--signal))}
+body.no-scene .card,body.no-webgl .card{background:hsl(var(--raised));border-radius:var(--r-3);box-shadow:inset 0 0 0 1px hsl(var(--signal) / .3)}
+
+/* one corner language (owner, 2026-10-23: "soften the corners in a perfect way"): the 3D bevels are a
+   tenth of a form's thinnest side; the flat parts take the same family from one scale: 4px for small
+   parts (chips, labels, small buttons), 8px for rows and tab bars, 12px for panels. No round pills:
+   angular, with a soft edge. The lime action keeps its cut corner. */
+:root{--r-1:4px;--r-2:8px;--r-3:12px}
+html body :is(.chips button,.chips a,.pill,.state,.recs .st,.legend li,.mock,.mock button){border-radius:var(--r-1)}
+html body :is(.tabs,.recs a,.rows li,.story button,.cview .story a,.rows-pick a,.parts button,.timeline-wrap,.turns,.segs){border-radius:var(--r-2)}
+html body .tabs button,html body .tabs .tab-pill{border-radius:calc(var(--r-2) - 3px)}
+html body :is(.card-facts,.term-pop,.menu-sheet,.stage-note){border-radius:var(--r-1)}
+
+/* labels on the 3D: a square on the point and a 1px leader to the words (fix 34) */
+.tag{border-left:0;padding:0}
+.tag::before{content:'';position:absolute;width:1px;background:hsl(var(--text-faint))}
+.tag::after{content:'';position:absolute;width:7px;height:7px;border:1.5px solid hsl(var(--text-muted));border-radius:2px;background:hsl(var(--canvas))}
+.tag[data-at="above"],.tag:not([data-at]){padding:0 0 0 12px}
+.tag[data-at="above"]::before,.tag:not([data-at])::before{left:0;top:2px;bottom:-14px}
+.tag[data-at="above"]::after,.tag:not([data-at])::after{left:-4px;bottom:-19px}
+.tag[data-at="below"]{padding:0 0 0 12px}
+.tag[data-at="below"]::before{left:0;top:-14px;bottom:2px}
+.tag[data-at="below"]::after{left:-4px;top:-19px}
+.tag.small[data-at="below"]{padding:0;text-align:center}
+.tag.small[data-at="below"]::before{left:50%;top:-12px;height:10px;bottom:auto}
+.tag.small[data-at="below"]::after{left:calc(50% - 4px);top:-17px}
+.tag[data-at="left"]{padding:0 14px 0 0;text-align:right}
+.tag[data-at="left"]::before{right:0;top:2px;bottom:2px}
+.tag[data-at="left"]::after{right:-20px;top:calc(50% - 4px);width:7px}
+.tag[data-at="right"]{padding:0 0 0 14px}
+.tag[data-at="right"]::before{left:0;top:2px;bottom:2px}
+.tag[data-at="right"]::after{left:-20px;top:calc(50% - 4px)}
+.tag.lit::after,.tag.hot::after{border-color:hsl(var(--signal))}
+.tag.lit::before,.tag.hot::before{background:hsl(var(--signal) / .6)}
+
+/* the hover tag: what is under the pointer, and what a click does (fixes 13, 40) */
+.hover-tag{position:fixed;left:0;top:0;z-index:5;pointer-events:none;display:grid;gap:2px;padding:7px 10px;border-radius:8px;
+  background:hsl(var(--canvas) / .88);box-shadow:inset 0 0 0 1px hsl(var(--border));font:400 12px/1.3 var(--font-sans);color:hsl(var(--text-muted));
+  clip-path:inset(0 100% 0 0);transition:clip-path .28s var(--glide)}
+.hover-tag b{font:500 10px/1.4 var(--font-mono);letter-spacing:.16em;text-transform:uppercase;color:hsl(var(--text-strong))}
+.hover-tag span::before{content:'→ ';color:hsl(var(--signal))}
+.hover-tag.on{clip-path:inset(-4px)}
+@media (hover:none){.hover-tag{display:none}}
+
+/* how it works: five segments under the stage (fix 42); a done step shows a check (fix 47); the
+   list keeps its height while one row opens (fix 48) */
+.segs{justify-self:center;display:flex;align-items:center;gap:6px}
+.segs button{width:46px;height:22px;padding:0;border:0;background:none;cursor:pointer;display:grid;align-items:center}
+.segs button::before{content:'';height:3px;border-radius:2px;background:hsl(var(--text-faint) / .6);transition:background .5s var(--glide)}
+.segs button.on::before{background:hsl(var(--signal))}
+.segs button:hover::before{background:hsl(var(--text-muted))}
+.segs .mono{margin-left:14px;font-size:10px;letter-spacing:.2em;color:hsl(var(--text-muted))}
+.story{min-height:calc(5 * 42px + 64px)}
+.story .n{position:relative}
+.story .n svg{position:absolute;width:12px;height:12px;opacity:0;transform:scale(.4);transition:transform .45s var(--glide),opacity .2s}
+.story .n i{font-style:normal;transition:transform .45s var(--glide)}
+.story .done .n svg{opacity:1;transform:none}
+.story .done .n i{transform:scale(0)}
+.story .done .n{color:hsl(var(--signal))}
+@media (prefers-reduced-motion:reduce){.story .say{transition:none}}
+/* resolvers: the rest of the offers one click deeper (fix 64); a hollow dot for a grammar not specified (fix 66) */
+.more-n{background:none;border:0;padding:0;font:500 12px/1 var(--font-mono);color:hsl(var(--text-strong));border-bottom:1px solid hsl(var(--text-faint));cursor:pointer}
+.more-n:hover{color:hsl(var(--reference));border-color:hsl(var(--reference))}
+.chips .open::after{content:'';width:7px;height:7px;border-radius:50%;border:1.5px solid hsl(var(--text-muted))}
+/* measured: three cases as quoted lines (fix 73) */
+.cases{display:grid;gap:3px}
+.cases q{display:block;font:400 11.5px/1.4 var(--font-mono);color:hsl(var(--text));quotes:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cases q::before{content:'"';color:hsl(var(--text-faint))}.cases q::after{content:'"';color:hsl(var(--text-faint))}
+.muted.small{display:block;margin-top:3px;font-size:11px}
+/* FXN: a release schedule as a line of steps (fix 82) */
+.sched{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(8,1fr);gap:4px;align-items:end;height:46px;position:relative}
+.sched li{position:relative;height:100%;display:flex;align-items:flex-end}
+.sched i{display:block;width:100%;height:var(--h);border-radius:2px 2px 0 0;background:hsl(var(--signal) / .55)}
+.sched span{position:absolute;top:100%;margin-top:4px;white-space:nowrap;font:500 10px/1 var(--font-mono);letter-spacing:.1em;color:hsl(var(--text-muted))}
+.sched li:last-child span{right:0}
+.rule:has(.sched){padding-bottom:18px}
+/* record: the timeline's highlight slides (fix 86); a preview of the content (fix 87) */
+.timeline .tl-hi{position:absolute;top:33px;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:1.5px solid hsl(var(--signal) / .7);
+  transition:left .55s var(--glide);pointer-events:none}
+.timeline a[aria-current="true"] i{box-shadow:none}
+.preview{margin:10px 0 0;font-size:14px;line-height:1.5;color:hsl(var(--text))}
+.preview .mono{display:block;font-size:10px;letter-spacing:.16em;color:hsl(var(--text-muted));margin-bottom:2px}
+.preview[hidden]{display:none}
+/* links: each label meets the first line of its row (fix 58) */
+.groups dt{padding-top:16px}
+/* reduced motion: labels and the hover tag appear in place (fix 37) */
+@media (prefers-reduced-motion:reduce){.tag,.hover-tag,.callout,.timeline .tl-hi,.segs button::before{transition:none}}
+
+/* ---------- audit 3 (2026-10-23): one spacing scale, folding by the page's own size, polish ----------
+   Containers (fix 6): an inner page's body knows its height (cb), a sheet knows its width (sh). A
+   sheet folds by its own room, not the screen's: chips fold behind "Show all", case lists behind
+   "+N more", the lede to fewer lines. Sizes here are the page's own px; above 1440 the root zoom
+   (kit-ui.js) makes them bigger together. */
+@media (min-width:901px){.chain-body{container:cb / size}}
+.sheet{container:sh / inline-size}
+/* one spacing scale: 4, 8, 12, 16, 24, 32 (fix 15); --g tightens it on a short page */
+.sheet{--g:1;padding:calc(28px * var(--g)) 30px calc(24px * var(--g))}
+.sheet .two{margin-top:calc(12px * var(--g))}
+.sheet .meta-line{margin-top:calc(8px * var(--g))}
+.sheet .sheet-lede,.sheet .sheet-lede.tight{margin-top:calc(12px * var(--g))}
+.sheet .strip{margin-top:calc(16px * var(--g));padding:calc(12px * var(--g)) 0}
+.sheet .recs,.sheet .facts,.sheet .groups,.sheet .story,.sheet .tab-line,.sheet .parts,.sheet .runs,.sheet .tabs.dark,.sheet .preview{margin-top:calc(16px * var(--g))}
+.sheet .next-row,.sheet .chips,.sheet .facts.plain,.sheet .rule,.sheet .aside{margin-top:calc(12px * var(--g))}
+.sheet .facts{padding:calc(12px * var(--g)) 0;gap:calc(8px * var(--g)) 18px}
+.sheet .sheet-foot{margin-top:calc(16px * var(--g));padding-top:calc(16px * var(--g))}
+.sheet .aside{padding-top:calc(12px * var(--g))}
+.sheet .rule{padding-top:calc(12px * var(--g))}
+/* strip values wrap instead of being cut (fix 8) */
+.strip dd{white-space:normal;overflow:visible;text-overflow:clip}
+/* the chain's foot stays on one row (fix 7) */
+.view[data-view="chain"] .sheet-foot{flex-wrap:nowrap;gap:20px}
+/* chips: one style everywhere (fix 23); the "Show all" chip only where chips fold */
+.chips button,.chips a{height:30px;padding:0 12px;font:500 12px/1 var(--font-sans);gap:6px}
+.chips [aria-pressed="true"]{border-color:hsl(var(--signal));background:hsl(var(--signal) / .16);color:hsl(var(--text-strong))}
+.chips .open::after{flex:none;align-self:center}
+.chips .chips-all{display:none;border-style:dashed;color:hsl(var(--text-strong))}
+/* a sheet that is short folds (fixes 5, 6) */
+@container cb (max-height:620px){
+  .sheet{--g:.7}
+  .sheet .sheet-lede{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .chips[data-f="pick"]:not(.all) > :not([aria-pressed="true"]):not(.chips-all):nth-child(n+9){display:none}
+  .chips[data-f="pick"]:not(.all) > .chips-all{display:inline-flex}
+  .chips button,.chips a{height:26px;padding:0 10px;font-size:11.5px}
+  .cases q:nth-child(n+3){display:none}
+  .run p{display:none}
+}
+@container cb (max-height:540px){
+  .sheet{--g:.5}
+  .sheet .sheet-lede{-webkit-line-clamp:1}
+  .sheet .preview{display:none}
+  .chips[data-f="pick"]:not(.all) > :not([aria-pressed="true"]):not(.chips-all):nth-child(n+6){display:none}
+  .cases q:nth-child(n+2){display:none}
+  .sched{height:16px}
+}
+/* a narrow sheet (fixes 8, 9) */
+@container sh (max-width:430px){
+  .sheet{padding-left:24px;padding-right:24px}
+  .strip,.strip.four{grid-template-columns:repeat(auto-fit,minmax(84px,1fr))}
+  .eyebrow-dot{letter-spacing:.1em}
+  .sheet-foot{gap:16px}
+  .cta.small .say{padding:0 14px;gap:12px}
+}
+/* a wide sheet (tablet, fix 11): the list and the facts take two columns */
+@container sh (min-width:600px){
+  .recs:not(.activity){display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;align-content:start}
+  .recs li + li a{margin-top:0}
+  .facts:not(.plain){grid-template-columns:max-content minmax(0,1fr) max-content minmax(0,1fr)}
+  .groups{grid-template-columns:max-content minmax(0,1fr) max-content minmax(0,1fr)}
+  .groups dt:nth-of-type(2),.groups dt:nth-of-type(2) + dd{border-top:0}
+}
+/* the flat page, with no 3D, has the 3D page's corners and rim (fix 17) */
+body.no-scene .sheet,body.no-webgl .sheet{border-radius:var(--rx,12px) / var(--ry,12px);box-shadow:0 0 0 1.5px hsl(var(--text-muted) / .28)}
+/* the page top reads over the rings: a soft scrim under it (fix 18) */
+.scrim .page{background:linear-gradient(180deg,hsl(var(--canvas) / .82) 0,hsl(var(--canvas) / .5) 90px,hsl(var(--canvas) / 0) 170px),
+  linear-gradient(0deg,hsl(var(--canvas) / .92) 0,hsl(var(--canvas) / .6) 22%,hsl(var(--canvas) / 0) 40%)}
+.scrim .open{background:linear-gradient(180deg,hsl(var(--canvas) / .78) 0,hsl(var(--canvas) / 0) 150px),
+  radial-gradient(ellipse at 50% 55%,hsl(var(--canvas) / 0) 38%,hsl(var(--canvas) / .55) 100%)}
+/* notes and legends under a stage sit on a small dark backing, clear of the 3D (fix 21) */
+.stage-note,.legend,.segs,.turns{background:hsl(var(--canvas) / .74);border-radius:999px;padding:5px 14px;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px hsl(var(--border) / .7)}
+.legend{padding:6px 16px}
+/* figures do not shift as they change (fix 24); headlines break evenly (fix 25); lines stay short (fix 26) */
+.strip dd,.run dd,.parts b,.chips small,.recs small,.timeline span,.fleet b,.card-facts dd,.segs .mono,.turns .mono{font-variant-numeric:tabular-nums}
+.two,.cap-name,.run h3,.card .two{text-wrap:balance}
+.sheet-lede,.rule p,.aside,.preview,.story .say > span,.limit,.sig p,.details p{max-width:60ch}
+/* focus rings that read on each surface (fix 27) */
+.sheet :focus-visible,.stage-col :focus-visible{outline:2px solid hsl(var(--signal));outline-offset:3px}
+.card :focus-visible{outline:2px solid hsl(var(--ink));outline-offset:3px}
+.cta:focus-visible{outline:2px solid hsl(var(--text-strong));outline-offset:3px}
+/* one hover timing in the page: 200 ms (fix 28) */
+.recs a,.chips button,.chips a,.parts button,.story button,.more,.pill,.turn,.groups a b,.facts a,.next-row a,.aside a,.timeline a span,.segs button::before,.more-n,.nav a,.menu-sheet a{
+  transition:color .2s var(--glide),background-color .2s var(--glide),border-color .2s var(--glide),box-shadow .2s var(--glide)}
+.tabs button{transition:color .2s var(--glide),opacity .2s var(--glide)}
+/* labels wipe in from their leader's side (fix 32); the reveal leaves room for the leader */
+.tag[data-at="below"]{clip-path:inset(0 0 100% 0)}
+.tag[data-at="above"]{clip-path:inset(100% 0 0 0)}
+.tag[data-at="left"]{clip-path:inset(0 0 0 100%)}
+.tag[data-at="right"]{clip-path:inset(0 100% 0 0)}
+.tags.here .tag.seen{clip-path:inset(-24px -26px -24px -26px)}
+.tag.small[data-at="above"]{padding:0;text-align:center}
+.tag.small[data-at="above"]::before{left:50%;top:auto;bottom:-12px;height:10px}
+.tag.small[data-at="above"]::after{left:calc(50% - 4px);bottom:-17px;top:auto}
+/* on a small stage a label shows its title only (fix 19) */
+.tags.compact .tag{font-size:0;gap:0;max-width:none;white-space:nowrap}
+/* the hover label eases to the next thing (fix 33) */
+.hover-tag{transition:clip-path .28s var(--glide),transform .12s var(--glide)}
+@media (prefers-reduced-motion:reduce){.hover-tag{transition:none}}
+
+/* a tablet in portrait: the 3D gets half the screen (fix 11) */
+@media (min-width:601px) and (max-width:900px){.view .chain-body .stage{height:calc(50vh / var(--s))}}
+
+/* Smaller laptops */
+@media (max-width:1240px){
+  .lead{padding-left:40px;padding-right:36px}
+}
+/* Short screens: drop the path notes so the page still fits one screen */
+@media (max-height:760px) and (min-width:901px){
+  .paths small{display:none}
+  .cap-cases{display:none}
+}
+/* Tablet and phone: one column, rail becomes a 2x2 grid */
+@media (max-width:900px){
+  .hero{display:block}
+  .lead{padding:34px 18px 0}
+  .scrim .home{background:linear-gradient(180deg,hsl(var(--canvas) / .5) 0,hsl(var(--canvas) / .78) 46%,hsl(var(--canvas) / .9) 100%)}
+  .callouts{display:none}
+  .eyebrow{font-size:11px;gap:12px;margin-bottom:16px}.eyebrow .dash{width:36px}
+  .hero h1{font-size:clamp(34px,calc(11vw / var(--s)),56px);max-width:none}
+  .hero h1 b,.hero h1 span{display:block;white-space:nowrap}
+  .lede{margin-top:18px;font-size:16px}.lede span{display:inline}
+  .copy .cta{margin-top:22px;height:52px;font-size:17px;align-self:stretch}.cta .who{width:60px}.cta .say{flex:1;justify-content:space-between;padding:0 20px}
+  .links{margin-top:18px;flex-direction:column;gap:14px}.more{font-size:15px}
+  .paths{margin-top:26px;grid-template-columns:1fr;padding:6px 0}
+  .paths a{border-left:0;padding:14px 0;border-top:1px solid hsl(var(--border))}.paths a:first-child{border-top:0}
+  .paths small{margin-top:2px;font-size:13px}
+  .rail{padding:20px 18px 28px;border-top:1px solid hsl(var(--border))}
+  .rail-line{display:none}
+  .rail-head p{font-size:14px}
+  .all{margin-top:16px;font-size:14px}
+  .page{padding:20px 18px 22px}
+  .minimap{width:72px;height:60px}
+  .turn.prev{left:0}.turn.next{right:0}
+  .quiet{gap:24px}
+  .card-slot{width:100%;aspect-ratio:auto;min-height:420px;max-height:none}
+  .chain-body{grid-template-columns:1fr;gap:12px}.chain-body .stage{height:240px}
+  .sheet-slot{height:auto}.sheet{padding:20px 18px}
+  .strip{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .details{grid-template-columns:1fr}.card .facts{grid-template-columns:max-content 1fr}
+  .strip.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols{grid-template-columns:1fr;gap:14px}.card-bar{flex-wrap:wrap}
+  .card .tabs button{padding:0 10px;font-size:13px}.card .tabs{max-width:100%}
+  .chain-body .stage{height:calc(46vh / var(--s))}
+  .chips button,.chips a{height:44px;padding:0 14px;font-size:14px}
+  .tabs button,.tabs.dark button{height:44px}
+  /* the open card on a tablet or phone: its height follows its words; the facts come after them (fix 13) */
+  .card-slot{height:auto;min-height:0;max-height:none}
+  .card{height:auto}
+  .card-body{grid-template-columns:1fr;gap:16px}
+  .card-panels .panel{overflow:visible}
+  .card-facts{border-left:0;padding:14px 0 0;border-top:1px solid hsl(var(--ink) / .14);grid-template-columns:repeat(2,minmax(0,1fr))}
+  .turn{width:48px;height:48px}.segs{flex-wrap:wrap;justify-content:center}.segs button{height:44px;width:52px}.segs .mono{flex-basis:100%;text-align:center;margin:4px 0 0}
+  .sheet-slot{max-height:none}.sheet{max-height:none}
+  .card-body{grid-template-columns:1fr}.card-facts{border-left:0;padding:12px 0 0;border-top:1px solid hsl(var(--ink) / .14);grid-template-columns:1fr 1fr}
+  .card-path{display:none}
+  .view[data-view="chain"] .strip{grid-template-columns:repeat(3,minmax(0,1fr))}.view[data-view="chain"] .strip dd{font-size:14px}
+  .tab-line{flex-wrap:wrap}
+  .parts{grid-template-columns:1fr}
+  .timeline{margin:0 12%}
+  .tags{display:none}
+}
+</style>
+<!-- the four stage pages (How it works, Resolvers, Measured, FXN): their own styles, after the page's -->
+<link rel="stylesheet" href="stages.css?v=20261023n">
+<!-- one chain of the network, opened from home (ring-view.js) -->
+<link rel="stylesheet" href="ring-view.css?v=20261023a">
+<!-- the concept's own pages (concept-views.js) -->
+<link rel="stylesheet" href="concept-views.css?v=20261023a">
+<!-- the identity flow (identity-flow.js) -->
+<link rel="stylesheet" href="identity-flow.css?v=20261023a">
+<!-- the home's Measured rail (rail-capabilities.js) -->
+<link rel="stylesheet" href="rail.css?v=20261023a">
+</head>
+<body data-view="home" class="first">
+
+<div class="scene" aria-hidden="true"><canvas id="chains"></canvas></div>
+<div class="scrim" aria-hidden="true"><i class="home"></i><i class="page"></i><i class="open"></i></div>
+<div class="callouts" aria-hidden="true">
+  <span class="callout" data-ui data-kind="fxn"><i></i><span>DEFXN<small>The base chain kernel</small></span></span>
+  <span class="callout" data-ui data-kind="identity"><i></i><span>Identity chains</span></span>
+  <span class="callout" data-ui data-kind="network"><i></i><span>Network chains<small>DeArk · CR3TV</small></span></span>
+  <span class="callout" data-ui data-kind="token"><i></i><span>Token ledgers<small>Inside a network</small></span></span>
+  <span class="callout" data-ui data-kind="resolver"><i></i><span>Resolver chains</span></span>
+  <span class="callout" data-ui data-kind="pool"><i></i><span>Pool chains<small>Inside a network</small></span></span>
+  <span class="callout" data-ui data-kind="computers"><i></i><span>Computers</span></span>
+</div>
+
+<header class="top" data-kit="top"></header>
+
+<main class="views">
+
+  <!-- HOME -->
+  <section class="view hero" data-view="home" aria-labelledby="title">
+    <section class="lead">
+      <div class="copy">
+        <p class="eyebrow mono" data-ui><i></i><b class="dash"></b>An open world</p>
+        <h1 id="title" data-ui><b>DEFXN is</b> <b>the grid.</b> <span>Run your own.</span></h1>
+        <p class="lede" data-ui><span>An open world of networks and chains, joined by one shared set of rules. Every record is signed, so anyone can check it.</span> <span>Anyone can run a node. You can run yours today, in your browser.</span></p>
+        <a class="cta quiet" href="#/trace">
+          <span class="say">Explore a record <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span>
+        </a>
+        <nav class="paths" aria-label="What you can do">
+          <a href="#/trace">
+            <svg viewBox="0 0 34 36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M17 2l15 8v16l-15 8-15-8V10z"/><path d="M2 10l15 8 15-8M17 18v16"/></svg>
+            <span><b>Trace</b><small>Follow any record back to genesis</small></span>
+          </a>
+          <a href="#/open?r=project-notes&amp;tab=signature">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M18 3l15 7-15 7-15-7z"/><path d="M3 18l15 7 15-7M3 26l15 7 15-7"/></svg>
+            <span><b>Verify</b><small>See the data, its rules and its signature</small></span>
+          </a>
+          <a href="#/layers">
+            <svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="18" cy="7" r="4.5"/><circle cx="7" cy="28" r="4.5"/><circle cx="29" cy="28" r="4.5"/><path d="M15.6 10.8L9.4 24.2M20.4 10.8l6.2 13.4M11.5 28h13"/></svg>
+            <span><b>Understand</b><small>How your chain fits the bigger network</small></span>
+          </a>
+        </nav>
+      </div>
+    </section>
+
+    <aside class="rail" aria-labelledby="measured">
+      <svg class="rail-line" viewBox="0 0 60 1000" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke" aria-hidden="true">
+        <path d="M0 0 L30 45 L30 955 L60 1000" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <!-- the Measured rail (rail-capabilities.js, rail.css): one dated fleet run, every capability
+           with a manifest and its checked cases, and one capability in focus. Back on home (owner,
+           2026-10-24: "bring back my right sidebar"); its action is the page's one filled action. -->
+      <div class="rail-head">
+        <i></i><span class="mono" id="measured">Measured</span>
+        <p>What DEFXN measures today <span data-cap="summary"></span></p>
+      </div>
+      <section class="rx-fleet" data-cap="fleet" aria-label="The fleet run"></section>
+      <section class="rx-caps" aria-labelledby="rx-caps-h">
+        <div class="rx-row"><h3 class="mono" id="rx-caps-h">Capabilities</h3><span class="rx-count" data-cap="count"></span></div>
+        <div class="rx-stack" data-cap="stack" aria-hidden="true"></div>
+        <ol class="rx-grid" data-cap="list" aria-label="Capabilities, most checked cases first"></ol>
+      </section>
+      <section class="rx-focus" data-cap="focus" aria-live="polite"></section>
+      <a class="cta small rail-cta" href="#/measured?tab=runs"><span class="say">See the benchmarks <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+    </aside>
+  </section>
+
+  <!-- YOUR CHAIN: your ring, your key at its centre, and its tile opened into the chain's page -->
+  <section class="view page" data-view="chain" aria-labelledby="chain-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="Personal chain" data-back="#/" data-back-label="Back to network" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="chain-body">
+      <div class="stage-col">
+        <div class="stage" data-stage></div>
+        <div class="turns" role="group" aria-label="Turn the ring">
+          <button class="turn" type="button" data-turn="-1" aria-label="Newer record"><svg viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 7H2M7.5 1.5L2 7l5.5 5.5"/></svg></button>
+          <span class="mono" data-f="count" aria-live="polite"></span>
+          <button class="turn" type="button" data-turn="1" aria-label="Older record"><svg viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 7h13M8.5 1.5L14 7l-5.5 5.5"/></svg></button>
+        </div>
+      </div>
+      <div class="sheet-slot" data-panel>
+        <div class="sheet">
+          <h1 id="chain-title" class="two">Your chain. <span data-f="sub"></span></h1>
+          <p class="sheet-lede tight"><span class="state" data-state="none">Sample</span> A record counts once your key signs it. Each one links to the one before it.</p>
+          <dl class="strip" data-f="strip"></dl>
+          <p class="next-row" data-f="nextrow" data-sw></p>
+          <div class="tab-line">
+            <div class="tabs dark" role="tablist" aria-label="Your chain" data-tabs="chain">
+              <i class="tab-pill" aria-hidden="true"></i>
+              <button role="tab" id="tab-records" aria-controls="records" aria-selected="true">Records</button>
+              <button role="tab" id="tab-activity" aria-controls="activity" aria-selected="false" tabindex="-1">Activity</button>
+            </div>
+          </div>
+          <ol class="recs" data-f="recs" role="tabpanel" id="records" aria-labelledby="tab-records"></ol>
+          <ol class="recs activity" role="tabpanel" id="activity" aria-labelledby="tab-activity" hidden></ol>
+          <div class="sheet-foot">
+            <a class="cta small" data-f="next"><span class="say">View record <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+            <a class="more" data-f="links">Connections</a><a class="more" data-f="history">History</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span></span>
+  </section>
+
+  <!-- ONE RECORD: the tile, its earlier versions, the chain's timeline; the page slab holds its details -->
+  <section class="view page" data-view="record" aria-labelledby="record-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="Personal chain" data-back="#/chain" data-back-label="Back to chain" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="chain-body">
+      <div class="stage-col">
+        <div class="stage" data-stage></div>
+        <nav class="timeline" data-f="timeline" aria-label="Records by date"></nav>
+      </div>
+      <div class="sheet-slot" data-panel>
+        <div class="sheet">
+          <p class="eyebrow-dot mono" data-f="kind" data-sw></p>
+          <h1 id="record-title" class="two" data-f="title" data-sw></h1>
+          <p class="meta-line mono" data-f="meta" data-sw></p>
+          <p class="sheet-lede" data-f="about" data-sw></p>
+          <p class="preview" data-f="preview" data-sw></p>
+          <dl class="facts" data-f="facts" data-sw></dl>
+          <div class="sheet-foot">
+            <a class="cta small" data-f="next"><span class="say">Open record <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+            <a class="more" data-f="links">Connections</a><a class="more" data-f="history">History</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span></span>
+  </section>
+
+  <!-- THE RECORD OPENED: the tile becomes the card -->
+  <section class="view page" data-view="open" aria-labelledby="open-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="Personal chain" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="card-slot" data-card>
+      <article class="card">
+        <div class="card-top">
+          <a class="back pill" data-f="back"><svg viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 7H2M7.5 1.5L2 7l5.5 5.5"/></svg>Back to chain</a>
+          <span class="card-path" data-f="path" data-sw></span>
+          <span class="card-kind mono" data-f="kind" data-sw></span>
+        </div>
+        <h2 id="open-title" class="two" data-f="title" data-sw></h2>
+        <p class="meta-line mono" data-f="meta" data-sw></p>
+        <div class="card-bar">
+          <div class="tabs" role="tablist" aria-label="Record" data-tabs="open">
+            <i class="tab-pill" aria-hidden="true"></i>
+            <button role="tab" id="tab-content" aria-controls="content" aria-selected="true">Content</button>
+            <button role="tab" id="tab-details" aria-controls="details" aria-selected="false" tabindex="-1">Details</button>
+            <button role="tab" id="tab-signature" aria-controls="signature" aria-selected="false" tabindex="-1">Signature</button>
+            <button role="tab" id="tab-history" aria-controls="history" aria-selected="false" tabindex="-1">History</button>
+          </div>
+          <a class="cta small" data-f="links"><span class="say">See connections <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+        </div>
+        <div class="card-body">
+          <div class="card-panels">
+            <section class="panel" role="tabpanel" id="content" aria-labelledby="tab-content"></section>
+            <section class="panel" role="tabpanel" id="details" aria-labelledby="tab-details" hidden></section>
+            <section class="panel" role="tabpanel" id="signature" aria-labelledby="tab-signature" hidden></section>
+            <section class="panel" role="tabpanel" id="history" aria-labelledby="tab-history" hidden></section>
+          </div>
+          <dl class="card-facts" data-f="facts" data-sw></dl>
+        </div>
+      </article>
+    </div>
+    <span></span>
+  </section>
+
+  <!-- CONNECTIONS: the chain laid out in a line; what the record links to, and what links to it -->
+  <section class="view page" data-view="links" aria-labelledby="links-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="Personal chain" data-back="#/record" data-back-label="Back to record" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="chain-body">
+      <div class="stage-col">
+        <div class="stage" data-stage></div>
+        <ul class="legend mono" aria-label="What the lines mean">
+          <li><i class="lg-link"></i>Chain link</li><li><i class="lg-dots"></i>Related record</li>
+          <li><i class="lg-ghost"></i>Earlier version</li><li><i class="lg-key"></i>Signed by your key</li>
+        </ul>
+      </div>
+      <div class="sheet-slot" data-panel>
+        <div class="sheet">
+          <p class="eyebrow-dot mono">Connections</p>
+          <h1 id="links-title" class="two" data-f="title" data-sw></h1>
+          <dl class="groups" data-f="groups" data-sw></dl>
+          <div class="sheet-foot">
+            <a class="cta small" data-f="next"><span class="say">Open record <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+            <a class="more" data-f="chain">Back to chain</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span></span>
+  </section>
+
+  <!-- HOW A RESULT IS MADE: five steps, a swap as the example (designer brief, section 3) -->
+  <section class="view page" data-view="resolve" aria-labelledby="resolve-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="How it works" data-back="#/" data-back-label="Back to network" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="chain-body">
+      <div class="stage-col">
+        <div class="stage" data-stage></div>
+        <div class="segs" role="group" aria-label="Steps">
+          <button type="button" data-seg="1" aria-label="Step 1"></button><button type="button" data-seg="2" aria-label="Step 2"></button><button type="button" data-seg="3" aria-label="Step 3"></button><button type="button" data-seg="4" aria-label="Step 4"></button><button type="button" data-seg="5" aria-label="Step 5"></button>
+          <span class="mono">Illustration. It shows no live state.</span>
+        </div>
+      </div>
+      <div class="sheet-slot" data-panel>
+        <div class="sheet">
+          <p class="eyebrow-dot mono">How a result is made</p>
+          <h1 id="resolve-title" class="two" data-f="title" data-sw aria-live="polite"></h1>
+          <ol class="story" data-f="steps"></ol>
+          <p class="aside">You choose whom to trust before you send. Each resolver shows its grammar, its capabilities and who can change it. <a href="#/resolvers">See the resolvers</a></p>
+          <div class="sheet-foot">
+            <a class="cta small" data-f="next"><span class="say"><span data-f="next-say">Next step</span> <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+            <a class="more" data-f="prev">Step back</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span></span>
+  </section>
+
+  <!-- RESOLVERS: the first-party resolvers, and what each is built from (brief, section 5) -->
+  <section class="view page" data-view="resolvers" aria-labelledby="resolvers-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="Resolvers" data-back="#/" data-back-label="Back to network" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="chain-body">
+      <div class="stage-col">
+        <div class="stage" data-stage></div>
+        <p class="stage-note mono" data-f="note"></p>
+      </div>
+      <div class="sheet-slot" data-panel>
+        <div class="sheet">
+          <p class="eyebrow-dot mono" data-f="kicker"></p>
+          <h1 id="resolvers-title" class="two" data-f="title" data-sw></h1>
+          <p class="sheet-lede tight" data-f="line" data-sw></p>
+          <dl class="strip" data-f="strip" data-sw></dl>
+          <dl class="facts plain" data-f="facts" data-sw></dl>
+          <div class="chips" data-f="pick" role="group" aria-label="Choose a resolver"></div>
+          <div class="sheet-foot">
+            <a class="cta small" data-f="next"><span class="say"><span data-f="next-say">See its capabilities</span> <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+            <a class="more" href="#/resolve">How a result is made</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span></span>
+  </section>
+
+  <!-- MEASURED: every capability with its checked cases, and the two dated benchmark runs -->
+  <section class="view page" data-view="measured" aria-labelledby="measured-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="Measured" data-back="#/" data-back-label="Back to network" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="chain-body">
+      <div class="stage-col">
+        <div class="stage" data-stage></div>
+        <p class="stage-note mono">One column per capability. One cube per checked case.</p>
+      </div>
+      <div class="sheet-slot" data-panel>
+        <div class="sheet">
+          <p class="eyebrow-dot mono">Measured</p>
+          <div class="tabs dark" role="tablist" aria-label="Measured" data-tabs="measured">
+            <i class="tab-pill" aria-hidden="true"></i>
+            <button role="tab" id="tab-caps" aria-controls="caps" aria-selected="true">Capabilities</button>
+            <button role="tab" id="tab-runs" aria-controls="runs" aria-selected="false" tabindex="-1">Benchmark runs</button>
+          </div>
+          <section class="panel dark" role="tabpanel" id="caps" aria-labelledby="tab-caps">
+            <h1 id="measured-title" class="two" data-f="title" data-sw></h1>
+            <p class="sheet-lede tight" data-f="line" data-sw></p>
+            <dl class="strip" data-f="strip" data-sw></dl>
+            <dl class="facts plain" data-f="facts" data-sw></dl>
+            <div class="chips" data-f="pick" role="group" aria-label="Choose a capability"></div>
+          </section>
+          <section class="panel dark" role="tabpanel" id="runs" aria-labelledby="tab-runs" hidden></section>
+          <div class="sheet-foot">
+            <a class="cta small" data-f="next"><span class="say"><span data-f="next-say">See resolvers that use it</span> <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+            <a class="more" href="#/resolve">How a result is made</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span></span>
+  </section>
+
+  <!-- FXN: the starting supply and the fee split, as owner decisions (brief, section 10) -->
+  <!-- ONE CHAIN OF THE NETWORK: any ring opened from home (ring-view.js) -->
+  <section class="view page" data-view="ring" aria-labelledby="ring-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="Network" data-back="#/" data-back-label="Back to network" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="chain-body">
+      <div class="stage-col">
+        <div class="stage" data-stage></div>
+        <p class="stage-note mono" data-rf="note"></p>
+      </div>
+      <div class="sheet-slot" data-panel>
+        <div class="sheet">
+          <p class="eyebrow-dot mono" data-rf="kind" data-sw></p>
+          <div class="ring-head" data-sw>
+            <span class="logo-slot" data-rf="logo" role="img" aria-label="Logo: not given yet"><span>Logo</span></span>
+            <h1 id="ring-title" class="two" data-rf="title"></h1>
+          </div>
+          <p class="sheet-lede" data-rf="what" data-sw></p>
+          <dl class="strip" data-rf="strip" data-sw></dl>
+          <p class="aside" data-rf="also" data-sw></p>
+          <div class="chips" data-rf="pick" role="group" aria-label="Other chains"></div>
+          <div class="sheet-foot">
+            <a class="cta small" data-rf="cta"><span class="say"><span data-rf="cta-say"></span> <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+            <a class="more" href="#/">Back to network</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span></span>
+  </section>
+
+  <section class="view page" data-view="fxn" aria-labelledby="fxn-title">
+    <div class="page-top">
+      <nav class="crumbs" data-kit="crumbs" data-here="FXN" data-back="#/" data-back-label="Back to network" aria-label="Where you are"></nav>
+      <a class="minimap" data-kit="minimap" href="#/" aria-label="Back to the network"></a>
+    </div>
+    <div class="chain-body">
+      <div class="stage-col">
+        <div class="stage" data-stage></div>
+        <p class="stage-note mono">One tile is 1% of the supply: 10,000,000 FXN.</p>
+      </div>
+      <div class="sheet-slot" data-panel>
+        <div class="sheet">
+          <p class="eyebrow-dot mono">FXN · owner decisions</p>
+          <h1 id="fxn-title" class="two">1,000,000,000 FXN.</h1>
+          <p class="sheet-lede tight">Fixed on the chain. Each part has its own release rule. Most of these rules are not in code yet.</p>
+          <div class="tabs dark" role="tablist" aria-label="FXN" data-tabs="fxn">
+            <i class="tab-pill" aria-hidden="true"></i>
+            <button role="tab" id="tab-supply" aria-controls="supply" aria-selected="true">Starting supply</button>
+            <button role="tab" id="tab-fees" aria-controls="fees" aria-selected="false" tabindex="-1">Fees</button>
+            <button role="tab" id="tab-money" aria-controls="money" aria-selected="false" tabindex="-1">Money</button>
+          </div>
+          <section class="panel dark" role="tabpanel" id="supply" aria-labelledby="tab-supply"></section>
+          <section class="panel dark" role="tabpanel" id="fees" aria-labelledby="tab-fees" hidden></section>
+          <section class="panel dark" role="tabpanel" id="money" aria-labelledby="tab-money" hidden></section>
+          <div class="sheet-foot">
+            <a class="cta small" href="#/idstart"><span class="say">Create your identity <svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M1 10h23M15 1l9 9-9 9"/></svg></span></a>
+            <a class="more" href="#/measured">What is measured</a>
+            <small class="cta-why">The public sale is per identity.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span></span>
+  </section>
+
+</main>
+
+<!-- labels on the 3D, one layer per view; placed by the scene each frame it draws -->
+<div class="tags" data-for="home" aria-hidden="true"></div>
+<div class="tags" data-for="chain" aria-hidden="true">
+  <span class="tag lit" data-tag="key" data-at="above"><b>Your chain</b><span data-f-tag="count"></span></span>
+  <span class="tag small" data-tag="oldest" data-at="below"><b>Oldest</b></span>
+  <span class="tag small" data-tag="newest" data-at="below"><b>Newest</b></span>
+</div>
+<div class="tags" data-for="record" aria-hidden="true"></div>
+<div class="tags" data-for="links" aria-hidden="true"></div>
+<div class="tags" data-for="resolve" aria-hidden="true">
+  <span class="tag" data-tag="alice"><b>Alice signs</b>"I give 10 A for B"</span>
+  <span class="tag" data-tag="bob" data-at="below"><b>Bob signs</b>"I give B for 10 A"</span>
+  <span class="tag" data-tag="resolver"><b>Resolver</b>Checks every signature, one price for the batch</span>
+  <span class="tag" data-tag="result"><b>Signed result</b>This signature is the result</span>
+  <span class="tag" data-tag="copies"><b>Other computers</b>Each keeps a copy</span>
+  <span class="tag lit" data-tag="c1" data-at="below"><b>Check 1</b>The resolver's signature</span>
+  <span class="tag lit" data-tag="c2" data-at="right"><b>Check 2</b>Alice's signature</span>
+  <span class="tag lit" data-tag="c3" data-at="right"><b>Check 3</b>Bob's signature</span>
+</div>
+<div class="tags" data-for="resolvers" aria-hidden="true"></div>
+<div class="tags" data-for="measured" aria-hidden="true"><span class="tag" data-tag="col"></span><span class="tag small" data-tag="ten" data-at="left"><b>10 cases</b></span></div>
+<div class="tags" data-for="fxn" aria-hidden="true"></div>
+<div class="tags" data-for="ring" aria-hidden="true"><span class="tag hot" data-tag="name"></span></div>
+
+<footer class="foot" data-kit="foot"></footer>
+<div class="hover-tag" aria-hidden="true"><b></b><span></span></div>
+<div class="mock" role="group" aria-label="Mockup controls" data-kit="mock"></div>
+
+<script src="vendor/three-r180-defxn.js"></script>
+<script src="mark-data.js?v=20261023m"></script>
+<script src="network-data.js?v=20261023m"></script>
+<script src="records-sample.js?v=20261023m"></script>
+<script src="kit-ui.js?v=20261023m"></script>
+<script src="ring-kit.js?v=20261023m"></script>
+<script src="capabilities-data.js?v=20261023m"></script>
+<script src="resolvers-data.js?v=20261023m"></script>
+<script src="fxn-data.js?v=20261023m"></script>
+<script src="chains-scene.js?v=20261023m"></script>
+<script src="stages.js?v=20261023m"></script>
+<script src="concept-data.js?v=20261023a"></script>
+<script src="ring-view.js?v=20261023a"></script>
+<script src="concept-views.js?v=20261023a"></script>
+<script src="identity-sample.js?v=20261023a"></script>
+<script src="identity-flow.js?v=20261023a"></script>
+<script src="identity-stages.js?v=20261023a"></script>
+<script src="trace-view.js?v=20261024a"></script>
+<script src="intro-view.js?v=20261024a"></script>
+<script src="home-descent.js?v=20261024a"></script>
+<script src="home-helix.js?v=20261024a"></script>
+<script src="home-sites.js?v=20261024a"></script>
+<script src="record-glass.js?v=20261024a"></script>
+<script src="app.js?v=20261023m"></script>
+<script src="rail-capabilities.js?v=20261023m"></script>
+</body>
+</html>

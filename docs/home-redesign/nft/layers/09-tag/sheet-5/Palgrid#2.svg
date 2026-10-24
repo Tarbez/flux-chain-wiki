@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Palgrid: a pixel swatch grid, PALETTE and the card's palette</title>
+  <path d="M1 17h4.5v4.5h-4.5zM6.5 22.5h4.5v4.5h-4.5zM12 28h4.5v4.5h-4.5z" fill="var(--acc)"/>
+  <path d="M6.5 17h4.5v4.5h-4.5zM12 22.5h4.5v4.5h-4.5zM1 28h4.5v4.5h-4.5z" fill="var(--acc2)"/>
+  <path d="M12 17h4.5v4.5h-4.5zM1 22.5h4.5v4.5h-4.5zM6.5 28h4.5v4.5h-4.5z" fill="var(--line)"/>
+  <text x="30" y="29.5" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--dim)">PALETTE</text>
+  <text x="116" y="29.5" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--ink)" font-weight="500"><tspan data-field="palette">PALETTE</tspan></text>
+</svg>

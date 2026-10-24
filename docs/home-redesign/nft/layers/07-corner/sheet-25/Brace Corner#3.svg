@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Brace Corner: a rounded L drawn like a curly brace: each arm points a sharp beak outward at its middle, tipped with an accent dot, and curls in at its end (sheet 25, the Brace set)</title>
+  <path d="M17 96Q10 96 10 89V63Q10 56 3 56Q10 56 10 49V22Q10 10 22 10H49Q56 10 56 3Q56 10 63 10H89Q96 10 96 17" fill="none" stroke="var(--ink)" stroke-width="1.5" vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round"/><circle cx="3" cy="56" r="1.9" fill="var(--acc)"/><circle cx="56" cy="3" r="1.9" fill="var(--acc)"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Tabs: role, network and status as three tabs, a cyan underline under the first (sheet-4, 08; record fields replace the status words on the sheet)</title>
+  <text x="0" y="24" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2.4" fill="var(--ink)" data-field="role">MEMBER</text>
+  <circle cx="100" cy="20" r="1.5" fill="var(--dim)"/>
+  <text x="116" y="24" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2.4" fill="var(--dim)" data-field="network">DEFXN</text>
+  <circle cx="184" cy="20" r="1.5" fill="var(--dim)"/>
+  <text x="200" y="24" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2.4" fill="var(--dim)" data-field="status">PREVIEW</text>
+  <path d="M0 37H360" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M0 37H84" fill="none" stroke="var(--acc)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+</svg>

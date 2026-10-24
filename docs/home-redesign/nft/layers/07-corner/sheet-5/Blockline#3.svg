@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Blockline: a solid pixel L bracket with a mint corner block</title>
+  <path d="M8 0h26v4h-26zM0 8h4v26h-4zM38 0h4v4h-4zM0 38h4v4h-4z" fill="var(--line)"/>
+  <path d="M0 0h8v8h-8z" fill="var(--acc)"/>
+</svg>

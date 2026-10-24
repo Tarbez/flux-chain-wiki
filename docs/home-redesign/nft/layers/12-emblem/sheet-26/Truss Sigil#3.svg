@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Truss Sigil: a girder seen side on: two heavy bars and three solid triangles between them, an accent pin at the middle joint (sheet 26, the Truss set: a girder: two rails with a zigzag web between them, round pins at the joints, one pin in the accent)</title>
+  <rect x="1.5" y="5.5" width="27" height="3.6" fill="var(--ink)"/>
+  <rect x="1.5" y="25" width="27" height="3.6" fill="var(--ink)"/>
+  <path d="M2 25L6.25 9.1L10.5 25ZM10.75 25L15 9.1L19.25 25ZM19.5 25L23.75 9.1L28 25Z" fill="var(--ink)"/>
+  <circle cx="15" cy="7.3" r="2.7" fill="var(--acc)"/>
+</svg>

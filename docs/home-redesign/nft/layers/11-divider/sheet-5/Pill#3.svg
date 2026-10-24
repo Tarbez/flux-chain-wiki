@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Pill: a line, a pixel connector into a pill with two mint bars, a line</title>
+  <path d="M0 12.5H148M213 12.5H360" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M149 11h3v3h-3zM208 11h3v3h-3z" fill="var(--line)"/>
+  <rect x="155.5" y="5.5" width="49" height="14" rx="7" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M172.5 9h4v7h-4zM183.5 9h4v7h-4z" fill="var(--acc)"/>
+</svg>

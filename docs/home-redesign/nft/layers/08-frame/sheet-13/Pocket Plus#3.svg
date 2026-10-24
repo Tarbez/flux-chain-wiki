@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Pocket Plus: a dotted rounded frame with an accent plus tucked inside three of its corners, the bottom-left corner left plain (sheet 13, 12)</title>
+  <path d="M30 12H970A18 18 0 0 1 988 30V670A18 18 0 0 1 970 688H30A18 18 0 0 1 12 670V30A18 18 0 0 1 30 12Z" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 4"/>
+  <rect x="17.5" y="20.4" width="8" height="2.2" fill="var(--acc)"/><rect x="20.4" y="17.5" width="2.2" height="8" fill="var(--acc)"/>
+  <rect x="974.5" y="20.4" width="8" height="2.2" fill="var(--acc)"/><rect x="977.4" y="17.5" width="2.2" height="8" fill="var(--acc)"/>
+  <rect x="974.5" y="677.4" width="8" height="2.2" fill="var(--acc)"/><rect x="977.4" y="674.5" width="2.2" height="8" fill="var(--acc)"/>
+</svg>

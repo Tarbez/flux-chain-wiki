@@ -1,0 +1,6 @@
+/* Lichen: grey green light, orange lichen spots. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 96 10% 90%;
+  --b: 100 22% 72%;
+  --c: 30 82% 60%;
+}

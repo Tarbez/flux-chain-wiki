@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Crossed: an L bracket with a small plus in its bend</title>
+  <path d="M0.5 17V0.5H17" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M9.5 6V13M6 9.5H13" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/>
+</svg>

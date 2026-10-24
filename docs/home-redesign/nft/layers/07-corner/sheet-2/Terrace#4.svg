@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Terrace: a bend stepped in small square pixels, then plain lines and a dotted run</title>
+  <path d="M0 12h3v3h-3zM3 9h3v3h-3zM6 6h3v3h-3zM9 3h3v3h-3zM12 0h3v3h-3z" fill="var(--line)"/>
+  <path d="M15 1.5H42M1.5 15V42" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M46 0.75h1.5v1.5h-1.5zM50 0.75h1.5v1.5h-1.5zM54 0.75h1.5v1.5h-1.5zM58 0.75h1.5v1.5h-1.5zM62 0.75h1.5v1.5h-1.5zM66 0.75h1.5v1.5h-1.5zM70 0.75h1.5v1.5h-1.5zM74 0.75h1.5v1.5h-1.5zM78 0.75h1.5v1.5h-1.5z" fill="var(--line)"/>
+  <path d="M0.75 46h1.5v1.5h-1.5zM0.75 50h1.5v1.5h-1.5zM0.75 54h1.5v1.5h-1.5zM0.75 58h1.5v1.5h-1.5zM0.75 62h1.5v1.5h-1.5zM0.75 66h1.5v1.5h-1.5zM0.75 70h1.5v1.5h-1.5z" fill="var(--line)"/>
+</svg>

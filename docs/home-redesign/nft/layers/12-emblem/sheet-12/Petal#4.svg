@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Petal: four rounded petals on the diagonals, like a soft X, with an accent dot at the centre (sheet 12, micrographics 01)</title>
+  <circle cx="15" cy="17" r="11" fill="var(--acc)" opacity="0.08"/>
+  <ellipse cx="18.68" cy="20.68" rx="5.4" ry="3.3" transform="rotate(45 18.68 20.68)" fill="var(--dim)"/>
+  <ellipse cx="11.32" cy="20.68" rx="5.4" ry="3.3" transform="rotate(135 11.32 20.68)" fill="var(--dim)"/>
+  <ellipse cx="11.32" cy="13.32" rx="5.4" ry="3.3" transform="rotate(225 11.32 13.32)" fill="var(--dim)"/>
+  <ellipse cx="18.68" cy="13.32" rx="5.4" ry="3.3" transform="rotate(315 18.68 13.32)" fill="var(--dim)"/>
+  <circle cx="15" cy="17" r="1.6" fill="var(--acc)"/>
+</svg>

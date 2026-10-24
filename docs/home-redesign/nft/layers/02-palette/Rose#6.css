@@ -1,0 +1,6 @@
+/* Rose: pink. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 340 72% 88%;
+  --b: 340 88% 66%;
+  --c: 320 70% 64%;
+}

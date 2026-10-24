@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Genesis Box: GENESIS ID and the genesis ID in large digits, inside four corner brackets (sheet 8)</title>
+  <path d="M0.5 8.5V0.5H8.5M211.5 0.5H219.5V8.5M219.5 41.5V49.5H211.5M8.5 49.5H0.5V41.5" fill="none" stroke="var(--acc)" stroke-opacity="0.22" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M0.5 8.5V0.5H8.5M211.5 0.5H219.5V8.5M219.5 41.5V49.5H211.5M8.5 49.5H0.5V41.5" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <text x="16" y="29" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="2.4" fill="var(--dim)">GENESIS ID</text>
+  <rect x="16" y="34" width="14" height="1.6" fill="var(--acc)"/>
+  <text x="204" y="36" font-family="JetBrains Mono, monospace" font-size="28" letter-spacing="1.2" fill="var(--ink)" data-field="genesisId" text-anchor="end" font-weight="500">GENESISID</text>
+</svg>

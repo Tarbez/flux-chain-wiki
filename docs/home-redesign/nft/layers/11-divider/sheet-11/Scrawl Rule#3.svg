@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Scrawl Rule: a small looping pen flourish that runs on into the rule, ending in an accent dot (sheet 11, 22-02)</title>
+  <path d="M2 18C6 14 10 9 12 4C13 1 10 2 10 8C10 14 12 19 15 16C17 13 19 10 21 14C23 18 25 17 27 13C29 9 31 10 33 14C35 17 38 17 42 13C46 10 52 11 60 12.5" fill="none" stroke="var(--ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M60 12.5H350" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="353" cy="12.5" r="2" fill="var(--acc)"/>
+</svg>

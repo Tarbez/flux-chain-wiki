@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Notched: top and bottom lines, each raised in a trapezoid at the centre, with a cyan dot on each side (sheet-4, 03)</title>
+  <path d="M22 20H432L444 12H556L568 20H978" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M22 680H432L444 688H556L568 680H978" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M452 16H548" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M452 684H548" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="18" cy="350" r="6" fill="var(--acc)" opacity="0.18"/><circle cx="982" cy="350" r="6" fill="var(--acc)" opacity="0.18"/><circle cx="18" cy="350" r="2.8" fill="var(--acc)"/><circle cx="982" cy="350" r="2.8" fill="var(--acc)"/>
+</svg>

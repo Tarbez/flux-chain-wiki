@@ -1,0 +1,6 @@
+/* Lilac: lilac light, a lime glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 288 24% 92%;
+  --b: 288 58% 80%;
+  --c: 82 70% 54%;
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Dotgrid: a 3 x 3 grid of dots with an accent centre (sheet-3, 07 and 25)</title>
+  <g fill="var(--dim)">
+    <circle cx="7" cy="9" r="1.8"/><circle cx="15" cy="9" r="1.8"/><circle cx="23" cy="9" r="1.8"/>
+    <circle cx="7" cy="17" r="1.8"/><circle cx="23" cy="17" r="1.8"/>
+    <circle cx="7" cy="25" r="1.8"/><circle cx="15" cy="25" r="1.8"/><circle cx="23" cy="25" r="1.8"/>
+  </g>
+  <circle cx="15" cy="17" r="1.8" fill="var(--acc)"/>
+</svg>

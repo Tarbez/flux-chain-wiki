@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Ladder Plus: a square frame with a dotted top edge, white plus marks on three corner points, and a ladder of ticks crossing the middle of each side edge, its two end ticks in the accent (sheet 13, 15)</title>
+  <path d="M26 18H974" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 5"/>
+  <path d="M18 26V674M26 682H982V26" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M11 18H25M18 11V25" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M975 18H989M982 11V25" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M11 682H25M18 675V689" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M15 326H21M985 326H979M12 334H24M988 334H976M15 342H21M985 342H979M12 350H24M988 350H976M15 358H21M985 358H979M12 366H24M988 366H976M15 374H21M985 374H979" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="11" y="317.2" width="14" height="1.6" fill="var(--acc)"/>
+  <rect x="11" y="381.2" width="14" height="1.6" fill="var(--acc)"/>
+  <rect x="975" y="317.2" width="14" height="1.6" fill="var(--acc)"/>
+  <rect x="975" y="381.2" width="14" height="1.6" fill="var(--acc)"/>
+</svg>

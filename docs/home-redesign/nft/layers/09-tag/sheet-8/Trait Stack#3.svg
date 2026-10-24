@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Trait Stack: the palette's name over the word PALETTE, on a cyan underline that ends in dots (sheet 8)</title>
+  <text x="0" y="18" font-family="JetBrains Mono, monospace" font-size="16" letter-spacing="3" fill="var(--ink)" data-field="palette" font-weight="500">PALETTE</text>
+  <text x="0" y="35" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="2.4" fill="var(--dim)">PALETTE</text>
+  <path d="M0.5 45.5H150" fill="none" stroke="var(--acc)" stroke-opacity="0.25" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M0.5 45.5H150" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <circle cx="158" cy="45.5" r="1.4" fill="var(--acc)"/>
+  <circle cx="165" cy="45.5" r="1.4" fill="var(--acc)" fill-opacity="0.6"/>
+  <circle cx="172" cy="45.5" r="1.4" fill="var(--acc)" fill-opacity="0.3"/>
+</svg>

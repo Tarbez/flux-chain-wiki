@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Milestones: a timeline of marked nodes, a ring, a crossed ring, a square, a diamond and a large accent diamond, ending in an arrow; JOINED and the join date under the first node (sheet 10, 27-02 and 27-03)</title>
+  <path d="M16 30.5H101M111 30.5H178M188 30.5H244M252 30.5H289M307 30.5H348" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="10" cy="30.5" r="5.5" fill="none" stroke="var(--ink)" stroke-width="1.2"/>
+  <circle cx="10" cy="30.5" r="2" fill="var(--ink)"/>
+  <circle cx="106" cy="30.5" r="4.5" fill="none" stroke="var(--ink)" stroke-width="1.1"/>
+  <path d="M104 28.5L108 32.5M108 28.5L104 32.5" fill="none" stroke="var(--ink)" stroke-width="1"/>
+  <rect x="179.5" y="27" width="7" height="7" fill="none" stroke="var(--dim)" stroke-width="1.1"/>
+  <path d="M248 26.5L252 30.5L248 34.5L244 30.5Z" fill="var(--dim)"/>
+  <path d="M298 20.5L307 30.5L298 40.5L289 30.5Z" fill="none" stroke="var(--acc)" stroke-width="6" stroke-linejoin="round" opacity="0.08"/>
+  <path d="M298 20.5L307 30.5L298 40.5L289 30.5Z" fill="var(--acc)" fill-opacity="0.16" stroke="var(--acc)" stroke-width="1.2" stroke-linejoin="round"/>
+  <rect x="296.5" y="29" width="3" height="3" fill="var(--acc)" transform="rotate(45 298 30.5)"/>
+  <path d="M348 26L353 30.5L348 35" fill="none" stroke="var(--ink)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M10 38V46" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="0" y="60" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="2" fill="var(--dim)">JOINED</text>
+  <text x="0" y="74" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="1.4" fill="var(--ink)" data-field="joined">JOINED</text>
+</svg>

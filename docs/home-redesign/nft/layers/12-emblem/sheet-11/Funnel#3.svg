@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Funnel: four even hairlines over an accent marker that narrows to a point (sheet 11, 29-02)</title>
+  <path d="M6 3.5H24M6 8.5H24M6 13.5H24M6 18.5H24" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M6.5 23h17v1.8h-17zM10 26.6h10v1.8h-10zM12.6 30.2h4.8L15 33.4z" fill="var(--acc)"/>
+</svg>

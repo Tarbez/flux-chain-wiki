@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Plus Survey: dotted top and bottom edges between solid sides, an accent plus on each corner point, two small ticks at the top and bottom centres, and a short accent bar at the middle of each side (sheet 13, 03)</title>
+  <path d="M28 16H972M28 684H972" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 5"/>
+  <path d="M16 28V672M984 28V672" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M495 11V22M505 11V22M495 678V689M505 678V689" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="10" y="15" width="12" height="2" fill="var(--acc)"/><rect x="15" y="10" width="2" height="12" fill="var(--acc)"/>
+  <rect x="978" y="15" width="12" height="2" fill="var(--acc)"/><rect x="983" y="10" width="2" height="12" fill="var(--acc)"/>
+  <rect x="10" y="683" width="12" height="2" fill="var(--acc)"/><rect x="15" y="678" width="2" height="12" fill="var(--acc)"/>
+  <rect x="978" y="683" width="12" height="2" fill="var(--acc)"/><rect x="983" y="678" width="2" height="12" fill="var(--acc)"/>
+  <rect x="12.5" y="320" width="7" height="60" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="14.5" y="322" width="3" height="56" fill="var(--acc)"/>
+  <rect x="980.5" y="320" width="7" height="60" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="982.5" y="322" width="3" height="56" fill="var(--acc)"/>
+</svg>

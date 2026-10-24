@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Wire Globe: a wireframe globe (sheet 7, item 26, drawn without the text beside it)</title>
+  <circle cx="15" cy="17" r="12" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <ellipse cx="15" cy="17" rx="5" ry="12" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M3 17H27M4.6 11H25.4M4.6 23H25.4" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

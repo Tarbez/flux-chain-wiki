@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Dot Grid: a three by three grid of small dots; the centre dot is cyan (sheet 8)</title>
+  <g fill="var(--ink)" fill-opacity="0.75"><circle cx="6" cy="8" r="1.6"/><circle cx="15" cy="8" r="1.6"/><circle cx="24" cy="8" r="1.6"/><circle cx="6" cy="17" r="1.6"/><circle cx="24" cy="17" r="1.6"/><circle cx="6" cy="26" r="1.6"/><circle cx="15" cy="26" r="1.6"/><circle cx="24" cy="26" r="1.6"/></g>
+  <circle cx="15" cy="17" r="5.5" fill="var(--acc)" fill-opacity="0.22"/>
+  <circle cx="15" cy="17" r="2.2" fill="var(--acc)"/>
+</svg>

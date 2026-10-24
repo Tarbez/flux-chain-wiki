@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Serialgrid: a small SERIAL label, the serial and a pixel dot grid cell</title>
+  <rect x="0.5" y="12.5" width="146" height="25" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <line x1="50.5" y1="12.5" x2="50.5" y2="37.5" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <line x1="120.5" y1="12.5" x2="120.5" y2="37.5" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="7" y="28.2" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="1.2" fill="var(--dim)">SERIAL</text>
+  <text x="60" y="29.5" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--ink)" font-weight="500">#<tspan data-field="serial">00</tspan></text>
+  <path d="M126.5 17.5h3v3h-3zM132.5 17.5h3v3h-3zM126.5 23.5h3v3h-3zM132.5 23.5h3v3h-3zM138.5 23.5h3v3h-3zM126.5 29.5h3v3h-3zM132.5 29.5h3v3h-3zM138.5 29.5h3v3h-3z" fill="var(--line)"/>
+  <path d="M138.5 17.5h3v3h-3z" fill="var(--ink)"/>
+</svg>

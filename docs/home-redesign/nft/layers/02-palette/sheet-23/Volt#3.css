@@ -1,0 +1,6 @@
+/* Volt: electric yellow light, a violet glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 60 30% 90%;
+  --b: 56 92% 60%;
+  --c: 272 80% 72%;
+}

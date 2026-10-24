@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Truss Corner: two rails round the bend with a zigzag web between them, a knee brace across the bend, a pin at each end and an accent pin at the bend (sheet 26, the Truss set: a girder: two rails with a zigzag web between them, round pins at the joints, one pin in the accent)</title>
+  <path d="M96 0.5H0.5V96" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M96 16.5H16.5V96" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M96 0.5V16.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M0.5 96H16.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M16.5 16.5L32.4 0.5L48.3 16.5L64.2 0.5L80.1 16.5L96 0.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.7"/>
+  <path d="M16.5 16.5L0.5 32.4L16.5 48.3L0.5 64.2L16.5 80.1L0.5 96" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.7"/>
+  <path d="M0.5 0.5L16.5 16.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="16.5" cy="16.5" r="2.6" fill="var(--acc)"/>
+  <circle cx="96" cy="0.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="96" cy="16.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="0.5" cy="96" r="1.7" fill="var(--dim)"/>
+  <circle cx="16.5" cy="96" r="1.7" fill="var(--dim)"/>
+</svg>

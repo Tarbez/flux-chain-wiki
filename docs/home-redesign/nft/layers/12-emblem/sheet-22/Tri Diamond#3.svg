@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Tri Diamond: a solid downward triangle with a diamond window cut in it, an accent diamond inside the window (sheet 22)</title>
+  <path d="M2.4 5.6H27.6L15 30.6ZM15 7.6 L20 13.6 L15 19.6 L10 13.6Z" fill="var(--dim)" fill-rule="evenodd"/>
+  <path d="M15 10 L18 13.6 L15 17.2 L12 13.6Z" fill="var(--acc)"/>
+</svg>

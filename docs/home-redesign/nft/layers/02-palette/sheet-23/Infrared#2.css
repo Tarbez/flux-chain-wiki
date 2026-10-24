@@ -1,0 +1,6 @@
+/* Infrared: white blocks, red heat light, a cold blue glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 0 0% 100%;
+  --b: 0 85% 64%;
+  --c: 210 90% 66%;
+}

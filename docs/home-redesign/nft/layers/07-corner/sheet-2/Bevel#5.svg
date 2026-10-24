@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Bevel: a chamfered corner with a thick filled slab along the cut and a small tick at the end of each arm</title>
+  <path d="M0 10L10 0H14L0 14Z" fill="var(--line)"/>
+  <path d="M14 0.5H44V4M0.5 14V44H4" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+</svg>

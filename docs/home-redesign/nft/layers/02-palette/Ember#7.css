@@ -1,0 +1,6 @@
+/* Ember: orange and red. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 22 88% 84%;
+  --b: 30 96% 60%;
+  --c: 10 90% 58%;
+}

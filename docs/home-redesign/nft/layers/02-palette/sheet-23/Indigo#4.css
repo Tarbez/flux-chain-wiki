@@ -1,0 +1,6 @@
+/* Indigo: indigo light, an orange spark. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 230 20% 90%;
+  --b: 230 64% 80%;
+  --c: 22 86% 64%;
+}

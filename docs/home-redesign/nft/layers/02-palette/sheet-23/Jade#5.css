@@ -1,0 +1,6 @@
+/* Jade: jade light, a gold glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 150 20% 88%;
+  --b: 152 36% 58%;
+  --c: 44 72% 60%;
+}

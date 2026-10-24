@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Stitch: a small L bracket whose bend is drawn in short broken steps</title>
+  <path d="M0.5 18V10M10 0.5H18" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M0.5 7.5V5.5M0.5 3V0.5H3M5.5 0.5H7.5" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+</svg>

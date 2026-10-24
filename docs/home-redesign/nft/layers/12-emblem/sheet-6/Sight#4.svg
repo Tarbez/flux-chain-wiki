@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Sight: a crosshair with a small bracketed square at its centre</title>
+  <path d="M15 1V9M15 25V33M1 17H8M22 17H29" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/>
+  <path d="M10 14.5V12H12.5M17.5 12H20V14.5M20 19.5V22H17.5M12.5 22H10V19.5" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/>
+  <rect x="13.5" y="15.5" width="3" height="3" fill="var(--ink)"/>
+</svg>

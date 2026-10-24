@@ -1,0 +1,6 @@
+/* Mauve: grey pink light, a green accent. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 320 10% 90%;
+  --b: 320 16% 70%;
+  --c: 160 50% 50%;
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Notch: a frame open at the sides, with a small diamond at the centre of the top and bottom edges</title>
+  <path d="M18 58V18H492M508 18H982V58M18 642V682H492M508 682H982V642" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--faint)"/>
+  <path d="M500 12L506 18L500 24L494 18ZM500 676L506 682L500 688L494 682Z" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+</svg>

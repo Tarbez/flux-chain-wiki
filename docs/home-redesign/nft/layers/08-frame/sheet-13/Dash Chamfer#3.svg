@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Dash Chamfer: a frame with four cut corners whose top edge is a row of long dashes, the other edges solid, with an accent bar at the middle of each side (sheet 13, 26)</title>
+  <path d="M36 14L14 36V664L36 686H964L986 664V36L964 14" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M46 14H108M123 14H185M200 14H262M277 14H339M354 14H416M431 14H493M508 14H570M585 14H647M662 14H724M739 14H801M816 14H878M893 14H955" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="10" y="314" width="8" height="72" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="12" y="316" width="4" height="68" fill="var(--acc)"/>
+  <rect x="982" y="314" width="8" height="72" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="984" y="316" width="4" height="68" fill="var(--acc)"/>
+</svg>

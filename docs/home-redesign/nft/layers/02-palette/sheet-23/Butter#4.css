@@ -1,0 +1,6 @@
+/* Butter: pale yellow light, a teal accent. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 50 24% 92%;
+  --b: 52 72% 80%;
+  --c: 184 62% 48%;
+}

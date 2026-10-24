@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>DEFXN element review</title>
+<!-- The owner's review board: keep elements that break the design out of new cards.
+     ONE LAYER: pick a category and see every element, each drawn by itself, with the warnings the page
+     finds on its own (a drawing that spills out of its box, a corner or frame that reaches toward the
+     words, a 3D element that needs the mark or sits under the genesis number, a palette whose links
+     are hard to read). Pick one to see it on three different cards. Keep or Hold each element.
+     TWO LAYERS: put two categories against each other in a grid of cards, one card per pair, and click
+     a card to mark the pair as a clash.
+     Holds and clashes are written as layers/review.flx (review-record.js grammar). Save the file into
+     layers/ and run node make-layers.mjs: new cards are then never born with a held element or a
+     clashing pair, and the shop and the skin picker refuse them. Until then the decisions are a draft
+     kept in this browser. Sample data: nothing is live. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="card.css">
+<style>
+  :root{--page:180 5% 7%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%;--hold:8 80% 64%;--keep:156 60% 52%;
+    --t0:0 0% 70%;--t1:168 70% 55%;--t2:268 80% 72%;--t3:40 95% 62%}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:hsl(var(--page));color:hsl(var(--page-text));font:400 12.5px/1.45 "JetBrains Mono",ui-monospace,monospace;
+    height:100svh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+  button,input,select{font:inherit;color:inherit}
+  .top{display:flex;align-items:center;gap:16px;padding:10px 16px;border-bottom:1px solid hsl(var(--page-line) / .1)}
+  .top h1{margin:0;font:800 15px/1 "Inter Tight",Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--page-strong));white-space:nowrap}
+  .tabs{display:flex;gap:4px}
+  .tabs button,.btn{background:none;border:1px solid hsl(var(--page-line) / .16);border-radius:4px;padding:7px 11px;cursor:pointer;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+  .tabs button[aria-pressed="true"]{background:hsl(var(--page-line) / .09);color:hsl(var(--page-strong));border-color:hsl(var(--page-line) / .4)}
+  .sum{margin-left:auto;display:flex;gap:14px;align-items:center;white-space:nowrap}
+  .sum b{color:hsl(var(--page-strong));font-weight:500}
+  .sum .draft{color:hsl(var(--honey))}
+  .btn.is-main{background:hsl(var(--page-strong));color:hsl(var(--page));border-color:hsl(var(--page-strong))}
+  .view{min-height:0;display:grid}
+  .view[hidden]{display:none}
+  /* one layer */
+  .one{grid-template-columns:190px minmax(0,1fr) 360px}
+  .rail{border-right:1px solid hsl(var(--page-line) / .08);padding:12px;overflow:auto;display:grid;gap:12px;align-content:start}
+  .rail h2{margin:0 0 6px;font:500 10px/1 "JetBrains Mono",monospace;letter-spacing:.22em;text-transform:uppercase}
+  .rail ul{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+  .rail li button{width:100%;display:flex;justify-content:space-between;gap:6px;background:none;border:0;border-radius:3px;padding:5px 8px;cursor:pointer;text-align:left}
+  .rail li button[aria-pressed="true"]{background:hsl(var(--page-line) / .09);color:hsl(var(--page-strong))}
+  .rail li small{display:flex;gap:6px}
+  .rail li small .h{color:hsl(var(--hold))}
+  .chips{display:flex;flex-wrap:wrap;gap:5px}
+  .chips button{border-radius:999px;padding:4px 9px;cursor:pointer;background:none;border:1px solid hsl(var(--page-line) / .18);font-size:11px}
+  .chips button[aria-pressed="true"]{background:hsl(var(--page-line) / .1);color:hsl(var(--page-strong));border-color:hsl(var(--page-line) / .5)}
+  .shelf{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr)}
+  .shelf header{display:flex;justify-content:space-between;align-items:baseline;padding:10px 16px 8px}
+  .shelf header b{color:hsl(var(--page-strong));font-weight:500}
+  .grid{overflow:auto;padding:0 16px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;align-content:start}
+  .tile{border:1px solid hsl(var(--page-line) / .08);border-radius:7px;padding:6px;display:grid;gap:6px;cursor:pointer;background:none;text-align:left;position:relative}
+  .tile:hover{border-color:hsl(var(--page-line) / .22)}
+  .tile[aria-selected="true"]{border-color:hsl(var(--page-strong));box-shadow:0 0 0 1px hsl(var(--page-strong))}
+  .tile.is-held{border-color:hsl(var(--hold) / .55)}
+  .tile.is-held .th{opacity:.45}
+  .tile b{font-weight:500;color:hsl(var(--page-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tile .row{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:10.5px}
+  .tile .tier{color:hsl(var(--tc))}
+  .warns{display:flex;flex-wrap:wrap;gap:4px;min-height:0}
+  .warns span{font-size:9.5px;letter-spacing:.06em;padding:2px 5px;border-radius:3px;background:hsl(var(--honey) / .12);color:hsl(var(--honey))}
+  .seg{display:flex;border:1px solid hsl(var(--page-line) / .16);border-radius:4px;overflow:hidden}
+  .seg button{flex:1;background:none;border:0;padding:4px 0;cursor:pointer;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+  .seg button[aria-pressed="true"].k{background:hsl(var(--keep) / .16);color:hsl(var(--keep))}
+  .seg button[aria-pressed="true"].h{background:hsl(var(--hold) / .16);color:hsl(var(--hold))}
+  .side{border-left:1px solid hsl(var(--page-line) / .08);padding:12px 16px;overflow:auto;display:grid;gap:10px;align-content:start}
+  .side h2{margin:0;font:600 17px/1.2 Inter,sans-serif;color:hsl(var(--page-strong))}
+  .side p{margin:0;font-size:11.5px}
+  .side .three{display:grid;gap:8px}
+  .side .three .nft-box{width:100%}
+  /* two layers */
+  .two{grid-template-rows:auto minmax(0,1fr)}
+  .axes{display:flex;gap:18px;align-items:center;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid hsl(var(--page-line) / .08)}
+  .axes label{display:flex;gap:8px;align-items:center;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+  .axes select,.axes input{background:hsl(var(--page-line) / .04);border:1px solid hsl(var(--page-line) / .14);border-radius:4px;padding:5px 8px;color:hsl(var(--page-strong))}
+  .axes input{width:140px}
+  .axes .pager{display:flex;gap:4px;align-items:center}
+  .axes .pager button{background:none;border:1px solid hsl(var(--page-line) / .16);border-radius:3px;padding:3px 8px;cursor:pointer}
+  .matrix{overflow:auto;padding:12px 16px;display:grid;gap:8px;align-content:start}
+  .matrix .h{font-size:10.5px;color:hsl(var(--page-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:end}
+  .matrix .rh{align-self:center;text-align:right;padding-right:6px}
+  .cell{position:relative;border:1px solid transparent;border-radius:6px;padding:2px;cursor:pointer;background:none}
+  .cell:hover{border-color:hsl(var(--page-line) / .3)}
+  .cell.is-clash{border-color:hsl(var(--hold));box-shadow:0 0 0 1px hsl(var(--hold))}
+  .cell.is-clash::after{content:"Clash";position:absolute;right:6px;top:6px;z-index:5;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:2px 5px;border-radius:3px;background:hsl(var(--hold));color:hsl(var(--page))}
+  .cell .nft-box{width:100%}
+  /* closer: the card drawn three times as large, and only one corner of it shown */
+  .cell .zoom{overflow:hidden;aspect-ratio:1000/700;border-radius:4px;position:relative}
+  .cell .zoom > div{position:absolute;width:300%}
+  .cell .zoom.tl > div{left:0;top:0}.cell .zoom.bl > div{left:0;bottom:0}.cell .zoom.br > div{right:0;bottom:0}
+  .note{margin:0;padding:6px 16px 8px;font-size:11px;border-top:1px solid hsl(var(--page-line) / .08)}
+  .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+  .note code{color:hsl(var(--page-strong))}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Element review</h1>
+  <div class="tabs" role="group" aria-label="View">
+    <button type="button" data-tab="one" aria-pressed="true">One layer</button>
+    <button type="button" data-tab="two" aria-pressed="false">Two layers</button>
+  </div>
+  <div class="sum"><span><b id="nHeld">0</b> held</span><span><b id="nClash">0</b> clashing pairs</span><span class="draft" id="draft"></span>
+    <button type="button" class="btn" id="discard">Discard draft</button><button type="button" class="btn is-main" id="save">Save review file</button></div>
+</header>
+
+<section class="view one" id="one" aria-label="One layer">
+  <aside class="rail" aria-label="Category">
+    <div><h2>Category</h2><ul id="layers"></ul></div>
+    <div><h2>Show</h2><div class="chips" id="show"></div></div>
+  </aside>
+  <div class="shelf">
+    <header><span id="count"></span><span>Pick one to see it on three cards</span></header>
+    <div class="grid" id="grid"></div>
+  </div>
+  <aside class="side" id="side" aria-label="On three cards"></aside>
+</section>
+
+<section class="view two" id="two" aria-label="Two layers" hidden>
+  <div class="axes">
+    <label>Rows <select id="rowLayer"></select></label><label><input type="search" id="rowQ" placeholder="Filter rows" aria-label="Filter rows"></label>
+    <span class="pager"><button type="button" id="rowPrev" aria-label="Previous rows">‹</button><span id="rowPage"></span><button type="button" id="rowNext" aria-label="Next rows">›</button></span>
+    <label>Columns <select id="colLayer"></select></label><label><input type="search" id="colQ" placeholder="Filter columns" aria-label="Filter columns"></label>
+    <span class="pager"><button type="button" id="colPrev" aria-label="Previous columns">‹</button><span id="colPage"></span><button type="button" id="colNext" aria-label="Next columns">›</button></span>
+    <label>Show <select id="zoom"><option value="all">Whole card</option><option value="tl">Top-left, closer</option><option value="bl">Bottom-left, closer</option><option value="br">Bottom-right, closer</option></select></label>
+    <span>Click a card to mark the pair as a clash.</span>
+  </div>
+  <div class="matrix" id="matrix"></div>
+</section>
+
+<p class="note"><b>Sample data.</b> Decisions stay in this browser until you save the file. Put <code>review.flx</code> in <code>layers/</code> and run <code>node make-layers.mjs</code>: new cards then leave out held elements and clashing pairs.</p>
+
+<script src="../mark-data.js"></script>
+<script src="../vendor/three-r180-defxn.js"></script>
+<script src="layers-bundle.js"></script>
+<script src="cards-data.js"></script>
+<script src="traits.js"></script>
+<script src="art3d.js"></script>
+<script src="builders-bundle.js"></script>
+<script src="card.js"></script>
+<script src="world.js"></script>
+<script src="thumbs.js"></script>
+<script src="review-record.js"></script>
+<script>
+(function () {
+  var T = window.DEFXN_TRAITS, A = window.Art3D, C = window.DefxnCard, TH = window.DefxnThumbs, R = window.DefxnReviewRecord;
+  var NS = 'http://www.w3.org/2000/svg', TIER_C = ['var(--t0)', 'var(--t1)', 'var(--t2)', 'var(--t3)'];
+  var REF = window.DEFXN_CARDS[0], BASE = Object.assign({}, TH.SHOWCASE), STORE = 'defxn-review-draft';
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function layerByKey(k) { return T.LAYERS.filter(function (l) { return l.key === k; })[0]; }
+  function idOf(e) { return e.layer + '/' + e.name; }
+
+  /* ---------- the review: the saved file (bundle), then this browser's draft ---------- */
+  var saved = R.encode(T.REVIEW), review = { hold: T.REVIEW.hold.slice(), clash: T.REVIEW.clash.map(function (p) { return p.slice(); }) };
+  try { var d = window.localStorage.getItem(STORE); if (d != null) review = R.decode(d); } catch (e) { /* no storage, or an old draft: start from the file */ }
+  function isHeld(e) { return review.hold.indexOf(idOf(e)) >= 0; }
+  function clashKey(a, b) { return [a, b].sort().join('|'); }
+  function isClash(a, b) { var k = clashKey(idOf(a), idOf(b)); return review.clash.some(function (p) { return clashKey(p[0], p[1]) === k; }); }
+  function changed() {
+    var text = R.encode(review);
+    try { if (text === saved) window.localStorage.removeItem(STORE); else window.localStorage.setItem(STORE, text); } catch (e) { /* the draft lives only on this page */ }
+    document.getElementById('nHeld').textContent = review.hold.length;
+    document.getElementById('nClash').textContent = review.clash.length;
+    document.getElementById('draft').textContent = text === saved ? '' : 'Draft, not in the file yet';
+    document.getElementById('discard').hidden = text === saved;
+  }
+  document.getElementById('save').addEventListener('click', function () {
+    var blob = new Blob([R.encode(review)], { type: 'text/plain' }), a = el('a');
+    a.href = URL.createObjectURL(blob); a.download = 'review.flx'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+  });
+  document.getElementById('discard').addEventListener('click', function () {
+    review = R.decode(saved); try { window.localStorage.removeItem(STORE); } catch (e) {}
+    changed(); drawRail(); drawGrid(); drawMatrix();
+  });
+
+  /* ---------- warnings the page finds by itself ---------- */
+  var warn = {}, host = null;
+  function measureHost() {
+    if (host) return host;
+    host = el('div'); host.setAttribute('aria-hidden', 'true');
+    host.style.cssText = 'position:absolute;left:-20000px;top:0;width:1000px;height:700px;visibility:hidden;pointer-events:none';
+    document.body.appendChild(host); return host;
+  }
+  var SHAPES = 'rect,path,line,circle,ellipse,polygon,polyline,text,use';
+  function chromeWarnings(e) {
+    var out = [], svg = C.chromeSvg(e, BASE, T.pick(Object.assign({}, BASE, { traits: REF.traits })));
+    if (!svg) return out;
+    var vb = svg.viewBox.baseVal, slot = e.attrs.slot;
+    svg.setAttribute('width', vb.width); svg.setAttribute('height', vb.height); svg.style.overflow = 'visible';
+    measureHost().appendChild(svg);
+    try {
+      var all = svg.getBBox(), pad = 2;
+      if (all.x < vb.x - pad || all.y < vb.y - pad || all.x + all.width > vb.x + vb.width + pad || all.y + all.height > vb.y + vb.height + pad) out.push('Spills out of its box');
+      var parts = svg.querySelectorAll(SHAPES);
+      if (slot === 'corner' && Array.prototype.some.call(parts, function (p) { var b = p.getBBox(); return b.x > 24 && b.y > 24; })) out.push('Reaches toward the words');
+      if (slot === 'frame' && Array.prototype.some.call(parts, function (p) { var b = p.getBBox(); return b.width + b.height > 0 && b.x > 30 && b.y > 30 && b.x + b.width < 970 && b.y + b.height < 670; })) out.push('Draws inside the card');
+      if (all.width === 0 && all.height === 0 && slot !== 'tag' && slot !== 'ornament') out.push('Draws nothing');
+    } catch (err) { out.push('Could not be measured'); }
+    svg.remove();
+    return out;
+  }
+  function lum(ch) {
+    var p = String(ch).trim().split(/\s+/), h = (+p[0] || 0) / 360, s = (parseFloat(p[1]) || 0) / 100, l = (parseFloat(p[2]) || 0) / 100;
+    function f(n) { var k = (n + h * 12) % 12, a = s * Math.min(l, 1 - l); var v = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+    return 0.2126 * f(0) + 0.7152 * f(8) + 0.0722 * f(4);
+  }
+  // a colour's OKLCH chroma, to compare with the Ark UI theme's neon limit (the chroma of pure yellow)
+  function chroma(ch) {
+    var p = String(ch).trim().split(/\s+/), h = (+p[0] || 0) / 360, s = (parseFloat(p[1]) || 0) / 100, l = (parseFloat(p[2]) || 0) / 100;
+    function f(n) { var k = (n + h * 12) % 12, a = s * Math.min(l, 1 - l); var v = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }
+    var r = f(0), g = f(8), bl = f(4);
+    var L = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * bl), M = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * bl), S = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * bl);
+    var A = 1.9779984951 * L - 2.4285922050 * M + 0.4505937099 * S, B = 0.0259040371 * L + 0.7827717662 * M - 0.8086757660 * S;
+    return Math.sqrt(A * A + B * B);
+  }
+  var NEON = chroma('60 100% 50%');
+  function paletteWarnings(e) {
+    var surface = 0.0035, b = lum(e.attrs.b || e.attrs.a), c = lum(e.attrs.c || e.attrs.b);
+    var out = [];
+    if ((b + 0.05) / (surface + 0.05) < 4.5) out.push('Links hard to read');
+    if ((c + 0.05) / (surface + 0.05) < 3) out.push('Accent too dark');
+    if (chroma(e.attrs.b || e.attrs.a) > NEON + 0.002 || chroma(e.attrs.c || e.attrs.b) > NEON + 0.002) out.push('Brighter than neon');
+    return out;
+  }
+  // a 3D element: built once, alone, and counted
+  function modelWarnings(e) {
+    return A.loadMark().then(function (mark) {
+      var picks = { palette: layerByKey('palette').elements[0] }; picks[e.layer] = e;
+      return A.build(mark, T.keyOf({ identity: 'review', genesisId: '0' }), picks).then(function (m) {
+        var out = [], n = 0, quiet = 0;
+        function look(x, y, z) { n++; var s = A.seen(x, y, z); if (!A.clear(s[0], s[1], 0)) quiet++; }
+        ['cubes', 'glasses', 'points', 'quads', 'bars', 'spheres'].forEach(function (k) { m[k].forEach(function (o) { look(o.x, o.y, o.z); }); });
+        m.lines.forEach(function (l) { look(l.p[0], l.p[1], l.p[2]); });
+        if (!n && e.layer !== 'mark' && e.attrs.build !== 'none') out.push('Needs the mark');   // "None" is empty on purpose
+        if (n > 7000) out.push('Heavy to draw');
+        if (quiet > 30) out.push('Under the genesis number');
+        A.dispose(m);
+        return out;
+      });
+    });
+  }
+  function warningsOf(e) {
+    var k = idOf(e);
+    if (warn[k]) return Promise.resolve(warn[k]);
+    var p = e.kind === 'chrome' ? Promise.resolve(chromeWarnings(e)) : e.kind === 'palette' ? Promise.resolve(paletteWarnings(e)) : modelWarnings(e);
+    return p.then(function (w) { warn[k] = w; return w; }).catch(function () { return (warn[k] = ['Could not be measured']); });
+  }
+
+  /* ---------- tabs ---------- */
+  var tab = 'one';
+  Array.prototype.forEach.call(document.querySelectorAll('[data-tab]'), function (b) {
+    b.addEventListener('click', function () {
+      tab = b.getAttribute('data-tab');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-tab]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      document.getElementById('one').hidden = tab !== 'one'; document.getElementById('two').hidden = tab !== 'two';
+      if (tab === 'two') drawMatrix();
+    });
+  });
+
+  /* ---------- one layer ---------- */
+  var layer = new URLSearchParams(location.search).get('layer') || 'frame', show = 'all', picked = null, gridTiles = {};
+  function drawRail() {
+    var ul = document.getElementById('layers'); ul.textContent = '';
+    T.LAYERS.forEach(function (l) {
+      var li = el('li'), b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(l.key === layer));
+      var held = l.elements.filter(isHeld).length, sm = el('small');
+      sm.appendChild(el('span', null, String(l.elements.length))); if (held) sm.appendChild(el('span', 'h', held + ' held'));
+      b.appendChild(el('span', null, l.name)); b.appendChild(sm);
+      b.addEventListener('click', function () { layer = l.key; picked = null; drawRail(); drawGrid(); });
+      li.appendChild(b); ul.appendChild(li);
+    });
+    var ch = document.getElementById('show'); ch.textContent = '';
+    [['all', 'All'], ['warn', 'Warnings'], ['held', 'Held'], ['kept', 'Kept']].forEach(function (o) {
+      var b = el('button', null, o[1]); b.type = 'button'; b.setAttribute('aria-pressed', String(show === o[0]));
+      b.addEventListener('click', function () { show = o[0]; drawRail(); drawGrid(); });
+      ch.appendChild(b);
+    });
+  }
+  function drawGrid() {
+    var l = layerByKey(layer), grid = document.getElementById('grid'), shown = 0;
+    grid.textContent = ''; gridTiles = {};
+    l.elements.slice().sort(function (a, b) { return b.weight - a.weight || a.name.localeCompare(b.name); }).forEach(function (e) {
+      if (show === 'held' && !isHeld(e)) return;
+      if (show === 'kept' && isHeld(e)) return;
+      var t = el('div', 'tile' + (isHeld(e) ? ' is-held' : '')); t.tabIndex = 0; t.setAttribute('role', 'button');
+      t.style.setProperty('--tc', TIER_C[e.tier]); t.setAttribute('aria-selected', String(picked === e));
+      t.appendChild(TH.thumb(e, { palette: layerByKey('palette').elements.filter(function (p) { return p.name === 'Glass'; })[0], record: BASE }));
+      var row = el('div', 'row'); row.appendChild(el('b', null, e.name)); row.appendChild(el('span', 'tier', T.TIERS[e.tier] + ' · ' + (Math.round(e.share * 10) / 10) + '%'));
+      t.appendChild(row);
+      var ws = el('div', 'warns'); t.appendChild(ws);
+      var seg = el('div', 'seg'), k = el('button', 'k', 'Keep'), h = el('button', 'h', 'Hold');
+      k.type = h.type = 'button'; k.setAttribute('aria-pressed', String(!isHeld(e))); h.setAttribute('aria-pressed', String(isHeld(e)));
+      k.addEventListener('click', function (ev) { ev.stopPropagation(); setHeld(e, false); });
+      h.addEventListener('click', function (ev) { ev.stopPropagation(); setHeld(e, true); });
+      seg.appendChild(k); seg.appendChild(h); t.appendChild(seg);
+      t.addEventListener('click', function () { pick(e); });
+      grid.appendChild(t); gridTiles[idOf(e)] = t; shown++;
+      warningsOf(e).then(function (w) {
+        w.forEach(function (x) { ws.appendChild(el('span', null, x)); });
+        if (show === 'warn' && !w.length && t.parentNode) { t.remove(); shown--; count(); }
+      });
+    });
+    function count() { document.getElementById('count').innerHTML = '<b>' + shown + '</b> of ' + l.elements.length + ' in ' + l.name; }
+    count();
+    if (!picked) { var first = grid.firstChild; if (first) pick(l.elements.filter(function (e) { return gridTiles[idOf(e)] === first; })[0]); }
+  }
+  function setHeld(e, on) {
+    var id = idOf(e), i = review.hold.indexOf(id);
+    if (on && i < 0) review.hold.push(id); if (!on && i >= 0) review.hold.splice(i, 1);
+    changed(); drawRail();
+    var t = gridTiles[id]; if (t) { t.classList.toggle('is-held', on); t.querySelector('.k').setAttribute('aria-pressed', String(!on)); t.querySelector('.h').setAttribute('aria-pressed', String(on)); }
+    if (picked === e) drawSide();
+  }
+  var sideCards = [];
+  function pick(e) {
+    if (!e) return;
+    if (picked && gridTiles[idOf(picked)]) gridTiles[idOf(picked)].setAttribute('aria-selected', 'false');
+    picked = e; if (gridTiles[idOf(e)]) gridTiles[idOf(e)].setAttribute('aria-selected', 'true');
+    drawSide();
+  }
+  function freeCards(list) { list.forEach(function (c) { if (c && c._model) A.dispose(c._model); }); list.length = 0; }
+  // the element on three different cards: the reference mix, and two births that do not have it
+  function drawSide() {
+    var side = document.getElementById('side'), e = picked;
+    freeCards(sideCards); side.textContent = '';
+    side.appendChild(el('h2', null, e.name));
+    side.appendChild(el('p', null, layerByKey(e.layer).name + ' · ' + T.TIERS[e.tier] + ' · in ' + (Math.round(e.share * 10) / 10) + '% of cards' + (isHeld(e) ? ' · held' : '')));
+    var three = el('div', 'three'); side.appendChild(three);
+    var mixes = [Object.assign({}, BASE, { traits: Object.assign({}, REF.traits) })];
+    [101, 202].forEach(function (n) { mixes.push(Object.assign(T.sampleRecord(n), {})); });
+    mixes.forEach(function (rec) {
+      var box = el('div');
+      if (rec.traits) rec.traits[e.layer] = e.name; else rec.skin = e.layer + ':' + e.name;
+      three.appendChild(box); sideCards.push(C.render(box, rec));
+    });
+  }
+
+  /* ---------- two layers ---------- */
+  var axes = { row: { layer: 'frame', q: '', page: 0 }, col: { layer: 'corner', q: '', page: 0 } }, cells = [];
+  ['row', 'col'].forEach(function (k) {
+    var sel = document.getElementById(k + 'Layer');
+    T.LAYERS.forEach(function (l) { var o = el('option', null, l.name); o.value = l.key; sel.appendChild(o); });
+    sel.value = axes[k].layer;
+    sel.addEventListener('change', function () { axes[k].layer = sel.value; axes[k].page = 0; drawMatrix(); });
+    var qi = document.getElementById(k + 'Q'), t = 0;
+    qi.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { axes[k].q = qi.value.trim().toLowerCase(); axes[k].page = 0; drawMatrix(); }, 200); });
+    document.getElementById(k + 'Prev').addEventListener('click', function () { axes[k].page = Math.max(0, axes[k].page - 1); drawMatrix(); });
+    document.getElementById(k + 'Next').addEventListener('click', function () { axes[k].page++; drawMatrix(); });
+  });
+  function listFor(a) {
+    return layerByKey(a.layer).elements.filter(function (e) { return !isHeld(e) && (!a.q || e.name.toLowerCase().indexOf(a.q) >= 0); })
+      .sort(function (x, y) { return y.weight - x.weight || x.name.localeCompare(y.name); });
+  }
+  function drawMatrix() {
+    if (tab !== 'two') return;
+    var m = document.getElementById('matrix'); freeCards(cells); m.textContent = '';
+    var area = m.getBoundingClientRect(), cw = 190, ch = cw * 0.7 + 8;
+    var nc = Math.max(2, Math.floor((area.width - 150) / (cw + 8))), nr = Math.max(2, Math.floor((area.height - 40) / (ch + 8)));
+    var rows = listFor(axes.row), cols = listFor(axes.col);
+    axes.row.page = Math.min(axes.row.page, Math.max(0, Math.ceil(rows.length / nr) - 1));
+    axes.col.page = Math.min(axes.col.page, Math.max(0, Math.ceil(cols.length / nc) - 1));
+    var rs = rows.slice(axes.row.page * nr, axes.row.page * nr + nr), cs = cols.slice(axes.col.page * nc, axes.col.page * nc + nc);
+    document.getElementById('rowPage').textContent = (axes.row.page + 1) + ' / ' + Math.max(1, Math.ceil(rows.length / nr));
+    document.getElementById('colPage').textContent = (axes.col.page + 1) + ' / ' + Math.max(1, Math.ceil(cols.length / nc));
+    m.style.gridTemplateColumns = '140px repeat(' + cs.length + ', ' + cw + 'px)';
+    m.appendChild(el('span'));
+    cs.forEach(function (c) { m.appendChild(el('span', 'h', c.name)); });
+    var same = axes.row.layer === axes.col.layer;
+    rs.forEach(function (r) {
+      m.appendChild(el('span', 'h rh', r.name));
+      cs.forEach(function (c) {
+        var cell = el('button', 'cell'); cell.type = 'button';
+        if (same) { cell.disabled = true; cell.style.opacity = '.25'; m.appendChild(cell); return; }
+        cell.classList.toggle('is-clash', isClash(r, c));
+        cell.setAttribute('aria-label', r.name + ' with ' + c.name + (isClash(r, c) ? ', marked as a clash' : ''));
+        var box = el('div'), zoom = document.getElementById('zoom').value;
+        if (zoom === 'all') cell.appendChild(box);
+        else { var z = el('div', 'zoom ' + zoom); z.appendChild(box); cell.appendChild(z); }
+        m.appendChild(cell);
+        var rec = Object.assign({}, BASE, { traits: Object.assign({}, REF.traits) });
+        rec.traits[r.layer] = r.name; rec.traits[c.layer] = c.name;
+        // a card is drawn when its cell comes into view
+        lazy(cell, function () { cells.push(C.render(box, rec)); });
+        cell.addEventListener('click', function () {
+          var k = clashKey(idOf(r), idOf(c)), i = -1;
+          review.clash.forEach(function (p, j) { if (clashKey(p[0], p[1]) === k) i = j; });
+          if (i >= 0) review.clash.splice(i, 1); else review.clash.push([idOf(r), idOf(c)]);
+          cell.classList.toggle('is-clash', i < 0); changed();
+        });
+      });
+    });
+  }
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); en.target._draw(); } }); }, { rootMargin: '200px' }) : null;
+  function lazy(node, fn) { node._draw = fn; if (io) io.observe(node); else fn(); }
+  document.getElementById('zoom').addEventListener('change', drawMatrix);
+  window.addEventListener('resize', function () { clearTimeout(window._rz); window._rz = setTimeout(drawMatrix, 200); });
+
+  changed(); drawRail(); drawGrid();
+})();
+</script>
+</body>
+</html>

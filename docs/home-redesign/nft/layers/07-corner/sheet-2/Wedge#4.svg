@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Wedge: a chamfered corner with a small filled triangle inside the bend; the arms run on as dashes</title>
+  <path d="M0.5 24V8.5L8.5 0.5H24" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M4.5 9.5L9.5 4.5V9.5Z" fill="var(--line)"/>
+  <path d="M28 0.5h6M37 0.5h6M46 0.5h6M55 0.5h6M64 0.5h6M73 0.5h6" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M0.5 28v6M0.5 37v6M0.5 46v6M0.5 55v6" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+</svg>

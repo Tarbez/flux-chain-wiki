@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Tri Orbit: three ellipses crossing, a plus at the centre, accent square nodes on the orbits (reference sheet 1, #11)</title>
+  <ellipse cx="15" cy="17" rx="13.5" ry="4.6" transform="rotate(90 15 17)" fill="none" stroke="var(--dim)" stroke-width="1"/>
+  <ellipse cx="15" cy="17" rx="13.5" ry="4.6" transform="rotate(30 15 17)" fill="none" stroke="var(--dim)" stroke-width="1"/>
+  <ellipse cx="15" cy="17" rx="13.5" ry="4.6" transform="rotate(-30 15 17)" fill="none" stroke="var(--dim)" stroke-width="1"/>
+  <path d="M12.5 17h5M15 14.5v5" stroke="var(--ink)" stroke-width="1"/>
+  <rect x="25.49" y="22.55" width="2.4" height="2.4" fill="var(--acc)"/>
+  <rect x="13.8" y="2.7" width="2.4" height="2.4" fill="var(--acc)"/>
+  <rect x="2.11" y="22.55" width="2.4" height="2.4" fill="var(--acc)"/>
+</svg>

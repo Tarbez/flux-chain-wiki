@@ -1,0 +1,6 @@
+/* Pearl: blush pearl light, a cyan sheen. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 330 12% 95%;
+  --b: 330 60% 86%;
+  --c: 186 58% 74%;
+}

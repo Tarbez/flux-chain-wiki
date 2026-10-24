@@ -1,0 +1,6 @@
+/* Slate: blue grey slate light, a brick accent. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 205 10% 88%;
+  --b: 205 24% 70%;
+  --c: 12 62% 62%;
+}

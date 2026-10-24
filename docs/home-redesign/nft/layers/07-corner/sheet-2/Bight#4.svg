@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Bight: a rounded double-line corner with a small plus inside it; the top arm runs on as dots</title>
+  <path d="M0.5 32V12.5A12 12 0 0 1 12.5 0.5H40" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M4 24V12.5A8.5 8.5 0 0 1 12.5 4H28" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M12.5 9.5v6M9.5 12.5h6" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/>
+  <path d="M44 0h1.5v1.5h-1.5zM48 0h1.5v1.5h-1.5zM52 0h1.5v1.5h-1.5zM56 0h1.5v1.5h-1.5zM60 0h1.5v1.5h-1.5zM64 0h1.5v1.5h-1.5zM68 0h1.5v1.5h-1.5zM72 0h1.5v1.5h-1.5zM76 0h1.5v1.5h-1.5zM80 0h1.5v1.5h-1.5zM84 0h1.5v1.5h-1.5zM88 0h1.5v1.5h-1.5z" fill="var(--line)"/>
+</svg>

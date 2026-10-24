@@ -1,0 +1,6 @@
+/* Abyss: deep sea blue light, a periwinkle glow like sea life. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 198 30% 86%;
+  --b: 198 76% 50%;
+  --c: 232 80% 72%;
+}

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s10-packets">
+  <title>Packet Fall: columns of short glowing dashes falling like packets of data, tallest in the middle, each led by a bright head (sheet 10, 14)</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g fill="none" stroke="#fff" stroke-width="2" data-sketch=""><path d="M560 200V500M620 120V560M680 80V620M740 140V560M800 220V480" stroke-dasharray="10 6"/></g>
+</svg>

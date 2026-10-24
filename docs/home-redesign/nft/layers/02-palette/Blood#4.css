@@ -1,0 +1,6 @@
+/* Blood: red. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 0 70% 82%;
+  --b: 356 90% 55%;
+  --c: 345 80% 48%;
+}

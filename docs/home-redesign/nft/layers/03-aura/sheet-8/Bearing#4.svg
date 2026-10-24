@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s8-compass">
+  <title>Bearing: a dotted ring around the mark with cyan ticks at the four compass points and a faint crosshair behind it (sheet 8)</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g data-sketch=""><ellipse cx="680" cy="357" rx="226" ry="316" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="2 8"/><path d="M680 29V73M680 641V685M445 357H489M871 357H915" stroke="#6ef" stroke-width="4"/></g>
+</svg>

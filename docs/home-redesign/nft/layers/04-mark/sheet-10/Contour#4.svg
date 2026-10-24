@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s10-mark-contour">
+  <title>Contour: the mark as contour lines: cubes only where the distance from its edge crosses a step, each step a terrace nearer the viewer (sheet 10, 20, topology)</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g fill="none" stroke="#fff" stroke-width="2" data-sketch=""><path d="M560 100Q680 260 800 100M560 610Q680 450 800 610" stroke-dasharray="4 4"/></g>
+</svg>

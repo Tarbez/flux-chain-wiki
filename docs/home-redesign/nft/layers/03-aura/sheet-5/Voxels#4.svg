@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s5-voxel-cubes">
+  <title>Voxels: three isometric cube outlines made of pixel dots, one mint, with scattered pixels and faint streaks</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g data-sketch="" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="3 4"><path d="M520 120 l40 -22 l40 22 v46 l-40 22 l-40 -22z M520 120 l40 22 l40 -22 M560 142 v46"/><path d="M890 300 l40 -22 l40 22 v46 l-40 22 l-40 -22z" stroke="#7dffc4"/><path d="M755 565 l40 -22 l40 22 v46 l-40 22 l-40 -22z"/></g>
+</svg>

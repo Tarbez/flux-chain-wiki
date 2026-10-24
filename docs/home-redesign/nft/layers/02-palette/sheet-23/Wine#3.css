@@ -1,0 +1,6 @@
+/* Wine: dusty wine light, a gold accent. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 336 14% 88%;
+  --b: 336 40% 70%;
+  --c: 46 76% 58%;
+}

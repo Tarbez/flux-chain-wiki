@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Segmented: a rounded frame with whole corners and solid sides, its top and bottom edges cut into six long segments (sheet 15, 07)</title>
+  <path d="M121 18H36A18 18 0 0 0 18 36V664A18 18 0 0 0 36 682H121M879 18H964A18 18 0 0 1 982 36V664A18 18 0 0 1 964 682H879M131 18H309M319 18H495M505 18H681M691 18H869M131 682H309M319 682H495M505 682H681M691 682H869" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Step Down: a row of vertical bars shrinking in height from left to right (sheet 7, item 21)</title>
+  <rect x="0" y="22" width="3" height="38" fill="var(--ink)"/>
+  <rect x="10" y="24.33" width="3" height="35.67" fill="var(--dim)"/>
+  <rect x="20" y="26.67" width="3" height="33.33" fill="var(--dim)"/>
+  <rect x="30" y="29" width="3" height="31" fill="var(--dim)"/>
+  <rect x="40" y="31.33" width="3" height="28.67" fill="var(--dim)"/>
+  <rect x="50" y="33.67" width="3" height="26.33" fill="var(--dim)"/>
+  <rect x="60" y="36" width="3" height="24" fill="var(--dim)"/>
+  <rect x="70" y="38.33" width="3" height="21.67" fill="var(--dim)"/>
+  <rect x="80" y="40.67" width="3" height="19.33" fill="var(--dim)"/>
+  <rect x="90" y="43" width="3" height="17" fill="var(--dim)"/>
+  <rect x="100" y="45.33" width="3" height="14.67" fill="var(--dim)"/>
+  <rect x="110" y="47.67" width="3" height="12.33" fill="var(--dim)"/>
+  <rect x="120" y="50" width="3" height="10" fill="var(--dim)"/>
+  <rect x="130" y="52.33" width="3" height="7.67" fill="var(--dim)"/>
+  <rect x="140" y="54.67" width="3" height="5.33" fill="var(--dim)"/>
+  <rect x="150" y="57" width="3" height="3" fill="var(--dim)"/>
+</svg>

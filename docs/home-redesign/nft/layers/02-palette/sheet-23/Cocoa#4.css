@@ -1,0 +1,6 @@
+/* Cocoa: brown light, a sky blue accent. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 24 12% 86%;
+  --b: 24 28% 62%;
+  --c: 196 56% 60%;
+}

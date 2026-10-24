@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Autograph: a signature stippled in dots over a signing line, a small cross at the line's start, an accent dot at the pen's lift, and the identity under the line (sheet 10, 24-03)</title>
+  <circle cx="10" cy="52" r="0.9" fill="var(--ink)"/>
+  <circle cx="11.16" cy="48.57" r="0.9" fill="var(--ink)"/>
+  <circle cx="12.26" cy="45.25" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="13.38" cy="41.94" r="1.25" fill="var(--ink)"/>
+  <circle cx="14.58" cy="38.49" r="0.9" fill="var(--ink)"/>
+  <circle cx="15.83" cy="35.11" r="0.9" fill="var(--ink)"/>
+  <circle cx="17.24" cy="31.66" r="0.9" fill="var(--ink)"/>
+  <circle cx="18.77" cy="28.44" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="20.43" cy="25.31" r="0.9" fill="var(--ink)"/>
+  <circle cx="22.18" cy="22.29" r="0.9" fill="var(--ink)"/>
+  <circle cx="24.12" cy="19.3" r="1.25" fill="var(--ink)"/>
+  <circle cx="26.32" cy="16.49" r="0.9" fill="var(--ink)"/>
+  <circle cx="29.17" cy="14.45" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="32.64" cy="14.9" r="0.9" fill="var(--ink)"/>
+  <circle cx="34.7" cy="17.65" r="0.9" fill="var(--ink)"/>
+  <circle cx="35" cy="21.3" r="0.9" fill="var(--ink)"/>
+  <circle cx="34.48" cy="25" r="0.9" fill="var(--ink)"/>
+  <circle cx="33.78" cy="28.48" r="1.25" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="32.93" cy="32.09" r="0.9" fill="var(--ink)"/>
+  <circle cx="32.07" cy="35.6" r="0.9" fill="var(--ink)"/>
+  <circle cx="31.21" cy="39.09" r="0.9" fill="var(--ink)"/>
+  <circle cx="30.29" cy="42.65" r="0.9" fill="var(--ink)"/>
+  <circle cx="29.12" cy="46.13" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="27.9" cy="49.56" r="0.9" fill="var(--ink)"/>
+  <circle cx="26.95" cy="52.94" r="1.25" fill="var(--ink)"/>
+  <circle cx="30.28" cy="54.05" r="0.9" fill="var(--ink)"/>
+  <circle cx="33.08" cy="52.11" r="0.9" fill="var(--ink)"/>
+  <circle cx="35.46" cy="49.34" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="37.24" cy="45.99" r="0.9" fill="var(--ink)"/>
+  <circle cx="38.78" cy="42.55" r="0.9" fill="var(--ink)"/>
+  <circle cx="40.17" cy="39.28" r="0.9" fill="var(--ink)"/>
+  <circle cx="41.57" cy="36.08" r="1.25" fill="var(--ink)"/>
+  <circle cx="43.1" cy="32.91" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="45" cy="30" r="0.9" fill="var(--ink)"/>
+  <circle cx="48.02" cy="28.28" r="0.9" fill="var(--ink)"/>
+  <circle cx="51.4" cy="29.01" r="0.9" fill="var(--ink)"/>
+  <circle cx="53.16" cy="31.99" r="0.9" fill="var(--ink)"/>
+  <circle cx="52.7" cy="35.44" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="51.85" cy="39.05" r="1.25" fill="var(--ink)"/>
+  <circle cx="51.08" cy="42.57" r="0.9" fill="var(--ink)"/>
+  <circle cx="51" cy="46" r="0.9" fill="var(--ink)"/>
+  <circle cx="53.38" cy="48.5" r="0.9" fill="var(--ink)"/>
+  <circle cx="56.79" cy="48.9" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="59.93" cy="47.17" r="0.9" fill="var(--ink)"/>
+  <circle cx="62.09" cy="44.17" r="0.9" fill="var(--ink)"/>
+  <circle cx="63.83" cy="41.24" r="1.25" fill="var(--ink)"/>
+  <circle cx="65.57" cy="38.28" r="0.9" fill="var(--ink)"/>
+  <circle cx="67.59" cy="35.33" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="70.56" cy="33.42" r="0.9" fill="var(--ink)"/>
+  <circle cx="74.05" cy="34.08" r="0.9" fill="var(--ink)"/>
+  <circle cx="76.69" cy="36.42" r="0.9" fill="var(--ink)"/>
+  <circle cx="76.82" cy="39.91" r="0.9" fill="var(--ink)"/>
+  <circle cx="75.72" cy="43.26" r="1.25" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="74.77" cy="46.67" r="0.9" fill="var(--ink)"/>
+  <circle cx="77.53" cy="48.82" r="0.9" fill="var(--ink)"/>
+  <circle cx="81.07" cy="48.19" r="0.9" fill="var(--ink)"/>
+  <circle cx="84.25" cy="46.57" r="0.9" fill="var(--ink)"/>
+  <circle cx="86.73" cy="44.18" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="88.79" cy="41.32" r="0.9" fill="var(--ink)"/>
+  <circle cx="90.7" cy="38.36" r="1.25" fill="var(--ink)"/>
+  <circle cx="92.6" cy="35.38" r="0.9" fill="var(--ink)"/>
+  <circle cx="94.63" cy="32.46" r="0.9" fill="var(--ink)"/>
+  <circle cx="97" cy="30" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="100.33" cy="29.22" r="0.9" fill="var(--ink)"/>
+  <circle cx="103.46" cy="30.77" r="0.9" fill="var(--ink)"/>
+  <circle cx="105.14" cy="33.78" r="0.9" fill="var(--ink)"/>
+  <circle cx="104.52" cy="37.15" r="1.25" fill="var(--ink)"/>
+  <circle cx="103.44" cy="40.61" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="102.62" cy="44" r="0.9" fill="var(--ink)"/>
+  <circle cx="104.78" cy="46.67" r="0.9" fill="var(--ink)"/>
+  <circle cx="108.33" cy="46.14" r="0.9" fill="var(--ink)"/>
+  <circle cx="111.63" cy="45.2" r="0.9" fill="var(--ink)"/>
+  <circle cx="115.08" cy="44.23" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="118.59" cy="43.29" r="1.25" fill="var(--ink)"/>
+  <circle cx="122.14" cy="42.14" r="0.9" fill="var(--ink)"/>
+  <circle cx="125.61" cy="40.97" r="0.9" fill="var(--ink)"/>
+  <circle cx="128.88" cy="39.89" r="0.9" fill="var(--ink)"/>
+  <circle cx="132.3" cy="38.84" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="135.86" cy="37.88" r="0.9" fill="var(--ink)"/>
+  <circle cx="139.53" cy="37.09" r="0.9" fill="var(--ink)"/>
+  <circle cx="143.35" cy="36.49" r="1.25" fill="var(--ink)"/>
+  <circle cx="146.83" cy="36.11" r="0.9" fill="var(--ink)"/>
+  <circle cx="150.45" cy="35.81" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="154.17" cy="35.57" r="0.9" fill="var(--ink)"/>
+  <circle cx="157.98" cy="35.33" r="0.9" fill="var(--ink)"/>
+  <circle cx="161.85" cy="35.07" r="0.9" fill="var(--ink)"/>
+  <circle cx="165.78" cy="34.74" r="0.9" fill="var(--ink)"/>
+  <circle cx="169.17" cy="34.38" r="1.25" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="172.57" cy="33.91" r="0.9" fill="var(--ink)"/>
+  <circle cx="176.23" cy="33.32" r="0.9" fill="var(--ink)"/>
+  <circle cx="180.2" cy="32.62" r="0.9" fill="var(--ink)"/>
+  <circle cx="183.64" cy="31.97" r="0.9" fill="var(--ink)"/>
+  <circle cx="187.14" cy="31.29" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="190.63" cy="30.59" r="0.9" fill="var(--ink)"/>
+  <circle cx="194.03" cy="29.9" r="1.25" fill="var(--ink)"/>
+  <circle cx="197.9" cy="29.09" r="0.9" fill="var(--ink)"/>
+  <circle cx="201.44" cy="28.35" r="0.9" fill="var(--ink)"/>
+  <circle cx="204.97" cy="27.61" r="0.9" fill="var(--ink)" opacity="0.6"/>
+  <circle cx="211.97" cy="26.61" r="5" fill="var(--acc)" opacity="0.08"/>
+  <circle cx="211.97" cy="26.61" r="3.24" fill="var(--acc)" opacity="0.22"/>
+  <circle cx="211.97" cy="26.61" r="1.8" fill="var(--acc)"/>
+  <path d="M1 51L6 56M6 51L1 56" fill="none" stroke="var(--dim)" stroke-width="1" stroke-linecap="round"/>
+  <path d="M0 61.5H300" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="0" y="76" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="1.6" fill="var(--dim)" data-field="identity">IDENTITY</text>
+</svg>

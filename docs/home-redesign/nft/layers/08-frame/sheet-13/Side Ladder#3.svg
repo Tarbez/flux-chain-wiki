@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Side Ladder: a rounded frame with a short ladder of ticks on the inside of each side edge at its middle, the end and centre ticks in the accent (sheet 13, 06)</title>
+  <path d="M32 16H968A16 16 0 0 1 984 32V668A16 16 0 0 1 968 684H32A16 16 0 0 1 16 668V32A16 16 0 0 1 32 16Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M16 322H23M984 322H977M16 329H23M984 329H977M16 336H23M984 336H977M16 343H23M984 343H977M16 357H23M984 357H977M16 364H23M984 364H977M16 371H23M984 371H977M16 378H23M984 378H977" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="16" y="314.2" width="8" height="1.6" fill="var(--acc)"/><rect x="976" y="314.2" width="8" height="1.6" fill="var(--acc)"/>
+  <rect x="16" y="349.2" width="10" height="1.6" fill="var(--acc)"/><rect x="974" y="349.2" width="10" height="1.6" fill="var(--acc)"/>
+  <rect x="16" y="384.2" width="8" height="1.6" fill="var(--acc)"/><rect x="976" y="384.2" width="8" height="1.6" fill="var(--acc)"/>
+</svg>

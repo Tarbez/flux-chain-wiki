@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="color-scheme" content="dark">
+<title>Personal chain · DEFXN mockup</title>
+<!-- Forwards to the one mockup app (home-mockup.html), so a link to this page lands in the same
+     world with no reload between views. The record (?r=) and, for the open record, the tab
+     (#history, #connections) carry over. -->
+<script>
+  (function () {
+    var q = location.search.replace(/^\?/, ''), tab = location.hash.replace(/^#/, '');
+    var parts = [];
+    if (q) parts.push(q);
+    if ('chain' === 'open' && tab) parts.push('tab=' + tab);
+    location.replace('home-mockup.html#/chain' + (parts.length ? '?' + parts.join('&') : ''));
+  })();
+</script>
+<meta http-equiv="refresh" content="0; url=home-mockup.html#/chain">
+</head>
+<body style="background:#0a100d;color:#c3cdd6;font:14px system-ui"><a href="home-mockup.html#/chain">Personal chain</a></body>
+</html>

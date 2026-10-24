@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Slider: a hairline with a tick at each end and a small bracketed square at its centre</title>
+  <path d="M0.5 12H168M192 12H359.5M0.5 7V17M359.5 7V17" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M174 6.5H171.5V17.5H174M186 6.5H188.5V17.5H186" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <rect x="177.5" y="9.5" width="5" height="5" fill="var(--ink)"/>
+</svg>

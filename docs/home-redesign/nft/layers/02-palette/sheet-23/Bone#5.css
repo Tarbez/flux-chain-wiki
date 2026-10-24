@@ -1,0 +1,6 @@
+/* Bone: bone light, an oxblood accent. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 40 18% 92%;
+  --b: 42 54% 78%;
+  --c: 8 56% 58%;
+}

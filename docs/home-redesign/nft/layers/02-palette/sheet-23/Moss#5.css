@@ -1,0 +1,6 @@
+/* Moss: olive moss light, an ochre glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 76 22% 86%;
+  --b: 76 38% 58%;
+  --c: 46 70% 56%;
+}

@@ -1,0 +1,6 @@
+/* Gold: gold. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 44 84% 84%;
+  --b: 44 96% 58%;
+  --c: 32 90% 54%;
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Square Target: nested squares with a solid centre square, inside four corner brackets (sheet 7, item 18)</title>
+  <path d="M2.5 9.5V4.5H7.5M22.5 4.5H27.5V9.5M27.5 24.5V29.5H22.5M7.5 29.5H2.5V24.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M8.5 10.5h13v13h-13zM11.5 13.5h7v7h-7z" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="13.5" y="15.5" width="3" height="3" fill="var(--ink)"/>
+</svg>

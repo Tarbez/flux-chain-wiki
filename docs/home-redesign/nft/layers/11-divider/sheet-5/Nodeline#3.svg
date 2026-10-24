@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Nodeline: dots and dashes leading to a square-in-square centre node</title>
+  <path d="M0 11h2v2h-2zM8 11h2v2h-2zM16 11h2v2h-2zM24 11h2v2h-2zM32 11h2v2h-2zM40 11h2v2h-2zM48 11h2v2h-2zM56 11h2v2h-2zM64 11h2v2h-2zM72 11h2v2h-2zM80 11h2v2h-2zM358 11h2v2h-2zM350 11h2v2h-2zM342 11h2v2h-2zM334 11h2v2h-2zM326 11h2v2h-2zM318 11h2v2h-2zM310 11h2v2h-2zM302 11h2v2h-2zM294 11h2v2h-2zM286 11h2v2h-2zM278 11h2v2h-2z" fill="var(--dim)"/>
+  <path d="M92 11h8v2h-8zM104 11h8v2h-8zM116 11h8v2h-8zM128 11h8v2h-8zM140 11h8v2h-8zM152 11h8v2h-8zM260 11h8v2h-8zM248 11h8v2h-8zM236 11h8v2h-8zM224 11h8v2h-8zM212 11h8v2h-8zM200 11h8v2h-8z" fill="var(--line)"/>
+  <rect x="173.5" y="5.5" width="13" height="13" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M177.5 9.5h5v5h-5z" fill="var(--acc)"/>
+</svg>

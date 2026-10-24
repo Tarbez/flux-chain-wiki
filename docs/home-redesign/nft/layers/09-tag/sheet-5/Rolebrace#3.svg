@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Rolebrace: a pixel bracket, the role and a mint 2 x 3 dot grid</title>
+  <path d="M0 12h3v3h-3zM0 16h3v3h-3zM0 20h3v3h-3zM0 24h3v3h-3zM0 28h3v3h-3zM0 32h3v3h-3zM0 36h3v3h-3zM4 12h3v3h-3zM4 36h3v3h-3z" fill="var(--line)"/>
+  <text x="16" y="29.5" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--ink)" font-weight="500" style="text-transform:uppercase"><tspan data-field="role">ROLE</tspan></text>
+  <path d="M112 20h3v3h-3zM118 20h3v3h-3zM124 20h3v3h-3zM112 26h3v3h-3zM118 26h3v3h-3zM124 26h3v3h-3z" fill="var(--acc)"/>
+</svg>

@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>DEFXN identity card</title>
+<!-- One card, read from the URL. This is the hook point for real data:
+       card.html?genesisId=012&identity=0xB37...04D9&name=alex.fxn&status=Minted&role=Builder
+                &network=DEFXN&joined=24%20NOV%202026&serial=04
+     Optional: tagline=Line%20one|Line%20two (the two footer lines, split on "|").
+     With no field in the URL, the page shows the reference record (SAMPLE, cards-data.js).
+     With any field in the URL, a missing field stays empty: the page never fills a real card
+     with the sample's words. Only the tagline falls back, because it is the brand's line.
+     Optional: skin=corner:Twin%20Arc|palette:Glass (the elements the card wears over its genesis mix).
+     card.html?new makes a fresh SAMPLE record (traits.js: newRecord) with the next sample genesis
+     number and puts it in the URL, so a reload shows the same card. "New card" does the same on
+     click. Each number has its own DNA (traits.js), so no two cards share a mix. Nothing is minted
+     or sent. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="card.css">
+<style>
+  :root{--page:180 5% 7%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%}
+  html,body{margin:0;min-height:100%}
+  body{background:hsl(var(--page));color:hsl(var(--page-text));font:400 13px/1.5 var(--nft-font-mono);
+    min-height:100svh;display:grid;place-items:center;padding:20px 16px;box-sizing:border-box}
+  main{width:min(1000px,100%,calc((100svh - 326px) * 1000 / 700));display:grid;gap:10px}
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px;letter-spacing:.14em;text-transform:uppercase;font-size:10.5px}
+  .bar .links{display:flex;gap:14px}
+  .bar a{color:hsl(var(--page-text));text-decoration:none;border-bottom:1px solid hsl(var(--page-line) / .2);padding-bottom:3px}
+  .bar a:hover,.bar a:focus-visible{color:hsl(var(--page-strong))}
+  .acts{display:flex;gap:8px}
+  .bar button{font:inherit;letter-spacing:inherit;text-transform:inherit;color:hsl(var(--page-strong));cursor:pointer;
+    background:none;border:1px solid hsl(var(--page-line) / .35);border-radius:3px;padding:8px 11px;white-space:nowrap}
+  .bar button:hover,.bar button:focus-visible{border-color:hsl(var(--page-line) / .7)}
+  .bar button.is-main{background:hsl(var(--page-strong));color:hsl(var(--page));border-color:hsl(var(--page-strong))}
+  .bar button.is-main:hover,.bar button.is-main:focus-visible{background:hsl(0 0% 100%)}
+  .bar button:disabled{opacity:.5;cursor:wait}
+  /* the picks: one block per layer folder, read as "Mark: Glitch, 20 in 100" */
+  /* below the card: what the card wears in the site, or its layers */
+  .tabs{display:flex;gap:18px;border-bottom:1px solid hsl(var(--page-line) / .12);white-space:nowrap;min-width:0}
+  .tabs button{font:inherit;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:hsl(var(--page-text));background:none;border:0;
+    padding:6px 0 7px;cursor:pointer;border-bottom:1px solid transparent;margin-bottom:-1px}
+  .tabs button[aria-selected="true"]{color:hsl(var(--page-strong));border-bottom-color:hsl(var(--page-strong))}
+  .tabs .changed{margin-left:auto;align-self:center;font-size:10.5px;letter-spacing:.06em;color:hsl(var(--honey));min-width:0;overflow:hidden;text-overflow:ellipsis}
+  /* while the skin drawer is open the page moves left, so the card and its site pieces stay in view */
+  body.is-skinning{padding-right:432px}
+  #layers .mix{margin-top:8px;font-size:11px}
+  .tabpanel{height:150px}
+  .tabpanel[hidden]{display:none}
+  .kit{box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:12px;height:100%;padding:12px;border-radius:6px;
+    background:hsl(var(--canvas));transition:opacity .25s ease-out}
+  .kit.is-fresh{opacity:.35}
+  .kit-who{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;min-width:0}
+  .kit-who > div{display:grid;gap:8px;min-width:0}
+  .kit-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .kit .w-panel{min-width:0;height:100%}
+  .kit-acts{display:grid;gap:8px;align-content:center;min-width:0}
+  .kit-acts .w-btn{width:100%;padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .picks{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px 12px;margin:0;padding:8px 0 0;align-content:start}
+  .picks div{min-width:0}
+  .picks dt{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 2px}
+  .picks dd{margin:0;color:hsl(var(--page-strong));font-size:12px;letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .picks dd small{color:hsl(var(--page-text));font-size:10px;margin-left:5px}
+  .mix{margin:0;font-size:12px;letter-spacing:.04em}
+  .mix b{color:hsl(var(--honey));font-weight:500}
+  .note{margin:0;font-size:11.5px;letter-spacing:.02em}
+  .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+  .bar button[aria-pressed="true"]{border-color:hsl(var(--page-line) / .8);background:hsl(var(--page-line) / .08)}
+  .mix code{font:inherit;color:hsl(var(--page-strong));word-break:break-all}
+  /* the skin drawer: an overlay at the right, so the card page itself never grows */
+  .skin{position:fixed;z-index:20;top:0;right:0;bottom:0;width:min(400px,100vw);box-sizing:border-box;display:flex;flex-direction:column;gap:12px;
+    padding:18px 18px 16px;background:hsl(180 5% 9%);border-left:1px solid hsl(var(--page-line) / .14);box-shadow:-24px 0 48px hsl(0 0% 0% / .45)}
+  .skin[hidden]{display:none}
+  .skin header{display:flex;justify-content:space-between;align-items:baseline}
+  .skin h2{margin:0;font:500 12px/1 var(--nft-font-mono);letter-spacing:.24em;text-transform:uppercase;color:hsl(var(--page-strong))}
+  .skin header button{background:none;border:0;color:hsl(var(--page-text));font:inherit;cursor:pointer;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+  .skin p{margin:0;font-size:11.5px}
+  .skin header a{margin-left:auto;margin-right:14px;color:hsl(var(--page-text));font-size:11px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid hsl(var(--page-line) / .2)}
+  .skin-layers{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+  .skin-layers button{min-width:0;display:grid;gap:1px;text-align:left;cursor:pointer;background:none;border:1px solid hsl(var(--page-line) / .12);border-radius:4px;padding:5px 6px;color:hsl(var(--page-text))}
+  .skin-layers button span{font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+  .skin-layers button b{font-weight:500;font-size:11px;color:hsl(var(--page-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .skin-layers button.is-changed{border-color:hsl(var(--honey) / .55)}
+  .skin-layers button.is-changed b{color:hsl(var(--honey))}
+  .skin-layers button[aria-selected="true"]{background:hsl(var(--page-line) / .09);border-color:hsl(var(--page-line) / .5)}
+  .skin-grid{overflow:auto;flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-content:start;padding-right:2px}
+  .skin-item{min-width:0;display:grid;gap:4px;cursor:pointer;text-align:left;background:none;border:1px solid hsl(var(--page-line) / .08);border-radius:6px;padding:4px;color:hsl(var(--page-text))}
+  .skin-item:hover{border-color:hsl(var(--page-line) / .25)}
+  .skin-item[aria-selected="true"]{border-color:hsl(var(--page-strong));box-shadow:0 0 0 1px hsl(var(--page-strong))}
+  .skin-item b{font-weight:500;font-size:11px;color:hsl(var(--page-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .skin-item small{font-size:10px;display:flex;justify-content:space-between;gap:4px}
+  .skin-item small i{font-style:normal;color:hsl(var(--tc))}
+  .skin .cost{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid hsl(var(--page-line) / .12);padding-top:10px}
+  .skin .cost b{font:500 18px/1 var(--nft-font-mono);color:hsl(var(--honey))}
+  .skin .why{min-height:2.4em;color:hsl(var(--page-text))}
+  .skin .why.is-refused{color:hsl(8 80% 68%)}
+  .skin .acts{display:flex;gap:10px;justify-content:flex-end}
+  .skin .acts button{font:11px/1 var(--nft-font-mono);letter-spacing:.16em;text-transform:uppercase;cursor:pointer;border-radius:3px;padding:9px 14px;
+    color:hsl(var(--page-strong));background:none;border:1px solid hsl(var(--page-line) / .35)}
+  .skin .acts button.is-main{background:hsl(var(--page-strong));color:hsl(var(--page));border-color:hsl(var(--page-strong))}
+  .skin .acts button:disabled{opacity:.4;cursor:not-allowed}
+  @media (max-width:720px){.picks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<main>
+  <div id="card"></div>
+  <div class="bar">
+    <span class="links"><a href="index.html">All cards</a> <a href="shop.html" id="shopLink">Shop</a></span>
+    <div class="acts">
+      <button type="button" id="png">PNG</button>
+      <button type="button" id="glb" title="Save the card as a 3D file (.glb)">3D file</button>
+      <button type="button" id="turn" aria-pressed="false">Rotate</button>
+      <button type="button" id="skinBtn" aria-expanded="false" aria-controls="skin">Skin</button>
+      <button type="button" id="new" class="is-main">New card</button>
+    </div>
+  </div>
+  <div class="below">
+    <div class="tabs" role="tablist" aria-label="Below the card">
+      <button type="button" role="tab" id="tab-site" aria-selected="true" aria-controls="site">In the site</button>
+      <button type="button" role="tab" id="tab-layers" aria-selected="false" aria-controls="layers">Layers</button>
+      <span class="changed" id="changed" aria-live="polite"></span>
+    </div>
+    <div class="tabpanel" id="site" role="tabpanel" aria-labelledby="tab-site"></div>
+    <div class="tabpanel" id="layers" role="tabpanel" aria-labelledby="tab-layers" hidden>
+      <dl class="picks" id="picks"></dl>
+      <p class="mix" id="mix"></p>
+    </div>
+  </div>
+  <p class="note" id="note"><b>Sample data.</b> Nothing on this page is live.</p>
+</main>
+<aside class="skin" id="skin" hidden aria-label="Skin">
+  <header><h2>Skin</h2><a id="toShop" href="shop.html">Open the shop</a><button type="button" id="skinClose">Close</button></header>
+  <p>Pick a layer, then an element. The card keeps the mix it was born with, and no two cards wear the same mix.</p>
+  <div class="skin-layers" id="skinLayers" role="tablist" aria-label="Layers"></div>
+  <div class="skin-grid" id="skinRows" role="listbox" aria-label="Elements"></div>
+  <div class="cost"><span>Cost</span><b id="skinCost">0 FXN</b></div>
+  <p class="why" id="skinWhy"></p>
+  <div class="acts"><button type="button" id="skinReset">Back to genesis</button><button type="button" id="skinWear" class="is-main">Wear this skin</button></div>
+</aside>
+<script src="../mark-data.js"></script>
+<script src="../vendor/three-r180-defxn.js"></script>
+<script src="layers-bundle.js"></script>
+<script src="cards-data.js"></script>
+<script src="traits.js"></script>
+<script src="art3d.js"></script>
+<script src="builders-bundle.js"></script>
+<script src="card.js"></script>
+<script src="card-record.js"></script>
+<script src="world.js"></script>
+<script src="thumbs.js"></script>
+<script src="glb.js" onerror="this.remove()"></script>
+<script>
+(function () {
+  var FIELDS = ['genesisId', 'identity', 'name', 'status', 'role', 'network', 'joined', 'serial'];
+  var T = window.DEFXN_TRAITS, R = window.DefxnCardRecord, reference = window.DEFXN_CARDS[0];
+  var box = document.getElementById('card'), picks = document.getElementById('picks'), note = document.getElementById('note');
+  var newBtn = document.getElementById('new'), pngBtn = document.getElementById('png'), glbBtn = document.getElementById('glb');
+  var turnBtn = document.getElementById('turn'), skinBtn = document.getElementById('skinBtn'), drawer = document.getElementById('skin');
+  var card = null, record = null, why = '';
+
+  function fromUrl() {
+    var q = new URLSearchParams(location.search), r;
+    if (q.has('new')) return null;
+    if (!FIELDS.some(function (f) { return q.has(f); })) r = Object.assign({}, reference);
+    else {
+      r = {};
+      FIELDS.forEach(function (f) { r[f] = q.get(f) || ''; });
+      r.tagline = q.has('tagline') ? q.get('tagline').split('|') : reference.tagline;
+    }
+    if (q.get('skin')) r.skin = q.get('skin');
+    return r;
+  }
+  function toUrl(r) {
+    var q = new URLSearchParams();
+    if (r !== reference && r.genesisId !== reference.genesisId) { FIELDS.forEach(function (f) { q.set(f, r[f]); }); q.set('tagline', r.tagline.join('|')); }
+    var sk = typeof r.skin === 'string' ? r.skin : T.skinText(r.skin || {});
+    if (sk) q.set('skin', sk);
+    var qs = q.toString();
+    history.replaceState(null, '', 'card.html' + (qs ? '?' + qs : ''));
+  }
+  function odds(n) { return '1 in ' + T.words(n); }
+  var HOW = {
+    number: 'Genesis number {n} was born with this mix, and no other number can be.',
+    pinned: 'This record pins its mix, and no other number can draw it.',
+    preview: 'A look at one mix. It belongs to no number.',
+    key: 'The genesis ID is not a number, so this mix is not checked against the others.'
+  };
+  function showPicks(c) {
+    var t = c._traits;
+    picks.textContent = '';
+    T.LAYERS.forEach(function (layer) {
+      var e = t.picks[layer.key], d = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd'), sm = document.createElement('small');
+      dt.textContent = layer.name; dd.textContent = e.name; sm.textContent = Math.round(e.share * 10) / 10 + '%';
+      if (t.changed.indexOf(layer.key) >= 0) { dd.style.color = 'hsl(var(--honey))'; sm.textContent += ' skin'; }
+      dd.appendChild(sm); d.appendChild(dt); d.appendChild(dd); picks.appendChild(d);
+    });
+    var mix = document.getElementById('mix'), b = document.createElement('b'), code = document.createElement('code');
+    mix.innerHTML = '';
+    b.textContent = (t.skinned ? 'Wearing a skin: ' + odds(t.odds) + ', born ' + odds(T.elementsOf(t.genesis).reduce(function (p, e) { return p * 100 / e.share; }, 1)) : 'This mix: ' + odds(t.odds)) + '.';
+    mix.appendChild(b);
+    var how = t.skinned ? 'It keeps the mix it was born with as its record, and no number was born with the mix it wears.' : HOW[t.how].replace('{n}', t.number);
+    mix.appendChild(document.createTextNode(' ' + how + ' Record '));
+    code.textContent = R.of(record, t); mix.appendChild(code);
+  }
+  /* ---------- in the site: the card's UI pieces, as a site that supports the NFT engine draws them ---------- */
+  var site = document.getElementById('site'), changedEl = document.getElementById('changed');
+  function siteKit(c, rec, worn) {
+    var W = window.DefxnWorld;
+    if (!W) return;
+    var th = W.theme(c._traits, rec), kit = document.createElement('div');
+    kit.className = 'kit is-fresh'; th.apply(kit);
+    var who = document.createElement('div'), col = document.createElement('div'), bw = document.createElement('div');
+    who.className = 'kit-who'; bw.className = 'kit-badges';
+    who.appendChild(W.avatar(th, 92));
+    col.appendChild(W.nameLine(th, { glyph: 18 }));
+    W.badges(th, { maxH: 26 }).forEach(function (b) { bw.appendChild(b); });
+    col.appendChild(bw); who.appendChild(col);
+    var p = W.panel(th, { title: 'Records', scale: 0.3, ornH: 18, ornW: 110 });
+    p.body.appendChild(W.bullets(th, ['Names', 'Records']));
+    var acts = document.createElement('div');
+    acts.className = 'kit-acts';
+    var q = new URLSearchParams();
+    FIELDS.forEach(function (f) { if (rec[f]) q.set(f, rec[f]); });
+    if (rec.tagline) q.set('tagline', rec.tagline.join('|'));
+    var sk = typeof rec.skin === 'string' ? rec.skin : T.skinText(rec.skin || {});
+    if (sk) q.set('skin', sk);
+    acts.appendChild(W.button(th, 'Enter a site', { primary: true, href: 'engine-demo.html?' + q.toString() }));
+    document.getElementById('shopLink').href = 'shop.html?' + q.toString();     // the shop opens on this card
+    acts.appendChild(W.button(th, 'Settings'));
+    acts.appendChild(W.divider(th));
+    kit.appendChild(who); kit.appendChild(p); kit.appendChild(acts);
+    site.textContent = ''; site.appendChild(kit);
+    requestAnimationFrame(function () { kit.classList.remove('is-fresh'); });
+    // which site pieces the worn skin changed (W.SHAPES says what each layer shapes)
+    var t = c._traits, born = worn ? T.elementsOf(t.genesis) : null;
+    var PIECE = { palette: 'colours', corner: 'corners', frame: 'frames', tag: 'badges', ornament: 'headings', divider: 'dividers',
+      emblem: 'bullets', mark: 'avatar', backdrop: 'banner', aura: 'banner', signal: 'banner', particles: 'banner' };
+    changedEl.textContent = !worn || !t.changed.length ? '' : 'Changed in the site: ' + t.changed.map(function (k) {
+      return PIECE[k] + ' (' + t.picks[k].name + ')';
+    }).join(', ');
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[role="tab"]'), function (tab) {
+    tab.addEventListener('click', function () {
+      Array.prototype.forEach.call(document.querySelectorAll('[role="tab"]'), function (x) {
+        var on = x === tab; x.setAttribute('aria-selected', String(on)); document.getElementById(x.getAttribute('aria-controls')).hidden = !on;
+      });
+    });
+  });
+
+  function show(r, text) {
+    record = r; why = text;
+    if (card && card._setMode) card._setMode('card');
+    turnBtn.setAttribute('aria-pressed', 'false'); turnBtn.textContent = 'Rotate';
+    card = window.DefxnCard.render(box, r);
+    document.title = 'DEFXN identity card ' + (r.genesisId || '');
+    showPicks(card);
+    siteKit(card, r, true);
+    note.innerHTML = '<b>Sample data.</b> ' + text + ' Nothing on this page is live.';
+  }
+  function makeNew() {
+    var r = T.newRecord(T.takeNumber(), reference.tagline);
+    toUrl(r);
+    closeSkin();
+    show(r, 'The next sample number, with a made-up identity drawn from it. This browser hands out each number once; real numbers come with the mint.');
+  }
+
+  /* ---------- rotate: the art as a solid object ---------- */
+  turnBtn.addEventListener('click', function () {
+    var on = turnBtn.getAttribute('aria-pressed') !== 'true';
+    turnBtn.setAttribute('aria-pressed', String(on)); turnBtn.textContent = on ? 'Back to card' : 'Rotate';
+    card._setMode(on ? 'object' : 'card');
+  });
+
+  /* ---------- skin ---------- */
+  var rows = document.getElementById('skinRows'), costEl = document.getElementById('skinCost'), whyEl = document.getElementById('skinWhy');
+  var wearBtn = document.getElementById('skinWear'), draft = {}, born = null;
+  var layersEl = document.getElementById('skinLayers'), layerNow = 'mark';
+  var TIER_C = ['0 0% 70%', '168 70% 55%', '268 80% 72%', '40 95% 62%'];
+  function wornOf(i) { var l = T.LAYERS[i], want = draft[l.key]; return want ? l.elements.filter(function (e) { return e.name === want; })[0] || born[i] : born[i]; }
+  function drawLayers() {
+    layersEl.textContent = '';
+    T.LAYERS.forEach(function (l, i) {
+      var b = document.createElement('button'), e = wornOf(i);
+      b.type = 'button'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', String(l.key === layerNow));
+      b.dataset.layer = l.key; b.className = e !== born[i] ? 'is-changed' : '';
+      var sp = document.createElement('span'), nm = document.createElement('b'); sp.textContent = l.name; nm.textContent = e.name;
+      b.appendChild(sp); b.appendChild(nm);
+      b.addEventListener('click', function () { layerNow = l.key; drawLayers(); drawItems(); });
+      layersEl.appendChild(b);
+    });
+  }
+  // the elements of one layer, each drawn by itself (thumbs.js), in the palette the card wears
+  function drawItems() {
+    var i = T.LAYERS.map(function (l) { return l.key; }).indexOf(layerNow), l = T.LAYERS[i], now = wornOf(i), palI = T.LAYERS.map(function (x) { return x.key; }).indexOf('palette');
+    rows.textContent = ''; rows.scrollTop = 0;
+    l.elements.filter(function (e) { return !e.held || e === born[i]; }).sort(function (a, b) { return a === born[i] ? -1 : b === born[i] ? 1 : a.share - b.share || a.name.localeCompare(b.name); }).forEach(function (e) {
+      var it = document.createElement('button'), nm = document.createElement('b'), sm = document.createElement('small'), tier = document.createElement('i'), price = document.createElement('span');
+      it.type = 'button'; it.className = 'skin-item'; it.setAttribute('role', 'option'); it.setAttribute('aria-selected', String(e === now));
+      it.dataset.layer = l.key; it.dataset.name = e.name;
+      it.style.setProperty('--tc', TIER_C[e.tier]);
+      it.appendChild(window.DefxnThumbs.thumb(e, { palette: wornOf(palI), record: record }));
+      nm.textContent = e.name; tier.textContent = T.TIERS[e.tier]; price.textContent = e === born[i] ? 'born \u00b7 free' : T.price(e) + ' FXN';
+      sm.appendChild(tier); sm.appendChild(price); it.appendChild(nm); it.appendChild(sm);
+      it.addEventListener('click', function () {
+        draft[l.key] = e === born[i] ? '' : e.name;
+        Array.prototype.forEach.call(rows.children, function (x) { x.setAttribute('aria-selected', String(x === it)); });
+        drawLayers(); preview();
+        if (l.key === 'palette') drawItems();         // the other layers are shown in the new palette
+      });
+      rows.appendChild(it);
+    });
+  }
+  function openSkin() {
+    var t = card._traits; born = T.elementsOf(t.genesis); draft = T.skinOf(record);
+    drawLayers(); drawItems();
+    var q = new URLSearchParams(); FIELDS.forEach(function (f) { if (record[f]) q.set(f, record[f]); });
+    if (record.tagline) q.set('tagline', record.tagline.join('|'));
+    if (T.skinText(draft)) q.set('skin', T.skinText(draft));
+    document.getElementById('toShop').href = 'shop.html?' + q.toString() + '&layer=' + layerNow;
+    drawer.hidden = false; skinBtn.setAttribute('aria-expanded', 'true'); document.body.classList.add('is-skinning');
+    preview(true);
+  }
+  function closeSkin() {
+    if (drawer.hidden) return;
+    drawer.hidden = true; skinBtn.setAttribute('aria-expanded', 'false'); document.body.classList.remove('is-skinning');
+    show(record, why);                         // drop an unworn preview
+  }
+  function preview(quiet) {
+    var r = Object.assign({}, record, { skin: T.skinText(draft) });
+    var t = T.pick(r), c = T.skinCost(t.genesis, t.dna);
+    costEl.textContent = c.total.toLocaleString('en-US') + ' FXN';
+    var rv = t.review || { ok: true, held: [], clashes: [] };
+    if (t.takenBy) {
+      whyEl.className = 'why is-refused';
+      whyEl.textContent = 'Genesis ' + t.takenBy + ' was born with this mix, so no card can wear it. Change one more layer.';
+    } else if (!rv.ok) {
+      whyEl.className = 'why is-refused';
+      whyEl.textContent = rv.clashes.length ? rv.clashes[0][0].name + ' and ' + rv.clashes[0][1].name + ' clash, so no card wears them together. Change one of them.'
+        : rv.held[0].name + ' is held back from cards for now. Pick another.';
+    } else {
+      whyEl.className = 'why';
+      whyEl.textContent = c.lines.length ? 'Proposed price: each element costs its odds (1 in N) times ' + T.SKIN_BASE_FXN + ' FXN. Sample: nothing is charged.' : 'The card wears the mix it was born with.';
+    }
+    wearBtn.disabled = !!t.takenBy || !rv.ok;
+    if (!quiet) { card = window.DefxnCard.render(box, r); showPicks(card); siteKit(card, r, true); }
+  }
+  skinBtn.addEventListener('click', function () { if (drawer.hidden) openSkin(); else closeSkin(); });
+  document.getElementById('skinClose').addEventListener('click', closeSkin);
+  document.getElementById('skinReset').addEventListener('click', function () { draft = {}; drawLayers(); drawItems(); preview(); });
+  wearBtn.addEventListener('click', function () {
+    record = Object.assign({}, record, { skin: T.skinText(draft) });
+    if (!record.skin) delete record.skin;
+    toUrl(record);
+    drawer.hidden = true; skinBtn.setAttribute('aria-expanded', 'false'); document.body.classList.remove('is-skinning');
+    show(record, record.skin ? 'This card wears a skin over the mix it was born with. Sample: nothing was charged.' : why);
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !drawer.hidden) closeSkin(); });
+
+  /* ---------- start ---------- */
+  var opening = new URLSearchParams(location.search).get('open');
+  var first = fromUrl();
+  if (first && first.genesisId === reference.genesisId && first.identity === reference.identity) show(first, 'This is the reference record, card 009.');
+  else if (first) show(first, 'This record came from the URL.');
+  else makeNew();
+
+  if (opening === 'skin') setTimeout(openSkin, 300);       // arriving from a site's loadout
+  newBtn.addEventListener('click', makeNew);
+  pngBtn.addEventListener('click', function () {
+    pngBtn.disabled = true;
+    document.fonts.ready
+      .then(function () { return window.DefxnCard.downloadPNG(card, 'defxn-card-' + (record.genesisId || 'sample') + '.png'); })
+      .catch(function (err) { console.error('The PNG was not made: ' + err.message); })
+      .then(function () { pngBtn.disabled = false; });
+  });
+  // the 3D file: the solid object (thick mark), with the card's DNA and record in it
+  if (!window.DefxnGLB) { glbBtn.disabled = true; glbBtn.title = 'The 3D file writer (glb.js) is not on this page yet.'; }
+  glbBtn.addEventListener('click', function () {
+    if (!window.DefxnGLB || !card._model) return;
+    var t = card._traits;
+    var meta = Object.assign(window.DefxnGLB.metaOf(card), { record: R.of(record, t) });
+    window.DefxnGLB.download(window.Art3D.solid(card._model), meta, 'defxn-card-' + (record.genesisId || 'sample') + '.glb');
+  });
+})();
+</script>
+</body>
+</html>

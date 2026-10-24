@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Hair Wave: a waveform of thin vertical lines and dots, tallest in the middle, with a soft glow (sheet 7, item 16)</title>
+  <path d="M78 30.67V49.33M90 27.23V52.77M102 24.13V55.87M114 19.54V60.46M126 25.74V54.26M138 24.18V55.82M150 21.38V58.62M162 30.45V49.55M174 29.89V50.11" fill="none" stroke="var(--faint)" stroke-width="7" stroke-linecap="round"/>
+  <path d="M78 30.67V49.33M90 27.23V52.77M102 24.13V55.87M114 19.54V60.46M126 25.74V54.26M138 24.18V55.82M150 21.38V58.62M162 30.45V49.55M174 29.89V50.11" fill="none" stroke="var(--faint)" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M6 37.43V42.57M18 37.37V42.63M30 36.96V43.04M42 36.39V43.61M54 34.82V45.18M66 32.04V47.96M78 28.34V51.66M90 24.03V55.97M102 20.16V59.84M114 14.42V65.58M126 22.17V57.83M138 20.23V59.77M150 16.73V63.27M162 28.07V51.93M174 27.37V52.63M186 33.59V46.41M198 35.19V44.81M210 36.61V43.39M222 37.1V42.9M234 37.31V42.69M246 37.44V42.56" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="12" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="24" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="36" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="48" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="60" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="72" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="84" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="84" cy="33.17" r="0.7" fill="var(--line)"/>
+  <circle cx="84" cy="46.83" r="0.7" fill="var(--line)"/>
+  <circle cx="96" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="96" cy="32.73" r="0.7" fill="var(--line)"/>
+  <circle cx="96" cy="47.27" r="0.7" fill="var(--line)"/>
+  <circle cx="108" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="108" cy="28.31" r="0.7" fill="var(--line)"/>
+  <circle cx="108" cy="51.69" r="0.7" fill="var(--line)"/>
+  <circle cx="120" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="120" cy="28.03" r="0.7" fill="var(--line)"/>
+  <circle cx="120" cy="51.97" r="0.7" fill="var(--line)"/>
+  <circle cx="132" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="132" cy="28.35" r="0.7" fill="var(--line)"/>
+  <circle cx="132" cy="51.65" r="0.7" fill="var(--line)"/>
+  <circle cx="144" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="144" cy="28.45" r="0.7" fill="var(--line)"/>
+  <circle cx="144" cy="51.55" r="0.7" fill="var(--line)"/>
+  <circle cx="156" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="156" cy="30.33" r="0.7" fill="var(--line)"/>
+  <circle cx="156" cy="49.67" r="0.7" fill="var(--line)"/>
+  <circle cx="168" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="168" cy="34.41" r="0.7" fill="var(--line)"/>
+  <circle cx="168" cy="45.59" r="0.7" fill="var(--line)"/>
+  <circle cx="180" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="192" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="204" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="216" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="228" cy="40" r="0.9" fill="var(--line)"/>
+  <circle cx="240" cy="40" r="0.9" fill="var(--line)"/>
+</svg>

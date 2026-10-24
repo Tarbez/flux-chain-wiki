@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Stepcut: a faint frame whose four corners are cut in two steps, the steps drawn in the accent with a glow (sheet 10, 02-03)</title>
+  <path d="M50 18H950M50 682H950M18 50V650M982 50V650" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M18 50V31H24.5V24.5H31V18H50M950 18H969V24.5H975.5V31H982V50M18 650V669H24.5V675.5H31V682H50M950 682H969V675.5H975.5V669H982V650" fill="none" stroke="var(--acc)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.06"/>
+  <path d="M18 50V31H24.5V24.5H31V18H50M950 18H969V24.5H975.5V31H982V50M18 650V669H24.5V675.5H31V682H50M950 682H969V675.5H975.5V669H982V650" fill="none" stroke="var(--acc)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.18"/>
+  <path d="M18 50V31H24.5V24.5H31V18H50M950 18H969V24.5H975.5V31H982V50M18 650V669H24.5V675.5H31V682H50M950 682H969V675.5H975.5V669H982V650" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linecap="square" stroke-linejoin="round"/>
+</svg>

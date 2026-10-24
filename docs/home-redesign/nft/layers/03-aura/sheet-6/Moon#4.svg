@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="s6-moon">
+  <title>Moon: a dotted orbit around the mark, a small solid square planet on it and a small circle for its moon</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g data-sketch="" fill="none" stroke="#fff" stroke-width="1"><ellipse cx="720" cy="357" rx="256" ry="100" stroke-dasharray="1 7"/><rect x="926" y="380" width="14" height="14" fill="#fff"/><circle cx="905" cy="415" r="5"/></g>
+</svg>

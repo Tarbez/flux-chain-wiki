@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Rank: a bracketed ROLE label and the role in amber (sheet 9, piece 24)</title>
+  <path d="M4.5 13.5H0.5V36.5H4.5M51.5 13.5H55.5V36.5H51.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="12" y="29" font-family="JetBrains Mono, monospace" font-size="10.5" letter-spacing="2.4" fill="var(--dim)">ROLE</text>
+  <text x="72" y="30.6" font-family="JetBrains Mono, monospace" font-size="16" letter-spacing="3" fill="var(--acc)" data-field="role" font-weight="500">ROLE</text>
+</svg>

@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Kick: a chamfered corner whose side arm ends in a kick inward at 45 degrees, with a short parallel stroke inside the kick (sheet 11, 01-03)</title>
+  <path d="M96 1.5H13L1.5 13V72L13 83.5" fill="none" stroke="var(--acc2)" stroke-opacity="0.18" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M96 1.5H13L1.5 13V72L13 83.5" fill="none" stroke="var(--acc2)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><path d="M7 70L15 78" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

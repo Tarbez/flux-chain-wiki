@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Node Rail: a small square, a line, dots, a line, a small square (sheet 7, item 15)</title>
+  <rect x="0" y="10" width="4" height="4" fill="var(--dim)"/>
+  <path d="M9 12H152" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="162" cy="12" r="1" fill="var(--dim)"/>
+  <circle cx="171" cy="12" r="1" fill="var(--dim)"/>
+  <circle cx="180" cy="12" r="1" fill="var(--dim)"/>
+  <circle cx="189" cy="12" r="1" fill="var(--dim)"/>
+  <circle cx="198" cy="12" r="1" fill="var(--dim)"/>
+  <path d="M208 12H351" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="356" y="10" width="4" height="4" fill="var(--dim)"/>
+</svg>

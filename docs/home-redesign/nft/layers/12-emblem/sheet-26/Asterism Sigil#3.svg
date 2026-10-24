@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Asterism Sigil: a large four-point star with a small accent star above it and a speck of dust below (sheet 26, the Asterism set: a star chart: four-point stars joined by lines that stop short of them, the brightest star in the accent)</title>
+  <path d="M13 7L15.65 16.85L25.5 19.5L15.65 22.15L13 32L10.35 22.15L0.5 19.5L10.35 16.85Z" fill="var(--ink)"/>
+  <path d="M25.2 2L26.31 5.49L29.8 6.6L26.31 7.71L25.2 11.2L24.09 7.71L20.6 6.6L24.09 5.49Z" fill="var(--acc)"/>
+  <circle cx="26" cy="29.5" r="1.8" fill="var(--dim)"/>
+</svg>

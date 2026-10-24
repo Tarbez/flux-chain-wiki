@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Centre Dash: rounded brackets at the four corners joined only across the top by a dashed line, an accent segment at its centre (sheet 13, 27)</title>
+  <path d="M16 80V32A16 16 0 0 1 32 16H80M920 16H968A16 16 0 0 1 984 32V80M984 620V668A16 16 0 0 1 968 684H920M80 684H32A16 16 0 0 1 16 668V620" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M92 16H452M548 16H908" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="5 5"/>
+  <rect x="456" y="12.5" width="88" height="7" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="458" y="14.5" width="84" height="3" fill="var(--acc)"/>
+</svg>

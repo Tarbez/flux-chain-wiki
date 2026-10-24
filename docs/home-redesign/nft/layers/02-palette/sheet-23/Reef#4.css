@@ -1,0 +1,6 @@
+/* Reef: teal light, a coral glow. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 176 28% 88%;
+  --b: 174 58% 50%;
+  --c: 10 86% 66%;
+}

@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>DEFXN card world</title>
+<!-- The site as one card shapes it: what the owner sees, what a visitor to the owner's profile sees,
+     and what each of the card's twelve elements shapes. world.js derives the look from the card's
+     picks (traits.js) and draws every chrome piece with DefxnCard.chromeSvg, so the site and the card
+     cannot disagree.
+
+     The record is read from the URL, with the same fields as card.html:
+       world.html?genesisId=012&identity=0xB37...04D9&name=alex.fxn&status=Minted&role=Builder
+                 &network=DEFXN&joined=24%20NOV%202026&serial=04&tagline=Line%20one|Line%20two
+     Optional: skin=corner:Bracket|palette:Glass (passed through to traits.js), view=you|others|elements.
+     world.html?genesisId=27 alone shows the sample record for that number. With no record in the URL
+     the page shows sample record 012. A number with no sample record gets a made-up SAMPLE record,
+     the same one every time. Nothing is minted, sent or read from a network. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="card.css">
+<style>
+  :root{--page:180 5% 7%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%}
+  html,body{margin:0;height:100%}
+  body{background:hsl(var(--page));color:hsl(var(--page-text));font:400 13px/1.5 var(--nft-font-mono)}
+  .pg{height:100svh;max-width:1600px;margin:0 auto;padding:10px 16px 8px;box-sizing:border-box;
+    display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:8px}
+
+  /* the page's own bar: the views and the number. It is not part of the site it shows. */
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
+  .tabs{display:flex;gap:2px}
+  .tabs button{font:500 11px/1 var(--nft-font-mono);letter-spacing:.16em;text-transform:uppercase;color:hsl(var(--page-text));
+    background:none;border:0;border-bottom:1px solid transparent;padding:11px 12px 9px;cursor:pointer}
+  .tabs button:hover{color:hsl(var(--page-strong))}
+  .tabs button[aria-selected="true"]{color:hsl(var(--page-strong));border-bottom-color:hsl(var(--honey))}
+  .pick{display:flex;align-items:center;gap:10px;margin:0}
+  .pick label{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase}
+  .pick input{width:76px;box-sizing:border-box;font:500 13px/1 var(--nft-font-mono);letter-spacing:.06em;color:hsl(var(--page-strong));
+    background:hsl(180 8% 4%);border:1px solid hsl(var(--page-line) / .22);border-radius:3px;padding:8px 9px}
+  .pick button{font:500 11px/1 var(--nft-font-mono);letter-spacing:.16em;text-transform:uppercase;cursor:pointer;border-radius:3px;padding:9px 14px;
+    color:hsl(var(--page));background:hsl(var(--page-strong));border:1px solid hsl(var(--page-strong))}
+  .pick button:hover{background:hsl(0 0% 100%)}
+  .tabs button:focus-visible,.pick input:focus-visible,.pick button:focus-visible{outline:2px solid hsl(var(--honey));outline-offset:2px}
+  .note{margin:0;font-size:11.5px;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+
+  .stage{position:relative;min-height:0}
+  .view{position:absolute;inset:0;overflow:hidden;border-radius:10px;border:1px solid hsl(var(--page-line) / .1)}
+  .view[hidden]{display:none}
+
+  /* ---------- the site, drawn in the owner's theme (world.js sets the tokens on each view) ---------- */
+  .site{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+  .site-bar{display:flex;align-items:center;gap:30px;height:52px;padding:0 22px;border-bottom:1px solid hsl(var(--border-subtle))}
+  .brand{display:flex;align-items:center;gap:10px;color:hsl(var(--text-strong));text-decoration:none;
+    font:800 14px/1 var(--w-display);letter-spacing:.2em;text-transform:uppercase}
+  .brand img{display:block;height:20px;width:auto;filter:invert(1)}
+  .site-nav{display:flex;gap:24px}
+  .site-nav a{font:500 11px/1 var(--w-mono);letter-spacing:.16em;text-transform:uppercase;color:hsl(var(--text-muted));
+    text-decoration:none;padding:7px 0 6px;border-bottom:1px solid transparent}
+  .site-nav a:hover{color:hsl(var(--text-strong))}
+  .site-nav a[aria-current="page"]{color:hsl(var(--text-strong));border-bottom-color:hsl(var(--accent))}
+  .site-nav a:focus-visible,.brand:focus-visible{outline:2px solid hsl(var(--accent));outline-offset:3px}
+  .me{margin-left:auto;display:flex;align-items:center;gap:10px;font:500 12px/1 var(--w-mono);letter-spacing:.06em;color:hsl(var(--text-strong))}
+  .me .w-avatar{border-radius:3px}
+
+  /* You see */
+  .home{display:grid;grid-template-rows:minmax(0,1fr) auto auto;gap:12px;padding:16px 22px 16px;min-height:0}
+  .home-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:14px;min-height:0}
+  .split{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px 22px;margin:0}
+  .facts div{min-width:0}
+  .facts dt{font:400 10px/1 var(--w-mono);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--text-muted));margin:0 0 7px}
+  .facts dd{margin:0;font:500 14px/1.2 var(--w-mono);letter-spacing:.06em;color:hsl(var(--text-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .grow{flex:1;min-height:0}
+  .acts{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+
+  /* Others see: the visitor's own bar keeps the site's plain look; the profile below is the owner's */
+  .site-bar.is-plain{--accent:0 0% 86%;--text-strong:0 0% 94%;--text-muted:180 3% 58%;background:hsl(180 5% 5%);border-bottom-color:hsl(0 0% 100% / .08)}
+  .plain-btn{margin-left:auto;font:500 11px/1 var(--w-mono);letter-spacing:.16em;text-transform:uppercase;cursor:pointer;
+    color:hsl(0 0% 94%);background:none;border:1px solid hsl(0 0% 100% / .22);border-radius:3px;padding:10px 14px}
+  .plain-btn:focus-visible{outline:2px solid hsl(0 0% 86%);outline-offset:3px}
+  .profile{display:grid;grid-template-rows:auto auto minmax(0,1fr);min-height:0}
+  .profile>.w-banner{height:clamp(110px,23vh,230px)}
+  .who{position:relative;z-index:1;display:flex;align-items:flex-end;gap:20px;margin-top:-46px;padding:0 26px}
+  .who .w-avatar{border:1px solid hsl(var(--border-strong));box-shadow:0 0 0 4px hsl(var(--canvas))}
+  .who-text{display:grid;gap:9px;min-width:0;padding-bottom:2px}
+  .who-text .w-name{font-size:30px;gap:12px}
+  .who-meta{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px;min-width:0}
+  .gid{display:flex;align-items:baseline;gap:10px;font:400 10px/1 var(--w-mono);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--text-muted))}
+  .gid b{font:500 18px/1 var(--w-mono);letter-spacing:.08em;color:hsl(var(--text-strong))}
+  .who-acts{margin-left:auto;display:flex;gap:10px;padding-bottom:4px}
+  .prof-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;padding:16px 22px 16px;min-height:0}
+  .prof-grid .w-bullets li{font-size:13.5px}
+  .w-body>.card-slot{flex:1 1 0;min-height:0;container-type:size;display:grid;place-items:center}
+  .w-body>.grow{flex:1 1 0}
+  .card-slot .nft-box{width:min(100cqw,100cqh * 1000 / 700)}
+
+  /* Element by element */
+  .tiles{height:100%;box-sizing:border-box;padding:14px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:10px}
+  .tile{display:grid;grid-template-rows:auto auto auto minmax(0,1fr);gap:4px;min-width:0;min-height:0;padding:11px 12px 10px;
+    border:1px solid hsl(var(--border-subtle));border-radius:6px;background:hsl(var(--surface))}
+  .tile-top{display:flex;justify-content:space-between;gap:8px;font:400 9.5px/1 var(--w-mono);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--text-muted))}
+  .tile-name{font:500 13px/1.2 var(--w-mono);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tile-what{margin:0;font:400 11.5px/1.35 var(--w-sans);color:hsl(var(--text-muted));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tile .w-sample{min-height:0;height:100%;margin-top:4px;background:hsl(var(--canvas))}
+  .tile .w-sample .w-banner{height:100%}
+  @media (max-width:1100px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:none;grid-auto-rows:170px;overflow:auto}}
+  @media (max-width:900px){
+    .pg{height:auto;min-height:100svh}
+    .stage{min-height:0}
+    .view{position:relative;inset:auto}
+    .home-grid,.prof-grid{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+    .who{flex-wrap:wrap}
+    .who-acts{margin-left:0}
+    .w-body>.card-slot{container-type:inline-size;flex:none}
+    .card-slot .nft-box{width:100%}
+    .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .site-nav{display:none}
+    .note{white-space:normal}
+  }
+  @media (max-width:520px){.tiles{grid-template-columns:minmax(0,1fr)}.tabs button{padding:10px 7px 8px;letter-spacing:.08em}}
+</style>
+</head>
+<body>
+<div class="pg">
+  <header class="bar">
+    <div class="tabs" role="tablist" aria-label="Views">
+      <button type="button" role="tab" id="tab-you" aria-controls="view-you" data-view="you">You see</button>
+      <button type="button" role="tab" id="tab-others" aria-controls="view-others" data-view="others">Others see</button>
+      <button type="button" role="tab" id="tab-elements" aria-controls="view-elements" data-view="elements">Element by element</button>
+    </div>
+    <form class="pick" id="pick">
+      <label for="num">Genesis number</label>
+      <input id="num" type="number" min="1" max="99999" step="1" inputmode="numeric" autocomplete="off">
+      <button type="button" id="next">Next number</button>
+    </form>
+  </header>
+  <main class="stage">
+    <section class="view" id="view-you" role="tabpanel" aria-labelledby="tab-you" data-view="you"></section>
+    <section class="view" id="view-others" role="tabpanel" aria-labelledby="tab-others" data-view="others" hidden></section>
+    <section class="view" id="view-elements" role="tabpanel" aria-labelledby="tab-elements" data-view="elements" hidden></section>
+  </main>
+  <p class="note" id="note"><b>Sample data.</b> Nothing on this page is live.</p>
+</div>
+<script src="../mark-data.js"></script>
+<script src="../vendor/three-r180-defxn.js"></script>
+<script src="layers-bundle.js"></script>
+<script src="cards-data.js"></script>
+<script src="traits.js"></script>
+<script src="art3d.js"></script>
+<script src="builders-bundle.js"></script>
+<script src="card.js"></script>
+<script src="world.js"></script>
+<script>
+(function () {
+  'use strict';
+  var T = window.DEFXN_TRAITS, W = window.DefxnWorld, C = window.DefxnCard, CARDS = window.DEFXN_CARDS;
+  var FIELDS = ['genesisId', 'identity', 'name', 'status', 'role', 'network', 'joined', 'serial'];
+  var TAGLINE = CARDS[0].tagline;
+  var VIEWS = ['you', 'others', 'elements'];
+  var num = document.getElementById('num'), note = document.getElementById('note');
+  var state = { record: null, theme: null, view: 'you', built: {}, why: '' };
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  /* ---------- the record ---------- */
+  // the sample record for a number: a sample card's record when one has that number and a .fxn name,
+  // otherwise a made-up SAMPLE record drawn from the number, so it is the same one every time
+  // one sample record per number, the same as on card.html (traits.js)
+  function sampleRecord(n) { return T.sampleRecord(n, TAGLINE); }
+  function fromUrl() {
+    var q = new URLSearchParams(location.search), r;
+    if (VIEWS.indexOf(q.get('view')) >= 0) state.view = q.get('view');
+    var given = FIELDS.filter(function (f) { return q.has(f); });
+    if (!given.length) return null;
+    state.why = '';
+    if (given.length === 1 && given[0] === 'genesisId' && T.numberOf(q.get('genesisId'))) r = sampleRecord(T.numberOf(q.get('genesisId')));
+    else {
+      state.why = 'This record came from the address.';
+      r = {};
+      FIELDS.forEach(function (f) { r[f] = q.get(f) || ''; });
+      r.tagline = q.has('tagline') ? q.get('tagline').split('|') : TAGLINE;
+    }
+    if (q.get('skin')) r.skin = q.get('skin');
+    return r;
+  }
+  function query(r, view) {
+    var q = new URLSearchParams();
+    FIELDS.forEach(function (f) { q.set(f, r[f] || ''); });
+    q.set('tagline', (r.tagline || []).join('|'));
+    if (r.skin) q.set('skin', typeof r.skin === 'string' ? r.skin : T.skinText(r.skin));
+    if (view) q.set('view', view);
+    return q.toString();
+  }
+  function toUrl() { history.replaceState(null, '', 'world.html?' + query(state.record, state.view)); }
+
+  /* ---------- the site's top bar ---------- */
+  function brand() {
+    var a = el('a', 'brand'), img = el('img');
+    a.href = '#'; a.addEventListener('click', function (e) { e.preventDefault(); });
+    img.alt = ''; img.src = window.DEFXN_MARK || '';
+    a.appendChild(img); a.appendChild(el('span', null, 'DEFXN'));
+    return a;
+  }
+  function nav(current) {
+    var n = el('nav', 'site-nav');
+    n.setAttribute('aria-label', 'Site');
+    ['Names', 'Records', 'Settings'].forEach(function (t) {
+      var a = el('a', null, t);
+      a.href = '#';
+      if (t === current) a.setAttribute('aria-current', 'page');
+      a.addEventListener('click', function (e) { e.preventDefault(); });
+      n.appendChild(a);
+    });
+    return n;
+  }
+  function facts(rows) {
+    var dl = el('dl', 'facts');
+    rows.forEach(function (r) {
+      var d = el('div');
+      d.appendChild(el('dt', null, r[0]));
+      d.appendChild(el('dd', null, r[1]));
+      dl.appendChild(d);
+    });
+    return dl;
+  }
+  function cardHref() { return 'card.html?' + query(state.record); }
+
+  /* ---------- You see: the site as the owner browses it ---------- */
+  function buildYou(view, th) {
+    var r = th.record, site = el('div', 'site');
+    var bar = el('header', 'site-bar'), me = el('div', 'me');
+    bar.appendChild(brand());
+    bar.appendChild(nav('Names'));
+    me.appendChild(W.avatar(th, 28, { corners: false }));
+    var g = W.emblem(th, 16);
+    if (g) { g.setAttribute('aria-hidden', 'true'); me.appendChild(g); }
+    me.appendChild(el('span', null, r.name || ''));
+    bar.appendChild(me);
+    site.appendChild(bar);
+
+    var home = el('div', 'home'), grid = el('div', 'home-grid'), low = el('div', 'home-grid is-low');
+    var id = W.panel(th, { title: 'Identity' }), b = id.body;
+    b.appendChild(W.nameLine(th, { level: 'p', glyph: 26 }));
+    var chips = el('div', 'w-chips');
+    W.badges(th).forEach(function (x) { chips.appendChild(x); });
+    if (chips.firstChild) b.appendChild(chips);
+    b.appendChild(facts([['Identity', C.fieldOf(r, th.traits, 'identity')], ['Genesis ID', r.genesisId || ''],
+      ['Network', r.network || ''], ['Joined', r.joined || '']]));
+    var acts = el('div', 'acts');
+    acts.appendChild(W.button(th, 'View profile', { primary: true, onClick: function () { open('others', true); } }));
+    acts.appendChild(W.button(th, 'Open card', { href: cardHref() }));
+    b.appendChild(acts);
+    grid.appendChild(id);
+
+    var card = W.panel(th, { title: 'Card' }), slot = el('div', 'card-slot'), box = el('div');
+    slot.appendChild(box);
+    card.body.appendChild(slot);
+    grid.appendChild(card);
+    home.appendChild(grid);
+
+    // the owner's divider splits the page's two sections
+    home.appendChild(W.divider(th));
+
+    var names = W.panel(th, { title: 'Names' }), nrow = el('div', 'split');
+    nrow.appendChild(W.bullets(th, [r.name || '']));
+    nrow.appendChild(W.button(th, 'Open records'));   // names are claimed by the genesis key only, for now: no claim button
+    names.body.appendChild(nrow);
+    low.appendChild(names);
+
+    var settings = W.panel(th, { title: 'Settings' });
+    settings.body.appendChild(W.bullets(th, ['Profile', 'Card and theme', 'Sign-in keys']));
+    low.appendChild(settings);
+    home.appendChild(low);
+    site.appendChild(home);
+    view.appendChild(site);
+    C.render(box, r);
+  }
+
+  /* ---------- Others see: the owner's profile, as a visitor opens it ---------- */
+  function buildOthers(view, th) {
+    var r = th.record, site = el('div', 'site');
+    var bar = el('header', 'site-bar is-plain');
+    bar.appendChild(brand());
+    bar.appendChild(nav(''));
+    bar.appendChild(el('button', 'plain-btn', 'Sign in')).type = 'button';
+    site.appendChild(bar);
+
+    var prof = el('div', 'profile');
+    prof.appendChild(W.banner(th, { label: 'Banner cut from the card art of ' + (r.name || 'this owner') }));
+    var who = el('div', 'who'), text = el('div', 'who-text'), meta = el('div', 'who-meta');
+    who.appendChild(W.avatar(th, 104));
+    text.appendChild(W.nameLine(th, { level: 'h1', glyph: 30 }));
+    W.badges(th).forEach(function (x) { meta.appendChild(x); });
+    var gid = el('span', 'gid');
+    gid.appendChild(document.createTextNode('Genesis ID'));
+    gid.appendChild(el('b', null, r.genesisId || ''));
+    meta.appendChild(gid);
+    text.appendChild(meta);
+    who.appendChild(text);
+    var acts = el('div', 'who-acts');
+    acts.appendChild(W.button(th, 'Open card', { primary: true, href: cardHref() }));
+    var copy = W.button(th, 'Copy name', { onClick: function () {
+      var label = copy.querySelector('span:not(.w-deco)');
+      if (!navigator.clipboard) { label.textContent = 'Copy not available'; return; }
+      navigator.clipboard.writeText(r.name || '').then(function () { label.textContent = 'Name copied'; },
+        function () { label.textContent = 'Copy not allowed'; });
+      setTimeout(function () { label.textContent = 'Copy name'; }, 1800);
+    } });
+    acts.appendChild(copy);
+    who.appendChild(acts);
+    prof.appendChild(who);
+
+    var grid = el('div', 'prof-grid');
+    var about = W.panel(th, { title: 'About' }), ab = about.body;
+    ab.appendChild(W.bullets(th, r.tagline || []));
+    ab.appendChild(W.divider(th));
+    ab.appendChild(W.header(th, 'Record', { ornament: false }));
+    ab.appendChild(facts([['Identity', C.fieldOf(r, th.traits, 'identity')], ['Network', r.network || ''],
+      ['Joined', r.joined || ''], ['Serial', r.serial || '']]));
+    grid.appendChild(about);
+
+    var card = W.panel(th, { title: 'Card' }), slot = el('div', 'card-slot'), box = el('div');
+    slot.appendChild(box);
+    card.body.appendChild(slot);
+    grid.appendChild(card);
+    prof.appendChild(grid);
+    site.appendChild(prof);
+    view.appendChild(site);
+    C.render(box, r);
+  }
+
+  /* ---------- Element by element ---------- */
+  function buildElements(view, th) {
+    var grid = el('div', 'tiles');
+    T.LAYERS.forEach(function (layer) {
+      var e = th.picks[layer.key], tile = el('article', 'tile'), top = el('div', 'tile-top');
+      top.appendChild(el('span', null, layer.folder.slice(0, 2) + ' ' + layer.name));
+      top.appendChild(el('span', null, e ? Math.round(e.share * 10) / 10 + '%' : ''));
+      tile.appendChild(top);
+      var name = el('b', 'tile-name', e ? e.name : 'Not picked');
+      if (e) name.title = layer.folder + '/' + e.file;
+      tile.appendChild(name);
+      tile.appendChild(el('p', 'tile-what', W.SHAPES[layer.key] || ''));
+      if (e) tile.appendChild(W.sample(layer.key, e, th.record));
+      grid.appendChild(tile);
+    });
+    view.appendChild(grid);
+  }
+
+  /* ---------- views ---------- */
+  var BUILD = { you: buildYou, others: buildOthers, elements: buildElements };
+  function open(view, focus) {
+    state.view = view;
+    VIEWS.forEach(function (v) {
+      var tab = document.getElementById('tab-' + v), pane = document.getElementById('view-' + v), on = v === view;
+      tab.setAttribute('aria-selected', on ? 'true' : 'false');
+      tab.tabIndex = on ? 0 : -1;
+      pane.hidden = !on;
+    });
+    var pane = document.getElementById('view-' + view);
+    if (!state.built[view]) {
+      state.built[view] = true;
+      pane.textContent = '';
+      state.theme.apply(pane);
+      try { BUILD[view](pane, state.theme); } catch (err) { console.error('The ' + view + ' view did not draw: ' + err.message); }
+    }
+    if (focus) document.getElementById('tab-' + view).focus();
+    toUrl();
+  }
+  function show(record, why) {
+    state.record = record;
+    state.theme = W.theme(T.pick(record), record);
+    state.built = {};
+    VIEWS.forEach(function (v) { document.getElementById('view-' + v).textContent = ''; });
+    num.value = T.numberOf(record.genesisId) || '';
+    document.title = 'DEFXN card world ' + (record.genesisId || '');
+    note.innerHTML = '';
+    var b = el('b', null, 'Sample data.');
+    note.appendChild(b);
+    note.appendChild(document.createTextNode(' Nothing on this page is live.' + (why ? ' ' + why : '')));
+    open(state.view);
+  }
+  function goTo(n) {
+    n = Math.max(1, Math.min(99999, Math.floor(n) || 1));
+    var r = sampleRecord(n);
+    if (state.record && state.record.skin) r.skin = state.record.skin;
+    show(r, '');
+  }
+
+  document.querySelectorAll('.tabs [role="tab"]').forEach(function (tab, i, all) {
+    tab.addEventListener('click', function () { open(tab.getAttribute('data-view')); });
+    tab.addEventListener('keydown', function (e) {
+      var step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!step) return;
+      e.preventDefault();
+      open(all[(i + step + all.length) % all.length].getAttribute('data-view'), true);
+    });
+  });
+  document.getElementById('pick').addEventListener('submit', function (e) { e.preventDefault(); goTo(+num.value); });
+  num.addEventListener('change', function () { goTo(+num.value); });
+  document.getElementById('next').addEventListener('click', function () { goTo((T.numberOf(state.record.genesisId) || 0) + 1); });
+
+  var first = fromUrl();
+  if (first) show(first, state.why);
+  else show(sampleRecord(12), '');
+})();
+</script>
+</body>
+</html>

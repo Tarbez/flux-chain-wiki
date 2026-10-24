@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Bracket Span: a long line with up-turned ends and short ticks at its centre (sheet 7, item 30)</title>
+  <path d="M0.5 6V12.5H359.5V6" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M168 12.5V9M174 12.5V9M180 12.5V6.5M186 12.5V9M192 12.5V9" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

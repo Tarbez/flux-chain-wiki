@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Truss Rule: a faint rule with a short girder at its centre, a pin at each end, the middle pin in the accent (sheet 26, the Truss set: a girder: two rails with a zigzag web between them, round pins at the joints, one pin in the accent)</title>
+  <path d="M3 12H140" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M220 12H357" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M140 6.5H220" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M140 17.5H220" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M140 6.5V17.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M220 6.5V17.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M140 17.5L150 6.5L160 17.5L170 6.5L180 17.5L190 6.5L200 17.5L210 6.5L220 17.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.7"/>
+  <circle cx="3" cy="12" r="1.7" fill="var(--dim)"/>
+  <circle cx="357" cy="12" r="1.7" fill="var(--dim)"/>
+  <circle cx="180" cy="17.5" r="2.6" fill="var(--acc)"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Crest Crown: a solid crown of three points with round tips, the middle tip and a jewel in the accent, on a band (sheet 22)</title>
+  <path d="M4.6 25.2L2.6 10.8L10 17.4L15 8.6L20 17.4L27.4 10.8L25.4 25.2ZM15 17.6 L17.6 20.8 L15 24 L12.4 20.8Z" fill="var(--dim)" fill-rule="evenodd"/>
+  <path d="M15 18.9 L16.55 20.8 L15 22.7 L13.45 20.8Z" fill="var(--acc)"/>
+  <rect x="4.6" y="27" width="20.8" height="3.4" rx="0.8" fill="var(--dim)"/>
+  <path d="M0.6 9.4a2 2 0 1 0 4 0a2 2 0 1 0 -4 0ZM25.4 9.4a2 2 0 1 0 4 0a2 2 0 1 0 -4 0Z" fill="var(--dim)"/>
+  <circle cx="15" cy="6.4" r="2.3" fill="var(--acc)"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Origami Corner: a dog-ear: the bend folded over along a crease, the flap underside in the accent, a dashed valley fold beside it and a small folded tip at the end of each arm (sheet 26, the Origami set: folded paper: creases, a dog-eared flap and accordion pleats, the underside of a fold in the accent)</title>
+  <path d="M20 0.5H100" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M0.5 20V100" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M20 0.5L0.5 20" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M20 0.5L20 20L0.5 20Z" fill="var(--acc)" fill-opacity="0.4"/>
+  <path d="M20 0.5V20H0.5" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M44 0.5L41 3.5M38 6.5L35 9.5M32 12.5L29 15.5M26 18.5L23 21.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.6"/>
+  <path d="M100 0.5L92 0.5L100 8.5Z" fill="var(--dim)"/>
+  <path d="M0.5 100L0.5 92L8.5 100Z" fill="var(--dim)"/>
+</svg>

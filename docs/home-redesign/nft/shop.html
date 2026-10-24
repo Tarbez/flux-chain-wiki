@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>DEFXN element shop</title>
+<!-- The shop: every element of every layer, each drawn by itself (thumbs.js), so it can be seen
+     before it is picked. Pick one to see it large: alone (a 3D element turns under the pointer), on
+     your card, or in a site. "Try on" puts it in your loadout; the loadout shows its total in FXN and
+     "Wear on card" opens card.html wearing it. Prices are the PROPOSED rule (traits.js price: an
+     element costs its odds times 1 FXN). Sample data: nothing is sold, charged or sent.
+     The address keeps the state: layer, tier, q, sort, item, the card (genesisId or a full record)
+     and skin (the loadout). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="card.css">
+<style>
+  :root{--page:180 5% 7%;--panel:180 5% 9%;--page-text:180 3% 62%;--page-strong:0 0% 94%;--page-line:0 0% 100%;--honey:38 78% 62%;
+    --t0:0 0% 70%;--t1:168 70% 55%;--t2:268 80% 72%;--t3:40 95% 62%}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:hsl(var(--page));color:hsl(var(--page-text));font:400 12.5px/1.45 "JetBrains Mono",ui-monospace,monospace;
+    height:100svh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+  button,input,select{font:inherit;color:inherit}
+  .top{display:flex;align-items:center;gap:18px;padding:10px 16px;border-bottom:1px solid hsl(var(--page-line) / .1)}
+  .top h1{margin:0;font:800 15px/1 "Inter Tight",Inter,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--page-strong));white-space:nowrap}
+  .top input[type=search]{flex:1;max-width:320px;background:hsl(var(--page-line) / .04);border:1px solid hsl(var(--page-line) / .14);border-radius:4px;padding:7px 10px}
+  .top label{display:flex;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+  .top select,.top input[type=number]{background:hsl(var(--page-line) / .04);border:1px solid hsl(var(--page-line) / .14);border-radius:4px;padding:6px 8px;color:hsl(var(--page-strong))}
+  .top input[type=number]{width:84px}
+  .top .links{margin-left:auto;display:flex;gap:14px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase}
+  .top .links a{color:hsl(var(--page-text));text-decoration:none;border-bottom:1px solid hsl(var(--page-line) / .2)}
+  main{display:grid;grid-template-columns:200px minmax(0,1fr) 380px;min-height:0}
+  /* the rail */
+  .rail{border-right:1px solid hsl(var(--page-line) / .08);padding:12px 12px 12px 16px;overflow:auto;display:grid;gap:14px;align-content:start}
+  .rail h2{margin:0 0 6px;font:500 10px/1 "JetBrains Mono",monospace;letter-spacing:.22em;text-transform:uppercase;color:hsl(var(--page-text))}
+  .rail ul{list-style:none;margin:0;padding:0;display:grid;gap:1px}
+  .rail li button{width:100%;display:flex;justify-content:space-between;gap:8px;background:none;border:0;border-radius:3px;padding:5px 8px;cursor:pointer;text-align:left;color:hsl(var(--page-text))}
+  .rail li button:hover{background:hsl(var(--page-line) / .05)}
+  .rail li button[aria-pressed="true"]{background:hsl(var(--page-line) / .09);color:hsl(var(--page-strong))}
+  .rail li button small{color:hsl(var(--page-text) / .8)}
+  .tiers{display:flex;flex-wrap:wrap;gap:6px}
+  .tiers button{border-radius:999px;padding:4px 9px;cursor:pointer;background:none;border:1px solid hsl(var(--tc) / .35);color:hsl(var(--tc));font-size:11px}
+  .tiers button[aria-pressed="true"]{background:hsl(var(--tc) / .14);border-color:hsl(var(--tc) / .8)}
+  .rail select{width:100%;background:hsl(var(--page-line) / .04);border:1px solid hsl(var(--page-line) / .14);border-radius:4px;padding:6px 8px;color:hsl(var(--page-strong))}
+  /* the grid */
+  .shelf{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr)}
+  .shelf header{display:flex;justify-content:space-between;align-items:baseline;padding:10px 16px 8px}
+  .shelf header b{color:hsl(var(--page-strong));font-weight:500}
+  .grid{overflow:auto;padding:0 16px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-content:start}
+  .item{background:none;border:1px solid hsl(var(--page-line) / .08);border-radius:7px;padding:6px;cursor:pointer;text-align:left;display:grid;gap:6px;position:relative}
+  .item:hover{border-color:hsl(var(--page-line) / .22)}
+  .item[aria-selected="true"]{border-color:hsl(var(--page-strong));box-shadow:0 0 0 1px hsl(var(--page-strong))}
+  .item .meta{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:baseline}
+  .item b{font-weight:500;color:hsl(var(--page-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item .price{color:hsl(var(--page-strong))}
+  .item .tier{font-size:10.5px;color:hsl(var(--tc))}
+  .item .layer{font-size:10.5px;text-align:right}
+  .flag{position:absolute;top:10px;left:10px;z-index:1;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 6px;border-radius:3px;background:hsl(var(--page) / .85);color:hsl(var(--page-strong))}
+  .flag.is-try{color:hsl(var(--honey))}
+  /* the detail */
+  .detail{border-left:1px solid hsl(var(--page-line) / .08);display:grid;grid-template-rows:auto auto auto auto minmax(0,1fr);gap:10px;padding:12px 16px;min-height:0;overflow:auto}
+  .views{display:flex;gap:4px}
+  .views button{flex:1;background:none;border:1px solid hsl(var(--page-line) / .14);border-radius:4px;padding:6px 0;cursor:pointer;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
+  .views button[aria-pressed="true"]{background:hsl(var(--page-line) / .09);color:hsl(var(--page-strong));border-color:hsl(var(--page-line) / .35)}
+  .view{aspect-ratio:10/7;border-radius:8px;overflow:hidden;background:#050606}
+  .view > .th-stage{width:100%;height:100%}
+  .view.is-site{display:grid;place-items:center;padding:10px;background:hsl(180 6% 5%)}
+  .view.is-card .nft-box{width:100%}
+  .facts{display:grid;gap:4px}
+  .facts h2{margin:0;font:600 18px/1.2 Inter,sans-serif;color:hsl(var(--page-strong))}
+  .facts .row{display:flex;gap:12px;flex-wrap:wrap;font-size:11.5px}
+  .facts .tier{color:hsl(var(--tc))}
+  .facts .shapes{font-size:11.5px}
+  .acts{display:flex;gap:8px}
+  .acts button,.acts a{flex:1;text-align:center;text-decoration:none;cursor:pointer;border-radius:4px;padding:9px 10px;font-size:11px;letter-spacing:.14em;text-transform:uppercase;border:1px solid hsl(var(--page-line) / .35);background:none;color:hsl(var(--page-strong))}
+  .acts .is-main{background:hsl(var(--page-strong));color:hsl(var(--page));border-color:hsl(var(--page-strong))}
+  .acts button:disabled{opacity:.4;cursor:default}
+  .loadout{border-top:1px solid hsl(var(--page-line) / .1);padding-top:10px;display:grid;gap:8px;align-content:start}
+  .loadout h3{margin:0;display:flex;justify-content:space-between;font:500 10px/1 "JetBrains Mono",monospace;letter-spacing:.22em;text-transform:uppercase}
+  .loadout ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+  .loadout li{display:grid;grid-template-columns:72px minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:11.5px}
+  .loadout li span:first-child{font-size:10px;letter-spacing:.14em;text-transform:uppercase}
+  .loadout li b{font-weight:500;color:hsl(var(--page-strong));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .loadout li button{background:none;border:0;cursor:pointer;color:hsl(var(--page-text));padding:0 2px}
+  .loadout .total{display:flex;justify-content:space-between;align-items:baseline}
+  .loadout .total b{font:500 17px/1 "JetBrains Mono",monospace;color:hsl(var(--honey))}
+  .loadout .why{margin:0;font-size:11px}
+  .loadout .why.is-refused{color:hsl(8 80% 68%)}
+  .empty{margin:0;font-size:11.5px}
+  .note{margin:0;padding:6px 16px 8px;font-size:11px;border-top:1px solid hsl(var(--page-line) / .08)}
+  .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+  @media (max-width:1100px){main{grid-template-columns:170px minmax(0,1fr) 320px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Element shop</h1>
+  <input type="search" id="q" placeholder="Search elements" aria-label="Search elements">
+  <label>Shown in <select id="pal" aria-label="Palette the elements are shown in"></select></label>
+  <label>Your card <input type="number" id="num" min="1" step="1" aria-label="Your genesis number"></label>
+  <nav class="links" aria-label="Pages"><a href="card.html" id="toCard">Your card</a><a href="engine-demo.html">Engine demo</a></nav>
+</header>
+<main>
+  <aside class="rail" aria-label="Filters">
+    <div><h2>World</h2><ul id="layersWorld"></ul></div>
+    <div><h2>Interface</h2><ul id="layersUi"></ul></div>
+    <div><h2>Rarity</h2><div class="tiers" id="tiers"></div></div>
+    <div><h2>Order</h2><select id="sort" aria-label="Order">
+      <option value="rare">Rarest first</option><option value="cheap">Price, low to high</option><option value="dear">Price, high to low</option><option value="name">Name</option>
+    </select></div>
+  </aside>
+  <section class="shelf" aria-label="Elements">
+    <header><span id="count"></span><span id="shown"></span></header>
+    <div class="grid" id="grid" role="listbox" aria-label="Elements"></div>
+  </section>
+  <aside class="detail" aria-label="The picked element">
+    <div class="views" role="group" aria-label="See it">
+      <button type="button" data-view="alone" aria-pressed="true">Alone</button>
+      <button type="button" data-view="card" aria-pressed="false">On your card</button>
+      <button type="button" data-view="site" aria-pressed="false">In a site</button>
+    </div>
+    <div class="view" id="view"></div>
+    <div class="facts" id="facts"></div>
+    <div class="acts"><button type="button" id="try" class="is-main">Try on</button><button type="button" id="untry">Take off</button></div>
+    <div class="loadout" aria-label="Your loadout">
+      <h3><span>Your loadout</span><span id="loadCount"></span></h3>
+      <ul id="loadList"></ul>
+      <p class="empty" id="loadEmpty">Try on elements to build a loadout. Your card keeps the mix it was born with.</p>
+      <div class="total"><span>Total</span><b id="total">0 FXN</b></div>
+      <p class="why" id="why"></p>
+      <div class="acts"><a id="wear" class="is-main" href="#">Wear on card</a><a id="enter" href="#">Enter a site</a></div>
+    </div>
+  </aside>
+</main>
+<p class="note"><b>Sample data.</b> Prices follow the proposed rule: an element costs its odds times 1 FXN. Nothing is sold or charged, and nothing on this page is live.</p>
+
+<script src="../mark-data.js"></script>
+<script src="../vendor/three-r180-defxn.js"></script>
+<script src="layers-bundle.js"></script>
+<script src="cards-data.js"></script>
+<script src="traits.js"></script>
+<script src="art3d.js"></script>
+<script src="builders-bundle.js"></script>
+<script src="card.js"></script>
+<script src="card-record.js"></script>
+<script src="world.js"></script>
+<script src="thumbs.js"></script>
+<script>
+(function () {
+  var T = window.DEFXN_TRAITS, W = window.DefxnWorld, TH = window.DefxnThumbs, C = window.DefxnCard;
+  var FIELDS = ['genesisId', 'identity', 'name', 'status', 'role', 'network', 'joined', 'serial'];
+  var WORLD = ['backdrop', 'palette', 'aura', 'mark', 'signal', 'particles'], UI = ['corner', 'frame', 'tag', 'ornament', 'divider', 'emblem'];
+  var TIER_C = ['var(--t0)', 'var(--t1)', 'var(--t2)', 'var(--t3)'];
+  var q = new URLSearchParams(location.search);
+  var state = { layer: q.get('layer') || '', tiers: (q.get('tier') || '').split(',').filter(Boolean).map(Number), q: q.get('q') || '', sort: q.get('sort') || 'rare',
+    item: q.get('item') || '', view: 'alone', pal: q.get('pal') || '', skin: T.skinOf({ skin: q.get('skin') || '' }) };
+  var ALL = [];
+  T.LAYERS.forEach(function (l) { l.elements.forEach(function (e) { ALL.push(e); }); });
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function layerOf(e) { return T.LAYERS.filter(function (l) { return l.key === e.layer; })[0]; }
+  function idOf(e) { return e.layer + '/' + e.name; }
+  function find(id) { return ALL.filter(function (e) { return idOf(e) === id; })[0] || null; }
+
+  /* ---------- your card ---------- */
+  function cardRecord() {
+    if (FIELDS.some(function (f) { return q.has(f) && f !== 'genesisId'; })) {
+      var r = {}; FIELDS.forEach(function (f) { r[f] = q.get(f) || ''; });
+      r.tagline = q.has('tagline') ? q.get('tagline').split('|') : (window.DEFXN_CARDS[0] || {}).tagline;
+      return r;
+    }
+    return T.sampleRecord(T.numberOf(q.get('genesisId')) || 263);
+  }
+  var record = cardRecord(), born = T.pick(record);
+  document.getElementById('num').value = born.number || '';
+  function worn() { return T.pick(Object.assign({}, record, { skin: T.skinText(state.skin) })); }
+
+  /* ---------- the palette the elements are shown in ---------- */
+  var pals = T.LAYERS.filter(function (l) { return l.key === 'palette'; })[0].elements, palSel = document.getElementById('pal');
+  var mine = el('option', null, 'Your card’s (' + born.picks.palette.name + ')'); mine.value = ''; palSel.appendChild(mine);
+  pals.forEach(function (p) { var o = el('option', null, p.name); o.value = p.name; palSel.appendChild(o); });
+  palSel.value = state.pal;
+  function palette() { var w = worn().picks.palette; return state.pal ? pals.filter(function (p) { return p.name === state.pal; })[0] || w : w; }
+
+  /* ---------- the address keeps the state ---------- */
+  function save() {
+    var o = new URLSearchParams();
+    if (state.layer) o.set('layer', state.layer);
+    if (state.tiers.length) o.set('tier', state.tiers.join(','));
+    if (state.q) o.set('q', state.q);
+    if (state.sort !== 'rare') o.set('sort', state.sort);
+    if (state.item) o.set('item', state.item);
+    if (state.pal) o.set('pal', state.pal);
+    if (q.has('identity')) { FIELDS.forEach(function (f) { if (record[f]) o.set(f, record[f]); }); }
+    else if (born.number) o.set('genesisId', born.number);
+    var sk = T.skinText(state.skin); if (sk) o.set('skin', sk);
+    history.replaceState(null, '', 'shop.html?' + o.toString());
+  }
+
+  /* ---------- the rail ---------- */
+  function layerButton(key, label, count) {
+    var li = el('li'), b = el('button'); b.type = 'button';
+    b.appendChild(el('span', null, label)); b.appendChild(el('small', null, String(count)));
+    b.setAttribute('aria-pressed', String(state.layer === key));
+    b.addEventListener('click', function () { state.layer = state.layer === key && key ? '' : key; drawRail(); drawGrid(); save(); });
+    li.appendChild(b); return li;
+  }
+  function drawRail() {
+    var w = document.getElementById('layersWorld'), u = document.getElementById('layersUi');
+    w.textContent = ''; u.textContent = '';
+    w.appendChild(layerButton('', 'All', ALL.length));
+    T.LAYERS.forEach(function (l) { (WORLD.indexOf(l.key) >= 0 ? w : u).appendChild(layerButton(l.key, l.name, l.elements.length)); });
+    var t = document.getElementById('tiers'); t.textContent = '';
+    T.TIERS.forEach(function (name, i) {
+      var b = el('button', null, name); b.type = 'button'; b.style.setProperty('--tc', TIER_C[i]);
+      b.setAttribute('aria-pressed', String(state.tiers.indexOf(i) >= 0));
+      b.addEventListener('click', function () { var k = state.tiers.indexOf(i); if (k >= 0) state.tiers.splice(k, 1); else state.tiers.push(i); drawRail(); drawGrid(); save(); });
+      t.appendChild(b);
+    });
+    document.getElementById('sort').value = state.sort;
+  }
+
+  /* ---------- the grid ---------- */
+  function list() {
+    var s = state.q.trim().toLowerCase();
+    var out = ALL.filter(function (e) {
+      return !e.held && (!state.layer || e.layer === state.layer) && (!state.tiers.length || state.tiers.indexOf(e.tier) >= 0) &&
+        (!s || e.name.toLowerCase().indexOf(s) >= 0 || layerOf(e).name.toLowerCase().indexOf(s) >= 0);
+    });
+    var by = { rare: function (a, b) { return a.share - b.share; }, cheap: function (a, b) { return T.price(a) - T.price(b); },
+      dear: function (a, b) { return T.price(b) - T.price(a); }, name: function (a, b) { return a.name.localeCompare(b.name); } }[state.sort];
+    return out.sort(function (a, b) { return by(a, b) || a.name.localeCompare(b.name); });
+  }
+  var grid = document.getElementById('grid'), tiles = {};
+  function flagOf(e) {
+    var t = worn(), i = T.LAYERS.indexOf(layerOf(e));
+    if (T.elementsOf(t.genesis)[i] === e) return ['Yours', ''];
+    if (t.picks[e.layer] === e) return ['Trying', 'is-try'];
+    return null;
+  }
+  function drawGrid() {
+    var items = list(), pal = palette();
+    grid.textContent = ''; tiles = {};
+    document.getElementById('count').innerHTML = '<b>' + items.length + '</b> of ' + ALL.length + ' elements';
+    document.getElementById('shown').textContent = 'Shown in ' + pal.name;
+    items.forEach(function (e) {
+      var b = el('button', 'item'); b.type = 'button'; b.setAttribute('role', 'option');
+      b.style.setProperty('--tc', TIER_C[e.tier]);
+      b.setAttribute('aria-selected', String(idOf(e) === state.item));
+      b.appendChild(TH.thumb(e, { palette: pal, record: record }));
+      var m = el('div', 'meta');
+      m.appendChild(el('b', null, e.name)); m.appendChild(el('span', 'price', T.price(e) + ' FXN'));
+      m.appendChild(el('span', 'tier', T.TIERS[e.tier])); m.appendChild(el('span', 'layer', layerOf(e).name));
+      b.appendChild(m);
+      var f = flagOf(e); if (f) b.appendChild(el('span', 'flag ' + f[1], f[0]));
+      b.addEventListener('click', function () { pick(e); });
+      grid.appendChild(b); tiles[idOf(e)] = b;
+    });
+    if (!state.item && items.length) pick(items[0], true);
+  }
+
+  /* ---------- the detail ---------- */
+  var view = document.getElementById('view'), facts = document.getElementById('facts'), stop = function () {};
+  function pick(e, quiet) {
+    if (tiles[state.item]) tiles[state.item].setAttribute('aria-selected', 'false');
+    state.item = idOf(e);
+    if (tiles[state.item]) tiles[state.item].setAttribute('aria-selected', 'true');
+    drawDetail(); if (!quiet) save();
+  }
+  function drawDetail() {
+    var e = find(state.item);
+    if (!e) return;
+    var l = layerOf(e), t = worn(), i = T.LAYERS.indexOf(l), bornWith = T.elementsOf(t.genesis)[i] === e, wearing = t.picks[e.layer] === e;
+    stop(); stop = function () {};
+    view.className = 'view is-' + state.view; view.textContent = '';
+    if (state.view === 'alone') { var st = el('div'); view.appendChild(st); stop = TH.stage(st, e, { palette: palette(), record: record }); }
+    else if (state.view === 'card') {
+      var box = el('div'), sk = Object.assign({}, state.skin); sk[e.layer] = bornWith ? '' : e.name;
+      view.appendChild(box); C.render(box, Object.assign({}, record, { skin: T.skinText(sk) }));
+    } else view.appendChild(W.sample(e.layer, e, Object.assign({}, record, { skin: T.skinText(Object.assign({}, state.skin, { palette: state.pal || '' })) })));
+    facts.textContent = '';
+    facts.style.setProperty('--tc', TIER_C[e.tier]);
+    facts.appendChild(el('h2', null, e.name));
+    var row = el('div', 'row');
+    row.appendChild(el('span', 'tier', T.TIERS[e.tier]));
+    row.appendChild(el('span', null, l.name));
+    row.appendChild(el('span', null, 'in ' + (Math.round(e.share * 10) / 10) + '% of cards'));
+    row.appendChild(el('span', null, bornWith ? 'Yours: born with it' : T.price(e) + ' FXN'));
+    facts.appendChild(row);
+    facts.appendChild(el('span', 'shapes', 'In a site: ' + (W.SHAPES[e.layer] || '')));
+    var tryB = document.getElementById('try'), off = document.getElementById('untry');
+    tryB.disabled = bornWith || wearing; tryB.textContent = bornWith ? 'Born with it' : wearing ? 'Trying on' : 'Try on';
+    off.disabled = !wearing || bornWith;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function (b) {
+    b.addEventListener('click', function () {
+      state.view = b.getAttribute('data-view');
+      Array.prototype.forEach.call(document.querySelectorAll('[data-view]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      drawDetail();
+    });
+  });
+
+  /* ---------- the loadout ---------- */
+  function cardQuery(skinText) {
+    var o = new URLSearchParams();
+    FIELDS.forEach(function (f) { if (record[f]) o.set(f, record[f]); });
+    if (record.tagline) o.set('tagline', record.tagline.join('|'));
+    if (skinText) o.set('skin', skinText);
+    return o.toString();
+  }
+  function drawLoadout() {
+    var t = worn(), c = T.skinCost(t.genesis, t.dna), ul = document.getElementById('loadList');
+    ul.textContent = '';
+    c.lines.forEach(function (line) {
+      var li = el('li'), x = el('button', null, '×'); x.type = 'button'; x.setAttribute('aria-label', 'Take off ' + line.to.name);
+      x.addEventListener('click', function () { delete state.skin[line.layer.key]; changed(); });
+      li.appendChild(el('span', null, line.layer.name)); li.appendChild(el('b', null, line.to.name));
+      li.appendChild(el('span', null, line.fxn + ' FXN')); li.appendChild(x);
+      ul.appendChild(li);
+    });
+    document.getElementById('loadEmpty').hidden = c.lines.length > 0;
+    document.getElementById('loadCount').textContent = c.lines.length ? c.lines.length + ' of 12 layers' : '';
+    document.getElementById('total').textContent = c.total.toLocaleString('en-US') + ' FXN';
+    var why = document.getElementById('why'), wear = document.getElementById('wear'), enter = document.getElementById('enter');
+    var rv = t.review || { ok: true, held: [], clashes: [] };
+    if (t.takenBy) { why.className = 'why is-refused'; why.textContent = 'Genesis ' + t.takenBy + ' was born with this mix, so no card can wear it. Change one more layer.'; }
+    else if (!rv.ok) {
+      why.className = 'why is-refused';
+      why.textContent = rv.clashes.length ? rv.clashes[0][0].name + ' and ' + rv.clashes[0][1].name + ' clash, so no card wears them together. Take one off.'
+        : rv.held[0].name + ' is held back from cards for now. Take it off.';
+    }
+    else { why.className = 'why'; why.textContent = c.lines.length ? 'No card was born with this mix, so your card can wear it.' : ''; }
+    var sk = T.skinText(state.skin), ok = c.lines.length && !t.takenBy && rv.ok;
+    wear.href = ok ? 'card.html?' + cardQuery(sk) : '#'; wear.setAttribute('aria-disabled', String(!ok)); wear.style.opacity = ok ? '' : '.4';
+    enter.href = 'engine-demo.html?' + cardQuery(ok ? sk : '');
+    document.getElementById('toCard').href = 'card.html?' + cardQuery(ok ? sk : '');
+  }
+  function changed() {
+    // only flags and the detail change: the tiles' drawings stay
+    Object.keys(tiles).forEach(function (id) {
+      var b = tiles[id], e = find(id), old = b.querySelector('.flag'), f = flagOf(e);
+      if (old) old.remove();
+      if (f) b.appendChild(el('span', 'flag ' + f[1], f[0]));
+    });
+    drawDetail(); drawLoadout(); save();
+  }
+  document.getElementById('try').addEventListener('click', function () { var e = find(state.item); if (!e) return; state.skin[e.layer] = e.name; changed(); });
+  document.getElementById('untry').addEventListener('click', function () { var e = find(state.item); if (!e) return; delete state.skin[e.layer]; changed(); });
+  document.getElementById('wear').addEventListener('click', function (ev) { if (this.getAttribute('aria-disabled') === 'true') ev.preventDefault(); });
+
+  /* ---------- filters ---------- */
+  var qi = document.getElementById('q'), timer = 0;
+  qi.value = state.q;
+  qi.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(function () { state.q = qi.value; drawGrid(); save(); }, 160); });
+  document.getElementById('sort').addEventListener('change', function () { state.sort = this.value; drawGrid(); save(); });
+  palSel.addEventListener('change', function () { state.pal = palSel.value; drawGrid(); drawDetail(); save(); });
+  document.getElementById('num').addEventListener('change', function () {
+    var n = T.numberOf(this.value); if (!n) return;
+    q = new URLSearchParams(); record = T.sampleRecord(n); born = T.pick(record); state.skin = {};
+    mine.textContent = 'Your card’s (' + born.picks.palette.name + ')';
+    drawGrid(); drawDetail(); drawLoadout(); save();
+  });
+
+  drawRail(); drawGrid(); drawDetail(); drawLoadout();
+})();
+</script>
+</body>
+</html>

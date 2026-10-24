@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Origami Sigil: a solid dog-eared sheet: its top corner folded down, the flap in the accent (sheet 26, the Origami set: folded paper: creases, a dog-eared flap and accordion pleats, the underside of a fold in the accent)</title>
+  <path d="M3.5 4.5L17 4.5L26.5 14L26.5 29.5L3.5 29.5Z" fill="var(--ink)"/>
+  <path d="M17 4.5L17 14L26.5 14Z" fill="var(--acc)"/>
+</svg>

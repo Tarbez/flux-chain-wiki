@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Chamfer Lines: a corner made only of three short parallel strokes across the bend, bright accent nearest the corner, fading inward (sheet 22)</title>
+  <path d="M0.9 12.1L12.1 0.9" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="square"/>
+  <path d="M7.4 18.6L18.6 7.4" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="square" opacity="0.55"/>
+  <path d="M13.9 25.1L25.1 13.9" fill="none" stroke="var(--acc)" stroke-width="2.6" stroke-linecap="square" opacity="0.25"/>
+</svg>

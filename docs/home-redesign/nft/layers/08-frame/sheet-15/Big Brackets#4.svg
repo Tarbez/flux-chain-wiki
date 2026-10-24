@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Big Brackets: large square L brackets at the four corners, with no edges between them (sheet 15, 21)</title>
+  <g><path d="M16 114V16H114" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/></g><g transform="matrix(-1 0 0 1 1000 0)"><path d="M16 114V16H114" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/></g><g transform="matrix(1 0 0 -1 0 700)"><path d="M16 114V16H114" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/></g><g transform="matrix(-1 0 0 -1 1000 700)"><path d="M16 114V16H114" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--dim)"/></g>
+</svg>

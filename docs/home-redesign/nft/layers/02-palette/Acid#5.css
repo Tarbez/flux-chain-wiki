@@ -1,0 +1,6 @@
+/* Acid: yellow green. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 72 80% 80%;
+  --b: 84 90% 55%;
+  --c: 60 90% 56%;
+}

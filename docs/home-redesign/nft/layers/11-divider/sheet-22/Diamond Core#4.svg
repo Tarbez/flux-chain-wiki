@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Diamond Core: a rule broken at its centre by a large outlined diamond with an accent diamond core, a small grey diamond on each side (sheet 22)</title>
+  <path d="M0 12H151" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M209 12H360" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M180 1.5L195 12L180 22.5L165 12Z" fill="var(--faint)" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M180 6.8L187.4 12L180 17.2L172.6 12Z" fill="var(--acc)"/>
+  <path d="M155.5 9.2L158.3 12L155.5 14.8L152.7 12ZM204.5 9.2L207.3 12L204.5 14.8L201.7 12Z" fill="var(--dim)"/>
+</svg>

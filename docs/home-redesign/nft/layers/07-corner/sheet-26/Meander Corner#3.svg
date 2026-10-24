@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Meander Corner: a plain L whose arms end in small key hooks, a square key spiral in the accent in its bend (sheet 26, the Meander set: the Greek key: square key hooks drawn in 1 px lines, one key in the accent)</title>
+  <path d="M93 6.5V12H100V0.5H0.5V100H12V93H6.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+  <path d="M5.5 24V5.5H19V15H10.5V10.5H14.5" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>
+</svg>

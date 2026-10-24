@@ -1,0 +1,50 @@
+/* DEFXN mockup: one chain of the network (ring-view.js), and the kind labels on home.
+   Loaded after the page styles. Sizes follow the page's scale --s where it is set (1 by default). */
+
+/* the scene steps back behind this page as it does behind the other pages */
+body[data-view="ring"] .scrim .page{opacity:1}
+
+/* the page: the logo's slot beside the headline. It stays empty until the owner gives a logo. */
+.ring-head{display:flex;align-items:center;gap:calc(16px * var(--s, 1));margin-top:calc(10px * var(--s, 1))}
+.ring-head .two{margin:0}
+.logo-slot{flex:none;width:calc(60px * var(--s, 1));height:calc(60px * var(--s, 1));border-radius:calc(14px * var(--s, 1));
+  display:grid;place-items:center;border:1.5px dashed hsl(var(--text-faint));background:hsl(var(--canvas) / .35)}
+.logo-slot span{font:500 calc(9px * var(--s, 1))/1 var(--font-mono);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--text-faint))}
+.logo-slot img{width:78%;height:78%;object-fit:contain}
+[data-view="ring"] .aside{margin-top:calc(14px * var(--s, 1))}
+[data-view="ring"] .chips{margin-top:calc(14px * var(--s, 1))}
+[data-view="ring"] .sheet-foot{margin-top:auto}
+
+/* home: a kind label can carry a second, quieter line (the named networks) */
+.callout span small{display:block;margin-top:2px;font-size:9px;letter-spacing:.16em;color:hsl(var(--text-muted))}
+.callout[data-kind="resolver"] i{border-color:hsl(var(--chain-resolver))}
+.callout[data-kind="resolver"] i::after{background:hsl(var(--chain-resolver))}
+.callout[data-kind="pool"] i{border-color:hsl(var(--chain-pool))}
+.callout[data-kind="pool"] i::after{background:hsl(var(--chain-pool))}
+.callout[data-kind="token"] i{border-color:hsl(var(--chain-token))}
+.callout[data-kind="token"] i::after{background:hsl(var(--chain-token))}
+
+/* (audit 4) where a kind is used: the brief's product groups, as quiet links on their own line */
+[data-view="ring"] .uses{display:block;margin-top:6px}
+[data-view="ring"] .uses a{color:hsl(var(--text-strong));border-bottom:1px solid hsl(var(--text-faint))}
+[data-view="ring"] .uses a:hover{color:hsl(var(--reference));border-color:hsl(var(--reference))}
+
+/* (audit 4, fixes 31 and 33) home's kind labels are a legend you can use: hover lights the kind,
+   a click opens it. Only a shown label takes the pointer. */
+.callout.seen{pointer-events:auto;cursor:pointer}
+.callout.seen:hover span{color:hsl(var(--reference))}
+.callout.seen:hover i{border-color:hsl(var(--reference))}
+
+/* (audit 4) the rings of one kind, one after another; and the chips in two groups */
+.view[data-view="ring"] .chips{display:grid;gap:8px}
+.view[data-view="ring"] .peers{display:flex;align-items:center;gap:10px}
+.view[data-view="ring"] .peers a{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px hsl(var(--border));color:hsl(var(--text-strong));padding:0}
+.view[data-view="ring"] .peers a:hover{box-shadow:inset 0 0 0 1px hsl(var(--reference));color:hsl(var(--reference))}
+.view[data-view="ring"] .peers .mono{font-size:10px;letter-spacing:.14em;color:hsl(var(--text-muted))}
+.view[data-view="ring"] .grp{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.view[data-view="ring"] .grp b{width:76px;font-size:9.5px;font-weight:500;letter-spacing:.14em;color:hsl(var(--text-muted))}
+/* the labels sit above the page layer so they can take the pointer; the layer itself lets it through */
+.callouts{z-index:2}
+
+/* the one line from the brief that governs this kind (fixes 282, 286) */
+.ring-rv .rule-line,.rule-line{font-weight:500;color:hsl(var(--text-strong))}

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Dot Tab: a frame with a rounded top-left corner and white plus marks on its other three corner points, a small raised trapezoid tab at the top centre holding a row of accent dots, and three accent dots in a gap at the bottom centre (sheet 13, 29)</title>
+  <path d="M18 675V34A16 16 0 0 1 34 18H430L440 11H560L570 18H975M982 25V675M975 682H522M478 682H25" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M975 18H989M982 11V25" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M11 682H25M18 675V689" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M975 682H989M982 675V689" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="476" cy="14.6" r="1.5" fill="var(--acc)"/>
+  <circle cx="488" cy="14.6" r="1.5" fill="var(--acc)"/>
+  <circle cx="500" cy="14.6" r="1.5" fill="var(--acc)"/>
+  <circle cx="512" cy="14.6" r="1.5" fill="var(--acc)"/>
+  <circle cx="524" cy="14.6" r="1.5" fill="var(--acc)"/>
+  <circle cx="488" cy="682" r="1.7" fill="var(--acc)"/>
+  <circle cx="500" cy="682" r="1.7" fill="var(--acc)"/>
+  <circle cx="512" cy="682" r="1.7" fill="var(--acc)"/>
+</svg>

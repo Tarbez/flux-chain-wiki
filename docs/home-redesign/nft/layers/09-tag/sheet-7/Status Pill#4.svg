@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Status Pill: the status beside a filled dot in a rounded outline (sheet 7, item 09)</title>
+  <rect x="0.5" y="10.5" width="107.8" height="24" rx="12" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="16" cy="22.5" r="3.5" fill="var(--state)"/>
+  <text x="30" y="26.9" font-family="JetBrains Mono, monospace" font-size="12" font-weight="500" letter-spacing="2.4" fill="var(--ink)" data-field="status">STATUS</text>
+</svg>

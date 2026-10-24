@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Truss Frame: the card edge and an inner rail, a girder web between them at the top and bottom centre with an accent pin at its middle, and a knee brace in each corner (sheet 26, the Truss set: a girder: two rails with a zigzag web between them, round pins at the joints, one pin in the accent)</title>
+  <rect x="0.5" y="0.5" width="999" height="699" rx="30" fill="none" stroke="var(--line)" stroke-opacity="0.85" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="16.5" y="16.5" width="967" height="667" rx="16" fill="none" stroke="var(--line)" stroke-opacity="0.55" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M388 16.5L404 0.5L420 16.5L436 0.5L452 16.5L468 0.5L484 16.5L500 0.5L516 16.5L532 0.5L548 16.5L564 0.5L580 16.5L596 0.5L612 16.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.7"/>
+  <path d="M388 16.5V0.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M612 16.5V0.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M388 683.5L404 699.5L420 683.5L436 699.5L452 683.5L468 699.5L484 683.5L500 699.5L516 683.5L532 699.5L548 683.5L564 699.5L580 683.5L596 699.5L612 683.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.7"/>
+  <path d="M388 683.5V699.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M612 683.5V699.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M9.14 9.14L20.69 20.69" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M990.86 9.14L979.31 20.69" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M9.14 690.86L20.69 679.31" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M990.86 690.86L979.31 679.31" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="500" cy="16.5" r="2.6" fill="var(--acc)"/>
+  <circle cx="500" cy="683.5" r="2.6" fill="var(--acc)"/>
+  <circle cx="388" cy="16.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="612" cy="16.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="388" cy="683.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="612" cy="683.5" r="1.7" fill="var(--dim)"/>
+</svg>

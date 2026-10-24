@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Fork Rule: a single rule that splits at an accent node into three parallel lines, each ending in a dot, the middle one in the accent (sheet 22)</title>
+  <path d="M0 12H206" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="209" cy="12" r="2.4" fill="var(--acc)"/>
+  <path d="M211.5 11L223 4.5M211.5 13L223 19.5M211.5 12H223" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M223 4.5H350" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M223 12H350" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M223 19.5H350" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M352.7 4.5a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0ZM352.7 19.5a1.8 1.8 0 1 0 3.6 0a1.8 1.8 0 1 0 -3.6 0Z" fill="var(--dim)"/>
+  <circle cx="354.5" cy="12" r="1.8" fill="var(--acc)"/>
+</svg>

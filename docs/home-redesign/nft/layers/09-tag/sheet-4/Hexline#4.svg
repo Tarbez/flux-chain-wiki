@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Hexline: a hexagon, the network spaced wide, a long line under it ending in three cyan dots (sheet-4, 06)</title>
+  <path d="M10 9.5 L18.23 14.25 L18.23 23.75 L10 28.5 L1.77 23.75 L1.77 14.25 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="30" y="24" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="6.5" fill="var(--ink)" data-field="network">DEFXN</text>
+  <path d="M30 37H328" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="337" cy="37" r="1.6" fill="var(--acc)"/><circle cx="344" cy="37" r="1.6" fill="var(--acc)"/><circle cx="351" cy="37" r="1.6" fill="var(--acc)"/>
+</svg>

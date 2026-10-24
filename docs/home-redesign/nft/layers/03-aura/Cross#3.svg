@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="cross">
+  <title>Cross</title>
+  <rect width="1000" height="700" fill="#050606" data-sketch=""/>
+  <g data-sketch=""><line x1="440" y1="80" x2="920" y2="640" stroke="#fff" stroke-width="8"/><line x1="920" y1="80" x2="440" y2="640" stroke="#fff" stroke-width="8"/></g>
+</svg>

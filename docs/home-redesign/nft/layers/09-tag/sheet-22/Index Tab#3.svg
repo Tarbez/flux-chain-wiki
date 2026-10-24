@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Index Tab: a folder index tab: a small raised tab says ROLE, the body under it holds the role, an accent square at its end (sheet 22)</title>
+  <path d="M0.5 44.5V10.5Q0.5 7.5 3.5 7.5H46L54 18.5H170.5Q173.5 18.5 173.5 21.5V44.5Z" fill="var(--faint)" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
+  <path d="M4 7.5H42" fill="none" stroke="var(--acc)" stroke-width="2"/>
+  <text x="9" y="16.4" font-family="JetBrains Mono, monospace" font-size="8" letter-spacing="2" fill="var(--dim)">ROLE</text>
+  <text x="12" y="36.6" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.2" font-weight="500" fill="var(--ink)" data-field="role">ROLE</text>
+  <rect x="160" y="26.5" width="5" height="5" fill="var(--acc)"/>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Truss Strip: a bridge girder: two rails, a zigzag web, a pin at every joint and the middle pin in the accent (sheet 26, the Truss set: a girder: two rails with a zigzag web between them, round pins at the joints, one pin in the accent)</title>
+  <path d="M4 26.5H356" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4 53.5H356" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4 26.5V53.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M356 26.5V53.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4 53.5L26 26.5L48 53.5L70 26.5L92 53.5L114 26.5L136 53.5L158 26.5L180 53.5L202 26.5L224 53.5L246 26.5L268 53.5L290 26.5L312 53.5L334 26.5L356 53.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.7"/>
+  <circle cx="4" cy="53.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="26" cy="26.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="48" cy="53.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="70" cy="26.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="92" cy="53.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="114" cy="26.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="136" cy="53.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="158" cy="26.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="180" cy="53.5" r="2.6" fill="var(--acc)"/>
+  <circle cx="202" cy="26.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="224" cy="53.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="246" cy="26.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="268" cy="53.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="290" cy="26.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="312" cy="53.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="334" cy="26.5" r="1.7" fill="var(--dim)"/>
+  <circle cx="356" cy="53.5" r="1.7" fill="var(--dim)"/>
+</svg>

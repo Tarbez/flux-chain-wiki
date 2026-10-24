@@ -1,0 +1,6 @@
+/* Frost: ice blue. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 192 72% 88%;
+  --b: 192 92% 66%;
+  --c: 205 70% 66%;
+}

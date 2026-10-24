@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Origami Strip: an accordion-folded paper strip, its panels sloping up and down in turn, the middle pleat in the accent (sheet 26, the Origami set: folded paper: creases, a dog-eared flap and accordion pleats, the underside of a fold in the accent)</title>
+  <path d="M0.5 26L30.42 34V54L0.5 46Z" fill="var(--faint)"/>
+  <path d="M30.42 34L60.33 26V46L30.42 54Z" fill="var(--rule)"/>
+  <path d="M60.33 26L90.25 34V54L60.33 46Z" fill="var(--faint)"/>
+  <path d="M90.25 34L120.17 26V46L90.25 54Z" fill="var(--rule)"/>
+  <path d="M120.17 26L150.08 34V54L120.17 46Z" fill="var(--faint)"/>
+  <path d="M150.08 34L180 26V46L150.08 54Z" fill="var(--rule)"/>
+  <path d="M180 26L209.92 34V54L180 46Z" fill="var(--acc)" fill-opacity="0.4"/>
+  <path d="M209.92 34L239.83 26V46L209.92 54Z" fill="var(--rule)"/>
+  <path d="M239.83 26L269.75 34V54L239.83 46Z" fill="var(--faint)"/>
+  <path d="M269.75 34L299.67 26V46L269.75 54Z" fill="var(--rule)"/>
+  <path d="M299.67 26L329.58 34V54L299.67 46Z" fill="var(--faint)"/>
+  <path d="M329.58 34L359.5 26V46L329.58 54Z" fill="var(--rule)"/>
+  <path d="M0.5 26L30.42 34L60.33 26L90.25 34L120.17 26L150.08 34L180 26L209.92 34L239.83 26L269.75 34L299.67 26L329.58 34L359.5 26" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M0.5 46L30.42 54L60.33 46L90.25 54L120.17 46L150.08 54L180 46L209.92 54L239.83 46L269.75 54L299.67 46L329.58 54L359.5 46" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M0.5 26V46M30.42 34V54M60.33 26V46M90.25 34V54M120.17 26V46M150.08 34V54M180 26V46M209.92 34V54M239.83 26V46M269.75 34V54M299.67 26V46M329.58 34V54M359.5 26V46" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.7"/>
+</svg>

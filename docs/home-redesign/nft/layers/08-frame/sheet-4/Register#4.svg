@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Register: L brackets with a cyan tick inside, and a plus at the middle of each edge (sheet-4, 01)</title>
+  <path d="M14 60V14H60" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M21 32V21H32" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <g transform="matrix(-1 0 0 1 1000 0)"><path d="M14 60V14H60" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M21 32V21H32" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+  <g transform="matrix(1 0 0 -1 0 700)"><path d="M14 60V14H60" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M21 32V21H32" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+  <g transform="matrix(-1 0 0 -1 1000 700)"><path d="M14 60V14H60" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M21 32V21H32" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+  <path d="M493 18H507M500 11V25" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M493 682H507M500 675V689" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M11 350H25M18 343V357" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M975 350H989M982 343V357" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

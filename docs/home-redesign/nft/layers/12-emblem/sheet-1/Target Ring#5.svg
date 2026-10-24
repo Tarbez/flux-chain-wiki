@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Target Ring: two concentric circles, axis lines with tick nodes, an accent square at the centre (reference sheet 1, #30)</title>
+  <circle cx="15" cy="17" r="12.5" fill="none" stroke="var(--dim)" stroke-width="1.1"/>
+  <circle cx="15" cy="17" r="6.5" fill="none" stroke="var(--dim)" stroke-width="1"/>
+  <path d="M0.5 17H29.5M15 1V33" fill="none" stroke="var(--line)" stroke-width="0.8"/>
+  <rect x="0.4" y="16" width="2" height="2" fill="var(--dim)"/><rect x="27.6" y="16" width="2" height="2" fill="var(--dim)"/>
+  <rect x="14" y="1" width="2" height="2" fill="var(--dim)"/><rect x="14" y="31" width="2" height="2" fill="var(--dim)"/>
+  <rect x="13.2" y="15.2" width="3.6" height="3.6" fill="var(--acc)"/>
+</svg>

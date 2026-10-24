@@ -1,0 +1,195 @@
+/* DEFXN mockup kit: what every mockup page shares (home, chain, record, open record).
+   One home for the brand tokens, the header, the footer, the scene layer, the one main
+   action (.cta) and the quiet links (.more), so the pages cannot drift apart (rule R07:
+   every page belongs to the same system as Home). The tokens move into the SDK theme
+   (@deadark/sdk/theme) as they are; the owner confirms them before the build. */
+
+/* Brand (to the SDK theme). Three font slots: display, sans, mono. */
+:root{
+  --s:1;                       /* the page scale: 1 up to 1440x900, set by kit-ui.js above it */
+  --canvas:150 24% 5%;
+  --surface:150 20% 7%;
+  --raised:150 16% 10%;
+  --border:150 12% 15%;
+  --text-strong:140 20% 96%;
+  --text:208 24% 80%;
+  --text-muted:200 12% 64%;
+  --text-faint:160 10% 32%;
+  --primary:83 87% 66%;        /* lime: the one main action */
+  --primary-ink:150 40% 5%;
+  --secondary:83 87% 66%;      /* the one main action (same lime in the screenshot) */
+  --secondary-ink:150 40% 5%;
+  --reference:83 87% 66%;      /* links, on hover and focus only */
+  /* Chain kinds in the scene, DEFXN's real model (brand brief 2026-10-23). Owner, 2026-10-23: "enrich
+     it through different colours": each kind has its own calm hue family, never neon. Colour still
+     means the kind; teal (--signal) stays for chosen and signed, lime for the one action. */
+  --chain-identity:210 18% 72%;  /* every identity's own ledger chain: silver blue */
+  --chain-network:168 40% 40%;   /* native network chains: the DEFXN teal family */
+  --chain-token:38 26% 46%;      /* every token's own history ledger: brass */
+  --chain-other:200 6% 34%;      /* the scene's base gray for links, posts and glyphs */
+  --chain-resolver:204 34% 48%;  /* every resolver's own chain: steel blue */
+  --chain-pool:282 20% 56%;      /* every pool's own chain, where it signs its swap results: mauve */
+  /* each network chain's own accent, so the three networks read apart; its ledger and the chains
+     inside it take that network's family */
+  --net-fxn:168 40% 40%;          /* FXN, the first chain (DEFXN is the kernel and has no family colour) */
+  --net-deark:24 42% 50%;        /* copper */
+  --net-cr3tv:340 28% 56%;       /* rose */
+  --chain-ledger:164 48% 44%;    /* a network's coin ledger (FXN, DARO, CR3), the ring at its centre */
+  --chain-defi:83 87% 66%;
+  --signal:166 62% 52%;        /* the DEFXN mark's glow and the visitor's chain */
+  /* the brief's four state labels (section 12): Built, Partial, Decided, Not built (audit 4) */
+  --state-built:166 62% 52%;
+  --state-partial:38 78% 62%;    /* honey: built in part, still under review */
+  --state-decided:212 62% 72%;   /* a quiet blue: an owner decision, mostly not in code */
+  --danger:6 56% 60%;            /* calm but unmistakable: what never happens (the server never holds your key) */
+  --ember:24 96% 56%;            /* the record descent (2026-10-24): a record block's edge and the proof line through the chain */
+  --chart-fleet:168 74% 50%;
+  --chart-swaps:83 87% 66%;
+  --chart-transfers:212 92% 64%;
+  --chart-records:262 82% 72%;
+  --record:38 22% 88%;         /* the record tile and the card it becomes (bone) */
+  --record-ink:150 30% 8%;
+  --font-display:"Inter Tight","Inter",system-ui,sans-serif;
+  --font-sans:"Inter",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,monospace;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0}
+/* nothing here scrolls sideways: a view that slides in from the side (the home rail) could leave
+   stale overflow behind it after a flight back home (audit 3, measured at 1024x768) */
+html,body{overflow-x:clip}
+body{background:hsl(var(--canvas));color:hsl(var(--text));font:400 16px/1.5 var(--font-sans);
+  display:flex;flex-direction:column;min-height:calc(100svh / var(--s));-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+svg{display:block}
+.mono{font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.24em}
+:focus-visible{outline:2px solid hsl(var(--reference));outline-offset:3px}
+
+/* Header */
+.top{position:relative;z-index:2;height:60px;flex:none;display:flex;align-items:center;gap:28px;padding:0 48px;border-bottom:1px solid hsl(var(--border) / .8);
+  background:hsl(var(--canvas) / .5);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1)}
+.brand{display:grid;gap:2px;margin-right:auto}
+.brand b{font:800 20px/1 var(--font-display);letter-spacing:.2em;color:hsl(var(--text-strong))}
+.brand small{font:500 9px/1 var(--font-mono);letter-spacing:.32em;color:hsl(var(--text-muted))}
+.nav{display:flex;align-items:center;gap:34px;font:500 14px/1 var(--font-sans);color:hsl(var(--text-strong))}
+.nav a{display:flex;align-items:center;gap:8px}
+.nav a:hover{color:hsl(var(--reference))}
+/* the page you are on: a short teal rule under its name (orientation, law 49) */
+.nav a{position:relative}
+.nav a::after{content:'';position:absolute;left:0;right:0;bottom:-10px;height:2px;background:hsl(var(--signal));transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.22,.7,.18,1)}
+.nav a[aria-current="page"]::after{transform:none}
+.rule-v{width:1px;height:34px;background:hsl(var(--border))}
+.account{display:flex;align-items:center;gap:12px;color:hsl(var(--text-strong));font:500 13px/1.2 var(--font-sans)}
+.account svg{width:26px;height:26px}
+.account small{display:block;font:400 10px/1.3 var(--font-mono);color:hsl(var(--text-muted))}
+.earn{display:flex;align-items:center;gap:10px;height:36px;padding:0 16px 0 18px;border:1.5px solid hsl(var(--text-faint));
+  color:hsl(var(--text-strong));font:500 14px/1 var(--font-sans);
+  clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,0 100%)}
+.earn:hover{border-color:hsl(var(--reference));color:hsl(var(--reference))}
+.menu{display:none;margin-left:auto;background:none;border:1px solid hsl(var(--border));color:hsl(var(--text-strong));
+  height:38px;padding:0 14px;font:500 12px/1 var(--font-mono);letter-spacing:.2em}
+
+/* The 3D layer: the whole screen, behind the page. */
+.scene{position:fixed;inset:0;z-index:0;pointer-events:none}
+.scene canvas{width:100%;height:100%;display:block}
+.scene::after{content:'';position:absolute;inset:0;pointer-events:none}
+body.no-scene .scene{display:none}
+body.no-scene .glass,body.no-scene .top,body.no-scene .foot{-webkit-backdrop-filter:none;backdrop-filter:none}
+body.picking{cursor:pointer}
+
+/* The one main action */
+.cta{display:flex;align-items:center;height:52px;background:hsl(var(--secondary));
+  color:hsl(var(--secondary-ink));font:600 18px/1 var(--font-sans);
+  clip-path:polygon(0 0,calc(100% - 15px) 0,100% 15px,100% 100%,0 100%)}
+.cta .who{width:66px;display:grid;place-items:center;border-right:1.5px solid hsl(var(--secondary-ink) / .35);height:30px}
+.cta .who svg{width:28px;height:28px}
+.cta .say{padding:0 24px 0 22px;display:flex;align-items:center;gap:44px;white-space:nowrap}
+.cta .say svg{width:22px;height:17px}
+.cta:hover{filter:brightness(1.08)}
+/* A smaller form of the same action, for pages whose action is not the identity */
+.cta.small{height:44px;font-size:15px;clip-path:polygon(0 0,calc(100% - 11px) 0,100% 11px,100% 100%,0 100%)}
+.cta.small .say{gap:18px;padding:0 20px}
+.cta.small .say svg{width:18px;height:14px}
+/* The same action shape as a second choice: outline, no fill, so the page keeps one filled action */
+.cta.quiet{background:transparent;color:hsl(var(--secondary));box-shadow:inset 0 0 0 1.5px hsl(var(--secondary) / .7)}
+.cta.quiet .who{border-right-color:hsl(var(--secondary) / .35)}
+.cta.quiet:hover{filter:none;background:hsl(var(--secondary) / .08)}
+
+/* Quiet links: light text on a faint rule, lime on hover (rule R03) */
+.more{align-self:flex-start;display:flex;align-items:center;gap:12px;color:hsl(var(--text-strong));
+  font-size:14px;padding-bottom:7px;border-bottom:1px solid hsl(var(--text-faint))}
+.more:hover{color:hsl(var(--reference));border-color:hsl(var(--reference))}
+
+/* Where am I: brand / chain, and the way back */
+.crumbs{display:grid;gap:10px;font-size:12px}
+.crumbs .path{color:hsl(var(--text-muted))}
+.crumbs .path b{color:hsl(var(--text-strong));font-weight:600;letter-spacing:.04em}
+.crumbs .back{display:flex;align-items:center;gap:8px;color:hsl(var(--text-strong))}
+.crumbs .back:hover{color:hsl(var(--reference))}
+.crumbs svg{width:14px;height:12px}
+
+/* The small network map: where this chain sits, and the way back to the network */
+.minimap{display:block;width:108px;height:90px;color:hsl(var(--text-faint))}
+.minimap:hover{color:hsl(var(--text-muted))}
+.minimap .yours{color:hsl(var(--signal))}
+
+/* Footer bar */
+.foot{position:relative;z-index:1;flex:none;height:52px;display:flex;align-items:center;gap:20px;padding:0 48px 0 36px;border-top:1px solid hsl(var(--border) / .8);
+  background:hsl(var(--canvas) / .6);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1)}
+.foot a{display:flex;align-items:center;gap:12px;color:hsl(var(--text-strong));font-size:13px;padding-bottom:4px;border-bottom:1px solid hsl(var(--text-muted))}
+.foot .mark{color:hsl(var(--signal))}
+.foot small{margin-left:auto;font:400 12px/1 var(--font-mono);color:hsl(var(--text))}
+
+/* Mockup-only control: not part of the design. */
+.mock{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:20;display:flex;gap:8px;align-items:center;padding:6px 8px 6px 12px;
+  background:hsl(var(--raised) / .92);border:1px dashed hsl(var(--text-faint));font:400 11px/1 var(--font-mono);color:hsl(var(--text-muted))}
+.mock button{font:inherit;color:hsl(var(--text-strong));background:none;border:1px solid hsl(var(--border));padding:5px 8px;cursor:pointer}
+.mock a{color:hsl(var(--text-strong));border-bottom:1px solid hsl(var(--text-faint))}
+
+/* Arrival: once, then still. */
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+@media (max-width:1240px){
+  .nav{gap:22px;font-size:13px}.top{padding:0 28px;gap:20px}
+  .cta{font-size:17px;height:50px}.cta .say{gap:32px}
+}
+@media (max-height:760px) and (min-width:901px){
+  .cta{height:48px;font-size:16px}.cta .who{height:26px}
+}
+@media (max-width:900px){
+  .nav,.top .rule-v,.account{display:none}
+  .menu{display:block}.brand{margin-right:0}.top{padding:0 18px;height:56px}
+  .earn{height:34px;font-size:13px;padding:0 14px 0 16px}
+  .foot{padding:0 18px;font-size:13px}.foot small{font-size:12px}
+  .mock{bottom:12px}
+}
+.minimap svg{width:100%;height:100%;overflow:visible}
+
+/* The menu sheet: tablet and phone only; it slides down from the header (audit 3, fix 10) */
+.menu-sheet{display:none}
+@media (max-width:900px){
+  .menu-sheet{display:grid;position:absolute;left:0;right:0;top:100%;padding:6px 18px 18px;background:hsl(var(--canvas) / .97);
+    border-bottom:1px solid hsl(var(--border));clip-path:inset(0 0 100% 0);transform:translateY(-10px);pointer-events:none;
+    transition:clip-path .45s cubic-bezier(.22,.7,.18,1),transform .45s cubic-bezier(.22,.7,.18,1)}
+  .menu-sheet a{display:flex;align-items:center;justify-content:space-between;min-height:48px;border-top:1px solid hsl(var(--border));
+    font:500 16px/1.2 var(--font-sans);color:hsl(var(--text-strong))}
+  .menu-sheet a:first-child{border-top:0}
+  .menu-sheet a[aria-current="page"]{color:hsl(var(--signal))}
+  .menu-sheet small{font:400 11px/1 var(--font-mono);color:hsl(var(--text-muted))}
+  body.menu-open .menu-sheet{clip-path:inset(0 0 -24px 0);transform:none;pointer-events:auto}
+  .menu[aria-expanded="true"]{border-color:hsl(var(--signal));color:hsl(var(--signal))}
+}
+@media (prefers-reduced-motion:reduce){.menu-sheet{transition:none}}
+
+/* The mockup pill: bottom right, beside the footer's own words; folded below 1100px (fix 12) */
+.mock{left:auto;right:150px;bottom:10px;transform:none;padding:4px 6px 4px 4px;border-radius:999px;max-width:calc(100vw / var(--s) - 140px);flex-wrap:wrap;justify-content:flex-end}
+.mock-toggle{height:26px;border-radius:999px}
+.mock-body{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mock.folded{padding:4px}
+.mock.folded .mock-body{display:none}
+@media (max-width:900px){.mock{right:12px;bottom:12px}}
+
+/* while the window resizes nothing animates (fix 35) */
+body.resizing *,body.resizing *::before,body.resizing *::after{transition:none!important}

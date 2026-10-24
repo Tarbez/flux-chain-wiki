@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Node Rail: a square frame with a small filled square node on each corner, dotted top and bottom edges, solid sides and a long accent bar at the middle of each side (sheet 13, 28)</title>
+  <path d="M26 18H974M26 682H974" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="1 5"/>
+  <path d="M18 26V674M982 26V674" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="14" y="14" width="8" height="8" fill="var(--ink)"/>
+  <rect x="978" y="14" width="8" height="8" fill="var(--ink)"/>
+  <rect x="14" y="678" width="8" height="8" fill="var(--ink)"/>
+  <rect x="978" y="678" width="8" height="8" fill="var(--ink)"/>
+  <rect x="14.5" y="298" width="7" height="104" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="16.5" y="300" width="3" height="100" fill="var(--acc)"/>
+  <rect x="978.5" y="298" width="7" height="104" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="980.5" y="300" width="3" height="100" fill="var(--acc)"/>
+</svg>

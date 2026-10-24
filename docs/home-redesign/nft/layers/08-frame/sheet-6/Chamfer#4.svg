@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Chamfer: an inner frame with cut corners; the top-left and bottom-right cuts hold a small solid triangle</title>
+  <path d="M34 18H966M982 34V666M966 682H34M18 666V34" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--faint)"/>
+  <path d="M34 18L18 34M966 18L982 34M982 666L966 682M18 666L34 682" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M18 18H29L18 29ZM982 682H971L982 671Z" fill="var(--line)"/>
+</svg>

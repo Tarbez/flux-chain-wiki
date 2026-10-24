@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
+  <title>Dot Numeral: the genesis ID drawn large in dotted accent outlines over a faint fill, the label GENESIS ID and the identity under it (sheet 22)</title>
+  <text x="1" y="48" font-family="JetBrains Mono, monospace" font-size="48" font-weight="700" letter-spacing="3" fill="var(--faint)" stroke="var(--acc)" stroke-width="1.9" stroke-dasharray="0 3.6" stroke-linecap="round" stroke-linejoin="round" data-field="genesisId">000</text>
+  <text x="2" y="63" font-family="JetBrains Mono, monospace" font-size="8.5" letter-spacing="2.6" fill="var(--dim)">GENESIS ID</text>
+  <text x="2" y="76" font-family="JetBrains Mono, monospace" font-size="10.5" letter-spacing="1.4" fill="var(--ink)" data-field="identity">IDENTITY</text>
+</svg>

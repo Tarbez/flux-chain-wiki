@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Rise Chamfer: a frame whose top edge steps up toward the right into a cut top-right corner, with a cut bottom-left corner, a tick ladder with one accent tick on the right edge, and an accent bar high on the left edge (sheet 13, 10)</title>
+  <path d="M14 662V38A16 16 0 0 1 30 22H592L600 14H962L986 38V670A16 16 0 0 1 970 686H38Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M986 308H976M986 315H980M986 322H980M986 329H980M986 336H976M986 343H980M986 357H980M986 364H976M986 371H980M986 378H980M986 385H980M986 392H976" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="974" y="349.1" width="12" height="1.8" fill="var(--acc)"/>
+  <rect x="10.5" y="60" width="7" height="54" fill="var(--acc)" rx="2" opacity="0.16"/><rect x="12.5" y="62" width="3" height="50" fill="var(--acc)"/>
+</svg>

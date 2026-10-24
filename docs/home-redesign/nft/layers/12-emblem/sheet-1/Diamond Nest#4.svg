@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Diamond Nest: nested diamond outlines on horizontal and vertical axis lines, a square node at the centre (reference sheet 1, #28)</title>
+  <path d="M0.5 17H29.5M15 0.5V33.5" fill="none" stroke="var(--line)" stroke-width="0.7"/>
+  <path d="M15 2.5 28 17 15 31.5 2 17Z" fill="none" stroke="var(--dim)" stroke-width="1.1" stroke-linejoin="round"/>
+  <path d="M15 7.5 23.5 17 15 26.5 6.5 17Z" fill="none" stroke="var(--dim)" stroke-width="1" stroke-linejoin="round"/>
+  <path d="M15 12.2 19.3 17 15 21.8 10.7 17Z" fill="none" stroke="var(--line)" stroke-width="0.9" stroke-linejoin="round"/>
+  <rect x="13.6" y="15.6" width="2.8" height="2.8" fill="var(--acc)"/>
+</svg>

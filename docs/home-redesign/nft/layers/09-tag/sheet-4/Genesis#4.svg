@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
+  <title>Genesis: GENESIS spaced wide, a line, then three cyan squares (sheet-4, 09)</title>
+  <text x="0" y="29" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="5.2" fill="var(--ink)">GENESIS</text>
+  <path d="M104 24.5H318" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="326" y="22" width="5" height="5" fill="var(--acc)"/><rect x="336" y="22" width="5" height="5" fill="var(--acc)"/><rect x="346" y="22" width="5" height="5" fill="var(--acc)"/>
+</svg>

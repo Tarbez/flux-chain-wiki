@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Slashes: four slashes fading from bright to dim, three cyan dots, then the rule (sheet-4, 29)</title>
+  <path d="M2 19L9 5" fill="none" stroke="var(--ink)" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity="1"/><path d="M11 19L18 5" fill="none" stroke="var(--ink)" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity="0.62"/><path d="M20 19L27 5" fill="none" stroke="var(--ink)" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity="0.36"/><path d="M29 19L36 5" fill="none" stroke="var(--ink)" stroke-width="1.5" vector-effect="non-scaling-stroke" opacity="0.16"/>
+  <circle cx="48" cy="12" r="1.5" fill="var(--acc)"/><circle cx="55" cy="12" r="1.5" fill="var(--acc)"/><circle cx="62" cy="12" r="1.5" fill="var(--acc)"/>
+  <path d="M72 12H360" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

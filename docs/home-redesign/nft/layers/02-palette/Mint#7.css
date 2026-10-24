@@ -1,0 +1,6 @@
+/* Mint: green. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 156 64% 86%;
+  --b: 156 76% 54%;
+  --c: 172 70% 52%;
+}

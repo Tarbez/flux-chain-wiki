@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 34" data-slot="emblem">
+  <title>Fold Sigil: a page with its top-right corner folded down, the flap in the accent (sheet 25, the Fold set)</title>
+  <path d="M5 2.5H18.5L26 10V31.5H5Z" fill="var(--ink)"/><path d="M18.5 2.5V10H26Z" fill="var(--acc)"/>
+</svg>

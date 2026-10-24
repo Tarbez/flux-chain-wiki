@@ -1,0 +1,6 @@
+/* Glass: white blocks, cyan light. --a tints the blocks, --b the light, --c the glow and the accents. */
+.nft {
+  --a: 0 0% 100%;
+  --b: 190 90% 66%;
+  --c: 190 92% 72%;
+}

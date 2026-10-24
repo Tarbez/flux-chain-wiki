@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Box Node: a small square outline at the corner point and a single line (sheet 7, item 03)</title>
+  <path d="M0.5 0.5h7v7h-7z" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M7.5 0.5H38M0.5 7.5V38" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

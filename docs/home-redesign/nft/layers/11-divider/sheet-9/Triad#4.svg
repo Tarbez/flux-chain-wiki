@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Triad: a rule with three diamonds: amber outline, solid grey, outline (sheet 9, piece 12)</title>
+  <path d="M0 12.5H156M204 12.5H360" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M167 7.5L172 12.5L167 17.5L162 12.5Z" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linejoin="round" opacity="0.16"/>
+  <path d="M167 7.5L172 12.5L167 17.5L162 12.5Z" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M180 7.5L185 12.5L180 17.5L175 12.5Z" fill="var(--dim)"/>
+  <path d="M193 7.5L198 12.5L193 17.5L188 12.5Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

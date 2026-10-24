@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-slot="frame">
+  <title>Arrow Notch: a rounded frame with a cut top-right corner, three accent dashes along the top edge at the left, a small inward arrow notch at the middle of the right edge, and a row of accent dots at the bottom right (sheet 13, 20)</title>
+  <path d="M100 16H964L984 36V336L974 350L984 364V668A16 16 0 0 1 968 684H32A16 16 0 0 1 16 668V32A16 16 0 0 1 32 16H40" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="46" y="14.5" width="12" height="3" fill="var(--acc)"/>
+  <rect x="64" y="14.5" width="12" height="3" fill="var(--acc)"/>
+  <rect x="82" y="14.5" width="12" height="3" fill="var(--acc)"/>
+  <path d="M984 336L974 350L984 364" fill="none" stroke="var(--ink)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="913" y="677" width="2" height="2" fill="var(--acc)"/>
+  <rect x="921" y="677" width="2" height="2" fill="var(--acc)"/>
+  <rect x="929" y="677" width="2" height="2" fill="var(--acc)"/>
+  <rect x="937" y="677" width="2" height="2" fill="var(--acc)"/>
+  <rect x="945" y="677" width="2" height="2" fill="var(--acc)"/>
+  <rect x="953" y="677" width="2" height="2" fill="var(--acc)"/>
+</svg>

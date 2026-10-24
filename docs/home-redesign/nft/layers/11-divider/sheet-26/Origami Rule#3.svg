@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
+  <title>Origami Rule: a faint rule pleated at its centre, one pleat in the accent, a small folded tip at each end (sheet 26, the Origami set: folded paper: creases, a dog-eared flap and accordion pleats, the underside of a fold in the accent)</title>
+  <path d="M10 12H158" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M202 12H350" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M158 5L169 8V19L158 16Z" fill="var(--faint)"/>
+  <path d="M169 8L180 5V16L169 19Z" fill="var(--rule)"/>
+  <path d="M180 5L191 8V19L180 16Z" fill="var(--acc)" fill-opacity="0.4"/>
+  <path d="M191 8L202 5V16L191 19Z" fill="var(--rule)"/>
+  <path d="M158 5L169 8L180 5L191 8L202 5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M158 16L169 19L180 16L191 19L202 16" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M158 5V16M169 8V19M180 5V16M191 8V19M202 5V16" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-opacity="0.7"/>
+  <path d="M0.5 12L9 12L0.5 3.5Z" fill="var(--dim)"/>
+  <path d="M359.5 12L351 12L359.5 3.5Z" fill="var(--dim)"/>
+</svg>

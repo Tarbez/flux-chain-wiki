@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" data-slot="corner">
+  <title>Bowtie: a small bow-tie at the corner point with a square under it, and arms running out of them</title>
+  <path d="M1 1L7 4.5L13 1V8L7 4.5L1 8Z" fill="var(--line)"/>
+  <path d="M5.5 11h3v3h-3z" fill="var(--line)"/>
+  <path d="M16 4.5H48M7 17V48" fill="none" stroke-width="1" vector-effect="non-scaling-stroke" stroke="var(--line)"/>
+  <path d="M52 3.75h1.5v1.5h-1.5zM56 3.75h1.5v1.5h-1.5zM60 3.75h1.5v1.5h-1.5zM64 3.75h1.5v1.5h-1.5zM68 3.75h1.5v1.5h-1.5zM72 3.75h1.5v1.5h-1.5zM76 3.75h1.5v1.5h-1.5zM80 3.75h1.5v1.5h-1.5z" fill="var(--line)"/>
+  <path d="M6.25 52h1.5v1.5h-1.5zM6.25 56h1.5v1.5h-1.5zM6.25 60h1.5v1.5h-1.5zM6.25 64h1.5v1.5h-1.5zM6.25 68h1.5v1.5h-1.5zM6.25 72h1.5v1.5h-1.5z" fill="var(--line)"/>
+</svg>
