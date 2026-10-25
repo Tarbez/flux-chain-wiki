@@ -189,6 +189,11 @@
       settings = Object.assign({}, settings || {});
       if (settings.query === undefined && settings.history !== 'none' && continuity) settings.query = continuity.returnQuery(page);
       if (!Object.prototype.hasOwnProperty.call(catalog, page)) throw new Error('Unknown page: ' + page);
+      /* A retired key (an entry with `redirect`, js/pages/catalog.js ArkUI.pageRedirects) never mounts: the page it names does, and
+         writeHistory below puts that page's own path in the address, so the old key is not kept alive by the address. One place for
+         every visitor, with or without the 3D world. */
+      var moved = catalog[page].redirect;
+      if (moved && moved !== page && Object.prototype.hasOwnProperty.call(catalog, moved)) page = moved;
       var ticket = ++request; requested = page; requestedSettings = settings;
       var run = null;
       if (page === active) {

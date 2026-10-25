@@ -6,6 +6,10 @@
     var store = new ArkEngines.FluxMemoryStore({ historyLimit: 40, timelineLimit: 80 });
     var pages = {
       zero: { mesh: 'zero', dissolve: 0, depth: 0 },
+      /* No route uses these two presets since the owner deleted /experiments (2026-10-24). They stay as the scene pages that select
+         the 'proximity' mesh with a half dissolve, and the two reference-geometry slots (js/halo/surface-motion.js), which tests/scene-state.cjs, tests/mesh-state.cjs and tests/mesh-drag.cjs drive. */
+      proximity: { mesh: 'proximity', dissolve: .5, depth: 1 },
+      lab: { mesh: 'proximity', dissolve: .5, depth: 1 },
       learnings: { mesh: 'zero', dissolve: 0, depth: 0 },
       about: { mesh: 'zero', dissolve: 0, depth: 0 },
       concept: { mesh: 'zero', dissolve: 0, depth: 0 },
@@ -147,7 +151,7 @@
       '.concept-links > a,.theory-footer > a,.deploy-step,.deploy-caveat,' +
       '.learning-list > li,.hero-experiment-kicker,.hero-experiment-index,.hero-experiment-copy h1,' +
       '.hero-experiment-question,.hero-experiment-note,.hero-experiment-copy a,' +
-      '.section-heading > div,.section-heading > p,.lab-toolbar,.experiment-stage,.lab-bottom > *,.lab-note,' +
+      '.section-heading > div,.section-heading > p,' +
       '.article-topline,.article-title,.article-core,.article-contents,.article-reading > section,' +
       '.article-answer-controls,.article-next,.mechanism-depth,.mechanism-inner-title,' +
       '.mechanism-inner,.content-layer-path,' +

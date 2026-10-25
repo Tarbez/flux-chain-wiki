@@ -62,9 +62,92 @@
   });
 
   /* the apps the page offers, in the order a visitor meets them (their words and addresses are DOWNLOAD.APP.<KEY>.*) */
-  var APPS = ['BROWSER', 'MOBILE', 'DESKTOP', 'CLI'];
+  /* the browser's own apps only (owner, 2026-10-25: "focus on the product"); the miner apps live with the operator guide */
+  var APPS = ['BROWSER', 'MOBILE'];
   /* the one case rule for a label a manifest authored in capitals (js/ark/page-kit.js) */
   function sentence(text) { return ArkUI.sentenceCase(text); }
+
+  /* The redesign's pieces the blocks do not draw (owner image, 2026-10-25), added once the page is built:
+     the way back above the title, the product name in the title's accent, the actions' icons, the picture of the
+     browser and an FXN ID in The idea, the apps' note, and one line under the next and related links. */
+  /* The core picture: the FXN Browser's window onto the real network, and an FXN ID card. The window's body is the
+     page's [data-stage], so the 3D world frames the kernel inside it (js/world/download-stage.js) and each step reshapes
+     the network there. The card's rows say what is true at that step: the checkout runs from step 3, the miner is
+     verified from step 3, the network is joined only at step 5. */
+  var ID_ROWS = [['DEFXN sites', 0], ['FXN ID held', 2], ['Network access', 4]];
+  function picture(el) {
+    var art = el('div', 'download-art');
+    art.setAttribute('role', 'img');
+    art.setAttribute('aria-label', 'The FXN Browser open on defxn://, showing the network, beside an FXN ID card. Illustration: not live data.');
+    var win = el('div', 'dl-win');
+    var bar = el('div', 'dl-win-bar');
+    ['r', 'y', 'g'].forEach(function (c) { bar.appendChild(el('i', 'dl-dot dl-' + c)); });
+    bar.appendChild(el('span', 'dl-url', 'defxn://'));
+    win.appendChild(bar);
+    var view = el('div', 'dl-win-view'); view.setAttribute('data-stage', '');
+    win.appendChild(view);
+    var word = el('div', 'dl-win-word'); word.appendChild(el('b', '', 'DEFXN')); word.appendChild(el('small', '', 'FXN CHAIN'));
+    win.appendChild(word);
+    art.appendChild(win);
+    var id = el('div', 'dl-id');
+    id.appendChild(el('p', 'dl-id-title', 'Your FXN ID'));
+    var key = el('p', 'dl-id-key'); key.appendChild(el('span', '', 'fxn_9a3d…7f2e')); id.appendChild(key);
+    var list = el('ul', 'dl-id-rows');
+    ID_ROWS.forEach(function (row) { var li = el('li', '', row[0]); li.dataset.from = String(row[1]); li.appendChild(el('i')); list.appendChild(li); });
+    id.appendChild(list);
+    art.appendChild(id);
+    /* the FXN ID card is glass (css/cutouts.css .tp-panel) laid over the window: the overlap shows the window and the
+       3D through it, blurred; the 3D world draws the cutouts themselves (js/world/download-stage.js, holes in glass) */
+    id.classList.add('tp-panel');
+    return art;
+  }
+  /* the picture and the 3D follow the chosen step */
+  function showStep(root, index) {
+    root.querySelectorAll('.dl-id-rows li').forEach(function (li) { li.classList.toggle('is-on', index >= Number(li.dataset.from)); });
+    var art = root.querySelector('.download-art');
+    if (art && art.dataset.step !== String(index)) {
+      art.dataset.step = String(index);
+      /* the window's edge glows once as a step lands (a CSS keyframe restarted by the class; nothing runs after it) */
+      art.classList.remove('is-landing'); void art.offsetWidth; art.classList.add('is-landing');
+    }
+    var host = window.ArkWorldHost;
+    if (host && host.ready && host.scene && host.scene.select && host.viewFor && host.viewFor('download') === 'download') host.scene.select({ view: 'download', s: index });
+  }
+  function dress(root, words) {
+    var el = ArkUI.el;
+    var crumbs = root.querySelector('.ark-breadcrumb');
+    /* no separate "Back to products" link: the breadcrumb's Products already goes back (owner, 2026-10-25: less noise) */
+    /* "Get FXN Browser": the product's name in the accent (only while the title still reads "Get <name>") */
+    var title = root.querySelector('.ark-hero__title'), m = title && /^(Get\s+)(.+)$/.exec(title.textContent);
+    if (m) { title.textContent = m[1]; title.appendChild(el('span', 'download-title-name', m[2])); }
+    var buttons = root.querySelectorAll('.ark-hero [data-ark-part="button"]');
+    if (ArkUI.actionIcon && buttons[0]) ArkUI.actionIcon(buttons[0], 'document');
+    if (ArkUI.actionIcon && buttons[1]) ArkUI.actionIcon(buttons[1], 'account');
+    /* The picture stands under the depth tabs in the left column and the apps follow it, outside the views (they do not
+       move when a view changes, so the 3D framed in the window stays put); the terminal holds the right column. */
+    var focus = root.story && root.story.panel('focus'), head = focus && focus.querySelector('[data-ark-block="section-header"]');
+    var apps = focus && focus.querySelector('#download-apps-fold'), depth = root.querySelector('[data-story-depth]');
+    var next = root.querySelector('.ark-pager [data-ark-part="pager-next"]');
+    if (next) next.appendChild(el('span', 'download-next-line', words('NEXT.LINE')));
+    var label = root.querySelector('.ark-pager__related-label'); if (label) label.textContent = 'Related links';
+    Array.prototype.forEach.call(root.querySelectorAll('.ark-pager__related-list a'), function (a, i) {
+      a.appendChild(el('span', 'download-related-line', words(i === 0 ? 'ASIDE.LINE' : 'GUIDE.LINE')));
+    });
+    /* the next step and the related links stand in the right column under the terminal, as in the image: moved into
+       the side column so its height, not the left column's, decides where they sit */
+    var side = root.querySelector('.story-side'), pager = root.querySelector('.ark-pager');
+    /* and the way back, the title and its actions lead the left column, so each column is one flow and neither one's
+       height stretches the other's rows (the blocks keep their layout pins: they are attributes, not positions) */
+    var main = root.querySelector('.story-main'), hero = root.querySelector('.ark-hero');
+    if (main && hero) { main.insertBefore(hero, main.firstChild); if (crumbs) main.insertBefore(crumbs, hero); }
+    var foot = el('p', 'download-footnote', 'Illustration — not live data.');
+    if (side && pager) { side.appendChild(pager); side.appendChild(foot); } else root.appendChild(foot);
+    if (depth) {
+      var art = picture(el), after = art;
+      depth.insertAdjacentElement('afterend', art);
+      [head, head && el('p', 'download-apps-note', words('APPS.NOTE')), apps].forEach(function (node) { if (node) { after.insertAdjacentElement('afterend', node); after = node; } });
+    }
+  }
 
   ArkUI.pageModules.download = {
     mount: function (host) {
@@ -87,6 +170,7 @@
       top.appendChild(copier.element);
       card.appendChild(top);
       var cardTitle = el('p', 'download-terminal-title'); card.appendChild(cardTitle);
+      var cardDesc = el('p', 'download-terminal-desc'); card.appendChild(cardDesc);
       var screen = el('div', 'download-screen'); card.appendChild(screen);
       var expect = el('p', 'download-expect'); card.appendChild(expect);
       card.appendChild(copier.status);
@@ -101,17 +185,54 @@
         { label: sentence(words('NEXT')), href: 'route:' + manifest.meta.next, tone: 'primary' }
       ] } }, { from: manifest.route });
       var previous = stepper.querySelector('[data-action="download-previous"]'), next = stepper.querySelector('[data-action="download-next"]'), onward = stepper.querySelector('a');
-      way.appendChild(progress); way.appendChild(stepper);
+      /* one dot per step, the current one lit; a dot is a button to that step (redesign 2026-10-25) */
+      var dots = el('div', 'download-dots'); dots.setAttribute('role', 'group'); dots.setAttribute('aria-label', 'Steps');
+      for (var d = 0; d < count; d++) (function (n) {
+        var dot = el('button', 'download-dot'); dot.type = 'button'; dot.setAttribute('aria-label', 'Step ' + (n + 1) + ': ' + stepTitle(n));
+        dot.addEventListener('click', function () { select(n, true); }); dots.appendChild(dot);
+        /* a pointer resting on a dot previews that step's shape in the 3D; leaving returns to the chosen step */
+        dot.addEventListener('pointerenter', function () { if (root) showStep(root, n); });
+        dot.addEventListener('pointerleave', function () { if (root) showStep(root, active); });
+      })(d);
+      /* The step player (owner, 2026-10-25: "make sure it does animate through the steps"): it walks the five steps
+         with the terminal, the picture and the 3D in step, then comes back to where you were. It plays once on a first
+         visit, when the 3D is up; the button plays it again or stops it. Timed step advances, as js/pages/home-flow.js:
+         no frame loop, and it stops for good at any choice you make, when the tab hides, or when the page leaves. */
+      var TOUR_MS = 3200, tour = { on: false, timer: 0, from: 0 };
+      var play = el('button', 'download-play'); play.type = 'button';
+      function setPlay(on) {
+        tour.on = on; play.setAttribute('aria-pressed', on ? 'true' : 'false');
+        play.textContent = on ? 'Stop' : 'Play the five steps';
+      }
+      function stopTour() { clearTimeout(tour.timer); tour.timer = 0; if (tour.on) setPlay(false); }
+      function tourStep(i) {
+        if (!tour.on) return;
+        select(i, false);
+        tour.timer = setTimeout(function () {
+          if (!tour.on) return;
+          if (i < count - 1) tourStep(i + 1); else { select(tour.from, false); setPlay(false); }
+        }, i < count - 1 ? TOUR_MS : TOUR_MS + 800);
+      }
+      function startTour() { if (!root || !root.isConnected) return; tour.from = active; setPlay(true); tourStep(0); }
+      play.addEventListener('click', function () { if (tour.on) stopTour(); else startTour(); });
+      document.addEventListener('visibilitychange', function () { if (document.hidden) stopTour(); });
+      setPlay(false);
+      var dotsRow = el('div', 'download-dots-row'); dotsRow.appendChild(dots); dotsRow.appendChild(play);
+      var where = el('div', 'download-where'); where.appendChild(progress); where.appendChild(dotsRow);
+      way.appendChild(where); way.appendChild(stepper);
       card.appendChild(way);
 
       function paint() {
         var t = TERMINAL[active];
         label.textContent = (t.lines ? 'TERMINAL' : t.checks ? 'CHECK' : 'WHAT IT PROVES') + ' · STEP ' + String(active + 1).padStart(2, '0') + ' / ' + String(count).padStart(2, '0');
         cardTitle.textContent = stepTitle(active);
+        cardDesc.textContent = words('POINT' + (active + 1) + '.TEXT');
+        Array.prototype.forEach.call(dots.children, function (dot, n) { dot.setAttribute('aria-current', n === active ? 'step' : 'false'); });
         screen.textContent = ''; copier.element.hidden = !t.lines; expect.hidden = !t.expect; expect.textContent = t.expect || '';
         if (t.lines) {
           var pre = el('pre', 'download-code'); copier.setName('commands for ' + stepTitle(active));
-          t.lines.forEach(function (line) { var row = el('code'); row.appendChild(el('span', 'download-prompt', '$ ')); row.appendChild(document.createTextNode(line)); pre.appendChild(row); });
+          /* numbered lines, as an editor shows them (the number is not copied: Copy takes the commands alone) */
+          t.lines.forEach(function (line, n) { var row = el('code'); row.appendChild(el('span', 'download-ln', String(n + 1))); row.appendChild(document.createTextNode(line)); pre.appendChild(row); });
           screen.appendChild(pre);
         } else if (t.checks) {
           /* what to look for once it runs: Ark's facts (one record, one pair per line) */
@@ -127,6 +248,7 @@
         }
         previous.hidden = active === 0; next.hidden = active === count - 1; onward.hidden = active !== count - 1;
         progress.textContent = 'Step ' + (active + 1) + ' of ' + count;
+        if (root && !root.downloadMoments) showStep(root, active);
       }
       /* The step tabs of How it works (Ark tabs, as /deploy's), chosen in step with the terminal:
          through the primitive (a click), never by hand. */
@@ -142,6 +264,7 @@
         return (v === 'focus' ? '' : 'view=' + v + '&') + 'step=' + active;
       }
       function select(index, write) {
+        if (write) stopTour();   /* a choice you make ends the player */
         active = Math.max(0, Math.min(count - 1, index));
         paint(); openRow(active);
         if (write && root) ArkUI.route.write(ArkUI.pageCatalog.download.path, query(), 'push');
@@ -152,8 +275,9 @@
       for (var i = 0; i < count; i++) steps.push({ value: 'step-' + (i + 1), title: stepTitle(i), content: copy('POINT' + (i + 1) + '.TEXT') });
       var guide = { label: sentence(words('GUIDE')), href: words('GUIDE.HREF') };
       var def = {
-        page: 'download', id: 'download', titleId: 'download-title', was: WAS, insertWas: WAS.insert,
-        crumbs: [{ label: 'Home', href: 'route:zero' }, { label: manifest.title }],
+        page: 'download', id: 'download', className: 'download-page', titleId: 'download-title', was: WAS, insertWas: WAS.insert,
+        crumbs: [{ label: 'Products', href: 'route:resolutions' }, { label: 'FXN Browser' }],
+        lede: copy('LEDE'),
         /* no eyebrow: "RUN DEFXN / FROM SOURCE" repeated the breadcrumb above it (first-visit audit 2026-10-22, P2) */
         title: copy('TITLE'),
         /* the one thing a newcomer can do today: the browser has no public download, the FXN ID is made on this site */
@@ -168,7 +292,8 @@
             { block: 'section-header', props: { title: copy('APPS.TITLE'), level: 3 } },
             { block: 'disclosure', id: 'download-apps-fold', props: { foldBelow: 'phone', more: 'Show the four apps', less: 'Hide the apps', blocks: [
               { block: 'card-grid', id: 'download-apps', props: { label: words('APPS.TITLE'), columns: 4, alignRows: true, items: APPS.map(function (key) {
-                var url = words('APP.' + key + '.URL'), card = { eyebrow: copy('APP.' + key + '.PLATFORMS'), title: copy('APP.' + key + '.NAME'), description: copy('APP.' + key + '.TEXT') };
+                /* compact (redesign 2026-10-25): the platform is the name, the app is its line; the long text is gone from the card */
+                var url = words('APP.' + key + '.URL'), card = { title: copy('APP.' + key + '.PLATFORMS'), description: copy('APP.' + key + '.NAME') };
                 if (/^https:\/\//.test(url)) { card.href = url; card.meta = 'Download'; } else card.status = { label: 'Not published yet', tone: 'drift' };
                 return card;
               }) } }] } }] },
@@ -183,13 +308,13 @@
           ] }
         },
         /* what success proves, in sight in every view; on a phone it folds behind "Show the status" */
-        boundary: { tone: 'drift', title: stepTitle(3), body: copy('POINT4.TEXT') }, boundaryFold: 'phone',
+        boundary: { tone: 'drift', title: stepTitle(3), body: copy('POINT4.TEXT') }, boundaryFold: 'phone', boundaryAside: true,
         figure: { slot: 'terminal', kind: 'illustration', caption: 'What each step looks like at the terminal: its commands with Copy, and what to expect. Commands and defaults come from the operator guide.',
           more: 'Show the terminal', less: 'Hide the terminal' },
         slots: { terminal: card },
         handlers: { 'download-previous': function () { select(active - 1, true); }, 'download-next': function () { select(active + 1, true); } },
         pager: { label: 'Continue', next: { label: sentence(words('NEXT')), href: 'route:' + manifest.meta.next },
-          related: [{ label: 'Deploy a site with the Bundle Deployer', href: words('ASIDE.HREF') }, guide] },
+          related: [{ label: 'Deploy a site with the Bundle Deployer', href: words('ASIDE.HREF') }, { label: 'Open the full operator guide', href: guide.href }] },
         query: function (view) { return query(view); },
         onRestore: function (params) { select(Math.max(0, Math.min(count - 1, Number(params.get('step')) || 0)), false); }
       };
@@ -202,6 +327,26 @@
       var params = root.story.params();
       select(params ? Math.max(0, Math.min(count - 1, Number(params.get('step')) || 0)) : 0, false);
       root.downloadSelect = select;
+      dress(root, words);
+      if (!root.downloadMoments) showStep(root, active);
+      /* the world loads after first paint: once it is up, it takes the chosen step; a view change moves the picture,
+         so the world re-frames the window */
+      if (window.ArkWorldHost && ArkWorldHost.whenReady) ArkWorldHost.whenReady(function () {
+        if (!root.isConnected) return;
+        var mo = root.downloadMoments;
+        if (mo) mo.show(0); else showStep(root, active);
+        /* the first visit in this tab plays the moments once (the steps, on a page without them), unless motion is reduced */
+        var addr = root.story && root.story.params(), asked = addr && addr.get('step'), seen = false;
+        try { seen = sessionStorage.getItem('defxn-download-tour') === '1'; sessionStorage.setItem('defxn-download-tour', '1'); } catch (e) { seen = false; }
+        var still = ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion();
+        if (mo && !seen && !still) setTimeout(function () { if (root.isConnected && !document.hidden && !mo.playing()) mo.start(); }, 1400);
+        else if (!mo && !asked && !seen && !still) setTimeout(function () { if (root.isConnected && !document.hidden && !tour.on && active === 0) startTour(); }, 1400);
+      });
+      root.downloadTour = { start: startTour, stop: stopTour, playing: function () { return tour.on; } };
+      stepTabs();
+      root.querySelector('[data-story-depth] [data-ark-part="tabs-list"]').addEventListener('click', function () {
+        setTimeout(function () { var h = window.ArkWorldHost; if (h && h.ready && h.scene && h.scene.refresh && h.viewFor('download') === 'download') h.scene.refresh(320); }, 30);
+      });
       return root;
     }
   };

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card studio</title>
+<link rel="icon" href="data:,">
+<!-- DEFXN identity card: the studio for card components (WEAR-AUDIT.md, after loop 9). One idea: a site author
+     places a card slot and gives it motion; every visitor's own card fills it.
+     The left column edits the slot's timeline (js/nft/timeline-editor.js, DFXNTL1). The right column shows the three
+     component kinds (js/nft/card-components.js) made from the picked sample card, and the slot's FLX text, which is
+     what the CMS would store (DFXNCOMP1). The CMS Skin lab is the intended home, through its owner.
+     Sample data: the three cards are the review samples. Nothing is live. -->
+<link rel="stylesheet" href="../../../css/themes.css">
+<link rel="stylesheet" href="../../../css/flux-themes.css">
+<link rel="stylesheet" href="../../../assets/kit/defxn-fonts.css">
+<link rel="stylesheet" href="../../../css/ark-blocks.css">
+<link rel="stylesheet" href="../../../css/nft-card.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font-family: var(--font-sans, system-ui, sans-serif); overflow: hidden; }
+  .st-tool { display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 20px; box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); font: 500 12px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+  .st-tool b { color: hsl(var(--text-strong)); font-weight: 600; }
+  .st-pick { display: flex; gap: 4px; }
+  .st-pick button { font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 7px 10px; border-radius: 6px; border: 1px solid hsl(var(--border-default)); background: transparent; color: hsl(var(--text)); cursor: pointer; }
+  .st-pick button[aria-pressed="true"] { background: hsl(var(--text-strong)); color: hsl(var(--canvas)); border-color: transparent; }
+  .st-state { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-family: var(--font-sans, system-ui, sans-serif); font-size: 13px; }
+  .st-note { color: hsl(var(--text-faint)); }
+  .st-main { height: calc(100% - 48px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+  .st-edit { min-height: 0; overflow: auto; padding: 18px 20px; border-right: 1px solid hsl(var(--border-subtle)); }
+  .st-edit > h2, .st-stage > h2, .st-slot > h2 { margin: 0 0 10px; font: 600 12px/1.2 var(--font-mono, monospace); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+  .st-stage { min-height: 0; overflow: hidden; padding: 18px 22px; display: grid; grid-template-rows: auto auto auto 1fr; gap: 16px; align-content: start; }
+  .st-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .st-slot pre { margin: 0; max-height: 5.5rem; overflow: auto; padding: 8px; border-radius: 6px; background: hsl(var(--surface)); font: 11px/1.4 var(--font-mono, monospace); white-space: pre-wrap; overflow-wrap: anywhere; color: hsl(var(--text-muted)); }
+  .st-slot select { margin-left: 8px; }
+</style>
+</head>
+<body>
+<div class="st-tool">
+  <b>Card studio</b>
+  <div class="st-pick" role="group" aria-label="Pick a sample card">
+    <button type="button" data-card="27">Card 27</button>
+    <button type="button" data-card="263">Card 263</button>
+    <button type="button" data-card="512">Card 512</button>
+  </div>
+  <span class="st-state" role="status">Loading.</span>
+  <span class="st-note">Sample data</span>
+</div>
+<div class="st-main">
+  <section class="st-edit" aria-labelledby="st-edit-h"><h2 id="st-edit-h">The slot's motion</h2><div id="editor"></div></section>
+  <section class="st-stage" aria-labelledby="st-stage-h">
+    <h2 id="st-stage-h">What the card makes</h2>
+    <div id="banner"></div>
+    <div class="st-row"><div id="stamp"></div><div id="plate"></div></div>
+    <div class="st-slot"><h2>The slot, as the CMS stores it <select id="kind" aria-label="Slot kind"><option value="banner">Banner</option><option value="stamp">Stamp</option><option value="nameplate">Nameplate</option></select></h2><pre id="slot"></pre></div>
+  </section>
+</div>
+<script src="../../../js/ark/vendor/engines.js"></script>
+<script src="../../../js/ark/vendor/ark-kit.js"></script>
+<script src="../../../js/ark/vendor/ark-kit-skin.js"></script>
+<script src="../../../js/nft/timeline.js"></script>
+<script src="../../../js/nft/skin-package.js"></script>
+<script src="../../../js/nft/wear.js"></script>
+<script src="../../../js/nft/card-components.js"></script>
+<script src="../../../js/nft/timeline-editor.js"></script>
+<script src="../../../js/nft/skin-bundle.js"></script>
+<script src="../../../js/nft/cards-data.js"></script>
+<script src="../../../js/nft/traits.js"></script>
+<script src="../../../js/nft/card-chrome.js"></script>
+<script src="../../../js/nft/card-record.js"></script>
+<script src="../../../js/nft/grid-look.js"></script>
+<script src="../../../js/nft/skin-recipe.js"></script>
+<script>
+(function () {
+  'use strict';
+  var C = window.DefxnCardComponents, E = window.DefxnTimelineEditor, W = window.DefxnWear, state = document.querySelector('.st-state');
+  if (!C || !E || !W || !window.DefxnSkin || !window.ArkKitSkin) { state.textContent = 'The studio code did not load. Reload the page.'; return; }
+  var stage = document.querySelector('.st-stage'), timeline = null, wear = null, editor = null, stops = [];
+
+  function slotText() { return C.encode({ kind: document.getElementById('kind').value, timeline: timeline }); }
+  function showSlot() { document.getElementById('slot').textContent = slotText(); }
+  function draw() {
+    stops.forEach(function (s) { s(); }); stops = [];
+    [['banner', 'banner'], ['stamp', 'stamp'], ['nameplate', 'plate']].forEach(function (k) {
+      var host = document.getElementById(k[1]); host.textContent = '';
+      var el = C.render(k[0], wear);
+      if (el) { host.appendChild(el); stops.push(C.settle(el)); }
+    });
+    // the page takes the card's colours, as a site does when the card is on
+    var tokens = window.DefxnSkinPackage.decode(wear.package).tokens;
+    Object.keys(tokens).forEach(function (k) { if (/^--(canvas|surface|raised|text|text-muted|text-strong|border-[a-z]+|primary|accent|text-inverse)$/.test(k)) document.body.style.setProperty(k, tokens[k]); });
+  }
+  function pick(n) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-card]'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-card') === n)); });
+    state.textContent = 'Making card ' + n + '’s components.';
+    var rec = window.DefxnSkin.samples().filter(function (r) { return Number(r.genesisId) === Number(n); })[0];
+    return window.DefxnSkin.recipe(rec, { locked: [] }).then(function (recipe) {
+      wear = W.of(recipe, rec);
+      // the slot starts from the card's own arrival, without the art track: the author changes it from there
+      var start = { version: 1, tracks: recipe.arrival.tracks.filter(function (t) { return t.target !== 'art'; }) };
+      draw();
+      if (!editor) editor = E.mount(document.getElementById('editor'), { timeline: start, preview: function () { return stage; }, onChange: function (tl) { timeline = tl; showSlot(); } });
+      else editor.set(start);
+      timeline = editor.get(); showSlot();
+      state.textContent = 'Card ' + n + (recipe.palette ? ', ' + recipe.palette : '') + '. Its pieces make a banner, a stamp and a nameplate. Change the motion, then press Preview.';
+    }).catch(function (e) { state.textContent = 'Card ' + n + ' did not load: ' + e.message; });
+  }
+  document.getElementById('kind').addEventListener('change', showSlot);
+  Array.prototype.forEach.call(document.querySelectorAll('[data-card]'), function (b) { b.addEventListener('click', function () { pick(b.getAttribute('data-card')); }); });
+  window.__studio = pick('263');
+})();
+</script>
+</body>
+</html>

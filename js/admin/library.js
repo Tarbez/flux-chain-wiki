@@ -17,6 +17,8 @@
    (ArkComponents.problems): "Create block" and "Insert" refuse while it has refusals, and Save
    refuses the components draft while any saved block has one (js/admin/save.js). A refusal
    names the field (by its label path), the failure, what it needs and the remedy.
+   The Card slot block's field ('cardslot') mounts the NFT session's slot editor (DefxnCardComponents.editor) after loading
+   its scripts here; FLX text in, FLX text out, one change per step, destroyed when its field is repainted.
    Must not: mutate the components draft itself: every command goes to the preview
    (postCmsComponentsCommand), which computes it once and relays the whole draft back.
    ===================================================================== */
@@ -112,6 +114,77 @@
     };
   }
 
+  /* ===================================================================================
+     The Card slot's editor (kind 'cardslot'): the NFT session's DefxnCardComponents.editor. Its scripts load here, once, when
+     a card slot field first draws; a visitor to the site never loads them. The text it hands on is the slot's FLX (DFXNCOMP1).
+     =================================================================================== */
+  const CARD_KIT = [['js/nft/timeline.js', 'DefxnTimeline'], ['js/nft/timeline-editor.js', 'DefxnTimelineEditor'], ['js/nft/card-components.js', 'DefxnCardComponents']];
+  const CARD_KIT_SHEET = 'css/nft-card.css';
+  const loadFile = (el, name) => new Promise((ok, fail) => { el.onload = ok; el.onerror = () => fail(new Error('could not load ' + name)); document.head.appendChild(el); });
+  let cardKit = null;
+  function loadCardKit() {
+    if (!cardKit) {
+      cardKit = CARD_KIT.reduce((chain, [src, global]) => chain.then(() => {
+        if (window[global]) return null;
+        const el = document.createElement('script'); el.src = src;
+        return loadFile(el, src);
+      }), Promise.resolve()).then(() => {
+        /* the styles do not hold the editor back: unstyled, it still works, and a failure is said in the console */
+        if (!document.querySelector('link[data-card-kit]')) {
+          const el = document.createElement('link'); el.rel = 'stylesheet'; el.href = CARD_KIT_SHEET; el.setAttribute('data-card-kit', '');
+          el.onerror = () => console.error('The card slot editor\'s styles did not load (could not load ' + CARD_KIT_SHEET + '). The editor works unstyled; reload the editor to try again.');
+          document.head.appendChild(el);
+        }
+        return null;
+      }).then(() => {
+        if (!window.DefxnCardComponents) throw new Error('js/nft/card-components.js loaded and defined no DefxnCardComponents');
+        return window.DefxnCardComponents;
+      });
+      cardKit.catch(() => { cardKit = null; });   /* a failed load may be tried again */
+    }
+    return cardKit;
+  }
+  /* the editors on screen: one whose field was repainted (its host left the document) is destroyed on the next draw or mount */
+  let slotEditors = [];
+  function pruneSlotEditors() {
+    slotEditors = slotEditors.filter((e) => { if (e.host.isConnected) return true; try { e.editor.destroy(); } catch (error) { /* already gone */ } return false; });
+  }
+  /* The field: with no slot saved, one button (absent is a state of its own, not a banner nobody chose); with one, the editor.
+     Each change the editor reports is one ctx.set, so one undoable step. */
+  function cardSlotEl(schema, key, ctx, label, path) {
+    pruneSlotEditors();
+    const box = h('fieldset', { class: 'lib-cardslot', 'data-prop': path, 'data-prop-row': path }, h('legend', { text: label }));
+    const hint = hintOf(schema); if (hint) box.appendChild(h('p', { class: 'hint', text: hint }));
+    const body = h('div', { class: 'lib-cardslot-body' });
+    box.appendChild(body);
+    const say = (text, ...buttons) => { body.textContent = ''; body.appendChild(h('p', { class: 'hint', role: 'status', text })); buttons.forEach((b) => body.appendChild(b)); };
+    const button = (text, run, quiet) => h('button', { type: 'button', class: 'btn small' + (quiet ? ' quiet' : ''), text, onclick: run });
+    const fresh = (K) => K.encode({ kind: K.KINDS[0], timeline: null });
+    /* resolves to DefxnCardComponents once the editor is mounted, or to null after saying what failed */
+    const start = (initial) => {
+      say('Loading the card slot editor...');
+      return loadCardKit().then((K) => {
+        body.textContent = '';
+        try { slotEditors.push({ host: body, editor: K.editor(body, { value: initial, onChange: (text) => { if (body.isConnected) ctx.set(key, text); } }) }); }
+        catch (error) {
+          say('The saved slot text cannot be read (' + (error && error.message ? error.message : error) + '). It needs slot text written by this editor. Start again to replace it with a new slot.',
+            button('Start again', () => { const text = fresh(K); ctx.set(key, text); start(text); }));
+          return null;
+        }
+        return K;
+      }, (error) => {
+        say('The card slot editor did not load: ' + error.message + '. It needs js/nft/timeline.js, js/nft/timeline-editor.js and js/nft/card-components.js from this site. Check the connection, then try again, or reload the editor.',
+          button('Try again', () => start(initial)));
+        return null;
+      });
+    };
+    const saved = ctx.get(key);
+    if (typeof saved === 'string' && saved !== '') start(saved);
+    else say('No card is placed here yet. Until you choose what the card makes, this block shows nothing.',
+      button('Choose what the card makes', () => { start(undefined).then((K) => { if (K) ctx.set(key, fresh(K)); }); }));
+    return box;
+  }
+
   /* One prop's editor. `ctx` is { get(key), set(key, value) } where undefined means "absent";
      `o` carries { id (unique id prefix), aria (accessible-name prefix), path (where this sits),
      fields (the block's top-level fields), all() (its current props), rerender() (after a
@@ -165,6 +238,8 @@
         const hint = hintOf(schema); if (hint) box.appendChild(h('p', { class: 'hint', text: hint }));
         return box;
       }
+      case 'cardslot':
+        return cardSlotEl(schema, key, ctx, label, path);
       case 'object': {
         const group = h('fieldset', { 'data-prop': path, 'data-prop-row': path }, h('legend', { text: label }));
         const hint = hintOf(schema); if (hint) group.appendChild(h('p', { class: 'hint', text: hint }));
@@ -218,12 +293,14 @@
         return h('p', { class: 'hint lib-unknown-kind', 'data-prop-row': path, text: label + ': this kind of field ("' + schema.kind + '") has no editor here yet. Its saved value is kept as it is.' });
     }
   }
-  function firstBlockName() { const ark = CMS_BLOCK_RESOLVERS.find((b) => !b.legacy); return ark ? ark.name : ''; }
+  /* a typed block (legacy, or the site's own such as the Card slot) has no Ark block behind it: no thumbnail, example or glossary */
+  const isTyped = (b) => b.legacy || b.site;
+  function firstBlockName() { const ark = CMS_BLOCK_RESOLVERS.find((b) => !isTyped(b)); return ark ? ark.name : ''; }
   /* a nested block spec ({ block, props }) inside a tab or a section: its type, then its own fields */
   function specEl(lc, i, o) {
     const spec = isObj(lc.get(i)) ? lc.get(i) : { block: firstBlockName(), props: {} };
     const box = h('div', { class: 'lib-spec' });
-    const blockNames = CMS_BLOCK_RESOLVERS.filter((b) => !b.legacy).map((b) => b.name);
+    const blockNames = CMS_BLOCK_RESOLVERS.filter((b) => !isTyped(b)).map((b) => b.name);
     box.appendChild(ctlSelectField({ get: () => spec.block, set: (_k, v) => { lc.set(i, { block: v, props: ArkComponents.starterProps(ArkComponents.arkResolverFor(v), '') }); if (o.rerender) o.rerender(); } },
       'Block', 'block', blockNames, (n) => ArkComponents.labelOf(ArkComponents.arkResolverFor(n)), { ariaLabel: o.aria + ' block' }));
     const props = isObj(spec.props) ? spec.props : {};
@@ -238,6 +315,7 @@
      way to remove it, never hidden. */
   function cmsBlockFields(fields, ctx, opts) {
     opts = opts || {};
+    pruneSlotEditors();   /* a repaint: the card slot editors of the fields it replaced go */
     const box = h('div', { class: 'cms-form lib-fields' });
     const o = { id: opts.id || 'lib', aria: opts.aria || '', path: '', fields, all: opts.all || (() => ({})), rerender: opts.rerender };
     /* [[term]] markup is an Ark block's (its renderer draws the term); a legacy or captured block
@@ -494,11 +572,11 @@
       offered.forEach((block) => {
         const pickId = 'new:' + block.resolver;
         const row = h('div', { class: 'lib-row lib-block', 'data-resolver': block.resolver, 'data-find': (block.label + ' ' + block.description + ' ' + groupLabel + ' ' + block.name).toLowerCase() });
-        row.appendChild(thumbEl(group, block.legacy ? '' : block.name, block.example));
+        row.appendChild(thumbEl(group, isTyped(block) ? '' : block.name, block.example));
         row.appendChild(h('div', { class: 'lib-words' }, h('span', { text: block.label }), h('small', { text: block.description })));
         /* Insert puts the block in as it comes (its registry example; a legacy block with its name
            as visible text, never empty); Customize fills it in first */
-        const starter = () => (block.legacy ? ArkComponents.starterProps(block.resolver, block.label) : taggedLinks(fieldsOfBlock(block.name), clone(block.example)));
+        const starter = () => (isTyped(block) ? ArkComponents.starterProps(block.resolver, block.label) : taggedLinks(fieldsOfBlock(block.name), clone(block.example)));
         const insert = insertButton(pickId, (point) => insertNew(block.resolver, starter(), uniqueLabel(block.label, components.masters), point));
         const custom = h('button', { type: 'button', class: 'btn small', text: 'Customize', title: 'Fill it in, then insert it or save it to the Library', 'aria-expanded': String(libCustom === block.resolver) });
         custom.addEventListener('click', () => {
@@ -557,7 +635,7 @@
       return refusals;
     };
     const ctx = { get: (prop) => fresh.props[prop], set: (prop, v) => { if (v === undefined) delete fresh.props[prop]; else fresh.props[prop] = v; check(); } };
-    const drawFields = () => { fieldsHost.textContent = ''; fieldsHost.appendChild(cmsBlockFields(fields, ctx, { id: 'lib-new', aria: '', all: () => fresh.props, glossary: !block.legacy, rerender: () => { drawFields(); check(); } })); };
+    const drawFields = () => { fieldsHost.textContent = ''; fieldsHost.appendChild(cmsBlockFields(fields, ctx, { id: 'lib-new', aria: '', all: () => fresh.props, glossary: !isTyped(block), rerender: () => { drawFields(); check(); } })); };
     form.appendChild(ctlField({ get: () => fresh.label, set: (_k, v) => { fresh.label = v; } }, 'Name', 'label', { type: 'text', ariaLabel: 'New component name', hint: 'What the Library calls it' }));
     form.append(previewHost, fieldsHost, refusalsHost);
     drawFields();
@@ -580,5 +658,5 @@
   }
 
   A.provide({ cmsOpenMasterInLibrary: cmsOpenMasterInLibrary, renderLibrary: renderLibrary,
-    cmsBlockFields: cmsBlockFields, cmsFieldsFor: cmsFieldsFor, cmsBlockRefusals: cmsBlockRefusals, cmsRefusalList: cmsRefusalList });
+    cmsBlockFields: cmsBlockFields, loadCardKit: loadCardKit, cmsFieldsFor: cmsFieldsFor, cmsBlockRefusals: cmsBlockRefusals, cmsRefusalList: cmsRefusalList });
 })();

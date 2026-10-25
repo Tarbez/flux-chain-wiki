@@ -86,7 +86,7 @@
      (flx/flux-spec/registry/role-letters.json: name + summary for G, Y, V, M, C, S). J is the one
      letter the registry leaves to each record type (manifest-types.json), so its line says that. */
   var BLOCKS = [
-    { text: 'G',            under: 'who',       means: 'G is the role letter for the Ghost identity key: who signed this record.' },
+    { text: 'G',            under: 'who',       means: 'G is the role letter for the signing key: who signed this record.' },
     { text: 'YLEDGERENTRY', under: 'what kind', means: 'Y is the role letter for the record type: what kind of record this is. What it means is the resolver’s job, not the chain’s.' },
     { text: 'V3',           under: 'version',   means: 'V is the role letter for the version: which version of the grammar the record follows.' },
     { text: 'M1760…',       under: 'when',      means: 'M is the role letter for the moment: when the record was made, in Unix seconds.' },

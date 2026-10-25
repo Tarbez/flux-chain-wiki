@@ -1,4 +1,5 @@
-/* The card's art around the page while a visitor wears a card (js/ark/skin-site.js). The art is the NFT session's
+/* The card's art around the page while a visitor wears a card (js/ark/skin-site.js). The wearer's menu in the header is
+   the NFT session's (js/nft/user-navbar.js, styled in css/nft-card.css). The art is the NFT session's
    js/nft/scene.js, with its own rules in css/nft-card.css. Linked only when a skin goes on (ArkUI.loadSheet).
 
    The world: the card's backdrop, aura, signal and particles as the page's background, only where the ring world is
@@ -13,6 +14,37 @@
 /* home's labels name the rings the card's world now covers: they wait under it with the rings */
 #scene:has(.card-world[data-shown="true"]) .world-tags { visibility: hidden; }
 
-/* The avatar: the card's art cut square, in the account button's icon place. The button keeps its words and its name. */
-.header-account-avatar { display: inline-block; flex: none; width: 22px; height: 22px; border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px hsl(var(--border-default)); }
-.header-account-link[data-card-avatar] > .native-icon { display: none; }
+/* The wearer's menu in the header (js/nft/user-navbar.js, mounted by js/ark/skin-site.js): the card's icon alone, at every
+   width. With its "Card N" words the bar ran out of room and dropped one of the site's own controls (Mesh Explorer at 1280
+   and 1440, the MENU at 390, measured 2026-10-24). The number and name are in the menu and on /account. */
+.header-user-zone { display: inline-flex; flex: none; }
+.header-user-zone .defxn-seal__text { display: none; }
+.header-user-zone .defxn-seal--mark { padding: 0 4px; }
+/* Phones: no room for one more control even as an icon (the MENU dropped at 390 and 561, measured 2026-10-24). The card shows on /account, where the
+   Account button leads and where keys are asked, with its full seal; the bar keeps every site control. */
+@media (max-width: 639px) { .header-user-zone { display: none; } }
+
+/* Fixed-size pieces keep their own padding (skin audit, 2026-10-25). A card's "airy" density gives every container part
+   24px of padding. The bar's page links are a 36px segmented control: the padding squeezed Overview and Mesh Explorer to
+   14px tall and showed the divider colour as a block behind them. The Products panel is a fixed-height grid and its foot
+   a one-line key row: the padding took a row of products away at 720px tall. The skin's other rules still reach them. */
+#scene .ark-header .dx-bar__nav[data-ark-skin-density] { padding:0; }
+#scene .ark-header .dx-switch__panel[data-ark-skin-density] { padding:0; }
+#scene .dx-switch__panel .dx-switch__foot[data-ark-skin-density] { padding:8px 14px; }
+/* The panel stays the kit's grid (find, rail, list, preview, foot). A card's "columns" layout made it a flex row on a
+   phone, so the category list and the foot shrank to their content (197px of 358px at 390 wide). */
+#scene[data-ark-skin] .ark-header .dx-switch__panel:not([hidden]) { display:grid; }
+
+/* The kit's derived colours follow the skin (skin audit, 2026-10-25). The kit works out --dx-edge (every bar control's
+   edge) and --dx-link on :root and on [data-theme], from the page's own tokens. A skin sets its tokens on #scene, so
+   those two kept the page's colours under any skin: the bar's segment dividers and the Get FXN Browser edge stayed
+   orange. The same two rules again on the skin's root, so they read the skin's tokens. */
+#scene[data-ark-skin] { --dx-edge: hsl(var(--border-control, var(--border-strong))); --dx-link: var(--reference); }
+:root[data-theme="ember-light"] #scene[data-ark-skin] { --dx-link: var(--reference-600); }
+
+/* The Products panel opens at once under a skin (skin audit, 2026-10-25). Ark UI dresses a part when it first shows, in
+   small slices over about two seconds, and each slice restarted the kit's 0.16 s fade-in (dx-switch-in, from opacity 0).
+   Under card 512 the panel stayed invisible for 2 s after the press; a new category and the preview did the same. */
+#scene[data-ark-skin] .dx-switch__panel:not([hidden]),
+#scene[data-ark-skin] .dx-switch__panel :is(.dx-lane, .dx-resolvers):not([hidden]),
+#scene[data-ark-skin] .dx-switch__preview > * { animation: none; }

@@ -63,7 +63,7 @@ assert(seo.includes('"name": "DEFXN"'), 'SEO data uses the canonical product nam
 assert(/<title>[^<]*\bDEFXN\b[^<]*<\/title>/.test(fs.readFileSync('index.html', 'utf8')), 'public title uses the canonical product name');
 assert(fs.readFileSync('admin.html', 'utf8').includes('<title>Flux Protocol admin</title>'), 'admin title uses the canonical product name');
 assert(fs.readFileSync('admin-app.html', 'utf8').includes('<title>Flux Protocol content</title>'), 'content editor title uses the canonical product name');
-/* 2026-10-24: the header button for /download read "Run DEFXN". The browser rebrand and the journey fix renamed it "Get FXN Browser"; the owner then named the product DEFXN Grid (2026-10-24), so it reads "Get DEFXN Grid". */
-assert(fs.readFileSync('js/content/manifests/nav.js', 'utf8').includes('"value": "Get DEFXN Grid"'), 'navigation uses the canonical product name');
+/* 2026-10-24: the header button for /download read "Run DEFXN". The browser rebrand and the journey fix renamed it "Get FXN Browser"; the owner then named the product DEFXN Grid and settled on FXN Browser (both 2026-10-24), so it reads "Get FXN Browser". */
+assert(fs.readFileSync('js/content/manifests/nav.js', 'utf8').includes('"value": "Get FXN Browser"'), 'navigation uses the canonical product name');
 
 console.log('PASS: Batch 1 documentation topology, status vocabulary, evidence records, and product naming.');

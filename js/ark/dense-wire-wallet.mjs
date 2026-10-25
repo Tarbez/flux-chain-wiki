@@ -45,21 +45,25 @@ const WIRE_TIMEOUT_MS = 15000;
 
 /* ---- endpoint, and the networks a holder can point this wallet at ---
    Directed 2026-10-16 ("make sure the ability to change the networks").
-   Production stays the default; anything else is an explicit, visible
+   The FXN devnet is the default; anything else is an explicit, visible
    choice (a real UI control in account.js), never silently assumed --
    and still bounded by index.html's own CSP connect-src, so no choice
    here can reach a host that CSP does not already allow. */
 export const KNOWN_NETWORKS = [
-  /* the public node: nothing is live, so it is the public devnet. The id stays "production": browsers saved it as their choice. */
-  { id: "production", label: "Public devnet", url: "wss://nodes.defxn.com/ws" },
+  /* The default (first entry): the fxn devnet on bk2 and mk2 (devnet-deploy-2026-10-23/DEPLOY.md), the chain that holds
+     genesis, PVAs and skins. Owner, 2026-10-25: the defxn site names this one network as its devnet. */
+  { id: "fxn-devnet", label: "FXN devnet", url: "wss://devnet.defxn.com/ws" },
   { id: "local-devnet", label: "Local devnet", url: "ws://127.0.0.1:19501/ws" },
+  /* The older chain the other nodes still run (no network id, no genesis key, no mint). It moves to the fxn devnet when
+     every node runs it (DEVNET-MAINNET-PLAN.md). The id stays "production": browsers saved it as their choice. */
+  { id: "production", label: "Old public chain", url: "wss://nodes.defxn.com/ws" },
 ];
 const NETWORK_STORAGE_KEY = "defxn.dense-wire.network.v1";
 
 /** Resolution order: `?ws=` override, then a page global, then whatever
  *  network this browser last chose (persisted locally, convenience
  *  only -- never trusted for anything security-relevant), then
- *  production. */
+ *  the FXN devnet. */
 export function resolveWireUrl() {
   try {
     const explicit = new URLSearchParams(location.search).get("ws");
@@ -258,31 +262,33 @@ function approvedOnly(signer, approved) {
   };
 }
 
-/** Full scoped-authorization review, then the real signature. Refuses
+/** Full scoped-authorization review, then the real signature. Every signing surface on this site goes through it (an FXN
+ *  send here, a skin mint in js/ark/chain-cards.mjs): `action`, `scope`, `authority`, `configuration` and `denies`
+ *  name what this one signature authorizes. Refuses
  *  outright if that modal is not loaded: per the workspace law, every
  *  signing surface shows the full modal, so a missing modal means no
  *  signature, never a silent fallback. */
-async function reviewAndSign({ who, signer, wireUrl, title, description, claims, manifest, facts, run }) {
+export async function reviewAndSign({ who, signer, wireUrl, title, description, claims, manifest, facts, run,
+  action = "native.transfer", scope = "fxn.transfer", authority = "(none: a holder-signed FXN transfer, not a DAO action)",
+  configuration = "dense-wire native-token grammar · KNXFER1", denies = "scope does not authorize any other amount, recipient or chain" }) {
   const dialog = window.ArkUI && window.ArkUI.authorizationDialog;
   if (!dialog || !window.ArkAuthorizationView) {
     throw new Error("The signing review did not load (js/ark/authorization-dialog.js). Nothing was signed. Reload the page and try again.");
   }
   const unsigned = await bytesToSign(signer.pubHex, run);
   const digest = await sha256Hex(unsigned);
-  const action = "native.transfer";
-  const scope = "fxn.transfer";
   const view = window.ArkAuthorizationView.scopedAuthorizationView({
     title,
     description: description + " Review exactly what this signs before approving. Nothing is signed or sent until you approve.",
     requester: (who.displayName ? who.displayName + " · " : "") + signer.pubHex,
     network: "dense-wire · " + wireUrl,
-    authority: "(none: a holder-signed FXN transfer, not a DAO action)",
-    configuration: "dense-wire native-token grammar · KNXFER1",
+    authority,
+    configuration,
     scope,
     action,
     manifestDigest: digest,
     claimStack: ["primary authorize " + action + " for exact manifest " + digest].concat(claims, [
-      "scope does not authorize any other amount, recipient or chain",
+      denies,
       "trust zero",
     ]).join("\n"),
     manifest,
@@ -327,6 +333,10 @@ export async function sendFxn({ who, wire, amount, recipient }) {
   if (toKeyHex === signer.pubHex) throw new Error("The recipient is the same key you're signed in as. Nothing would move.");
   const units = BigInt(String(amount).trim());
   if (!(units > 0n)) throw new Error("Enter a whole, positive amount of FXN to send.");
+  // Owner, 2026-10-25: a send between two of your own public ids (or one and your root) is public forever, and it
+  // shows anyone that both are you. The review says so first. `linkRisk` reads the opened file only; it sends nothing.
+  const risk = who.linkRisk ? await who.linkRisk(signer.pubHex, toKeyHex) : null;
+  const warning = risk ? `This send links ${risk.from} and ${risk.to} in public. Anyone who reads the chain can tell both are you. It cannot be undone.` : "";
   const head = await wire.chainHead(signer.pubHex);
   const pos = head.kind === "head" ? head.length : 0;
   const prev = head.kind === "head" ? head.headCid : "0".repeat(64);
@@ -340,11 +350,11 @@ export async function sendFxn({ who, wire, amount, recipient }) {
   const now = Date.now();
   const signed = await reviewAndSign({
     who, signer, wireUrl: wire.url,
-    title: `Send ${units} FXN to ${short(toKeyHex)}`,
-    description: "This is the whole action: your signature alone moves the value, the recipient does nothing.",
+    title: risk ? `Warning: send ${units} FXN to your own ${risk.to}` : `Send ${units} FXN to ${short(toKeyHex)}`,
+    description: (warning ? warning + " " : "") + "This is the whole action: your signature alone moves the value, the recipient does nothing.",
     claims: [`evidence recipient ${toKeyHex}`, `evidence amount ${units}FXN`, `evidence chain ${BASE_CHAIN_ID}`],
     manifest: { schema: "dense-wire.native-transfer/1", sender: signer.pubHex, recipient: toKeyHex, amount: units.toString() + "FXN", chainId: BASE_CHAIN_ID, at: now },
-    facts: [{ label: "Amount", value: `${units} FXN` }, { label: "Recipient", value: toKeyHex }],
+    facts: (warning ? [{ label: "Links your ids", value: warning }] : []).concat([{ label: "Amount", value: `${units} FXN` }, { label: "Recipient", value: toKeyHex }]),
     run: (s) => buildNativeTransfer(s, { pos, prev, toKeyHex, chainId: BASE_CHAIN_ID, amount: units, now }).then((r) => r.text),
   });
   return parseNativeSendReply(await wire.sendLine(`NATIVE_SEND\t${signed}`));

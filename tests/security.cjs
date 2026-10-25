@@ -23,13 +23,14 @@ vm.runInContext(fs.readFileSync('js/ark/page-loader.js','utf8'), context);
  assert(connect.split(' ').every(origin => origin === "'self'" || /^(http:\/\/(127\.0\.0\.1|localhost):8766|https:\/\/(public|st[1-9]|cd1)\.defxn\.com|wss:\/\/nodes\.defxn\.com|ws:\/\/(127\.0\.0\.1|localhost):19501)$/.test(origin)), 'Account/CMS may contact its own host; Explorer is limited to local Miner and named public/storage hosts; the wallet to the dense-wire chain-server: ' + connect);
  assert(!connect.includes('*'), 'connect-src must never use a wildcard');
  assert(!html.includes('js/resolvers/logo.js'));
+ // (the sample site hrefs were /experiments, a page the owner deleted 2026-10-24; any site path proves the same rule)
  // A CTA may send a visitor only within this site. Reason: `window.location.assign(p.href)` took whatever copy said, so a
  // `javascript:` or `//host` href in a content file would have run script or redirected off-site. Not reachable from a visitor
  // today (same trust as editing the JS), which is exactly why it is cheap to close now and expensive to find later.
  {
   const ark = vm.createContext({});
   vm.runInContext(fs.readFileSync('js/ark/props.js','utf8'), ark);
-  const ok = ['#', '#/about', '#/experiments/lab', '/', '/experiments', '/a/b?c=1#d'];
+  const ok = ['#', '#/about', '#/explore', '/', '/stats', '/a/b?c=1#d'];
   const bad = ['javascript:alert(1)', 'JaVaScRiPt:alert(1)', ' javascript:alert(1)', 'data:text/html,<script>1</script>', 'vbscript:x', '//evil.example', '/\\evil.example', '\\\\evil.example',
    'https://evil.example', 'http://evil.example', 'about:blank', '#/a b', '/\t/evil.example', '', null, undefined, 42, {}, ['#/a']];
   for (const value of ok) assert.equal(ark.ArkProps.isSiteHref(value), true, 'should allow ' + value);
@@ -41,8 +42,8 @@ vm.runInContext(fs.readFileSync('js/ark/page-loader.js','utf8'), context);
   vm.runInContext(fs.readFileSync('js/ark/props.js','utf8'), cta);
   vm.runInContext(fs.readFileSync('js/resolvers/cta.js','utf8'), cta);
   const click = (href) => { let handler; registered.decorate({ classList: { add() {} }, addEventListener: (t, h) => { handler = h; } }, { href }); handler(); };
-  click('#/about'); click('javascript:alert(1)'); click('//evil.example'); click('https://evil.example'); click('/experiments'); click(undefined);
-  assert.deepEqual(assigned, ['#/about', '/experiments'], 'only site hrefs navigate');
+  click('#/about'); click('javascript:alert(1)'); click('//evil.example'); click('https://evil.example'); click('/stats'); click(undefined);
+  assert.deepEqual(assigned, ['#/about', '/stats'], 'only site hrefs navigate');
   assert.deepEqual(events, ['ark:enter'], 'an absent href still fires the enter event; a refused one fires nothing');
  }
  // The manifest index writes each id into a script tag. Reason: the ids are hardcoded today, but the admin editor rewrites this

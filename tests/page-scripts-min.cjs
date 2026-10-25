@@ -64,7 +64,7 @@ const builtKeys = Object.keys(plan.hashes);
   /* a vendor chunk is generated too, by its own esbuild pipeline: either reason keeps a generated file unbuilt */
   for (const script of generatedScripts) assert(/generated|another pipeline/.test(why(script)), script + ' is generated: its generator (or its own pipeline) owns its bytes');
   assert(/nothing to gain/.test(why('js/ark/ml-dsa.js')), 'js/ark/ml-dsa.js is an esbuild bundle already: a second copy would gain nothing');
-  for (const script of ['js/pages/account.js', 'js/pages/explorer.js', 'js/pages/stats.js', 'js/pages/home.js', 'js/pages/resolver-math.js', 'js/studio.js', 'js/ark/mesh-directory-client.js', 'js/content/resolution-products.js'])
+  for (const script of ['js/pages/account.js', 'js/pages/explorer.js', 'js/pages/stats.js', 'js/pages/home.js', 'js/pages/resolver-math.js', 'js/ark/mesh-directory-client.js', 'js/content/resolution-products.js'])
     assert(!exempt.has(script), script + ' is built: it is the budget this change exists for');
   assert(fs.readFileSync(plan.manifest ? pages.MANIFEST : '', 'utf8') === plan.manifest.toString(), 'js/min/manifest.js is what the build writes');
   assert.deepEqual(pages.orphans(ROOT, plan.outputs), [], 'nothing under js/min/ is left from a script that is no longer built');

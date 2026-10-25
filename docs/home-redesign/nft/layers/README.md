@@ -82,7 +82,10 @@ viewBox unit is one card unit.
 | divider | `0 0 360 24` | the line above the footer, at (56, 568) |
 | emblem | `0 0 30 34` | beside the two footer lines |
 
-Colours are only these names, written as `var(--name)` in an attribute or a style:
+Colours are only these names, written as `var(--name)` in an attribute or a style. The one list is
+`INKS` in `js/nft/card-chrome.js`.
+
+Structure (the same on every card):
 
 | Name | Colour |
 |---|---|
@@ -91,9 +94,21 @@ Colours are only these names, written as `var(--name)` in an attribute or a styl
 | `--line` | a hairline, white at 42% |
 | `--faint` | a faint hairline, white at 7.5% |
 | `--rule` | the divider line, white at 16% |
-| `--acc` | the palette's accent (`--c`) |
-| `--acc2` | the palette's light (`--b`) |
-| `--state` | green when the status is Minted, grey otherwise |
+| `--state` | green when the status is Minted, grey otherwise (a meaning colour: no skin changes it) |
+
+Roles (the design laws 71 to 77). Name the role a stroke plays, not a hue:
+
+| Name | Role | On the card | On a site that wears the card |
+|---|---|---|---|
+| `--primary` | identity: headings, the hero, the card's name | the palette's light (`--b`) | the site's `--primary` |
+| `--complementary` | the one action a view asks for | the palette's accent (`--c`) | the site's `--secondary` |
+| `--referential` | data that points at something: a name, an id, a link | the light, held back (72%) | the site's `--reference` |
+
+A role colour is spent on purpose: draw structure in the structure names, and give a role only to the
+stroke that carries that role. New drawings use the role names.
+
+`--acc` (the palette's accent) and `--acc2` (the light) are the names drawings used before roles. They
+still work and keep their exact colours: `--acc` is the complementary hue, `--acc2` the primary hue.
 
 For a 1-pixel line, use `stroke-width="1" vector-effect="non-scaling-stroke"`.
 

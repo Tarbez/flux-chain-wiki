@@ -61,7 +61,7 @@
   function entry(key) { return ArkUI.pageCatalog && ArkUI.pageCatalog[key]; }
   K.href = function (key, query) { var e = entry(key); return e ? ArkUI.route.href(e.path) + (query ? '?' + query : '') : '#'; };
   /* a link to a page of the site: the router follows it (js/hero-motion.js reads data-scene-link) */
-  K.link = function (a, key, query) { a.dataset.sceneLink = key; a.href = K.href(key, query); return a; };
+  K.link = function (a, key, query) { a.dataset.sceneLink = key; a.href = K.href(key, query); if (query) a.dataset.routeQuery = query; return a; };   /* routeQuery: as W.link in js/pages/world-sheet.js */
   /* a link to a choice inside the page: the same address, for a new tab or a copied link, but the page handles the click */
   K.stayLink = function (a, key, query) { a.href = K.href(key, query); return a; };
   K.go = function (key, query) { return ArkUI.pageRouter.navigate(key, { query: query || '' }); };

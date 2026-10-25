@@ -5,7 +5,7 @@ ArkManifest.define({
   "route": "/what-is-a-resolver",
   "group": "page",
   "meta": {
-    "next": "deployment",
+    "next": "resolutions",
     "back": "zero",
     "diagrams": [
       {
@@ -343,7 +343,7 @@ ArkManifest.define({
       "label": "Hub link target: deploy a resolver",
       "kind": "link",
       "section": "Hub",
-      "value": "route:deployment"
+      "value": "route:resolutions/deployments"
     },
     "EXPLORE.LINK": {
       "label": "Hub link: Explore product",

@@ -168,7 +168,7 @@ ArkManifest.define({
       "label": "Local1",
       "kind": "text",
       "section": "Deployer layout",
-      "value": "Auth Kit and private signing keys"
+      "value": "FXN ID file and private signing keys"
     },
     "LOCAL2": {
       "label": "Local2",

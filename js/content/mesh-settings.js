@@ -131,10 +131,18 @@ var ArkMeshSettings = (function () {
       y: num(row && row.y, 0, -1.5, 1.5)
     };
   }
+  /* Every entry already in the saved data stays (each one still checked by sanitizePageEntry), in the data's own order: a page that left
+     PAGES (the retired 'proximity' and 'lab') is not dropped, because saved CMS data is never rewritten and writing the site back must
+     round-trip exactly (tests/site-bundle.test.mjs, tests/mesh-settings.cjs). Pages in PAGES that the data lacks get their defaults. */
   function sanitizePages(p) {
     var out = {};
+    var has = function (o, k) { return Object.prototype.hasOwnProperty.call(o, k); };
+    if (p && typeof p === 'object') Object.keys(p).forEach(function (id) {
+      if (id === '__proto__' || !p[id] || typeof p[id] !== 'object') return;
+      out[id] = sanitizePageEntry(p[id]);
+    });
     PAGES.forEach(function (page) {
-      out[page.id] = sanitizePageEntry((p && p[page.id]) || PAGE_DEFAULTS[page.id]);
+      if (!has(out, page.id)) out[page.id] = sanitizePageEntry((p && p[page.id]) || PAGE_DEFAULTS[page.id]);
     });
     return out;
   }

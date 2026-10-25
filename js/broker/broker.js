@@ -21,6 +21,11 @@
                  serves other people's sites. A yes lasts for this tab and
                  this identity only: it is never stored, and unlocking a
                  different identity forgets every yes.
+     PUBLIC IDS  (owner, 2026-10-25) a site sees one public id of the identity,
+                 never the root. The person picks which one, per site. A site
+                 signs only as the public id it was shown. Showing a second
+                 public id to the same site warns first: that site could then
+                 link the two forever.
 
    There is no "sign everything from this origin" switch and none should be
    added here -- that would turn the allowlist into the consent, which is
@@ -38,8 +43,8 @@
   var queuedIdentityRequests = []; /* [event, ...] held while the person unlocks -- see
     handleIdentityRequest's own comment for why this exists and isn't a single slot
     the way queuedSignRequest is. */
-  var sharedWith = Object.create(null); /* origin -> true: the person said yes to sharing
-    the CURRENT identity with that origin, in this tab. Cleared on every identity change. */
+  var sharedWith = Object.create(null); /* origin -> public id key: the person said yes to showing
+    that public id to that origin, in this tab. Cleared when a different file is opened. */
   var shareQueue = []; /* identity requests from origins with no yes yet, asked one at a time */
   var shareAsking = null; /* the request the share prompt shows now */
   var everReceivedRequest = false; /* has ANY *.defxn.com page ever actually asked
@@ -66,15 +71,35 @@
       return Array.from(new Uint8Array(bytes)).map(function (byte) { return byte.toString(16).padStart(2, '0'); }).join('');
     });
   }
-  function publicFields(identity) {
-    return { publicKeyB64: identity.publicKeyB64, displayName: identity.displayName || '' };
+  function hexToB64(hex) { var s = ''; for (var i = 0; i < hex.length; i += 2) s += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16)); return btoa(s); }
+  function idByKey(key) { return (who && who.publicIds || []).filter(function (id) { return id.key === key; })[0] || null; }
+  /* What a site learns: one public id's key and its name. Never the file's name, which is the same for every id. */
+  function publicFields(id) {
+    return { publicKeyB64: hexToB64(id.key), displayName: id.name };
   }
+  /* The public id a site signs as: the one it was shown, else the current one. */
+  function idFor(origin) { return idByKey(sharedWith[origin]) || (who && who.publicId) || null; }
   function reply(event, message) {
     try { event.source.postMessage(message, event.origin); } catch (_) { /* source window gone; nothing to tell it */ }
   }
 
+  /* The bar names the current public id, and lets the person switch it when the file holds more than one. */
   function renderStatus() {
-    $('brokerBarStatus').textContent = who ? ('Signed in · ' + (who.displayName || who.publicKeyB64.slice(0, 10) + '…')) : 'Not signed in';
+    var bar = $('brokerBarStatus');
+    bar.textContent = !who ? 'Not signed in' : (who.publicId ? 'Signed in as ' + who.publicId.name : 'Signed in · no public id');
+    var ids = (who && who.publicIds) || [];
+    if (ids.length < 2) return;
+    ids.forEach(function (id) {
+      if (who.publicId && id.key === who.publicId.key) return;
+      var b = h('button', { type: 'button', class: 'btn', text: 'Use ' + id.name, onclick: function () { who.usePublicId(id.key); } });
+      bar.appendChild(document.createTextNode(' '));
+      bar.appendChild(b);
+    });
+  }
+  /* A site asks again: answer with the id it knows, unless the person now uses another id. Then ask, and warn. */
+  function needsAsk(origin) {
+    var shared = idByKey(sharedWith[origin]);
+    return !shared || Boolean(who.publicId && who.publicId.key !== shared.key);
   }
 
   /* Reuses the exact dialog authorizePublish() in js/admin/admin.js builds,
@@ -86,20 +111,23 @@
     var description = data.description || 'Review the exact bytes before this identity signs them.';
     var signingMessage = String(data.signingMessage || '');
     authorizationDigest(signingMessage).then(function (digest) {
+      var id = idFor(event.origin);
+      if (!id) { reply(event, { type: 'flux-broker:signed', requestId: data.requestId, ok: false, error: 'This FXN ID has no public id. Add one on your defxn account page, then try again.' }); return; }
+      var idB64 = hexToB64(id.key);
       var view = window.ArkAuthorizationView.scopedAuthorizationView({
         title: title, description: description,
         requester: event.origin,
         network: data.action || 'flux.broker.sign',
-        authority: who.publicKeyB64,
+        authority: idB64,
         configuration: data.capability || 'identity.sign',
         scope: data.capability || 'identity.sign',
         action: data.action || 'flux.broker.sign',
         manifestDigest: digest,
-        claimStack: 'primary authorize ' + (data.action || 'flux.broker.sign') + ' for ' + event.origin + '\nconstraint owner ' + who.publicKeyB64 + '\nfailure reject altered or cross-site bytes\ntrust zero',
+        claimStack: 'primary authorize ' + (data.action || 'flux.broker.sign') + ' for ' + event.origin + '\nconstraint owner ' + idB64 + '\nfailure reject altered or cross-site bytes\ntrust zero',
         manifest: data.manifest || {},
         authorizationBytes: signingMessage,
         actionPayloadBytes: signingMessage,
-        facts: [{ label: 'Requesting site', value: event.origin }],
+        facts: [{ label: 'Requesting site', value: event.origin }, { label: 'Signs as', value: id.name }],
       });
       var titleId = 'brokerAuthTitle-' + data.requestId, descId = 'brokerAuthDesc-' + data.requestId;
       var dialog = document.createElement('flux-authorization-dialog');
@@ -137,10 +165,11 @@
         dialog.state = 'signing';
         close.disabled = true; denyButton.disabled = true; approveButton.disabled = true;
         approveButton.textContent = 'Signing locally…';
-        var signer = who;
-        signer.sign(signingMessage).then(function (signature) {
+        var signer = who.publicIdSigner(id.key);
+        signer.signText(signingMessage).then(function (signatureHex) {
           finish();
-          reply(event, { type: 'flux-broker:signed', requestId: data.requestId, ok: true, publicKeyB64: signer.publicKeyB64, signature: signature });
+          sharedWith[event.origin] = id.key; /* a signature shows the key, so the site now knows this id */
+          reply(event, { type: 'flux-broker:signed', requestId: data.requestId, ok: true, publicKeyB64: idB64, signature: hexToB64(signatureHex) });
         }).catch(function (error) {
           finish();
           reply(event, { type: 'flux-broker:signed', requestId: data.requestId, ok: false, error: (error && error.message) || 'sign-failed' });
@@ -179,44 +208,86 @@
   }
 
   function shareIdentity(event) {
-    reply(event, { type: 'flux-broker:identity', identity: publicFields(who) });
-    $('brokerStatus').textContent = event.origin + ' has your identity now -- switch back to that tab to continue.';
+    var id = idByKey(sharedWith[event.origin]);
+    reply(event, { type: 'flux-broker:identity', identity: id ? publicFields(id) : null });
+    $('brokerStatus').textContent = event.origin + ' knows you as ' + (id ? id.name : '') + ' now. Switch back to that tab to continue.';
   }
 
   /* Every origin asks once per identity per tab (see SHARING in the header).
      The prompt names the exact origin, because a <label>.defxn.com page
      may be someone else's site. */
   function askToShare(event) {
-    if (sharedWith[event.origin]) { shareIdentity(event); return; }
+    if (!needsAsk(event.origin)) { shareIdentity(event); return; }
     shareQueue.push(event);
     showNextShare();
   }
 
   function showNextShare() {
     if (shareAsking) return;
-    while (shareQueue.length && sharedWith[shareQueue[0].origin]) shareIdentity(shareQueue.shift());
+    while (shareQueue.length && !needsAsk(shareQueue[0].origin)) shareIdentity(shareQueue.shift());
     var box = $('brokerShare');
     if (!shareQueue.length) { box.hidden = true; box.textContent = ''; return; }
     var event = shareAsking = shareQueue.shift();
+    var ids = who.publicIds || [];
     box.textContent = '';
-    box.appendChild(h('p', { class: 'gate-eyebrow', text: 'SHARE YOUR IDENTITY' }));
-    box.appendChild(h('p', { id: 'brokerShareQuestion', text: event.origin + ' asks for your public key and name.' }));
-    box.appendChild(h('p', { class: 'hint', text: 'It cannot sign with them. Each signature asks you again. Share only with a site you opened yourself.' }));
+    box.appendChild(h('p', { class: 'gate-eyebrow', text: 'SHARE A PUBLIC ID' }));
+    if (!ids.length) {
+      box.appendChild(h('p', { id: 'brokerShareQuestion', text: event.origin + ' asks who you are. This FXN ID has no public id yet.' }));
+      box.appendChild(h('p', { class: 'hint', text: 'Add one on your defxn account page, then open the new file here.' }));
+      var stop = h('button', { type: 'button', class: 'btn', text: 'Don’t share' });
+      box.appendChild(h('div', { class: 'gate-actions' }, stop));
+      stop.addEventListener('click', function () { answerShare(null); });
+      box.hidden = false;
+      return;
+    }
+    box.appendChild(h('p', { id: 'brokerShareQuestion', text: event.origin + ' asks which public id you are. Pick one.' }));
+    var picked = (who.publicId || ids[0]).key;
+    var list = h('div', { class: 'gate-actions', role: 'radiogroup', 'aria-labelledby': 'brokerShareQuestion' });
+    ids.forEach(function (id) {
+      var input = h('input', { type: 'radio', name: 'brokerShareId', value: id.key, checked: id.key === picked });
+      input.addEventListener('change', function () { picked = id.key; });
+      list.appendChild(h('label', {}, input, document.createTextNode(' ' + id.name + (id.label ? ' · ' + id.label : ''))));
+    });
+    box.appendChild(list);
+    box.appendChild(h('p', { class: 'hint', text: 'The site sees that id’s key and name. It cannot sign with them. Each signature asks you again.' }));
     var deny = h('button', { type: 'button', class: 'btn', text: 'Don’t share' });
     var allow = h('button', { type: 'button', class: 'btn primary', text: 'Share with ' + event.origin });
     box.appendChild(h('div', { class: 'gate-actions' }, deny, allow));
-    deny.addEventListener('click', function () { answerShare(false); });
-    allow.addEventListener('click', function () { answerShare(true); });
+    deny.addEventListener('click', function () { answerShare(null); });
+    allow.addEventListener('click', function () { answerShare(picked); });
     box.hidden = false;
     allow.focus();
   }
 
-  function answerShare(yes) {
-    var event = shareAsking; shareAsking = null;
+  /* A site that already knows one public id is about to see another. Says what that costs, then asks again. */
+  function warnSecondId(event, before, after, then) {
+    var box = $('brokerShare');
+    box.textContent = '';
+    box.appendChild(h('p', { class: 'gate-eyebrow', text: 'THIS LINKS TWO PUBLIC IDS' }));
+    box.appendChild(h('p', { id: 'brokerShareQuestion', text: event.origin + ' already knows you as ' + before.name + '.' }));
+    box.appendChild(h('p', { class: 'hint', text: 'If it also sees ' + after.name + ', it can tell both are you. That cannot be undone.' }));
+    var back = h('button', { type: 'button', class: 'btn primary', text: 'Keep ' + before.name });
+    var go = h('button', { type: 'button', class: 'btn', text: 'Show ' + after.name + ' too' });
+    box.appendChild(h('div', { class: 'gate-actions' }, back, go));
+    back.addEventListener('click', function () { then(before.key); });
+    go.addEventListener('click', function () { then(after.key); });
+    box.hidden = false;
+    back.focus();
+  }
+
+  function answerShare(key) {
+    var event = shareAsking;
     if (!event) return;
-    if (!who) { queuedIdentityRequests.push(event); showNextShare(); return; }
-    if (yes) {
-      sharedWith[event.origin] = true;
+    if (!who) { shareAsking = null; queuedIdentityRequests.push(event); showNextShare(); return; }
+    var before = idByKey(sharedWith[event.origin]);
+    var after = key && idByKey(key);
+    if (before && after && before.key !== after.key) {
+      warnSecondId(event, before, after, function (chosen) { shareAsking = null; sharedWith[event.origin] = chosen; shareIdentity(event); showNextShare(); });
+      return;
+    }
+    shareAsking = null;
+    if (after) {
+      sharedWith[event.origin] = after.key;
       shareIdentity(event);
     } else {
       /* One no answers every waiting request from that origin, so a page
@@ -257,7 +328,9 @@
     container: $('brokerAuthContainer'),
     product: 'defxn',
     onChange: function (identity) {
-      if (!identity || !who || identity.publicKeyB64 !== who.publicKeyB64) sharedWith = Object.create(null);
+      /* A new file (a new identity object) forgets every share. Switching public id in the same file does not:
+         a site keeps the id it was shown, and askToShare warns before it sees another. */
+      if (!identity || identity !== who) sharedWith = Object.create(null);
       who = identity || null;
       renderStatus();
       if (who) {

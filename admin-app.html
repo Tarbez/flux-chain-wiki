@@ -350,6 +350,11 @@
 <script src="js/ark/vendor/ark-kit.js" defer></script>
 <script src="js/content/glossary.js" defer></script>
 <script src="js/admin/vendor/cms-blocks.js" defer></script>
+<!-- ARK's structured-state FLX grammar, vendored byte-identical from
+     flux/ark-browser/src/shared/flx-state-grammar.js (tests/versions.cjs fails on drift). It sits in js/vendor/,
+     not js/admin/vendor/, because the public site reads FLX drafts with it too (the World draft, 2026-10-24).
+     Before js/content/components.js and js/content/world.js: a saved data file decodes FLX when it loads (ArkWorld.define threw here when it came later). -->
+<script src="js/vendor/flx-state-grammar.js" defer></script>
 <script src="js/content/components.js" defer></script>
 <script src="js/content/components-data.js" defer></script>
 <script src="js/content/states.js" defer></script>
@@ -358,11 +363,6 @@
 <script src="js/content/canvas-transitions-data.js" defer></script>
 <script src="js/content/element-motion.js" defer></script>
 <script src="js/content/element-motion-data.js" defer></script>
-<!-- ARK's structured-state FLX grammar, vendored byte-identical from
-     flux/ark-browser/src/shared/flx-state-grammar.js (tests/versions.cjs fails on drift). It sits in js/vendor/,
-     not js/admin/vendor/, because the public site reads FLX drafts with it too (the World draft, 2026-10-24).
-     Before js/content/world.js: a saved world's data file decodes FLX when it loads (ArkWorld.define threw here when it came later). -->
-<script src="js/vendor/flx-state-grammar.js" defer></script>
 <script src="js/content/world.js" defer></script>
 <script src="js/content/world-data.js" defer></script>
 <script src="js/content/mesh-settings.js" defer></script>

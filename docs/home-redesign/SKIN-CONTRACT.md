@@ -134,11 +134,10 @@ Layouts are named per part, so each one is designed once:
   - A popover's panel takes the rules, never its wrapper.
   - `edge: cut` is a corner-shape bevel that clips nothing (the copper card had hidden the mega dropdown).
 - **`js/ark/skin-site.js`** is the one entry. It loads the recipe and the chunk, names the site's parts (`js/ark/skin-parts.js`), and applies the skin on `#scene` with the site's locks and its own limits. It then fires `defxn:skin`, and the ring world repaints.
-- **The site's own limits per part** (`DefxnSkinParts.ALLOW`):
-  - The dense navbar and its mega dropdown take a frame and an edge, never tags, strips or list markers.
+- **The card's own rules dress the site** (owner, 2026-10-24). Every part Ark UI names takes every rule the card sends. Ark UI's rule-to-part table decides what each kind can wear, and it takes back what would cover content. The site switches off only what someone saw a reason to switch off on the real page (`DefxnSkinParts.OFF`, empty in code, and the CMS policy below).
+  - Measured on 2026-10-24, 1440x900, cards 263 and 512 on 6 routes: 25 to 49 parts dressed per page. Ark UI took back 12 to 32 decorations per page that would have covered content, and moved no colour.
+  - Before this, a site table (`ALLOW`) listed what each part may take and kept most parts bare. It is retired.
   - The mega dropdown's link chips are not lists.
-  - Reading panels may carry more.
-  This is the product's rule for its parts, on top of Ark UI's rule-to-part table.
 - **The recipe's home** (owner, 2026-10-24): the recipe pieces the site needs move to `js/nft/`, one copy, with a small palettes-and-chrome bundle. The full card art and 3D stay in `docs/home-redesign/nft/` until the NFT design is approved. The site's loader accepts only `js/` paths.
 - **Review entry:** `?skin-sample=27|263|512`. Record 009 is refused. Nothing is stored.
 - **Contrast on the site's own backgrounds.** The product rule has two parts. Every text level meets 4.5:1 on `--canvas` and `--surface`, the same rule as `tests/theme-color-contrast.cjs`. It also meets 4.5:1 on the mega dropdown's backgrounds: the `--primary-100` glow, and `--reference-100` on a focused or hovered card.
@@ -146,8 +145,8 @@ Layouts are named per part, so each one is designed once:
   - After it, they read 5.12 to 5.26:1.
 - **The header's popover swap carries no skin marks.** On the first press, the header swaps in Ark's popover button. That copy used to carry the skin's attributes, and removing the skin left them behind. `js/resolvers/header-popover.js` now skips `data-ark-part`, `data-ark-skin-*` and `data-defxn-part`. `tests/header-ark-parts.cjs` holds this.
 - **The skin report.** Ark UI reports each part, the rules it kept, skipped or took back, and the tokens the contrast rules moved. The report comes from `getArkSkinReport(root)`, the bubbling `ark:skin-report` event and `result.report`. The site reads it with `DefxnSkinSite.report()`.
-- **The CMS skin policy.** `DefxnSkinParts.policy(given, family)` lays content over the code's limits.
-  - Its `allow` replaces a part's rule list. A card family's `allow` replaces both lists for that family's cards.
+- **The CMS skin policy.** `DefxnSkinParts.policy(given, family)` adds the CMS's switches to the code's.
+  - Its `off` lists the rules a part does not wear. A card family's `off` adds to it for that family's cards. A switch only takes a rule away: a family cannot switch back on what every card has off.
   - Its `contrast` rules are added to the site's own rules. A policy can raise the floor but never lower it.
   - `DefxnSkinSite.apply(record, { policy })` previews a draft policy. The CMS skin lab edits it and saves it as FLX.
 
@@ -163,7 +162,7 @@ The site's pages are built from Ark blocks, such as the hero, the tabs, the fact
 | rule | `hero-meta` `pager` `list-row` `tabs-list` `fact` | ornament | the divider piece on the part's rule line |
 | list | `list-rows` | marker | one emblem before each row |
 
-- **One table decides what the site wears.** `DefxnSkinParts.ALLOW` names each part and the elements it takes. A part it does not name wears nothing. The recipe's own part table no longer decides on the site. The CMS skin lab edits this table as content.
+- **The card decides, the site switches off.** Since the owner's decision (2026-10-24), the card's own rules reach every part, and the site's switches (`DefxnSkinParts.OFF` and the CMS policy's `off`) take rules away. Until then a site table (`ALLOW`) named each part and the elements it took. The CMS skin lab edits the switches as content.
 - **One spelling.** Block parts are named in upper case with no hyphen: `tabs-list` is `TABSLIST`, `section-header` is `SECTIONHEADER`. `DefxnSkinSite.ruleKey(name)` turns a reported part into that spelling, so the lab's switches reach Ark UI's block parts.
 - **A decoration never covers content.** Ark UI takes back a tag, strip, emblem or divider that would cover text or a control, and a full frame falls back to its corners. Each one shows as `reverted` in the report, with its reason, so the CMS skin lab shows it as a break. A tag stays on its part's top edge, and a piece's words are never stretched. This fixed three breaks:
   - the tag on callouts covered the tab strip on `/account`, and its words were stretched

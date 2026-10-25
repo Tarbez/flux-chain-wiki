@@ -156,7 +156,7 @@ ArkManifest.define({
       "label": "Secondary action link",
       "kind": "link",
       "section": "Links",
-      "value": "route:deployment"
+      "value": "route:resolutions/deployments"
     },
     "FOOTER.HOME.HREF": {
       "label": "Footer: Home link",

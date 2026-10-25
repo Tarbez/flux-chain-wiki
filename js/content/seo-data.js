@@ -24,6 +24,66 @@ ArkSEO.define({
       "aiSummary": "",
       "aiBlocked": false
     },
+    "worldchain": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "worldidentity": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "worldmeasure": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "worldstats": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "worldworks": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
+    "worldminute": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
     "chain": {
       "title": "Every identity, its own chain — DEFXN",
       "description": "Walk the record that joins a chain: signed, checked against its grammar and signature, replicated to peers, then read by a resolver. Every identity and every resolver runs its own chain.",
@@ -62,16 +122,6 @@ ArkSEO.define({
       "schemaType": "",
       "noindex": false,
       "aiSummary": "",
-      "aiBlocked": false
-    },
-    "deployment": {
-      "title": "Deploy a resolver — DEFXN",
-      "description": "Deploy a resolver in six steps: write its grammar, name its capabilities, choose who can change it, review and sign one launch record, serve it, and watch it in the explorer.",
-      "ogImage": "",
-      "canonical": "",
-      "schemaType": "",
-      "noindex": false,
-      "aiSummary": "You deploy a DEFXN resolver by signing one launch record, which gives it its own chain, names the capabilities it uses and publishes its grammar; then a provider serves it. The explorer and deployer run on the development network; public hosting is not established.",
       "aiBlocked": false
     },
     "concept": {
@@ -446,7 +496,7 @@ ArkSEO.define({
     },
     "account": {
       "title": "Your account — DEFXN",
-      "description": "Verify an Auth Kit locally and inspect its identity facts. Live FXN holdings, Credits, and mesh standing are not linked until their read contracts are verified.",
+      "description": "Open your FXN ID file on this device and check its Master ID, Public IDs and wallets. Live FXN holdings, Credits, and mesh standing are not linked until their read contracts are verified.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -484,9 +534,9 @@ ArkSEO.define({
       "aiSummary": "",
       "aiBlocked": false
     },
-    "stats": {
-      "title": "Mesh performance — DEFXN",
-      "description": "How fast the protocol is, why, and how we found out: a real transfer taken apart block by block, where server time goes, and every wrong turn on the way.",
+    "stats/now": {
+      "title": "Stats overview — DEFXN",
+      "description": "How fast DEFXN is, in five questions: each operation, one batch, one node through the network, the whole fleet, and when each was measured.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -494,9 +544,9 @@ ArkSEO.define({
       "aiSummary": "",
       "aiBlocked": false
     },
-    "stats/gpu": {
-      "title": "GPU benchmark detail — DEFXN",
-      "description": "Why a rented RTX PRO 6000 box was fast: its CPU. The protocol never addresses the GPU. It is signatures and hashing, measured and corrected.",
+    "stats/capabilities": {
+      "title": "Capabilities, measured — DEFXN",
+      "description": "How fast each DEFXN operation runs: swaps, transfers, stake locks and replica stores, on one machine with no network, each in its own unit.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -504,9 +554,9 @@ ArkSEO.define({
       "aiSummary": "",
       "aiBlocked": false
     },
-    "stats/ledger": {
-      "title": "Ledger benchmark detail — DEFXN",
-      "description": "The finance ledger, measured: each identity appends to its own chain of value moves, and one position holds one record. Real signed samples.",
+    "stats/ceiling": {
+      "title": "One node, through the network — DEFXN",
+      "description": "How many swaps a second one DEFXN node took through the real WebSocket wire, by number of connections, and on what machine.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -677,16 +727,6 @@ ArkSEO.define({
     "identity/you": {
       "title": "Your identity — DEFXN",
       "description": "A sample identity: the chain a key file starts and what it holds. Nothing on the page is live.",
-      "ogImage": "",
-      "canonical": "",
-      "schemaType": "",
-      "noindex": false,
-      "aiSummary": "",
-      "aiBlocked": false
-    },
-    "measured": {
-      "title": "Measured — DEFXN",
-      "description": "The capabilities and resolvers DEFXN lists, with the checked cases for each and the dated benchmark runs. Absent measurements show as not measured, never as zero.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",

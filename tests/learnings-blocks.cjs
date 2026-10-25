@@ -141,7 +141,7 @@ const asked = ROUTES.filter((r) => process.argv.length <= 2 || process.argv.slic
   }
   assert(!fs.existsSync(path.join(ROOT, 'js/resolvers/learnings.js')), 'the hand-built reader (js/resolvers/learnings.js) is gone');
   for (const file of ['css/article-reading.css', 'css/learnings.css', 'css/document-flow.css']) assert(!fs.existsSync(path.join(ROOT, file)), file + ' is gone');
-  assert(!/\.(learning|article)-[a-z-]+/.test(read('css/page-layout.css') + read('css/task-page.css') + read('css/site-direction.css') + read('css/settings.css') + read('css/color-system.css')), 'no learning-* / article-* rule is left in the shared stylesheets');
+  assert(!/\.(learning|article)-[a-z-]+/.test(read('css/page-layout.css') + read('css/site-direction.css') + read('css/settings.css') + read('css/color-system.css')), 'no learning-* / article-* rule is left in the shared stylesheets');
   assert(!/data-page\^="article\/"\][^{]*canvas/.test(read('css/site-direction.css')), 'no rule puts the particle canvas back on a note');
   /* Named regression (docs/ux-audit/ledger.md, /learnings "four names", 2026-10-20): the fixed corner button said NOTES
      but was built from the copy key NAV.BACK.TUTORIALS -- the fourth name survived in the key an editor sees in the Content

@@ -4,7 +4,10 @@
    them, so a site and the card cannot disagree.
 
    DefxnCardChrome.fieldOf(record, traits, field)   the text a data-field shows ("name", "dna"...)
-   DefxnCardChrome.colours(record, traits)          the chrome colours: ink dim line faint rule acc acc2 state
+   DefxnCardChrome.colours(record, traits)          the chrome colours: every name in INKS
+   DefxnCardChrome.INKS, INK_SOURCE                 the colour names a drawing may write as var(--name), and the
+                                                    regular expression source that finds them (one list, read by
+                                                    the card, the skin recipe and the world page)
    DefxnCardChrome.chromeSvg(element, record, traits) the element's SVG, colours and fields filled in
    DefxnCardChrome.fill(element, record, traits, colours) the same, with colours given
    DefxnCardChrome.isLive(status), shortId(id)
@@ -30,6 +33,13 @@
     return 'rgba(' + f(0) + ',' + f(8) + ',' + f(4) + ',' + a + ')';
   }
   function cssVar(node, name, fallback) { return getComputedStyle(node).getPropertyValue(name).trim() || fallback; }
+  /* The colours a drawing may name (layers/README.md). Structure: ink, dim, line, faint, rule. Meaning: state (locked).
+     Role (the design laws 71 to 77): primary, complementary, referential. A stroke that names a role takes that role's
+     colour wherever it is drawn: on the card the palette's, on a site the site's role token (skin-recipe.js).
+     acc and acc2 are the names drawings used before roles; they keep their exact colours (acc is the palette's
+     accent, the complementary hue; acc2 the light, the primary hue). */
+  var INKS = ['ink', 'dim', 'line', 'faint', 'rule', 'state', 'primary', 'complementary', 'referential', 'acc2', 'acc'];
+  var INK_SOURCE = 'var\\(--(' + INKS.join('|') + ')\\)';
   // the colours a chrome drawing may name, as var(--ink) and so on (layers/README.md)
   function colours(record, traits) {
     var root = document.documentElement, pal = (traits.picks.palette && traits.picks.palette.attrs) || {};
@@ -37,6 +47,9 @@
     return {
       ink: rgba(ink, 1), dim: rgba(muted, 1), line: rgba(line, 0.42), faint: rgba(line, 0.075), rule: rgba(line, 0.16),
       acc: rgba(pal.c || ink, 1), acc2: rgba(pal.b || ink, 1),
+      // on the card the roles are the palette's own colours: the light is the card's identity, the accent its contrast,
+      // and a reference is the light held back (the palette has two hues; --a is the 3D blocks' near-white tint)
+      primary: rgba(pal.b || ink, 1), complementary: rgba(pal.c || ink, 1), referential: rgba(pal.b || ink, 0.72),
       state: isLive((record || {}).status) ? rgba(cssVar(root, '--nft-live', '156 76% 54%'), 1) : rgba(muted, 1)
     };
   }
@@ -55,7 +68,7 @@
     return String(record[f] == null ? '' : record[f]).toUpperCase();
   }
   function fill(element, record, traits, cols) {
-    var text = String(element.svg || '').replace(/var\(--(ink|dim|line|faint|rule|acc2|acc|state)\)/g, function (m, k) { return cols[k]; });
+    var text = String(element.svg || '').replace(new RegExp(INK_SOURCE, 'g'), function (m, k) { return cols[k]; });
     var doc = new DOMParser().parseFromString(text, 'image/svg+xml'), root = doc.documentElement;
     if (root.nodeName !== 'svg') { console.error('Chrome ' + element.file + ' is not a valid SVG: fix the file in layers/ and run make-layers.mjs.'); return null; }
     Array.prototype.forEach.call(root.querySelectorAll('[data-sketch],title'), function (n) { n.parentNode.removeChild(n); });
@@ -72,5 +85,5 @@
   // one chrome element drawn for any UI piece outside the card: exactly as the card draws it
   function chromeSvg(element, record, traits) { return fill(element, record, traits, colours(record, traits)); }
 
-  window.DefxnCardChrome = { fieldOf: fieldOf, colours: colours, chromeSvg: chromeSvg, fill: fill, isLive: isLive, shortId: shortId };
+  window.DefxnCardChrome = { INKS: INKS.slice(), INK_SOURCE: INK_SOURCE, fieldOf: fieldOf, colours: colours, chromeSvg: chromeSvg, fill: fill, isLive: isLive, shortId: shortId };
 })();

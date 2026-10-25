@@ -1,0 +1,45 @@
+/* Cutouts, transparency and knockouts: the shared utilities (2026-10-25).
+
+   Real transparency only: a hole shows what is behind it (the page, the 3D world), never a fill painted to look
+   like the background. Shapes with holes are made in the 3D world itself (THREE.Shape + holes, js/world/download-stage.js),
+   not in SVG (owner, 2026-10-25: "since we have 3d"). Three CSS utilities, each driven by custom properties and each with an @supports fallback that
+   degrades to a solid or simpler look. Text is never inside a cutout: these are layers under or around real HTML.
+
+   .tp-panel     TransparentPanel. A glass panel: canvas at --tp-alpha over a backdrop blur, isolated so its own
+                 blend never reaches the page. Without backdrop-filter it turns nearly solid, so words stay legible.
+   .mk-scrim     MaskLayer. A dimming layer (--mk-color at --mk-alpha, fading by --mk-fade) with a soft elliptical
+                 KNOCKOUT (--mk-hole-x/-y/-w/-h) cut by mask-composite: exclude: the words sit on darkness, the
+                 3D inside the hole stays at full brightness. Without mask-composite it is the plain gradient.
+   .cut-corner   A CSS clip-path cut corner, --cut deep (the intro's and home's cut-corner action, made reusable).
+
+   Browser support: clip-path polygon everywhere evergreen. mask-composite: exclude is standard in
+   Chrome/Edge 120+, Firefox 53+ and Safari 15.4+ (older WebKit takes -webkit-mask-composite: xor, given below).
+   backdrop-filter: Chrome 76+, Firefox 103+, Safari 9+ with the -webkit- prefix. */
+
+/* ---- TransparentPanel --------------------------------------------------------------------------------------- */
+.tp-panel { --tp-alpha:.62; --tp-blur:12px;
+  background:hsl(var(--canvas) / var(--tp-alpha)); isolation:isolate;
+  -webkit-backdrop-filter:blur(var(--tp-blur)) saturate(1.1); backdrop-filter:blur(var(--tp-blur)) saturate(1.1); }
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) {
+  .tp-panel { background:hsl(var(--canvas) / .92); }
+}
+
+/* ---- MaskLayer ---------------------------------------------------------------------------------------------- */
+.mk-scrim { --mk-color:var(--canvas); --mk-alpha:.86; --mk-fade:180deg;
+  --mk-hole-x:50%; --mk-hole-y:40%; --mk-hole-w:34%; --mk-hole-h:30%;
+  position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:linear-gradient(var(--mk-fade), hsl(var(--mk-color) / 0) 0, hsl(var(--mk-color) / calc(var(--mk-alpha) * .7)) 45%, hsl(var(--mk-color) / var(--mk-alpha)) 100%); }
+@supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
+  .mk-scrim {
+    /* two mask layers: the whole layer, and a soft ellipse; "exclude" keeps the layer only where the ellipse is not,
+       so the hole is genuinely transparent and its edge feathers out over 40% of its radius */
+    -webkit-mask-image:linear-gradient(#000, #000), radial-gradient(var(--mk-hole-w) var(--mk-hole-h) at var(--mk-hole-x) var(--mk-hole-y), #000 0, #000 58%, transparent 100%);
+    -webkit-mask-composite:xor;
+    mask-image:linear-gradient(#000, #000), radial-gradient(var(--mk-hole-w) var(--mk-hole-h) at var(--mk-hole-x) var(--mk-hole-y), #000 0, #000 58%, transparent 100%);
+    mask-composite:exclude;
+  }
+}
+
+/* ---- cut corner ----------------------------------------------------------------------------------------------- */
+.cut-corner { --cut:14px; clip-path:polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+@supports not (clip-path:polygon(0 0, 100% 0, 100% 100%)) { .cut-corner { border-radius:8px; } }

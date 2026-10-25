@@ -77,7 +77,7 @@ elements.html now shows, under each element, what that element shapes in the sit
 ## shop.html: every element, by itself
 
 1. **What is this page about?** Every element of every layer, each drawn alone, with its rarity tier and its proposed price.
-2. **What is the one dominant action?** Try on. It is the filled button by the picked element. Once the loadout has a pick, Wear on card is the filled button under it.
+2. **What is the one dominant action?** Try on. It is the filled button by the picked element. Once the loadout has a pick, Wear on card is the filled button under it. Mint as a skin sits beside it as a plain link: it leaves for /account, where the signature happens.
 3. **What does the user need to know right now?** What the element looks like alone, what it costs, and how rare it is.
 4. **What can stay hidden?** How the element looks on the card and in a site: two buttons above the large view show them on request.
 5. **What is repeated elsewhere?** The elements page shows the same elements on the card. The shop shows them alone, which is what a buyer looks at first.
@@ -108,7 +108,34 @@ elements.html now shows, under each element, what that element shapes in the sit
 4. **What can stay hidden?** The other groups. The rail shows one of Ark UI's own groups at a time, or all parts.
 5. **What is repeated elsewhere?** The world and the avatar also show on the site's pages and on the profile. Here they sit behind every part at once.
 6. **What exists only because the data has it?** The rule line under each part. It reads Ark UI's own report, so it says what happened, not what was asked for.
-7. **What can be removed without changing the decision?** Nothing more. The parts are drawn at two thirds of their size so a group fits in view.
+7. **What can be removed without changing the decision?** Nothing more. The parts are drawn at two thirds of their size so a group fits in view. The Real size switch shows them as a page draws them.
 8. **Does leaving preserve state?** The card is in the address (?skin-sample=263). The group is not.
 9. **Does returning preserve context?** Yes for the card, through the address.
 10. **What if the system is wrong or fails silently?** A block Ark UI refuses says so in its tile. A card that does not go on says why in the status line. A rule Ark UI takes back is named under the part, with nothing hidden.
+
+## wear.html: a card the wearer keeps on a site
+
+1. **What is this page about?** Keeping a card on a site: try it, say yes, and every page shows it after a reload.
+2. **What is the one dominant action?** Wear it. It is the main button in the wearer's menu, and it asks first.
+3. **What does the user need to know right now?** Which card is on, and whether this device keeps it. The status line says both. The bar's one control, the seal, shows the card's number. Its menu shows the name, the site check and the actions.
+4. **What can stay hidden?** Why the seal guards against copies of the site. The confirm says it once, at the moment of choosing.
+5. **What is repeated elsewhere?** The parts. They are Ark UI's own examples, as on primitives.html.
+6. **What exists only because the data has it?** The seal. It shows only while a card is on, and only that card's own icon, number and name.
+7. **What can be removed without changing the decision?** Nothing more. Steps, stats and the tool bar's try buttons were removed: trying a card lives in the wearer's menu, as on the site. The page fits 1280x720 and 1440x900 with no scroll.
+8. **Does leaving preserve state?** Yes. A worn card is kept on this device, for this address. A tried card is not, and the status line says so.
+9. **Does returning preserve context?** Yes. The kept card goes back on before anything else loads, with no NFT engine.
+10. **What if the system is wrong or fails silently?** A kept text that this site did not write, or whose number is not its skin's card, is dropped and never worn. Blocked storage still lets a card go on for the visit, and `kept: false` says it was not kept. A card that does not go on says why in the status line.
+
+## studio.html: a card slot and its motion
+
+1. **What is this page about?** A site author's card slot: what the card makes there (a banner, a stamp or a nameplate) and how it moves.
+2. **What is the one dominant action?** Preview. It is the only filled button.
+3. **What does the user need to know right now?** What each kind looks like with a real card, and whether the motion keeps the rails. A track that breaks them says which one and why, and is not handed on.
+4. **What can stay hidden?** The FLX text. It sits below the pieces, for the person who wires the CMS.
+5. **What is repeated elsewhere?** The pieces. They are the card's own drawings, as on the site.
+6. **What exists only because the data has it?** The three kinds. Each is drawn from the picked card's own pieces, and a card without a piece draws less.
+7. **What can be removed without changing the decision?** Nothing more. The page fits 1280x720 and 1440x900 with no scroll. The track list scrolls in its own column.
+8. **Does leaving preserve state?** No. The CMS keeps a slot as its draft. This page is the editor's design surface.
+9. **Does returning preserve context?** It opens on card 263 and the card's own arrival every time.
+10. **What if the system is wrong or fails silently?** A refused track is named with its reason. A card that does not load says so in the status line. A slot text this grammar did not write is refused.
+

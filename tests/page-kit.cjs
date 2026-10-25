@@ -56,7 +56,7 @@ const words = (el) => label(el).replace(/\s*[→↗]$/, ''); // a link button dr
       };
       const plain = (value) => JSON.parse(JSON.stringify(value)); // out of the window's realm, for deepStrictEqual
       const ways = plain(ArkUI.nextSteps('concept/practice'));
-      const wrap = plain(ArkUI.nextSteps('palette')), none = plain(ArkUI.nextSteps('reference')), lastJourney = plain(ArkUI.nextSteps('proximity'));
+      const wrap = plain(ArkUI.nextSteps('palette')), none = plain(ArkUI.nextSteps('reference')), lastJourney = plain(ArkUI.nextSteps('treasury')); // the last journey's page was 'proximity' (/experiments) until the owner deleted it, 2026-10-24
       // the one Copy
       const copies = [...document.querySelectorAll('.copy-command')];
       const first = copies[0];
@@ -81,7 +81,7 @@ const words = (el) => label(el).replace(/\s*[→↗]$/, ''); // a link button dr
     assert.equal(s.rule.mixed, 'Inspect activation gates', 'a label authored in mixed case is left alone');
     assert.equal(s.rule.empty, '');
     assert.equal(s.rule.lowerOnly, 'already lower');
-    assert.deepEqual(s.ways.map((w) => w.href), ['route:resolutions', 'route:stats', 'route:proximity'], 'an understand page leads on to the lead of the next two journeys and of the model');
+    assert.deepEqual(s.ways.map((w) => w.href), ['route:resolutions', 'route:stats/now', 'route:palette'], 'an understand page leads on to the lead of each next journey (the Prove journey starts at /stats/now since the stats section replaced /stats, 2026-10-24; the Previews journey lost its lead, /experiments, when the owner deleted it, and leads with /palette since)');
     assert.deepEqual(s.lastJourney, [], 'the last journey has nothing after it and names itself no way on');
     assert.deepEqual(s.none, [], 'a page in no journey (the reference reader) has no ways on');
     assert(s.wrap.every((w) => w.href !== 'route:palette'), 'a page never leads on to itself');
@@ -143,8 +143,8 @@ const words = (el) => label(el).replace(/\s*[→↗]$/, ''); // a link button dr
       s.where.shift();
     } else assert.equal(s.relatedLabel.trim(), 'Where next', route + ': the pager\'s related row is named "Where next"');
     if (route === '/concept/spec') assert(s.heroActions.concat(s.sources).some((t) => /DEFXN/.test(t)), 'a token the site spells in capitals stays in capitals: ' + s.heroActions.join(' | '));
-    assert.deepEqual(s.where.map((w) => w.text), ['Resolutions', 'Mesh performance', 'Interactive model'], route + ' has its ways on: ' + JSON.stringify(s.where));
-    assert(s.where.some((w) => /experiments/.test(w.href)), route + ' links the interactive model');
+    assert.deepEqual(s.where.map((w) => w.text), ['Resolutions', 'Network stats', 'Interface palette'], route + ' has its ways on (the Prove journey leads with /stats/now, labelled "Network stats" since 2026-10-25; the Previews journey leads with /palette since /experiments was deleted): ' + JSON.stringify(s.where));
+    assert(!s.where.some((w) => /experiments/.test(w.href)), route + ' no longer links the interactive model (deleted 2026-10-24)');
   }
 
   /* ---- the lifecycle: out of it, not only along it ---------------------------------------- */
@@ -153,8 +153,8 @@ const words = (el) => label(el).replace(/\s*[→↗]$/, ''); // a link button dr
       const page = window.document.querySelector('[data-ark-page]');
       return [...page.querySelectorAll('[data-ark-block="actions"][aria-label="Where next"] [data-ark-part="button"]')].map((a) => ({ text: words(a), href: a.getAttribute('href') }));
     } });
-    assert.deepEqual(seen.extra.map((w) => w.text), ['Resolutions', 'Mesh performance', 'Interactive model'], route + ' leads out of the lifecycle');
-    assert(seen.extra.some((w) => /\/experiments/.test(w.href)), route + ' links /experiments');
+    assert.deepEqual(seen.extra.map((w) => w.text), ['Resolutions', 'Network stats', 'Interface palette'], route + ' leads out of the lifecycle (the Prove journey leads with /stats/now; the Previews journey with /palette)');
+    assert(!seen.extra.some((w) => /\/experiments/.test(w.href)), route + ' no longer links /experiments (deleted 2026-10-24)');
   }
   console.log('PASS: one Copy, one case rule, and a way on from the lifecycle and the sheets.');
 })().catch((error) => { console.error(error); process.exit(1); });

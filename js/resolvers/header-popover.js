@@ -44,8 +44,8 @@ var ArkHeaderPopover = (function () {
     new MutationObserver(function () {
       var open = made.root.getAttribute('data-state') === 'open';
       header.classList.toggle('nav-open', open);
-      made.trigger.setAttribute('aria-label', open ? 'Close all pages' : 'Open all pages');
-      made.trigger.title = open ? 'Close all pages' : 'All pages';
+      /* the "you" button's name says who and which network (js/resolvers/header.js refreshAccountNav keeps data-label) */
+      made.trigger.setAttribute('aria-label', open ? 'Close your account, network and pages' : made.trigger.dataset.label || 'Open your account, network and pages');
       if (!open) made.panel.navLayers.reset();
     }).observe(made.root, { attributes: true, attributeFilter: ['data-state'] });
   }

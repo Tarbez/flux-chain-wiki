@@ -84,20 +84,44 @@
    workaround needed -- ranks this identity's live wallets by whether each
    has an active, unrevoked delegation grant.
 
+   NAMES (owner, 2026-10-25). FXN ID = the whole identity (the file). Master ID = its root (code still says root).
+   Public ID = what the person shows others. Role keys = keys made from the Master ID for one job (gate, genesis).
+   Every string a person reads uses these words; field names, record kinds and HKDF labels do not change.
+
+   PUBLIC IDS (owner, 2026-10-25). The root never signs for a page. A page sees the person as ONE public id: an
+   independent key sealed in the file (fxn-auth/public-ids). `publicKeyB64`, `identityId`, `displayName`, `sign` and
+   `signBytes` are that public id's, so every page and copied site that signs through `who` (authKitSigner(who), the
+   CMS login, publishing) signs as the public id after a rebuild, with no page edit. `usePublicId` switches. A file
+   with no public id signs nothing and says how to add one. The root still signs the file's own records (wallet
+   links to the root in older files, reveals); nothing it signs leaves the file from here. `signWithDelegatedRoot`
+   refuses for the same reason. `linkRisk` tells a page when an act would link two public ids in public.
+   A wallet a public id makes is private: its KWALLET1 stays in the file until `publishWallet` sends it.
+
+   GENESIS KEY (owner, 2026-10-25). A network's genesis records (network, mint, custody, safes, sends) are signed by
+   the genesis key, which fxn-auth/root-keys makes from the root seed with its own label. `genesisSigner()` signs with
+   it, and its `keyName` lets a review say which key signs. The root itself still signs nothing for a page.
+
    Build: node scripts/build-auth.cjs  ->  js/admin/auth.js (a classic script).
    ===================================================================== */
-import { createAuthKitSession, addWalletToAuthKit, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit, parseAuthKit, encodeAuthKitEnvelope, canonicalAuthKitRootKey } from '@deadark/ark-ui/flux-auth';
+import { createAuthKitSession, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit, parseAuthKit, encodeAuthKitEnvelope, canonicalAuthKitRootKey } from '@deadark/ark-ui/flux-auth';
 import { createArkAuthKitPanel } from '@deadark/ark-ui/flux-auth-ui';
 import { createPersistedSecretVault, rememberMeDurationMs } from '@deadark/ark-ui/flux-auth-persisted-secret';
 import { createArkRememberMePicker, ARK_AUTH_SESSION_STYLES } from '@deadark/ark-ui/flux-auth-session-dom';
-import { createFluxRootHandle, FLUX_ROOT_DERIVATION } from 'fxn-auth/root-from-mnemonic';
+import { createFluxRootHandle, fluxRootFromMnemonic, FLUX_ROOT_DERIVATION } from 'fxn-auth/root-from-mnemonic';
 import { createRootIdentitySigningHandle } from 'deadark-identity-core/root-signing-handle';
 import { createWalletSigningHandle } from 'fxn-auth/wallet-signing-handle';
-import { createWalletForIdentity, createWalletRotation, createWalletRevocation, walletLinkRecordCid } from 'fxn-auth/wallet-lifecycle';
+import { createWalletRotation, createWalletRevocation, walletLinkRecordCid } from 'fxn-auth/wallet-lifecycle';
 import { createWalletDelegation, signWalletDelegation } from 'fxn-auth/wallet-delegation';
 import { reduceWalletRegistry } from 'fxn-auth/wallet-registry';
-import { resolveClaimScope, rightsDimension, delegationDimension } from 'fxn-auth/claim-scope-resolver';
 import { rankDiscovery } from 'fxn-auth-client/wallet-mesh';
+import { addPublicId, addWalletToPublicId, describePublicIds, linkRisk, openPublicIds, publishWallet, seedSigner } from 'fxn-auth/public-ids';
+import { GENESIS_KEY_LABEL, rootDerivedKey } from 'fxn-auth/root-keys';
+import { createAuthKitV10 } from 'fxn-auth/auth-kit-create';
+import { releaseSecretKeyForKit, parseCommittee, enrollWithGate } from 'fxn-auth/fxn-id-gate';
+
+const NO_GENESIS_KEY = 'This FXN ID cannot make a genesis key here, because its Master ID does not come from its Master ID recovery phrase. Missing: a Master ID made from that phrase. To fix: sign in with an FXN ID made by fxn-id new or this site.';
+const NO_PUBLIC_ID = 'This FXN ID has no Public ID, so it cannot sign for a site or the chain. Missing: a Public ID. To fix: add one under Public IDs on your account page, then save the new file.';
+const hexToBase64 = (hex) => { let binary = ''; for (let i = 0; i < hex.length; i += 2) binary += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16)); return btoa(binary); };
 
 const toBase64 = (bytes) => {
   let binary = '';
@@ -205,14 +229,29 @@ function formatUntil(at) {
   return new Date(at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
+/* The genesis key of an opened FXN ID as `{ key, seed }` (hex), the shape seedSigner takes; null when the root is not
+   rebuilt from the recovery phrase (a deadark-profile-v1 root). The root secret is zeroed before this returns. */
+async function genesisKeyOf(opened) {
+  if ((opened.summary?.rootDerivation || FLUX_ROOT_DERIVATION) !== FLUX_ROOT_DERIVATION || !opened.secret?.mnemonic) return null;
+  const root = await fluxRootFromMnemonic(opened.secret.mnemonic);
+  try {
+    const derived = await rootDerivedKey(root.secretKey, GENESIS_KEY_LABEL);
+    const seed = Array.from(derived.secretKey.slice(0, 32), (b) => b.toString(16).padStart(2, '0')).join('');
+    derived.secretKey.fill(0);
+    return { key: derived.pubHex, seed };
+  } finally {
+    root.secretKey.fill(0);
+  }
+}
+
 /* One root handle for a phrase, by the derivation the kit names. */
 async function rootHandle({ mnemonic, derivation, callsign }) {
   if (derivation === FLUX_ROOT_DERIVATION) return createFluxRootHandle(mnemonic);
   if (derivation === 'deadark-profile-v1') {
-    if (!callsign) throw new Error('This FXN ID names a DeArk profile root but records no callsign, so its key cannot be rebuilt.');
+    if (!callsign) throw new Error('This FXN ID names a DeArk profile Master ID but records no callsign, so its key cannot be rebuilt.');
     return createRootIdentitySigningHandle({ phrase: mnemonic, callsign });
   }
-  throw new Error('This FXN ID uses a root derivation this page does not know: ' + derivation + '.');
+  throw new Error('This FXN ID uses a Master ID derivation this page does not know: ' + derivation + '.');
 }
 
 /* container: where the sign-in panel is drawn.
@@ -240,11 +279,74 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
     // public key asynchronously). Unawaited, walletHandle was a Promise: walletPublicKeyB64 read undefined,
     // signWithWallet threw, and Sign out threw on `dispose` before it could sign anyone out.
     const walletHandle = opened.secret?.walletSecretKey ? await createWalletSigningHandle(opened.secret.walletSecretKey) : null;
+    // A block that does not open is refused here, so a changed file never signs as a public id it does not hold.
+    const ids = await openPublicIds(opened.vault, opened.secret?.mnemonic);
+    const shownIds = await describePublicIds(ids);
+    const genesis = await genesisKeyOf(opened);
     if (active) { active.handle.dispose(); if (active.walletHandle) active.walletHandle.dispose(); }
+    const currentId = () => (active?.ids || ids).find((id) => id.key === active?.current) || null;
+    const needId = () => { const id = currentId(); if (!id) throw new Error(NO_PUBLIC_ID); return id; };
+    const shownCurrent = () => (active?.shown || shownIds).find((id) => id.key === active?.current) || null;
+    // Keys this file links to the root: the root and the wallets of older files. Used only for linkRisk, never sent.
+    const rootKeys = () => [toHex(handle.publicKeyB64), ...(active?.vault?.wallets ?? (active?.vault?.wallet ? [active.vault.wallet] : [])).map((w) => { try { return toHex(w.body.walletPublicKey); } catch { return ''; } })];
+    async function reloadIds(vault) {
+      active.vault = vault;
+      active.ids = await openPublicIds(vault, active.secret.mnemonic);
+      active.shown = await describePublicIds(active.ids);
+      refreshKept();
+    }
     const identity = Object.freeze({
-      publicKeyB64: handle.publicKeyB64,
-      displayName: opened.summary?.displayName || '',
-      identityId: opened.summary?.identityId || '',
+      // The public id this page signs as. Getters: usePublicId switches it.
+      get publicKeyB64() { const id = currentId(); return id ? hexToBase64(id.key) : ''; },
+      get displayName() { return shownCurrent()?.name || ''; },
+      get identityId() { return currentId()?.key || ''; },
+      /** The current Public ID, no seed: { key, name, label, at, wallets: [{ key, label, at, record, published }] }, or
+       *  null. `published` is null for a private wallet (its link is only in the file). */
+      get publicId() { return shownCurrent(); },
+      /** Every public id in the file, no seed. Shown only to the person on this page; never send the list to a site. */
+      get publicIds() { return (active?.shown || shownIds).slice(); },
+      /** The file's own name. Local only: it is the same for every public id, so it links them if a site sees it. */
+      fileDisplayName: opened.summary?.displayName || '',
+      usePublicId: (key) => {
+        if (!active) throw new Error('Sign in before choosing a Public ID.');
+        if (!active.ids.some((id) => id.key === key)) throw new Error('This FXN ID has no such Public ID. Missing: a key from publicIds. To fix: pick one of them.');
+        active.current = key;
+        onChange(identity);
+        return shownCurrent();
+      },
+      /** `{ pubHex, publicKeyB64, signText, signBytes }` (hex signatures) for any public id in the file, by key. The broker
+       *  signs for each site as the public id that site was shown. */
+      publicIdSigner: (key) => {
+        const id = (active?.ids || ids).find((i) => i.key === key);
+        if (!id) throw new Error('This FXN ID has no such Public ID. Missing: a key from publicIds. To fix: pick one of them.');
+        return seedSigner(id);
+      },
+      /** The genesis key's public half (64 hex), or '' when this FXN ID cannot make one here. */
+      genesisKeyHex: genesis?.key || '',
+      /** `{ pubHex, publicKeyB64, signText, signBytes, keyName }` (hex signatures) for the genesis key: the only key a
+       *  network's genesis records are signed with. Throws, naming what is missing, when this FXN ID cannot make one. */
+      genesisSigner: () => {
+        if (!genesis) throw new Error(NO_GENESIS_KEY);
+        return Object.freeze({ ...seedSigner(genesis), keyName: 'Your genesis key' });
+      },
+      /** `{ pubHex, publicKeyB64, signText, signBytes }` (hex signatures) for one wallet of the CURRENT public id. */
+      walletSigner: (walletKeyHex) => {
+        const wallet = needId().wallets.find((w) => w.key === walletKeyHex);
+        if (!wallet) throw new Error('That wallet is not one of this Public ID\'s. Missing: a wallet key from publicId.wallets. To fix: switch to its Public ID first, or pick one of this ID\'s wallets.');
+        return seedSigner(wallet);
+      },
+      /** The warning when sending from `fromHex` to `toHex` links two of your public ids (or one and your root), else null. */
+      linkRisk: (fromHex, toHex) => linkRisk(active?.ids || ids, fromHex, toHex, rootKeys()),
+      /** The file as it is now, ready to save (`.auth.fxn`). After a public id or wallet is added, the old file lacks it. */
+      fileText: () => { if (!active?.vault) throw new Error('Sign in before saving the file.'); return encodeAuthKitEnvelope(active.vault); },
+      /** Adds a public id with fresh wallets. Returns { vault, publicId }: save the vault as the new file. */
+      addPublicId: async ({ label, walletCount = 1 } = {}) => {
+        if (!active?.vault) throw new Error('Sign in before adding a Public ID.');
+        const added = await addPublicId(active.vault, active.secret.mnemonic, { label, walletCount });
+        await reloadIds(added.vault);
+        if (!active.current) { active.current = added.publicId.key; onChange(identity); }
+        return added;
+      },
       // Also a GETTER, same reasoning as `walletAddresses` below --
       // `rotateWallet` moves the preferred pointer to the new address
       // when the rotated wallet was preferred, so a frozen snapshot
@@ -278,18 +380,22 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
       // derives it in memory for `signWithWallet` itself; this only
       // surfaces what already exists, no new derivation. `null` exactly
       // when `signWithWallet` would also refuse, for the same reason.
-      walletPublicKeyB64: walletHandle ? walletHandle.publicKeyB64 : null,
+      // The current public id's first wallet (was the file's root-linked wallet until 2026-10-25).
+      // Only a wallet whose link is already public: a page that shows or signs with a private wallet next to the
+      // Public ID would tell a site the link the file keeps private. Null until one is published.
+      get walletPublicKeyB64() { const w = currentId()?.wallets.find((x) => x.published != null); return w ? hexToBase64(w.key) : null; },
       securityProfile: opened.summary?.securityProfile || '',
       rootVerified: true,
-      sign: async (text) => toBase64(await handle.sign(new TextEncoder().encode(text))),
+      sign: async (text) => hexToBase64(await seedSigner(needId()).signText(text)),
       // Raw bytes, not text: dense-wire records are signed over their exact bytes. genesis's
       // and defxn-dao's signers (js/dense-wire/flx-identity-bridge.mjs) and defxn-dao's DAO
       // voting call this; it was in the earlier bundle and was lost when this entry was
       // rewritten, so those sites could not sign once they picked up a current build.
-      signBytes: async (bytes) => toBase64(await handle.sign(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes))),
+      signBytes: async (bytes) => hexToBase64(await seedSigner(needId()).signBytes(bytes)),
       signWithWallet: async (text) => {
-        if (!walletHandle) throw new Error('This identity has no wallet set up yet, so there is nothing to sign with -- create a wallet and complete its first-time setup first.');
-        return toBase64(await walletHandle.sign(new TextEncoder().encode(text)));
+        const wallet = needId().wallets.find((x) => x.published != null);
+        if (!wallet) throw new Error('This Public ID has no published wallet, so a page cannot sign with one next to it. Missing: a wallet whose link is public. To fix: publish a wallet\'s link on your account page first.');
+        return hexToBase64(await seedSigner(wallet).signText(text));
       },
       /**
        * Mints and persists a real additional wallet, signed by this
@@ -299,23 +405,25 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
        * session API to replace a loaded vault in place).
        * @param {{pin:string,password?:string,label?:string,rights?:string[]}} input
        */
-      addWallet: async ({ pin, password = '', label = 'Default', rights = ['receive', 'hold', 'spend', 'present'] }) => {
+      // Since 2026-10-25 a new wallet belongs to the CURRENT Public ID, never to the Master ID, and needs no PIN: the
+      // block opens with the phrase this session holds. `record` is its KWALLET1, signed by the wallet and the Public ID.
+      // The wallet is PRIVATE (owner ruling, option A): do not send `record`. Only `publishWallet` sends it, by the
+      // owner's choice. `walletAddress` is the wallet's key, kept for older callers.
+      addWallet: async ({ label } = {}) => {
         if (!active?.vault) throw new Error('Sign in before adding a wallet.');
-        const existing = active.vault.wallet?.body;
-        const identityId = existing?.identityId || toHex(handle.publicKeyB64);
-        const identityPublicKey = existing?.identityPublicKey || toHex(handle.publicKeyB64);
-        const { record, walletSecretKey, walletAddress } = await createWalletForIdentity({
-          identityId,
-          identityPublicKey,
-          signIdentity: (message) => handle.sign(message),
-          label,
-          rights,
-          preferred: !active.vault.wallet,
-          issuedAt: Date.now(),
-        });
-        const updatedVault = await addWalletToAuthKit(active.vault, { pin, password }, record, toBase64(walletSecretKey));
-        active.vault = updatedVault;
-        return { vault: updatedVault, walletAddress };
+        const added = await addWalletToPublicId(active.vault, active.secret.mnemonic, needId().key, { label });
+        await reloadIds(added.vault);
+        return { vault: added.vault, wallet: added.wallet, record: added.wallet.record, walletAddress: added.wallet.key };
+      },
+      /** Publishes one wallet's link to its Public ID, by the owner's choice (owner ruling, option A, 2026-10-25).
+       *  `send(record)` is the page's transport: it sends the wallet's KWALLET1 to chain pva (RESOLVER_RECORD) and
+       *  resolves on the node's OK, or throws its refusal. Only then is the wallet marked published in the file.
+       *  Anyone who reads chain pva then sees whose wallet it is. Returns { vault, wallet }: save the new file. */
+      publishWallet: async ({ walletKey, send, ask } = {}) => {
+        if (!active?.vault) throw new Error('Sign in before publishing a wallet\'s link.');
+        const done = await publishWallet(active.vault, active.secret.mnemonic, walletKey, { send, ask });
+        await reloadIds(done.vault); // also re-saves a kept sign-in, so a reload keeps the published mark
+        return { vault: done.vault, wallet: done.wallet, alreadyOnChain: done.alreadyOnChain };
       },
       /**
        * The wallet grants its ROOT real, live signing power over itself
@@ -364,26 +472,10 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
        * @param {'receive'|'hold'|'spend'|'present'} right
        * @param {number|null} [amount]
        */
-      signWithDelegatedRoot: async (walletAddress, message, right, amount = null) => {
-        if (!active?.vault) throw new Error('Sign in before signing as delegated root.');
-        const entry = active.vault.walletDelegations?.[walletAddress];
-        if (!entry) throw new Error('No delegation exists for this wallet.');
-        const walletLinks = active.vault.wallets ?? (active.vault.wallet ? [active.vault.wallet] : []);
-        const walletLink = walletLinks.find((w) => w.body.walletAddress === walletAddress);
-        if (!walletLink) throw new Error('No such wallet on this identity.');
-        const registry = await reduceWalletRegistry(walletLinks);
-        const rootPublicKey = toHex(handle.publicKeyB64);
-        const dimensions = {
-          rights: rightsDimension(registry),
-          delegation: delegationDimension({
-            signedDelegation: entry.signedDelegation,
-            now: Date.now(),
-            isRevoked: (_walletPublicKey, nonce) => Boolean(entry.revoked && entry.signedDelegation.grant.nonce === nonce),
-          }),
-        };
-        const decision = await resolveClaimScope({ walletAddress, walletPublicKey: walletLink.body.walletPublicKey, rootPublicKey, right, amount }, dimensions, ['rights', 'delegation']);
-        if (!decision.authorized) throw new Error(`Delegated action refused: ${decision.reason}`);
-        return toBase64(await handle.sign(new TextEncoder().encode(message)));
+      // Owner, 2026-10-25: the root signs nothing a page can send, so the delegated-root signer is gone. It refuses
+      // by name; the Claim Scope check it ran is in git history for the day a delegated signer is a public id.
+      signWithDelegatedRoot: async () => {
+        throw new Error('The Master ID does not sign for pages. Missing: a Public ID signer. To fix: sign with the identity (its current Public ID) or one of its wallets.');
       },
       /**
        * Supersedes `walletAddress` with a brand-new wallet key in the
@@ -462,16 +554,21 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
         return response.order.map((address) => byAddress.get(address)).filter(Boolean);
       },
     });
-    active = { handle, walletHandle, identity, vault: opened.vault, secret: opened.secret };
+    active = { handle, walletHandle, identity, vault: opened.vault, secret: opened.secret, ids, shown: shownIds, current: ids[0]?.key || null };
     onChange(identity);
   }
 
+  let keptRefused = false;   // a kept sign-in was found but could not be reopened (and was deleted)
   const realSession = createAuthKitSession({
     verifyRoot: async (input) => {
       if (pending) pending.dispose();
       pending = await rootHandle(input);
       return { rootPublicKey: pending.publicKeyB64 };
     },
+    /* v10 (2026-10-25): the gate client, so a v10 file opens with its four factors and no typed Secret Key. fxn-auth's
+       releaseSecretKeyForKit has exactly the session's shape. It asks the file's own (birth) committee; the Emergency
+       Kit's Secret Key still opens the file when the gate cannot answer. */
+    releaseSecretKey: (input) => releaseSecretKeyForKit(input),
   });
 
   /* The panel reads its screen from the session. A kept sign-in reopens with no file loaded, so the
@@ -564,6 +661,19 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
     });
   }
 
+  /* The file changed (a public id or wallet was added): a kept sign-in must hold the new file, or a reload loses it. */
+  function refreshKept() {
+    return queue(async () => {
+      if (!active) return;
+      let ms = 0;
+      try { ms = await kept.remainingMs(); } catch { return; }
+      if (!ms) return;
+      try {
+        await kept.save(encodeRemembered({ kitText: encodeAuthKitEnvelope(active.vault), mnemonic: active.secret.mnemonic, walletSecretKey: active.secret.walletSecretKey, walletSecretKeys: active.secret.walletSecretKeys }), ms);
+      } catch { /* the kept copy stays older; the saved file is what counts */ }
+    });
+  }
+
   function forgetKept() {
     return queue(async () => {
       try { await kept.clear(); } catch { /* no storage means nothing is kept */ }
@@ -595,7 +705,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
       const vault = parseAuthKit(material.kitText);
       const summary = describeAuthKit(vault);
       handle = await rootHandle({ mnemonic: material.mnemonic, derivation: summary.rootDerivation, callsign: summary.callsign });
-      if (canonicalAuthKitRootKey(handle.publicKeyB64) !== canonicalAuthKitRootKey(vault.rootPublicKey)) throw new Error('The kept phrase does not make this FXN ID root.');
+      if (canonicalAuthKitRootKey(handle.publicKeyB64) !== canonicalAuthKitRootKey(vault.rootPublicKey)) throw new Error('The kept phrase does not make this FXN ID\'s Master ID.');
       if (active) { handle.dispose(); return; } // someone opened a file while this was reading
       const secret = { mnemonic: material.mnemonic };
       if (material.walletSecretKey) secret.walletSecretKey = material.walletSecretKey;
@@ -609,6 +719,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
     } catch {
       if (handle && !active) handle.dispose();
       await forgetKept();
+      keptRefused = true;
       showKeep({ status: KEEP_WORDS.restoreRefused });
     }
   }
@@ -622,7 +733,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
       if (!opened.rootVerified || !pending) {
         if (pending) pending.dispose();
         pending = null;
-        throw new Error('This FXN ID opened, but its root could not be proven, so it cannot sign.');
+        throw new Error('This FXN ID opened, but its Master ID could not be proven, so it cannot sign.');
       }
       const handle = pending;
       pending = null;
@@ -637,8 +748,48 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
 
   return {
     current: () => (active ? active.identity : null),
+    /* The last refusal, for a page that draws its own failure screen (defxn.com /auth): { code, message, detail } or
+       null. code is AuthKitError's stable code (ark-ui flux-auth): switch on it, never on the words. keptRefused is
+       true once a kept sign-in was found on load but could not be reopened (this browser then deleted it). */
+    error: () => { const e = realSession.getState().error; return e ? { code: e.code, message: e.message, detail: e.detail || null } : null; },
+    keptRefused: () => keptRefused,
+    /* What the loaded file is, for a page that draws its own checks: { version, needsSecretKey, hasGate } or null.
+       No factor and no key: only what the file's public header says. */
+    fileInfo: () => { const m = realSession.getState().summary; return m ? { version: m.version, needsSecretKey: !!m.needsSecretKey, hasGate: !!m.hasGate } : null; },
     // Signing out also deletes a kept sign-in. Disposing does not: a page that is going away has not signed out.
     signOut: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } hideKeep(); void forgetKept(); drop(); },
     dispose: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } hideKeep(); drop(); },
   };
 }
+
+/* ---- Making a new FXN ID in the browser (v10, 2026-10-25) --------------------------------------------------------
+   The one writer is fxn-auth's createAuthKitV10 (no copy here). This adds only what a web page needs around it:
+     1 the gate committee, read from the site's committee file in fxn-auth's own grammar (parseCommittee);
+     2 the file, with its Master ID recovery phrase and Master ID Secret Key returned ONCE as the Emergency Kit;
+     3 the first Public ID (fxn-auth/public-ids addPublicId), so the new file can sign at once;
+     4 the gate enrollment (enrollWithGate): each committee node gets its piece of the Secret Key. A node that does not
+       answer is reported, never hidden; the file still opens with the Emergency Kit.
+   Input: { displayName, pin, password, word, icon, wordCount (12|24), committeeUrl }. Returns { text, fileName,
+   publicId, emergencyKit: { mnemonic, secretKey }, gate: { threshold, nodes, enrolled: [ids], failed: [{ nodeId,
+   reason }] } }. Nothing is stored; the page saves the file and shows the kit. */
+const NO_COMMITTEE = (url, why) => Object.assign(new Error('This site has no FXN ID gate committee, so it cannot make a new FXN ID yet. Missing: the committee file at ' + url + ' (' + why + '). To fix: publish the gate committee there.'), { code: 'gate-committee-missing' });
+async function loadCommittee(url) {
+  let text = '';
+  try { const res = await fetch(url, { cache: 'no-store' }); if (!res.ok) throw new Error('HTTP ' + res.status); text = await res.text(); } catch (error) { throw NO_COMMITTEE(url, error.message); }
+  try { return parseCommittee(text); } catch (error) { throw NO_COMMITTEE(url, 'it does not parse: ' + error.message); }
+}
+export async function createFxnId({ displayName, pin, password = '', word = '', icon, wordCount = 24, committeeUrl = '/gate.committee', onProgress } = {}) {
+  const committee = await loadCommittee(committeeUrl);
+  const made = await createAuthKitV10({ displayName, pin, password, word, icon, wordCount, gate: committee, onProgress,
+    reveal: { reason: 'Shown once, on the page that made this FXN ID.' } });
+  const withId = await addPublicId(made.vault, made.emergencyKit.mnemonic, { label: 'Main', walletCount: 1 });
+  let failed = [];
+  try { await enrollWithGate(made.gateEnrollments); } catch (error) { failed = error.failed || [{ nodeId: 'all', reason: error.message }]; }
+  const enrolled = committee.nodes.map((n) => n.id).filter((id) => !failed.some((f) => f.nodeId === id));
+  const name = String(displayName || '').trim().toLowerCase().replace(/[^a-z0-9._]+/g, '-').replace(/^-+|-+$/g, '') || 'fxn-id';
+  return Object.freeze({ text: encodeAuthKitEnvelope(withId.vault), fileName: name + '.auth.fxn', publicId: withId.publicId, emergencyKit: made.emergencyKit,
+    gate: Object.freeze({ threshold: committee.threshold, nodes: committee.nodes.length, enrolled, failed }) });
+}
+
+/* The nine FXN ID icons, from ark-ui itself (never a copy): a page draws its own icon picker from this list. */
+export { FXN_ID_ICONS } from '@deadark/ark-ui/flux-auth';

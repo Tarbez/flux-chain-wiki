@@ -136,11 +136,7 @@
       return;
     }
     var target = event.target.closest('[data-scene-link], [data-reset-word], [data-section-target]');
-    if (!target) {
-      var labLink = event.target.closest('a[href="#work"]');
-      if (labLink) { event.preventDefault(); navigate('proximity'); }
-      return;
-    }
+    if (!target) return; /* the legacy a[href="#work"] link opened the interactive model; /experiments is deleted (owner, 2026-10-24), so #work now resolves to not-found like any retired address */
     if (target.dataset.sceneLink) { event.preventDefault(); navigate(target.dataset.sceneLink, target); }
     else if (target.dataset.resetWord !== undefined) {
       window.clearTimeout(wordTimer);
@@ -163,12 +159,22 @@
     scene.style.removeProperty('--hero-y');
   }
 
+  /* A link whose page is the target of a retired key (ArkUI.pageRedirects: the header's `stats` link opens stats/now) stands for that
+     page's whole section: it is current on every route under the target's first segment (stats/now, stats/ceiling, stats/week-...).
+     The section is read from the redirect target, not listed here. */
+  function linkIsCurrent(linked, page) {
+    if (linked === page) return true;
+    var targets = ArkUI.pageRedirects ? Object.keys(ArkUI.pageRedirects).map(function (old) { return ArkUI.pageRedirects[old]; }) : [];
+    if (targets.indexOf(linked) < 0 || linked.indexOf('/') < 0) return false;
+    return page.indexOf(linked.split('/')[0] + '/') === 0;
+  }
+
   function sync() {
     var current = state.get();
     var isTheory = current.page.indexOf('concept/') === 0;
     scene.querySelectorAll('.ark-header a, .site-footer-strip nav a').forEach(function (link) {
       if (link.closest('.dx-switch')) return;   /* product switcher: other sites, its own current */
-      if (router.resolve(link.getAttribute('href')) === current.page) link.setAttribute('aria-current', 'page');
+      if (linkIsCurrent(router.resolve(link.getAttribute('href')), current.page)) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');
     });
     var paused = current.paused;
@@ -202,7 +208,7 @@
   }
   toggle.addEventListener('click', function () {
     var page = state.get().page;
-    navigate(page === 'zero' ? 'proximity' : page.indexOf('article/') === 0 ? 'learnings' : page.indexOf('concept/') === 0 ? 'concept' : 'zero');
+    navigate(page.indexOf('article/') === 0 ? 'learnings' : page.indexOf('concept/') === 0 ? 'concept' : 'zero');
   });
   document.addEventListener('keydown', function (event) {
     if (event.key !== 'Escape' || event.defaultPrevented) return;
@@ -223,7 +229,8 @@
   }
   window.addEventListener('popstate', restoreRoute);
   window.addEventListener('hashchange', restoreRoute);
-  document.addEventListener('ark:enter', function () { navigate('proximity'); });
+  /* a call-to-action with no href fires ark:enter; it used to open the interactive model (/experiments, deleted 2026-10-24) and now opens the overview */
+  document.addEventListener('ark:enter', function () { navigate('about'); });
   /* this site's own header links route in place; the product switcher's links leave for the
      products' own sites, so they are left to the browser */
   scene.querySelectorAll('.ark-header a').forEach(function (link) {

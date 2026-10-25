@@ -5,8 +5,10 @@
               repeats (the header's Run DEFXN).
    reference  secondary actions and links only: never decoration.
    success / warning / danger  state only.
-   Everything else is neutral, so the few colored things carry weight. */
-:root {
+   Everything else is neutral, so the few colored things carry weight.
+   Declared on a worn skin's root too (#scene[data-ark-skin], js/ark/skin-site.js): worked out on :root alone, these kept
+   the page's colours under a skin (skin audit, 2026-10-25). */
+:root, #scene[data-ark-skin] {
  --signal-primary:hsl(var(--primary));
  --signal-complement:hsl(var(--secondary));
  --signal-reference:hsl(var(--reference));

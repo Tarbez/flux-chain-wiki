@@ -28,7 +28,7 @@ ArkManifest.define({
       "label": "Header link: get the browser (/download)",
       "kind": "line",
       "section": "Header links",
-      "value": "Get DEFXN Grid"
+      "value": "Get FXN Browser"
     },
     "MESH": {
       "label": "Header link: mesh explorer",
@@ -72,12 +72,6 @@ ArkManifest.define({
       "section": "Header links",
       "value": "Operating model"
     },
-    "EXPERIMENTS": {
-      "label": "Header link: registry",
-      "kind": "line",
-      "section": "Header links",
-      "value": "Model"
-    },
     "ABOUT": {
       "label": "Header link: observer",
       "kind": "line",
@@ -100,7 +94,7 @@ ArkManifest.define({
       "label": "Header link: download",
       "kind": "line",
       "section": "Header links",
-      "value": "Get DEFXN Grid"
+      "value": "Get FXN Browser"
     },
     "BRAND.NAME": {
       "label": "Wordmark",

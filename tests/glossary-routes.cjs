@@ -33,8 +33,10 @@ const build = (...args) => {
 /* The words the pages used and the glossary lacked (docs/ux-audit/ledger.md S5). */
 const ADDED = ['mesh', 'resolution', 'fxn', 'fxn chain', 'bundle', 'tier', 'ops/s', 'dao', 'roster', 'threshold', 'substrate', 'auth kit', 'ghost id', 'miner presence'];
 /* The routes the ledger names as jargon walls with no glossing, now wired. */
-const WIRED = { stats: 'stats', 'stats/ledger': 'stats-ledger', 'resolver-math': 'resolver-math', resolvers: 'resolvers', explorer: 'explorer', account: 'account' };
-const WIRED_SOURCE = { stats: 'js/pages/stats.js', 'stats/ledger': 'js/pages/stats-ledger.js', 'resolver-math': 'js/pages/resolver-math.js', resolvers: 'js/pages/resolvers.js', explorer: 'js/pages/explorer.js', account: 'js/pages/account.js' };
+/* 2026-10-24: stats and stats/ledger left this list: their pages (js/pages/stats.js, stats-ledger.js) are retired from the catalog, which carries the new 3D stats pages
+   (js/pages/world-stats.js) with no glossary terms; their keys are redirects. The files and their glossary files stay. */
+const WIRED = { 'resolver-math': 'resolver-math', resolvers: 'resolvers', explorer: 'explorer', account: 'account' };
+const WIRED_SOURCE = { 'resolver-math': 'js/pages/resolver-math.js', resolvers: 'js/pages/resolvers.js', explorer: 'js/pages/explorer.js', account: 'js/pages/account.js' };
 
 (async () => {
   const entries = builder.parse(read('docs/glossary.md'));
@@ -142,7 +144,7 @@ const WIRED_SOURCE = { stats: 'js/pages/stats.js', 'stats/ledger': 'js/pages/sta
     assert.deepEqual(over, [], 'every block+terms route fits +30 KB gz with kit + adapter + its glossary (' + (base / 1000).toFixed(2) + ' + file)');
   });
 
-  for (const [route, key] of [['/stats', 'stats'], ['/resolvers', 'resolvers']]) {
+  for (const [route, key] of [['/resolvers', 'resolvers']]) {
     await test(route + ': every term keeps its definition in the tip at mount, as the trigger\'s accessible description, and the server render serialises it', async () => {
       // Defect guarded: a per-route glossary that dropped what the term block promises (pages-ux-a #6): the definition is there before anyone opens anything.
       const whole = new Map(entries.map((entry) => [entry.key, entry.definition]));

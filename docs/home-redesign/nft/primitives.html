@@ -85,6 +85,9 @@
     .pg-flow { columns: 1; }
     .pg-tile-body { zoom: .85; }
   }
+  /* Real size: every part as a page draws it (WEAR-AUDIT.md I7). The flow takes fewer columns, and the pane scrolls. */
+  .pg-real .pg-tile-body { zoom: 1; }
+  .pg-real .pg-flow { columns: 2 440px; }
 </style>
 </head>
 <body>
@@ -99,6 +102,9 @@
   <div class="pg-visit" role="group" aria-label="Whose rules">
     <button type="button" data-rules="site" aria-pressed="true">Site's table</button>
     <button type="button" data-rules="card" aria-pressed="false">Card's own rules</button>
+  </div>
+  <div class="pg-visit" role="group" aria-label="Part size">
+    <button type="button" data-size="real" aria-pressed="false">Real size</button>
   </div>
   <span class="pg-state" role="status" aria-live="polite"></span>
   <span class="pg-note">Sample data</span>
@@ -250,12 +256,19 @@
     }).catch(function (e) { console.error('The panel art did not paint: ' + e.message); return null; });
   }
   function gridLine(on) {
-    var g = on && on.gridLook && on.gridLook.params;
-    return g ? ' The grid would take ' + g.detail + ', ' + g.texture + ' texture, edge hue ' + Math.round(g.edgeHue) + '.' : '';
+    var g = on && on.gridLook && on.gridLook.params, v = on && on.voice;
+    var voice = v === 'mono' ? ' Headings in mono: its frame line is straight.' : v === 'sans' ? ' Headings in sans: its frame line is mixed.' : v === 'keep' ? ' Headings keep the site\'s face: its frame line curves.' : '';
+    return voice + (g ? ' The grid would take ' + g.detail + ', ' + g.texture + ' texture, edge hue ' + Math.round(g.edgeHue) + '.' : '');
   }
   var wearing = '', visiting = false, mode = new URLSearchParams(location.search).get('rules') === 'card' ? 'card' : 'site';
-  function cardRules() {
-    var K2 = window.ArkKitSkin, on = SITE.active ? SITE.active() : null, scene = document.getElementById('scene');
+  // the worn sample's own recipe, made here: the site may wear it as a package and keep no recipe of its own
+  var recipes = {};
+  function recipeOf(n) {
+    if (!recipes[n]) recipes[n] = SITE.sample(n).then(function (rec) { return window.DefxnSkin.recipe(rec, { locked: window.DefxnSkinParts.LOCKS }); });
+    return recipes[n];
+  }
+  function cardRules(on) {
+    var K2 = window.ArkKitSkin, scene = document.getElementById('scene');
     if (mode !== 'card' || !K2 || !on) return null;
     var keys = Array.from(K2.arkSkinPartKeys()).concat(Object.keys(K2.ARK_SKIN_BLOCK_PARTS || {}));
     var skin = window.DefxnSkin.arkSkin(on, { keys: keys, root: scene, derive: K2.deriveSkinTokens });
@@ -304,10 +317,11 @@
     state.textContent = 'Putting on card ' + n + '.';
     visiting = true;
     SITE.sample(n).then(SITE.apply).then(function (res) {
+      return recipeOf(n).then(function (on) { return { res: res, on: on }; });
+    }).then(function (got) {
       visiting = false;
       if (wearing !== n) return;
-      res = cardRules() || res;
-      var on = SITE.active ? SITE.active() : null;
+      var on = got.on, res = cardRules(on) || got.res;
       state.textContent = 'Wearing card ' + n + (on && on.palette ? ': ' + on.palette : '') + '. ' + (res && res.applied ? res.applied.length : 0) + ' parts took the skin.' + gridLine(on);
       describe();
     }).catch(function (err) { visiting = false; state.textContent = 'Card ' + n + ' did not go on: ' + err.message; });
@@ -323,6 +337,16 @@
     });
   });
 
+  // Real size: parts as a page draws them. A card's rules read part widths, so a card on the page goes on again.
+  var sizeBtn = document.querySelector('[data-size]'), real = new URLSearchParams(location.search).get('size') === 'real';
+  function sized() { document.body.classList.toggle('pg-real', real); sizeBtn.setAttribute('aria-pressed', String(real)); }
+  sized();
+  sizeBtn.addEventListener('click', function () {
+    real = !real; sized();
+    var url = new URL(location.href); if (real) url.searchParams.set('size', 'real'); else url.searchParams.delete('size'); history.replaceState(null, '', url);
+    if (wearing) visit(wearing);
+  });
+
   paint();
   var first = new URLSearchParams(location.search).get('skin-sample') || '';
   // skin-site.js puts a ?skin-sample on by itself; here only the buttons follow it
@@ -332,10 +356,14 @@
   // a card put on by the address (skin-site.js reads ?skin-sample) is reported here too
   document.addEventListener('defxn:skin', function (e) {
     if (!e.detail || !e.detail.on || !wearing) return;
-    var on = SITE.active ? SITE.active() : null;
     if (/^Putting on/.test(state.textContent)) {
-      state.textContent = 'Wearing card ' + wearing + (on && on.palette ? ': ' + on.palette : '') + '.' + gridLine(on);
-      if (mode === 'card' && !e.detail.fromCard && !visiting) setTimeout(cardRules, 0);
+      var n = wearing;
+      recipeOf(n).then(function (on) {
+        if (wearing !== n) return;
+        state.textContent = 'Wearing card ' + n + (on && on.palette ? ': ' + on.palette : '') + '.' + gridLine(on);
+        if (mode === 'card' && !e.detail.fromCard && !visiting) cardRules(on);
+        setTimeout(describe, 60);
+      });
     }
     setTimeout(describe, 60);
   });

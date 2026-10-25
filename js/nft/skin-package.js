@@ -3,7 +3,9 @@
    layer table, no 3D (WEAR-AUDIT.md, loop 5; SKIN-AUDIT.md 4.1).
 
    The records, one per line, each boxes joined by "-", labels upper case, text as hex of its UTF-8 bytes:
-     DFXNSKIN1-T<table>-D<hex dna>-R<hex card record line>-N<hex skin name>     the header, first line
+     DFXNSKIN1-T<table>-D<hex dna>-R<hex card record line>-N<hex skin name>-F<hex family>
+                                                                                the header, first line (F: the matched
+                                                                                set the card wears whole, or empty)
      DFXNSKINTOK1-K<hex token>-V<hex value>                                     one colour token
      DFXNSKINPC1-K<hex piece>-N<hex element name>-B<hex viewBox>-X<hex keep x>-Y<hex keep y>-M<0|1>-F<hex fields>-S<hex svg>
                                                                                 one drawn piece, filled for its wearer
@@ -19,7 +21,8 @@
    to audit it. It carries no signature yet: the identity's signature line (DFXNSKINSIG1) waits for real card
    objects (KASSET1), and until then a reader treats a package as an unsigned sample.
 
-   DefxnSkinPackage.encode(recipe) -> text      DefxnSkinPackage.decode(text) -> skin data
+   DefxnSkinPackage.encode(recipe) -> text      DefxnSkinPackage.decode(text) -> skin data (with `family`, for a
+                                                site policy that allows more to a whole set)
    DefxnSkinPackage.toArkSkin(data, opts)       the skin in the shape Ark UI's applyArkSkin takes (also used by
                                                 skin-recipe.js's arkSkin: one copy of how rules reach parts)
    DefxnSkinPackage.apply(root, text, opts)     -> Promise of { result, gridLook, arrival }: wears a package
@@ -38,9 +41,9 @@
     PANEL: ['frame', 'edge', 'ornament', 'header'],
     LIST: ['marker'],
     SEPARATOR: ['ornament'],
-    BUTTON: ['edge']
+    BUTTON: ['edge', 'button']
   };
-  var FLAT = ['frame', 'edge', 'ornament', 'marker', 'header', 'density'];
+  var FLAT = ['frame', 'edge', 'ornament', 'marker', 'header', 'density', 'button'];
   var VOID = /^(INPUT|IMG|HR|BR|TEXTAREA|SELECT|PROGRESS|METER|VIDEO|AUDIO|IFRAME|CANVAS)$/;
   function squash(v) { return String(v).replace(/[^A-Za-z0-9]/g, '').toUpperCase(); }
 
@@ -68,6 +71,7 @@
       }
       keys.forEach(function (key) {
         var r = {}, bare = opts.root && String(key).split('|').every(function (side) { return voidOnly[squash(side)] !== false; });
+        // a nameplate's fit is Ark UI's to decide (0.2.22: drawn 48 px tall, taken back where there is no room)
         FLAT.forEach(function (k) { var v = flat[k]; if (bare && k !== 'edge') return; if (v && v !== 'keep' && v !== 'none') r[k] = v; });
         var l = layouts[squash(key)];
         if (l && l !== 'keep') r.layout = l;
@@ -93,7 +97,7 @@
   function unhex(h) { var a = new Uint8Array(h.length / 2); for (var i = 0; i < a.length; i++) a[i] = parseInt(h.substr(i * 2, 2), 16); return typeof TextDecoder !== 'undefined' ? new TextDecoder().decode(a) : Buffer.from(a).toString('utf8'); }
   var HEX = /^(?:[0-9a-f]{2})*$/;
   var KINDS = {
-    DFXNSKIN1: [['T', /^[0-9a-f]{0,8}$/], ['D', HEX], ['R', HEX], ['N', HEX]],
+    DFXNSKIN1: [['T', /^[0-9a-f]{0,8}$/], ['D', HEX], ['R', HEX], ['N', HEX], ['F', HEX]],
     DFXNSKINTOK1: [['K', HEX], ['V', HEX]],
     DFXNSKINPC1: [['K', HEX], ['N', HEX], ['B', HEX], ['X', HEX], ['Y', HEX], ['M', /^[01]$/], ['F', HEX], ['S', HEX]],
     DFXNSKINRL1: [['P', HEX], ['K', HEX], ['V', HEX]],
@@ -103,7 +107,7 @@
   function line(kind, values) { return [kind].concat(KINDS[kind].map(function (b, i) { return b[0] + values[i]; })).join('-'); }
   function encode(recipe, ark) {
     var data = ark || toArkSkin(recipe), out = [];
-    out.push(line('DFXNSKIN1', [recipe.table || '', hex(recipe.dna || ''), hex(recipe.record || ''), hex(data.name)]));
+    out.push(line('DFXNSKIN1', [recipe.table || '', hex(recipe.dna || ''), hex(recipe.record || ''), hex(data.name), hex(recipe.family || '')]));
     Object.keys(recipe.tokens).sort().forEach(function (k) { out.push(line('DFXNSKINTOK1', [hex(k), hex(recipe.tokens[k])])); });
     Object.keys(recipe.chrome).sort().forEach(function (k) {
       var c = recipe.chrome[k]; if (!c) return;
@@ -132,7 +136,7 @@
         if (box.indexOf(b[0]) !== 0 || !b[1].test(box.slice(b[0].length))) throw new Error('Skin package line ' + (n + 1) + ': box ' + (i + 2) + ' must be ' + b[0] + ' with a payload it allows.');
         return box.slice(b[0].length);
       });
-      if (kind === 'DFXNSKIN1') { data.table = v[0]; data.dna = unhex(v[1]); data.record = unhex(v[2]); data.name = unhex(v[3]); }
+      if (kind === 'DFXNSKIN1') { data.table = v[0]; data.dna = unhex(v[1]); data.record = unhex(v[2]); data.name = unhex(v[3]); data.family = unhex(v[4]) || null; }
       else if (kind === 'DFXNSKINTOK1') data.tokens[unhex(v[0])] = unhex(v[1]);
       else if (kind === 'DFXNSKINPC1') {
         var c = { svg: unhex(v[7]), viewBox: unhex(v[2]).split(' ').filter(Boolean).map(Number) }, x = unhex(v[3]), y = unhex(v[4]), f = unhex(v[6]);

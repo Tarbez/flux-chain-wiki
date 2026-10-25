@@ -104,60 +104,9 @@
     return line.length > max ? line.slice(0, max - 1) + '…' : line;
   }
 
-  /* The auth panel and the signer outlive any one mount (the signer is a shared singleton, so a route
-     change alone must not dispose it); the first mount creates them. */
-  function accountSession() {
-    if (ArkUI.accountSession) return ArkUI.accountSession;
-    var container = document.createElement('div');
-    var preservingIdentity = false;
-    var auth = ArkAdminAuth.create({ container: container, product: 'DEFXN', onChange: function (next) {
-      if (!preservingIdentity) {
-        if (next) {
-          ArkUI.localIdentity.set(next);
-          if (ArkUI.cmsSession) ArkUI.cmsSession.connect(next).then(function () { ArkUI.localIdentity.refresh(); });
-          // Unlocking proves the key locally; this is the step that
-          // authenticates the identity to the mesh fleet itself --
-          // publishing it to the directory (skipped if already
-          // published) shows the real scoped-claim authorization
-          // modal before anything is signed. Fire-and-forget: a
-          // cancelled or failed publish must not block sign-in.
-          if (window.ArkUI.meshDirectory) {
-            window.ArkUI.meshDirectory.ensurePublished(next).then(function () {
-              ArkUI.accountSession.meshAuthMessage = '';
-              ArkUI.localIdentity.refresh();
-            }).catch(function (error) {
-              ArkUI.accountSession.meshAuthMessage = (error && error.message) || 'Could not authenticate this identity to the mesh.';
-              ArkUI.localIdentity.refresh();
-            });
-          }
-        }
-        else { ArkUI.localIdentity.clear(); if (ArkUI.cmsSession) ArkUI.cmsSession.revoke(); }
-      }
-      ArkUI.localIdentity.refresh();
-    } });
-    function isUnlocked() {
-      var pointer = ArkUI.localIdentity.current();
-      var signer = auth.current();
-      return !!(pointer && signer && pointer.identityId === (signer.identityId || signer.publicKeyB64) && pointer.publicKeyB64 === signer.publicKeyB64);
-    }
-    function lock() {
-      preservingIdentity = true;
-      try { auth.signOut(); } finally { preservingIdentity = false; }
-    }
-    ArkUI.accountSession = { container: container, isUnlocked: isUnlocked,
-      signOut: function () { auth.signOut(); }, current: function () { return auth.current(); } };
-    ArkUI.localIdentity.subscribe(function () {
-      if (auth.current() && !isUnlocked()) lock();
-      if (ArkUI.refreshAccountNav) ArkUI.refreshAccountNav();
-    });
-    window.addEventListener('pagehide', function () {
-      preservingIdentity = true;
-      try { auth.dispose(); } finally { preservingIdentity = false; }
-      // Disposing a root handle is not signing out of the remembered account.
-      ArkUI.localIdentity.refresh();
-    });
-    return ArkUI.accountSession;
-  }
+  /* The auth panel and the signer outlive any one mount: one shared session for /account and /auth
+     (js/ark/account-session.js). */
+  function accountSession() { return ArkUI.openAccountSession(); }
 
   /* The Auth Kit -> identity -> wallet -> publishing map, the figure block's live part. */
   var MAP_SVG = '<svg viewBox="0 0 560 168" role="presentation"><path class="account-map-route account-map-route-main" d="M78 84H213C252 84 253 35 294 35H380"/><path class="account-map-route" d="M213 84C252 84 253 133 294 133H468"/><path class="account-map-route" d="M380 35C418 35 420 84 458 84H514"/><circle class="account-map-origin" cx="50" cy="84" r="27"/><circle class="account-map-node" cx="213" cy="84" r="6"/><circle class="account-map-node" cx="380" cy="35" r="6"/><circle class="account-map-node" cx="294" cy="133" r="6"/><circle class="account-map-node" cx="458" cy="84" r="6"/><text class="account-map-you" data-ark-label x="50" y="88" text-anchor="middle">YOU</text><text data-ark-label x="200" y="68" text-anchor="end">FXN ID</text><text data-ark-label x="393" y="20">IDENTITY</text><text data-ark-label x="307" y="151">WALLET</text><text data-ark-label x="514" y="68" text-anchor="end">PUBLISH</text></svg>';
@@ -257,7 +206,7 @@
       var refs = {};                       // rendered block roots, by name
       var views = {};                      // the persistent view nodes, moved into whichever tabs exist
       var cardHost = null, tabsEl = null, tabsValues = [], railEl = null, identityWrap = null, mapWrap = null, offstage = null;
-      var nftSample = null, profileCard = null;   // the NFT card (js/ark/profile-card.js): a review sample named in the address
+      var nftSample = null, profileCard = null, cardSeal = null, realCard = null, mintAsk = null, tradeAsk = null, tradeNote = null, salePrice = null, activateNote = null;   // the NFT card (js/ark/profile-card.js): a review sample named in the address
       var lastProps = Object.create(null); // props each live block was last painted with
       var wallet = { symbol: 'FXN', logo: null, balance: null, display: '—', message: 'Sign in to check', key: '' };
       var mesh = null;
@@ -307,13 +256,13 @@
       }
       function identityProps(next) {
         return { label: 'Identity details', columns: 1, items: [
-          { term: 'Identity ID', value: next && (next.core && next.core.ghostId || next.ghostId || next.identityId) || null, mono: true },
+          { term: 'FXN ID number', value: next && (next.core && next.core.ghostId || next.ghostId || next.identityId) || null, mono: true },
           { term: 'Wallet address', value: next && next.walletAddress || null, mono: true }
         ] };
       }
       function developerProps(next) {
         return { label: 'Developer details', columns: 1, items: [
-          { term: 'Public root key', value: next && next.publicKeyB64 ? base64ToHex(next.publicKeyB64) : null, mono: true },
+          { term: 'Public ID key', value: next && next.publicKeyB64 ? base64ToHex(next.publicKeyB64) : null, mono: true },
           { term: 'Security level', value: next && next.securityProfile || null }
         ] };
       }
@@ -420,8 +369,28 @@
       /* a list refuses two rows with one key (and would be replaced by its refusal): the vault may name an address twice
          (a rotated-from wallet), a person's list shows it once */
       function once(items) { var seen = Object.create(null); return items.filter(function (item) { if (seen[item.id]) return false; seen[item.id] = true; return true; }); }
+      /* Public IDs (owner, 2026-10-25): the IDs sites and the chain see, each with its own wallets. The current ID's
+         wallets follow it, each Private (its link only in the file) or Published (its KWALLET1 on chain pva). A
+         private wallet offers Publish link. Wallets an older file linked to the Master ID come last, named as such. */
       function keysListProps() {
         var who = signer();
+        if (who && who.publicIds) {
+          var current = who.publicId, items = [];
+          who.publicIds.forEach(function (id) {
+            var item = { id: id.key, title: id.name + (id.label ? ' \u00b7 ' + id.label : ''), meta: id.wallets.length + (id.wallets.length === 1 ? ' wallet' : ' wallets') };
+            if (current && id.key === current.key) item.status = { label: 'In use', tone: 'trust' };
+            else item.actions = [{ label: 'Use', action: 'keys-use-id', tone: 'secondary' }];
+            items.push(item);
+            if (current && id.key === current.key) id.wallets.forEach(function (w) {
+              var row = { id: w.key, title: w.key, meta: 'Wallet of ' + id.name };
+              if (w.published != null) row.status = { label: 'Published', tone: 'live' };
+              else { row.status = { label: 'Private', tone: 'hidden' }; row.actions = [{ label: 'Publish link', action: 'keys-publish', tone: 'secondary' }]; }
+              items.push(row);
+            });
+          });
+          ((who.walletAddresses) || []).forEach(function (address) { items.push({ id: address, title: address, meta: 'Older wallet, made by your Master ID inside the file' }); });
+          return { label: 'Public IDs', empty: { reason: 'This FXN ID has no Public ID yet.', remedy: 'Press Add Public ID below, then save the new file.' }, items: once(items) };
+        }
         var addresses = (who && who.walletAddresses) || [];
         var delegations = (who && who.walletDelegations) || {};
         return { label: 'Signing wallets', empty: { reason: 'No signing wallets yet.', remedy: 'Add one below; each can then be rotated, revoked or delegated on its own.' },
@@ -460,7 +429,8 @@
           { term: 'Updated', value: record.updatedAt ? new Date(record.updatedAt).toLocaleString() : 'Not reported' }] };
       }
       function keysAddProps() {
-        return { label: 'Add a signing wallet', fields: [{ name: 'label', label: 'Label', type: 'text', value: 'Default', autocomplete: 'off' }], submit: { label: 'Add wallet', action: 'keys-add', tone: 'primary' } };
+        return { label: 'Add a wallet to the Public ID in use', fields: [{ name: 'label', label: 'Label', type: 'text', value: '', autocomplete: 'off' }], submit: { label: 'Add wallet', action: 'keys-add', tone: 'primary' },
+          actions: [{ label: 'Add Public ID', action: 'keys-add-id', tone: 'secondary' }, { label: 'Save the new file', action: 'keys-save', tone: 'ghost' }] };
       }
       function keysActionProps() {
         return { label: 'Rotate, revoke or delegate', fields: [
@@ -488,7 +458,7 @@
         var storage = pin(el('div'), SESSION + '/div:1/p:2', true); storage.setAttribute('data-account-notices', '');
         node.appendChild(storage);
         node.appendChild(make({ block: 'disclosure', id: 'account-explain', was: WAS['account-explain'], props: { more: 'What is an FXN ID file?', less: 'Hide this',
-          content: 'An FXN ID file (.auth.fxn) holds the keys that sign for you. It stays on this device and is never uploaded.\n\nYour identity ID, which developer tools call your Ghost ID, is the public name your FXN ID file opens.' } }));
+          content: 'An FXN ID file (.auth.fxn) holds the keys that sign for you. It stays on this device and is never uploaded.\n\nInside it, your Master ID stays private. Your Public IDs are what others see.' } }));
         var ways = pin(el('div', 'account-cms'), SESSION + '/div:1/div:2', true);
         refs.ways = make({ block: 'actions', id: 'account-ways', props: waysProps(), was: localEditing() ? Object.assign({ 'button#3': SESSION + '/div:1/div:2/a:3' }, WAS['account-ways']) : WAS['account-ways'] }); remember('ways', waysProps());
         ways.appendChild(refs.ways);
@@ -586,7 +556,7 @@
       }
       function buildKeys() {
         var keys = pin(el('section', 'account-keys'), KEYS);
-        keys.appendChild(el('p', 'account-hint', 'Create dedicated signing keys and manage each one independently without changing your primary identity.'));
+        keys.appendChild(el('p', 'account-hint', 'Sites and the chain see one Public ID at a time. A new wallet is private: only this file shows which Public ID it belongs to.'));
         refs.keysList = make({ block: 'list', id: 'account-keys-list', props: keysListProps(), was: WAS['account-keys-list'] }); remember('keysList', keysListProps());
         keys.appendChild(refs.keysList);
         /* Ark's field has no password kind, so the PIN and the password are the one hand-built pair on the page; both
@@ -607,26 +577,96 @@
         keys.setAttribute('data-account-panel', 'keys'); keys.setAttribute('aria-label', 'Signing wallets');
         return keys;
       }
-      /* The NFT card: the card drawn by the NFT session's renderer, a line that says it is a sample, and one switch that puts
-         the card's look on the whole site or takes it off (js/ark/profile-card.js, js/ark/skin-site.js). It takes the
-         map's place, at the map's height, so the page still fits 1280x720. */
-      function buildNft() {
-        var node = el('section', 'account-nft'), art = el('div', 'account-nft-art'), side = el('div', 'account-nft-side');
+      /* The NFT card: the card drawn by the NFT session's renderer, a line that says it is a sample, and the card's seal
+         (js/nft/wear.js through DefxnSkinSite.sealIn): Wear it keeps the card on this device after a confirm, Stop trying
+         and Take off end it (js/ark/profile-card.js, js/ark/skin-site.js). It takes the map's place, at the map's height,
+         so the page still fits 1280x720. */
+      /* card: a sample's number, or the signed-in identity's real card record (DefxnSkinSite.chainCard: its PVA,
+         verified in this browser) */
+      function buildNft(card) {
+        var node = el('section', 'account-nft'), art = el('div', 'account-nft-art'), side = el('div', 'account-nft-side'), real = typeof card === 'object';
         node.setAttribute('aria-label', 'Your card');
-        profileCard = DefxnProfileCard.open(art, nftSample);
-        side.appendChild(el('p', 'account-nft-kicker')).textContent = 'Sample card ' + nftSample;
+        profileCard = DefxnProfileCard.open(art, card);
+        side.appendChild(el('p', 'account-nft-kicker')).textContent = real ? 'Your PVA ' + card.genesisId : 'Sample card ' + card;
         refs.nftNote = side.appendChild(el('p', 'account-nft-note'));
-        refs.nftNote.textContent = 'No card is linked to an FXN ID yet.';
-        refs.nftWear = make({ block: 'actions', id: 'account-nft-wear', props: wearProps() }); remember('nftWear', wearProps());
-        side.appendChild(refs.nftWear);
-        profileCard.onChange(function () { paint('nftWear', wearProps()); });
+        refs.nftNote.textContent = real ? 'Your browser checked this card on the chain. It is bound to your FXN ID.' : 'No card is linked to an FXN ID yet.';
+        if (real) {
+          realCard = card;
+          /* a skin the shop sent here to mint (?mint-skin=DFXNSKIN1-...): read by the skin grammar, minted only after the
+             full signing review. Without one, the card's own action is Try it on. */
+          mintAsk = null;
+          try { var asked = new URLSearchParams(location.search).get('mint-skin'); if (asked) mintAsk = DefxnCardRecord.skin.decode(asked); }
+          catch (error) { refs.nftNote.textContent = 'The skin in this address does not read (' + error.message + '). Build it in the shop again.'; }
+          var items = [{ label: 'Try it on', action: 'nft-try', tone: mintAsk ? 'ghost' : 'primary' }];
+          if (mintAsk) { items.unshift({ label: 'Mint this skin', action: 'nft-mint', tone: 'primary' }); refs.nftNote.textContent = 'The shop sent a skin: ' + DEFXN_TRAITS.skinText(mintAsk).split('|').join(', ') + '. Minting it puts it on your key. Your PVA stays as it is.'; }
+          side.appendChild(make({ block: 'actions', id: 'account-nft-try', props: { items: items } }));
+          /* the wearer's skins, each with the link that starts a trade: the taker opens it and accepts (buildTrade). Three
+             show, so the card still fits the page; the menu tries every one on. */
+          DefxnSkinSite.chainCards().then(function (cards) {
+            if (!cards || !cards.skins.length || !side.isConnected) return;
+            side.appendChild(make({ block: 'list', id: 'account-nft-skins', props: { label: 'Your skins' + (cards.skins.length > 3 ? ' (3 of ' + cards.skins.length + ')' : ''),
+              items: cards.skins.slice(0, 3).map(function (sk) { return { id: sk.id, title: sk.label, meta: 'skin ' + sk.id.slice(0, 8), actions: [{ label: 'Copy gift link', action: 'skin-link', tone: 'ghost' }, { label: 'Copy sale link', action: 'skin-sale-link', tone: 'ghost' }] }; }) } }));
+            /* the price a sale link asks: the taker's FXN is then held for the skin, and paid to you when you give it */
+            refs.saleForm = side.appendChild(make({ block: 'form', id: 'account-nft-sale', props: { label: 'Sale link', fields: [
+              { name: 'price', label: 'Price in FXN', type: 'number', autocomplete: 'off', placeholder: '100' },
+              { name: 'days', label: 'Days the buyer\u2019s FXN waits for you', type: 'number', value: '3', autocomplete: 'off' }],
+              submit: { label: 'Use this price', action: 'skin-sale-price', tone: 'secondary' } } }));
+          }, function () { /* the card itself already said what it could read */ });
+        }
+        var seal = side.appendChild(el('div', 'account-nft-seal'));
+        DefxnSkinSite.sealIn(seal).then(function (made) { if (seal.isConnected) cardSeal = made; else made.remove(); }, function (error) { refs.nftNote.textContent = 'The card\u2019s seal did not load (' + error.message + '). Reload the page to try again.'; });
         profileCard.ready.catch(function (error) { refs.nftNote.textContent = 'The card did not load (' + error.message + '). Reload the page to try again.'; });
         node.appendChild(art); node.appendChild(side);
         return node;
       }
-      function wearProps() {
-        var on = !!(profileCard && profileCard.wearing());
-        return { label: 'Card look', items: [{ label: on ? 'Use the site\u2019s look' : 'Wear this card\u2019s look', action: 'nft-wear', tone: 'secondary' }] };
+      /* No PVA yet: the one step that makes it. It cites the first FXN payment the wallet received (chain-cards.mjs
+         activatePva), after the full signing review. A wallet that received nothing is told so by the step itself. */
+      function buildActivate() {
+        var node = el('section', 'account-trade');
+        node.setAttribute('aria-label', 'Your card');
+        node.appendChild(el('p', 'account-nft-kicker')).textContent = 'Your card';
+        activateNote = node.appendChild(el('p', 'account-nft-note'));
+        activateNote.textContent = 'Your identity card, the PVA, comes from your first FXN payment. It stays bound to your key.';
+        node.appendChild(make({ block: 'actions', id: 'account-pva-activate', props: { items: [{ label: 'Activate your PVA', action: 'pva-activate', tone: 'primary' }] } }));
+        return node;
+      }
+      /* A skin trade, one step per device, from a link (js/ark/chain-cards.mjs acceptSkin and giveSkin). The taker opens
+         ?take-skin=<skin id> and accepts; the page then shows the link the owner opens, ?give-skin=<id>&consent=<id>, to
+         move the skin. Each step shows the full signing review first. Null when the address carries neither. */
+      function buildTrade() {
+        var q = new URLSearchParams(location.search), take = q.get('take-skin'), give = q.get('give-skin'), end = q.get('end-sale'), price = q.get('price'), days = q.get('days') || '3';
+        if (!take && !give && !end) return null;
+        if (price && !/^[1-9][0-9]*$/.test(price)) price = null;
+        var node = el('section', 'account-trade');
+        node.setAttribute('aria-label', 'Skin trade');
+        node.appendChild(el('p', 'account-nft-kicker')).textContent = end ? 'A sale that ended' : take ? (price ? 'A skin for sale' : 'A skin for you') : 'Give a skin';
+        tradeNote = node.appendChild(el('p', 'account-nft-note'));
+        tradeNote.textContent = end ? 'If the owner did not give you the skin in time, take your FXN back.'
+          : take ? (price ? 'Skin ' + take.slice(0, 8) + ' is for sale for ' + price + ' FXN. Your FXN wait up to ' + days + ' days, and go to the owner only when the skin moves to you.'
+            : 'Someone wants to give you skin ' + take.slice(0, 8) + '. Accept it, then send the link you get back.')
+          : 'Someone accepted skin ' + give.slice(0, 8) + '. Give it to move it to them. You cannot take it back.';
+        tradeAsk = end ? { step: 'end', edge: end } : take ? { step: 'take', id: take, price: price, days: days } : { step: 'give', id: give, edge: q.get('consent') };
+        var label = end ? 'Take my FXN back' : take ? (price ? 'Accept and pay ' + price + ' FXN' : 'Accept this skin') : 'Give this skin';
+        node.appendChild(make({ block: 'actions', id: 'account-trade-act', props: { items: [{ label: label, action: 'skin-trade', tone: 'primary' }] } }));
+        return node;
+      }
+      function runTrade() {
+        if (!tradeAsk) return;
+        var who = session.isUnlocked() ? session.current() : null;
+        if (!who) { tradeNote.textContent = 'Unlock your FXN ID first. Each step is signed by your own key.'; return; }
+        tradeNote.textContent = 'Review the step, then approve it.';
+        var run = tradeAsk.step === 'take' ? DefxnSkinSite.acceptSkin(who, tradeAsk.id, tradeAsk.price, tradeAsk.days)
+          : tradeAsk.step === 'end' ? DefxnSkinSite.endSale(who, tradeAsk.edge) : DefxnSkinSite.giveSkin(who, tradeAsk.id, tradeAsk.edge);
+        run.then(function (res) {
+          if (res.kind === 'accepted') {
+            var link = location.origin + '/account?give-skin=' + res.id + '&consent=' + res.edge;
+            tradeNote.textContent = (res.sale ? 'Paid ' + res.price + ' FXN into the sale. ' : 'Accepted. ') + 'Send this link to the owner, ' + res.owner.slice(0, 8) + '\u2026: ' + link
+              + (res.sale ? ' If the skin has not moved by ' + new Date(res.deadline * 1000).toLocaleString() + ', open ' + location.origin + '/account?end-sale=' + res.edge + ' to take your FXN back.' : '');
+            copyText(link, 'Link copied. Send it to the owner.');
+          } else if (res.kind === 'given') tradeNote.textContent = 'Given. The skin is now ' + res.to.slice(0, 8) + '\u2026\u2019s.' + (res.paid ? ' You received ' + res.paid + ' FXN.' : '');
+          else if (res.kind === 'returned') tradeNote.textContent = 'Your ' + res.amount + ' FXN are back in your wallet.';
+          else tradeNote.textContent = res.failure + ' Missing: ' + res.missing + '. To fix: ' + res.remedy + '.';
+        }, function (error) { tradeNote.textContent = error.message; });
       }
       /* The glance rail: Ark's interactive stats (each tile opens the view that owns its number), and the way to the explorer. */
       function buildRail() {
@@ -686,13 +726,21 @@
           var left = pin(el('div', 'account-hero'), HERO, true);
           refs.hero = make({ block: 'hero', id: 'account-headline', props: heroProps(identity), was: WAS['account-headline'] }); remember('hero', heroProps(identity));
           left.appendChild(refs.hero);
-          nftSample = typeof DefxnProfileCard !== 'undefined' ? DefxnProfileCard.fromAddress() : null;
-          if (nftSample) left.appendChild(buildNft());
+          nftSample = typeof DefxnProfileCard !== 'undefined' ? DefxnProfileCard.fromAddress() || DefxnSkinSite.heldNumber() : null;   /* the sample in the address, or the card held on this device */
+          if (nftSample) left.appendChild(buildNft(nftSample));
           mapWrap = el('div', 'account-map');
           mapWrap.appendChild(make({ block: 'figure', id: 'account-map', was: WAS['account-map'], props: { kind: 'illustration', slot: 'account-map', aspect: 'auto', labelMin: '12',
             caption: 'How it fits together: your FXN ID file opens your identity, your wallet and publishing.' } }));
           mapWrap.hidden = !!identity || !!nftSample;
           left.appendChild(mapWrap);
+          /* a skin trade link: ?take-skin=<id> (the taker consents) or ?give-skin=<id>&consent=<id> (the owner moves it) */
+          if (identity && typeof DefxnSkinSite !== 'undefined') { var trade = buildTrade(); if (trade) left.insertBefore(trade, mapWrap); }
+          /* no sample: the signed-in identity's own PVA, when the chain holds one. A failed read leaves the map. */
+          if (!nftSample && identity && typeof DefxnSkinSite !== 'undefined' && typeof DefxnProfileCard !== 'undefined') DefxnSkinSite.chainCard().then(function (rec) {
+            if (!rec && mapWrap.isConnected && !profileCard) { left.insertBefore(buildActivate(), mapWrap); return; }
+            if (!rec || !mapWrap.isConnected || profileCard) return;
+            left.insertBefore(buildNft(rec), mapWrap); mapWrap.hidden = true;
+          }, function (error) { console.info('[account] Your card was not read from the chain (' + error.message + '). The page shows the map.'); });
           identityWrap = pin(el('div', 'account-identity'), STATE, true);
           /* On a phone the identity details fold behind a press (Ark's disclosure, foldBelow 'phone'): the page
              was 1.7x the viewport signed in, past the 1.6x fold budget; wider they are always in sight. With the NFT card
@@ -703,16 +751,19 @@
           refs.identity = refs.fold.querySelector('#account-identity'); remember('identity', identityProps(identity));
           refs.copy = refs.fold.querySelector('#account-copy'); remember('copy', copyProps());
           refs.dev = make({ block: 'disclosure', id: 'account-developer', was: WAS['account-developer'], props: { more: 'Developer details', less: 'Hide developer details',
-            content: 'Technical names for what you see here: the identity ID is your Ghost ID, and the public root key is the key every signature of yours is checked against.',
+            content: 'Technical names for what you see here: the FXN ID number names this file, and the Public ID key is the key sites and the chain check your signatures against. Your Master ID signs nothing they see.',
             blocks: [{ block: 'facts', id: 'account-developer-facts', props: developerProps(identity), was: WAS['account-developer-facts'] }] } });
           refs.devFacts = refs.dev.querySelector('#account-developer-facts'); remember('devFacts', developerProps(identity));
           identityWrap.appendChild(refs.fold); identityWrap.appendChild(refs.dev);
           identityWrap.hidden = !identity;
           left.appendChild(identityWrap);
+          /* the frame the 3D world is fitted to (js/world/world-host.js frame()): your identity over the network, below the words */
+          var worldStage = el('div', 'account-stage'); worldStage.setAttribute('data-stage', ''); worldStage.setAttribute('aria-hidden', 'true');
+          left.appendChild(worldStage);
           shell.appendChild(left);
           views.session = buildSession(); views.create = buildCreate(); views.wallet = buildWallet(); views.keys = buildKeys(); views.contacts = buildContacts(); views.mesh = buildMesh();
           offstage = el('div', 'account-offstage'); offstage.hidden = true;
-          cardHost = el('section', 'account-card'); cardHost.setAttribute('aria-label', 'Account');
+          cardHost = el('section', 'account-card'); cardHost.setAttribute('aria-label', 'Account'); cardHost.setAttribute('data-panel', '');   /* the world draws its glass slab under this box */
           cardHost.appendChild(buildTabs(sessionState, sessionState === 'verified-local' ? 'defi' : (sessionState === 'signed-out' ? 'signin' : 'session')));
           shell.appendChild(cardHost);
           railEl = buildRail(); railEl.hidden = !identity;
@@ -728,7 +779,6 @@
         /* every press that means something to the page raises ark:action (Ark's actions, forms, lists, stats); `item` is a list row's id */
         actions: {
           'copy-ghost': function () { copyIdentityField('ghost'); },
-          'nft-wear': function () { profileCard.wear(!profileCard.wearing()).catch(function (error) { refs.nftNote.textContent = 'The look did not change (' + error.message + '). Reload the page to try again.'; }); },
           'copy-wallet': function () { copyIdentityField('wallet'); },
           'forget': function () { session.signOut(); },
           'wallet-send': function () { showWallet('send'); },
@@ -742,6 +792,45 @@
           'rail-mesh': function () { openTab('mesh'); },
           'contacts-search': function (detail) { searchContacts(detail.values.query); },
           'contacts-refresh': function () { loadContacts(false); },
+          'skin-trade': function () { runTrade(); },
+          'pva-activate': function () {
+            var who = session.isUnlocked() ? session.current() : null;
+            if (!who) { activateNote.textContent = 'Unlock your FXN ID first. Your card is signed by your own key.'; return; }
+            activateNote.textContent = 'Review the activation, then approve it.';
+            /* the first FXN may be in a private wallet: the chain counts it only after that one link is published, with
+               the Publish link step's own review and warning (owner, 2026-10-25) */
+            var publishFirst = function (walletKey) {
+              activateNote.textContent = 'Your first FXN is in a private wallet. Publishing its link lets the chain count it. Anyone can then see that this wallet is yours.';
+              return keysPublish(walletKey).then(function () {
+                var w = who.publicId && (who.publicId.wallets || []).filter(function (x) { return x.key === walletKey; })[0];
+                return !!(w && w.published != null);
+              });
+            };
+            DefxnSkinSite.activatePva(who, publishFirst).then(function (res) {
+              activateNote.textContent = res.kind === 'activated' ? 'Your PVA is active: ' + res.id.slice(0, 8) + '\u2026.' + (res.published ? ' Wallet ' + res.published.slice(0, 8) + '\u2026 is now public.' : '') + ' Reload the page to see your card.' : res.failure + ' Missing: ' + res.missing + '. To fix: ' + res.remedy + '.';
+            }, function (error) { activateNote.textContent = error.message; });
+          },
+          'skin-sale-price': function (detail) {
+            salePrice = { price: String(detail.values.price || '').trim(), days: String(detail.values.days || '3').trim() };
+            refs.nftNote.textContent = /^[1-9][0-9]*$/.test(salePrice.price) ? 'Sale links now ask ' + salePrice.price + ' FXN. Press Copy sale link by a skin.' : 'Set a price: a whole number of FXN, 1 or more.';
+          },
+          'skin-sale-link': function (detail) {
+            var price = salePrice ? salePrice.price : '', days = (salePrice && salePrice.days) || '3';
+            if (!/^[1-9][0-9]*$/.test(price)) { refs.nftNote.textContent = 'Set a price first: a whole number of FXN, 1 or more.'; return; }
+            if (!/^([1-9]|[12][0-9]|30)$/.test(days)) { refs.nftNote.textContent = 'Set the days the buyer\u2019s FXN waits: 1 to 30.'; return; }
+            if (/^[0-9a-f]{64}$/.test(detail.item || '')) copyText(location.origin + '/account?take-skin=' + detail.item + '&price=' + price + '&days=' + days, 'Sale link copied: ' + price + ' FXN. Send it to the buyer.');
+          },
+          'skin-link': function (detail) { if (/^[0-9a-f]{64}$/.test(detail.item || '')) copyText(location.origin + '/account?take-skin=' + detail.item, 'Trade link copied. Send it to the person who should get the skin.'); },
+          'nft-mint': function () {
+            if (!realCard || !mintAsk) return;
+            var who = session.isUnlocked() ? session.current() : null;
+            if (!who) { refs.nftNote.textContent = 'Unlock your FXN ID first. A skin is signed by your own key.'; return; }
+            refs.nftNote.textContent = 'Review the skin, then approve it to mint.';
+            DefxnSkinSite.mintSkin(who, mintAsk).then(function (res) {
+              refs.nftNote.textContent = res.kind === 'minted' ? 'Minted. The skin is on your key: ' + res.id.slice(0, 8) + '. Try it on from your menu.' : res.failure + ' Missing: ' + res.missing + '. To fix: ' + res.remedy + '.';
+            }, function (error) { refs.nftNote.textContent = error.message; });
+          },
+          'nft-try': function () { if (realCard) DefxnSkinSite.tryRecord(realCard).catch(function (error) { refs.nftNote.textContent = 'Your card did not go on (' + error.message + '). Reload the page to try again.'; }); },
           'contact-open': function (detail) { openContactDetail(detail.item, contactStates[detail.item]); },
           'contact-back': function () { showContactList(); },
           'contact-invite': function (detail) { inviteFromRow(detail.item); },
@@ -749,6 +838,10 @@
           'contact-decline': function (detail) { contactAction(detail.item, 'declineInvite'); },
           'contact-withdraw': function (detail) { contactAction(detail.item, 'withdrawInvite'); },
           'keys-add': function (detail) { keysAdd(detail.values); },
+          'keys-add-id': function () { keysAddId(); },
+          'keys-save': function () { keysSave(); },
+          'keys-publish': function (detail) { keysPublish(detail.item); },
+          'keys-use-id': function (detail) { var who = signer(); if (who && who.usePublicId) { try { who.usePublicId(detail.item); renderKeys(); } catch (error) { result('keysAddResult', error.message, 'danger'); } } },
           'keys-rotate': function (detail) { keysRotate(detail.values); },
           'keys-revoke': function () { keysRevoke(); },
           'keys-delegate': function () { keysDelegate(); },
@@ -1072,19 +1165,92 @@
       function keysAdd(values) {
         var who = signer();
         if (!who || !who.addWallet) return;
-        var label = String(values.label || '').trim() || 'Default';
+        var label = String(values.label || '').trim() || undefined;
+        var id = who.publicId;
+        if (!id) { result('keysAddResult', 'This FXN ID has no Public ID. Press Add Public ID first.', 'danger'); return; }
+        /* One record joins the wallet to its Public ID: the wallet signs it, and the Public ID countersigns it. It stays
+           in the file (owner ruling, option A): the wallet is private until Publish link sends it. The Master ID signs
+           nothing here. */
         confirmWalletAction({
-          title: 'Add a signing wallet', scope: 'wallet.add', action: 'wallet.add.sign',
-          manifest: { label: label }, facts: [{ label: 'Label', value: label }],
+          title: 'Add a wallet to ' + id.name, scope: 'wallet.link', action: 'wallet.link.sign',
+          manifest: { publicId: id.key, label: label || null, record: 'KWALLET1', sent: false },
+          facts: [{ label: 'Public ID', value: id.name }, { label: 'Signed by', value: 'the new wallet and ' + id.name }, { label: 'Who can see the link', value: 'only you. It stays in your FXN ID file.' }],
         }).then(function (approved) {
           if (!approved) throw cancelled('Cancelled. No wallet was added.');
           result('keysAddResult', 'Adding\u2026');
-          return who.addWallet({ pin: keysFields.pin.value, password: keysFields.password.value || undefined, label: label });
+          return who.addWallet({ label: label });
         }).then(function (added) {
-          result('keysAddResult', 'Added ' + added.walletAddress, 'trust');
-          keysFields.pin.value = '';
           renderKeys();
+          result('keysAddResult', 'Added private wallet ' + added.walletAddress.slice(0, 12) + '\u2026. Save the new file now: it is the only copy of this wallet\u2019s key.', 'trust');
         }).catch(keysFail('keysAddResult', 'Could not add a wallet.'));
+      }
+
+      /* Publish link (owner ruling, option A, 2026-10-25): sends one private wallet's KWALLET1 to chain pva. The record
+         was signed when the wallet was made; nothing new is signed here. The chain takes it until the wallet first sends:
+         FXN it received while private is fine, a record it signed is not (owner, 2026-10-25). */
+      function keysPublish(walletKey) {
+        var who = signer();
+        if (!who || !who.publishWallet) return Promise.resolve();
+        var id = who.publicId;
+        if (!id) return Promise.resolve();
+        return confirmWalletAction({
+          title: 'Publish this wallet\u2019s link to ' + id.name, scope: 'wallet.link', action: 'wallet.link.publish',
+          manifest: { publicId: id.key, wallet: walletKey, record: 'KWALLET1', chain: 'pva' },
+          facts: [{ label: 'Wallet', value: walletKey }, { label: 'Public ID', value: id.name },
+            { label: 'Sends', value: 'one KWALLET1 record to chain pva, signed when the wallet was made' },
+            { label: 'Who can see the link', value: 'anyone who reads chain pva. This cannot be undone.' }],
+        }).then(function (approved) {
+          if (!approved) throw cancelled('Cancelled. The link stays private.');
+          result('keysAddResult', 'Sending the link to the chain\u2026');
+          return import(new URL('js/ark/dense-wire-wallet.mjs', document.baseURI).href).then(function (m) {
+            var send = function (record) {
+              var wire = new m.WalletWire(m.resolveWireUrl());
+              return wire.sendLine('RESOLVER_RECORD\t' + record).then(function (reply) {
+                wire.close();
+                var line = String(reply).trim();
+                if (!/^OK\b/.test(line)) throw new Error('The chain did not take the link: ' + line + '. Missing: a wallet that has never sent anything. To fix: publish a wallet before it sends; for one that already sent, make a new wallet.');
+              }, function (error) { wire.close(); throw error; });
+            };
+            /* the file was not saved after an earlier publish: the chain may already hold this exact link */
+            var ask = function (line) {
+              var wire = new m.WalletWire(m.resolveWireUrl());
+              return wire.sendLine(line).then(function (reply) { wire.close(); return reply; }, function (error) { wire.close(); throw error; });
+            };
+            return who.publishWallet({ walletKey: walletKey, send: send, ask: ask });
+          });
+        }).then(function (done) {
+          renderKeys();
+          result('keysAddResult', (done && done.alreadyOnChain ? 'The chain already held this link. ' : 'Published. ') + 'Save the new file now, so it records that this link is public.', 'trust');
+        }).catch(keysFail('keysAddResult', 'Could not publish the link.'));
+      }
+
+      function keysAddId() {
+        var who = signer();
+        if (!who || !who.addPublicId) return;
+        confirmWalletAction({
+          title: 'Add a Public ID', scope: 'public-id.add', action: 'public-id.add',
+          manifest: { wallets: 0 }, facts: [{ label: 'Makes', value: 'a new Public ID. Sites and the chain cannot link it to your other Public IDs.' }],
+        }).then(function (approved) {
+          if (!approved) throw cancelled('Cancelled. No Public ID was added.');
+          result('keysAddResult', 'Adding\u2026');
+          return who.addPublicId({ walletCount: 0 });
+        }).then(function (added) {
+          renderKeys();
+          result('keysAddResult', 'Added ' + added.publicId.name + '. Save the new file now: your Master ID recovery phrase does not bring this Public ID back.', 'trust');
+        }).catch(keysFail('keysAddResult', 'Could not add a Public ID.'));
+      }
+
+      function keysSave() {
+        var who = signer();
+        if (!who || !who.fileText) return;
+        try {
+          var url = URL.createObjectURL(new Blob([who.fileText()], { type: 'application/vnd.flux.auth-kit' }));
+          var a = document.createElement('a');
+          a.href = url; a.download = (String(who.fileDisplayName || 'fxn-id').replace(/[^A-Za-z0-9 _-]+/g, '').trim() || 'fxn-id') + '.auth.fxn';
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+          result('keysAddResult', 'Saved. Keep this file and delete older copies.', 'trust');
+        } catch (error) { result('keysAddResult', error.message, 'danger'); }
       }
 
       function keysRotate(values) {
@@ -1495,7 +1661,7 @@
         if (unlock && unlock.click) unlock.click();
         else if (unlock && unlock.focus) unlock.focus();
       }
-      page.arkDispose = function () { generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); window.clearTimeout(copyTimer); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); if (profileCard) profileCard.close(); };
+      page.arkDispose = function () { generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); window.clearTimeout(copyTimer); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); if (profileCard) profileCard.close(); if (cardSeal) cardSeal.remove(); };
       return page;
     }
   };

@@ -288,7 +288,7 @@ const index0 = fs.readFileSync('index.html', 'utf8');
     assert(!/document\.addEventListener\('click'/.test(code), 'no hand-built "press outside" listener on the document');
     assert(!/addEventListener\('focusout', function \(event\) \{\s*if \(!mega/.test(code), 'no hand-built "focus left" listener for the Resolutions menu');
     assert(!/products-open/.test(code), 'the header class that lifted the bar is a CSS :has() on the open popover now');
-    assert(/id: 'header-chain-popover'/.test(code) && /label: ArkCopy\.text\('NAV\.PRODUCTS'\)/.test(code), 'both panels are built by the one stub');
+    assert(/id: 'header-chain-popover'/.test(code) && /id: 'primary-navigation'/.test(code), 'both panels are built by the one stub');
     /* loading happens inside the first press, never while the bar is built */
     const lazyBody = code.slice(code.indexOf('function lazyHeaderPopover'), code.indexOf('function buildHeaderChainPopover'));
     assert(/function load\(\)[\s\S]*loadScript\('js\/resolvers\/header-popover\.js'\)/.test(lazyBody) && /on && !state\) load\(\)/.test(lazyBody), 'the helper is loaded by load(), which only an open request calls');

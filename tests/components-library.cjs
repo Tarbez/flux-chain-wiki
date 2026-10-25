@@ -25,8 +25,11 @@ function windowWith(files, url) {
   const dom = new JSDOM('<!doctype html><html><head></head><body><div id="libPane"></div><main data-page="x"><div data-ark-insert="main"></div></main></body></html>', { runScripts: 'outside-only', url: url || 'https://defxn.com/x', pretendToBeVisual: true });
   const w = dom.window;
   w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  w.TextEncoder = TextEncoder; w.TextDecoder = TextDecoder;   // the FLX grammar components are stored in turns text into bytes; jsdom has no codec
   w.eval('var ArkCopy = { isKey: function () { return false; }, resolve: function (v) { return v; }, text: function (k) { return k; } };');
-  for (const file of files) w.eval(read(file) + '\n//# sourceURL=' + file);
+  /* components are stored as FLX records: the grammar comes before the module that reads them, as in index.html */
+  const order = files.includes('js/content/components.js') ? ['js/vendor/flx-state-grammar.js'].concat(files) : files;
+  for (const file of order) w.eval(read(file) + '\n//# sourceURL=' + file);
   return { dom, w };
 }
 const KIT = ['js/ark/vendor/engines.js', 'js/ark/vendor/ark-kit.js', 'js/content/glossary.js', 'js/admin/vendor/cms-blocks.js'];

@@ -5,7 +5,7 @@ ArkManifest.define({
   "route": "/start-from-something-real",
   "group": "page",
   "meta": {
-    "next": "deployment",
+    "next": "resolutions",
     "back": "resolver"
   },
   "fields": {

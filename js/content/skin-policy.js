@@ -1,15 +1,20 @@
 /* =====================================================================
    THE SKIN POLICY, AS CONTENT (ArkSkinPolicy)
    ---------------------------------------------------------------------
-   Which rules an NFT card skin may put on which part of the site, and which extra contrast floors a skin
-   is held to. The owner tests skins on the real site "skin by skin" from the CMS (Skin lab), so these
-   rules are content (a saved FLX draft), not code.
+   Which rules the site switches OFF on which of its parts when a card is worn, and which extra contrast floors
+   a skin is held to. The owner tests skins on the real site "skin by skin" from the CMS (Skin lab), so these
+   switches are content (a saved FLX draft), not code.
 
-   The code defaults live in js/ark/skin-parts.js (DefxnSkinParts.ALLOW and .CONTRAST). This module holds
-   only what the CMS changes on top of them, and DefxnSkinParts.policy() merges the two:
-     allow     { PART: [rule keys] }   replaces the code default for that part
-     families  { <family>: { allow: { PART: [rule keys] } } }   replaces both, for cards of that family
+   The owner's decision (2026-10-24): a card dresses the site by its own rules. Every part takes every rule the
+   card sends, and Ark UI decides what each part's kind can wear (its family table, cover checks, contrast). The
+   CMS can switch any rule off on any part. Before that decision a site table listed what each part MAY take
+   (an "allow" map); that map is retired, and a saved one is read as nothing (none had been saved).
+   The code defaults live in js/ark/skin-parts.js (DefxnSkinParts.OFF and .CONTRAST). DefxnSkinParts.policy()
+   adds this module's switches to them:
+     off       { PART: [rule keys] }   rules that part never wears, added to the code's
+     families  { <family>: { off: { PART: [rule keys] } } }   switched off too, for cards of that family only
      contrast  [{ fg: [tokens], bg: [tokens], min }]   ADDED to the site's own rules, never removed
+   A switch only ever takes a rule away: a family cannot switch back on what the site switched off.
    An empty policy (the default) changes nothing: the site behaves as the code defaults say.
 
    sanitize() keeps only what is well formed. problems() says what it would drop and what would fix it,
@@ -33,7 +38,7 @@ var ArkSkinPolicy = (function () {
 
   /* ---- problems: what is wrong, and what would fix it ------------------------------------- */
   function ruleList(list, where, out) {
-    if (!Array.isArray(list)) { out.push({ path: where, sentence: where + ' must be a list of rule keys, such as ["frame", "edge"]. Use [] to allow no rule.' }); return []; }
+    if (!Array.isArray(list)) { out.push({ path: where, sentence: where + ' must be a list of rule keys, such as ["frame", "edge"]. Use [] to switch no rule off.' }); return []; }
     var kept = [];
     list.forEach(function (rule) {
       if (RULES.indexOf(rule) >= 0) kept.push(rule);
@@ -41,7 +46,7 @@ var ArkSkinPolicy = (function () {
     });
     return RULES.filter(function (r) { return kept.indexOf(r) >= 0; });
   }
-  function allowMap(map, where, out) {
+  function offMap(map, where, out) {
     var res = {};
     if (map === undefined) return res;
     if (!isObject(map)) { out.push({ path: where, sentence: where + ' must be an object of part keys, such as { "CARD": ["frame"] }.' }); return res; }
@@ -50,7 +55,8 @@ var ArkSkinPolicy = (function () {
         out.push({ path: where + '.' + part, sentence: where + ' has the part key ' + JSON.stringify(part) + '. A part key is an Ark UI part in upper case with no hyphen, such as CARD, PRIMARY|BUTTON or SECTIONHEADER (the block part section-header).' });
         return;
       }
-      res[part] = ruleList(map[part], where + '.' + part, out);
+      var list = ruleList(map[part], where + '.' + part, out);
+      if (list.length) res[part] = list;   /* an empty list switches nothing off: it is not kept */
     });
     return res;
   }
@@ -84,13 +90,13 @@ var ArkSkinPolicy = (function () {
   function familyMap(map, out) {
     var res = {};
     if (map === undefined) return res;
-    if (!isObject(map)) { out.push({ path: 'families', sentence: 'families must be an object of card families, such as { "Arcade": { "allow": { "CARD": ["frame"] } } }.' }); return res; }
+    if (!isObject(map)) { out.push({ path: 'families', sentence: 'families must be an object of card families, such as { "Arcade": { "off": { "CARD": ["frame"] } } }.' }); return res; }
     Object.keys(map).sort().forEach(function (name) {
       var where = 'families.' + name;
       if (!FAMILY.test(name)) { out.push({ path: where, sentence: 'The family name ' + JSON.stringify(name) + ' is not usable. Use the name the card shows (such as Arcade): letters, digits, spaces, - and _, up to 40 characters.' }); return; }
-      if (!isObject(map[name])) { out.push({ path: where, sentence: where + ' must be an object with an allow map.' }); return; }
-      var allow = allowMap(map[name].allow, where + '.allow', out);
-      if (Object.keys(allow).length) res[name] = { allow: allow };
+      if (!isObject(map[name])) { out.push({ path: where, sentence: where + ' must be an object with an off map.' }); return; }
+      var off = offMap(map[name].off, where + '.off', out);
+      if (Object.keys(off).length) res[name] = { off: off };
     });
     return res;
   }
@@ -99,27 +105,29 @@ var ArkSkinPolicy = (function () {
   function problems(whole) {
     var out = [];
     if (whole === undefined || whole === null) return out;
-    if (!isObject(whole)) { out.push({ path: '', sentence: 'A skin policy is an object with allow, families and contrast. Start from {}.' }); return out; }
-    allowMap(whole.allow, 'allow', out); familyMap(whole.families, out); contrastList(whole.contrast, out);
+    if (!isObject(whole)) { out.push({ path: '', sentence: 'A skin policy is an object with off, families and contrast. Start from {}.' }); return out; }
+    offMap(whole.off, 'off', out); familyMap(whole.families, out); contrastList(whole.contrast, out);
     return out;
   }
 
   function sanitize(whole) {
     var src = isObject(whole) ? whole : {}, ignore = [];
-    return { version: 1, allow: allowMap(src.allow, 'allow', ignore), families: familyMap(src.families, ignore), contrast: contrastList(src.contrast, ignore) };
+    return { version: 2, off: offMap(src.off, 'off', ignore), families: familyMap(src.families, ignore), contrast: contrastList(src.contrast, ignore) };
   }
   function defaults() { return sanitize({}); }
 
-  /* The allow list a part ends up with, for a card of `family` (or none): the code defaults, then the policy's
-     allow over them, then the family's over both. DefxnSkinParts.policy() does the same merge on the site; the
-     CMS needs it before the canvas answers, so tests/skin-policy.cjs holds the two to the same result.
-     A part with no list takes every rule the card sends. */
-  function effectiveAllow(codeDefaults, policy, family) {
-    var p = sanitize(policy), fam = family && p.families[family], allow = {};
-    [codeDefaults, p.allow, fam && fam.allow].forEach(function (layer) {
-      Object.keys(layer || {}).forEach(function (part) { allow[part] = layer[part].slice(); });
+  /* The rules a part has switched off, for a card of `family` (or none): the code's, the policy's and the family's
+     together. DefxnSkinParts.policy() does the same on the site; the CMS needs it before the canvas answers, so
+     tests/skin-policy.cjs holds the two to the same result. A part with no list wears every rule the card sends. */
+  function effectiveOff(codeDefaults, policy, family) {
+    var p = sanitize(policy), fam = family && p.families[family], off = {};
+    [codeDefaults, p.off, fam && fam.off].forEach(function (layer) {
+      Object.keys(layer || {}).forEach(function (part) {
+        var had = off[part] || [];
+        off[part] = RULES.filter(function (r) { return had.indexOf(r) >= 0 || layer[part].indexOf(r) >= 0; });
+      });
     });
-    return allow;
+    return off;
   }
 
   function flx() {
@@ -142,13 +150,13 @@ var ArkSkinPolicy = (function () {
 
   /* the exact file text: the CMS Save and a hand edit produce the same bytes */
   function serialize(whole) {
-    return '/* The skin policy: which rules a card skin may put on which part of the site, and the extra contrast\n' +
+    return '/* The skin policy: which rules the site switches off on which of its parts when a card is worn, and the extra contrast\n' +
       '   floors it is held to (js/content/skin-policy.js). FLX records of ARK\'s structured-state grammar, one per leaf.\n' +
       '   Edit from DEFXN Studio, More > Skin lab. This file is not meant for hand editing. */\n' +
       'ArkSkinPolicy.define(' + JSON.stringify(encode(whole)) + ');\n';
   }
 
-  return { RULES: RULES.slice(), sanitize: sanitize, problems: problems, defaults: defaults, effectiveAllow: effectiveAllow,
+  return { RULES: RULES.slice(), sanitize: sanitize, problems: problems, defaults: defaults, effectiveOff: effectiveOff,
     encode: encode, decode: decode, define: define, get: get, onChange: onChange, serialize: serialize };
 })();
 if (typeof module === 'object' && module.exports) module.exports = ArkSkinPolicy;

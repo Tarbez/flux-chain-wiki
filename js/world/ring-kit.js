@@ -119,10 +119,20 @@
     k.cam = { aim: new THREE.Vector3().fromArray(cfg.aim || [0, 0, 0]), dist: cfg.dist, elev: THREE.MathUtils.degToRad(cfg.elev), yaw: 0,
       tilt: reduced ? 0 : THREE.MathUtils.degToRad(o.tilt == null ? 2.2 : o.tilt) };
     var intro = o.intro || {};
-    var FLY = intro.fly || 4400, FROM_DIST = intro.dist || 1.16, FROM_ELEV = THREE.MathUtils.degToRad(intro.elev == null ? 3 : intro.elev),
+    var FLY_AT = 0, FLY_WAIT = 0, FLY = intro.fly || 4400, FROM_DIST = intro.dist || 1.16, FROM_ELEV = THREE.MathUtils.degToRad(intro.elev == null ? 3 : intro.elev),
       FROM_YAW = THREE.MathUtils.degToRad(intro.yaw == null ? 2 : intro.yaw);
     /* a first view that is not the network starts in place: no fly-in to undo */
     k.skipIntro = function () { FROM_DIST = 1; FROM_ELEV = 0; FROM_YAW = 0; };
+    /* a first view that brings its own arrival (the intro's welcome, chains-scene.js api.to): where the camera
+       starts relative to the view (distance factor, extra height and turn in degrees) and how long it takes */
+    k.setIntro = function (o) {
+      FROM_DIST = o.dist; FROM_ELEV = THREE.MathUtils.degToRad(o.elev); FROM_YAW = THREE.MathUtils.degToRad(o.yaw); FLY = o.fly;
+      /* Counted from the second frame drawn after this, the first one the page shows (world-host.js reveals the canvas
+         two frames after the first flight): the first frame compiles every shader, 100-380 ms on a slow CPU and seconds
+         in a software renderer, and a clock started earlier spent the glide while the canvas was still hidden. Not the
+         world's clock either: a return visit's skipped build has moved that past any fly-in. */
+      FLY_AT = null; FLY_WAIT = 1;
+    };
     function place(cam, aim, dist, elev, yaw) {
       cam.position.set(aim.x + dist * Math.cos(elev) * Math.sin(yaw), aim.y + dist * Math.sin(elev), aim.z + dist * Math.cos(elev) * Math.cos(yaw));
       cam.lookAt(aim); cam.updateMatrixWorld();
@@ -785,7 +795,8 @@
     var ticking = false;
     function wake() { if (!raf && !ticking && !document.body.classList.contains('no-scene') && startAt !== null) raf = requestAnimationFrame(tick); }
     function setView(ms) {
-      var c = k.cam, f = reduced ? 1 : k.ease.inOut(clamp01(ms / FLY)), d = c.dist * (FROM_DIST + (1 - FROM_DIST) * f);
+      if (FLY_AT === null && FLY_WAIT-- <= 0) FLY_AT = ms;
+      var c = k.cam, f = reduced ? 1 : FLY_AT === null ? 0 : k.ease.inOut(clamp01((ms - FLY_AT) / FLY)), d = c.dist * (FROM_DIST + (1 - FROM_DIST) * f);
       place(camera, c.aim, d, c.elev + FROM_ELEV * (1 - f) - lean.y * c.tilt * .6,
         c.yaw + FROM_YAW * (1 - f) + lean.x * c.tilt);
       scene.fog.near = d * fogStart; scene.fog.far = d * fogEnd;   /* clear up to the subject, thickening behind it */
@@ -801,10 +812,32 @@
       if (ms < END || now < shadowUntil) renderer.shadowMap.needsUpdate = true;
       draw();
     }
+    /* A view may steer the build clock (js/world/download-stage.js): the network's tiles, links and cubes all build
+       at their own moment on this clock, so winding it back takes the network apart and winding it forward builds it
+       again. clockTo(ms, dur) eases the clock to ms and holds it there; clockRelease() hands it back to real time, the
+       network built. Reduced motion jumps. */
+    var CLOCK = null;
+    function clockNow(now) {
+      if (!CLOCK) return null;
+      var f = CLOCK.dur > 0 ? k.ease.inOut(clamp01((now - CLOCK.t0) / CLOCK.dur)) : 1;
+      return CLOCK.from + (CLOCK.to - CLOCK.from) * f;
+    }
+    k.clockTo = function (ms, dur) {
+      var now = performance.now(), from = CLOCK ? clockNow(now) : k.time();
+      CLOCK = { from: Math.min(from, END + 1000), to: ms, t0: now, dur: reduced ? 0 : (dur || 0) };
+      k.wake((reduced ? 0 : dur || 0) + 200); k.moved((reduced ? 0 : dur || 0) + 200);
+    };
+    k.clockRelease = function () {
+      if (!CLOCK) return;
+      CLOCK = null; OFFSET = END + 1000 - (startAt === null ? 0 : performance.now() - startAt);
+      k.wake(400); k.moved(400);
+    };
+    k.clocked = function () { return !!CLOCK; };
     function tick(now) {
       raf = 0; ticking = true;
       if (startAt === null) startAt = now;
-      var ms = reduced ? END + 1000 : now - startAt + OFFSET;
+      var held = clockNow(now);
+      var ms = reduced ? END + 1000 : held !== null ? held : now - startAt + OFFSET;
       var moving = settleStep();
       render(ms, now);
       ticking = false;
@@ -815,7 +848,7 @@
       if (document.body.classList.contains('no-scene')) return;
       raf = requestAnimationFrame(tick);
     };
-    k.time = function () { return reduced ? END + 1000 : startAt === null ? OFFSET : performance.now() - startAt + OFFSET; };
+    k.time = function () { var held = clockNow(performance.now()); return reduced ? END + 1000 : held !== null ? held : startAt === null ? OFFSET : performance.now() - startAt + OFFSET; };
     k.redraw = function () { if (!raf && T.main) { var now = performance.now(); render(k.time(), now); } };
 
     /* ---------- size and frame ---------- */

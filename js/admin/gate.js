@@ -4,7 +4,7 @@
    The admin is locked until an identity passes three steps, shown as a
    ladder so a person can see where they are, not just that they are stuck:
 
-     01 IDENTITY   choose the recovery file (.auth.flx) and unlock it here
+     01 IDENTITY   choose the FXN ID file (.auth.fxn) and unlock it here
                    (js/admin/auth.js). The root key lives in a handle in
                    this page's memory and nowhere else.
      02 ACCESS     this page asks the host for a challenge, signs it with
@@ -343,7 +343,7 @@
     } else {
       if (pointer) {
         $('gateHeading').textContent = 'Unlock your identity.';
-        $('gateLead').textContent = 'Public details for ' + pointer.displayName + ' are saved. Select your .auth.flx file again and enter its PIN and password if you set one to check CMS access.';
+        $('gateLead').textContent = 'Public details for ' + pointer.displayName + ' are saved. Select your FXN ID file (.auth.fxn) again and enter its PIN and password if you set one to check CMS access.';
       } else {
         $('gateHeading').textContent = 'Locked.';
         $('gateLead').textContent = 'Sign in with your DeadArk identity to edit or publish this site.';

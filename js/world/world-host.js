@@ -44,7 +44,7 @@
   var router = window.ArkUI && ArkUI.pageRouter, state = window.ArkUI && ArkUI.sceneState;
   if (!scene || !router || !state || !window.ArkWorld) return;
 
-  var VERSION = '20261024-w3';
+  var VERSION = '20261025-w5';
   var ease = 'cubic-bezier(.22,.7,.18,1)';
 
   /* ---------- the one place the calm pose is named ----------
@@ -55,10 +55,19 @@
   var CALM = { n: .6, elev: 30, dist: 135, tilt: 1.2 };
   /* route key -> the world view the camera flies to (the mockup's #/<view>). A key not listed gets the calm pose. */
   var VIEW_OF = {
-    zero: 'home', intro: 'intro',
+    zero: 'home', intro: 'intro', download: 'download',
     chain: 'chain', 'chain/record': 'record', 'chain/open': 'open', 'chain/links': 'links',
     identity: 'idstart', 'identity/sign': 'idsign', 'identity/safe': 'idsafe', 'identity/you': 'idyou',
-    resolvers: 'resolvers', measured: 'measured', fxn: 'fxn', ring: 'ring',
+    resolvers: 'resolvers', fxn: 'fxn', ring: 'ring',
+    /* /account: one identity over the whole network, the view the identity flow ends on (identity-stages.js idvalue) */
+    account: 'idvalue',
+    /* /auth: your FXN ID card standing on the kernel, its look following the sign-in state (js/world/auth-stage.js) */
+    auth: 'auth',
+    /* the stats section (js/world/stats-stage.js): ONE stage for all its pages, so moving between them is a camera flight inside the
+       same scene. The page says which part it is at (state s). 'stats/now' comes last so the view's own page (keyOf) is Now. The week
+       pages come from the data (ArkSitePages.statsWeeks); stats-stage.js adds them to this map when it loads. /measured is one of
+       these pages now (ArkUI.pageRedirects), and the old measured view stays registered in stages.js, unused. */
+    'stats/ceiling': 'stats', 'stats/capabilities': 'stats', 'stats/now': 'stats',
     works: 'movie', 'works/resolve': 'resolve',   /* works: the 60-second sequence (js/world/minute-experience.js) */ 'works/layers': 'layers', 'works/life': 'life',
     trace: 'trace'
   };
@@ -107,7 +116,8 @@
     var w = ArkWorld.get(), m = w.motion, key = el.dataset.arkPage, kind = ArkWorld.forRoute(pathOf(key)).exit.words;
     var late = active ? Math.max(0, (Number(el.dataset.worldWordsAt) || 0) - performance.now()) : 0;
     var animations = riseItems(el).map(function (item, i) {
-      var card = item.classList.contains('intro-card'), rail = item.classList.contains('rail');
+      /* .rail (home's rail) or data-rise="side" (the intro's ledger: never .rail, which home's rail script mounts into) */
+      var card = item.classList.contains('intro-card'), rail = item.classList.contains('rail') || item.dataset.rise === 'side';
       if (active) {
         return item.animate([card ? CARD_IN : rail ? RAIL_IN : RISE_IN, card ? CARD_SHOWN : SHOWN],
           { duration: m.riseIn, delay: late + Math.min(i, 7) * m.riseStagger, easing: ease, fill: 'both' });
@@ -126,13 +136,21 @@
   setRiseVariables(ArkWorld.get().motion);
 
   /* ---------- a fresh load of "/" opens the intro; "/" inside the site is home ---------- */
-  var arrived = false, navigate = router.navigate, preview = /[?&](cms-)?preview(=|&|$)/.test(location.search);
+  var arrived = false, toIntro = false, navigate = router.navigate, preview = /[?&](cms-)?preview(=|&|$)/.test(location.search);
   router.navigate = function (page, settings) {
-    if (!arrived && wanted && !preview && page === 'zero' && ArkUI.pageCatalog.intro) { page = 'intro'; settings = Object.assign({}, settings, { history: 'replace' }); }
+    /* a retired route's redirect (ArkUI.pageRedirects) is followed by the router itself (js/ark/page-router.js) */
+    if (!arrived && wanted && !preview && page === 'zero' && ArkUI.pageCatalog.intro) { page = 'intro'; toIntro = true; settings = Object.assign({}, settings, { history: 'replace' }); }
     arrived = true;
     return navigate.call(router, page, settings);
   };
 
+  /* an old address (a path in the entry's `aliases`: /stats, /stats/gpu, /stats/ledger, /measured, /monitor) opens the new page and takes the page's own path
+     in the address bar, once the route has landed, so a bookmark of the old one is not kept alive by the address */
+  window.addEventListener('ark:route-ready', function () {
+    var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[state.get().page];
+    if (!entry || !entry.path || !(entry.aliases || []).some(function (a) { return a === location.pathname; })) return;
+    try { history.replaceState(history.state, '', entry.path + location.search + location.hash); } catch (e) {}
+  });
   if (!wanted) { root.dataset.world = 'off'; return; }
   /* 'loading' until the world draws: the old relief is already out of sight, so the background never cuts from one picture to another */
   root.dataset.world = 'loading';
@@ -158,10 +176,11 @@
     ['DEFXN_NETWORK', 'js/content/network-data.js'], ['DEFXN_RECORDS', 'js/content/records-sample.js'],
     ['DEFXNRingKit', 'js/world/ring-kit.js'],
     ['DEFXN_CAPABILITIES', 'js/content/capabilities-data.js'], ['DEFXN_RESOLVERS', 'js/content/resolvers-data.js'], ['DEFXN_FXN', 'js/content/fxn-data.js'],
-    ['DEFXNScene', 'js/world/chains-scene.js'], [null, 'js/world/stages.js'],
+    ['DEFXNScene', 'js/world/chains-scene.js'], [null, 'js/world/stages.js'], [null, 'js/world/glass-kit.js'],
     ['DEFXN_CONCEPT', 'js/content/concept-data.js'], ['DEFXN_IDENTITY', 'js/content/identity-sample.js'],
-    [null, 'js/world/ring-stage.js'], [null, 'js/world/concept-stages.js'], [null, 'js/world/identity-stages.js'], [null, 'js/world/intro-stage.js'],
-    [null, 'js/world/home-descent.js'], [null, 'js/world/home-helix.js'], [null, 'js/world/home-sites.js'], [null, 'js/world/record-glass.js']
+    [null, 'js/world/ring-stage.js'], [null, 'js/world/concept-stages.js'], [null, 'js/world/identity-stages.js'], [null, 'js/world/intro-stage.js'], [null, 'js/world/download-stage.js'], [null, 'js/world/auth-stage.js'],
+    [null, 'js/world/home-descent.js'], [null, 'js/world/home-helix.js'], [null, 'js/world/home-sites.js'], [null, 'js/world/record-glass.js'],
+    ['ArkStatsHighlights', 'js/content/stats-highlights.js'], ['ArkSitePages', 'js/content/site-pages.js'], ['ArkStatsScale', 'js/content/stats-scale.js'], [null, 'js/world/stats-stage.js']
   ];
   function src(path) { return (location.protocol === 'file:' ? '' : '/') + path + '?v=' + VERSION; }
   function load(list) {
@@ -385,11 +404,19 @@
     layer.dataset.ready = '1';
     ArkWorld.onChange(applyWorld);
     k.setLook(ArkWorld.get().look);
-    S.go();
+    /* S.go() (the kernel's first draw) waits for the first flight, in fly(): a world that drew before its first view was
+       chosen showed home's grid while the intro redirect was still on its way */
     host.ready = true; host.scene = S;
     var key = pending || state.get().page;
     pending = null;
-    fly(key);
+    /* A fresh load of "/" is about to become the intro (the redirect above), but home mounts before that redirect
+       runs. Flying to home first opened on the grid and then pulled away to the intro, which read as an exit (owner,
+       2026-10-25; measured: camera 119 -> 99 on home, then 352 on the intro). So the world waits for the route: the
+       intro's mount flies it, with its own arrival. The state still says home while the redirect loads the intro (the
+       router commits the page when it is ready), so "redirect not made yet" and "redirect in flight" both wait. If no
+       route comes, it flies to whatever page is showing. */
+    if (key === 'zero' && (toIntro || (!arrived && wanted && !preview && ArkUI.pageCatalog.intro))) setTimeout(function () { toIntro = false; if (flown === null) fly(state.get().page); }, 4000);
+    else fly(key);
     readyHooks.splice(0).forEach(function (fn) { fn(); });
   }
   function applyWorld() {
@@ -404,7 +431,9 @@
   function fly(key) {
     if (!host.ready) { pending = key; return; }
     if (!ArkUI.pageCatalog[key]) return;
+    if (flown === null && key === 'zero' && toIntro) return;   /* the first flight waits for the intro redirect (start(), below) */
     var first = flown === null;
+    if (first) S.go();
     cur = { key: key };
     /* the state the page gave while it mounted is used by this flight, once */
     current = carried || {}; carried = null;
@@ -412,8 +441,29 @@
     showTags();
     var timing = S.to(Object.assign({}, current, { view: viewFor(key) }), first);
     flown = key;
+    /* the canvas shows from the first flight on (css/world.css), once a frame of that flight is drawn: until the kernel's
+       next frame the canvas still holds the frame sizing drew from the default (home) camera */
+    if (first) requestAnimationFrame(function () { requestAnimationFrame(function () { layer.dataset.flown = '1'; }); });
     var el = pageEl(key);
     if (el && timing) el.dataset.worldWordsAt = String(performance.now() + (timing.words || 0));
+    watchPanel(el);
+  }
+  /* The page slab is measured when the flight starts. A page whose styles or words arrive later (account,
+     2026-10-25: the slab stopped 25 px short of the card) would leave the slab on the old box, so the world
+     watches the [data-panel] box and refits when its size changes. */
+  var panelWatch = null, panelSize = '';
+  function watchPanel(el) {
+    if (panelWatch) panelWatch.disconnect();
+    panelWatch = null; panelSize = '';
+    var box = el && el.querySelector('[data-panel]');
+    if (!box || !window.ResizeObserver || !S.refit) return;
+    function sizeOf() { return box.offsetWidth + 'x' + box.offsetHeight; }
+    panelSize = asShown(el, sizeOf);   /* the size the flight just measured */
+    panelWatch = new ResizeObserver(function () {
+      var size = sizeOf();
+      if (size !== panelSize && !el.hidden) { panelSize = size; S.refit(); }
+    });
+    panelWatch.observe(box);
   }
   host.fly = fly;   /* what the router's events call; a test or a page that is not routed may fly the world to a route's view too */
   /* a page that mounts starts the flight at once: the old page's words are still leaving, so the camera and

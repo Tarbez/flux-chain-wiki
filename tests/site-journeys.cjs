@@ -29,8 +29,11 @@ for (const key of Object.keys(catalog)) assert('journey' in catalog[key], key + 
 for (const key of Object.keys(catalog).filter((k) => /^(resolutions|article|concept)\//.test(k))) assert(catalog[key].journey, key + ' gets its family\'s journey');
 
 // the regression itself: previews are previews, never evidence
-for (const key of ['treasury', 'deposits', 'palette', 'proximity']) assert.equal(catalog[key].journey, 'preview', key + ' is filed as a preview, not live evidence');
-assert.equal(catalog['stats/gpu'].journey, 'prove', '/stats/gpu is in the Prove journey, so it is listed at last');
+/* 'proximity' (/experiments) left this list: the owner deleted that page, 2026-10-24 */
+for (const key of ['treasury', 'deposits', 'palette']) assert.equal(catalog[key].journey, 'preview', key + ' is filed as a preview, not live evidence');
+/* 2026-10-24: /stats/gpu is a redirect to /stats/ceiling now (ArkUI.pageRedirects), so the page that is listed is the new one; the old key is in no list on purpose */
+assert.equal(catalog['stats/ceiling'].journey, 'prove', '/stats/ceiling is in the Prove journey, so it is listed');
+assert.equal(catalog['stats/gpu'].journey, null, 'the retired /stats/gpu key is a redirect and in no list'); assert.equal(catalog['stats/gpu'].redirect, 'stats/ceiling');
 assert.equal(catalog.reference.journey, null, 'the reference reader is a utility in no list');
 
 // every journey has exactly one way in, and the footer strip and not-found page read it
@@ -56,7 +59,7 @@ const ArkSEO = seoCtx.ArkSEO;
 const sitemapPaths = ArkSEO.routes([], []).map((r) => r.path);
 const listed = rows.filter((r) => r.journey).map((r) => r.path);
 assert.deepEqual([...new Set(sitemapPaths)].sort(), [...new Set(['/', ...listed])].sort(), 'the sitemap lists exactly home and the pages with a journey');
-assert(!sitemapPaths.includes('/reference') && !sitemapPaths.includes('/not-found') && !sitemapPaths.includes('/experiments/lab'), 'no utility, not-found or merged-away address');
+assert(!sitemapPaths.includes('/reference') && !sitemapPaths.includes('/not-found') && !sitemapPaths.includes('/experiments/lab') && !sitemapPaths.includes('/experiments'), 'no utility, not-found, merged-away or deleted address (/experiments was deleted by the owner, 2026-10-24)');
 
 // seo.js refuses to run without the table rather than silently dropping SEO overrides
 const bare = vm.createContext({});

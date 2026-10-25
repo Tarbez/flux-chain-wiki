@@ -150,7 +150,7 @@ const ROUTES = {
       [/^id:source-step-2$/, 'step 2 ends "The DEFXN miner is the flux-miner command." (it ended "The package exposes flux-miner; ark-miner is a legacy alias.")'],
       /* journey audit 2026-10-24 (docs/journey/END-TO-END-2026-10-24.md): a newcomer arrives here to get the browser, and no download exists.
          The heading names that state; the miner steps stay below it, introduced by the deck as the page for people who run a miner. */
-      [/^id:download-title$/, '"Start a local miner from a trusted checkout." reads "DEFXN Grid has no public download yet." (named FXN Browser until the owner renamed it, 2026-10-24): the page leads with the browser, the miner steps follow in the deck'],
+      [/^id:download-title$/, '"Start a local miner from a trusted checkout." reads "FXN Browser has no public download yet." (the owner named it DEFXN Grid, then settled on FXN Browser, 2026-10-24): the page leads with the browser, the miner steps follow in the deck'],
       [/^page:\/header:1\/p:1$/, 'the deck opens with the browser and the FXN ID, then points to the miner steps']
     ]
   }

@@ -36,7 +36,7 @@ context.ArkSEO={pageDescription:(id,fallback)=>id==='about'?'About-specific desc
  function module(page){return {mount(host){mounts[page]=(mounts[page]||0)+1;const el=host.appendChild(new Element());if(page==='learnings')el.classList.add('learning-page');return el;}};}
  const router=context.ArkUI.createPageRouter({scene,outlet,state:context.ArkUI.sceneState,writeHistory:(page,mode)=>writes.push([page,mode]),load:async(page)=>{
    loads[page]=(loads[page]||0)+1;
-   if(page==='proximity')return new Promise(resolve=>{resolveSlow=()=>resolve(module(page));});
+   if(page==='dao')return new Promise(resolve=>{resolveSlow=()=>resolve(module(page));});
    if(page==='concept'&&failConcept){failConcept=false;throw Error('Network fixture');}
    return module(page);
  }});
@@ -48,27 +48,20 @@ context.ArkSEO={pageDescription:(id,fallback)=>id==='about'?'About-specific desc
  await router.navigate('zero');assert.equal(oldLearning.parent.children.includes(oldLearning),false);assert.equal(disposed.learnings,1);
  assert.equal(window.scrollY,0,'non-reading routes reset document scroll');
  await router.navigate('learnings');assert.notEqual(router.pages.learnings,oldLearning);assert.equal(window.scrollY,321,'reading routes restore document scroll');assert.equal(router.pages.learnings.scrollTop,0,'reading pages do not scroll internally');assert.equal(loads.learnings,1);
- const slow=router.navigate('proximity');await router.navigate('zero');resolveSlow();assert.equal(await slow,false);assert.equal(router.active,'zero');assert(!mounts.proximity);
+ const slow=router.navigate('dao');await router.navigate('zero');resolveSlow();assert.equal(await slow,false);assert.equal(router.active,'zero');assert(!mounts.dao);/* the slow page was 'proximity' until the owner deleted /experiments, 2026-10-24 */
  assert.equal(await router.navigate('concept'),false);assert.equal(router.active,'zero');assert(error);assert.equal(outlet.children.length,1);
  assert(await router.retry());assert.equal(router.active,'concept');assert.equal(loads.concept,2);
  await router.navigate('article/why-the-chain-was-retired',{history:'none'});assert.equal(outlet.children.length,1);
  assert.equal(scene.children[0],canvas);assert.equal(scene.children[1],header);assert.equal(scene.children[2],outlet);
  assert.equal(router.resolve('#/about'),'about');
-// Reason this case exists: the header link was `#/work`, a catalog route whose page file had been deleted, so WORK opened a
-// page that could never load. Both legacy spellings now resolve to the interactive model.
-// 2026-10-19 (docs/ux-audit/pages.md P3): /experiments and /experiments/lab were two pages for one model with the same h1;
-// they are one page at /experiments (key 'proximity', drawn by the lab module), and the old lab address is an alias of it.
-assert.equal(router.resolve('#/work'),'proximity');assert.equal(Object.keys(context.ArkUI.pageCatalog).includes('work'),false);
- assert.equal(router.resolve('#/experiments/lab'),'proximity');assert.equal(router.resolve('#work'),'proximity');
- assert.equal(router.resolve('/experiments/lab'),'proximity','the old lab path opens the merged page');
- assert.equal(Object.keys(context.ArkUI.pageCatalog).includes('lab'),false,'one catalog entry for the interactive model');
- assert.equal(context.ArkUI.pageCatalog.proximity.module,'lab','the merged page is the lab');
- assert(fs.readFileSync('js/pages/lab.js','utf8').includes('Interactive model'));
+// The owner deleted the interactive model page (/experiments, key 'proximity', module 'lab') on 2026-10-24. There is no redirect table:
+// its old addresses (/experiments, /experiments/lab, /work, #work) now resolve to the not-found page like any other retired address.
+for(const old of ['#/work','#work','#/experiments/lab','/experiments/lab','#/experiments','/experiments','#proximity'])assert.equal(router.resolve(old),'notfound',old+' is retired: it opens the not-found page');
+for(const key of ['proximity','lab','work'])assert.equal(Object.keys(context.ArkUI.pageCatalog).includes(key),false,key+' is not a catalog entry');
 // 2026-10-19 (docs/ux-audit/pages.md P8): an address nothing answers used to resolve to Home, silently. It resolves to the
 // not-found page, which names it; aliases (/explorer, /monitor) still open their page.
- assert.equal(router.resolve('/no-such-page'),'notfound');assert.equal(router.resolve('/explorer'),'explorer');assert.equal(router.resolve('/monitor'),'stats');
+ assert.equal(router.resolve('/no-such-page'),'notfound');assert.equal(router.resolve('/explorer'),'explorer');assert.equal(router.resolve('/monitor'),'stats/now');   /* 2026-10-24: /stats is /stats/now; the alias moved with the page */
  assert.equal(router.resolve('#'),'zero');assert.equal(router.resolve(''),'zero');
- assert.equal(router.resolve('#/experiments'),'proximity');assert.equal(router.resolve('#proximity'),'proximity');
  assert.equal(router.resolve('#/lifecycle'),'lifecycle');assert.equal(router.url('lifecycle'),'#/lifecycle');
  assert.equal(context.ArkUI.sceneState.pages.lifecycle.mesh,'zero');
  for(const id of ['intent','offer','agreement','fulfillment','receipt']) {
@@ -83,7 +76,8 @@ assert.equal(router.resolve('#/work'),'proximity');assert.equal(Object.keys(cont
 assert.equal(router.resolve('/explore'),'explorer');assert.equal(router.resolve('/explore/'),'explorer','a trailing slash is the same route');assert.equal(router.resolve('/explorer'),'explorer','the old explorer address still lands on the explorer');assert.equal(router.resolve('#/explorer'),'explorer');
 assert.equal(router.resolve('/learnings/why-the-chain-was-retired'),'article/why-the-chain-was-retired');assert.equal(router.resolve('/'),'zero');assert.equal(router.resolve('/no-such-page'),'notfound','an unknown address names itself instead of showing Home');
 // /monitor was retired 2026-10-10; a bookmarked link must land on /stats, not silently redirect to home.
-assert.equal(router.resolve('/monitor'),'stats','a bookmarked /monitor link lands on stats, which carries the live pulse now');assert.equal(router.resolve('#/monitor'),'stats');
+assert.equal(router.resolve('/monitor'),'stats/now','a bookmarked /monitor link lands on /stats/now, which carries the pulse now (2026-10-24: /stats became /stats/now)');assert.equal(router.resolve('#/monitor'),'stats/now');
+for (const [old, now] of [['/stats','stats/now'],['/stats/gpu','stats/ceiling'],['/stats/ledger','stats/capabilities'],['/measured','stats/capabilities']]) assert.equal(router.resolve(old),now,old+' opens its new page (an alias, so the address is rewritten to the page\'s own path)');
  assert.equal(writes.at(-1)[1],'none');
  await router.navigate('about');assert.equal(router.active,'about');assert.equal(context.ArkUI.sceneState.get().page,'about');
  assert.equal(description.value,'About-specific description');
@@ -277,6 +271,22 @@ assert.equal(router.resolve('/monitor'),'stats','a bookmarked /monitor link land
   delete window.ArkCanvasTransitions;
   canvasScene.querySelector=(selector)=>selector==='[data-ark-layer="persistent"]'?persistentEl:null;
   await assert.doesNotReject(canvasRouter.navigate('about'),'navigation does not throw when ArkCanvasTransitions itself is unavailable');
+ }
+
+ // A retired key (stats, stats/gpu, stats/ledger, measured) must never mount its redirect target under the old key, with or without the 3D
+ // world (world-host.js used to do this alone, so ?world=off mounted the new page as 'stats'). The router follows `redirect` once.
+ {
+  const rWrites=[],rLoads=[];
+  const rScene=new Element(),rOutlet=rScene.appendChild(new Element());
+  const rRouter=context.ArkUI.createPageRouter({scene:rScene,outlet:rOutlet,state:{get(){return {paused:true};},navigate(){}},writeHistory:(page,mode)=>rWrites.push([page,mode]),
+   load:async(page)=>{rLoads.push(page);return {mount(host){return host.appendChild(new Element());}};}});
+  for(const [old,now] of [['stats','stats/now'],['stats/gpu','stats/ceiling'],['stats/ledger','stats/capabilities'],['measured','stats/capabilities']]){
+   rLoads.length=0;rWrites.length=0;
+   assert(await rRouter.navigate(old,{history:'replace'}));
+   assert.equal(rRouter.active,now,old+' lands on '+now);assert(rLoads.every(p=>p===now),old+' loads only its target (a cached target loads nothing)');
+   assert.deepEqual(rWrites[0],[now,'replace'],'the address is rewritten to the target, not left on '+old);
+   assert.equal(Object.keys(rRouter.pages).includes(old),false,old+' is never mounted');
+  }
  }
 
  console.log('PASS: lazy home, module caching, outgoing DOM disposal, scroll restoration, last request wins, failure/retry, deep links/history, stable canvas/header/outlet identities, catalog assets, background in/out transition sequencing.');

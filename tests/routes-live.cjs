@@ -69,12 +69,8 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
   const productionScripts = [...read('index.html').matchAll(/<script src="([^"?]+)(?:\?[^"]*)?" defer><\/script>/g)].map((match) => match[1]);
   const routeBoot = productionScripts.filter((file) => ['js/pages/catalog.js', 'js/ark/scene-state.js'].includes(file));
   assert.deepEqual(routeBoot, ['js/pages/catalog.js', 'js/ark/scene-state.js'], 'catalog must exist before scene state snapshots its routes');
-  // /experiments and /experiments/lab merged (2026-10-19): one page, one h1; the old intro's question is the lab's own study title.
-  assert(!fs.existsSync(path.join(ROOT, 'js/resolvers/experiment.js')) && !fs.existsSync(path.join(ROOT, 'js/pages/experiments.js')), 'the duplicate experiment entry page is gone, merged into the lab');
-  assert(read('js/pages/lab.js').includes('How can threshold agreement be pictured?'), 'the old intro question survives in the lab');
-  /* the lab is a page of Ark blocks since 2026-10-19 (W3-GUIDE): its h1 is the hero's, given the old id */
-  // the hero title names the page as the menu does, and stays (first-visit audit 2026-10-22: it was "Explore three protocol concepts." and then each study's question)
-  assert(/block: 'hero', id: 'lab-hero'[^\n]*title: 'Interactive model: authority, lifecycle and networks'/.test(read('js/pages/lab.js')) && read('js/pages/lab.js').includes("titleId: 'experiments-title'"), 'interactive model has a primary heading');
+  // The interactive model page (/experiments) was deleted by the owner, 2026-10-24: the duplicate entry pages and the lab page are gone, and so are the checks of the lab's heading and intro question.
+  assert(['js/resolvers/experiment.js', 'js/pages/experiments.js', 'js/pages/lab.js', 'js/studio.js'].every((file) => !fs.existsSync(path.join(ROOT, file))), 'the experiments entry pages, the lab page and its driver are gone');
 
   const summary = await inspectDocument({ html: await readIndexHtml(ROOT), url: HOST + '/', resources, root: ROOT, timeoutMs: STALL_DEADLINE_MS }, async (window) => {
     const { document, ArkUI, ArkCopy, ArkStates, ArkCanvasTransitions, ArkElementMotion } = window;

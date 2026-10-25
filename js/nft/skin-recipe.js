@@ -16,6 +16,7 @@
        gridLook: { params, why, notes } for the ring world (js/nft/grid-look.js, loaded before this file),
        arrival: the card's own arrival timeline (js/nft/timeline.js, loaded before this file),
        layouts: per-part layouts and rules.density, each derived from the card's own drawings,
+       voice:   the headings' slot ('keep', 'sans' or 'mono'), from the frame's line; sent as --font-display,
        locks:   the token names the site locked (opts.locked), carried so Ark UI skips them too,
        rules:   { frame, edge, ornament, marker, header, layout, density } (closed sets only),
        notes:   anything left out, and why }
@@ -28,8 +29,8 @@
    "corners", edges on one or two sides make "bracket", a full frame with a raised or cut tab in the
    middle of its top or bottom makes "ticket". Its top-left corner gives the edge: a straight
    45-degree cut is "cut", a curve is "soft", a right angle is "square". A worn ornament gives
-   ornament "strip", a worn emblem marker "emblem", a worn tag header "tag". layout and density stay
-   "keep": they wait for the owner's review. A card that wears all six pieces of one matched set (the
+   ornament "strip", a worn icon marker "icon" or "index" (by its ink), a worn nameplate header "nameplate".
+   Layouts and density come from the measures below. A card that wears all six pieces of one matched set (the
    "<Set> <Piece>" families, such as Arcade) reports that set as `family`.
 
    Needs, in order: skin-bundle.js (or the full layers-bundle.js), cards-data.js, traits.js,
@@ -60,37 +61,54 @@
   // (--reference is a role, not meaning: the SDK's deriveSkinTokens derives it with its ladder)
   // the meaning tokens and the part table live once, in js/nft/skin-package.js; recipe() loads it first
   function pkg() {
-    if (!window.DefxnSkinPackage) throw new Error('The skin recipe needs js/nft/skin-package.js. recipe() loads it; a caller that skips recipe() loads it first.');
+    if (!window.DefxnSkinPackage) throw new Error('The skin recipe needs js/nft/skin-package.js. recipe() loads it. A caller that skips recipe() loads it first.');
     return window.DefxnSkinPackage;
   }
   function needPackage() { return window.DefxnSkinPackage ? Promise.resolve() : T.load('js/nft/skin-package.js'); }
-  var CHROME_KEYS = ['ink', 'dim', 'line', 'faint', 'rule', 'acc', 'acc2', 'state'];
+  // the drawings' colour names (card-chrome.js INKS): structure, meaning and the old accents get the card's colours;
+  // the three roles get the site's role tokens, so a role reads the same as the site's own primary, complement, reference
+  function inks() { return C.INKS; }
+  var ROLE_TOKENS = { primary: 'hsl(var(--primary))', complementary: 'hsl(var(--secondary))', referential: 'hsl(var(--reference))' };
 
   /* ---------- tokens: the one place a palette becomes tokens ---------- */
   function tokens(traits, record) {
     record = record || {};
     var pal = (traits.picks.palette && traits.picks.palette.attrs) || {};
     var a = chan(pal.a || '0 0% 100%'), b = pal.b ? chan(pal.b) : a, c = pal.c ? chan(pal.c) : b;
-    var hue = b[0], sat = Math.min(8, b[1] * 0.08);
-    function surface(l) { return hsl([hue, sat, l]); }
-    // text on a primary fill: whichever of near-black or white reads better on it
-    var dark = [hue, Math.min(40, b[1]), 7], lb = luminance(b);
-    var inverse = contrast(lb, luminance(dark)) >= contrast(lb, 1) ? hsl(dark) : '0 0% 98%';
-    var vars = {
-      '--canvas': surface(3.6), '--surface': surface(5.4), '--raised': surface(8.4), '--nested': surface(11.5), '--overlay': surface(6.8),
-      '--text-strong': rootVar('--nft-ink', '0 0% 97%'), '--text': '0 0% 80%', '--text-muted': rootVar('--nft-muted', '180 2% 56%'),
-      '--text-faint': '180 2% 40%', '--text-inverse': inverse,
+    var hue = b[0], at = atmosphere(traits, b);
+    function surface(l, k) { return hsl([hue, at.sat * (k == null ? 0.5 : k), at.light + l]); }
+    var surfaces = { '--canvas': surface(0, 1), '--surface': surface(1.8), '--raised': surface(4.8), '--nested': surface(7.9), '--overlay': surface(3.2) };
+    // text on a fill (--primary is the light, --accent the accent): near-black or white, whichever reads better on
+    // the worse of the two, as Ark UI's gate checks both
+    var dark = [hue, Math.min(40, b[1]), 7], fills = [luminance(b), luminance(c)];
+    function worst(l) { return Math.min.apply(null, fills.map(function (f) { return contrast(f, l); })); }
+    var light = [0, 0, 98], useDark = worst(luminance(dark)) >= worst(luminance(light)), inverse = hsl(useDark ? dark : light), ink = luminance(useDark ? dark : light);
+    // a fill that neither reads on (Blood's two mid reds) moves its lightness away from the text, a step at a time,
+    // until the text reads at 4.6:1 (4.5 and a margin for Ark UI's rounding); its hue and saturation stay the card's
+    function fill(col) { var f = col.slice(); while (contrast(luminance(f), ink) < 4.6 && f[2] > 4 && f[2] < 96) f[2] += useDark ? 1 : -1; return f; }
+    var fb = fill(b), fc = fill(c);
+    // the text and the rules: the light's hue, faintly; a two-hue palette gives its headings and rules the accent
+    var two = arc(b[0], c[0]) >= 25 && c[1] >= 20, lead = two ? c : b, lightest = luminance(chan(surfaces['--nested']));
+    var vars = Object.assign(surfaces, {
+      '--text-strong': at.tinted ? hsl([lead[0], Math.min(18, lead[1] * 0.2), 95]) : rootVar('--nft-ink', '0 0% 97%'),
+      '--text': at.tinted ? readable([hue, Math.min(16, b[1] * 0.18)], 80, lightest, 4.6) : '0 0% 80%',
+      '--text-muted': at.tinted ? readable([hue, Math.min(14, b[1] * 0.16)], 58, lightest, 4.6) : rootVar('--nft-muted', '180 2% 56%'),
+      '--text-faint': at.tinted ? hsl([hue, Math.min(10, b[1] * 0.12), 42]) : '180 2% 40%', '--text-inverse': inverse,
       // --a is the tint of the 3D blocks, near white in every palette (L 82-100%). It is not a site
       // colour: as --complement and --role it told sites "white buttons, white links", and the SDK's
       // ladders seeded from it came out grey. The site's action colour (--complement) is the card's
       // accent --c; its link and control colour (--role) is the card's light --b. One-hue palettes
       // (Copper) give both the same hue; Mono gives white, which the SDK keeps as a neutral ladder.
-      '--primary': hsl(b), '--accent': hsl(c), '--complement': hsl(c),
+      '--primary': hsl(fb), '--accent': hsl(fc), '--complement': hsl(fc),
       '--live': rootVar('--nft-live', '156 76% 54%'), '--role': hsl(b), '--badge': hsl(b),
-      '--border-subtle': '0 0% 100% / 0.075', '--border-default': '0 0% 100% / 0.16', '--border-strong': '0 0% 100% / 0.42'
-    };
+      '--border-subtle': at.tinted ? hsl([hue, b[1] * 0.6, 72]) + ' / 0.09' : '0 0% 100% / 0.075',
+      '--border-default': at.tinted ? hsl([hue, b[1] * 0.6, 72]) + ' / 0.2' : '0 0% 100% / 0.16',
+      '--border-strong': at.tinted ? hsl([lead[0], lead[1] * 0.7, 68]) + ' / 0.5' : '0 0% 100% / 0.42'
+    });
+    // raised parts (menus, popovers, dialogs) cast the glow's colour, as strongly as the glow layer builds
+    if (at.glow != null) vars['--theme-shadow-color'] = hsl([c[0], Math.min(72, c[1]), 5 + 21 * at.glow]);
     var colours = C.colours(record, traits);
-    CHROME_KEYS.forEach(function (k) { vars['--w-' + k] = colours[k]; });
+    inks().forEach(function (k) { vars['--w-' + k] = ROLE_TOKENS[k] || colours[k]; });
     // On the card, chrome lines are white at 42%, 16% and 7.5% over its own art, and they read. On a
     // site's near-black surfaces they vanished (measured, WEAR-AUDIT.md C4). An interface draws them
     // stronger, in the same order: the main line in the card's light, the rule and the faint line in
@@ -102,6 +120,26 @@
     return vars;
   }
   function rgbOf(c) { return rgb(c).map(function (v) { return Math.round(v * 255); }); }
+  function arc(x, y) { return Math.abs(((x - y) % 360 + 540) % 360 - 180); }
+  /* The page's atmosphere, from the card's 3D layers (WEAR-AUDIT.md, loop 6, A9 A10 A12 D2). The canvas takes the
+     card's light hue as strongly as its background layer builds (the grid look's hazeTint, from the census), and is
+     as light as its glow layer builds (baseGlow). Surfaces hold half that colour, so content stays restrained. A
+     grey palette stays grey. A layer with no census keeps the restrained values every card had before (8% at most),
+     and says so in the grid look's notes. */
+  var ATMOS = { base: 0.14, haze: 0.32, light: 3.6, glow: 2.4 };
+  function atmosphere(traits, b) {
+    var look = window.DefxnGridLook ? window.DefxnGridLook.derive(traits).params : {};
+    var haze = look.hazeTint != null ? Math.min(1, look.hazeTint / 0.3) : null;
+    var glow = look.baseGlow != null ? Math.max(0, Math.min(1, (look.baseGlow - 0.35) / 0.45)) : null;
+    return { tinted: haze != null, glow: glow,
+      sat: haze != null ? b[1] * (ATMOS.base + ATMOS.haze * haze) : Math.min(8, b[1] * 0.08),
+      light: ATMOS.light + (glow != null ? ATMOS.glow * glow : 0) };
+  }
+  // the darkest lightness from `from` up that reads at `min`:1 on the lightest surface (Ark UI's gate checks it again)
+  function readable(hs, from, lightest, min) {
+    for (var l = from; l < 96; l += 1) if (contrast(luminance([hs[0], hs[1], l]), lightest) >= min) return hsl([hs[0], hs[1], l]);
+    return hsl([hs[0], 0, 96]);
+  }
   // the tokens a site may receive: less the meaning tokens and the product's locked list
   function siteTokens(vars, locked) {
     var out = {}, skip = pkg().MEANING.concat(locked || []);
@@ -110,10 +148,12 @@
   }
 
   /* ---------- chrome as plain data ---------- */
-  var VIEW = { corner: [0, 0, 120, 120], frame: [0, 0, 1000, 700], tag: [0, 0, 360, 50], ornament: [0, 0, 360, 80], divider: [0, 0, 360, 24], emblem: [0, 0, 30, 34] };
+  var VIEW = { corner: [0, 0, 120, 120], frame: [0, 0, 1000, 700], tag: [0, 0, 360, 50], ornament: [0, 0, 360, 80], divider: [0, 0, 360, 24], emblem: [0, 0, 30, 34], button: [0, 0, 200, 56] };
   var KEEP = {                               // the bands world.js keeps unstretched (keepBands)
     frame: { x: [0, 120, 380, 620, 880, 1000], y: [0, 120, 250, 450, 580, 700] },
-    divider: { x: [0, 60, 150, 210, 300, 360], y: [0, 24] }
+    divider: { x: [0, 60, 150, 210, 300, 360], y: [0, 24] },
+    // a button keeps its two ends and its top and bottom edge bands; its middle stretches to the label
+    button: { x: [0, 24, 176, 200], y: [0, 14, 42, 56] }
   };
   var DRAWS = /<(rect|path|line|circle|ellipse|polygon|polyline|text|use|image)\b/i;
 
@@ -129,7 +169,7 @@
       throw new Error('The drawing of ' + element.layer + '/' + element.name + ' is not loaded yet. Call DefxnSkin.drawing(element) first, or use DefxnSkin.recipe, which loads it.');
     }
     if (!element || element.kind !== 'chrome' || !DRAWS.test(String(element.svg || ''))) return null;
-    var slot = element.attrs.slot, text = String(element.svg).replace(/var\(--(ink|dim|line|faint|rule|acc2|acc|state)\)/g, 'var(--w-$1)');
+    var slot = element.attrs.slot, text = String(element.svg).replace(new RegExp(C.INK_SOURCE, 'g'), 'var(--w-$1)');
     var doc = new DOMParser().parseFromString(text, 'image/svg+xml'), root = doc.documentElement;
     if (root.nodeName !== 'svg') return null;
     Array.prototype.forEach.call(root.querySelectorAll('[data-sketch],title,script'), function (n) { n.parentNode.removeChild(n); });
@@ -333,7 +373,7 @@
     return rasterize(sized(svgText, W, H, false), W, H).then(function (d) {
       if (!d) return { marker: 'icon' };
       var lit = 0; for (var i = 3; i < d.length; i += 4) if (d[i] > 60) lit++;
-      return { marker: lit / (W * H) > ICON.heavy ? 'index' : 'icon' };
+      return { marker: lit / (W * H) > ICON.heavy ? 'index' : 'icon', iconInk: lit / (W * H) };
     });
   }
   /* The cut points, measured over every element on 2026-10-24 (WEAR-AUDIT.md, loop 1). Each splits its
@@ -342,6 +382,66 @@
      one whose ends carry 1.38 times its middle's ink is capped; a strip that matches itself above 0.73 at
      a shift repeats; a frame whose inner line sits 8 px or more inside it is airy. */
   var ICON = { heavy: 0.22 }, DIVIDE = { broken: 0.9, capped: 1.38 }, STRIP = { repeats: 0.73, heavy: 0.058 }, FRAME = { airy: 8, ring: 120 };
+  /* The heading voice, from the frame's own line (WEAR-AUDIT.md, loop 6, E3 D13 B11). The share of the edge ring's
+     length that curves, measured over all 123 frames on 2026-10-24: a third of them curve less than 0.009 (32 not
+     at all) and a third more than 0.036. A straight, cut line speaks in the site's mono, a mixed line in its sans, a
+     curving line keeps its display serif. The voice is one of the site's three slots, never a new face. */
+  var VOICE = { sans: 0.009, display: 0.036 };
+  /* The type that Ark UI 0.2.21 lets a card reach, each from a measure of the card's own drawings (loop 6):
+     - the nameplate's letter spacing (em of its own size; over 75 nameplates the thirds fall at 0.138 and 0.2)
+       becomes the eyebrow's spacing (the card's small label is the site's small label), and sets the headings'
+       spacing: a tight nameplate tightens them, an open one opens them, the middle third keeps the site's;
+     - the icon's ink (over 77 icons the lower third ends at 0.106; the heavy cut is the marker's 0.22) sets the
+       headings' weight: a light icon 500, a heavy one 700, the middle keeps the site's 600;
+     - numbers take the mono face, as every card face writes its own numbers;
+     - the edge rule sets the focus ring's corner: soft is round, square and cut are sharp.
+     Case is not sent: 131 of 132 nameplate words are upper case, so no card decides it. */
+  var TRACK = { tight: 0.138, open: 0.2 }, INK = { light: 0.106 };
+  // the nameplate's letter spacing, in em of its own font size (its first text with a size)
+  function trackOf(svgText) {
+    var m = /<text\b[^>]*>/.exec(svgText);
+    if (!m) return null;
+    var size = /font-size="([\d.]+)"/.exec(m[0]), ls = /letter-spacing="(-?[\d.]+)"/.exec(m[0]);
+    return size ? (ls ? parseFloat(ls[1]) : 0) / parseFloat(size[1]) : null;
+  }
+  function typeTokens(m, rules) {
+    var t = { '--font-numeric': 'var(--font-mono)' };
+    if (m.track != null) {
+      t['--type-eyebrow-tracking'] = Math.max(0.04, Math.min(0.32, m.track)).toFixed(3) + 'em';
+      if (m.track < TRACK.tight) t['--type-heading-tracking'] = '-0.035em';
+      else if (m.track > TRACK.open) t['--type-heading-tracking'] = '0.02em';
+    }
+    if (m.iconInk != null) {
+      if (m.iconInk < INK.light) t['--type-heading-weight'] = '500';
+      else if (m.iconInk > ICON.heavy) t['--type-heading-weight'] = '700';
+    }
+    if (rules.edge === 'soft') t['--focus-radius'] = '10px';
+    else if (rules.edge === 'square' || rules.edge === 'cut') t['--focus-radius'] = '0px';
+    return t;
+  }
+  function voiceOf(curve) { return curve == null ? 'keep' : curve >= VOICE.display ? 'keep' : curve >= VOICE.sans ? 'sans' : 'mono'; }
+  // the share of a drawing's line length that curves: turns of 0.4 to 25 degrees per 2 units; a sharper turn is a corner
+  function curveOf(svgText) {
+    if (!svgText || typeof document === 'undefined') return null;
+    var host = document.createElement('div');
+    host.setAttribute('aria-hidden', 'true');
+    host.setAttribute('style', 'position:absolute;left:-10000px;top:0;width:1000px;height:700px;visibility:hidden;pointer-events:none');
+    host.innerHTML = svgText;
+    document.body.appendChild(host);
+    var curved = 0, straight = 0;
+    Array.prototype.forEach.call(host.querySelectorAll('path,line,polyline,polygon,rect,circle,ellipse'), function (g) {
+      var len = 0; try { len = g.getTotalLength(); } catch (e) { return; }
+      if (!(len > 0)) return;
+      var prev = null, pp = g.getPointAtLength(0), n = Math.floor(len / 2);
+      for (var i = 1; i <= n; i++) {
+        var p = g.getPointAtLength(i * 2), dir = Math.atan2(p.y - pp.y, p.x - pp.x);
+        if (prev != null) { var t = Math.abs(dir - prev); if (t > Math.PI) t = 2 * Math.PI - t; t = t * 180 / Math.PI; if (t > 0.4 && t < 25) curved += 2; else straight += 2; }
+        prev = dir; pp = p;
+      }
+    });
+    host.parentNode.removeChild(host);
+    return curved + straight ? curved / (curved + straight) : null;
+  }
   function rulesOf(element) {
     if (!element) return Promise.resolve({});
     var k = element.layer + '/' + element.name;
@@ -361,7 +461,7 @@
     } else if (element.layer === 'ornament') p = draws ? stripRules(String(element.svg)) : Promise.resolve({ ornament: 'none', period: 0, ink: 0 });
     else if (element.layer === 'emblem') p = draws ? iconRules(String(element.svg)) : Promise.resolve({ marker: 'none' });
     else if (element.layer === 'divider') p = draws ? dividerRules(String(element.svg)) : Promise.resolve({ divider: 'none' });
-    else if (element.layer === 'tag') p = Promise.resolve({ header: draws ? 'nameplate' : 'none' });
+    else if (element.layer === 'tag') p = Promise.resolve({ header: draws ? 'nameplate' : 'none', track: draws ? trackOf(String(element.svg)) : null });
     else p = Promise.resolve({});
     return (ruleCache[k] = p);
   }
@@ -409,13 +509,21 @@
     return needPackage().then(function () { return drawingsOf(traits); }).then(function () {
       // keyed by the interface names Ark UI takes (frame, corner, nameplate, accent-strip, divider, icon)
       Object.keys(PIECE).forEach(function (slot) { chrome[T.uiName(slot)] = chromeData(picks[slot], record, traits); });
+      // the wear-only pieces (layers/worn/): only when the card wears one, so a born card sends none
+      (T.WORN || []).forEach(function (l) { if (picks[l.key]) chrome[T.uiName(l.key)] = chromeData(picks[l.key], record, traits); });
       return Promise.all(['frame', 'ornament', 'emblem', 'tag', 'divider'].map(function (l) { return rulesOf(picks[l]); }));
     }).then(function (parts) {
       var m = {};
       parts.forEach(function (r) { Object.keys(r).forEach(function (k) { m[k] = r[k]; }); });
       var rules = { frame: m.frame || 'none', edge: m.edge || 'keep', ornament: m.ornament || 'none', marker: m.marker || 'none',
-        header: m.header || 'none', layout: 'keep', density: densityOf(m) };
+        header: m.header || 'none', layout: 'keep', density: densityOf(m),
+        // a worn button draws every control's outline (Ark UI's button rule; only control parts take it)
+        button: picks.button ? 'drawn' : 'none' };
       var layouts = layoutsOf(m);
+      var frame = chrome[T.uiName('frame')], curve = frame ? curveOf(frame.svg) : null, voice = voiceOf(curve);
+      if (voice !== 'keep') vars['--font-display'] = 'var(--font-' + voice + ')';
+      var type = typeTokens(m, rules);
+      Object.keys(type).forEach(function (k) { vars[k] = type[k]; });
       var R = window.DefxnCardRecord;
       return {
         version: VERSION, table: window.DEFXN_LAYERS_TABLE || '', dna: traits.dna,
@@ -426,7 +534,9 @@
         gridLook: window.DefxnGridLook ? window.DefxnGridLook.derive(traits) : null,
         // the card's own arrival when it is put on (js/nft/timeline.js): it ends, and skips under reduced motion
         arrival: window.DefxnTimeline ? window.DefxnTimeline.arrival({ picks: picks, rules: rules }) : null,
-        measures: { inset: m.inset || 0, period: m.period || 0, ink: m.ink || 0, divider: m.divider || 'none' }, notes: notes
+        voice: voice,
+        measures: { inset: m.inset || 0, period: m.period || 0, ink: m.ink || 0, divider: m.divider || 'none', curve: curve == null ? null : Math.round(curve * 1000) / 1000,
+          track: m.track == null ? null : Math.round(m.track * 1000) / 1000, iconInk: m.iconInk == null ? null : Math.round(m.iconInk * 1000) / 1000 }, notes: notes
       };
     });
   }

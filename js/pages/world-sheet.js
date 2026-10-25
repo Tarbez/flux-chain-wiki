@@ -44,7 +44,8 @@
   function entry(key) { return ArkUI.pageCatalog && ArkUI.pageCatalog[key]; }
   W.href = function (key, query) { var e = entry(key); return e ? ArkUI.route.href(e.path) + (query ? '?' + query : '') : '#'; };
   /* a link to a page of the site: the router follows it (js/hero-motion.js reads data-scene-link) */
-  W.link = function (a, key, query) { a.dataset.sceneLink = key; a.href = W.href(key, query); return a; };
+  /* routeQuery: the router and the site's link check (js/ark/route.js, tests/routes-live.cjs) read a link's query from it, not from the href */
+  W.link = function (a, key, query) { a.dataset.sceneLink = key; a.href = W.href(key, query); if (query) a.dataset.routeQuery = query; return a; };
   /* a link field (route:<key>) of a manifest, or a plain address */
   W.field = function (a, role) {
     var value = ArkCopy.text(role), tagged = /^route:(\S+)$/.exec(value);

@@ -126,9 +126,11 @@ that needs several signers, see **Threshold**.
 
 **Substrate** — the shared layer every network builds on, which no single network owns. Mesh operations governs it; a network's DAO governs only its own network. Source: [governance](protocol/governance.md), `js/content/manifests/dao.js`.
 
-**Auth Kit** — the recovery file (`.auth.flx`) that holds your keys. It stays on your device and is never uploaded; you choose it to unlock your account. Source: `docs/account-auth.md`.
+**FXN ID** — your identity: one file (`.auth.fxn`) that holds your keys. It stays on your device and is never uploaded; you choose it to sign in. Source: `docs/account-auth.md`.
 
-**Ghost ID** — your identity ID as developer tools name it: the public name your Auth Kit unlocks. Source: `js/pages/account.js` ("What is an Auth Kit?"), `docs/account-auth.md`.
+**Master ID** — the key at the centre of your FXN ID. Its secret half never leaves the file, and it signs nothing that others see. Your recovery phrase and Secret Key rebuild it. Source: `js/pages/account.js`.
+
+**Public ID** — the identity you show others. It has its own key and its own name, and it makes its own wallets. Nothing public links one Public ID to another or to your Master ID. Source: `js/pages/account.js`.
 
 **Miner presence** — which miners are reachable on the mesh under a name. A named network partitions this and nothing else: it does not isolate accounts, identities, DAOs, records or treasuries, and it is not a security boundary. Source: [networks](operators/networks.md), [status](status.md).
 

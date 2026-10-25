@@ -46,7 +46,7 @@ var ArkAdminStore = (function () {
     { key: 'settingsDefaults', kind: 'single', global: 'ArkSiteDefaults', label: 'Site-wide defaults', file: 'settings-defaults', title: 'Site-wide settings defaults' },
     { key: 'seo', kind: 'single', global: 'ArkSEO', label: 'SEO', file: 'seo', title: 'SEO', needs: ['js/content/site-pages.js'], byItem: { manifests: 'pages', articles: 'articles' } },
     { key: 'layout', kind: 'single', global: 'ArkLayout', label: 'Layout', file: 'layout', title: 'Responsive layout', byRoute: ['routes', 'groups', 'labels', 'alts'] },
-    { key: 'components', kind: 'single', global: 'ArkComponents', label: 'Components', file: 'components', title: 'Components', byRoute: ['routes', 'spots'] },
+    { key: 'components', kind: 'single', global: 'ArkComponents', label: 'Components', file: 'components', title: 'Components', needs: ['js/vendor/flx-state-grammar.js'], byRoute: ['routes', 'spots'] },
     { key: 'states', kind: 'single', global: 'ArkStates', label: 'States', file: 'states', title: 'State groups', byRoute: ['routes'] },
     { key: 'canvasTransitions', kind: 'single', global: 'ArkCanvasTransitions', label: 'Page transition', file: 'canvas-transitions', title: 'Canvas transitions' },
     { key: 'elementMotion', kind: 'single', global: 'ArkElementMotion', label: 'Element animation', file: 'element-motion', title: 'Element animation', byRoute: ['routes'] },

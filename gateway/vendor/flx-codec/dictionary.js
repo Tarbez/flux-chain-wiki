@@ -2,6 +2,7 @@ export const FLX_ARCHIVE_MAGIC = "FLX2";
 export const FLX_ARCHIVE_FORMAT = "flx-archive";
 export const FLX_ARCHIVE_MAJOR_VERSION = 2;
 export const FLX_ARCHIVE_MINOR_VERSION = 2;
+export const FLX_ARCHIVE_DICTIONARY_LIMIT = 4096;
 export const FLX_DEFAULT_CONTENT_TYPES = [
     "text/html",
     "text/css",
@@ -54,15 +55,18 @@ export const FLX_CANONICAL_KEYS = [
     "receivedBlocks",
     "receiptState",
 ];
-function pushUnique(values, value) {
-    if (!value)
+// The verifier refuses a dictionary of more than FLX_ARCHIVE_DICTIONARY_LIMIT entries (codec.js), so the builder
+// stops adding at the limit and never writes an archive its own decoder refuses. A value left out is written as a
+// literal, which every intern* and decode* function already accepts. A site of 4,672 words once failed this way.
+function pushUnique(values, value, room) {
+    if (!value || values.includes(value) || room.left <= 0)
         return;
-    if (!values.includes(value))
-        values.push(value);
+    values.push(value);
+    room.left -= 1;
 }
-function pushManyUnique(values, source) {
+function pushManyUnique(values, source, room) {
     for (const entry of source)
-        pushUnique(values, entry);
+        pushUnique(values, entry, room);
 }
 function splitPathLike(value) {
     return value
@@ -70,22 +74,22 @@ function splitPathLike(value) {
         .map((segment) => segment.trim())
         .filter(Boolean);
 }
-function collectPayloadStrings(value, strings, keys) {
+function collectPayloadStrings(value, strings, keys, room) {
     if (typeof value === "string") {
-        pushUnique(strings, value);
+        pushUnique(strings, value, room);
         return;
     }
     if (typeof value === "number" || typeof value === "boolean" || value == null)
         return;
     if (Array.isArray(value)) {
         for (const item of value)
-            collectPayloadStrings(item, strings, keys);
+            collectPayloadStrings(item, strings, keys, room);
         return;
     }
     if (typeof value === "object") {
         for (const [key, entry] of Object.entries(value)) {
-            pushUnique(keys, key);
-            collectPayloadStrings(entry, strings, keys);
+            pushUnique(keys, key, room);
+            collectPayloadStrings(entry, strings, keys, room);
         }
     }
 }
@@ -153,40 +157,42 @@ export function buildFlxArchiveDictionary(input) {
     const stateScopes = [...baseDictionary.stateScopes];
     const routeTokens = [...baseDictionary.routeTokens];
     const keys = [...baseDictionary.keys];
-    pushManyUnique(paths, splitPathLike(input.entry));
-    pushManyUnique(strings, [input.generatedBy, input.sourceFormat, input.purpose]);
+    // The base comes from a decoded archive, which the verifier already held to the limit; only new entries spend room.
+    const room = { left: FLX_ARCHIVE_DICTIONARY_LIMIT - [strings, paths, contentTypes, routeIds, stateScopes, routeTokens, keys].reduce((sum, values) => sum + values.length, 0) };
+    pushManyUnique(paths, splitPathLike(input.entry), room);
+    pushManyUnique(strings, [input.generatedBy, input.sourceFormat, input.purpose], room);
     for (const route of input.routes || []) {
-        pushUnique(routeIds, route.routeId);
-        pushManyUnique(strings, [route.title, route.description, route.layout]);
-        pushManyUnique(strings, route.guards || []);
-        pushManyUnique(paths, splitPathLike(route.path));
-        pushManyUnique(routeTokens, splitPathLike(route.path));
+        pushUnique(routeIds, route.routeId, room);
+        pushManyUnique(strings, [route.title, route.description, route.layout], room);
+        pushManyUnique(strings, route.guards || [], room);
+        pushManyUnique(paths, splitPathLike(route.path), room);
+        pushManyUnique(routeTokens, splitPathLike(route.path), room);
         for (const dependency of route.dependencyGraph || []) {
-            pushManyUnique(routeTokens, splitPathLike(dependency.route));
-            pushManyUnique(strings, [dependency.relation, dependency.phase]);
+            pushManyUnique(routeTokens, splitPathLike(dependency.route), room);
+            pushManyUnique(strings, [dependency.relation, dependency.phase], room);
         }
         for (const restorePath of route.restorePaths || []) {
-            pushManyUnique(paths, splitPathLike(restorePath));
-            pushManyUnique(routeTokens, splitPathLike(restorePath));
+            pushManyUnique(paths, splitPathLike(restorePath), room);
+            pushManyUnique(routeTokens, splitPathLike(restorePath), room);
         }
-        collectPayloadStrings(route.payload, strings, keys);
+        collectPayloadStrings(route.payload, strings, keys, room);
     }
     for (const asset of input.assets || []) {
-        pushManyUnique(paths, splitPathLike(asset.path));
-        pushUnique(contentTypes, asset.contentType);
-        pushUnique(strings, asset.hash);
-        collectPayloadStrings(asset.payload, strings, keys);
+        pushManyUnique(paths, splitPathLike(asset.path), room);
+        pushUnique(contentTypes, asset.contentType, room);
+        pushUnique(strings, asset.hash, room);
+        collectPayloadStrings(asset.payload, strings, keys, room);
     }
     for (const state of input.states || []) {
-        pushUnique(stateScopes, state.scope);
-        pushManyUnique(strings, [state.stateId, state.schema, state.rootPath]);
+        pushUnique(stateScopes, state.scope, room);
+        pushManyUnique(strings, [state.stateId, state.schema, state.rootPath], room);
         if (state.rootPath)
-            pushManyUnique(paths, splitPathLike(state.rootPath));
-        collectPayloadStrings(state.payload, strings, keys);
+            pushManyUnique(paths, splitPathLike(state.rootPath), room);
+        collectPayloadStrings(state.payload, strings, keys, room);
     }
     if (input.delta) {
-        pushManyUnique(strings, [input.delta.parentArchiveId, input.delta.baseIntegrity, input.delta.deltaKind]);
-        collectPayloadStrings(input.delta.operations, strings, keys);
+        pushManyUnique(strings, [input.delta.parentArchiveId, input.delta.baseIntegrity, input.delta.deltaKind], room);
+        collectPayloadStrings(input.delta.operations, strings, keys, room);
     }
     if (input.continuation) {
         pushManyUnique(strings, [
@@ -194,8 +200,8 @@ export function buildFlxArchiveDictionary(input) {
             input.continuation.resumeToken,
             input.continuation.chunkChecksum,
             input.continuation.receiptState,
-        ]);
-        pushManyUnique(strings, input.continuation.receivedBlocks || []);
+        ], room);
+        pushManyUnique(strings, input.continuation.receivedBlocks || [], room);
     }
     return createFlxDictionaryState({ strings, paths, contentTypes, routeIds, stateScopes, routeTokens, keys });
 }

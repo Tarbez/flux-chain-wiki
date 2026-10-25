@@ -36,13 +36,13 @@ ArkManifest.define({
       "label": "Resolver deployment link",
       "kind": "line",
       "section": "Page",
-      "value": "How deploying a resolver works"
+      "value": "Resolve your deployments"
     },
     "RESOLVER.HREF": {
       "label": "Resolver deployment link target",
       "kind": "link",
       "section": "Page",
-      "value": "route:deployment"
+      "value": "route:resolutions/deployments"
     },
     "BACK": {
       "label": "Link back (an arrow is added)",

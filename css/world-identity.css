@@ -21,10 +21,10 @@
 .wi-story a { grid-template-columns: 30px 1fr; }
 .wi-rows a { grid-template-columns: minmax(0, 1fr); border-left: 2px solid transparent; }
 .wi-story a:hover, .wi-rows a:hover { color: hsl(var(--text-strong)); background: hsl(var(--text-strong) / .03); }
-.wi-story a[aria-current="step"], .wi-rows a[aria-current="true"] { background: hsl(var(--signal) / .07); color: hsl(var(--text-strong)); }
-.wi-rows a[aria-current="true"] { border-left-color: hsl(var(--signal)); }
+.wi-story a[aria-current="step"], .wi-rows a[aria-current="true"] { background: hsl(var(--reference-100)); color: hsl(var(--text-strong)); }
+.wi-rows a[aria-current="true"] { border-left-color: hsl(var(--reference)); }
 .wi-story .n { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 600 12px/1 var(--font-mono); border: 1px solid hsl(var(--border-default)); transition: border-color .5s, color .5s; }
-.wi-story [aria-current="step"] .n { border-color: hsl(var(--signal)); color: hsl(var(--signal)); }
+.wi-story [aria-current="step"] .n { border-color: hsl(var(--reference)); color: hsl(var(--reference)); }
 .wi-story .done .n { border-color: hsl(var(--signal) / .5); color: hsl(var(--text-strong)); }
 .wi-story b, .wi-rows b { font: 600 15px/1.3 var(--font-sans); }
 .wi-rows b .state { margin-left: 8px; }

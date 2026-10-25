@@ -24,6 +24,7 @@ const dom = new JSDOM('<!doctype html><html><head></head><body><h1 class="title"
 const w = dom.window;
 w.ArkCopy = { isKey: () => false, resolve: (v) => v };
 w.matchMedia = () => ({ matches: false });
+w.ARK_FLX_STATE = require('../js/vendor/flx-state-grammar.js');   // components are stored as FLX records: the grammar is lent to the sandbox, as index.html loads it before components.js
 const context = vm.createContext(w);
 for (const file of ['js/ark/atomizer.js', 'js/ark/flux.js', 'js/ark/runtime.js', 'js/content/layout.js', 'js/content/components.js']) {
   vm.runInContext(fs.readFileSync(file, 'utf8'), context, { filename: file });

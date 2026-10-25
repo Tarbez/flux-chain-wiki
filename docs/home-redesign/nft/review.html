@@ -15,7 +15,12 @@
      Holds and clashes are written as layers/review.flx (review-record.js grammar). Save the file into
      layers/ and run node make-layers.mjs: new cards are then never born with a held element or a
      clashing pair, and the shop and the skin picker refuse them. Until then the decisions are a draft
-     kept in this browser. Sample data: nothing is live. -->
+     kept in this browser.
+     THE SKIN GATE (skin-gate.js): "Check on the parts" puts every element of the shown category on every Ark UI part
+     the site ships, one at a time, and measures what breaks (text covered, a control covered, a drawing cut off, two
+     drawings colliding, text that no longer reads). What it finds is written into review.flx as PROPOSED holds
+     (DFXNGATE1 lines). A proposal keeps nothing out of a card: the owner holds or keeps each element.
+     Sample data: nothing is live. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -97,6 +102,20 @@
   .note{margin:0;padding:6px 16px 8px;font-size:11px;border-top:1px solid hsl(var(--page-line) / .08)}
   .note b{color:hsl(var(--honey));font-weight:500;letter-spacing:.16em;text-transform:uppercase}
   .note code{color:hsl(var(--page-strong))}
+  /* the skin gate */
+  .warns span.g{background:hsl(var(--hold) / .14);color:hsl(var(--hold))}
+  .btn:disabled{opacity:.4;cursor:default}
+  .gate{position:fixed;inset:var(--gate-top,52px) 0 0 0;z-index:20;background:hsl(var(--page));display:grid;grid-template-rows:auto minmax(0,1fr)}
+  .gate[hidden]{display:none}
+  .gate header{display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid hsl(var(--page-line) / .1)}
+  .gate header b{color:hsl(var(--page-strong));font-weight:500}
+  .gate header span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gate .stage{position:relative;overflow:hidden}
+  .gate iframe{position:absolute;left:0;top:0;width:1440px;height:900px;border:0;transform-origin:0 0;background:#000}
+  .rail .parts-why{margin:0 0 6px;font-size:10.5px}
+  .rail ul.parts li{display:flex;justify-content:space-between;gap:6px;padding:3px 8px;font-size:11px}
+  .rail ul.parts li b{color:hsl(var(--hold));font-weight:500;white-space:nowrap}
+  .side ul.found{margin:0;padding:0 0 0 16px;font-size:11.5px;color:hsl(var(--hold))}
 </style>
 </head>
 <body>
@@ -106,7 +125,7 @@
     <button type="button" data-tab="one" aria-pressed="true">One layer</button>
     <button type="button" data-tab="two" aria-pressed="false">Two layers</button>
   </div>
-  <div class="sum"><span><b id="nHeld">0</b> held</span><span><b id="nClash">0</b> clashing pairs</span><span class="draft" id="draft"></span>
+  <div class="sum"><button type="button" class="btn" id="gateRun">Check on the parts</button><span><b id="nGate">0</b> proposed</span><span><b id="nHeld">0</b> held</span><span><b id="nClash">0</b> clashing pairs</span><span class="draft" id="draft"></span>
     <button type="button" class="btn" id="discard">Discard draft</button><button type="button" class="btn is-main" id="save">Save review file</button></div>
 </header>
 
@@ -114,6 +133,7 @@
   <aside class="rail" aria-label="Category">
     <div><h2>Category</h2><ul id="layers"></ul></div>
     <div><h2>Show</h2><div class="chips" id="show"></div></div>
+    <div id="partsBox" hidden><h2>Parts that break</h2><p class="parts-why">A part where most of a category breaks needs a fix to the part, not a hold on each element.</p><ul class="parts" id="parts"></ul></div>
   </aside>
   <div class="shelf">
     <header><span id="count"></span><span>Pick one to see it on three cards</span></header>
@@ -134,6 +154,12 @@
   <div class="matrix" id="matrix"></div>
 </section>
 
+<section class="gate" id="gate" aria-label="Skin gate" hidden>
+  <header><b>Skin gate</b><span id="gateState" role="status" aria-live="polite"></span>
+    <button type="button" class="btn" id="gateStop" hidden>Stop</button><button type="button" class="btn" id="gateClose">Close</button></header>
+  <div class="stage" id="gateStage"></div>
+</section>
+
 <p class="note"><b>Sample data.</b> Decisions stay in this browser until you save the file. Put <code>review.flx</code> in <code>layers/</code> and run <code>node make-layers.mjs</code>: new cards then leave out held elements and clashing pairs.</p>
 
 <script src="../../../js/ark/mark-data.js"></script>
@@ -152,18 +178,20 @@
 <script src="world.js"></script>
 <script src="thumbs.js"></script>
 <script src="review-record.js"></script>
+<script src="skin-gate.js"></script>
 <script>
 (function () {
   var T = window.DEFXN_TRAITS, A = window.Art3D, C = window.DefxnCard, TH = window.DefxnThumbs, R = window.DefxnReviewRecord;
   var NS = 'http://www.w3.org/2000/svg', TIER_C = ['var(--t0)', 'var(--t1)', 'var(--t2)', 'var(--t3)'];
   var REF = window.DEFXN_CARDS[0], BASE = Object.assign({}, TH.SHOWCASE), STORE = 'defxn-review-draft';
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function layerByKey(k) { return T.LAYERS.filter(function (l) { return l.key === k; })[0]; }
+  function layerByKey(k) { return T.CATEGORIES.filter(function (l) { return l.key === k; })[0]; }
   function idOf(e) { return e.layer + '/' + e.name; }
 
   /* ---------- the review: the saved file (bundle), then this browser's draft ---------- */
-  var saved = R.encode(T.REVIEW), review = { hold: T.REVIEW.hold.slice(), clash: T.REVIEW.clash.map(function (p) { return p.slice(); }) };
-  try { var d = window.localStorage.getItem(STORE); if (d != null) review = R.decode(d); } catch (e) { /* no storage, or an old draft: start from the file */ }
+  var saved = R.encode(T.REVIEW), review = { hold: T.REVIEW.hold.slice(), clash: T.REVIEW.clash.map(function (p) { return p.slice(); }), gate: [] };
+  function fromDraft() { try { var d = window.localStorage.getItem(STORE); if (d != null) review = R.decode(d); } catch (e) { /* no storage, or an old draft: start from the file */ } }
+  fromDraft();
   function isHeld(e) { return review.hold.indexOf(idOf(e)) >= 0; }
   function clashKey(a, b) { return [a, b].sort().join('|'); }
   function isClash(a, b) { var k = clashKey(idOf(a), idOf(b)); return review.clash.some(function (p) { return clashKey(p[0], p[1]) === k; }); }
@@ -172,6 +200,7 @@
     try { if (text === saved) window.localStorage.removeItem(STORE); else window.localStorage.setItem(STORE, text); } catch (e) { /* the draft lives only on this page */ }
     document.getElementById('nHeld').textContent = review.hold.length;
     document.getElementById('nClash').textContent = review.clash.length;
+    document.getElementById('nGate').textContent = new Set(review.gate.filter(function (g) { return review.hold.indexOf(g.id) < 0; }).map(function (g) { return g.id; })).size;
     document.getElementById('draft').textContent = text === saved ? '' : 'Draft, not in the file yet';
     document.getElementById('discard').hidden = text === saved;
   }
@@ -259,6 +288,94 @@
   }
 
   /* ---------- tabs ---------- */
+  /* ---------- the skin gate: every element of a category on every Ark UI part, measured (skin-gate.js) ---------- */
+  var G = window.DefxnSkinGate, gate = null, stopping = false, running = false;
+  function gateOf(e) { var id = idOf(e); return review.gate.filter(function (g) { return g.id === id; }); }
+  function gateWords(e) {
+    var g = gateOf(e), words = g.slice(0, 3).map(function (x) { return G.BREAKS[x['break']] + ' · ' + x.part; });
+    if (g.length > 3) words.push((g.length - 3) + ' more');
+    return words;
+  }
+  // per part and break: how many elements of the shown category the gate found breaking there
+  function drawParts() {
+    var l = layerByKey(layer), ids = {}, tally = {};
+    l.elements.forEach(function (e) { ids[idOf(e)] = true; });
+    review.gate.forEach(function (g) { if (!ids[g.id]) return; var k = g.part + '|' + g['break']; (tally[k] = tally[k] || new Set()).add(g.id); });
+    var rows = Object.keys(tally).sort(function (a, b) { return tally[b].size - tally[a].size || a.localeCompare(b); }).slice(0, 8);
+    var ul = document.getElementById('parts'); ul.textContent = '';
+    document.getElementById('partsBox').hidden = !rows.length;
+    rows.forEach(function (k) {
+      var p = k.split('|'), li = el('li');
+      li.appendChild(el('span', null, p[0] + ' · ' + G.BREAKS[p[1]]));
+      li.appendChild(el('b', null, tally[k].size + ' of ' + l.elements.length));
+      ul.appendChild(li);
+    });
+  }
+  function measurable(l) { return l.elements.some(function (e) { return e.kind === 'chrome' || e.kind === 'palette'; }); }
+  function gateButton() {
+    var b = document.getElementById('gateRun'), l = layerByKey(layer);
+    b.disabled = running || !measurable(l);
+    b.title = measurable(l) ? 'Put every element of ' + l.name + ' on every Ark UI part and measure what breaks' : '3D elements draw no Ark UI part: there is nothing to check here';
+  }
+  function gateState(t) { document.getElementById('gateState').textContent = t; }
+  function fit() {
+    var st = document.getElementById('gateStage'), f = gate && gate.frame;
+    if (!f) return;
+    var r = st.getBoundingClientRect();
+    if (r.width && r.height) f.style.transform = 'scale(' + Math.min(r.width / 1440, r.height / 900) + ')';
+  }
+  function openGate() {
+    var pane = document.getElementById('gate');
+    pane.style.setProperty('--gate-top', document.querySelector('.top').getBoundingClientRect().height + 'px');
+    pane.hidden = false;
+    if (!gate) gate = G.open(document.getElementById('gateStage'));
+    fit();
+    return gate.ready;
+  }
+  window.addEventListener('resize', fit);
+  document.getElementById('gateClose').addEventListener('click', function () {
+    stopping = true;
+    if (!running) { document.getElementById('gate').hidden = true; if (gate) { gate.close(); gate = null; } }
+  });
+  document.getElementById('gateStop').addEventListener('click', function () { stopping = true; });
+  document.getElementById('gateRun').addEventListener('click', function () {
+    var l = layerByKey(layer), list = l.elements.filter(function (e) { return e.kind === 'chrome' || e.kind === 'palette'; });
+    if (!list.length || running) return;
+    running = true; stopping = false; gateButton();
+    document.getElementById('gateStop').hidden = false;
+    gateState('Loading the parts page.');
+    var done = 0;
+    Promise.resolve().then(openGate).then(function () {
+      return gate.run(list, {
+        stopped: function () { return stopping; },
+        onStep: function (i, n, e) { done = i - 1; gateState(l.name + ': ' + i + ' of ' + n + '. Now ' + e.name + '.'); }
+      });
+    }).then(function (res) {
+      // the new measurement replaces this category's old one; other categories keep theirs
+      var ids = {}; list.slice(0, stopping ? done : list.length).forEach(function (e) { ids[idOf(e)] = true; });
+      review.gate = review.gate.filter(function (g) { return !ids[g.id]; }).concat(res.found.filter(function (g) { return ids[g.id]; }));
+      changed(); drawRail(); drawGrid();
+      var flagged = new Set(res.found.map(function (g) { return g.id; })).size;
+      var why = {}; res.notMeasured.forEach(function (x) { why[x.why] = (why[x.why] || 0) + 1; });
+      gateState((stopping ? 'Stopped after ' + done + ' of ' + list.length + '. ' : 'Checked ' + list.length + ' in ' + l.name + '. ') +
+        flagged + ' broke a part and are proposed for a hold.' +
+        Object.keys(why).map(function (w) { return ' ' + why[w] + ' not measured: ' + w; }).join('') +
+        (res.unknownKinds.length ? ' Ark UI drew kinds the gate cannot name: ' + res.unknownKinds.join(', ') + '.' : ''));
+    }).catch(function (err) { gateState('The gate stopped: ' + err.message); })
+      .then(function () { running = false; document.getElementById('gateStop').hidden = true; gateButton(); });
+  });
+  // one element on the parts, the parts it broke outlined: the owner looks before holding it
+  function seeOnParts(e) {
+    if (running) return;
+    document.getElementById('gateStop').hidden = true;
+    gateState('Putting ' + e.name + ' on the parts.');
+    Promise.resolve().then(openGate).then(function () { return gate.show(e); }).then(function (m) {
+      if (m.notMeasured) { gateState(e.name + ' is not measured. ' + m.notMeasured); return; }
+      var n = Object.keys(m.found).length;
+      gateState(e.name + ' on card ' + m.sample + (m.partner ? ' with ' + m.partner.split('/')[1] + ' (its rules draw this piece)' : '') + (n ? ': the outlined parts are where the gate measured a break.' : ': the gate measured no break.') + ' Scroll the parts to see them all.');
+    }).catch(function (err) { gateState(e.name + ' did not go on: ' + err.message); });
+  }
+
   var tab = 'one';
   Array.prototype.forEach.call(document.querySelectorAll('[data-tab]'), function (b) {
     b.addEventListener('click', function () {
@@ -273,7 +390,7 @@
   var layer = new URLSearchParams(location.search).get('layer') || 'frame', show = 'all', picked = null, gridTiles = {};
   function drawRail() {
     var ul = document.getElementById('layers'); ul.textContent = '';
-    T.LAYERS.forEach(function (l) {
+    T.CATEGORIES.forEach(function (l) {
       var li = el('li'), b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(l.key === layer));
       var held = l.elements.filter(isHeld).length, sm = el('small');
       sm.appendChild(el('span', null, String(l.elements.length))); if (held) sm.appendChild(el('span', 'h', held + ' held'));
@@ -281,8 +398,9 @@
       b.addEventListener('click', function () { layer = l.key; picked = null; drawRail(); drawGrid(); });
       li.appendChild(b); ul.appendChild(li);
     });
+    drawParts();
     var ch = document.getElementById('show'); ch.textContent = '';
-    [['all', 'All'], ['warn', 'Warnings'], ['held', 'Held'], ['kept', 'Kept']].forEach(function (o) {
+    [['all', 'All'], ['gate', 'Gate found'], ['warn', 'Warnings'], ['held', 'Held'], ['kept', 'Kept']].forEach(function (o) {
       var b = el('button', null, o[1]); b.type = 'button'; b.setAttribute('aria-pressed', String(show === o[0]));
       b.addEventListener('click', function () { show = o[0]; drawRail(); drawGrid(); });
       ch.appendChild(b);
@@ -290,16 +408,18 @@
   }
   function drawGrid() {
     var l = layerByKey(layer), grid = document.getElementById('grid'), shown = 0;
-    grid.textContent = ''; gridTiles = {};
+    grid.textContent = ''; gridTiles = {}; gateButton();
     l.elements.slice().sort(function (a, b) { return b.weight - a.weight || a.name.localeCompare(b.name); }).forEach(function (e) {
       if (show === 'held' && !isHeld(e)) return;
       if (show === 'kept' && isHeld(e)) return;
+      if (show === 'gate' && !gateOf(e).length) return;
       var t = el('div', 'tile' + (isHeld(e) ? ' is-held' : '')); t.tabIndex = 0; t.setAttribute('role', 'button');
       t.style.setProperty('--tc', TIER_C[e.tier]); t.setAttribute('aria-selected', String(picked === e));
       t.appendChild(TH.thumb(e, { palette: layerByKey('palette').elements.filter(function (p) { return p.name === 'Glass'; })[0], record: BASE }));
       var row = el('div', 'row'); row.appendChild(el('b', null, e.name)); row.appendChild(el('span', 'tier', T.TIERS[e.tier] + ' · ' + (Math.round(e.share * 10) / 10) + '%'));
       t.appendChild(row);
       var ws = el('div', 'warns'); t.appendChild(ws);
+      gateWords(e).forEach(function (w) { ws.appendChild(el('span', 'g', w)); });
       var seg = el('div', 'seg'), k = el('button', 'k', 'Keep'), h = el('button', 'h', 'Hold');
       k.type = h.type = 'button'; k.setAttribute('aria-pressed', String(!isHeld(e))); h.setAttribute('aria-pressed', String(isHeld(e)));
       k.addEventListener('click', function (ev) { ev.stopPropagation(); setHeld(e, false); });
@@ -336,7 +456,19 @@
     var side = document.getElementById('side'), e = picked;
     freeCards(sideCards); side.textContent = '';
     side.appendChild(el('h2', null, e.name));
-    side.appendChild(el('p', null, layerByKey(e.layer).name + ' · ' + T.TIERS[e.tier] + ' · in ' + (Math.round(e.share * 10) / 10) + '% of cards' + (isHeld(e) ? ' · held' : '')));
+    side.appendChild(el('p', null, layerByKey(e.layer).name + ' · ' + T.TIERS[e.tier] + ' · ' + (layerByKey(e.layer).worn ? (Math.round(e.share * 10) / 10) + '% of its category\'s weight (sets its price)' : 'in ' + (Math.round(e.share * 10) / 10) + '% of cards') + (isHeld(e) ? ' · held' : '')));
+    var g = gateOf(e);
+    if (g.length) {
+      side.appendChild(el('p', null, 'The gate proposes a hold. On the site\'s parts it measured:'));
+      var ul = el('ul', 'found'); g.forEach(function (x) { ul.appendChild(el('li', null, G.BREAKS[x['break']] + ' on ' + x.part + (x.count > 1 ? ', ' + x.count + ' times' : ''))); }); side.appendChild(ul);
+    }
+    if (e.kind === 'chrome' || e.kind === 'palette') {
+      var see = el('button', 'btn', 'See it on the parts'); see.type = 'button';
+      see.addEventListener('click', function () { seeOnParts(e); });
+      side.appendChild(see);
+    }
+    // a wear-only element (layers/worn/) is drawn on a site's parts, never on the card
+    if (layerByKey(e.layer).worn) { side.appendChild(el('p', null, 'Wear-only: no card is born with it. It is drawn on a site\'s ' + layerByKey(e.layer).name.toLowerCase() + 's, not on the card. Use See it on the parts.')); return; }
     var three = el('div', 'three'); side.appendChild(three);
     var mixes = [Object.assign({}, BASE, { traits: Object.assign({}, REF.traits) })];
     [101, 202].forEach(function (n) { mixes.push(Object.assign(T.sampleRecord(n), {})); });
@@ -407,7 +539,17 @@
   document.getElementById('zoom').addEventListener('change', drawMatrix);
   window.addEventListener('resize', function () { clearTimeout(window._rz); window._rz = setTimeout(drawMatrix, 200); });
 
-  changed(); drawRail(); drawGrid();
+  // the review file itself, when the page is served: its gate lines are not in the bundle (make-layers keeps the
+  // holds and clashes only). A draft in this browser still wins, as before.
+  fetch('layers/review.flx', { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return null; }).then(function (text) {
+    if (text != null) {
+      try {
+        var file = R.decode(text); saved = R.encode(file);
+        review = file; fromDraft();
+      } catch (err) { document.getElementById('draft').textContent = 'layers/review.flx did not read: ' + err.message; }
+    }
+    changed(); drawRail(); drawGrid();
+  });
 })();
 </script>
 </body>

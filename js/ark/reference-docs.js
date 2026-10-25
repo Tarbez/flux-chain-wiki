@@ -19,7 +19,6 @@ ArkUI.referenceDocs = Object.freeze([
   "docs/evidence/cap-004-verification.md",
   "docs/evidence/fxn-speed-audit-v0.md",
   "docs/evidence/infra-001-platform-resolver-audit.md",
-  "docs/evidence/public-claim-inventory.md",
   "docs/evidence/registry.md",
   "docs/finance-ledger-design.md",
   "docs/fleet-plan-2026-10-10.md",

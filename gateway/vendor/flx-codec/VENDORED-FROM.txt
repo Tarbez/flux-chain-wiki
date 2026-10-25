@@ -6,6 +6,8 @@ package specifier through.
 
 Vendored at flx-codec commit 8aa7ba2 ("flx-codec: .flx format dispatcher and optional
 manifest purpose"), re-copied 2026-10-23. Browser-safe decode came in 3fb58e3.
+Re-copied 2026-10-24 for flx-codec 0.1.1 (uncommitted at the time): the encoder caps its dictionary at the
+decoder's 4096-entry limit and writes the rest as literals.
 blake3.js is what the shell checks a site's bytes with (../../content.js): WebCrypto has no
 BLAKE3. tests/gateway-flx-codec-vendor.test.mjs fails if any copy drifts from flx-codec.
 Do not hand-edit these files; re-copy them from flx-codec/src/ instead, the same

@@ -30,7 +30,8 @@ const dom = new JSDOM('<!doctype html><html><head></head><body><main data-page="
 const w = dom.window;
 w.ArkCopy = { isKey: () => false, resolve: (v) => v };
 w.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
-for (const file of ['js/ark/atomizer.js', 'js/ark/flux.js', 'js/ark/runtime.js', 'js/ark/icons.js', 'js/ark/dash-kit.js', 'js/content/components.js',
+w.TextEncoder = TextEncoder; w.TextDecoder = TextDecoder;   // the FLX grammar components are stored in turns text into bytes; jsdom has no codec
+for (const file of ['js/ark/atomizer.js', 'js/ark/flux.js', 'js/ark/runtime.js', 'js/ark/icons.js', 'js/ark/dash-kit.js', 'js/vendor/flx-state-grammar.js', 'js/content/components.js',
   'js/resolvers/blocks/rblock-text-v1.js', 'js/resolvers/blocks/rblock-cta-v1.js', 'js/resolvers/blocks/rblock-image-v1.js', 'js/resolvers/blocks/rblock-card-v1.js',
   'js/resolvers/blocks/rblock-quote-v1.js', 'js/resolvers/blocks/rblock-divider-v1.js', 'js/resolvers/blocks/rblock-captured-v1.js']) {
   w.eval(fs.readFileSync(path.join(ROOT, file), 'utf8') + '\n//# sourceURL=' + file);
@@ -72,10 +73,20 @@ draft = C.setOverride(draft, '/x', 'main', 'i0', 'heading', 'Overridden heading'
 /* the sanitized draft itself is unchanged by a round trip: nothing is rewritten */
 assert.equal(JSON.stringify(C.sanitize(JSON.parse(JSON.stringify(draft)))), JSON.stringify(draft), 'sanitize() rewrites no legacy master or instance');
 
-/* and the file Save writes for it is byte-identical: no field added, renamed or reordered */
-const SERIALIZED = '1a4e2bce76f32388dfddf64480e78127a83a513ba08be94fa70ae6060050974e';
+/* The file Save writes for it. Its BYTES changed once, on purpose, on 2026-10-24: the store moved from a JSON literal to FLX records
+   (workspace law, "stored state is FLX"; ArkComponents.encode). What must not change is the CONTENT: every legacy master and
+   instance reads back exactly as sanitize() holds it (a saved master is never migrated in place), a file written in the old JSON form
+   still loads to the same draft (read once, written forward), and a second write is byte-identical. The pin below holds the FLX bytes. */
+const SERIALIZED = '39442a873bdc7e475236cd21711800349125053c945b4dc78b7b25289da3ac62';
+const text = C.encode(draft);
+assert.equal(JSON.stringify(C.decode(text)), JSON.stringify(C.sanitize(draft)), 'the FLX records read back as exactly the sanitized draft: no legacy master or instance changes');
+assert.equal(C.encode(C.decode(text)), text, 'and the round trip is byte-exact');
+C.define(JSON.parse(JSON.stringify(draft)));
+const fromOldJson = JSON.stringify(C.get());
+C.define(text);
+assert.equal(JSON.stringify(C.get()), fromOldJson, 'a data file written before the move (a JSON literal) loads to the same draft as its FLX successor');
 const serialized = crypto.createHash('sha256').update(C.serialize(draft)).digest('hex');
-if (!process.argv.includes('--print')) assert.equal(serialized, SERIALIZED, 'components-data.js for legacy masters is written differently than before the Library change');
+if (!process.argv.includes('--print')) assert.equal(serialized, SERIALIZED, 'components-data.js for legacy masters is written differently than before');
 else console.log('serialized', serialized);
 
 const host = w.document.querySelector('[data-ark-insert="main"]');

@@ -1,6 +1,6 @@
 import { decodeArchiveBinary, encodeArchiveBinary, looksLikeFlxArchiveBinary } from "./binary.js";
 import { cidForBytes } from "./blake3.js";
-import { FLX_ARCHIVE_FORMAT, FLX_ARCHIVE_MAGIC, FLX_ARCHIVE_MAJOR_VERSION, FLX_ARCHIVE_MINOR_VERSION, buildFlxArchiveDictionary, decodePath, decodeRoutePath, decodeStructuredValue, encodePath, encodeRoutePath, encodeStructuredValue, internContentType, internRouteId, internStateScope, internString, } from "./dictionary.js";
+import { FLX_ARCHIVE_DICTIONARY_LIMIT, FLX_ARCHIVE_FORMAT, FLX_ARCHIVE_MAGIC, FLX_ARCHIVE_MAJOR_VERSION, FLX_ARCHIVE_MINOR_VERSION, buildFlxArchiveDictionary, decodePath, decodeRoutePath, decodeStructuredValue, encodePath, encodeRoutePath, encodeStructuredValue, internContentType, internRouteId, internStateScope, internString, } from "./dictionary.js";
 const textEncoder = new TextEncoder();
 const textDecoder = new TextDecoder();
 const flxNodeZlib = globalThis.process?.getBuiltinModule?.("node:zlib");
@@ -95,7 +95,7 @@ const BLOCK_ORDER = {
     integrity: 8,
 };
 const MAX_ARCHIVE_BLOCK_COUNT = 1024;
-const MAX_ARCHIVE_DICTIONARY_ENTRIES = 4096;
+const MAX_ARCHIVE_DICTIONARY_ENTRIES = FLX_ARCHIVE_DICTIONARY_LIMIT;
 const MAX_ARCHIVE_EXPANSION_RATIO = 64;
 const MAX_DELTA_CHAIN_LENGTH = 32;
 const MAX_RECOVERY_MATRIX_EXPLICIT_LOSS_COUNT = 4;

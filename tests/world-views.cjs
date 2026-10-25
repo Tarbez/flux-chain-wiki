@@ -16,10 +16,15 @@ const { JSDOM } = require('jsdom');
 const ROUTES = {
   chain: 'chain', 'chain/record': 'record', 'chain/open': 'open', 'chain/links': 'links',
   identity: 'idstart', 'identity/sign': 'idsign', 'identity/safe': 'idsafe', 'identity/you': 'idyou',
-  resolvers: 'resolvers', measured: 'measured', fxn: 'fxn', ring: 'ring',
+  resolvers: 'resolvers', fxn: 'fxn', ring: 'ring',
+  /* 2026-10-24: /measured is /stats/capabilities now. The four fixed pages of the stats section share ONE view, `stats` (js/world/stats-stage.js), so a move between
+     them is a camera flight inside one scene; the week pages come from the data and are added by the stage (tests/world-stats.cjs) */
+  'stats/now': 'stats', 'stats/ceiling': 'stats', 'stats/capabilities': 'stats',
   /* works is the 60-second sequence now (its own `movie` stage, js/world/minute-experience.js), not the mockup's minute view */
   works: 'movie', 'works/resolve': 'resolve', 'works/layers': 'layers', 'works/life': 'life',
-  trace: 'trace', zero: 'home', intro: 'intro'
+  trace: 'trace', zero: 'home', intro: 'intro',
+  /* 2026-10-25: /account shows one identity over the whole network, the view the identity flow ends on */
+  account: 'idvalue'
 };
 const hostSource = fs.readFileSync('js/world/world-host.js', 'utf8');
 
@@ -120,9 +125,9 @@ const wait = (w, ms) => new Promise((resolve) => w.setTimeout(resolve, ms));
   assert.deepEqual(t.calls.select[0], { r: 'rec-4', view: 'record' });
   host.select({ tab: 'x' });
   assert.deepEqual(t.calls.select[1], { r: 'rec-4', tab: 'x', view: 'record' }, 'a second change keeps the first');
-  host.fly('measured');
+  host.fly('stats/capabilities');
   host.select({ c: 'cap-1' });
-  assert.deepEqual(t.calls.select[2], { c: 'cap-1', view: 'measured' }, 'a new flight starts a new state');
+  assert.deepEqual(t.calls.select[2], { c: 'cap-1', view: 'stats' }, 'a new flight starts a new state');
 
   /* on(): a page listens; off() stops it; no listener, home keeps today's click */
   t.w.ArkWorldHost.covered = false;

@@ -16,6 +16,7 @@
   --account-rule:hsl(var(--border-subtle));
   --account-muted:hsl(var(--text-muted));
   width:100%; max-width:none; margin:0; padding:0; gap:0;
+  grid-template-rows:minmax(0,1fr);   /* the shell fills the page, so the card runs to the footer */
   overflow:auto; scrollbar-width:thin;
   background:transparent; border-radius:0;
   color:hsl(var(--text));
@@ -29,17 +30,20 @@
 #scene .account-page [hidden] { display:none !important; }
 #scene .account-visually-hidden { position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 
-/* ---- the grid: identity | card, rail underneath ----------------------------------------------- */
+/* ---- the grid: identity | card, rail underneath -----------------------------------------------
+   The card takes 65% of the width and the page's full height less its padding (owner, 2026-10-25: "make the right side like 65% width and full
+   height minus space and paddings"). A box of fixed size also keeps the world's glass slab on it: the slab is measured from the card's box, and a
+   card that grew as its content loaded had left the slab short and its buttons outside it. */
 #scene .ark-block-page.account-page > .account-shell {
   display:grid;
-  grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
-  grid-template-rows:minmax(0,1fr) auto;
-  gap:28px clamp(40px,6vw,96px);
-  width:min(100%,1240px); max-width:1240px; min-height:100%;
-  margin:auto; padding:clamp(24px,4vh,48px) clamp(24px,4vw,56px) 24px;
+  grid-template-columns:minmax(0,35fr) minmax(0,65fr);
+  grid-template-rows:minmax(0,1fr); grid-auto-rows:auto;   /* the rail's row exists only while the rail shows */
+  gap:20px clamp(24px,3vw,44px);
+  box-sizing:border-box; width:100%; max-width:none; height:100%; min-height:0;
+  margin:0; padding:clamp(16px,3vh,28px) clamp(20px,3vw,44px) clamp(16px,3vh,28px);
 }
-#scene .account-hero { grid-column:1; grid-row:1; align-self:start; min-width:0; max-width:620px; }
-#scene .account-card { grid-column:2; grid-row:1; align-self:start; min-width:0; width:100%; max-width:580px; }
+#scene .account-hero { grid-column:1; grid-row:1; align-self:start; min-width:0; max-width:none; }
+#scene .account-card { grid-column:2; grid-row:1; align-self:stretch; min-width:0; width:100%; max-width:none; min-height:0; box-sizing:border-box; display:flex; flex-direction:column; overflow:auto; }
 #scene .account-rail { grid-column:1/-1; grid-row:2; }
 
 /* ---- identity (left) ------------------------------------------------------------------------ */
@@ -154,4 +158,20 @@
   #scene .account-rail { grid-row:3; }
   #scene .account-secret { grid-template-columns:1fr; }
   #scene .account-nft { grid-template-columns:1fr; max-width:none; }   /* the card at full width: its smallest labels stay readable */
+}
+
+/* ---- the 3D world (js/world/world-host.js, view idvalue) -------------------------------------------
+   With the world on, the left column is the words above the stage the 3D is fitted to, and the card is the
+   box the world draws its slab under (the same frame as /identity/you, css/world-chain.css). The flat figure
+   stands in for the 3D, so it only shows when the world is off. */
+#scene .account-stage { display:none; pointer-events:none; }
+html[data-world="on"] #scene .account-hero { display:flex; flex-direction:column; align-self:stretch; max-width:none; min-height:0; }
+/* the stage ends where the card ends; the network draws a little past its frame, so the stage keeps a margin */
+html[data-world="on"] #scene .account-stage { display:block; flex:1 1 0; min-height:0; margin:clamp(24px,5vh,56px) 0 clamp(48px,9vh,96px); order:99; }
+html[data-world="on"] #scene .account-map { display:none; }
+html[data-world="on"] #scene .account-card { align-self:stretch; max-width:none; padding:28px clamp(24px,3vw,40px) 24px; }
+/* a short window: the slab starts at the top of its row, so a tall view grows downward into the scroll and never above the page */
+@media (max-height:860px) {
+  html[data-world="on"] #scene .account-card { padding:20px clamp(20px,2.6vw,32px) 18px; }
+  html[data-world="on"] #scene .account-cms { padding-top:10px; }
 }

@@ -8,7 +8,8 @@
 <!-- The shop: every element of every layer, each drawn by itself (thumbs.js), so it can be seen
      before it is picked. Pick one to see it large: alone (a 3D element turns under the pointer), on
      your card, or in a site. "Try on" puts it in your loadout; the loadout shows its total in FXN and
-     "Wear on card" opens card.html wearing it. Prices are the PROPOSED rule (traits.js price: an
+     "Wear on card" opens card.html wearing it. "Mint as a skin" opens /account, which mints the loadout as a real,
+     tradable skin on your key after the signing review (js/ark/chain-cards.mjs). Prices are the PROPOSED rule (traits.js price: an
      element costs its odds times 1 FXN). Sample data: nothing is sold, charged or sent.
      The address keeps the state: layer, tier, q, sort, item, the card (genesisId or a full record)
      and skin (the loadout). -->
@@ -134,7 +135,7 @@
       <p class="empty" id="loadEmpty">Try on elements to build a loadout. Your card keeps the mix it was born with.</p>
       <div class="total"><span>Total</span><b id="total">0 FXN</b></div>
       <p class="why" id="why"></p>
-      <div class="acts"><a id="wear" class="is-main" href="#">Wear on card</a><a id="enter" href="#">Enter a site</a></div>
+      <div class="acts"><a id="wear" class="is-main" href="#">Wear on card</a><a id="enter" href="#">Enter a site</a><a id="mint" href="#">Mint as a skin</a></div>
     </div>
   </aside>
 </main>
@@ -166,7 +167,8 @@
   var state = { layer: q.get('layer') || '', tiers: (q.get('tier') || '').split(',').filter(Boolean).map(Number), q: q.get('q') || '', sort: q.get('sort') || 'rare',
     item: q.get('item') || '', view: 'alone', pal: q.get('pal') || '', skin: T.skinOf({ skin: q.get('skin') || '' }) };
   var ALL = [];
-  T.LAYERS.forEach(function (l) { l.elements.forEach(function (e) { ALL.push(e); }); });
+  // every category, the wear-only ones too (layers/worn/: a born card has none; buying one is the only way in)
+  T.CATEGORIES.forEach(function (l) { l.elements.forEach(function (e) { ALL.push(e); }); });
   /* SETS: chrome pieces drawn together, named "<Set> <Piece>" (Corner, Frame, Tag, Strip, Rule, Sigil).
      A set is listed only when it has a piece in all six chrome layers. */
   var PIECE = { corner: 'Corner', frame: 'Frame', tag: 'Tag', ornament: 'Strip', divider: 'Rule', emblem: 'Sigil' }, SETS = {};
@@ -183,7 +185,7 @@
   function setOf(e) { var m = PIECE[e.layer] && e.name.match(new RegExp('^(.+) ' + PIECE[e.layer] + '$')); return m && SETS[m[1]] ? m[1] : ''; }
   state.set = q.get('set') || '';
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
-  function layerOf(e) { return T.LAYERS.filter(function (l) { return l.key === e.layer; })[0]; }
+  function layerOf(e) { return T.CATEGORIES.filter(function (l) { return l.key === e.layer; })[0]; }
   function idOf(e) { return e.layer + '/' + e.name; }
   function find(id) { return ALL.filter(function (e) { return idOf(e) === id; })[0] || null; }
 
@@ -235,7 +237,7 @@
     var w = document.getElementById('layersWorld'), u = document.getElementById('layersUi');
     w.textContent = ''; u.textContent = '';
     w.appendChild(layerButton('', 'All', ALL.length));
-    T.LAYERS.forEach(function (l) { (WORLD.indexOf(l.key) >= 0 ? w : u).appendChild(layerButton(l.key, l.name, l.elements.length)); });
+    T.CATEGORIES.forEach(function (l) { (WORLD.indexOf(l.key) >= 0 ? w : u).appendChild(layerButton(l.key, l.name, l.elements.length)); });
     var st = document.getElementById('sets'); st.textContent = '';
     Object.keys(SETS).sort().forEach(function (name) {
       var li = el('li'), btn = el('button'); btn.type = 'button';
@@ -370,6 +372,10 @@
     var sk = T.skinText(state.skin), ok = c.lines.length && !t.takenBy && rv.ok;
     wear.href = ok ? 'card.html?' + cardQuery(sk) : '#'; wear.setAttribute('aria-disabled', String(!ok)); wear.style.opacity = ok ? '' : '.4';
     enter.href = 'engine-demo.html?' + cardQuery(ok ? sk : '');
+    // the account page signs the mint with your FXN ID (DefxnCardRecord.skin: the skin's own record, packed into its mint)
+    var mint = document.getElementById('mint');
+    mint.href = ok ? '/account?mint-skin=' + encodeURIComponent(DefxnCardRecord.skin.encode(state.skin)) : '#';
+    mint.setAttribute('aria-disabled', String(!ok)); mint.style.opacity = ok ? '' : '.4';
     document.getElementById('toCard').href = 'card.html?' + cardQuery(ok ? sk : '');
   }
   function changed() {

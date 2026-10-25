@@ -183,45 +183,10 @@ async function main() {
       check(await count() === '01 / 03', 'after a person picks a step the tour does not move it again');
       await context.close();
     }
-    /* ---- the lab model (/experiments): drawn, readable, and its tab strip fits a phone ---- */
-    for (const [width, height] of [[1280, 800], [390, 844]]) {
-      const context = await browser.newContext({ viewport: { width, height } });
-      const page = await context.newPage();
-      const errors = []; page.on('pageerror', (e) => errors.push(e.message));
-      await page.goto(server.origin + '/experiments', { waitUntil: 'domcontentloaded' });
-      await routeSettled(page, 'proximity', scaled(20000));
-      await page.waitForSelector('.lab .specimen');
-      const lab = await page.evaluate(() => {
-        const box = (sel) => { const r = document.querySelector(sel).getBoundingClientRect(); return { w: r.width, h: r.height }; };
-        const tabs = document.querySelector('.study-tabs'), toolbar = document.querySelector('.lab-toolbar');
-        const small = [...document.querySelectorAll('.lab *')].filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && el.getClientRects().length && parseFloat(getComputedStyle(el).fontSize) < 12).map((el) => el.className + ':' + getComputedStyle(el).fontSize);
-        return { specimen: box('.lab .specimen'), dots: document.querySelectorAll('.lab .dot-group i').length, tabsOver: tabs.scrollWidth - tabs.clientWidth, toolbarOver: toolbar.scrollWidth - toolbar.clientWidth,
-          corner: document.querySelector('.stage-corner').textContent, hint: document.querySelector('#variable-hint').textContent, small: small.slice(0, 4),
-          stageOverlap: (() => { const f = document.querySelector('.stage-footnote').getBoundingClientRect(), d = document.querySelector('.specimen').getBoundingClientRect(); const dots = [...document.querySelectorAll('.dot-group')].map((g) => g.getBoundingClientRect()); return dots.some((r) => r.bottom > f.top && r.top < f.bottom && r.right > f.left && r.left < f.right); })() };
-      });
-      const tag = width + 'px lab: ';
-      check(lab.specimen.h > 100 && lab.dots === 12, tag + 'the model is drawn (the .expansion scope reaches it): 12 dots in a ' + Math.round(lab.specimen.h) + 'px specimen');
-      check(lab.tabsOver <= 0 && lab.toolbarOver <= 0, tag + 'the three study tabs fit their strip (overflow ' + lab.tabsOver + '/' + lab.toolbarOver + 'px)');
-      check(/^Figure 1 of 3 · FX—001$/.test(lab.corner), tag + 'the stage code says what it is (' + lab.corner + ')');
-      check(/^Drag the slider/.test(lab.hint), tag + 'the slider has its instruction');
-      check(lab.small.length === 0, tag + 'no text in the model is under 12px' + (lab.small.length ? ' (' + lab.small.join(', ') + ')' : ''));
-      check(!lab.stageOverlap, tag + 'the stage footnote does not sit on the dots');
-      /* W4-S14 / S8: the three studies are Ark's choice (not a hand-built aria-pressed group), a pick keeps the canonical address, and the
-         canonical link restores the state (js/studio.js wrote and read only the merged-away alias) */
-      check(await page.locator('.study-tabs fieldset.ark-choice input[type="radio"]').count() === 3 && await page.locator('.lab [aria-pressed]').count() === 0, tag + 'the studies are one Ark choice, no aria-pressed buttons');
-      await page.locator('.study-tabs input[value="rhythm"]').click(); // the radio is the label's whole box (Ark's choice)
-      check(await page.locator('.study-tabs input[value="rhythm"]').isChecked() && /Figure 2 of 3/.test(await page.locator('.stage-corner').textContent()), tag + 'picking a study moves the model');
-      check(new URL(page.url()).pathname === '/experiments' && /model=rhythm&value=50/.test(page.url()), tag + 'the address stays /experiments with the state in it (' + page.url().replace(server.origin, '') + ')');
-      await page.goto(server.origin + '/experiments?model=depth&value=15', { waitUntil: 'domcontentloaded' });
-      await routeSettled(page, 'proximity', scaled(20000));
-      await page.waitForSelector('.lab .specimen');
-      check(await page.locator('.study-tabs input[value="depth"]').isChecked() && await page.locator('#variable').inputValue() === '15', tag + '/experiments?model=depth&value=15 restores the study and its value');
-      check(errors.length === 0, tag + 'no page error');
-      await context.close();
-    }
+    /* The lab model checks (/experiments: drawn, readable, tab strip, address state) are retired: the owner deleted that page, 2026-10-24. */
   } finally { await browser.close(); await server.close(); }
   if (failures.length) { console.log('\n' + failures.length + ' check(s) failed'); process.exit(1); }
-  console.log('PASS: /explore stepper, kinds and ways back, and the lab model, behave on both widths.');
+  console.log('PASS: /explore stepper, kinds and ways back behave on both widths.');
   process.exit(0);
 }
 main().catch((error) => { console.error(error); process.exit(1); });

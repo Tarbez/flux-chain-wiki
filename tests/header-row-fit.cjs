@@ -8,7 +8,7 @@
    HEADER_COLLAPSE_ORDER until it fits. Two things only a reading of the code would miss, each
    pinned here:
    - Account is never collapsed (it carries the visitor's own state) and the order is fixed:
-     Stats first, Run DEFXN last.
+     Overview first, Run DEFXN last.
    - when the collapsed set changes, the header announces it ('ark-header-refit'): the move
      happens a frame after whatever changed the row, and the editor's selection outline
      (js/main.js) was left 88px off the selected link without it (studio-flows statesui).
@@ -41,7 +41,7 @@ function makeRow(widths, headerWidth) {
     querySelector: (sel) => { const m = /data-header-item="([^"]+)"/.exec(sel); return m ? items.find((it) => it.key === m[1]) || null : null; },
     dispatchEvent: (event) => { events.push(event.type); return true; },
   };
-  return { header, items, events, collapsed: () => ['stats', 'deployment', 'about', 'explorer', 'resolutions', 'download', 'account'].filter((key) => items.some((it) => it.key === key && it.classes.has('header-collapsed'))) };
+  return { header, items, events, collapsed: () => ['about', 'explorer', 'resolutions', 'download', 'account'].filter((key) => items.some((it) => it.key === key && it.classes.has('header-collapsed'))) };
 }
 function load(row) {
   let observed = null;
@@ -58,21 +58,21 @@ function load(row) {
   vm.runInContext('fitHeaderRow', context)(row.header);
   return () => observed([]);
 }
-const LINKS = { resolutions: 135, about: 104, deployment: 124, explorer: 133, stats: 80, account: 163, download: 116 };
+const LINKS = { about: 104, explorer: 133, account: 163, download: 116 };
 
 {
-  /* 1280: links 855 + 6*8 = 903; 148+903+101+80 + 3*12 = 1268 > 1200 room: Stats goes */
-  const row = makeRow(LINKS, 1280), fit = load(row);
+  /* 900: links 516 + 3*8 = 540; 148+540+101+80 + 3*12 = 905 > 820 room: Overview goes, 793 fits */
+  const row = makeRow(LINKS, 900), fit = load(row);
   fit();
-  assert.deepEqual(row.collapsed(), ['stats'], 'at 1280 only the lowest-priority link leaves the row');
+  assert.deepEqual(row.collapsed(), ['about'], 'at 900 only the lowest-priority link leaves the row');
   assert.deepEqual(row.events, ['ark-header-refit'], 'the change is announced');
   fit();
   assert.deepEqual(row.events, ['ark-header-refit'], 'an unchanged fit announces nothing');
 }
 {
-  const row = makeRow(LINKS, 1024), fit = load(row);
+  const row = makeRow(LINKS, 800), fit = load(row);
   fit();
-  assert.deepEqual(row.collapsed(), ['stats', 'deployment', 'about'], 'narrower: links leave in priority order, lowest first');
+  assert.deepEqual(row.collapsed(), ['about', 'explorer'], 'narrower: links leave in priority order, lowest first');
   assert(!row.collapsed().includes('account'), 'Account never leaves the row');
 }
 {
@@ -90,6 +90,6 @@ const LINKS = { resolutions: 135, about: 104, deployment: 124, explorer: 133, st
   /* everything collapsible gone and still too wide: Account stays, the loop ends */
   const row = makeRow(LINKS, 500), fit = load(row);
   fit();
-  assert.deepEqual(row.collapsed(), ['stats', 'deployment', 'about', 'explorer', 'resolutions', 'download']);
+  assert.deepEqual(row.collapsed(), ['about', 'explorer', 'download']);
 }
-console.log('PASS: the header row collapses Stats, Deploy (a resolver), Overview, Mesh Explorer, Resolutions, Run DEFXN in that order until it fits, never Account, and announces each change.');
+console.log('PASS: the header row collapses Overview, Mesh Explorer, Resolutions, Run DEFXN in that order until it fits, never Account, and announces each change.');

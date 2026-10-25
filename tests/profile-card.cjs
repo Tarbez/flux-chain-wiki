@@ -1,4 +1,5 @@
-/* DefxnProfileCard (js/ark/profile-card.js): the NFT card on /account, and the switch that wears its look.
+/* DefxnProfileCard (js/ark/profile-card.js): the NFT card on /account. Wearing its look is the seal's (js/nft/wear.js
+   through DefxnSkinSite.sealIn, tests/skin-site.cjs), not this file's.
    Why each case exists:
    - Only a review sample named in the address shows a card. No lookup from an FXN ID to a card is built, so any
      other value shows nothing, and record 009 (it carries a .eth name) never reaches the site.
@@ -8,8 +9,8 @@
      tests/skin-site.cjs; a second copy of that loader here is what that test exists to prevent.
    - The card's sheet is linked only when a card shows: scripts/page-styles.mjs leaves a sheet a script links
      itself out of every route list. Its :root palette had put it on every route, for every visitor.
-   - close() leaves nothing behind: the card's unmount runs (it frees the shared WebGL renderer) and the
-     defxn:skin listener goes, so a route change does not keep a detached page alive. */
+   - close() leaves nothing behind: the card's unmount runs (it frees the shared WebGL renderer), so a route change
+     does not keep a detached page alive. */
 const fs = require('node:fs'), path = require('node:path'), assert = require('node:assert/strict');
 const { JSDOM } = require('jsdom');
 const root = path.join(__dirname, '..');
@@ -58,25 +59,18 @@ const tick = () => new Promise((r) => setTimeout(r, 0));
     assert.ok(!/three-r180|mark-data|nft-card\.css|art3d/.test(src), 'a second copy of the art loader in the card would drift from DefxnSkinSite.art()');
   }
 
-  // 4. the switch follows the look, whoever changed it, and close() leaves nothing behind
+  // 4. close() leaves nothing behind and frees the renderer
   {
-    const { w, skinCalls, unmounts } = boot('?skin-sample=263');
+    const { w, unmounts } = boot('?skin-sample=263');
     const box = w.document.getElementById('box'), before = box.outerHTML;
     const pc = w.DefxnProfileCard.open(box, '263');
-    let changes = 0; pc.onChange(() => { changes++; });
     await pc.ready;
-    assert.equal(pc.wearing(), false, 'the look is off until it is put on');
-    await pc.wear(true);
-    assert.deepEqual(skinCalls, ['apply:263'], 'wear(true) applies this card\'s record');
-    assert.equal(pc.wearing(), true);
-    w.DefxnSkinSite.remove();
-    assert.equal(pc.wearing(), false, 'the look taken off elsewhere reads as off');
-    assert.equal(changes, 2, 'onChange runs on each change, from the switch or from elsewhere');
+    assert.ok(box.querySelector('.nft-mount'), 'the card is mounted');
     pc.close();
     assert.equal(box.outerHTML, before, 'close() leaves the box exactly as it was');
     assert.equal(unmounts(), 1, 'the card\'s own unmount ran (it frees the WebGL renderer)');
-    w.DefxnSkinSite.apply({ genesisId: '027' });
-    assert.equal(changes, 2, 'after close() the page no longer listens');
+    pc.close();
+    assert.equal(unmounts(), 1, 'a second close() does nothing');
   }
 
   // 5. closed while loading: no card appears and ready resolves null
@@ -96,5 +90,5 @@ const tick = () => new Promise((r) => setTimeout(r, 0));
   const derived = /BEGIN derived page styles[\s\S]*?END derived page styles/.exec(fs.readFileSync(path.join(root, 'js/pages/catalog.js'), 'utf8'))[0];
   assert.ok(!derived.includes('css/nft-card.css'), 'and no route lists it');
 
-  console.log('profile-card: ok (address, shared loader, switch, close, lazy sheet)');
+  console.log('profile-card: ok (address, shared loader, close, lazy sheet)');
 })().catch((e) => { console.error(e); process.exit(1); });

@@ -46,6 +46,8 @@ var ArkComponents = (function () {
                         js/ark/blocks.js looping ArkKit.ARK_BLOCK_NAMES. What the Library offers
                         to create from nothing (W2-LIBRARY, docs/ux-audit/components.md §5 line 6).
        a CAPTURED selection -- RBLOCK_CAPTURED_V1, see the header; its props come from its tree.
+       a SITE typed block -- RBLOCK_CARD_SLOT_V1, a block this site owns with no Ark successor,
+                        always offered (see SITE below).
        a LEGACY typed block -- RBLOCK_TEXT/CTA/IMAGE/CARD/QUOTE/DIVIDER_V1, the six hand-built
                         resolvers the Library offered before Ark had blocks (js/resolvers/blocks/).
                         READ ALIASES, kept as-is (future law: a saved master is never migrated in
@@ -77,10 +79,22 @@ var ArkComponents = (function () {
     RBLOCK_DIVIDER_V1: { label: 'Divider', description: 'A line between two parts of a page.', group: 'layout', primary: '', successor: 'divider', props: {} }
   };
   var LEGACY_RESOLVERS = Object.keys(LEGACY);
-  var RESOLVERS = LEGACY_RESOLVERS.concat([CAPTURED]);
-  /* each legacy resolver's real prop names, in the order its master stores them (cleanProps) */
+  /* The SITE blocks: typed blocks this site owns, with no Ark successor, so they are always offered
+     (never `legacy`). Described in the same vocabulary as LEGACY, plus the site's own prop kind
+     'cardslot': a card slot's FLX text (js/nft/card-components.js, DFXNCOMP1), edited by the NFT session's
+     slot editor (js/admin/library.js) and checked on Save (problems()). A card slot with no `slot` is an
+     empty block: it renders nothing. */
+  var SITE = {
+    RBLOCK_CARD_SLOT_V1: { label: 'Card slot', description: 'Shows the card a visitor wears, as a banner, a stamp or a nameplate. A visitor who wears no card sees nothing here.', group: 'media', primary: '',
+      props: { slot: { kind: 'cardslot', label: 'What the card makes here', help: 'a banner, a stamp or a nameplate, with its own motion if you want it' } } }
+  };
+  var SITE_RESOLVERS = Object.keys(SITE);
+  var RESOLVERS = LEGACY_RESOLVERS.concat(SITE_RESOLVERS, [CAPTURED]);
+  /* the typed blocks, legacy and site: one description each */
+  function typedOf(resolver) { return LEGACY[resolver] || SITE[resolver] || null; }
+  /* each typed resolver's real prop names, in the order its master stores them (cleanProps) */
   var RESOLVER_PROPS = {};
-  LEGACY_RESOLVERS.forEach(function (r) { RESOLVER_PROPS[r] = Object.keys(LEGACY[r].props); });
+  LEGACY_RESOLVERS.concat(SITE_RESOLVERS).forEach(function (r) { RESOLVER_PROPS[r] = Object.keys(typedOf(r).props); });
 
   /* ---- the Ark block registry. Read from ArkKit (js/ark/vendor/ark-kit.js on the editor,
      ark-kit-public.js on the site) WHEN it is there: an Ark master is recognised by the SHAPE
@@ -143,7 +157,7 @@ var ArkComponents = (function () {
   }
   function groupOf(resolver) {
     if (resolver === CAPTURED) return 'captured';
-    if (LEGACY[resolver]) return LEGACY[resolver].group;
+    if (typedOf(resolver)) return typedOf(resolver).group;
     var d = descriptorOf(resolver);
     return d ? groupOfDescriptor(d) : 'text';
   }
@@ -151,7 +165,7 @@ var ArkComponents = (function () {
 
   function labelOf(resolver) {
     if (resolver === CAPTURED) return 'Made from a selection';
-    if (LEGACY[resolver]) return LEGACY[resolver].label;
+    if (typedOf(resolver)) return typedOf(resolver).label;
     var d = descriptorOf(resolver);
     if (d) return d.label;
     var name = arkBlockName(resolver);
@@ -168,12 +182,17 @@ var ArkComponents = (function () {
     registry().forEach(function (d) {
       var group = groupOfDescriptor(d);
       out.push({ resolver: arkResolverFor(d.name), name: d.name, label: d.label, description: d.description || '', group: group, groupLabel: groupName(group),
-        props: Object.keys(d.props || {}), legacy: false, example: JSON.parse(JSON.stringify(d.example || {})) });
+        props: Object.keys(d.props || {}), legacy: false, site: false, example: JSON.parse(JSON.stringify(d.example || {})) });
     });
     LEGACY_RESOLVERS.forEach(function (r) {
       if (names.indexOf(LEGACY[r].successor) >= 0) return;
       out.push({ resolver: r, name: r, label: LEGACY[r].label, description: LEGACY[r].description, group: LEGACY[r].group, groupLabel: groupName(LEGACY[r].group),
-        props: RESOLVER_PROPS[r].slice(), legacy: true, example: {} });
+        props: RESOLVER_PROPS[r].slice(), legacy: true, site: false, example: {} });
+    });
+    /* a site block has no Ark successor, so it is always offered; `site` tells the Library it has no Ark preview or example */
+    SITE_RESOLVERS.forEach(function (r) {
+      out.push({ resolver: r, name: r, label: SITE[r].label, description: SITE[r].description, group: SITE[r].group, groupLabel: groupName(SITE[r].group),
+        props: RESOLVER_PROPS[r].slice(), legacy: false, site: true, example: {} });
     });
     var rank = function (g) { var i = GROUP_ORDER.indexOf(g); return i < 0 ? GROUP_ORDER.length : i; };
     return out.map(function (b, i) { return { b: b, i: i }; }).sort(function (x, y) { return rank(x.b.group) - rank(y.b.group) || x.i - y.i; }).map(function (x) { return x.b; });
@@ -190,7 +209,7 @@ var ArkComponents = (function () {
     var schemas = null;
     /* a captured slot is one run of text (or an image's address): one line */
     if (master.resolver === CAPTURED) return slotsOf(master.tree).map(function (name) { return { prop: name, kind: 'line', label: slotLabel(name) }; });
-    if (LEGACY[master.resolver]) schemas = LEGACY[master.resolver].props;
+    if (typedOf(master.resolver)) schemas = typedOf(master.resolver).props;
     else { var d = descriptorOf(master.resolver); if (d) schemas = d.props; }
     if (!schemas) return Object.keys(master.props || {}).map(function (name) { return { prop: name, kind: 'text', label: slotLabel(name) }; });
     return Object.keys(schemas).map(function (name) { return Object.assign({ prop: name }, JSON.parse(JSON.stringify(schemas[name]))); });
@@ -204,7 +223,7 @@ var ArkComponents = (function () {
      An Ark block starts from its registry example (Ark tests that every example is valid), with
      the text put into its first required one-line or text prop -- derived from the schema. */
   function primaryOf(resolver) {
-    if (LEGACY[resolver]) return LEGACY[resolver].primary;
+    if (typedOf(resolver)) return typedOf(resolver).primary;
     var d = descriptorOf(resolver); if (!d) return '';
     var names = Object.keys(d.props || {}), textual = function (n) { return d.props[n].kind === 'line' || d.props[n].kind === 'text'; };
     return names.find(function (n) { return textual(n) && d.props[n].required; }) || names.find(textual) || '';
@@ -450,12 +469,29 @@ var ArkComponents = (function () {
     return out;
   }
 
-  function define(value) { current = sanitize(value); return get(); }
+  /* Stored form: FLX, never JSON (workspace law, "stored state is FLX"). serialize() writes the draft as
+     records of ARK's structured-state grammar (js/vendor/flx-state-grammar.js, ARK_FLX_STATE), one per leaf,
+     derived from the draft's own shape inside one
+         ArkComponents.define("<FLX records>");
+     call, the way js/content/world.js does. define() takes that text, or a plain value (the CMS preview, a
+     file written before this change: read once, written forward, never rewritten in place). The round trip is
+     exact: decode(encode(x)) re-encodes to the same records (tests/components-content.cjs). A card slot's own
+     text (DFXNCOMP1, js/nft/card-components.js) rides inside as one string leaf, hex like any free text. */
+  function flx() {
+    var F = typeof ARK_FLX_STATE !== 'undefined' ? ARK_FLX_STATE : (typeof require === 'function' ? require('../vendor/flx-state-grammar.js') : null);
+    if (!F) throw new Error('ArkComponents needs js/vendor/flx-state-grammar.js loaded before it (ARK_FLX_STATE)');
+    return F;
+  }
+  function encode(value) { return flx().encodeState(sanitize(value)); }
+  function decode(text) { return sanitize(flx().decodeState(String(text))); }
+  function define(value) { current = typeof value === 'string' ? decode(value) : sanitize(value); return get(); }
   function get() { return JSON.parse(JSON.stringify(current)); }
   /* the exact file text; the Studio-driven edit and a hand edit produce the same bytes,
      the same contract js/content/layout.js's serialize() keeps for layout-data.js */
   function serialize(value) {
-    return '/* Reusable content blocks inserted in DEFXN Studio. */\nArkComponents.define(' + JSON.stringify(sanitize(value), null, 2) + ');\n';
+    return '/* Reusable content blocks inserted in DEFXN Studio. FLX records of ARK\'s structured-state grammar, one per leaf.\n' +
+      '   Edit from DEFXN Studio, Library; this file is not meant for hand editing. */\n' +
+      'ArkComponents.define(' + JSON.stringify(encode(value)) + ');\n';
   }
 
   /* ---- the save path's check. Every Ark master's props, and every instance's props as it
@@ -477,7 +513,7 @@ var ArkComponents = (function () {
     return null;
   }
   function schemasOf(resolver) {
-    if (LEGACY[resolver]) return LEGACY[resolver].props;
+    if (typedOf(resolver)) return typedOf(resolver).props;
     var d = descriptorOf(resolver);
     return d ? d.props : null;
   }
@@ -493,7 +529,18 @@ var ArkComponents = (function () {
     });
     return out.join(' › ');
   }
-  function problems(value, validate) {
+  /* The card slot's check: the NFT session's own decoder (DefxnCardComponents.decode, js/nft/card-components.js)
+     refuses text it did not write, so nothing here re-reads the grammar. It throws on a bad slot. `slotCheck(text)`
+     may be passed in (tests). With no decoder loaded a slot is refused as unchecked, never passed as checked. */
+  function defaultSlotCheck() {
+    if (typeof DefxnCardComponents !== 'undefined' && DefxnCardComponents && typeof DefxnCardComponents.decode === 'function') return function (text) { DefxnCardComponents.decode(text); };
+    return null;
+  }
+  function slotPropsOf(resolver) {
+    var schemas = (SITE[resolver] || {}).props || {};
+    return Object.keys(schemas).filter(function (name) { return schemas[name].kind === 'cardslot'; });
+  }
+  function problems(value, validate, slotCheck) {
     var draft = sanitize(value), check = validate || defaultCheck(), out = [], refusedPaths = {};
     function refuse(where, master, refusal, extra) {
       var field = pathLabel(master.resolver, refusal.path);
@@ -511,6 +558,40 @@ var ArkComponents = (function () {
       var own = check({ block: arkBlockName(master.resolver), props: master.props });
       if (own && own.ok === false) own.refusals.forEach(function (r) { refuse(where, master, r, { masterId: id }); });
       refusedPaths[id] = own && own.ok === false ? own.refusals.map(function (r) { return r.path; }) : [];
+    });
+    /* a card slot is read by the card's own decoder; an absent or empty slot is an empty block, which is allowed */
+    var readSlot = slotCheck || defaultSlotCheck();
+    function slotRefusal(where, master, prop, text, extra) {
+      var refusal = { path: 'props.' + prop, needs: 'slot text from the Card slot editor: a DFXNCOMP1 line, then any DFXNTL1 lines it wrote' };
+      if (!readSlot) {
+        refuse(where, master, Object.assign(refusal, { failure: 'it could not be checked', needs: 'the card slot reader (js/nft/card-components.js)', remedy: 'open the Card slot in the Library so the reader loads, then save again' }), extra);
+        return false;
+      }
+      try { readSlot(text); return true; }
+      catch (e) {
+        refuse(where, master, Object.assign(refusal, { failure: 'the slot text was not written by the Card slot editor (' + String(e && e.message ? e.message : e).replace(/\s+/g, ' ').replace(/\.$/, '') + ')',
+          remedy: 'open the Card slot in the Library and choose what the card makes there again, or clear the field' }), extra);
+        return false;
+      }
+    }
+    Object.keys(draft.masters).forEach(function (id) {
+      var master = draft.masters[id];
+      slotPropsOf(master.resolver).forEach(function (prop) {
+        var text = master.props[prop];
+        if (typeof text === 'string' && text !== '') slotRefusal('Component "' + master.label + '"', master, prop, text, { masterId: id });
+      });
+    });
+    Object.keys(draft.routes).forEach(function (route) {
+      Object.keys(draft.routes[route]).forEach(function (anchorId) {
+        draft.routes[route][anchorId].forEach(function (instance) {
+          var master = draft.masters[instance.masterId];
+          if (!master) return;
+          slotPropsOf(master.resolver).forEach(function (prop) {
+            var text = instance.overrides[prop];
+            if (readSlot && typeof text === 'string' && text !== '' && text !== master.props[prop]) slotRefusal('"' + master.label + '" on ' + (route === SHELL ? 'every page' : route), master, prop, text, { masterId: instance.masterId, route: route, anchorId: anchorId, key: instance.key });
+          });
+        });
+      });
     });
     if (check) Object.keys(draft.routes).forEach(function (route) {
       Object.keys(draft.routes[route]).forEach(function (anchorId) {
@@ -1049,6 +1130,8 @@ var ArkComponents = (function () {
     blocks: blocks, labelOf: labelOf,
     /* the Ark block registry, as the Library and the save path read it */
     isArk: isArk, arkResolverFor: arkResolverFor, arkBlockName: arkBlockName, descriptorOf: descriptorOf,
-    groups: groups, groupOf: groupOf, fieldsOf: fieldsOf, pathLabel: pathLabel, problems: problems
+    groups: groups, groupOf: groupOf, fieldsOf: fieldsOf, pathLabel: pathLabel, problems: problems,
+    /* the stored form: FLX records (never JSON) */
+    encode: encode, decode: decode
   };
 })();

@@ -38,9 +38,9 @@ function bootForms() {
   window.eval('var ArkSecretIds = ' + JSON.stringify(ids('js/content/secrets/index.js', 'ArkSecretIds')) + ';');
   for (const id of window.ArkSecretIds) run('js/content/secrets/' + id + '.js');
   for (const rel of ['js/content/theme.js', 'js/content/theme-data.js', 'js/content/settings-defaults.js', 'js/content/settings-defaults-data.js',
-    'js/content/layout.js', 'js/content/layout-data.js', 'js/content/components.js', 'js/content/components-data.js',
+    'js/content/layout.js', 'js/content/layout-data.js', 'js/vendor/flx-state-grammar.js', 'js/content/components.js', 'js/content/components-data.js',
     'js/content/states.js', 'js/content/states-data.js', 'js/content/canvas-transitions.js', 'js/content/canvas-transitions-data.js',
-    'js/content/element-motion.js', 'js/content/element-motion-data.js', 'js/vendor/flx-state-grammar.js', 'js/content/world.js', 'js/content/world-data.js', 'js/content/skin-policy.js', 'js/content/skin-policy-data.js', 'js/content/mesh-settings.js', 'js/content/mesh-settings-data.js',
+    'js/content/element-motion.js', 'js/content/element-motion-data.js', 'js/content/world.js', 'js/content/world-data.js', 'js/content/skin-policy.js', 'js/content/skin-policy-data.js', 'js/content/mesh-settings.js', 'js/content/mesh-settings-data.js',
     'js/content/learnings.js', 'js/content/article-index.js', 'js/content/site-pages.js', 'js/content/seo.js', 'js/content/seo-data.js', 'js/pages/catalog.js',
     'js/ark/reference-docs.js', 'js/admin/store.js', 'js/admin/vendor/tweetnacl.js', 'js/admin/crypto.js']) run(rel);
   /* every article body, as loadBodies() would fetch them */

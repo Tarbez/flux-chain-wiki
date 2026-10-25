@@ -2,7 +2,8 @@ const assert = require('assert');
 const fs = require('fs');
 const vm = require('vm');
 
-const context = vm.createContext({});
+const context = vm.createContext({ TextEncoder, TextDecoder });   // a bare context lends only the text codec the FLX grammar needs
+vm.runInContext(fs.readFileSync('js/vendor/flx-state-grammar.js', 'utf8'), context);
 vm.runInContext(fs.readFileSync('js/content/components.js', 'utf8'), context);
 const ArkComponents = vm.runInContext('ArkComponents', context);
 

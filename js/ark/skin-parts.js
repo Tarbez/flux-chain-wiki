@@ -4,7 +4,7 @@
    An NFT skin reaches a part of the page through Ark UI's part names (data-ark-part, the style-schema
    keys in design/ark-ui/ark-ui.components.ts). Ark UI's own primitives stamp them already. The site's
    hand-built pieces do not: the navbar and its Products mega dropdown (js/resolvers/header.js), the
-   all-pages menu layer, the redesign's rail and sheets. This file is the one place that says which
+   all-pages menu layer, the footer strip, the redesign's rail and sheets. This file is the one place that says which
    Ark UI part each of those is (docs/home-redesign/SKIN-CONTRACT.md, section 2).
 
    Why a map here and not attributes in header.js: header.js ships on every route and is held to a
@@ -20,19 +20,54 @@ var DefxnSkinParts = (function () {
   /* selector -> Ark UI part key; first match wins, so the more specific rows come first */
   var PARTS = [
     ['header.ark-header', 'MENUBAR'],
-    ['header.ark-header nav', 'NAVMENU'],
-    ['.ark-cta, .cta:not(.quiet)', 'PRIMARY|BUTTON'],
-    ['.cta.quiet', 'SECONDARY|BUTTON'],
-    ['.header-account-link', 'GHOST|BUTTON'],
-    ['.header-products-toggle, .header-chain-trigger, .nav-layer-back', 'BUTTON'],
+    /* The bar has three navs since the 2026-10-25 header: the family (the mark and the Products switcher), the page links,
+       and the "you" panel. 'header.ark-header nav' named all three, and a skin's NAVMENU padding and position on the family
+       nav moved the mark over Products and hung the Products panel from that nav, 765px to the right (skin audit,
+       2026-10-25). Only the page links are the NAVMENU; the "you" panel is a popover. */
+    ['header.ark-header .dx-bar__nav', 'NAVMENU'],
+    ['#primary-navigation', 'POPOVER'],
+    ['.site-footer-strip', 'TOOLBAR'],   /* the footer strip (js/hero-motion.js): it took no rule until it had a part name (NFT sweep, 2026-10-24) */
+    /* the Products switcher (the kit's, assets/kit/defxn-product.js; built on first press). css/navigation.css hands
+       it the site's tokens again, so a skin's colours reach it; these rows let the card's per-part rules reach it too
+       (skin audit, 2026-10-25: before them it took no rule at all) */
+    ['.dx-switch__panel', 'MEGAMENUPANEL'],
+    ['.dx-switch__find', 'INPUTGROUP'],
+    ['.dx-switch__find-input', 'SEARCH|TEXT'],
+    ['.dx-switch__close, .dx-switch__back, .dx-related__item', 'GHOST|BUTTON'],
+    ['.dx-switch__tabs', 'TABSLIST'],   /* the rail itself takes no part: as ASIDE its frame and padding nested a second box around the list and narrowed it on a phone */
+    ['.dx-switch__tab', 'TABSTRIGGER'],
+    ['.dx-switch__stage', 'MEGAMENUCOLUMN'],
+    ['.dx-lane__name, .dx-related__label', 'LABEL|TEXT'],
+    ['.dx-product-link', 'ITEM'],
+    ['.dx-row__mark', 'ITEMLEADING'],
+    ['.dx-row__text', 'ITEMCONTENT'],
+    ['.dx-row__go', 'ITEMTRAILING'],
+    ['.dx-product-link__name, .dx-related__name', 'TITLE|TEXT'],
+    ['.dx-product-link__line, .dx-preview__line, .dx-preview__caveat, .dx-related__line, .dx-switch__none', 'BODY|TEXT'],
+    ['.dx-row__facts', 'META|TEXT'],
+    ['.dx-tag', 'OUTLINE|BADGE|TEXT'],
+    ['.dx-switch__panel .dx-badge', 'BADGE'],
+    ['.dx-switch__preview', 'CARD'],
+    ['.dx-preview__eyebrow', 'CAPTION|TEXT'],
+    ['.dx-preview__tile', 'MEDIA'],
+    ['.dx-preview__name', 'HEADING|TEXT'],
+    ['.dx-preview__what', 'LEAD|TEXT'],
+    ['.dx-facts', 'DETAIL'],
+    ['.dx-facts dt', 'LABEL|TEXT'],
+    ['.dx-facts dd', 'VALUE|TEXT'],
+    ['.dx-switch__foot', 'TOOLBAR'],
+    ['.dx-switch__cap', 'KBD|TEXT'],
+    ['.dx-switch__home', 'LINK'],
+    ['.dx-switch__trigger', 'BUTTON'],
+    ['.ark-cta, .cta:not(.quiet), .dx-cta:not(.dx-cta--here)', 'PRIMARY|BUTTON'],
+    ['.cta.quiet, .header-run-link', 'SECONDARY|BUTTON'],   /* Get FXN Browser: the bar's one action took no rule (skin audit, 2026-10-25) */
+    ['.header-you', 'GHOST|BUTTON'],
+    ['.header-account-link', 'BUTTON'],
     ['.ark-link, .nav-route-link, .products-mega-link, .products-mega-all, .products-mega-how', 'LINK'],
-    ['.header-chain-popover, .nav-layer', 'POPOVER'],
-    ['.nav-layer-body', 'LIST'],
-    ['.nav-layer-choice', 'ITEM'],
     ['.products-mega', 'MEGAMENUPANEL'],
     ['.products-mega-primary, .products-mega-more', 'MEGAMENUCOLUMN'],
     ['.products-mega-feature, .rx-fleet, .rx-focus, .intro-card', 'CARD'],
-    ['.products-mega-heading, .nav-layer-title', 'HEADING|TEXT'],
+    ['.products-mega-heading', 'HEADING|TEXT'],
     ['.sheet', 'PANEL'],
     ['.rail', 'ASIDE'],
     ['.tabs', 'TABSLIST'],
@@ -42,68 +77,58 @@ var DefxnSkinParts = (function () {
   var LOCKS = ['--live', '--trust', '--drift', '--warning', '--danger', '--hidden', '--success',
     '--chain-identity', '--chain-resolver', '--chain-token', '--chain-pool', '--chain-ledger',
     '--net-fxn', '--net-deark', '--net-cr3tv', '--ember'];
-  /* The site's one table of which part wears which of the card's elements (the owner: "some elements of skins should
-     require their own rules when applied to UI"). A card wears one flat rule set (frame, edge, ornament, marker,
-     header); this says which of them each part takes. A part not named here wears nothing. Ark UI still decides what a
-     part's kind can take (its family table) and reports what it skipped. The CMS skin lab edits this table as content
-     (policy() below); these are its defaults.
-     A dense navbar and its mega dropdown take a frame and an edge, never strips, tags or list markers that would crowd
-     them; the reading panels may carry more. */
-  var ALLOW = {
-    MEGAMENUPANEL: ['frame', 'edge', 'ornament'],
-    POPOVER: ['frame', 'edge'],   /* Ark UI dresses the popover's panel, never its wrapper, and a cut edge clips nothing (0.2.20) */
-    CARD: ['frame', 'edge'],
-    PANEL: ['frame', 'edge', 'ornament', 'header'],
-    MODAL: ['frame', 'edge', 'header'],   /* the signing review (ArkUI.authorizationDialog) */
-    BUTTON: ['edge'], 'PRIMARY|BUTTON': ['edge'], 'SECONDARY|BUTTON': ['edge'], 'GHOST|BUTTON': ['edge'],
-    LIST: ['marker'], SEPARATOR: ['ornament'],
-    /* Ark UI's block parts, the blocks every page is built from (Ark UI 0.2.20, ARK_SKIN_BLOCK_PARTS). Named in upper case
-       with no hyphen, one spelling for the site and the CMS policy: tabs-list is TABSLIST, section-header SECTIONHEADER.
-       Ark UI decides where each element sits on its kind (SKINS.md); this says which kinds this site lets them reach. */
-    HERO: ['ornament'], SECTIONHEADER: ['ornament'],                       /* the strip after the page's title and each section title */
-    HEROMETA: ['ornament'], TABSLIST: ['ornament'], PAGER: ['ornament'],   /* the divider piece on their rule lines */
-    LISTROW: ['ornament'], FACT: ['ornament'],
-    /* A callout wears the tag strip and a figure its frame again: Ark UI now keeps a tag on its part, never stretches a
-       piece's words, and takes back a decoration that would cover text or a control (a full frame falls back to its
-       corners), with the reason in its report. Before that, the tag covered the tab strip on /account and the
-       figure's frame line ran through its label. */
-    ALERT: ['frame', 'edge', 'header'],
-    STAT: ['frame', 'edge'], FIGUREFRAME: ['frame', 'edge'], LISTEMPTY: ['frame', 'edge'], TERMTIP: ['frame', 'edge'],
-    TABSCONTENT: ['edge'], DISCLOSUREPANEL: ['edge'], ACCORDIONCONTENT: ['edge'],
-    LISTROWS: ['marker']                                                   /* one emblem before each row of a list */
+  /* Which of the card's rules each part does NOT wear. The owner's decision (2026-10-24): a card dresses the site by
+     its own rules, so every part takes every rule the card sends, and Ark UI decides what each part's kind can wear
+     (its family table), takes back a decoration that would cover text or a control, and holds colours to the contrast
+     rules below. The CMS switches rules off as content (js/content/skin-policy.js, policy() below); this is the code's
+     own list: a rule is switched off only for a reason measured on the real page, written next to it.
+     (Until that decision a table here listed what each part MAY take. On the NFT gallery the card's own rules dress
+     62 of 123 parts with nothing covered; the table had kept most of them bare.) */
+  var OFF = {
+    /* A table drew corners on every level at once: table-wrap, table, tbody, thead and each row. The thead and its row
+       share one box, so two sets of corners drew on the same points, and every row carried four corners (skin gate,
+       2026-10-25: 71 of 77 corner elements collided on the table). The table keeps its frame on table-wrap and table. */
+    THEAD: ['frame'], TBODY: ['frame'], ROW: ['frame']
   };
-  /* The card's flat rule set, given to each part this table (or a policy's) names, cut to the rules it allows.
-     `keep` is the part's own arrangement, so it is not sent: layout and density stay the part's until the owner
-     reviews the whole sets (the contract's open question 1). */
-  function rulesFor(cardRules, allowMap) {
-    var out = {}, map = allowMap || ALLOW;
-    Object.keys(map).forEach(function (part) {
-      var kept = {};
-      map[part].forEach(function (k) { var v = cardRules && cardRules[k]; if (v && v !== 'keep' && v !== 'none') kept[k] = v; });
+  function squash(v) { return String(v).replace(/[^A-Za-z0-9|]/g, '').toUpperCase(); }
+  /* the card's per-part rules (Ark UI's part keys, any spelling) less what `off` switches off. `off` is in the site's
+     one spelling (CARD, PRIMARY|BUTTON, SECTIONHEADER for section-header), so both sides are compared squashed. */
+  function switchOff(rules, off) {
+    var map = {}, out = {};
+    Object.keys(off || {}).forEach(function (part) { map[squash(part)] = off[part]; });
+    Object.keys(rules || {}).forEach(function (part) {
+      var gone = map[squash(part)] || [], kept = {};
+      Object.keys(rules[part]).forEach(function (k) { if (gone.indexOf(k) < 0) kept[k] = rules[part][k]; });
       if (Object.keys(kept).length) out[part] = kept;
     });
     return out;
   }
-  /* The CMS's skin policy (js/content/skin-policy.js, ArkSkinPolicy; edited in the CMS skin lab) is content over these
-     defaults: { allow: { PART: [rule keys] }, families: { family: { allow: {...} } }, contrast: [{ fg, bg, min }] }.
-     Its allow replaces a part's list here, and a card family's replaces both for that family's cards. Its contrast
-     rules are ADDED: a policy can raise the floor, never lower the site's own. `given` is a draft policy (the CMS
-     preview); otherwise the published one, if loaded. */
+  /* The owner's shape rule (2026-10-25): a full frame (or ticket) belongs to the big hero sections only. Every other
+     part that asks for one takes corners, and a surface (a card, a stat, an alert, a panel that pops up) carries nothing
+     under it: no strip. familyOf is Ark UI's part-kind reader (ArkKitSkin.arkSkinFamilyOfName). */
+  var FRAMED = ['HERO'];
+  function shapeRules(rules, familyOf) {
+    var out = {};
+    Object.keys(rules || {}).forEach(function (part) {
+      var r = Object.assign({}, rules[part]), hero = FRAMED.indexOf(squash(part)) >= 0;
+      if (!hero && (r.frame === 'full' || r.frame === 'ticket')) r.frame = 'corners';
+      if (!hero && r.ornament && familyOf && familyOf(part) === 'surface') delete r.ornament;
+      if (Object.keys(r).length) out[part] = r;
+    });
+    return out;
+  }
+  /* The CMS's skin policy (js/content/skin-policy.js, ArkSkinPolicy; edited in the CMS skin lab) adds to these
+     defaults: { off: { PART: [rule keys] }, families: { family: { off: {...} } }, contrast: [{ fg, bg, min }] }.
+     Every list only takes rules away, the card family's for that family's cards too. Its contrast rules are ADDED:
+     a policy can raise the floor, never lower the site's own. `given` is a draft policy (the CMS preview);
+     otherwise the published one, if loaded. */
   function policy(given, family) {
     var p = given || (typeof ArkSkinPolicy !== 'undefined' && ArkSkinPolicy.get ? ArkSkinPolicy.get() : null) || {};
-    var allow = {}, fam = family && p.families && p.families[family];
-    [ALLOW, p.allow, fam && fam.allow].forEach(function (layer) { Object.keys(layer || {}).forEach(function (part) { allow[part] = layer[part].slice(); }); });
-    return { allow: allow, contrast: CONTRAST.concat(p.contrast || []) };
-  }
-  /* a recipe's per-part rules, cut down to what this site allows (or what `allowMap`, a policy's, allows) */
-  function limit(rules, allowMap) {
-    var out = {}, map = allowMap || ALLOW;
-    Object.keys(rules || {}).forEach(function (part) {
-      var allow = map[part], r = rules[part], kept = {};
-      Object.keys(r).forEach(function (k) { if (!allow || allow.indexOf(k) >= 0) kept[k] = r[k]; });
-      if (Object.keys(kept).length) out[part] = kept;
+    var off = {}, fam = family && p.families && p.families[family];
+    [OFF, p.off, fam && fam.off].forEach(function (layer) {
+      Object.keys(layer || {}).forEach(function (part) { off[part] = (off[part] || []).concat(layer[part].filter(function (r) { return (off[part] || []).indexOf(r) < 0; })); });
     });
-    return out;
+    return { off: off, contrast: CONTRAST.concat(p.contrast || []) };
   }
   /* the site's small-text rule (tests/theme-color-contrast.cjs): every text level on the canvas and on a surface
      at 4.5:1. A skin is held to it too, so a card can never make the site's labels harder to read than the site
@@ -146,6 +171,6 @@ var DefxnSkinParts = (function () {
     return function () { obs.disconnect(); undo(); };
   }
 
-  return { PARTS: PARTS, LOCKS: LOCKS, ALLOW: ALLOW, CONTRAST: CONTRAST, policy: policy, rulesFor: rulesFor, limit: limit, mark: mark, watch: watch };
+  return { PARTS: PARTS, LOCKS: LOCKS, OFF: OFF, CONTRAST: CONTRAST, FRAMED: FRAMED, policy: policy, switchOff: switchOff, shapeRules: shapeRules, mark: mark, watch: watch };
 })();
 if (typeof module === 'object' && module.exports) module.exports = DefxnSkinParts;

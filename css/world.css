@@ -27,6 +27,10 @@
    pointer and the world reads it from the window (ring-kit.js). */
 .world-layer { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
 .world-layer > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Hidden until the first flight (world-host.js fly sets data-flown). Sizing the canvas draws a frame from the kernel's
+   default camera, which is home's close view of the grid: on /intro that frame showed first and the camera then
+   pulled out to the intro, which read as an exit (owner, 2026-10-25). */
+.world-layer:not([data-flown]) > canvas { visibility: hidden; }
 
 /* while the world is up, the particle relief, the signal grid and the old glows stay out of sight.
    They keep loading (the lifecycle pages ask the grid for its clock); they just draw nothing here. */

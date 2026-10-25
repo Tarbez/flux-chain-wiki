@@ -30,7 +30,7 @@ var ArkSitePages = (function () {
     { id: 'prove', title: 'Prove', note: 'Measured evidence: benchmarks, the live mesh explorer and the evidence standard' },
     { id: 'run', title: 'Run', note: 'Operate a node: run from source and join a named network' },
     { id: 'read', title: 'Read', note: 'Notes and articles from the work' },
-    { id: 'preview', title: 'Previews & lab', note: 'Design previews and illustrative models: not live data' }
+    { id: 'preview', title: 'Previews', note: 'Design previews: not live data' }
   ];
   var PAGES = [
     { key: 'zero', path: '/', label: 'Home', seoId: 'home', journey: 'understand' },
@@ -39,11 +39,12 @@ var ArkSitePages = (function () {
     { key: 'resolutions', path: '/resolutions', label: 'Resolutions', journey: 'build', lead: true, note: 'Every thing you can resolve on the mesh, one page each' },
     { key: 'learnings', path: '/learnings', label: 'Notes', journey: 'read', lead: true, note: 'Choose an architectural question' },
     { key: 'explorer', path: '/explore', label: 'Mesh Explorer', journey: 'prove' },
-    { key: 'palette', path: '/palette', label: 'Interface palette', journey: 'preview' },
+    { key: 'palette', path: '/palette', label: 'Interface palette', journey: 'preview', lead: true },   /* the lead since /experiments was deleted (owner, 2026-10-24) */
     { key: 'resolver', path: '/what-is-a-resolver', label: 'What is a resolver?', journey: 'build' },
     { key: 'resolver-math', path: '/resolver-math', label: 'Resolver math', seoId: 'resolvermath', journey: 'build' },
     { key: 'resolvers', path: '/resolvers', label: 'Resolvers and capabilities', journey: 'build' },
     { key: 'references', path: '/start-from-something-real', label: 'Reference resolvers', journey: 'build' },
+    { key: 'auth', path: '/auth', label: 'Sign in', journey: null, note: 'Sign in with your FXN ID file; the master account opens after' },
     { key: 'account', path: '/account', label: 'Your account', journey: 'build' },
     { key: 'account/domains', path: '/account/domains', label: 'Your domains', journey: 'build' },
     { key: 'bundledeployer', path: '/bundle-deployer', label: 'FXN Bundle Deployer', journey: 'build' },
@@ -52,11 +53,10 @@ var ArkSitePages = (function () {
     /* The stats section (2026-10-24, owner: "/measured is where we show capabilities, benchmarks, live data"): one 3D stage,
        inner pages. It replaces /stats, /stats/gpu, /stats/ledger and /measured, whose keys stay in js/pages/catalog.js
        as redirects. Its week pages are not listed here: they come from STATS_RUNS below, one per week that holds a run. */
-    { key: 'stats/now', path: '/stats/now', label: 'Network now', journey: 'prove', lead: true },
-    { key: 'stats/ceiling', path: '/stats/ceiling', label: 'Tested ceiling', journey: 'prove' },
-    { key: 'stats/capabilities', path: '/stats/capabilities', label: 'Capabilities, measured', journey: 'prove' },
-    { key: 'stats/resolver', path: '/stats/resolver', label: 'Resolver, measured', journey: 'prove' },
-    { key: 'deployment', path: '/how-deployment-works', label: 'Deploy a resolver', journey: 'understand', note: 'Six steps, from a grammar to a chain; the earlier agreement chapters stay beside it' },
+    /* the three steps of the stats section, in story order (2026-10-25: reduced from five, "we are repeating ourselves nonstop") */
+    { key: 'stats/now', path: '/stats/now', label: 'Network stats', journey: 'prove', lead: true },
+    { key: 'stats/capabilities', path: '/stats/capabilities', label: 'Operations, measured', journey: 'prove' },
+    { key: 'stats/ceiling', path: '/stats/ceiling', label: 'One node, measured', journey: 'prove' },
     { key: 'how/ask', path: '/how-deployment-works/ask', label: 'State the request', journey: 'understand' },
     { key: 'how/work', path: '/how-deployment-works/work', label: 'Agree on the terms', journey: 'understand' },
     { key: 'how/check', path: '/how-deployment-works/check', label: 'Verify the result', journey: 'understand' },
@@ -87,7 +87,7 @@ var ArkSitePages = (function () {
     { key: 'trace', path: '/trace', label: 'Trace a record', journey: 'understand' },
     { key: 'concept', path: '/concept', label: 'The operating model', journey: 'understand', note: 'Choose the mechanism you want to inspect' },
     { key: 'dao', path: '/dao', label: 'How DEFXN is governed', journey: 'understand' },
-    { key: 'download', path: '/download', label: 'Get DEFXN Grid', journey: 'run', lead: true },
+    { key: 'download', path: '/download', label: 'Get FXN Browser', journey: 'run', lead: true },
     { key: 'deploy', path: '/deploy', label: 'Create or join a network', journey: 'run' }
   ];
   /* The dated runs the stats section can show with their figures, and the only source of its week pages. A run is listed
@@ -121,10 +121,19 @@ var ArkSitePages = (function () {
       var w = byNumber[id]; w.key = 'stats/week-' + w.number; w.path = '/stats/week-' + w.number; return w;
     }).sort(function (a, b) { return a.year - b.year || a.number - b.number; });
   }
-  statsWeeks().forEach(function (w, i) {
-    var after = PAGES.findIndex(function (r) { return r.key === 'stats/resolver'; }) + 1 + i;
-    PAGES.splice(after, 0, { key: w.key, path: w.path, label: 'Week ' + w.number + ' runs', journey: 'prove' });
-  });
+  /* The time axis of the stats stage and its tabs: every week from the first run's to the week of `today` (an ISO date), oldest first, at most
+     `max` of them (the newest). A week with no run has key null: it has no page, and it is drawn empty. */
+  function statsTimeline(today, max) {
+    var weeks = statsWeeks(), now = isoWeek(today), out = [];
+    if (!weeks.length) return out;
+    var first = utcDay(weeks[0].from), last = Math.max(utcDay(now.from), utcDay(weeks[weeks.length - 1].from));
+    for (var t = first; t <= last; t += 7 * 864e5) {
+      var iso = isoDate(t), w = isoWeek(iso), page = weeks.filter(function (x) { return x.from === iso; })[0];
+      out.push({ number: w.number, year: w.year, from: iso, to: w.to, key: page ? page.key : null, runs: page ? page.runs.length : 0, current: iso === now.from });
+    }
+    return out.slice(-(max || 12));
+  }
+  /* the week pages were retired on 2026-10-25 (every stats card names its run and date): js/pages/catalog.js redirects their keys to stats/now */
   /* Routes derived from content registries (js/pages/catalog.js catalogContentRoutes and the
      resolutions loop): their journey comes from what kind of route they are, not a row. */
   var FAMILIES = [
@@ -148,6 +157,7 @@ var ArkSitePages = (function () {
     row: function (key) { var r = row(key); return r ? copy(r) : null; },
     statsRuns: function () { return copy(STATS_RUNS); },
     statsWeeks: function () { return copy(statsWeeks()); },
+    statsTimeline: statsTimeline,
     isoWeek: isoWeek,
     journeyOf: journeyOf
   };

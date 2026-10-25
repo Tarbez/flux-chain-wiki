@@ -15,11 +15,13 @@ The direction is **signed resolution**, and it is the only one:
 
 The agreement-fabric path is retired and kept read-only for compatibility.
 
-Measured (BENCH-012, 2026-10-10): **256 swaps per batch auction, 8.920 ms
+Measured (BENCH-012, 2026-10-10): **256 swaps per batch auction, 13.874 ms
 batch latency, 180 bytes per signed result, 3 × Ed25519 verify to audit.**
 Batched signature verification is 75% of a batch; the shard's own
 signature is 0.3%. 100% of swaps matched internally at one clearing price
 and paid zero curve slippage.
+The batch latency follows the evidence record
+([bench-012](evidence/bench-012-defi-shard-signed-resolution.md): 13.874 ms, 10 live replicas, broadcast on).
 
 Vocabulary this project no longer uses: [deprecated.md](deprecated.md).
 Capability overview: [overview.md](overview.md).
@@ -62,7 +64,7 @@ Missing evidence is `Unverified`, not `Not built`.
 | Public repository URLs and packaged downloads | Unverified | No durable canonical public location was established in this audit. | CAP-009 |
 | Public benchmark results | Live | BENCH-012, 2026-10-10: 15,360 swaps in 60 batches of 256, broadcast to 10 replicas, 60/60 audits passed. Reported as swaps per batch auction, batch latency, bytes per signed result and audit cost — never as a rate per second of anything. Historical figures from the retired direction are not quoted. | BENCH-012 |
 | Local disk cache in the write path | Retired | Removed fleet-wide 2026-10-10. It cost 52.8x inside the acknowledgement path (300 vs 15,830 resolutions/s, same binary and load) and recovered nothing: `GENESIS_PREV` changed from a 17-character sentinel to 64 zeros, so every stored cache was unreplayable. Recovery here is p2p — peers holding the content-addressed CID, shard-signed results carried on a feed, CID pinning. Nodes that meet an unreplayable cache now quarantine it and start rather than crash-looping. | BENCH-009 §5 |
-| A second copy of every signed result | Partial | A signed result is broadcast once per batch to replicas, which store it without re-verifying; 10 of 10 replicas reached in BENCH-012. The broadcast is **not pipelined** — 449 ms to reach 10 replicas against 8.920 ms to resolve — so it is the binding constraint on everything. | BENCH-012 |
+| A second copy of every signed result | Partial | A signed result is broadcast once per batch to replicas, which store it without re-verifying; 10 of 10 replicas reached in BENCH-012. The broadcast is **not pipelined** — 449 ms to reach 10 replicas against 13.874 ms to resolve — so it is the binding constraint on everything. | BENCH-012 |
 | Peer-sync bootstrap for a node that starts empty | Partial | Observed 2026-10-19 in source (`defxn-defi-rs` architecture §10, wave 2 close-out): a restarted node can recover from an IPFS CID at startup, and a replica catches up signed swap results from a listed provider (`catch_up_from_providers`). This does not refill every chain; a restarted node still serves other chains from empty until it re-acquires them. | — |
 
 Evidence record details are in the [registry](evidence/registry.md). Change a status only when that record is updated with a reproducible source or artifact.

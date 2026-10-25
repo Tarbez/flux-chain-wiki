@@ -17,7 +17,7 @@ var ArkResolutionProducts = (function () {
     code: { name: 'Code manager', status: 'ready', page: null, line: 'Edit a deployed site’s code and content. Access comes from the signed owner record.' },
     packages: { name: 'Mesh packages', status: 'ready', page: null, line: 'Publish and install signed packages from the mesh instead of one registry.' },
     deployer: { name: 'Bundle Deployer', status: 'building', page: 'bundledeployer', line: 'Review a site or app locally, then publish it as one signed bundle.' },
-    authkit: { name: 'Auth Kit', status: 'ready', page: 'account', line: 'Your keys and recovery phrase, held by you. No password on a server.' },
+    authkit: { name: 'FXN ID', status: 'ready', page: 'account', line: 'Your keys and recovery phrase, held by you. No password on a server.' },
     broker: { name: 'Identity broker', status: 'ready', page: null, line: 'Sign in once. Every defxn site can ask that one identity to sign.' },
     wallet: { name: 'FXN and credits', status: 'building', page: 'account', line: 'Signed value transfers and usage credits. Balances start at genesis.' },
     agreements: { name: 'Agreements resolver', status: 'building', page: 'lifecycle', line: 'Each side signs terms, work and receipt on its own chain. The resolver links them. Built in source. It is the earlier path, not the current direction.' },

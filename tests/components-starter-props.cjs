@@ -27,6 +27,10 @@ for (const resolver of C.resolvers) {
   const props = C.starterProps(resolver, 'State 1');
   const keys = Object.keys(props);
   if (resolver === 'RBLOCK_DIVIDER_V1') { assert.equal(keys.length, 0, 'a divider has no text and needs none'); continue; }
+  /* a block with no text prop at all (the card slot draws the visitor's card) gets no starter text: decided by its
+     props' kinds, not by a list of names */
+  const fields = C.fieldsOf({ resolver, props: {} });
+  if (fields.length && !fields.some((f) => f.kind === 'line' || f.kind === 'text')) { assert.equal(keys.length, 0, resolver + ' has no text prop, so it gets no starter text'); continue; }
   /* a captured component has no fixed prop list -- its slots come from its own tree, and its
      starter text is derived from real markup by ArkComponents.starterFrom (tests/components-capture.cjs) */
   if (resolver === C.CAPTURED) { assert.equal(keys.length, 0, 'starterProps never invents a slot for a captured tree'); continue; }

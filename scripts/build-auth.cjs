@@ -23,9 +23,16 @@ execFileSync(esbuild, [
   '--alias:fxn-auth/root-from-mnemonic=' + fluxRoot + '/fxn-auth/src/rootFromMnemonic.mjs',
   '--alias:fxn-auth/wallet-signing-handle=' + fluxRoot + '/fxn-auth/src/walletSigningHandle.mjs',
   '--alias:fxn-auth/wallet-lifecycle=' + fluxRoot + '/fxn-auth/src/walletLifecycle.mjs',
+  '--alias:fxn-auth/public-ids=' + fluxRoot + '/fxn-auth/src/publicIds.mjs',
+  '--alias:fxn-auth/root-keys=' + fluxRoot + '/fxn-auth/src/rootKeys.mjs',
   '--alias:fxn-auth/wallet-delegation=' + fluxRoot + '/fxn-auth/src/walletDelegation.mjs',
   '--alias:fxn-auth/wallet-registry=' + fluxRoot + '/fxn-auth/src/walletRegistry.mjs',
   '--alias:fxn-auth/claim-scope-resolver=' + fluxRoot + '/fxn-auth/src/claimScopeResolver.mjs',
+  '--alias:fxn-auth/auth-kit-create=' + fluxRoot + '/fxn-auth/src/authKitCreate.mjs',
+  '--alias:fxn-auth/fxn-id-gate=' + fluxRoot + '/fxn-auth/src/fxnIdGate.mjs',
+  // one ark-ui in the bundle: fxn-auth's own modules import it too, and its node_modules links the source tree, not
+  // this site's delivered package, so both resolve to the copy the entry uses
+  '--alias:@deadark/ark-ui/flux-auth=' + path.join(site, 'node_modules/@deadark/ark-ui/dist/ark-ui.flux-auth.js'),
   '--alias:fxn-auth-client/wallet-mesh=' + fluxRoot + '/fxn-auth-client/src/wallet-mesh.mjs',
   '--alias:deadark-identity-core/root-signing-handle=' + fluxRoot + '/deadark-identity-core/dist/identity/root-signing-handle.js',
   '--outfile=js/admin/auth.js',

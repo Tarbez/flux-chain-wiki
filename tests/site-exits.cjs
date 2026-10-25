@@ -75,25 +75,25 @@ for (const [file, re] of [['css/navigation.css', /\.ark-link::after \{ content:"
 {
   assert(/ArkUI\.journeyLead\(page\)/.test(read('js/pages/resolver-lab.js')) && /concat\(\[\{ label: ArkSitePages\.row\('references'\)\.label[^\n]*resolutions\) \}/.test(read('js/pages/resolver-lab.js')), '/what-is-a-resolver\'s pager leads on to the journey\'s start (Resolutions)');
   const kit = read('js/ark/page-kit.js');
-  assert(!/route:(resolutions|stats|proximity|download)/.test(kit.replace(/\/\*[\s\S]*?\*\//g, '')), 'the page kit names no page: its links come from ArkSitePages');
+  assert(!/route:(resolutions|stats|download)/.test(kit.replace(/\/\*[\s\S]*?\*\//g, '')), 'the page kit names no page: its links come from ArkSitePages');
   const ctx = vm.createContext({ ArkUI: { el: () => ({}) }, window: {} });
   vm.runInContext(read('js/content/site-pages.js') + '\n;this.ArkSitePages = ArkSitePages;', ctx);
   vm.runInContext(kit, ctx);
   const hrefs = (key) => JSON.parse(JSON.stringify(ctx.ArkUI.nextSteps(key).map((item) => item.href))); // out of the vm realm, for deepStrictEqual
-  assert.deepEqual(hrefs('lifecycle/receipt'), ['route:resolutions', 'route:stats', 'route:proximity'], '/lifecycle/receipt leads out: resolve something, the evidence, the model');
+  // The model (/experiments, key 'proximity') was the third way out until the owner deleted that page, 2026-10-24; the journeys after it are now resolve and evidence only.
+  assert.equal(hrefs('lifecycle/receipt')[0], 'route:resolutions', '/lifecycle/receipt leads out first to resolve something');
+  assert(hrefs('lifecycle/receipt').length >= 2 && hrefs('lifecycle/receipt').every((h) => h !== 'route:proximity'), '/lifecycle/receipt also leads to the evidence, and no way out names the deleted model page');
   assert.deepEqual(hrefs('lifecycle'), hrefs('concept/practice'), 'the lifecycle and the sheets share one rule');
-  assert(hrefs('dao').includes('route:proximity') && hrefs('concept/practice').includes('route:proximity'), '/dao and /concept/practice lead to the interactive model (/experiments)');
-  assert.deepEqual(hrefs('proximity'), [], 'the last journey has no journey after it');
+  assert(!hrefs('dao').includes('route:proximity') && !hrefs('concept/practice').includes('route:proximity'), '/dao and /concept/practice no longer lead to the interactive model (/experiments, deleted 2026-10-24)');
+  assert.deepEqual(hrefs('palette'), [], 'the last journey has no journey after it');
   assert.equal(ctx.ArkUI.journeyLead('resolver').href, 'route:resolutions', 'the start of the build journey is Resolutions');
   assert.equal(ctx.ArkUI.journeyLead('resolutions'), null, 'a journey\'s own start does not lead to itself');
   for (const file of ['js/pages/lifecycle.js', 'js/pages/sheet.js']) assert(/ArkUI\.nextSteps\(/.test(read(file)), file + ' takes its ways on from ArkUI.nextSteps');
 }
-// S8 (ledger /experiments P3): the model's state is written to and restored from its catalog address, not the alias.
+// The S8 block (js/studio.js wrote the model's state at its catalog address) is retired with js/studio.js: the owner deleted /experiments, 2026-10-24.
+// The shell pattern must not link the deleted page or its merged-away address.
 {
-  const studio = read('js/studio.js');
-  assert(!/'\/experiments\/lab'/.test(studio), 'js/studio.js names no address of its own: the model\'s path is its catalog entry\'s');
-  assert(/module === 'lab'/.test(studio) && /ArkUI\.route\.write\(home\.path,/.test(studio) && /home\.paths\.indexOf\(ArkUI\.route\.path\(\)\)<0/.test(studio), 'it writes to the canonical path and restores from it and its old addresses');
-  assert(!/-H-#\/experiments\/lab/.test(read('js/scene.flux.js')), 'the shell pattern links /experiments, not the merged-away address');
+  assert(!/-H-#\/experiments/.test(read('js/scene.flux.js')), 'the shell pattern links neither /experiments nor its merged-away address');
 }
 
 console.log('PASS: the former orphans have inbound links, the former dead ends lead on, and ↗ marks only links that leave the site.');

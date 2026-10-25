@@ -49,13 +49,6 @@ assert(/boundary: has\('STATUS\.TEXT'\) \? \{ tone: 'drift', title: copy\('STATU
 assert(/reference: evidence\.length \? \{ blocks: evidence \}/.test(sheet) && sheet.includes("copy('LIMIT.TEXT')"), 'shared sheet places limitations and evidence in the reference layer');
 assert(sheet.includes('manifest.meta.docs'), 'shared sheet renders canonical documentation links');
 
-const lab = fs.readFileSync('js/pages/lab.js', 'utf8');
-assert(lab.includes('Illustrative, not live network data.'), 'model boundary is beside the title');
-assert(!lab.includes('Nothing simulated but the pace'));
-assert(!lab.includes('mechanics are real and sourced'));
-// The old /experiments entry page's boundary moved into the lab when the two merged (2026-10-19,
-// docs/ux-audit/pages.md P3); it must survive the merge word for word.
-assert(lab.includes('do not represent real nodes, votes, or a ledger.'), 'the old entry page\'s boundary survives in the lab');
-assert(lab.includes('The model does not calculate a roster,'), 'including what the model does not calculate');
+// The illustrative-model boundary checks read js/pages/lab.js; the owner deleted that page (/experiments) on 2026-10-24, so they are retired with it.
 
 console.log('PASS: Batch 3 mechanism questions, status boundaries, evidence links, benchmark restraint, and illustrative-model labels.');

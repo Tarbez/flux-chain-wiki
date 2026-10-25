@@ -31,7 +31,6 @@ const stop = P.watch(doc.body);
 assert.equal(doc.querySelector('header').getAttribute('data-ark-part'), 'MENUBAR', 'the header bar is a MENUBAR');
 assert.equal(doc.querySelector('nav').getAttribute('data-ark-part'), 'NAVMENU', 'the header nav is a NAVMENU');
 assert.equal(doc.querySelector('.ark-link').getAttribute('data-ark-part'), 'LINK', 'a nav link is a LINK');
-assert.equal(doc.querySelector('.header-products-toggle').getAttribute('data-ark-part'), 'BUTTON', 'the Products trigger is a BUTTON');
 assert.equal(doc.querySelector('.cta').getAttribute('data-ark-part'), 'SECONDARY|BUTTON', 'an outline CTA is a SECONDARY|BUTTON');
 assert.equal(doc.querySelector('.rx-fleet').getAttribute('data-ark-part'), 'CARD', 'a rail card is a CARD');
 assert.equal(doc.getElementById('own').getAttribute('data-ark-part'), 'POPOVER', 'a part Ark UI named keeps its name');
@@ -47,25 +46,20 @@ return Promise.resolve().then(() => {
   // 5. locks
   ['--danger', '--success', '--chain-identity', '--net-fxn', '--ember'].forEach((t) => assert.ok(P.LOCKS.includes(t), t + ' is locked on this site'));
   assert.ok(!P.LOCKS.includes('--reference'), '--reference is a role the SDK derives, not a site lock');
-  // 6. the site's own limits: the navbar and its mega dropdown never take strips, tags or list markers
-  const cut = P.limit({ MEGAMENUPANEL: { frame: 'full', edge: 'soft', ornament: 'strip', marker: 'emblem' }, CARD: { frame: 'full', header: 'tag', ornament: 'strip' }, MODAL: { header: 'tag' } });
-  assert.deepEqual(JSON.parse(JSON.stringify(cut)), { MEGAMENUPANEL: { frame: 'full', edge: 'soft', ornament: 'strip' }, CARD: { frame: 'full' }, MODAL: { header: 'tag' } }, 'limit() drops the marker on the mega panel and the tag and strip on cards, and leaves a part it does not name alone');
-  assert.deepEqual(JSON.parse(JSON.stringify(P.limit({ POPOVER: { frame: 'full', edge: 'cut', header: 'tag' } }))), { POPOVER: { frame: 'full', edge: 'cut' } }, 'a popover takes a frame and an edge on its panel, never a tag (Ark UI dresses the panel, not the wrapper, since the #263 clipped-dropdown fix)');
+  // 6. The card dresses the site by its own rules (the owner, 2026-10-24): every part takes what the card sends, less what
+  //    is switched off. The code switches nothing off by itself; only someone who saw a reason on the real page does, in
+  //    the CMS. (A table here had listed what each part MAY take, and kept most parts bare.)
+  assert.deepEqual(P.OFF, {}, 'the code switches nothing off: the card\'s own rules reach every part');
+  assert.ok(!('ALLOW' in P) && !('rulesFor' in P) && !('limit' in P), 'the retired allow table is gone, so nothing can read it by mistake');
+  const sent = { CARD: { frame: 'full', edge: 'cut', header: 'tag' }, 'section-header': { ornament: 'strip' }, 'PRIMARY|BUTTON': { edge: 'cut' } };
+  assert.deepEqual(JSON.parse(JSON.stringify(P.switchOff(sent, {}))), sent, 'with nothing switched off, every part keeps every rule');
+  assert.deepEqual(JSON.parse(JSON.stringify(P.switchOff(sent, { CARD: ['header'], SECTIONHEADER: ['ornament'] }))), { CARD: { frame: 'full', edge: 'cut' }, 'PRIMARY|BUTTON': { edge: 'cut' } },
+    'a switch takes its rule away; a part left with none is dropped; the site\'s spelling (SECTIONHEADER) reaches Ark UI\'s block part (section-header)');
+  //    a switch only takes away: the policy's and the family's lists are added to the code's, never put back
+  const off = P.policy({ off: { CARD: ['edge'] }, families: { Arcade: { off: { CARD: ['frame'] } } } }, 'Arcade').off;
+  assert.deepEqual([...off.CARD].sort(), ['edge', 'frame'], 'the family\'s switches add to every card\'s');
+  assert.deepEqual(P.policy({ off: { CARD: ['edge'] } }, 'Other').off, { CARD: ['edge'] }, 'another family keeps only every card\'s switches');
   assert.ok(!P.PARTS.some(([sel]) => /products-mega-(chips|rows?)\b/.test(sel)), 'the mega dropdown\'s link chips and rows are not lists or items: a marker there crowds the navbar');
-  // 6b. the site's table is the one source of each part's rules: a card's flat rule set goes to the parts it names, cut to
-  //     what each allows; a part it does not name wears nothing; `keep` and `none` are not sent (layout and density stay
-  //     the part's own until the owner reviews the sets). Before, the recipe's own part table decided, a second list.
-  const card = { frame: 'full', edge: 'cut', ornament: 'strip', marker: 'emblem', header: 'tag', layout: 'keep', density: 'keep' };
-  const built = JSON.parse(JSON.stringify(P.rulesFor(card)));
-  assert.deepEqual(built.MEGAMENUPANEL, { frame: 'full', edge: 'cut', ornament: 'strip' }, 'the mega dropdown takes its frame, edge and strip, never a marker');
-  assert.deepEqual(built.CARD, { frame: 'full', edge: 'cut' }, 'a card takes a frame and an edge');
-  assert.deepEqual(built.MODAL, { frame: 'full', edge: 'cut', header: 'tag' }, 'the signing review takes the tag strip');
-  assert.ok(!('ITEM' in built) && !('MENUBAR' in built), 'a part the table does not name wears nothing');
-  assert.deepEqual(built.ALERT, { frame: 'full', edge: 'cut', header: 'tag' }, 'a callout block wears the frame and the tag strip (Ark UI takes a tag back where it would cover content: it covered the tab strip on /account before)');
-  assert.deepEqual([built.HERO, built.TABSLIST, built.LISTROWS], [{ ornament: 'strip' }, { ornament: 'strip' }, { marker: 'emblem' }], 'a title takes the strip, a tab strip the divider on its line, a list one emblem per row');
-  Object.keys(P.ALLOW).forEach((k) => assert.match(k, /^[A-Z][A-Z0-9]*(\|[A-Z][A-Z0-9]*)*$/, k + ' is in the site\'s one spelling (upper case, no hyphen), the one the CMS policy holds'));
-  assert.ok(!JSON.stringify(built).includes('keep'), 'keep is never sent');
-  assert.deepEqual(JSON.parse(JSON.stringify(P.rulesFor(card, { ALERT: ['header', 'layout'] }))), { ALERT: { header: 'tag' } }, 'a policy table names its own parts');
   // 7. the skin is held to the site's own small-text rule, the same one tests/theme-color-contrast.cjs enforces
   const theme = fs.readFileSync(path.join(root, 'tests/theme-color-contrast.cjs'), 'utf8');
   assert.match(theme, /for \(const key of \['text-strong','text','text-muted','text-faint'\]\) for \(const \[where, bg\] of \[\['canvas',canvas\],\['surface',surface\]\]\)/, 'the theme test still checks every text level on canvas and surface; if it changed, change DefxnSkinParts.CONTRAST with it');

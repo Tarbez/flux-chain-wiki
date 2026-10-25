@@ -14,7 +14,7 @@ HTML does not contain the experiment lab or article bodies.
 Canonical routes use hashes so static hosting does not need rewrite rules:
 
 - `#/`: home.
-- `#/experiments`: the interactive model (the old `#/experiments/lab` address opens it too).
+- The interactive model page (`#/experiments`) was deleted by the owner on 2026-10-24; its old addresses open the not-found page.
 - Any other address: a not-found page that names it and offers the closest pages.
 - `#/learnings`: three article previews.
 - `#/learnings/<slug>`: an individual article.
@@ -31,7 +31,7 @@ Canonical routes use hashes so static hosting does not need rewrite rules:
 - `#/treasury` and `#/deposits`: design-only economy previews, not live balances.
 - `#/concept`: the deeper Flux Protocol operating model.
 
-Legacy `#zero`, `#proximity`, `#work`, `#learnings`, and `#article/<slug>` links
+Legacy `#zero`, `#learnings`, and `#article/<slug>` links
 also resolve. Back/Forward and direct links use the same router.
 
 `js/content/site-pages.js` is the one page table (path, name, journey); `js/pages/catalog.js`
@@ -175,7 +175,7 @@ The lab is mounted by `ArkUI.mountStudio(root)` only on its own Lab route.
 “Open the experiment” navigates there; the same corner control and Escape return
 to Experiments. The introduction no longer includes a lab section below it.
 Its mode and slider values are retained separately from disposable page DOM.
-`css/studio.css` styles the lab; `css/learnings.css` styles routed page layers.
+`css/studio.css` holds the page-wide base rules; `css/learnings.css` styles routed page layers.
 
 ## Module boundaries and security
 

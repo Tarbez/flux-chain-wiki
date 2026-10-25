@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <!-- The CSP below also lets this page call the local FXN ID gate (http://127.0.0.1:4571 to 4575, flux/fxn-auth/scripts/fxn-id-gate-local.mjs), so the sign-in panel can ask it for a v10 Secret Key. Exact origins, no range. Fleet gate nodes are added here once they exist. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'self' http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com ws://127.0.0.1:19501 ws://localhost:19501; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'self' http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com ws://127.0.0.1:19501 ws://localhost:19501; object-src 'none'; base-uri 'none'; form-action 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- The family tab icon: the DEFXN mark in Ember, built by flux/defxn-product-kit (deriveIcon) and
@@ -64,7 +64,7 @@
      page built from blocks sits in (js/ark/blocks.js ArkUI.page). Before components.css, which is
      last. -->
 <link rel="stylesheet" href="css/world.css?v=20261024-tags1" />
-<link rel="stylesheet" href="css/ark-blocks.css?v=20261020-w5ark" />
+<link rel="stylesheet" href="css/ark-blocks.css?v=20261024-022" />
 <link rel="stylesheet" href="css/components.css?v=20261020-w4" />
 </head>
 <body>
@@ -117,6 +117,8 @@
 <script src="js/content/settings-defaults-data.js" defer></script>
 <script src="js/content/layout.js" defer></script>
 <script src="js/content/layout-data.js" defer></script>
+<!-- ARK's structured-state FLX grammar: before the stores that decode FLX records when their data file loads (components, then the world). -->
+<script src="js/vendor/flx-state-grammar.js" defer></script>
 <script src="js/content/components.js" defer></script>
 <script src="js/content/components-data.js" defer></script>
 <script src="js/content/states.js" defer></script>
@@ -126,7 +128,6 @@
 <script src="js/content/element-motion.js" defer></script>
 <script src="js/content/element-motion-data.js" defer></script>
 <!-- The 3D world's editable numbers (js/content/world.js): FLX records of the structured-state grammar, then the saved draft. The world itself loads after first paint (js/world/world-host.js). -->
-<script src="js/vendor/flx-state-grammar.js" defer></script>
 <script src="js/content/world.js" defer></script>
 <script src="js/content/world-data.js" defer></script>
 
@@ -164,8 +165,8 @@
 <script src="js/pages/catalog.js?v=20261020-w4" defer></script>
 <script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/min/manifest.js?v=a129b2dc" defer></script>
-<script src="js/ark/page-loader.js?v=20261024-c1" defer></script>
+<script src="js/min/manifest.js?v=3a59afed" defer></script>
+<script src="js/ark/page-loader.js?v=20261025-ac1" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
 <script src="js/ark/panel-continuity.js?v=20261024-world1" defer></script>
 <script src="js/ark/page-router.js?v=20261003-lifecycle103" defer></script>
@@ -188,6 +189,7 @@
 <script src="js/resolvers/blocks/rblock-card-v1.js" defer></script>
 <script src="js/resolvers/blocks/rblock-quote-v1.js" defer></script>
 <script src="js/resolvers/blocks/rblock-divider-v1.js" defer></script>
+<script src="js/resolvers/blocks/rblock-card-slot-v1.js" defer></script>
 <script src="js/resolvers/blocks/rblock-captured-v1.js" defer></script>
 
 <!-- 5. the pattern, then boot. (The header, footer, progress-pill and subtitle
@@ -203,10 +205,10 @@
 <script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/halo/shaders.js" defer></script>
 <!-- The 3D world under every page. It loads Three.js and its own files after first paint; js/zero-webgl.js below is its fallback. -->
-<script src="js/world/world-host.js?v=20261024-w4" defer></script>
+<script src="js/world/world-host.js?v=20261025-w5" defer></script>
 <!-- NFT skins (docs/home-redesign/SKIN-CONTRACT.md): the site's part map and its one skin entry. Ark UI's skin chunk and the card recipe load only when a skin is applied. -->
-<script src="js/ark/skin-parts.js?v=20261024-s5" defer></script>
-<script src="js/ark/skin-site.js?v=20261024-s6" defer></script>
+<script src="js/ark/skin-parts.js?v=20261024-off2" defer></script>
+<script src="js/ark/skin-site.js?v=20261024-slot1" defer></script>
 <script src="js/zero-webgl.js?v=20261024-w1" defer></script>
 <script src="js/hero-motion.js?v=20261020-w4" defer></script>
 <script src="js/lattice.js?v=20261020-w4" defer></script>

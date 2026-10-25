@@ -2,7 +2,7 @@
 ArkManifest.define({
   "id": "worldmeasure",
   "title": "Measure pages",
-  "route": "/measured",
+  "route": "/stats/capabilities",
   "group": "page",
   "fields": {
     "COMMON.ROOT": {

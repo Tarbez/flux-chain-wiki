@@ -29,7 +29,9 @@ vm.runInContext('ArkManifestIds', cx).forEach((id) => run('js/content/manifests/
 const catalog = vm.runInContext('ArkUI.pageCatalog', cx);
 
 const ROUTES = {
-  resolvers: ['worldResolvers', 'resolvers', 'js/pages/world-measure.js'], measured: ['worldMeasured', 'measured', 'js/pages/world-measure.js'],
+  /* 2026-10-24: the measured page is retired from the catalog (/measured is /stats/capabilities, js/pages/world-stats.js, tests/world-stats.cjs); its code stays in
+     world-measure.js unused, so no case below mounts it */
+  resolvers: ['worldResolvers', 'resolvers', 'js/pages/world-measure.js'],
   fxn: ['worldFxn', 'fxn', 'js/pages/world-measure.js'], ring: ['worldRing', 'ring', 'js/pages/world-measure.js'],
   /* works (In one minute) is the 60-second sequence now (worldMinuteMovie, js/pages/world-minute.js), held by tests/world-minute.cjs */
   'works/resolve': ['worldResolve', 'resolve', 'js/pages/world-works.js'],
@@ -103,7 +105,6 @@ function foreignWords(root) {
 /* ---- every page mounts, with its frame, its words and its world state ---- */
 const CASES = [
   ['resolvers', '', { view: 'resolvers' }], ['resolvers', 'id=dao', { view: 'resolvers', id: 'dao' }],
-  ['measured', '', { view: 'measured', tab: 'caps' }], ['measured', 'c=escrow&tab=runs', { view: 'measured', c: 'escrow', tab: 'runs' }],
   ['fxn', '', { view: 'fxn', g: 'mining', tab: 'supply' }], ['fxn', 'tab=fees', { view: 'fxn', g: 'computers', tab: 'fees' }], ['fxn', 'tab=money', { view: 'fxn', tab: 'money' }],
   ['ring', '', { view: 'ring', i: 'deark' }], ['ring', 'i=fxn', { view: 'ring', i: 'fxn' }], ['ring', 'i=resolver-1', { view: 'ring', i: 'resolver-1' }], ['ring', 'i=defxn', { view: 'ring', i: 'defxn' }], ['ring', 'i=fxn-ledger', { view: 'ring', i: 'fxn-ledger' }],
   /* works is the 60-second sequence now (tests/world-minute.cjs holds its state) */
@@ -128,19 +129,11 @@ for (const [key, query, want] of CASES) {
 }
 
 /* ---- the router hands a page its query in prepare(), before it writes the address ---- */
-/* why: a link from /resolvers to /measured?c=custody mounted the page before the address changed, and the page showed the first capability */
-{
-  const host = worldStub(), b = boot('', host); b.w.__path = '/measured';
-  const mod = b.w.ArkUI.pageModules.worldMeasured; assert.equal(typeof mod.prepare, 'function', 'a page has prepare(page, settings)');
-  mod.prepare('measured', { query: 'c=seal&tab=runs' });
-  const page = mod.mount(b.w.document.getElementById('outlet'));
-  assert.deepEqual([page.arkState().c, page.arkState().tab], ['seal', 'runs'], 'the page opens with the query it was navigated with, not the old address');
-  assert.equal(host.calls.state[0].c, 'seal'); page.arkDispose();
-}
+/* (the prepare() case for /measured?c=custody moved with the page: tests/world-stats.cjs holds /stats/capabilities?c=custody) */
 
 /* ---- registered 3D clicks: pick, pickRing ---- */
 {
-  const pages = { resolvers: ['pick'], measured: ['pick'], fxn: ['pick'], ring: ['pickRing'], trace: ['pick'] };
+  const pages = { resolvers: ['pick'], fxn: ['pick'], ring: ['pickRing'], trace: ['pick'] };
   for (const [key, names] of Object.entries(pages)) {
     const host = worldStub(), m = mount(key, '', host);
     assert.deepEqual(host.calls.on.map((c) => c[0]), names, key + ' listens for ' + names.join(', '));
@@ -159,20 +152,6 @@ for (const [key, query, want] of CASES) {
   const names = [...m.page.querySelectorAll('.wp-tags .tag')].map((t) => t.dataset.tag); assert(names.includes('name') && names.includes('cap-custody'), 'the 3D labels are in the page');
   /* the numbers are the data file's */
   const R = w.DEFXN_RESOLVERS.resolvers; assert(m.page.querySelector('.eyebrow-dot').textContent.includes(String(R.length)), 'the resolver count is the data file\'s');
-  m.page.arkDispose();
-}
-{
-  const host = worldStub(), m = mount('measured', '', host), C = m.w.DEFXN_CAPABILITIES;
-  const total = C.capabilities.reduce((s, c) => s + c.count, 0);
-  assert(m.page.querySelector('.strip').textContent.includes(C.capabilities[0].count + ' of ' + total), 'the checked cases are the data file\'s');
-  [...m.page.querySelectorAll('[role="tab"]')].find((t) => t.id === 'wm-tab-runs').click();
-  assert.deepEqual(m.writes.pop(), ['/measured', 'tab=runs', 'replace'], 'the runs tab replaces the entry');
-  assert.equal(host.calls.select.at(-1).tab, 'runs', 'select() tells the world about the tab');
-  const runs = m.page.querySelector('#wm-runs'), text = runs.textContent;
-  for (const run of C.runs) assert(text.includes(run.id) && text.includes(run.date) && text.includes(run.what), run.id + ' is named with its date');
-  assert(text.includes(C.limit), 'the limit that comes with the runs is said');
-  assert(!m.page.querySelector('#wm-caps') || m.page.querySelector('#wm-caps').hidden, 'the capabilities panel is out of the way on the runs tab');
-  host.calls.on[0][1]('capability', 'seal'); assert.equal(host.calls.select.at(-1).c, 'seal', 'a 3D pick of a capability column picks it'); assert.equal(host.calls.select.at(-1).tab, 'caps');
   m.page.arkDispose();
 }
 {

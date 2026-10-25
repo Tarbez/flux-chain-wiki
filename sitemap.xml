@@ -46,16 +46,13 @@
     <loc>https://defxn.com/deposits</loc>
   </url>
   <url>
-    <loc>https://defxn.com/stats</loc>
+    <loc>https://defxn.com/stats/now</loc>
   </url>
   <url>
-    <loc>https://defxn.com/stats/gpu</loc>
+    <loc>https://defxn.com/stats/capabilities</loc>
   </url>
   <url>
-    <loc>https://defxn.com/stats/ledger</loc>
-  </url>
-  <url>
-    <loc>https://defxn.com/how-deployment-works</loc>
+    <loc>https://defxn.com/stats/ceiling</loc>
   </url>
   <url>
     <loc>https://defxn.com/how-deployment-works/ask</loc>
@@ -86,6 +83,48 @@
   </url>
   <url>
     <loc>https://defxn.com/chain</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/chain/record</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/chain/open</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/chain/links</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/identity</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/identity/sign</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/identity/safe</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/identity/you</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/fxn</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/ring</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/how-it-works</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/how-it-works/resolve</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/how-it-works/layers</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/how-it-works/life</loc>
+  </url>
+  <url>
+    <loc>https://defxn.com/trace</loc>
   </url>
   <url>
     <loc>https://defxn.com/concept</loc>

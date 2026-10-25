@@ -24,9 +24,9 @@
   var REF = (window.DEFXN_CARDS || [])[0] || {};
   var REST = A.REST, ZOOM = { mark: 1.18, palette: 1.18, aura: 0.92, backdrop: 0.9, signal: 0.95, particles: 0.95 };
 
-  function layerOf(e) { for (var i = 0; i < T.LAYERS.length; i++) if (T.LAYERS[i].key === e.layer) return T.LAYERS[i]; return null; }
+  function layerOf(e) { var all = T.CATEGORIES || T.LAYERS; for (var i = 0; i < all.length; i++) if (all[i].key === e.layer) return all[i]; return null; }
   function byName(layerKey, name) {
-    var l = T.LAYERS.filter(function (x) { return x.key === layerKey; })[0];
+    var l = (T.CATEGORIES || T.LAYERS).filter(function (x) { return x.key === layerKey; })[0];
     return l ? l.elements.filter(function (e) { return e.name === name; })[0] || l.elements[0] : null;
   }
   function defaultPalette() { return byName('palette', 'Glass'); }

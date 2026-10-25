@@ -154,3 +154,89 @@
 .nft-panel-art.is-drawn{opacity:var(--nft-panel-a,.55)}
 .nft-panel-art canvas{width:100%;height:100%;display:block}
 .nft-panel-art::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,hsl(var(--canvas) / .96) 0%,hsl(var(--canvas) / .78) 38%,hsl(var(--canvas) / .2) 78%,transparent)}
+
+/* the SEAL (js/nft/wear.js, DefxnWear.seal): the worn card in an identity zone. Its icon draws in the card's own
+   inks (--w-*, set on the seal), its number in the mono slot, its name in the sans slot. The words are 12 px or
+   more, so they stay readable at the zone's size (WEAR-AUDIT.md C2, C6). */
+.defxn-seal{display:inline-flex;align-items:center;gap:.5rem;min-height:2.25rem;padding:.25rem .25rem .25rem .5rem;
+  border:1px solid hsl(var(--border-default,0 0% 100% / .16));border-radius:var(--size-card-radius,8px);
+  background:hsl(var(--surface,0 0% 6%));color:hsl(var(--text,0 0% 80%))}
+.defxn-seal[hidden]{display:none}
+.defxn-seal__mark{display:block;width:1.25rem;height:1.4rem;flex:none}
+.defxn-seal__mark svg{display:block;width:100%;height:100%}
+.defxn-seal__text{display:grid;line-height:1.15}
+.defxn-seal__num{font:600 .75rem/1.2 var(--font-mono,ui-monospace,monospace);letter-spacing:.06em;color:hsl(var(--text-strong,0 0% 96%))}
+.defxn-seal__name{font:400 .75rem/1.2 var(--font-sans,system-ui,sans-serif);color:hsl(var(--text-muted,0 0% 60%))}
+.defxn-seal__act{font-size:.75rem;padding:.25rem .5rem;min-height:1.75rem}
+.defxn-seal--mark{padding:.25rem .5rem;gap:.375rem;min-height:0;border:0;background:transparent}
+
+/* the USER ZONE (js/nft/user-navbar.js): one control in the bar, the seal, which opens the wearer's menu. The SITE
+   CHECK (js/nft/site-check.js) is a row of that menu. Its colour is its state's meaning: trust when the wearer's
+   browser verified the name, danger when a proof is refused or no owner exists, drift when it cannot check now.
+   While a card is on, the bar carries the card's strong border under it (never the action colour, which is kept for
+   actions). Phones show the seal's icon only. */
+.defxn-user{position:relative;display:inline-flex}
+[data-defxn-user="on"]{box-shadow:inset 0 -2px 0 hsl(var(--border-strong,0 0% 100% / .42))}
+.defxn-user__btn{display:inline-flex;align-items:center;padding:0;border:0;background:transparent;color:inherit;cursor:pointer;border-radius:var(--size-card-radius,8px)}
+.defxn-user__list{position:absolute;right:0;top:calc(100% + .5rem);z-index:20;width:min(22rem,calc(100vw - 2rem));padding:.75rem .875rem;
+  border:1px solid hsl(var(--border-strong,0 0% 100% / .42));border-radius:var(--size-card-radius,8px);background:hsl(var(--overlay,0 0% 8%));
+  box-shadow:0 14px 34px -12px hsl(var(--theme-shadow-color,0 0% 0%) / .7)}
+.defxn-user__list[hidden]{display:none}
+.defxn-user__rows{display:grid;gap:.625rem;color:hsl(var(--text,0 0% 80%));font:400 .8125rem/1.45 var(--font-sans,system-ui,sans-serif);text-align:left}
+.defxn-user__rows p{margin:0}
+.defxn-user__who{color:hsl(var(--text-strong,0 0% 96%))}
+.defxn-user__acts{display:flex;flex-wrap:wrap;gap:.375rem}
+.defxn-user__act{padding:.375rem .625rem;border-radius:6px;border:1px solid hsl(var(--border-default,0 0% 100% / .16));background:transparent;
+  color:hsl(var(--text-strong,0 0% 96%));font:500 .8125rem/1.2 var(--font-sans,system-ui,sans-serif);cursor:pointer}
+.defxn-user__act--main{background:hsl(var(--primary,0 0% 90%));color:hsl(var(--text-inverse,0 0% 5%));border-color:transparent}
+.defxn-check{display:grid;gap:.25rem;padding:.5rem .625rem;border-radius:6px;background:hsl(var(--surface,0 0% 6%));border-left:3px solid hsl(var(--text-muted,0 0% 60%))}
+.defxn-check[data-tone="trust"]{border-left-color:hsl(var(--trust,145 34% 58%))}
+.defxn-check[data-tone="danger"]{border-left-color:hsl(var(--danger,0 60% 60%))}
+.defxn-check[data-tone="drift"]{border-left-color:hsl(var(--drift,38 60% 62%))}
+.defxn-check__head{display:flex;align-items:center;gap:.4rem;font:600 .75rem/1.3 var(--font-mono,ui-monospace,monospace)}
+.defxn-check__dot{width:.5rem;height:.5rem;border-radius:999px;flex:none;background:hsl(var(--text-muted,0 0% 60%))}
+.defxn-check[data-tone="trust"] .defxn-check__dot{background:hsl(var(--trust,145 34% 58%))}
+.defxn-check[data-tone="danger"] .defxn-check__dot{background:hsl(var(--danger,0 60% 60%))}
+.defxn-check[data-tone="drift"] .defxn-check__dot{background:hsl(var(--drift,38 60% 62%))}
+.defxn-check__do{font-weight:600}
+.defxn-check dl{display:grid;grid-template-columns:auto 1fr;gap:.25rem .75rem;margin:.125rem 0 0;font:400 .75rem/1.4 var(--font-mono,ui-monospace,monospace)}
+.defxn-check dt{color:hsl(var(--text-muted,0 0% 60%))}
+.defxn-check dd{margin:0;overflow-wrap:anywhere}
+.defxn-user__bare{padding:.375rem .75rem;border-radius:999px;border:1px solid hsl(var(--border-default,0 0% 100% / .16));font:500 .8125rem/1.2 var(--font-sans,system-ui,sans-serif)}
+.defxn-user__bare[hidden]{display:none}
+@media (max-width:640px){.defxn-user .defxn-seal__text{display:none}}
+
+/* CARD COMPONENTS (js/nft/card-components.js): new elements made from the visitor's own card. Words are the site's
+   faces at 12 px or more. The drawings sit behind or beside the words and are never in their way. */
+.defxn-comp{position:relative;color:hsl(var(--text,0 0% 80%))}
+.defxn-comp__piece{display:block;pointer-events:none}
+.defxn-comp__piece svg{display:block}
+.defxn-comp--banner{display:grid;gap:.375rem;padding:1.5rem 4.5rem 1.25rem 1.75rem;border-radius:var(--size-card-radius,8px);background:hsl(var(--surface,0 0% 6%));isolation:isolate;min-height:8rem}
+.defxn-comp--banner .defxn-comp__frame{position:absolute;inset:0;z-index:-1}
+.defxn-comp__eyebrow{margin:0;font:600 .75rem/1.4 var(--font-mono,ui-monospace,monospace);letter-spacing:var(--type-eyebrow-tracking,.12em);text-transform:uppercase;color:hsl(var(--text-muted,0 0% 60%))}
+.defxn-comp__title{margin:0;font:var(--type-heading-weight,600) clamp(1.5rem,1.2rem + 1vw,2rem)/1.1 var(--font-display,var(--font-sans,system-ui,sans-serif));letter-spacing:var(--type-heading-tracking,-.02em);color:hsl(var(--text-strong,0 0% 96%))}
+.defxn-comp__corner-icon{position:absolute;top:1.25rem;right:1.25rem}
+.defxn-comp--stamp{display:inline-grid;justify-items:center;gap:.5rem;margin:0;padding:1.25rem 1.5rem 1rem;border-radius:var(--size-card-radius,8px);background:hsl(var(--surface,0 0% 6%))}
+.defxn-comp--stamp [class*="defxn-comp__corner--"]{position:absolute}
+.defxn-comp__corner--tl{top:4px;left:4px}
+.defxn-comp__corner--tr{top:4px;right:4px;transform:scaleX(-1)}
+.defxn-comp__corner--bl{bottom:4px;left:4px;transform:scaleY(-1)}
+.defxn-comp__corner--br{bottom:4px;right:4px;transform:scale(-1,-1)}
+.defxn-comp__num{font:600 .8125rem/1.2 var(--font-numeric,var(--font-mono,ui-monospace,monospace));letter-spacing:.06em;color:hsl(var(--text-strong,0 0% 96%))}
+.defxn-comp--nameplate{display:inline-block;line-height:0}
+
+/* the TIMELINE EDITOR (js/nft/timeline-editor.js) */
+.defxn-tle{display:grid;gap:.75rem;font:400 .8125rem/1.4 var(--font-sans,system-ui,sans-serif);color:hsl(var(--text,0 0% 80%))}
+.defxn-tle__tracks{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.defxn-tle__track{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.375rem .5rem;padding:.625rem;border:1px solid hsl(var(--border-default,0 0% 100% / .16));border-radius:8px;background:hsl(var(--surface,0 0% 6%))}
+.defxn-tle__head{grid-column:1/-1;margin:0;font:600 .75rem/1.2 var(--font-mono,ui-monospace,monospace);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-muted,0 0% 60%))}
+.defxn-tle__field{display:grid;gap:.125rem;min-width:0}
+.defxn-tle__field span{font-size:.75rem;color:hsl(var(--text-muted,0 0% 60%))}
+.defxn-tle__field select,.defxn-tle__field input{min-width:0;padding:.25rem .375rem;border-radius:6px;border:1px solid hsl(var(--border-control,var(--border-default,0 0% 100% / .2)));background:hsl(var(--canvas,0 0% 4%));color:hsl(var(--text-strong,0 0% 96%));font:inherit}
+.defxn-tle__remove{grid-column:1/-1;justify-self:start;padding:.25rem .5rem;border:0;background:transparent;color:hsl(var(--text-muted,0 0% 60%));font:inherit;text-decoration:underline;cursor:pointer}
+.defxn-tle__tools{display:flex;gap:.5rem}
+.defxn-tle__btn{padding:.4rem .75rem;border-radius:6px;border:1px solid hsl(var(--border-default,0 0% 100% / .16));background:transparent;color:hsl(var(--text-strong,0 0% 96%));font:500 .8125rem/1.2 var(--font-sans,system-ui,sans-serif);cursor:pointer}
+.defxn-tle__btn--main{background:hsl(var(--primary,0 0% 90%));color:hsl(var(--text-inverse,0 0% 5%));border-color:transparent}
+.defxn-tle__problems[data-ok="false"]{color:hsl(var(--danger,0 60% 60%))}
+.defxn-tle__problems p{margin:0}
+.defxn-tle__flx{margin:0;max-height:7rem;overflow:auto;padding:.5rem;border-radius:6px;background:hsl(var(--canvas,0 0% 4%));font:400 .6875rem/1.4 var(--font-mono,ui-monospace,monospace);white-space:pre-wrap;overflow-wrap:anywhere;color:hsl(var(--text-muted,0 0% 60%))}

@@ -536,7 +536,7 @@
     var pa = from.pr || to.pr, pb = to.pr || from.pr;
     if (pa && pb) { cur.pr = cur.pr || {}; ['x', 'y', 'w', 'h'].forEach(function (key) { cur.pr[key] = lerp(pa[key], pb[key], e); }); }
     /* a page that moves to a new box glides; a page that stays (a choice inside it) does not */
-    cur.glide = from.p > .99 && to.p > .99 && pa && pb && Math.abs(pb.x - pa.x) + Math.abs(pb.y - pa.y) + Math.abs(pb.h - pa.h) > 4 ? e : 1;
+    cur.glide = !to.still && from.p > .99 && to.p > .99 && pa && pb && Math.abs(pb.x - pa.x) + Math.abs(pb.y - pa.y) + Math.abs(pb.h - pa.h) > 4 ? e : 1;
     cur.dx = pa && pb ? Math.sign(pb.x - pa.x) || 1 : 1;
     if (u >= 1) { from = null; cur.run = 1; cur.glide = 1; ENTER = false; fitShadow(to); }
   }
@@ -558,7 +558,10 @@
     turn = { from: pos, d: d, t0: now, dur: 420 + 110 * Math.abs(d) }; k.wake(turn.dur + 60); k.moved(turn.dur + 60);
   }
   /* returns the flight's timing, so the words can come in as the page opens (fix 29) */
-  var CHAPTER = { minute: 1, resolve: 1, layers: 1, life: 1 };   /* How it works: one row in space */
+  var CHAPTER = { minute: 1, resolve: 1, layers: 1, life: 1 };
+  /* the intro's arrival: 1.7x the resting distance, 12 degrees higher (72 + 12 stays under the zenith), turned
+     16 degrees, over 3.2 s on the kernel's in-out ease */
+  var WELCOME = { dist: 1.7, elev: 12, yaw: -16, fly: 3200 };   /* How it works: one row in space */
   api.to = function (st, first) {
     var v = st.view, now = performance.now(), was = view;
     if (RING[v]) { var idx = pick(st); if (idx !== sel) { sel = idx; if (first || !RING[view]) { pos = sel; turn = null; } else turnTo(now); } }
@@ -567,8 +570,13 @@
     /* the page opens out of the new view's thing; closing, it folds back into the old one */
     to.pv = to.p > 0 ? v : (cur && cur.pv) || v;
     if (first || !cur || k.reduced) {
-      if (first && v !== 'home') k.skipIntro();
+      /* The intro is a welcome, so it ARRIVES (owner, 2026-10-25: it opened on the grid and pulled away, "an exit
+         animation, not a welcome one"). The camera starts farther out, higher and a little turned, and glides down
+         and in onto the network; the words come in as it settles. Every other first view starts in place. */
+      var welcome = first && v === 'intro' && !k.reduced && k.setIntro;
+      if (welcome) k.setIntro(WELCOME); else if (first && v !== 'home') k.skipIntro();
       cur = copy(to); cur.run = 1; cur.glide = 1; cur.dx = 1; from = null; fitShadow(to); apply(); k.moved(100); k.start(); k.redraw();
+      if (welcome) { k.wake(WELCOME.fly + 200); k.moved(WELCOME.fly + 200); return { dur: WELCOME.fly, words: WELCOME.fly * .45 }; }
       return { dur: 0, words: 0 };
     }
     from = copy(cur);
@@ -600,6 +608,13 @@
     var keep = cur.pv; from = copy(cur); to = target(view); to.pv = keep; cur.pv = keep;
     DUR = dur; ENTER = false; CRANE = 0; t0 = performance.now(); k.wake(dur + 120); k.moved(dur + 120);
   }
+  /* the page's box changed size after it was measured (its styles or words came in late): in a flight the
+     flight's end takes the new box; at rest the page eases onto it in 240 ms, flat, with no glide turn */
+  api.refit = function () {
+    if (!cur) return;
+    if (from) { var pr = panelBox(view); if (pr && to) to.pr = pr; return; }
+    retarget(240); if (to) to.still = true;
+  };
   /* the CMS changed a view's numbers (ArkWorld views): the camera eases to the current view's new target */
   api.refresh = function (dur) { if (cur && !k.reduced) retarget(dur == null ? 500 : dur); else if (cur) retarget(0); };
   api.select = function (st) {

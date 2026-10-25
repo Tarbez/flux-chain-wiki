@@ -32,7 +32,8 @@
       var gutter = box.width <= 620 ? 16 : Math.max(24, Math.min(48, box.width * .03));
       /* /resolutions and its 20 pages, and /explore, too (W3-GUIDE): the block frame's 1080, not
          their old 1480 / 1280 / 1600 (docs/ux-audit/pages-ux-b.md cross-page #4, three frame widths). */
-      var maxWidth = panelPage === 'deployment' || panelPage === 'account' ? 1600 : 1080;
+      /* /download: the two-column redesign (owner image, 2026-10-25) stands on the scene at up to 1400 (css/download.css) */
+      var maxWidth = panelPage === 'deployment' || panelPage === 'account' ? 1600 : panelPage === 'download' ? 1400 : 1080;
       var width = Math.min(maxWidth, box.width - gutter * 2);
       return { left: (box.width - width) / 2, top: 84, width: width, height: Math.max(180, box.height - 148) };
     }

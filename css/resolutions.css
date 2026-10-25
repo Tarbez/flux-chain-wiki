@@ -8,6 +8,7 @@
 .header-products {height:100%;}
 .header-products-chevron {width:6px;height:6px;margin-left:1px;border-right:1.4px solid currentColor;border-bottom:1.4px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform 180ms;}
 [aria-expanded="true"] > .header-products-chevron {transform:translateY(1px) rotate(225deg);}
+/* not #primary-navigation since 2026-10-25: that is the "you" panel now, styled in css/navigation.css */
 #scene .ark-header .products-mega {
   position:absolute;top:calc(100% - 6px);right:max(20px,2.8cqmin);z-index:40;
   display:block;width:min(1080px,calc(100% - 2 * max(20px,2.8cqmin)));box-sizing:border-box;padding:0;overflow:hidden;

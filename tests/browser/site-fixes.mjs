@@ -115,14 +115,13 @@ async function main() {
       await page.close();
     }
 
-    /* P3: the merged interactive model */
+    /* The interactive model page (/experiments, /experiments/lab) was deleted by the owner, 2026-10-24: its old addresses open the not-found page. */
     {
-      const page = await open(desk, base, '/experiments/lab');
-      check(await active(page) === 'proximity', '/experiments/lab opens the merged /experiments page');
-      check(await page.evaluate(() => document.querySelectorAll('[data-ark-page="proximity"] h1').length) === 1, 'which has one h1');
-      /* read without a glossed term's tip: /experiments marks terms on first use since 2026-10-21, and "nodes" is one */
-      check(await page.evaluate(() => { const c = document.querySelector('[data-ark-page="proximity"]').cloneNode(true); c.querySelectorAll('[data-ark-part="term-tip"]').forEach((t) => t.remove()); return c.textContent.includes('do not represent real nodes, votes, or a ledger'); }), 'and keeps the old entry page\'s boundary');
-      await page.close();
+      for (const old of ['/experiments', '/experiments/lab', '/work']) {
+        const page = await open(desk, base, old);
+        check(await active(page) === 'notfound', `${old} opens the not-found page`);
+        await page.close();
+      }
     }
 
     /* footer strip + former orphans */
@@ -134,7 +133,7 @@ async function main() {
          kit's 16px footer: fewer links, by the owner's choice) */
       const expected = await page.evaluate(() => ArkSitePages.journeys().filter((j) => { const lead = ArkSitePages.pages().find((r) => r.journey === j.id && r.lead && ArkUI.pageCatalog[r.key]); return lead && !(ArkUI.headerPages || []).includes(lead.key); }).length);
       check(expected >= 1 && expected < ArkSitePagesCount() && strip.length === expected, `${width}: the footer strip has one link per journey the header does not link (${strip.length} of ${expected})`);
-      check(strip.some((s) => s.href === '/experiments'), `${width}: the footer strip links /experiments`);
+      check(!strip.some((s) => s.href === '/experiments'), `${width}: the footer strip no longer links /experiments (deleted 2026-10-24)`);
       check(await page.evaluate(() => { const s = document.querySelector('.site-footer-strip'); const r = s.getBoundingClientRect(); return r.width > 0 && r.bottom <= innerHeight && getComputedStyle(s).display !== 'none'; }), `${width}: the footer strip is on screen`);
       await page.close();
       if (ctx !== desk) await ctx.close();

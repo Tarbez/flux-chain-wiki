@@ -267,7 +267,7 @@
        menu's duplicate "Publishing service" block, removed 2026-10-21: docs/ux-audit/cms.md P2-9) */
     var me = mesh.identity();
     if (info && info.current && me && info.current.ownerPublicKey && info.current.ownerPublicKey !== me.publicKeyB64) return { title: 'This identity does not own the site\'s name', body: 'The live site was published by another identity, so a publish from this one would be refused. Sign in with the identity that owns the name (Owner key, under Developer details).', actions: [{ label: 'Sign in', run: function () { try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (e) { /* the sentence above still says what to do */ } } }] };
-    if (!me) return { title: 'Sign in to publish', body: 'Publishing is signed with your identity, and its key is not unlocked in this tab (a reload drops it). Choose your sign-in file (.auth.flx) to unlock it; your edits stay.', actions: [{ label: 'Sign in', run: function () { try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (e) { /* the sentence above still says what to do */ } } }] };
+    if (!me) return { title: 'Sign in to publish', body: 'Publishing is signed with your identity, and its key is not unlocked in this tab (a reload drops it). Choose your FXN ID file (.auth.fxn) to unlock it; your edits stay.', actions: [{ label: 'Sign in', run: function () { try { if (gate && gate.reauthenticate) gate.reauthenticate(); } catch (e) { /* the sentence above still says what to do */ } } }] };
     return null;
   }
   /* A click on Publish while it is refused: the sheet that says why, with the remedy and Check

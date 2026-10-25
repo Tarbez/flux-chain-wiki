@@ -13,9 +13,6 @@
 }
 #scene .ark-header a[aria-current="page"] { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--nested)); }
 #scene .ark-header a:focus-visible { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--overlay)); }
-#scene .study-tabs button { border:0; }
-#scene .study-tabs button[aria-pressed="true"] { color:hsl(var(--text-strong)); background-color:hsl(var(--nested)); box-shadow:inset 0 0 0 1px hsl(var(--border-control)); }
-#scene .study-tabs button:focus-visible { color:hsl(var(--text-strong)); background-color:hsl(var(--overlay)); }
 #scene .mesh-drag-target:focus-visible { background:hsl(var(--nested)); }
 #scene input[type="range"]:focus-visible { accent-color:hsl(var(--reference)); background-color:hsl(var(--overlay)); }
 /* Anything made focusable with tabindex that is not a link, button or field -- a tabpanel, a

@@ -74,6 +74,11 @@
         /* every Ark block, as saved and as each instance shows it, passes the SDK's strict
            validateCmsArkBlock first -- refused, nothing is written, and each refusal says which
            component, which field, what it needs (js/content/components.js problems()) */
+        /* a site block's slot (the Card slot) is read by the card's own decoder: load it first when the draft holds one */
+        var siteBlocks = ArkComponents.blocks().filter(function (b) { return b.site; }).map(function (b) { return b.resolver; });
+        if (A.loadCardKit && Object.keys(state.componentsDraft.masters || {}).some(function (id) { return siteBlocks.indexOf(state.componentsDraft.masters[id].resolver) >= 0; })) {
+          try { await A.loadCardKit(); } catch (e) { /* problems() below refuses a slot it cannot check, and says what is needed */ }
+        }
         var refused = ArkComponents.problems(state.componentsDraft);
         if (refused.length) throw new Error('Not saved: ' + refused.length + ' thing' + (refused.length > 1 ? 's' : '') + ' to fix in your components (Library, or the toolbar\'s Component instance). ' + refused.map(function (p) { return p.sentence; }).join(' '));
         if (state.cdirs) await ArkAdminStore.saveComponents(state.cdirs.content, state.componentsDraft);

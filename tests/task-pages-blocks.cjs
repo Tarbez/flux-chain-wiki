@@ -163,32 +163,7 @@ const ROUTES = {
          "layout study" is internal language. The callout stays; the lede says what to do. */
       [/^page:\/div:1\/header:1\/p:[12]$/, 'the eyebrow is gone and the lede says what the visitor can do: "Enter an example FXN amount and a purpose to see what you would review before signing."'],
       [/^page:\/div:1\/section:1\/(h2:1|p:3)$/, 'the result is titled "Your draft"; its extra warning is gone']] },
-  '/experiments': { page: 'proximity', ids: ['lab-', 'work', 'experiments-title', 'study-', 'variable', 'range-'],
-    reshaped: [
-      [/^id:work$/, 'the model\'s section holds the model alone; its breadcrumb, heading and introduction are blocks before it'],
-      [/^page:\/div:1\/section:1\/div:1$/, 'the heading block became the hero (its status line a detail); its introduction is the disclosure after it'],
-      [/^page:\/div:1\/section:1\/div:2$/, 'the same model; the whitespace between its parts changed (the census\'s 160-character cut falls later), and since 2026-10-22 the slider and its analogy come before the stage (first-visit audit, P1: the slider sat below the fold); both keep their old keys by pin'],
-      [/^page:\/div:1\/section:1\/div:2\/div:1(\/div:1)?$/, 'the toolbar and its picker: Ark\'s choice (W4-S14) names itself with a visible legend ("Choose a model") before the three studies'],
-      [/^page:\/div:1\/section:1\/div:2\/div:2(\/span:1)?$/, 'the stage\'s corner label leads with what the code is ("Figure 1 of 3 · FX—001"; FX—001 was unexplained), derived from the study\'s place'],
-      [/^page:\/div:1\/section:1\/div:2\/div:3\/div:1$/, 'the slider\'s control now opens with one line saying how to use it ("Drag the slider ..."), between its label and the slider'],
-      [/^page:\/div:1\/section:1\/p:1$/, 'the evidence line is the pager\'s related pages, under "↳ Evidence context"'],
-      /* 2026-10-22 (first-visit audit 2026-10-22, P1): the page keeps one disclaimer in sight and one name */
-      [/^id:experiments-title$/, 'the h1 is the page\'s fixed name ("Interactive model: authority, lifecycle and networks"); the study question it was rewritten to is the model\'s own heading (#study-title)'],
-      [/^page:\/div:1\/section:1\/div:1\/p:1$/, 'the introduction is one sentence that says what to do; what the model is not moved into "Understand this analogy"'],
-      [/^page:\/div:1\/section:1\/div:2\/div:2\/span:2$/, 'the stage footnote names what the figure shows ("THREE INDEPENDENT GROUPS"); its disclaimer is the hero\'s Status line and the analogy panel'],
-      [/^page:\/div:1\/section:1\/div:2(\/div:3(\/details:1)?)?$/, 'the analogy panel also holds what the model does not do (the old introduction\'s caveats)']
-    ],
-    retired: [
-      [/^page:\/div:1$/, 'the model\'s wrapper; a block page stacks its blocks in its root'],
-      [/^page:\/div:1\/section:1\/div:1\/div:1$/, 'the heading\'s inner column; the hero has none'],
-      [/^page:\/div:1\/section:1\/p:1\/span:1$/, 'the "↳" glyph is the related heading\'s ("↳ Evidence context")'],
-      [/^page:\/div:1\/section:1\/div:2\/div:1\/div:1\/button:\d\/span:1$/, 'the study button\'s name span: the study picker is Ark\'s choice (W4-S14), whose option is one label ("01 Authority") that keeps the button\'s key'],
-      [/^page:\/div:1\/section:1\/div:1\/div:1\/p:1$/, 'the eyebrow "01 / Interactive model" repeated the breadcrumb and the title (first-visit audit 2026-10-22, P1); nothing carries it'],
-      [/^page:\/div:1\/section:1\/div:2\/div:1\/span:1$/, 'the toolbar\'s "INTERACTIVE MODEL" label was the page\'s name a third time (first-visit audit 2026-10-22, P1); nothing carries it']
-    ],
-    reworded: [[/^page:\/div:1\/section:1\/p:1$/, '"Evidence context: claim inventory and evidence registry." reads as the two related links under "↳ Evidence context"'],
-      [/^page:\/div:1\/section:1\/div:1\/div:1\/p:1$/, 'the eyebrow is gone: it repeated the breadcrumb and the title (first-visit audit 2026-10-22, P1)'],
-      [/^page:\/div:1\/section:1\/div:2\/div:2(\/span:2)?$/, 'the footnote names what the figure shows instead of a fourth disclaimer (first-visit audit 2026-10-22, P1)']] },
+  /* '/experiments' (page 'proximity') left this table: the owner deleted that page, 2026-10-24, and its layout-key fixture with it. */
   '/account/domains': { page: 'account/domains', ids: ['account-domains-', 'domainsNameInput'],
     reshaped: [[/^page:\/div:1\/header:1$/, 'the header became the hero (its back link is the breadcrumb\'s "Your account"); the form and the hand-off are the block after it'],
       [/^page:\/div:1\/header:1\/form:1$/, 'the form is Ark\'s form block (2026-10-21): the same label and Track, with Ark\'s required mark'],
@@ -210,14 +185,23 @@ const ROUTES = {
       [/^page:\/div:1\/header:1$/, 'the header became the hero: the address asked for is its detail, Home its action'],
       [/^page:\/div:1\/section:1$/, 'the ways onward are a section header and the journeys\' cards (in sight from 601px, a press away on a phone)'],
       [/^page:\/div:1\/section:1\/ul:1$/, 'the list is Ark\'s card grid; its first row, Home, is the hero\'s action'],
-      [/^page:\/div:1\/section:1\/ul:1\/li:\d$/, 'a journey\'s row is its card: the way in is the card\'s title link, the note its description']
+      [/^page:\/div:1\/section:1\/ul:1\/li:\d$/, 'a journey\'s row is its card: the way in is the card\'s title link, the note its description'],
+      /* 2026-10-24: the stats section replaced the old Prove page, so the journey leads with "Network now" (the card's title link) instead of "Mesh performance" */
+      [/^page:\/div:1\/section:1\/ul:1\/li:4\/a:1$/, 'the Prove journey\'s way in was "Prove: Mesh performance"; its card now leads with "Network now" (the stats section, 2026-10-24)'],
+      /* 2026-10-24: the owner deleted /experiments (page 'proximity'), the lead of the "Previews & lab" journey; the journey is "Previews" now and leads with /palette */
+      [/^page:\/div:1\/section:1\/ul:1\/li:7\/(a|span):1$/, 'the "Previews & lab: Interactive model" card is "Previews: Interface palette", noted "Design previews: not live data" (/experiments was deleted, 2026-10-24)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the dashboard shell\'s column; a block page stacks its blocks in its root'],
       [/^page:\/div:1\/header:1\/div:1$/, 'the header\'s copy column; Ark\'s hero has none'],
-      [/^page:\/div:1\/section:1\/ul:1\/li:1$/, 'the Home row; Home is the hero\'s action, which keeps its link\'s key']
+      [/^page:\/div:1\/section:1\/ul:1\/li:1$/, 'the Home row; Home is the hero\'s action, which keeps its link\'s key'],
     ],
-    reworded: [] }
+    /* the words of three old leaves are gone from the page, each for the reason on its reshaped/retired line above (exact keys, no pattern wider than the leaf) */
+    reworded: [
+      [/^page:\/div:1\/section:1\/ul:1\/li:4\/a:1$/, '"Prove: Mesh performance" is "Network now" (the stats section replaced the page the Prove journey opened, 2026-10-24)'],
+      [/^page:\/div:1\/section:1\/ul:1\/li:7\/a:1$/, '"Previews & lab: Interactive model" is "Previews: Interface palette": /experiments was deleted by the owner, 2026-10-24'],
+      [/^page:\/div:1\/section:1\/ul:1\/li:7\/span:1$/, 'the note "Design previews and illustrative models: not live data" is "Design previews: not live data": the model went with /experiments']
+    ] }
 };
 
 (async () => {
@@ -246,7 +230,7 @@ const ROUTES = {
     if (route === '/bundle-deployer') {
       assert.equal(seen.tabs.length, 3, 'the three parts are tabs');
       assert.equal(seen.handoff, 1, 'the Bundles hand-off (the family kit) stays');
-      for (const to of ['/account', '/download', '/resolutions/deployments', '/how-deployment-works']) assert(seen.pager.includes(to), '/bundle-deployer leads on to ' + to);
+      for (const to of ['/account', '/download', '/resolutions/deployments']) assert(seen.pager.includes(to), '/bundle-deployer leads on to ' + to);
     }
     if (route === '/deploy') {
       assert.deepEqual(seen.tabs, ['01 / Check discovery', '02 / Create or select', '03 / Start the miner', '04 / Verify health', '05 / Inspect topology'], 'every step is a named tab');
@@ -262,13 +246,7 @@ const ROUTES = {
     }
     /* Regression (W4-S14): /deploy and /download drew two Copy controls (.deploy-copy, .download-copy). */
     if (route === '/deploy') assert(!read('js/pages/deploy.js').includes("'deploy-copy'") && read('js/pages/deploy.js').includes('ArkUI.copyCommand('), '/deploy uses the one Copy (ArkUI.copyCommand)');
-    /* Regression (2026-10-20): the lab's slider had no instruction (docs/ux-audit/ledger.md, /experiments/lab P1): one line,
-       derived from the study's own end labels, and the slider is described by it. */
     if (route === '/treasury') assert(seen.tierExplained, '/treasury says what "Tier 1" means beside the label (it was a bare term: ledger TR-3)');
-    if (route === '/experiments') {
-      assert(/^Drag the slider.* from apart to together\.$/.test(seen.hint) || /^Drag the slider.*to move from apart to together\.$/.test(seen.hint), 'the model says how to use it: ' + seen.hint);
-      assert(seen.hintDescribes, 'the slider is described by that instruction');
-    }
     if (route === '/explore') {
       assert.equal(seen.liveParts, 5, 'the live explorer is all there');
       assert.equal(seen.rawOpen, 1, '"Browse the raw records" opens the raw view');

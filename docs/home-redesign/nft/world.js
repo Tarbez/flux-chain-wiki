@@ -394,7 +394,7 @@
     var doc = new DOMParser().parseFromString(e.svg, 'image/svg+xml'), out = { kind: 'plain', line: 'rule' };
     var shapes = doc.querySelectorAll('rect,path,polygon');
     for (var i = 0; i < shapes.length; i++) {
-      var n = shapes[i], stroke = /var\(--(line|rule|faint|acc2|acc|dim|ink)\)/.exec(n.getAttribute('stroke') || '');
+      var n = shapes[i], stroke = new RegExp(window.DefxnCardChrome ? DefxnCardChrome.INK_SOURCE : 'var\\(--(line|rule|faint|acc2|acc|dim|ink)\\)').exec(n.getAttribute('stroke') || '');
       if (!stroke) continue;
       if (n.nodeName === 'rect') {
         var h = parseFloat(n.getAttribute('height')) || 0, w = parseFloat(n.getAttribute('width')) || 0, rx = parseFloat(n.getAttribute('rx')) || 0;

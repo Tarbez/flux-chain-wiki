@@ -1,7 +1,7 @@
 /* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
 ArkManifest.define({
   "id": "download",
-  "title": "Get DEFXN Grid",
+  "title": "Get FXN Browser",
   "route": "/download",
   "group": "page",
   "meta": {
@@ -12,13 +12,91 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "DEFXN Grid has no public download yet."
+      "value": "Get FXN Browser"
+    },
+    "LEDE": {
+      "label": "Lede under the title",
+      "kind": "line",
+      "section": "Page",
+      "value": "The FXN Browser opens DEFXN sites and keeps your FXN ID on your own machine. It has no public download yet."
+    },
+    "BACK": {
+      "label": "Link above the title, back to the products",
+      "kind": "line",
+      "section": "Page",
+      "value": "Back to products"
+    },
+    "NEXT.LINE": {
+      "label": "Next card, one line under its name",
+      "kind": "line",
+      "section": "Page",
+      "value": "Do this once your miner runs."
+    },
+    "APPS.NOTE": {
+      "label": "Line under Get the apps",
+      "kind": "line",
+      "section": "Page",
+      "value": "Each app gets its download here when it is published."
+    },
+    "ASIDE.LINE": {
+      "label": "Related link: Bundle Deployer, one line",
+      "kind": "line",
+      "section": "Page",
+      "value": "Put a DEFXN site on the network."
+    },
+    "GUIDE.LINE": {
+      "label": "Related link: operator guide, one line",
+      "kind": "line",
+      "section": "Page",
+      "value": "Every step in full, with the defaults."
+    },
+    "MOMENT1.TITLE": {
+      "label": "What it does, 1: name",
+      "kind": "line",
+      "section": "Page",
+      "value": "Opens DEFXN sites"
+    },
+    "MOMENT1.LINE": {
+      "label": "What it does, 1: one line",
+      "kind": "line",
+      "section": "Page",
+      "value": "Type a defxn:// address and the site opens in the browser."
+    },
+    "MOMENT2.TITLE": {
+      "label": "What it does, 2: name",
+      "kind": "line",
+      "section": "Page",
+      "value": "Holds your FXN ID"
+    },
+    "MOMENT2.LINE": {
+      "label": "What it does, 2: one line",
+      "kind": "line",
+      "section": "Page",
+      "value": "Sites ask the browser to sign. Your key stays on your machine."
+    },
+    "MOMENT3.TITLE": {
+      "label": "What it does, 3: name",
+      "kind": "line",
+      "section": "Page",
+      "value": "Reaches the network"
+    },
+    "MOMENT3.LINE": {
+      "label": "What it does, 3: one line",
+      "kind": "line",
+      "section": "Page",
+      "value": "It connects to the DEFXN devnet. Nothing on it is live money yet."
+    },
+    "MOMENTS.LABEL": {
+      "label": "What it does: the list name",
+      "kind": "line",
+      "section": "Page",
+      "value": "What the FXN Browser does"
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "DEFXN Grid opens DEFXN sites and holds your FXN ID. Its build targets macOS only, and no download address is published. You can create your FXN ID on this site now. The five steps on this page are for people who run a miner: start one from an owner-approved checkout."
+      "value": "The first build is for macOS. Until it is published, you can do two things today. Create your FXN ID on this site, or run a miner from source with the five steps in the terminal."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -30,7 +108,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 1",
-      "value": "Use Node.js 22 or newer with npm. The storage directory must be writable and the status port free."
+      "value": "Install Node.js 22 or newer with npm. The miner also needs a folder it can write to and a free status port."
     },
     "POINT2.TITLE": {
       "label": "Heading",
@@ -54,7 +132,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "The daemon should stay running and answer on its status listener. Write down the source revision, package version, configuration and when you looked."
+      "value": "The daemon should stay running and answer on its status listener. Note the source revision and package version. Keep a copy of the configuration you started with."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -90,7 +168,7 @@ ArkManifest.define({
       "label": "Operator documentation link",
       "kind": "line",
       "section": "Links",
-      "value": "OPEN THE FULL OPERATOR GUIDE"
+      "value": "Read the operator guide"
     },
     "GUIDE.HREF": {
       "label": "Operator documentation target",
@@ -159,49 +237,49 @@ ArkManifest.define({
       "value": ""
     },
     "APP.BROWSER.NAME": {
-      "label": "DEFXN Grid: name",
+      "label": "FXN Browser: name",
       "kind": "line",
       "section": "Apps",
-      "value": "DEFXN Grid"
+      "value": "FXN Browser"
     },
     "APP.BROWSER.PLATFORMS": {
-      "label": "DEFXN Grid: systems",
+      "label": "FXN Browser: systems",
       "kind": "line",
       "section": "Apps",
       "value": "macOS"
     },
     "APP.BROWSER.TEXT": {
-      "label": "DEFXN Grid: what it is",
+      "label": "FXN Browser: what it is",
       "kind": "text",
       "section": "Apps",
       "value": "Opens DEFXN sites and holds your FXN ID. Windows and Linux builds are not made yet."
     },
     "APP.BROWSER.URL": {
-      "label": "DEFXN Grid: download address (https://..., empty until published)",
+      "label": "FXN Browser: download address (https://..., empty until published)",
       "kind": "line",
       "section": "Apps",
       "value": ""
     },
     "APP.MOBILE.NAME": {
-      "label": "DEFXN Grid for phones: name",
+      "label": "FXN Browser for phones: name",
       "kind": "line",
       "section": "Apps",
-      "value": "DEFXN Grid for phones"
+      "value": "FXN Browser for phones"
     },
     "APP.MOBILE.PLATFORMS": {
-      "label": "DEFXN Grid for phones: systems",
+      "label": "FXN Browser for phones: systems",
       "kind": "line",
       "section": "Apps",
       "value": "iOS · Android"
     },
     "APP.MOBILE.TEXT": {
-      "label": "DEFXN Grid for phones: what it is",
+      "label": "FXN Browser for phones: what it is",
       "kind": "text",
       "section": "Apps",
       "value": "Opens DEFXN sites and runs a node on your phone. Built and run on one iPhone and one Android phone. It is in no store yet."
     },
     "APP.MOBILE.URL": {
-      "label": "DEFXN Grid for phones: download address (https://..., empty until published)",
+      "label": "FXN Browser for phones: download address (https://..., empty until published)",
       "kind": "line",
       "section": "Apps",
       "value": ""

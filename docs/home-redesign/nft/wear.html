@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wear a card</title>
+<link rel="icon" href="data:,">
+<!-- DEFXN identity card: holding a wear (WEAR-AUDIT.md, loop 7). One idea: the wearer chooses a card, the site
+     keeps it on this device, and every page shows it before sign-in.
+     Try a card: it goes on as a preview, and a reload drops it. Wear it: Ark UI's confirm asks first, then the
+     site holds it (js/nft/wear.js, an FLX text in this address's storage). A reload puts it back with Ark UI's skin
+     layer and the skin package alone: no NFT engine, no layer table, no 3D. The engine loads only to try a card.
+     The blocks are Ark UI's own examples. Sample data: the three cards are the review samples. Nothing is live. -->
+<link rel="stylesheet" href="../../../css/themes.css">
+<link rel="stylesheet" href="../../../css/flux-themes.css">
+<link rel="stylesheet" href="../../../assets/kit/defxn-fonts.css">
+<link rel="stylesheet" href="../../../assets/kit/defxn-components.css">
+<link rel="stylesheet" href="../../../css/ark-blocks.css">
+<link rel="stylesheet" href="../../../css/nft-card.css">
+<link rel="stylesheet" href="../../../css/components.css">
+<style>
+  html, body { height: 100%; }
+  body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font-family: var(--font-sans, system-ui, sans-serif); overflow: hidden; }
+  .wr-tool { display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 20px; box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); font: 500 12px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+  .wr-tool b { color: hsl(var(--text-strong)); font-weight: 600; }
+  .wr-state { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-family: var(--font-sans, system-ui, sans-serif); font-size: 13px; }
+  .wr-note { color: hsl(var(--text-faint)); }
+  #site { height: calc(100% - 48px); display: flex; flex-direction: column; background: hsl(var(--canvas)); color: hsl(var(--text)); }
+  .wr-head { display: flex; align-items: center; gap: 22px; padding: 10px 24px; border-bottom: 1px solid hsl(var(--border-default)); }
+  .wr-word { font: 600 14px/1 var(--font-mono, monospace); letter-spacing: .3em; color: hsl(var(--text-strong)); }
+  .wr-head nav { display: flex; gap: 18px; font-size: 14px; }
+  .wr-head nav a { color: hsl(var(--text)); text-decoration: none; }
+  .wr-grow { flex: 1; }
+  .wr-account { color: hsl(var(--text)); font-size: 14px; text-decoration: none; }
+  .wr-main { --type-h1: clamp(2rem, 3.2vw, 3.25rem); flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; padding: 22px 24px; overflow: hidden; }
+  .wr-col { display: grid; gap: 16px; align-content: start; min-height: 0; }
+</style>
+</head>
+<body>
+<div class="wr-tool">
+  <b>Wear a card</b>
+  <span class="wr-state" role="status">Loading.</span>
+  <span class="wr-note">Sample data</span>
+</div>
+<div id="site">
+  <header class="wr-head" data-ark-part="navbar">
+    <span class="wr-word">DEFXN</span>
+    <nav aria-label="Main"><a href="#">Products</a><a href="#">Network</a><a href="#">Docs</a></nav>
+    <span class="wr-grow"></span>
+    <span id="user" hidden></span>
+    <a class="wr-account" href="#">Account</a>
+  </header>
+  <main class="wr-main">
+    <div class="wr-col" id="left"></div>
+    <div class="wr-col" id="right"></div>
+  </main>
+</div>
+<script src="../../../js/ark/vendor/engines.js"></script>
+<script src="../../../js/ark/vendor/ark-kit.js"></script>
+<script src="../../../js/ark/vendor/ark-kit-skin.js"></script>
+<script src="../../../js/nft/timeline.js"></script>
+<script src="../../../js/nft/skin-package.js"></script>
+<script src="../../../js/nft/wear.js"></script>
+<script src="../../../js/nft/site-check.js"></script>
+<script src="../../../js/nft/user-navbar.js"></script>
+<script src="../../../js/nft/card-components.js"></script>
+<script>
+(function () {
+  'use strict';
+  var K = window.ArkKit, W = window.DefxnWear, site = document.getElementById('site'), state = document.querySelector('.wr-state');
+  if (!K || !W || !window.ArkKitSkin) { state.textContent = 'Ark UI or the wear code did not load. Reload the page.'; return; }
+
+  // Ark UI's own examples, by block name
+  var examples = {};
+  K.describeArkBlocks().forEach(function (b) { examples[b.name] = b; });
+  function block(name, host) {
+    var b = examples[name];
+    if (!b) return;
+    try { host.appendChild(K.renderArkBlock({ block: b.name, props: b.example || {} }, { document: document, onInvalid: 'render', resolveHref: function () { return '#'; } })); }
+    catch (e) { console.error('Ark UI block ' + name + ' did not render: ' + e.message); }
+  }
+  ['hero'].forEach(function (n) { block(n, document.getElementById('left')); });
+  // a card slot: the site places "a banner here", and the card that is on fills it
+  var slot = document.createElement('div');
+  document.getElementById('right').appendChild(slot);
+  window.DefxnCardComponents.fill(slot, window.DefxnCardComponents.encode({ kind: 'banner' }));
+  ['callout'].forEach(function (n) { block(n, document.getElementById('right')); });
+
+  function say() {
+    var c = W.current;
+    if (!c) { state.textContent = 'No card is on. Open "Try a card" in the bar.'; return; }
+    state.textContent = c.held ? 'Wearing card ' + c.number + '. This device keeps it, so a reload puts it back.' : 'Trying on card ' + c.number + '. A reload drops it. Choose Wear it to keep it.';
+  }
+  document.addEventListener('defxn:wear', say);
+
+  // the NFT engine loads only to try a card: a held card goes back on without it
+  var ROOT = '../../../', ENGINE = ['js/nft/skin-bundle.js', 'js/nft/cards-data.js', 'js/nft/traits.js', 'js/nft/card-chrome.js', 'js/nft/card-record.js', 'js/nft/grid-look.js', 'js/nft/skin-recipe.js'];
+  var engine = null;
+  function load(src) { return new Promise(function (ok, no) { var s = document.createElement('script'); s.src = ROOT + src; s.onload = ok; s.onerror = function () { no(new Error(src + ' did not load')); }; document.head.appendChild(s); }); }
+  function needEngine() {
+    if (!engine) engine = ENGINE.reduce(function (p, f) { return p.then(function () { return load(f); }); }, Promise.resolve());
+    return engine;
+  }
+  function wearOf(n) {
+    state.textContent = 'Putting on card ' + n + '.';
+    return needEngine().then(function () {
+      var rec = window.DefxnSkin.samples().filter(function (r) { return Number(r.genesisId) === Number(n); })[0];
+      return window.DefxnSkin.recipe(rec, { locked: [] }).then(function (recipe) { return W.of(recipe, rec); });
+    });
+  }
+  // the wearer's bar: one control, the seal, which opens the menu (the samples are for review only). The site check
+  // reads this page's name; a local address has none, and the check says so. The name and the check come from the site.
+  window.DefxnUserNav.mount(document.getElementById('user'), site, { nav: document.querySelector('.wr-head'),
+    samples: ['27', '263', '512'].map(function (n) { return { number: n, label: 'card ' + n, wear: function () { return wearOf(n); } }; }),
+    check: function (name) {
+      return Promise.all([import('../../../gateway/resolve-name.js'), import('../../../gateway/name-config.js')]).then(function (m) {
+        return m[0].resolveName({ name: name, nodes: m[1].NAME_NODES, genesisPubHex: m[1].GENESIS_PUB_HEX });
+      });
+    } });
+
+  // a held card goes back on at once, before anything else loads (window.__restore is for the audit)
+  var t0 = performance.now();
+  window.__restore = W.restore(site).then(function (res) {
+    say();
+    if (res) state.textContent += ' It went back on in ' + Math.round(performance.now() - t0) + ' ms, with no NFT engine loaded.';
+    return res && { number: res.wear.number, applied: res.result.applied.length, ms: Math.round(performance.now() - t0), engine: !!window.DEFXN_TRAITS };
+  }).catch(function (err) { state.textContent = 'The held card did not go back on: ' + err.message; return null; });
+})();
+</script>
+</body>
+</html>

@@ -26,11 +26,12 @@
      - the particles layer's count sets the stagger: many particles, a quick cascade
      - the glow layer's count sets how long the art takes to arrive
      - the edge rule sets the easing: cut snaps, soft eases out, square eases both ways
-   DefxnTimeline.play(root, timeline) -> Promise of { played, ms }. DefxnTimeline.encode / decode write
+   DefxnTimeline.play(root, timeline) -> Promise of { played, cancelled, late, ms }: it follows Ark UI as it dresses. DefxnTimeline.encode / decode write
    and read a timeline as FLX records (DFXNTL1), for timelines a person authors in the CMS 3D studio.
    Works in the browser (window.DefxnTimeline); encode, decode, check and arrival also work in Node. */
 (function (root) {
   'use strict';
+  if (root.DefxnTimeline) return;   // loaded once: a second copy would start a second list of running plays
 
   var MAX_MS = 1200;
   var TARGETS = ['frame', 'corner', 'nameplate', 'accent-strip', 'divider', 'icon', 'art'];
@@ -93,36 +94,81 @@
     if (t.prop === 'grow') return [{ transform: 'scale(' + t.from + ')' }, { transform: 'scale(1)' }];
     return [{ transform: 'rotate(' + t.from + 'deg)' }, { transform: 'rotate(0)' }];
   }
-  function targets(rootEl, t) {
-    if (t.target === 'art') return Array.prototype.slice.call(rootEl.querySelectorAll('.nft-panel-art, .nft-world'));
-    var names = ALIAS[t.target] || [t.target];
-    return Array.prototype.slice.call(rootEl.querySelectorAll('[data-ark-skin-deco]')).filter(function (e) {
-      var d = e.getAttribute('data-ark-skin-deco'); return names.some(function (n) { return d === n || d.indexOf(n + '-') === 0; });
-    }).filter(function (e) { var r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight; });
+  function matches(t, e) {
+    if (t.target === 'art') return !!(e.matches && e.matches('.nft-panel-art, .nft-world'));
+    // Ark UI's pieces carry data-ark-skin-deco; the card's own components (js/nft/card-components.js) data-defxn-piece
+    var d = e.getAttribute && (e.getAttribute('data-ark-skin-deco') || e.getAttribute('data-defxn-piece')), names = ALIAS[t.target] || [t.target];
+    return !!d && names.some(function (n) { return d === n || d.indexOf(n + '-') === 0; });
   }
-  // the animations each root is playing: a new play on a root ends that root's earlier one, and never
-  // another root's (one module-wide list let a play anywhere cancel the art's arrival elsewhere)
+  function onScreen(e) { var r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight; }
+  var PIECES = '[data-ark-skin-deco], [data-defxn-piece], .nft-panel-art, .nft-world';
+  function within(node) {
+    if (node.nodeType !== 1) return [];
+    var list = Array.prototype.slice.call(node.querySelectorAll(PIECES));
+    return node.matches(PIECES) ? [node].concat(list) : list;
+  }
+
+  /* Ark UI dresses a page in slices, the parts on screen first, so most pieces do not exist yet when a card goes
+     on. The player follows Ark UI: each piece added on screen inside the window plays its track at its place in
+     the card's rhythm (its delay plus its stagger, counted from the start), or at once if Ark UI added it later.
+     Its time is cut to end inside MAX_MS, and a piece with less than SHORTEST ms left just appears. The play
+     ends when every animation has ended and no piece came for QUIET ms, and never after MAX_MS.
+     The animations each root is playing: a new play on a root ends that root's earlier one, and never another
+     root's (one module-wide list let a play anywhere cancel the art's arrival elsewhere). */
+  var QUIET = 120, SHORTEST = 160;
   var running = typeof WeakMap !== 'undefined' ? new WeakMap() : null;
   function play(rootEl, tl) {
     var prior = running && running.get(rootEl);
-    if (prior) prior.forEach(function (a) { a.cancel(); });
+    if (prior) prior.stop();
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var ok = check(tl);
     if (!ok.ok) return Promise.reject(new Error('The timeline was not played: ' + ok.problems.join('; ') + '.'));
     if (reduce || !Element.prototype.animate) return Promise.resolve({ played: 0, ms: 0, reduced: !!reduce });
-    var t0 = performance.now(), anims = [];
-    tl.tracks.forEach(function (t) {
-      targets(rootEl, t).slice(0, t.most || 12).forEach(function (e, i) {
-        var a = e.animate(keyframes(t), { duration: t.ms, delay: (t.delay || 0) + i * (t.stagger || 0), easing: EASE[t.easing], fill: 'backwards' });
-        anims.push(a);
-      });
-    });
-    if (running) running.set(rootEl, anims);
-    var cancelled = 0;
-    return Promise.all(anims.map(function (a) { return a.finished.catch(function () { cancelled++; }); })).then(function () {
-      anims.forEach(function (a) { a.cancel(); });               // nothing stays behind on the element
-      if (running && running.get(rootEl) === anims) running.delete(rootEl);
-      return { played: anims.length, cancelled: cancelled, ms: Math.round(performance.now() - t0) };
+    var t0 = performance.now(), anims = [], count = tl.tracks.map(function () { return 0; }), seen = [], live = 0, cancelled = 0, late = 0, last = t0;
+    return new Promise(function (resolve) {
+      var done = false, obs = null, quiet = null, cap = null;
+      function finish() {
+        if (done) return;
+        done = true;
+        if (obs) obs.disconnect();
+        clearTimeout(quiet); clearTimeout(cap);
+        anims.forEach(function (a) { a.cancel(); });               // nothing stays behind on the element
+        if (running && running.get(rootEl) === me) running.delete(rootEl);
+        resolve({ played: anims.length, cancelled: cancelled, late: late, ms: Math.round(performance.now() - t0) });
+      }
+      function settle() {
+        clearTimeout(quiet);
+        if (done || live) return;
+        var wait = QUIET - (performance.now() - last);
+        if (wait <= 0) finish(); else quiet = setTimeout(settle, wait);
+      }
+      function start(e) {
+        if (done || seen.indexOf(e) >= 0) return;
+        for (var k = 0; k < tl.tracks.length; k++) {
+          var t = tl.tracks[k];
+          if (!matches(t, e) || count[k] >= (t.most || 12)) continue;
+          if (!onScreen(e)) return;
+          seen.push(e);
+          var now = performance.now() - t0, at = Math.max(now, (t.delay || 0) + count[k] * (t.stagger || 0)), ms = Math.min(t.ms, MAX_MS - at);
+          if (ms < SHORTEST) { late++; return; }
+          var a = e.animate(keyframes(t), { duration: ms, delay: at - now, easing: EASE[t.easing], fill: 'backwards' });
+          count[k]++; live++; anims.push(a); last = performance.now();
+          a.finished.then(function () { live--; settle(); }, function () { live--; if (!done) cancelled++; settle(); });
+          return;
+        }
+      }
+      var me = { stop: function () { if (!done) cancelled += anims.filter(function (a) { return a.playState !== 'finished'; }).length; finish(); } };
+      if (running) running.set(rootEl, me);
+      Array.prototype.forEach.call(rootEl.querySelectorAll(PIECES), start);
+      if (typeof MutationObserver !== 'undefined') {
+        obs = new MutationObserver(function (list) {
+          if (performance.now() - t0 > MAX_MS - SHORTEST) { obs.disconnect(); obs = null; return; }
+          list.forEach(function (m) { Array.prototype.forEach.call(m.addedNodes, function (n) { within(n).forEach(start); }); });
+        });
+        obs.observe(rootEl, { childList: true, subtree: true });
+      }
+      cap = setTimeout(finish, MAX_MS + 50);
+      settle();
     });
   }
 

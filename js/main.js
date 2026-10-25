@@ -1551,14 +1551,14 @@
   var cmsSkin = { key: '', sample: '', seq: 0, chain: Promise.resolve(), listening: false, focusTimer: 0 };
   function cmsSkinRelay(error) {
     var site = window.DefxnSkinSite, parts = window.DefxnSkinParts, recipe = site && site.active(), offered = {};
-    /* what the card sends, whatever part wears it: the rules that are not keep or none (DefxnSkinParts.rulesFor decides the parts) */
+    /* what the card sends to every part: the rules that are not keep or none (the site and the policy switch some off, DefxnSkinParts.switchOff) */
     if (recipe && recipe.rules) Object.keys(recipe.rules).forEach(function (rule) { var v = recipe.rules[rule]; if (v && v !== 'keep' && v !== 'none') offered[rule] = v; });
     /* each part's rules name (DefxnSkinSite.ruleKey: card -> CARD), so the editor's switches reach Ark UI's lower-case block parts too */
     var report = (site && site.report()) || null, ruleKeys = {};
     if (report && site.ruleKey) report.parts.forEach(function (p) { ruleKeys[p.key] = site.ruleKey(p.key); });
     try {
       window.parent.postMessage({ type: 'defxn-cms-skin-report', sample: cmsSkin.sample, on: !!recipe, family: recipe ? recipe.family || null : null,
-        report: report, ruleKeys: ruleKeys, offered: offered, codeAllow: parts ? parts.ALLOW : {}, error: error || '' }, location.origin);
+        report: report, ruleKeys: ruleKeys, offered: offered, codeOff: parts ? parts.OFF : {}, error: error || '' }, location.origin);
     } catch (e) { /* the editor is gone */ }
   }
   function cmsSkinFocus(selector) {

@@ -38,7 +38,11 @@
    js/nft/chrome/ is generated: a file no element names any more is deleted.
    The number of different mixes is the product of the folders' element counts. Adding one file to
    any folder raises it. Run from this folder:  node make-layers.mjs
-   Run it again after any change in layers/. */
+   Run it again after any change in layers/.
+
+   WEAR-ONLY categories (the owner, 2026-10-25): layers/worn/<NN>-<key>/ holds categories that are not in the DNA. No
+   card is born with one; an owner buys or wears one by name (a skin "button:Pill"). They are read like any layer and
+   written as window.DEFXN_WORN beside DEFXN_LAYERS, so they never change a card's mix, its odds or the table version. */
 import { readFileSync, readdirSync, writeFileSync, statSync, existsSync, mkdirSync, unlinkSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
@@ -131,7 +135,7 @@ function fail(file, problem, remedy) {
 }
 
 // the chrome slots: each slot's box in card units (the card is 1000 x 700)
-export const SLOTS = { corner: [120, 120], frame: [1000, 700], tag: [360, 50], ornament: [360, 80], divider: [360, 24], emblem: [30, 34] };
+export const SLOTS = { corner: [120, 120], frame: [1000, 700], tag: [360, 50], ornament: [360, 80], divider: [360, 24], emblem: [30, 34], button: [200, 56] };
 const FIELDS = ['genesisId', 'identity', 'name', 'status', 'role', 'network', 'joined', 'serial', 'tagline1', 'tagline2', 'dna', 'number', 'mark', 'palette'];
 
 function attrsOf(svg, file) {
@@ -164,12 +168,17 @@ function paletteOf(css, file) {
   return out;
 }
 
-export function build() {
+const WORN = join(LAYERS, 'worn');
+export function build() { return inOrder(readLayers(LAYERS, '')); }
+// the wear-only categories: read like layers, kept out of the DNA (no order.flx place, no table version)
+export function buildWorn() { return existsSync(WORN) ? readLayers(WORN, 'worn/') : []; }
+function readLayers(root, prefix) {
   const layers = [];
-  for (const folder of readdirSync(LAYERS).sort()) {
-    const dir = join(LAYERS, folder);
+  for (const name of readdirSync(root).sort()) {
+    const dir = join(root, name), folder = prefix + name;
     if (!statSync(dir).isDirectory()) continue;
-    const fm = folder.match(/^(\d\d)-([a-z]+)$/);
+    if (!prefix && name === 'worn') continue;
+    const fm = name.match(/^(\d\d)-([a-z]+)$/);
     if (!fm) fail(folder, 'the folder name is not <NN>-<key>', 'Name it like "07-glow": two digits for its place, then a lower-case key.');
     const elements = [];
     const files = [];
@@ -200,8 +209,57 @@ export function build() {
     const key = fm[2];
     layers.push({ key, name: key[0].toUpperCase() + key.slice(1), folder, elements });
   }
-  if (!layers.length) fail('layers/', 'no layer folders', 'Add a folder such as layers/01-backdrop with one element file in it.');
+  if (!layers.length && !prefix) fail('layers/', 'no layer folders', 'Add a folder such as layers/01-backdrop with one element file in it.');
   return layers;
+}
+
+/* ---------- the DNA order, append only (WEAR-AUDIT.md H5, H6) ----------
+   A card's DNA names each element by its place in its layer. Sorted file names made that place, so adding a file
+   in the middle of the alphabet, or renaming one, moved every element after it, and every card born before
+   would have meant other elements. layers/order.flx records each element once, in the order it first appeared:
+     DFXNORDER1-F<hex folder>-N<hex element name>
+   A recorded element keeps its place for good. A new one goes after every recorded one of its layer, and a new
+   layer after every recorded layer. A recorded element or layer that is gone is refused by name: put it back, or
+   hold it in the review (layers/review.flx). The file only grows: lines are appended, never rewritten. */
+const ORDER = join(LAYERS, 'order.flx');
+function hexOf(s) { return Buffer.from(String(s), 'utf8').toString('hex'); }
+function fromHex(h) { return Buffer.from(h, 'hex').toString('utf8'); }
+export function readOrder() {
+  if (!existsSync(ORDER)) return [];
+  const text = readFileSync(ORDER, 'utf8'), lines = text.split('\n').filter(Boolean);
+  const rows = lines.map((l, i) => {
+    const m = /^DFXNORDER1-F((?:[0-9a-f]{2})+)-N((?:[0-9a-f]{2})+)$/.exec(l);
+    if (!m) fail('layers/order.flx', `line ${i + 1} is not DFXNORDER1-F<hex folder>-N<hex name>`, 'Restore the file from its last good copy: it is written only by this script.');
+    return [fromHex(m[1]), fromHex(m[2])];
+  });
+  if (rows.map(([f, n]) => `DFXNORDER1-F${hexOf(f)}-N${hexOf(n)}`).join('\n') + '\n' !== lines.join('\n') + '\n') fail('layers/order.flx', 'it does not encode back to the same text', 'Restore the file from its last good copy.');
+  return rows;
+}
+function inOrder(layers) {
+  const rows = readOrder();
+  if (!rows.length) return layers;                 // the first run records the order the files give today
+  const recorded = new Map();
+  for (const [folder, name] of rows) { if (!recorded.has(folder)) recorded.set(folder, []); recorded.get(folder).push(name); }
+  const byFolder = new Map(layers.map((l) => [l.folder, l]));
+  const order = [];
+  for (const folder of recorded.keys()) {
+    const l = byFolder.get(folder);
+    if (!l) fail(folder, 'this layer is recorded in layers/order.flx, and its folder is gone', 'Every card\'s DNA has a place for it. Put the folder back.');
+    const names = recorded.get(folder), have = new Map(l.elements.map((e) => [e.name, e]));
+    const gone = names.filter((n) => !have.has(n));
+    if (gone.length) fail(`${folder}/${gone[0]}`, `this element is recorded in layers/order.flx, and its file is gone` + (gone.length > 1 ? ` (and ${gone.length - 1} more)` : ''), 'A card\'s DNA points at it by its place. Put the file back under the same name, or hold the element in layers/review.flx instead of deleting it.');
+    l.elements = names.map((n) => have.get(n)).concat(l.elements.filter((e) => names.indexOf(e.name) < 0));
+    order.push(l);
+  }
+  const fresh = layers.filter((l) => !recorded.has(l.folder));
+  if (fresh.length && order.length && fresh.some((l) => l.folder < order[order.length - 1].folder)) fail(fresh[0].folder, 'a new layer would sort before a recorded one', 'A new layer goes last: give its folder a number after every other layer.');
+  return order.concat(fresh);
+}
+// the lines to add for elements the record does not have yet, in the order the table now holds them
+function orderToAppend(layers) {
+  const known = new Set(readOrder().map(([f, n]) => f + '\n' + n)), out = [];
+  for (const l of layers) for (const e of l.elements) if (!known.has(l.folder + '\n' + e.name)) out.push(`DFXNORDER1-F${hexOf(l.folder)}-N${hexOf(e.name)}`);
+  return out;
 }
 
 // the builder names js/nft/art3d.js and js/nft/builders/*.js register, read from their register('name', ...) calls
@@ -260,7 +318,14 @@ export function readReview(layers) {
 
 function main() {
   const layers = build();
-  const review = readReview(layers);
+  const added = orderToAppend(layers);
+  if (added.length) {
+    writeFileSync(ORDER, (existsSync(ORDER) ? readFileSync(ORDER, 'utf8') : '') + added.join('\n') + '\n');
+    console.log(`order: ${added.length} element${added.length > 1 ? 's' : ''} recorded in layers/order.flx (appended; every recorded place is kept)`);
+  }
+  const worn = buildWorn();
+  for (const l of worn) for (const e of l.elements) if (e.kind !== 'chrome') fail(`${l.folder}/${e.file}`, 'a wear-only category holds only drawn (chrome) elements', 'Give it a data-slot, or move it to a birth layer.');
+  const review = readReview(layers.concat(worn));
   const { names, sources } = builderNames();
   for (const l of layers) for (const e of l.elements) {
     if (e.kind !== 'build') continue;
@@ -292,9 +357,13 @@ function main() {
     '/* the table version: SHA-256 of every layer and element name in order. A stored DNA names it. */\n' +
     `window.DEFXN_LAYERS_TABLE = '${tableVersion(layers)}';\n` +
     '/* the owner\'s review (layers/review.flx): held elements and clashing pairs, as "layer/Name" */\n' +
-    'window.DEFXN_REVIEW = ' + JSON.stringify({ hold: review.hold, clash: review.clash }) + ';\n';
+    'window.DEFXN_REVIEW = ' + JSON.stringify({ hold: review.hold, clash: review.clash }) + ';\n' +
+    '/* the wear-only categories (layers/worn/): out of the DNA; a card has one only when its owner wears it */\n' +
+    'window.DEFXN_WORN = ' + JSON.stringify(worn) + ';\n';
   writeFileSync(OUT, text);
   const { table: skin, chunks } = skinLayers(layers);
+  const { table: skinWorn, chunks: wornChunks } = skinLayers(worn);
+  for (const [k, v] of wornChunks) chunks.set(k, v);
   mkdirSync(CHROME_DIR, { recursive: true });
   const keep = new Set();
   for (const [chunk, { id, svg }] of chunks) {
@@ -313,7 +382,8 @@ function main() {
     'window.DEFXN_LAYERS = ' + ascii(JSON.stringify(skin)) + ';\n' +
     `window.DEFXN_LAYERS_TABLE = '${tableVersion(layers)}';\n` +
     "window.DEFXN_LAYERS_SCOPE = 'skin';\n" +
-    'window.DEFXN_REVIEW = ' + JSON.stringify({ hold: review.hold, clash: review.clash }) + ';\n';
+    'window.DEFXN_REVIEW = ' + JSON.stringify({ hold: review.hold, clash: review.clash }) + ';\n' +
+    'window.DEFXN_WORN = ' + ascii(JSON.stringify(skinWorn)) + ';\n';
   writeFileSync(SKIN_OUT, skinText);
   console.log(`wrote ${OUT}: ${layers.length} layers, ${count} elements, ${mixes.toLocaleString('en-US')} different mixes`);
   console.log(`wrote ${SKIN_OUT}: ${(Buffer.byteLength(skinText) / 1024).toFixed(0)} KB, the full bundle is ${(Buffer.byteLength(text) / 1024).toFixed(0)} KB`);
@@ -322,6 +392,7 @@ function main() {
   console.log(`builders: ${sources.length} files in js/nft/builders/ and js/nft/art3d.js, ${names.size} builders in all`);
   console.log(`census: ${cen.census.size} 3D elements counted` + (cen.missing.length ? `; ${cen.missing.length} not counted (run make-census.mjs): ${cen.missing.slice(0, 4).join(', ')}` : '') + (cen.stale.length ? `; ${cen.stale.length} stale, left out (run make-census.mjs): ${cen.stale.slice(0, 4).join(', ')}` : ''));
   console.log(`review: ${review.hold.length} held, ${review.clash.length} clashing pairs` + (review.dropped.length ? `; dropped (no such element now): ${review.dropped.join(', ')}` : ''));
+  for (const l of worn) console.log(`  ${l.folder.padEnd(14)} ${String(l.elements.length).padStart(2)}  wear-only: ${l.elements.map((e) => e.name + ' ' + e.weight).join(', ')}`);
   for (const l of layers) console.log(`  ${l.folder.padEnd(14)} ${String(l.elements.length).padStart(2)}  ${l.elements.map((e) => e.name + ' ' + e.weight).join(', ')}`);
 }
 

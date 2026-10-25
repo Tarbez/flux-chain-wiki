@@ -63,13 +63,13 @@ html:not([data-world="on"]) .wc-sheet, html:not([data-world="on"]) .wc-card {
 .wc-flow { display: grid; grid-template-columns: 28px minmax(0, 1fr) 28px; grid-template-rows: auto auto; column-gap: 10px; row-gap: 5px; align-items: center; margin: 0 0 12px; flex: none; }
 .wc-flow .fl-step { grid-row: 1 / 3; width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: hsl(var(--text-strong));
   box-shadow: inset 0 0 0 1px hsl(var(--border-default)); transition: box-shadow .2s, color .2s; }
-.wc-flow a.fl-step:hover { color: hsl(var(--reference)); box-shadow: inset 0 0 0 1px hsl(var(--reference) / .6); }
+.wc-flow a.fl-step:hover { color: hsl(var(--reference)); box-shadow: inset 0 0 0 1px hsl(var(--reference-400)); }
 .wc-flow .fl-step svg { width: 13px; height: 11px; }
 .wc-flow span.fl-step { box-shadow: none; }
 .wc-flow .fl-segs { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 4px; }
 .wc-flow .fl-segs a { height: 4px; border-radius: 2px; background: hsl(var(--text-faint) / .45); transition: background .3s; }
 .wc-flow .fl-segs a.done { background: hsl(var(--signal) / .55); }
-.wc-flow .fl-segs a[aria-current="step"] { background: hsl(var(--signal)); }
+.wc-flow .fl-segs a[aria-current="step"] { background: hsl(var(--reference)); }
 .wc-flow .fl-segs a:hover { background: hsl(var(--text-muted)); }
 .wc-flow > .fl-step:first-child { grid-column: 1; }
 .wc-flow > .fl-step:last-child { grid-column: 3; }
@@ -113,10 +113,10 @@ html:not([data-world="on"]) .wc-sheet, html:not([data-world="on"]) .wc-card {
 .wc-recs li + li a { margin-top: 2px; }
 .wc-recs a { display: grid; grid-template-columns: 36px 1fr auto auto; gap: 14px; align-items: center; padding: 5px 10px; border-radius: 8px; border: 1px solid transparent; color: hsl(var(--text-strong)); }
 .wc-recs a:hover, .wc-recs a.hot { background: hsl(var(--text-strong) / .05); }
-.wc-recs a[aria-current="true"] { border-color: hsl(var(--signal) / .5); background: hsl(var(--signal) / .07); }
+.wc-recs a[aria-current="true"] { border-color: hsl(var(--reference-400)); background: hsl(var(--reference-100)); }
 .wc .mk { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; background: hsl(var(--text-strong) / .05); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); color: hsl(var(--text-muted)); flex: none; }
 .wc .mk svg { width: 18px; height: 18px; }
-.wc-recs a[aria-current="true"] .mk { color: hsl(var(--signal)); box-shadow: inset 0 0 0 1px hsl(var(--signal) / .5); }
+.wc-recs a[aria-current="true"] .mk { color: hsl(var(--reference)); box-shadow: inset 0 0 0 1px hsl(var(--reference-400)); }
 .wc-recs b { display: block; font: 600 16px/1.25 var(--font-sans); }
 .wc-recs small { display: block; margin-top: 3px; font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wc-recs .go { width: 14px; height: 12px; color: hsl(var(--text-faint)); }
@@ -137,7 +137,7 @@ html:not([data-world="on"]) .wc-sheet, html:not([data-world="on"]) .wc-card {
 .wc-timeline::before { content: ''; position: absolute; left: 0; right: 0; top: 33px; height: 1px; background: hsl(var(--border-default)); }
 .wc-timeline a { position: absolute; top: 33px; transform: translate(-50%, -50%); display: grid; place-items: center; width: 30px; height: 30px; }
 .wc-timeline a i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--text-faint)); transition: transform .5s var(--glide), background .5s; }
-.wc-timeline a[aria-current="true"] i { background: hsl(var(--signal)); transform: scale(1.5); }
+.wc-timeline a[aria-current="true"] i { background: hsl(var(--reference)); transform: scale(1.5); }
 .wc-timeline a span { position: absolute; bottom: 26px; white-space: nowrap; font: 500 10px/1.35 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); text-align: center; }
 .wc-timeline a span em, .wc-timeline a span u { display: block; font-style: normal; text-decoration: none; }
 .wc-timeline a.short span u { display: none; }
@@ -184,7 +184,7 @@ html:not([data-world="on"]) .wc-sheet, html:not([data-world="on"]) .wc-card {
 .wc-anat li span svg { width: 12px; height: 12px; }
 .wc-anat li b { font: 500 10px/1.3 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
 .wc-anat li small { font-size: 12px; line-height: 1.3; color: hsl(var(--text-strong)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wc-anat li.last { border-color: hsl(var(--primary) / .55); background: hsl(var(--primary) / .08); }
+.wc-anat li.last { border-color: hsl(var(--primary-400)); background: hsl(var(--primary-100)); }
 .wc-anat li.last span { color: hsl(var(--primary)); }
 .wc-anat figcaption { margin-top: 8px; font-size: 12px; line-height: 1.45; color: hsl(var(--text-muted)); max-width: 60ch; }
 .wc-sig { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 18px; align-items: start; }

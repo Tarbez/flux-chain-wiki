@@ -479,6 +479,66 @@ ArkManifest.define({
       "kind": "line",
       "section": "Intro (3D world)",
       "value": "Resolvers"
+    },
+    "LANDING.LINK.NETWORK.NAME": {
+      "label": "Link card: Network, name",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "Network"
+    },
+    "LANDING.LINK.NETWORK.LINE": {
+      "label": "Link card: Network, one line",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "Measured numbers from the devnet."
+    },
+    "LANDING.LINK.CHAINS.NAME": {
+      "label": "Link card: Chains, name",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "Chains"
+    },
+    "LANDING.LINK.CHAINS.LINE": {
+      "label": "Link card: Chains, one line",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "Every identity keeps its own chain."
+    },
+    "LANDING.LINK.RESOLVERS.NAME": {
+      "label": "Link card: Resolvers, name",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "Resolvers"
+    },
+    "LANDING.LINK.RESOLVERS.LINE": {
+      "label": "Link card: Resolvers, one line",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "What each resolver reads and signs."
+    },
+    "LANDING.LINK.PRODUCTS.NAME": {
+      "label": "Link card: Products, name",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "Products"
+    },
+    "LANDING.LINK.PRODUCTS.LINE": {
+      "label": "Link card: Products, one line",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "What you can resolve today."
+    },
+    "LANDING.LINK.DOCS.NAME": {
+      "label": "Link card: Docs, name",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "Docs"
+    },
+    "LANDING.LINK.DOCS.LINE": {
+      "label": "Link card: Docs, one line",
+      "kind": "line",
+      "section": "Intro (3D world), link cards",
+      "value": "The canonical reference."
     }
   }
 });

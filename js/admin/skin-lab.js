@@ -2,10 +2,11 @@
    ADMIN EDITOR · THE SKIN LAB (js/admin/skin-lab.js)
    ---------------------------------------------------------------------
    Owns: the Skin lab view (More > Skin lab). The owner tests NFT card skins on the real site "skin by skin":
-   which parts of the page take which rules, which rules Ark UI takes back, and which rules each part may
-   take at all. The answer to the last one is content, the skin policy (js/content/skin-policy.js).
+   which parts of the page take which rules, which rules Ark UI takes back, and which rules the site switches
+   off. A card dresses the site by its own rules (the owner, 2026-10-24); the switches are content, the skin
+   policy (js/content/skin-policy.js).
    Draws: a picker (the site's own look, or one of the three review samples), the report of what each part
-   took, and one switch per part and rule. A switch edits the DRAFT policy (state.skinPolicyDraft) and the
+   took, and one switch per part and rule, on unless switched off. A switch edits the DRAFT policy (state.skinPolicyDraft) and the
    canvas applies the sample again at once. Pressing a part outlines its first element on the canvas.
    Must not: write a file (Save does: ArkAdminStore.saveSkinPolicy, as FLX), hold a skin itself (the canvas
    applies it: js/main.js, through DefxnSkinSite), or name a rule or a part. Rows come from the canvas's
@@ -54,46 +55,42 @@
     if (typeof A.historyAction === 'function') A.historyAction({ label: label, merge: '', undo: function () { return putBack(before); }, redo: function () { return putBack(next); } });
     return true;
   }
-  function sameList(a, b) { return JSON.stringify(a || null) === JSON.stringify(b || null); }
 
-  /* ---- what the policy allows ------------------------------------------------------------------ */
+  /* ---- what the policy switches off ------------------------------------------------------------- */
   function family() { return lab.report && lab.report.family ? lab.report.family : null; }
-  function codeAllow() { return (lab.report && lab.report.codeAllow) || {}; }
-  /* the rules a part may wear for the card on the canvas. The site's table (DefxnSkinParts.ALLOW) is the only
-     source: a part it does not name, and the policy does not name, wears nothing. */
-  function allowedFor(part, fam) { return ArkSkinPolicy.effectiveAllow(codeAllow(), state.skinPolicyDraft, fam)[part] || []; }
+  function codeOff() { return (lab.report && lab.report.codeOff) || {}; }
+  /* the rules a part does not wear for the card on the canvas: the site's (DefxnSkinParts.OFF), the policy's and the
+     card family's together. Every other rule the card sends reaches the part, and Ark UI decides what it can wear. */
+  function offFor(part, fam) { return ArkSkinPolicy.effectiveOff(codeOff(), state.skinPolicyDraft, fam)[part] || []; }
   function scopeFamily() { return lab.scope === 'family' ? family() : null; }
-  function allowed(part, rule) { return allowedFor(part, family()).indexOf(rule) >= 0; }
+  function allowed(part, rule) { return offFor(part, family()).indexOf(rule) < 0; }
 
-  /* Turn one rule on or off for one part. The list is written for the scope chosen (every card, or this card's
-     set); when it equals what the scope would have anyway, the entry is removed so the policy stays small. */
+  /* Switch one rule off or on again for one part, in the scope chosen (every card, or this card's set). A switch
+     only ever takes a rule away, so a rule the site or every card switched off cannot be switched on for one set:
+     that switch is shown off and locked (lockedOff below). */
   function setAllowed(part, rule, on) {
     var fam = scopeFamily();
-    step((on ? 'allowing ' : 'stopping ') + rule + ' on ' + part, function () {
-      var list = allowedFor(part, fam).filter(function (r) { return r !== rule; });
-      if (on) list.push(rule);
+    step((on ? 'switching on ' : 'switching off ') + rule + ' on ' + part, function () {
+      var d = state.skinPolicyDraft, layer;
+      if (fam) { d.families = d.families || {}; d.families[fam] = d.families[fam] || { off: {} }; layer = d.families[fam].off = d.families[fam].off || {}; }
+      else layer = d.off = d.off || {};
+      var list = (layer[part] || []).filter(function (r) { return r !== rule; });
+      if (!on) list.push(rule);
       list = ArkSkinPolicy.RULES.filter(function (r) { return list.indexOf(r) >= 0; });
-      var d = state.skinPolicyDraft;
-      if (fam) {
-        var inherited = ArkSkinPolicy.effectiveAllow(codeAllow(), d, null)[part];
-        d.families = d.families || {}; d.families[fam] = d.families[fam] || { allow: {} };
-        if (sameList(list, inherited || [])) delete d.families[fam].allow[part]; else d.families[fam].allow[part] = list;
-      } else {
-        var code = codeAllow()[part];
-        d.allow = d.allow || {};
-        if (sameList(list, code || [])) delete d.allow[part]; else d.allow[part] = list;
-      }
+      if (list.length) layer[part] = list; else delete layer[part];
     });
+  }
+  /* switched off by a wider layer than the scope edits (the site's code, or every card when editing one set) */
+  function lockedOff(part, rule) {
+    var wider = scopeFamily() ? ArkSkinPolicy.effectiveOff(codeOff(), state.skinPolicyDraft, null) : codeOff();
+    return (wider[part] || []).indexOf(rule) >= 0;
   }
 
   /* ---- the report, as rows ---------------------------------------------------------------------- */
   /* One row per part in the report: every part is a candidate, because turning a rule on for a part the site table
-     does not name makes it wear that rule. "has" marks the parts worth listing first: rules applied, skipped or
-     taken back, a rule allowed for them, or a mention in the draft (so a part switched fully off can be switched on again). */
-  function mentioned(key) {
-    var d = state.skinPolicyDraft, fam = family();
-    return !!(d.allow && d.allow[key]) || !!(fam && d.families && d.families[fam] && d.families[fam].allow[key]);
-  }
+     names makes it wear the card's rules. "has" marks the parts worth listing first: rules applied, skipped or
+     taken back, or a rule switched off for them (so a part switched fully off can be switched on again). */
+  function mentioned(key) { return offFor(key, family()).length > 0; }
   function rows() {
     var rep = lab.report && lab.report.report;
     if (!rep) return [];
@@ -106,7 +103,7 @@
       var general = skipped.filter(function (x) { return x.rule === '*'; })[0] || null;
       var taken = reverted.filter(function (x) { return x.rule !== 'colours'; });
       var target = policyKey(p.key) || p.key;
-    var has = Object.keys(applied).length > 0 || skipped.length > 0 || reverted.length > 0 || allowedFor(target, family()).length > 0 || mentioned(target);
+    var has = Object.keys(applied).length > 0 || skipped.length > 0 || reverted.length > 0 || mentioned(target);
       return { part: p, ruleKeys: ruleKeys, applied: applied, skipped: skipped, reverted: reverted, colours: colours, general: general,
         offered: offered, has: has, broken: taken.length > 0 || !!colours };
     });
@@ -119,16 +116,18 @@
   function reasonOf(list, rule) { var hit = list.filter(function (x) { return x.rule === rule; })[0]; return hit ? hit.why : ''; }
   function ruleLine(row, rule) {
     var target = policyKey(row.part.key), key = target || row.part.key, on = allowed(key, rule), editable = !!target;
-    var tone = row.reverted.some(function (x) { return x.rule === rule; }) ? 'taken' : row.applied[rule] !== undefined ? 'applied' : row.skipped.some(function (x) { return x.rule === rule; }) ? 'skipped' : on ? 'idle' : 'off';
+    /* off first: a switch shows its new state at once, before the canvas answers with a fresh report */
+    var tone = !on ? 'off' : row.reverted.some(function (x) { return x.rule === rule; }) ? 'taken' : row.applied[rule] !== undefined ? 'applied' : row.skipped.some(function (x) { return x.rule === rule; }) ? 'skipped' : 'idle';
     var text = tone === 'applied' ? String(row.applied[rule])
       : tone === 'taken' ? 'Taken back: ' + reasonOf(row.reverted, rule)
       : tone === 'skipped' ? 'Not taken: ' + reasonOf(row.skipped, rule)
-      : tone === 'off' ? 'Off. The card would send ' + (row.offered[rule] !== undefined ? String(row.offered[rule]) : 'this rule') + '.'
-      : 'Allowed, but this page did not take it.';
+      : tone === 'off' ? 'Switched off. The card sends ' + (row.offered[rule] !== undefined ? String(row.offered[rule]) : 'this rule') + '.'
+      : 'On, but this page did not take it.';
     var id = 'skin-' + key.replace(/[^A-Za-z0-9]+/g, '_') + '-' + rule;
-    var input = h('input', { id: id, type: 'checkbox', role: 'switch', 'data-part': key, 'data-rule': rule, 'aria-label': 'Allow ' + rule + ' on ' + key });
+    var input = h('input', { id: id, type: 'checkbox', role: 'switch', 'data-part': key, 'data-rule': rule, 'aria-label': rule + ' on ' + key });
     input.checked = on;
     if (!editable) { input.disabled = true; input.title = 'No skin rule can reach this part yet: Ark UI has no rules name for it.'; }
+    else if (lockedOff(key, rule)) { input.disabled = true; input.title = scopeFamily() ? 'Switched off for every card. Switch it on under “Every card” first.' : 'Switched off by the site’s code (DefxnSkinParts.OFF).'; }
     else input.addEventListener('change', function () { setAllowed(key, rule, input.checked); });
     return h('li', { class: 'skin-rule', 'data-tone': tone, 'data-rule-row': rule },
       h('label', { for: id, class: 'skin-rule-name', text: rule }),
@@ -235,7 +234,7 @@
         if (!shown.length) list.appendChild(h('li', { class: 'hint', text: lab.filter === 'problems' ? 'No part had a rule or a colour taken back.' : 'No part on this page wears rules.' }));
         root.appendChild(list);
         var others = all.length - listed.length;
-        if (others > 0 && lab.filter !== 'all') root.appendChild(h('p', { class: 'hint', text: others + ' other parts wear nothing. “All parts” lists them, and a switch there gives one a rule.' }));
+        if (others > 0 && lab.filter !== 'all') root.appendChild(h('p', { class: 'hint', text: others + ' other parts took no rule on this page. “All parts” lists them.' }));
         root.appendChild(tokensBox(rep.report));
       }
       root.appendChild(h('p', { class: 'hint', text: 'Save in the header keeps the policy for the whole site.' }));
@@ -247,7 +246,7 @@
   /* the canvas answered (js/admin/bridge.js): keep the newest report and redraw */
   function skinReport(message) {
     if (message.sample !== state.skinChoice) return;   /* an answer to a pick that has since changed */
-    lab.report = { sample: message.sample, family: message.family || null, report: message.report || null, ruleKeys: message.ruleKeys || null, offered: message.offered || {}, codeAllow: message.codeAllow || {} };
+    lab.report = { sample: message.sample, family: message.family || null, report: message.report || null, ruleKeys: message.ruleKeys || null, offered: message.offered || {}, codeOff: message.codeOff || {} };
     lab.error = message.error || '';
     if (lab.scope === 'family' && !lab.report.family) lab.scope = 'site';
     if (state.view === 'skin') repaintPanels('skinPolicy');

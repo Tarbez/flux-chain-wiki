@@ -13,7 +13,8 @@
      4. Preview: the sender posts the sanitized policy as defxn-cms-preview-skin, a skin edit never re-sends (remounts)
         the whole site, and the canvas handler checks origin and source, applies with the DRAFT policy, relays the report
      5. The panel: rows are the canvas's report, a switch edits the draft and previews it, a rule taken back stands out,
-        a family scope writes families[family].allow, a part's row asks the canvas to outline it */
+        a family scope writes families[family].off, a part's row asks the canvas to outline it. Since the owner's decision
+        (2026-10-24) a card dresses the site by its own rules, so every switch starts on and switching one off is the edit. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -50,7 +51,7 @@ class FakeDir { constructor() { this.files = new Map(); }
   assert(!/skin-policy/.test(read('index.html')), 'the public page does not load the policy (the site loads it itself when a skin is applied)');
 
   /* ---- 2. Save ---- */
-  const draft = ArkSkinPolicy.sanitize({ allow: { CARD: ['edge'], 'PRIMARY|BUTTON': [] }, families: { Arcade: { allow: { CARD: ['frame', 'edge'] } } },
+  const draft = ArkSkinPolicy.sanitize({ off: { CARD: ['edge'], 'PRIMARY|BUTTON': ['frame'] }, families: { Arcade: { off: { CARD: ['frame', 'edge'] } } },
     contrast: [{ fg: ['--text-faint'], bg: ['--canvas'], min: 6 }] });
   const dir = new FakeDir();
   await Store.saveSkinPolicy(dir, draft);
@@ -117,7 +118,7 @@ class FakeDir { constructor() { this.files = new Map(); }
   /* what the canvas answers: a report in Ark UI's shape (js/ark/skin-site.js report()) */
   const part = (key, count, applied, skipped, reverted) => ({ key, family: 'surface', selector: 'div.' + key.toLowerCase(), count, rules: { applied: applied || {}, skipped: skipped || [], reverted: reverted || [] }, themed: false });
   const message = (extra) => Object.assign({ type: 'defxn-cms-skin-report', sample: '263', on: true, family: null, error: '',
-    codeAllow: clone(Parts.ALLOW), offered: { frame: 'full', edge: 'cut', ornament: 'strip', marker: 'emblem', header: 'tag' },
+    codeOff: clone(Parts.OFF), offered: { frame: 'full', edge: 'cut', ornament: 'strip', marker: 'emblem', header: 'tag' },
     report: { name: 'defxn-card-test', parts: [
       part('CARD', 5, { edge: 'cut', frame: 'full' }),
       part('LIST', 12, { marker: 'emblem' }),
@@ -132,13 +133,13 @@ class FakeDir { constructor() { this.files = new Map(); }
   const rowsOf = () => [...mount.querySelectorAll('.skin-part')].map((el) => el.dataset.part);
   assert.deepEqual(rowsOf(), ['CARD', 'LIST', 'MEGAMENUPANEL', 'card', 'PANEL'], 'one row per part that has rules applied, skipped or taken back (or that the card sends rules to); parts with none are hidden');
   assert(/5 parts wear rules from sample card 263/.test(mount.textContent) && /2 have a rule or a colour taken back/.test(mount.textContent), 'the summary counts the parts and the ones that had something taken back');
-  assert(/2 other parts wear nothing/.test(mount.textContent), 'the hidden parts are counted');
+  assert(/2 other parts took no rule on this page/.test(mount.textContent), 'the hidden parts are counted');
   const sw = (partKey, rule) => mount.querySelector(`input[data-part="${partKey}"][data-rule="${rule}"]`);
   assert.equal(mount.querySelector('.skin-part[data-part="CARD"] .skin-part-count').textContent, '5 elements', 'a row shows its count');
   assert.deepEqual([...mount.querySelectorAll('.skin-part[data-part="CARD"] .skin-rule')].map((r) => r.dataset.ruleRow), ['frame', 'edge', 'ornament', 'marker', 'header'], 'a row lists the rules the card sends, in the contract order, and each switch says whether the part may wear it');
-  assert.deepEqual(['frame', 'edge', 'ornament', 'marker', 'header'].map((r) => sw('CARD', r).checked), [true, true, false, false, false], 'each switch reflects the effective allow list (CARD takes frame and edge by the code default)');
+  assert.deepEqual(['frame', 'edge', 'ornament', 'marker', 'header'].map((r) => sw('CARD', r).checked), [true, true, true, true, true], 'every switch starts on: the card\'s own rules reach every part until one is switched off');
   assert.equal(mount.querySelector('.skin-part[data-part="CARD"] [data-rule-row="frame"] .skin-rule-state').textContent, 'full', 'an applied rule shows its value');
-  assert.match(mount.querySelector('.skin-part[data-part="CARD"] [data-rule-row="ornament"] .skin-rule-state').textContent, /^Off\. The card would send strip\./, 'a rule the policy does not allow says so, and what the card would send');
+  assert.match(mount.querySelector('.skin-part[data-part="CARD"] [data-rule-row="ornament"] .skin-rule-state').textContent, /^On, but this page did not take it\./, 'a rule that is on but not taken here says so');
   /* the breaks stand out */
   assert.equal(mount.querySelector('.skin-part[data-part="MEGAMENUPANEL"]').dataset.broken, 'true', 'a part with a rule taken back is marked');
   assert.equal(mount.querySelector('.skin-part[data-part="MEGAMENUPANEL"] [data-rule-row="frame"]').dataset.tone, 'taken', 'the rule taken back has its own tone');
@@ -163,26 +164,28 @@ class FakeDir { constructor() { this.files = new Map(); }
   /* a switch edits the draft, previews it at once, and is one undoable step */
   const before = sentFor('notifyPreviewSkin').length;
   sw('CARD', 'frame').checked = false; sw('CARD', 'frame').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft.allow), { CARD: ['edge'] }, 'turning frame off for CARD writes the list without it');
+  assert.deepEqual(clone(state.skinPolicyDraft.off), { CARD: ['frame'] }, 'switching frame off for CARD writes it in the off list');
+  A.skinReport(message());   /* the canvas answers the preview; its report may still be the last one */
+  assert.match(mount.querySelector('.skin-part[data-part="CARD"] [data-rule-row="frame"] .skin-rule-state').textContent, /^Switched off\. The card sends full\./, 'a rule switched off says so, and what the card sends, even before a fresh report drops it');
   assert.equal(A.skinPolicyDirty(), true, 'and marks the draft dirty');
   assert(sentFor('notifyPreviewSkin').length > before, 'and previews it live');
   assert.equal(A.singleDraftHandle('skinPolicy').dirty(), true, 'Save sees it');
   assert.equal(sw('CARD', 'frame').checked, false, 'the switch shows it off');
-  sw('CARD', 'ornament').checked = true; sw('CARD', 'ornament').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft.allow), { CARD: ['edge', 'ornament'] }, 'turning a rule on adds it, in the contract\'s order');
   sw('CARD', 'ornament').checked = false; sw('CARD', 'ornament').dispatchEvent(new window.Event('change', { bubbles: true }));
+  assert.deepEqual(clone(state.skinPolicyDraft.off), { CARD: ['frame', 'ornament'] }, 'a second rule switched off joins the list, in the contract\'s order');
+  sw('CARD', 'ornament').checked = true; sw('CARD', 'ornament').dispatchEvent(new window.Event('change', { bubbles: true }));
   sw('CARD', 'frame').checked = true; sw('CARD', 'frame').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft.allow), {}, 'putting a part back to the code default removes its entry, so the policy holds only what differs');
+  assert.deepEqual(clone(state.skinPolicyDraft.off), {}, 'switching every rule back on removes the part\'s entry, so the policy holds only what differs');
   assert.equal(A.skinPolicyDirty(), false, 'and the draft is clean again');
-  /* a part the site table does not name wears nothing; a switch gives it the rule */
-  assert.equal(Parts.ALLOW.ASIDE, undefined, 'ASIDE has no code list (fixture check)');
+  /* a part nobody switched anything off on wears every rule the card sends */
+  assert.equal(Parts.OFF.ASIDE, undefined, 'ASIDE has no code list (fixture check)');
   A.skinReport(message({ report: Object.assign(message().report, { parts: [part('ASIDE', 3)] }) }));
   mount.querySelector('[data-filter="all"]').click();
-  assert.deepEqual(['frame', 'edge'].map((r) => sw('ASIDE', r).checked), [false, false], 'a part with no list wears nothing');
-  sw('ASIDE', 'edge').checked = true; sw('ASIDE', 'edge').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft.allow), { ASIDE: ['edge'] }, 'turning edge on for a part with no list writes allow[PART] = [edge]');
+  assert.deepEqual(['frame', 'edge'].map((r) => sw('ASIDE', r).checked), [true, true], 'a part with no list wears every rule');
   sw('ASIDE', 'edge').checked = false; sw('ASIDE', 'edge').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft.allow), {}, 'and turning it off again removes the entry');
+  assert.deepEqual(clone(state.skinPolicyDraft.off), { ASIDE: ['edge'] }, 'switching edge off writes off[PART] = [edge]');
+  sw('ASIDE', 'edge').checked = true; sw('ASIDE', 'edge').dispatchEvent(new window.Event('change', { bubbles: true }));
+  assert.deepEqual(clone(state.skinPolicyDraft.off), {}, 'and switching it on again removes the entry');
   mount.querySelector('[data-filter="rules"]').click();
 
   /* a lower-case block part takes the switches of its rules name, which the canvas resolves (DefxnSkinSite.ruleKey:
@@ -192,11 +195,11 @@ class FakeDir { constructor() { this.files = new Map(); }
   const inRow = (row, rule) => mount.querySelector(`.skin-part[data-part="${row}"] input[data-rule="${rule}"]`);
   assert.ok(!inRow('card', 'frame').disabled && inRow('card', 'frame').dataset.part === 'CARD', 'the card block part takes CARD\'s switches');
   assert.ok(inRow('hero', 'frame').disabled && /no rules name/.test(inRow('hero', 'frame').title), 'a part with no rules name keeps its switches off, and says why');
-  assert.ok(inRow('alert', 'header').checked, 'the alert block shows ALERT\'s code list (frame, edge, header)');
-  inRow('alert', 'ornament').checked = true; inRow('alert', 'ornament').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft.allow), { ALERT: ['frame', 'edge', 'ornament', 'header'] }, 'turning a rule on for the alert block writes ALERT in the draft');
+  assert.ok(inRow('alert', 'header').checked, 'the alert block takes every rule until one is switched off');
   inRow('alert', 'ornament').checked = false; inRow('alert', 'ornament').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft.allow), {}, 'and off again removes it');
+  assert.deepEqual(clone(state.skinPolicyDraft.off), { ALERT: ['ornament'] }, 'switching a rule off for the alert block writes ALERT in the draft');
+  inRow('alert', 'ornament').checked = true; inRow('alert', 'ornament').dispatchEvent(new window.Event('change', { bubbles: true }));
+  assert.deepEqual(clone(state.skinPolicyDraft.off), {}, 'and on again removes it');
   mount.querySelector('[data-filter="rules"]').click();
 
   /* the family scope */
@@ -206,13 +209,21 @@ class FakeDir { constructor() { this.files = new Map(); }
   assert(scope && [...scope.options].map((o) => o.textContent).join('|') === 'Every card|Only cards of the set Arcade', 'a card that wears a set offers "only for this family"');
   scope.value = 'family'; scope.dispatchEvent(new window.Event('change', { bubbles: true }));
   sw('CARD', 'frame').checked = false; sw('CARD', 'frame').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft), { version: 1, allow: {}, families: { Arcade: { allow: { CARD: ['edge'] } } }, contrast: [] }, 'with the family scope a switch writes families[family].allow and nothing site-wide');
+  assert.deepEqual(clone(state.skinPolicyDraft), { version: 2, off: {}, families: { Arcade: { off: { CARD: ['frame'] } } }, contrast: [] }, 'with the family scope a switch writes families[family].off and nothing site-wide');
   assert.equal(sw('CARD', 'frame').checked, false, 'the switch shows the family\'s list for this card');
   scope.value = 'site'; scope.dispatchEvent(new window.Event('change', { bubbles: true }));
-  /* the same list as the site level removes the family entry */
+  /* switching it back on for the set removes the family entry */
   const scoped = mount.querySelector('#skin-scope'); scoped.value = 'family'; scoped.dispatchEvent(new window.Event('change', { bubbles: true }));
   sw('CARD', 'frame').checked = true; sw('CARD', 'frame').dispatchEvent(new window.Event('change', { bubbles: true }));
-  assert.deepEqual(clone(state.skinPolicyDraft.families), {}, 'turning it back on for the set leaves the family entry out, because the site list says the same');
+  assert.deepEqual(clone(state.skinPolicyDraft.families), {}, 'switching it back on for the set leaves the family entry out');
+  /* a switch only takes away: what every card has off cannot be switched on for one set, so that switch is locked and says why */
+  scoped.value = 'site'; scoped.dispatchEvent(new window.Event('change', { bubbles: true }));
+  sw('CARD', 'edge').checked = false; sw('CARD', 'edge').dispatchEvent(new window.Event('change', { bubbles: true }));
+  const fam2 = mount.querySelector('#skin-scope'); fam2.value = 'family'; fam2.dispatchEvent(new window.Event('change', { bubbles: true }));
+  assert.ok(sw('CARD', 'edge').disabled && !sw('CARD', 'edge').checked && /every card/.test(sw('CARD', 'edge').title), 'in the set scope, a rule every card has off is shown off, locked, and says where to change it');
+  const site2 = mount.querySelector('#skin-scope'); site2.value = 'site'; site2.dispatchEvent(new window.Event('change', { bubbles: true }));
+  sw('CARD', 'edge').checked = true; sw('CARD', 'edge').dispatchEvent(new window.Event('change', { bubbles: true }));
+  assert.deepEqual(clone(state.skinPolicyDraft.off), {}, 'and under every card it switches on again');
 
   /* pressing a row outlines the part on the canvas */
   mount.querySelector('.skin-part[data-part="LIST"] .skin-part-head').click();
@@ -229,7 +240,7 @@ class FakeDir { constructor() { this.files = new Map(); }
 
   /* Revert: the draft goes back to what is saved; leaving the lab takes the skin off the canvas */
   A.skinReport(message({ sample: '' }));
-  state.skinPolicyDraft = ArkSkinPolicy.sanitize({ allow: { CARD: [] } });
+  state.skinPolicyDraft = ArkSkinPolicy.sanitize({ off: { CARD: ['frame'] } });
   assert.equal(A.skinPolicyDirty(), true);
   A.revertSkinPolicy();
   assert.equal(A.skinPolicyDirty(), false, 'Revert puts the draft back to the saved policy');

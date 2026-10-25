@@ -7,6 +7,14 @@
    tests/browser/site-fixes.mjs). One base rule, never per-page patches: :where() keeps it at zero
    specificity, so a component that sets its own font still wins. --font-sans is the brand slot
    (assets/kit/defxn-fonts.css). */
+/* The type scale (docs/PRODUCT-DESIGN-LAWS.md laws 78-83): base 11px, ratio 1.618, each step rounded
+   to whole px. Set once here; pages use these names and never write a raw px size. Roles: tertiary =
+   captions, helper text, metadata, mono labels; secondary = body, lede, subheads, card titles; primary =
+   section and panel headings; hero = a page hero; display = the one display headline of a page. micro is
+   a last resort (law 81). A size between steps is a defect (law 82). */
+:root {
+  --fs-micro:7px; --fs-tertiary:11px; --fs-secondary:18px; --fs-primary:29px; --fs-hero:47px; --fs-display:76px;
+}
 :where(body) { font-family:var(--font-sans, system-ui, sans-serif); }
 :where(button, input, select, textarea) { font:inherit; }
 .hero-alive { --page-width:1080px; --page-gutter:clamp(20px,4cqw,56px); --page-top:clamp(32px,6cqh,64px); }
@@ -99,15 +107,6 @@
 .hero-alive[data-page="concept"],.hero-alive[data-page^="concept/"],.hero-alive[data-page="about"],.hero-alive[data-page="learnings"] { --mesh-opacity:.17; --mesh-blur:1.7px; }
 .hero-alive[data-page^="article/"] { --mesh-opacity:.24; --mesh-blur:1.2px; }
 .hero-alive:not(.has-particle-shapes) .ark-layer-persistent > canvas[role="presentation"] { filter:blur(2px); opacity:.5; }
-
-/* The experiment intro and lab are separate routes, not a stacked document. */
-
-.lab-page .expansion > .section { padding:var(--page-top) var(--page-gutter) 28px; }
-.lab-page .expansion .experiments { border:0; }
-.lab-page .expansion .experiment-stage { height:clamp(180px,30cqh,300px); }
-.lab-page .expansion .section-heading { margin-bottom:24px; }
-.lab-page .expansion .lab-bottom { padding:20px 26px; }
-@media(max-width:760px) {  .lab-page .expansion .lab-bottom { padding:18px; } }
 
 /* Theory pairs its explanation with a shared two-mesh iceberg, without a card. */
 

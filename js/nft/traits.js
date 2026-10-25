@@ -29,13 +29,19 @@
     throw new Error('The art layers are missing: load js/nft/skin-bundle.js (a site) or docs/home-redesign/nft/layers-bundle.js (the card) before traits.js. ' +
       'To make both, run: node docs/home-redesign/nft/make-layers.mjs');
   }
+  /* WEAR-ONLY categories (layers/worn/, the owner, 2026-10-25): never in the DNA, so they never change a card's mix,
+     its odds or CAP. A card has one only when its skin names one ("button:Pill"); a born card shows none. */
+  var WORN = window.DEFXN_WORN || [];
   var CAP = 1;
-  LAYERS.forEach(function (layer) {
+  LAYERS.concat(WORN).forEach(function (layer) {
     var total = layer.elements.reduce(function (s, e) { return s + e.weight; }, 0);
     layer.total = total;
+    layer.worn = WORN.indexOf(layer) >= 0;
     layer.elements.forEach(function (e, i) { e.index = i; e.share = e.weight * 100 / total; e.layer = layer.key; });
-    CAP *= layer.elements.length;
+    if (!layer.worn) CAP *= layer.elements.length;
   });
+  // every category a page lists: the DNA's layers, then the wear-only ones
+  var CATEGORIES = LAYERS.concat(WORN);
 
   /* THE OWNER'S REVIEW (layers/review.flx, bundled as DEFXN_REVIEW): a HELD element is never drawn
      for a new card and cannot be worn; two elements that CLASH are never drawn together and cannot
@@ -43,7 +49,7 @@
   var REVIEW = window.DEFXN_REVIEW || { hold: [], clash: [] }, HELD = {}, CLASH = {};
   REVIEW.hold.forEach(function (id) { HELD[id] = true; });
   REVIEW.clash.forEach(function (p) { (CLASH[p[0]] = CLASH[p[0]] || {})[p[1]] = true; (CLASH[p[1]] = CLASH[p[1]] || {})[p[0]] = true; });
-  LAYERS.forEach(function (layer) { layer.elements.forEach(function (e) { e.id = layer.key + '/' + e.name; e.held = !!HELD[e.id]; }); });
+  CATEGORIES.forEach(function (layer) { layer.elements.forEach(function (e) { e.id = layer.key + '/' + e.name; e.held = !!HELD[e.id]; }); });
   // what keeps a mix from being drawn or worn: its held elements and its clashing pairs
   function problems(els) {
     var held = els.filter(function (e) { return e.held; }), pairs = [];
@@ -58,7 +64,7 @@
   var TIERS = ['Common', 'Rare', 'Epic', 'Legendary'], CUTS = [50, 80, 95];
   // Elements with the same weight have the same odds, so they share one tier: the tier of the middle
   // of their group's span (a group is never split across a line by the order of its files).
-  LAYERS.forEach(function (layer) {
+  CATEGORIES.forEach(function (layer) {
     var acc = 0, groups = {};
     layer.elements.forEach(function (e) { (groups[e.weight] = groups[e.weight] || []).push(e); });
     Object.keys(groups).map(Number).sort(function (a, b) { return b - a; }).forEach(function (w) {
@@ -115,7 +121,7 @@
      rewritten. Element files are never renamed: their order sets every card's DNA. */
   var UI_NAMES = { backdrop: 'background', aura: 'glow', mark: 'logo', signal: 'beam', tag: 'nameplate', ornament: 'accent-strip', emblem: 'icon' };
   var KEY_OF = {};
-  LAYERS.forEach(function (l) { KEY_OF[l.key] = l.key; KEY_OF[uiName(l.key)] = l.key; });
+  CATEGORIES.forEach(function (l) { KEY_OF[l.key] = l.key; KEY_OF[uiName(l.key)] = l.key; });
   function uiName(key) { return UI_NAMES[key] || key; }
   // (not keyOf: that name is the card's own key, keyOf(record), further down)
   function layerKeyOf(name) { return KEY_OF[String(name || '').trim().toLowerCase()] || null; }
@@ -162,6 +168,17 @@
     }
     throw new Error('Genesis number ' + n + ' has no mix left: all ' + CAP.toLocaleString('en-US') +
       ' mixes are used. Add an element file to any folder in docs/home-redesign/nft/layers/ and run make-layers.mjs.');
+  }
+  // a real card's mix, drawn from its chain object id: the same id draws the same mix on every page. It is kept off
+  // the sample mixes and the review's held elements and clashes. Two real cards may draw one mix: no page holds every
+  // real card, so that check needs a registry and is not made here.
+  function dnaOfObject(id) {
+    for (var t = 0; t < 64; t++) {
+      var rnd = prng(keyOfString('object|' + id + '|' + t), 0x0d7a);
+      var d = dnaOf(LAYERS.map(function (l) { return weighted(l, rnd); }));
+      if (!(d in reservedSet) && problems(elementsOf(d)).ok) return d;
+    }
+    throw new Error('The card ' + id.slice(0, 8) + ' found no mix free of the review\'s held elements in 64 draws. Review the held list in layers/review.flx.');
   }
   function dnaAt(n) {
     while (ledger.next <= n) {
@@ -212,6 +229,14 @@
     return { dna: dnaOf(idx), changed: changed };
   }
   // the genesis number born with this DNA, among the numbers this page has replayed, or null
+  function wornOf(skin) {
+    var out = [];
+    WORN.forEach(function (layer) {
+      var want = String(skin[layer.key] || '').toLowerCase();
+      layer.elements.forEach(function (e) { if (want && e.name.toLowerCase() === want) out.push(e); });
+    });
+    return out;
+  }
   function bornWith(dna) {
     if (dna in reservedSet) return reservedSet[dna];
     return ledger.used[dna] || null;
@@ -238,26 +263,33 @@
        'number'  the genesis number's own DNA (unique)
        'pinned'  the record pins it (unique when its number is reserved)
        'preview' a full pin on a record with no number: a look at one mix, not a card
-       'key'     the genesis ID is not a number, so the DNA is drawn from the key and is NOT checked */
+       'key'     the genesis ID is not a number, so the DNA is drawn from the key and is NOT checked
+       'object'  a real card: the DNA is drawn from its chain object id (record.objectId) */
   function pick(record) {
-    var n = numberOf(record.genesisId), pinned = byName(record.traits), dna, how;
-    if (pinned) { dna = pinned; how = n && reserved[n] === pinned ? 'pinned' : 'preview'; }
+    var object = /^[0-9a-f]{64}$/.test(record.objectId || '') ? record.objectId : null;
+    var n = object ? null : numberOf(record.genesisId), pinned = byName(record.traits), dna, how;
+    if (object && !pinned) { dna = dnaOfObject(object); how = 'object'; }
+    else if (pinned) { dna = pinned; how = n && reserved[n] === pinned ? 'pinned' : 'preview'; }
     else if (n) { dna = dnaAt(n); how = 'number'; }
     else {
       var rnd = prng(keyOf(record), 0x0d7a);
       dna = dnaOf(LAYERS.map(function (l) { return weighted(l, rnd); })); how = 'key';
     }
-    var born = dna, worn = wear(born, skinOf(record));
+    var skin = skinOf(record), born = dna, worn = wear(born, skin);
     if (n) dnaAt(Math.max(n, top));           // replay far enough to check a worn mix against the born ones
     var els = elementsOf(worn.dna), picks = {};
     els.forEach(function (e) { picks[e.layer] = e; });
+    // the wear-only elements the skin names; an unknown name is no element, as in a birth layer
+    var extra = wornOf(skin);
+    extra.forEach(function (e) { picks[e.layer] = e; });
     return {
       dna: worn.dna, list: els, picks: picks, odds: odds(els), number: n, how: how,
-      genesis: born, skinned: worn.changed.length > 0, changed: worn.changed,
+      genesis: born, skinned: worn.changed.length > 0 || extra.length > 0, changed: worn.changed.concat(extra.map(function (e) { return e.layer; })),
       // the worn mix is taken when another number was born with it
       takenBy: worn.changed.length ? bornWith(worn.dna) : null,
       // a worn mix with a held element or a clashing pair (the owner's review) cannot be worn
-      review: worn.changed.length ? problems(els) : { held: [], clashes: [], ok: true }
+      review: worn.changed.length || extra.length ? problems(els.concat(extra)) : { held: [], clashes: [], ok: true },
+      worn: extra
     };
   }
 
@@ -292,6 +324,18 @@
       status: 'Sample', role: ROLES[w[0] % ROLES.length], network: 'DEFXN',
       joined: (d.getDate() < 10 ? '0' : '') + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear(),
       serial: num, tagline: tagline || ((window.DEFXN_CARDS || [])[0] || {}).tagline || []
+    };
+  }
+  /* a real card's record, from its PVA as js/ark/chain-cards.mjs verified it ({ id, owner, mintedAt }). It has no
+     number (owner, 2026-10-25): the Genesis ID line shows the short object id. The name line shows the public id's
+     name, made from its key (pva.name, chain::key_name), or the short key when a caller has not computed it. */
+  function objectRecord(pva, network) {
+    var d = new Date((pva.mintedAt || 0) * 1000), short = function (h) { return h.slice(0, 6) + '…' + h.slice(-4); };
+    return {
+      objectId: pva.id, genesisId: short(pva.id), identity: '0x' + String(pva.owner).toUpperCase(), name: pva.name || short(pva.owner),
+      status: 'Active', role: 'Member', network: network || 'DEFXN',
+      joined: (d.getUTCDate() < 10 ? '0' : '') + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(),
+      serial: pva.id.slice(0, 4), tagline: ((window.DEFXN_CARDS || [])[0] || {}).tagline || []
     };
   }
   // kept for card.html's New card: the next sample number's record
@@ -357,7 +401,7 @@
   }
   // every element a card wears, complete (for the chrome only: needAll(picks, 'chrome'))
   function needAll(picks, kind) {
-    return Promise.all(LAYERS.map(function (l) { var e = picks[l.key]; return !kind || (e && e.kind === kind) ? need(e) : e; }));
+    return Promise.all(CATEGORIES.map(function (l) { var e = picks[l.key]; return !kind || (e && e.kind === kind) ? need(e) : e; }));
   }
   // true when an element can be drawn now, with nothing left to load
   function ready(e) { return !e || (e.kind === 'chrome' ? e.svg != null : e.kind === 'build' ? !!e.attrs : true); }
@@ -365,8 +409,8 @@
   window.DEFXN_TRAITS = {
     UI_NAMES: UI_NAMES, uiName: uiName, layerKeyOf: layerKeyOf,
     need: need, needAll: needAll, ready: ready, load: load,
-    LAYERS: LAYERS, CAP: CAP, pick: pick, dnaAt: dnaAt, elementsOf: elementsOf, numberOf: numberOf,
-    takeNumber: takeNumber, newRecord: newRecord, sampleRecord: sampleRecord, ROLES: ROLES, words: words,
+    LAYERS: LAYERS, WORN: WORN, CATEGORIES: CATEGORIES, wornOf: wornOf, CAP: CAP, pick: pick, dnaAt: dnaAt, elementsOf: elementsOf, numberOf: numberOf,
+    takeNumber: takeNumber, newRecord: newRecord, sampleRecord: sampleRecord, objectRecord: objectRecord, dnaOfObject: dnaOfObject, ROLES: ROLES, words: words,
     TIERS: TIERS, score: score, problems: problems, REVIEW: REVIEW,
     skinOf: skinOf, skinText: skinText, wear: wear, bornWith: bornWith, price: price, skinCost: skinCost, SKIN_BASE_FXN: SKIN_BASE_FXN, keyOf: keyOf, keyHex: keyHex, keyOfString: keyOfString, prng: prng
   };

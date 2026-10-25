@@ -19,14 +19,14 @@ assert(catalog.notfound && catalog.notfound.noindex && !catalog.notfound.journey
 /* Since 2026-10-19 (W3-GUIDE) the page is Ark blocks (js/pages/not-found.js): it is booted in the
    real site (jsdom, api/lib/render-core.mjs), never a toy DOM -- blocks need the real DOM API. */
 (async () => {
-  const seen = await checks.visit('/stast', (window, page) => ({
+  const seen = await checks.visit('/stats/noww', (window, page) => ({
     text: page.textContent,
     asked: (page.querySelector('[data-not-found-address]') || {}).textContent,
     hrefs: [...page.querySelectorAll('a[href]')].map((a) => a.getAttribute('href'))
   }));
-  assert.equal(seen.asked, '/stast', 'it names the address that was asked for, verbatim');
+  assert.equal(seen.asked, '/stats/noww', 'it names the address that was asked for, verbatim');
   assert(/No page at this address/.test(seen.text), 'and says plainly that no page answers it');
-  assert(seen.hrefs.includes('/stats'), 'a one-letter typo offers the page that was meant');
+  assert(seen.hrefs.includes('/stats/now'), 'a one-letter typo offers the page that was meant (2026-10-24: /stats is /stats/now, so the typo is of the new address)');
   assert(seen.hrefs.includes('/'), 'Home is always a way on');
   const leads = context.ArkSitePages.pages().filter((r) => r.lead).map((r) => r.path);
   for (const lead of leads) assert(seen.hrefs.includes(lead), 'every journey\'s way in is offered: ' + lead);

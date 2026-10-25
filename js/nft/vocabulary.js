@@ -59,9 +59,9 @@
   var PIECES = {
     palette: { does: 'the colours every part reads', dresses: ['Containers', 'Cards', 'Navbars', 'Text fields', 'Charts', 'HUDs'],
       keeps: 'Meaning colours stay the site\'s: alerts, validation, status, success, danger, chain kinds and networks.' },
-    background: { does: 'the scene behind content', dresses: ['Panels', 'Cards', 'Empty states', 'Spatial UI', 'HUDs'],
-      keeps: 'It sits behind words only with the fade that keeps their contrast, and never stands for data.' },
-    glow: { does: 'light around what is in focus', dresses: ['Micro-interactions', 'Tabs', 'Inventory grids', 'Diegetic UI'],
+    background: { does: 'the scene behind content. How much it builds sets how strongly the page takes the card\'s hue.', dresses: ['Containers', 'Panels', 'Cards', 'Empty states', 'Spatial UI', 'HUDs'],
+      keeps: 'It sits behind words only with the fade that keeps their contrast, every text colour passes 4.5:1 on every surface, and it never stands for data.' },
+    glow: { does: 'light around what is in focus. Raised parts cast its colour. It sets how light the page is.', dresses: ['Micro-interactions', 'Tabs', 'Popovers', 'Modals', 'Dropdown menus', 'Inventory grids', 'Diegetic UI'],
       keeps: 'It never stands for a state: a glow is not success, error or live.' },
     logo: { does: 'the identity mark in the card\'s style', dresses: ['Avatars', 'Loaders', 'Error boundaries', 'Empty states'],
       keeps: 'It never replaces the site\'s own mark, and a loading mark shows only while something loads.' },
@@ -71,15 +71,15 @@
       keeps: 'It never stands for data: no particle field is a chart or a heatmap.' },
     corner: { does: 'marks at a surface\'s corners', dresses: ['Cards', 'Panels', 'Modals', 'Drawers', 'Reticles', 'HUDs'],
       keeps: 'It never covers a control\'s hit area or its focus ring.' },
-    frame: { does: 'the outline around a surface', dresses: ['Containers', 'Cards', 'Panels', 'Modals', 'Drawers', 'Popovers', 'Tooltips', 'Code blocks', 'Inventory grids', 'Dialogue boxes'],
-      keeps: 'It keeps to the edge, never draws over content, and frames only what the site already groups.' },
-    nameplate: { does: 'a small labelled shape on a surface\'s top edge', dresses: ['Cards', 'Panels', 'Dialogue boxes', 'Quest logs', 'Avatars'],
+    frame: { does: 'the outline around a surface. Its line sets the headings\' voice: straight is mono, mixed is sans, curved keeps the display face. Its corner shapes the focus ring\'s corner.', dresses: ['Containers', 'Cards', 'Panels', 'Modals', 'Drawers', 'Popovers', 'Tooltips', 'Code blocks', 'Inventory grids', 'Dialogue boxes'],
+      keeps: 'It keeps to the edge, never draws over content, and frames only what the site already groups. A voice picks one of the site\'s three faces: the words, their size and their order stay.' },
+    nameplate: { does: 'a small labelled shape on a surface\'s top edge. Its letter spacing becomes the eyebrows\' spacing and sets the headings\'.', dresses: ['Cards', 'Panels', 'Dialogue boxes', 'Quest logs', 'Avatars', 'Breadcrumbs'],
       keeps: 'It shows the wearer\'s own name and number only, and never invents a status, a count or "new".' },
     'accent-strip': { does: 'a decorative strip after a title or before items', dresses: ['Tabs', 'Cards', 'Panels', 'Quest logs'],
       keeps: 'It sits after a heading, so it never reads as a divider that claims a change of context.' },
     divider: { does: 'a rule between sections', dresses: ['Dividers', 'Breadcrumbs', 'Pagination', 'Steppers', 'Timelines', 'Lists', 'HUDs'],
       keeps: 'It goes only where the site already separates, so it never adds a change of context.' },
-    icon: { does: 'the card\'s own small symbol', dresses: ['Lists', 'Empty states', 'Inventory grids', 'Avatars', 'Ratings'],
+    icon: { does: 'the card\'s own small symbol. Its ink sets the headings\' weight, and it marks the wearer\'s seal.', dresses: ['Lists', 'Empty states', 'Inventory grids', 'Avatars', 'Ratings'],
       keeps: 'It is decoration only: it never replaces an action icon or a status icon, and a rating keeps its value.' }
   };
 
