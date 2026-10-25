@@ -1,0 +1,4 @@
+COMMITTEE	fxn-id-gate-committee-v1	2
+NODE	gate-bk2	https://gate.defxn.com/bk2	BMYTzWiKLWFYGHtDlWNfmvhUGQOs7VXvHQca0VE7pVbIIzwUPY0Q9qXhgTvEwEDHm9dNTYmDUhOH2PP0NyOkhqo=
+NODE	gate-mk2	https://gate.defxn.com/mk2	BKqXNH0zh3dJwGDHuvVcYv5D0MQZN4MTBn1lSiDGMjWKDOpdiV/ycBPRL2LYfCOcjCH+6TEIxGFSOPun4EEo3zM=
+NODE	gate-bk1	https://gate.defxn.com/bk1	BDu6wVEvTFlApY4DuNZ9VhBJaP1FzqJlq6IXO5OpzXlSy7F5LgRSRATMIbLRv6R1qF4X94pm9eGoQ3bLF3PsXOU=

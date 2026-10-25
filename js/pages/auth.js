@@ -181,6 +181,9 @@
          file. The icon list is ark-ui's FXN_ID_ICONS, never a copy. The PIN rule said here is the writer's own rule,
          told a step earlier; the writer still checks it. Each step builds the 3D card further (auth-stage.js 'create'). */
       var ICONS = (window.ArkAdminAuth && ArkAdminAuth.FXN_ID_ICONS) || [];
+      /* the gate committee a new FXN ID is enrolled with: the devnet committee (2 of 3 at gate.defxn.com), a byte copy of
+         flux/devnet-deploy-2026-10-23/gate/gate.committee in fxn-auth's own grammar. In assets/, so every host serves it. */
+      var COMMITTEE_URL = '/assets/gate.committee';
       var CSTEPS = [
         { key: 'name', title: ['Name your', 'identity.'], lede: 'This name is for you. Sites see your Public ID, which this file makes next.', label: 'Name', input: { type: 'text', name: 'displayName', max: 80, auto: 'nickname' } },
         { key: 'pin', title: ['Pick a', 'PIN.'], lede: 'You type this PIN each time you open the file. Use 8 to 12 digits, or 6 or 7 digits with a password.', label: 'PIN', input: { type: 'password', name: 'pin', mode: 'numeric', auto: 'new-password', hint: '8–12 digits' } },
@@ -197,9 +200,9 @@
         resetCreate(); creating = !!(window.ArkAdminAuth && ArkAdminAuth.createFxnId); happened = ''; keptSeen = true; paint(true);
         /* the gate committee is needed at the end: ask for it now, so no one answers six questions for a file this site
            cannot make (createFxnId reads the same file and says the same thing) */
-        fetch('/gate.committee', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); }).catch(function (error) {
+        fetch(COMMITTEE_URL, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); }).catch(function (error) {
           if (!creating) return;
-          cerr = 'This site has no FXN ID gate committee yet, so it cannot make a new FXN ID. Missing: the committee file at /gate.committee (' + error.message + ').';
+          cerr = 'This site has no FXN ID gate committee yet, so it cannot make a new FXN ID. Missing: the committee file at ' + COMMITTEE_URL + ' (' + error.message + ').';
           paint(true);
         });
       }
@@ -218,7 +221,7 @@
       function csubmit() {
         for (var i = 0; i < CSTEPS.length - 1; i++) { var e = cstepError(i); if (e) { cstep = i; cerr = e; paint(true); return; } }
         cphase = 'making'; cerr = ''; paint(true);
-        ArkAdminAuth.createFxnId({ displayName: cvals.displayName.trim(), pin: cvals.pin, password: cvals.password, word: cvals.word, icon: cvals.icon, wordCount: Number(cvals.wordCount) === 12 ? 12 : 24 })
+        ArkAdminAuth.createFxnId({ committeeUrl: COMMITTEE_URL, displayName: cvals.displayName.trim(), pin: cvals.pin, password: cvals.password, word: cvals.word, icon: cvals.icon, wordCount: Number(cvals.wordCount) === 12 ? 12 : 24 })
           .then(function (result) { made = result; cphase = 'kit'; cvals.pin = cvals.password = cvals.word = ''; paint(true); },
             function (error) { cphase = 'ask'; cerr = error.message; if (/PIN/i.test(error.message)) cstep = 1; paint(true); });
       }
@@ -528,7 +531,7 @@
         if (!kit) return f;
         var box = el('div', 'auth-kit tp-panel');
         box.appendChild(el('p', 'mono auth-kit-label', 'Master ID recovery phrase'));
-        var grid2 = el('ol', 'auth-word-grid');
+        var grid2 = el('ol', 'auth-kit-words');
         kit.mnemonic.split(' ').forEach(function (w, i) { var li = el('li'); li.appendChild(el('small', null, String(i + 1))); li.appendChild(el('strong', null, w)); grid2.appendChild(li); });
         box.appendChild(grid2);
         box.appendChild(el('p', 'mono auth-kit-label', 'Master ID Secret Key'));
@@ -541,7 +544,7 @@
           : 'The gate did not take your Secret Key (' + g.failed.map(function (x) { return x.nodeId + ': ' + x.reason; }).join(', ') + '). Until it does, the file opens only with the Secret Key above.'));
         box.appendChild(gl);
         f.appendChild(box);
-        var ok = el('label', 'auth-word-confirm'); var cb = el('input'); cb.type = 'checkbox'; ok.appendChild(cb); ok.appendChild(el('span', null, 'I wrote down the phrase and the Secret Key, on paper'));
+        var ok = el('label', 'auth-kit-confirm'); var cb = el('input'); cb.type = 'checkbox'; ok.appendChild(cb); ok.appendChild(el('span', null, 'I wrote down the phrase and the Secret Key, on paper'));
         var acts = el('div', 'auth-actions auth-kit-acts'); var save = main('Save FXN ID file', saveFile); save.disabled = true; acts.appendChild(ok); acts.appendChild(save); f.appendChild(acts);
         cb.addEventListener('change', function () { save.disabled = !cb.checked; });
         f.appendChild(note('lock', 'Anyone with these can open your Master ID. This page shows them once. Never photograph or paste them.'));

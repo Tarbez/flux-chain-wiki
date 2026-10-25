@@ -148,12 +148,20 @@
   }
 
   /* ---------- chrome as plain data ---------- */
-  var VIEW = { corner: [0, 0, 120, 120], frame: [0, 0, 1000, 700], tag: [0, 0, 360, 50], ornament: [0, 0, 360, 80], divider: [0, 0, 360, 24], emblem: [0, 0, 30, 34], button: [0, 0, 200, 56] };
+  var VIEW = { corner: [0, 0, 120, 120], frame: [0, 0, 1000, 700], tag: [0, 0, 360, 50], ornament: [0, 0, 360, 80], divider: [0, 0, 360, 24], emblem: [0, 0, 30, 34], button: [0, 0, 200, 56],
+    badge: [0, 0, 120, 32], menu: [0, 0, 360, 240], line: [0, 0, 360, 8], link: [0, 0, 120, 8], grid: [0, 0, 96, 96] };
   var KEEP = {                               // the bands world.js keeps unstretched (keepBands)
     frame: { x: [0, 120, 380, 620, 880, 1000], y: [0, 120, 250, 450, 580, 700] },
     divider: { x: [0, 60, 150, 210, 300, 360], y: [0, 24] },
     // a button keeps its two ends and its top and bottom edge bands; its middle stretches to the label
-    button: { x: [0, 24, 176, 200], y: [0, 14, 42, 56] }
+    button: { x: [0, 24, 176, 200], y: [0, 14, 42, 56] },
+    // the other wear-only pieces (layers/README.md, "Wear-only categories"): fixed ends and edges, a stretching middle;
+    // a grid is one tile, repeated whole in both directions
+    badge: { x: [0, 14, 106, 120], y: [0, 10, 22, 32] },
+    menu: { x: [0, 40, 320, 360], y: [0, 40, 200, 240] },
+    line: { x: [0, 24, 336, 360], y: [0, 8] },
+    link: { x: [0, 12, 108, 120], y: [0, 8] },
+    grid: { x: [0, 0.01, 95.99, 96], y: [0, 0.01, 95.99, 96], tile: { x: [[0.01, 95.99]], y: [[0.01, 95.99]] } }
   };
   var DRAWS = /<(rect|path|line|circle|ellipse|polygon|polyline|text|use|image)\b/i;
 
@@ -516,9 +524,11 @@
       var m = {};
       parts.forEach(function (r) { Object.keys(r).forEach(function (k) { m[k] = r[k]; }); });
       var rules = { frame: m.frame || 'none', edge: m.edge || 'keep', ornament: m.ornament || 'none', marker: m.marker || 'none',
-        header: m.header || 'none', layout: 'keep', density: densityOf(m),
-        // a worn button draws every control's outline (Ark UI's button rule; only control parts take it)
-        button: picks.button ? 'drawn' : 'none' };
+        header: m.header || 'none', layout: 'keep', density: densityOf(m) };
+      // each wear-only category the card wears draws its piece, by Ark UI's rule of the same name (ARK_SKIN_WORN_PIECES:
+      // a button on controls, a badge on badges, a menu on menus and popovers, a line on rows, a link under links, a grid
+      // behind groups). A born card wears none, so it sends 'none' for each.
+      (T.WORN || []).forEach(function (l) { rules[l.key] = picks[l.key] ? 'drawn' : 'none'; });
       var layouts = layoutsOf(m);
       var frame = chrome[T.uiName('frame')], curve = frame ? curveOf(frame.svg) : null, voice = voiceOf(curve);
       if (voice !== 'keep') vars['--font-display'] = 'var(--font-' + voice + ')';

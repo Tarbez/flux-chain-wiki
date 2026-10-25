@@ -118,7 +118,7 @@
     opts = opts || {};
     var pal = opts.palette || defaultPalette(), box = el('div', 'th th-' + (element.kind === 'chrome' ? 'chrome' : element.kind === 'palette' ? 'palette' : '3d'));
     box.setAttribute('role', 'img');
-    box.setAttribute('aria-label', element.name + ', ' + (layerOf(element) || {}).name + ' element');
+    box.setAttribute('aria-label', element.name + ', ' + ((layerOf(element) || {}).title || '') + ' element');
     box._thDraw = function () {
       if (element.kind === 'chrome') { drawChrome(box, element, pal, opts.record); return; }
       var cv = el('canvas');

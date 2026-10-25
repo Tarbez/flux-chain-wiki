@@ -247,9 +247,32 @@
       /* the network's nodes are matte ceramic in their brand colours (the record descent board's palette,
          2026-10-24): almost no coat, a soft sheen. Records keep the glass coat. */
       if (NODE[kind]) { m.roughness = .72; m.clearcoat = .12; m.clearcoatRoughness = .55; m.sheen = .18; m.sheenRoughness = .7; }
+      /* FLOATING GLASS CHAINS (owner, 2026-10-25: the chains take the glass of the /auth screens). A chain's tile is
+         translucent glass now (auth-stage.js's card: low roughness, a full clear coat, some metal, no depth written),
+         so a ring over another ring, or over the grid, shows through it. Its edge catches light: the glass-edge map
+         lights a thin band round every face, tinted by the tile's own colour (tileMaterial below), the way the auth
+         card's lit frame bars outline its body. The ledger keeps its inner glow, on its edge. */
+      if (NODE[kind]) {
+        m.transparent = true; m.opacity = k.GLASS; m.depthWrite = false;
+        m.roughness = .2; m.metalness = .35; m.clearcoat = 1; m.clearcoatRoughness = .1; m.envMapIntensity = 1;
+        m.sheen = .3; m.sheenRoughness = .35;
+        m.emissiveMap = k.glassEdge;
+        if (kind === 'ledger') m.emissiveIntensity = 1.8; else { m.emissive.copy(m.color); m.emissiveIntensity = 1.5; }
+      } else m.emissiveMap = null;
       m.needsUpdate = true;
       return m;
     }
+    /* the glass edge (2026-10-25): white where a face meets its edge, a fainter hairline on the engraved inset, black
+       elsewhere. Laid as the emissive map of a chain's glass tile, so only its edges glow. */
+    k.GLASS = .34;
+    k.glassEdge = (function () {
+      var cv = document.createElement('canvas'); cv.width = cv.height = 256;
+      var g = cv.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, 256, 256);
+      g.strokeStyle = 'rgba(255,255,255,.95)'; g.lineWidth = 7; g.strokeRect(3.5, 3.5, 249, 249);
+      g.strokeStyle = 'rgba(255,255,255,.3)'; g.lineWidth = 6; g.strokeRect(10, 10, 236, 236);
+      g.strokeStyle = 'rgba(255,255,255,.4)'; g.lineWidth = 1.5; g.strokeRect(19.5, 19.5, 217, 217);
+      var t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
+    })();
     /* the engraved panel: a hairline inset round each face, and two short ticks on its top edge, the
        way a data slab is machined. It darkens the colour it is laid on (a multiply), so it reads on
        every tone; it is the one texture the world shares. */
@@ -293,7 +316,19 @@
     function tileMaterial(kind) {
       /* less plastic: a satin face, a softer clear coat (audit 4); the engraved panel on every face */
       var m = tone(kind, new THREE.MeshPhysicalMaterial({ roughness: .6, metalness: .08, clearcoat: .55, clearcoatRoughness: .14, envMapIntensity: .75, map: kind === 'page' || kind === 'ghost' ? null : k.panelMap }));
-      return k.grain(m, kind === 'page' ? .25 : .55, kind === 'record' ? .4 : kind === 'page' ? .08 : 0);   /* records are seen up close; the page under the words only a breath of it */
+      k.grain(m, kind === 'page' ? .25 : .55, kind === 'record' ? .4 : kind === 'page' ? .08 : 0);   /* records are seen up close; the page under the words only a breath of it */
+      if (!NODE[kind]) return m;
+      /* a glass tile's lit edge wears the tile's own colour (its kind's, times its family tint), and where it glows the
+         glass is less clear, so the edge reads as a solid rim round a clear body */
+      var grained = m.onBeforeCompile;
+      m.onBeforeCompile = function (sh) {
+        grained(sh);
+        sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\n' +
+          '#if defined( USE_INSTANCING_COLOR ) || defined( USE_COLOR )\n totalEmissiveRadiance *= vColor;\n#endif\n' +
+          '#ifdef USE_EMISSIVEMAP\n diffuseColor.a = min(1., diffuseColor.a + emissiveColor.r * .55);\n#endif');
+      };
+      m.customProgramCacheKey = function () { return 'grain-glass'; };
+      return m;
     }
 
     var all = [];   /* instanced meshes flagged for upload each frame */

@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 8" data-slot="link">
+  <title>Wave: a gentle referential wave under the link</title>
+  <path d="M0 5 Q3 3.5 6 5 T12 5 T18 5 T24 5 T30 5 T36 5 T42 5 T48 5 T54 5 T60 5 T66 5 T72 5 T78 5 T84 5 T90 5 T96 5 T102 5 T108 5 T114 5 T120 5" fill="none" stroke="var(--referential)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

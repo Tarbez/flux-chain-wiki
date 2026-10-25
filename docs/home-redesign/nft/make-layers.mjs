@@ -135,7 +135,7 @@ function fail(file, problem, remedy) {
 }
 
 // the chrome slots: each slot's box in card units (the card is 1000 x 700)
-export const SLOTS = { corner: [120, 120], frame: [1000, 700], tag: [360, 50], ornament: [360, 80], divider: [360, 24], emblem: [30, 34], button: [200, 56] };
+export const SLOTS = { corner: [120, 120], frame: [1000, 700], tag: [360, 50], ornament: [360, 80], divider: [360, 24], emblem: [30, 34], button: [200, 56], badge: [120, 32], menu: [360, 240], line: [360, 8], link: [120, 8], grid: [96, 96] };
 const FIELDS = ['genesisId', 'identity', 'name', 'status', 'role', 'network', 'joined', 'serial', 'tagline1', 'tagline2', 'dna', 'number', 'mark', 'palette'];
 
 function attrsOf(svg, file) {

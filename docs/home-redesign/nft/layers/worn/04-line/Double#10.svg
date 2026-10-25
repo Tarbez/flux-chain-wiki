@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 8" data-slot="line">
+  <title>Double: two rules, the lower one fainter</title>
+  <line x1="0" y1="3" x2="360" y2="3" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <line x1="0" y1="6" x2="360" y2="6" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

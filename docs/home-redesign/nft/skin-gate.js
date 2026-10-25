@@ -52,7 +52,7 @@
   /* Ark UI's decoration kinds and the chrome piece each one draws (ark-ui.skin.ts, makeDeco callers). Notches are
      Ark UI's own drawing for a frame rule, so they count as the frame's. A kind missing here is reported, not guessed. */
   var PIECE_OF = { frame: 'frame', notches: 'frame', corners: 'corner', nameplate: 'nameplate', 'accent-strip': 'accent-strip',
-    'accent-strip-title': 'accent-strip', divider: 'divider', 'divider-rule': 'divider', 'icon-center': 'icon', 'icon-title': 'icon', button: 'button' };
+    'accent-strip-title': 'accent-strip', divider: 'divider', 'divider-rule': 'divider', 'icon-center': 'icon', 'icon-title': 'icon', button: 'button', badge: 'badge', menu: 'menu', line: 'line', link: 'link', grid: 'grid' };
   var SHAPES = 'rect,path,line,circle,ellipse,polygon,polyline,text,use,image';
   var CONTROLS = 'a[href],button,input,select,textarea,[role="button"],[role="tab"],[role="switch"],[role="checkbox"],[role="radio"],[role="menuitem"]';
   var MAX_POINTS = 500;   // painted-shape samples per drawn shape: a piece is never read as one box
@@ -299,6 +299,12 @@
       mine.forEach(function (m) {
         if (!m.pts.length) return;
         var part = partOf(m.host), broke = false;
+        // a pattern (a worn grid) is drawn behind the content on purpose: only a cut-off counts against it
+        if (m.deco.getAttribute('data-ark-skin-place') === 'pattern') {
+          var cbp = clipBox(m.host), outp = m.pts.filter(function (p) { return !inside(p, cbp); }).length;
+          if (outp >= Math.max(3, m.pts.length * 0.1)) { add(part, 'clip'); m.host.setAttribute('data-gate-hit', ''); }
+          return;
+        }
         // text: a line of text that is not inside the piece itself
         if (hits(m.pts, near(m.box, lines.map(function (l) { return l.rect; }))) >= MIN_HITS) { add(part, 'text'); broke = true; }
         // control: one that is not the piece's own part or a part around it
@@ -376,6 +382,12 @@
       Object.keys(found).forEach(function (k) { var n = found[k] - (base[k] || 0); if (n > 0) out[k] = n; });
       return out;
     }
+    // the reason Ark UI gave for taking back the rule of this name, on any part, or ''
+    function backWhy(rule) {
+      var rep = win.ArkKitSkin.getArkSkinReport(scene), why = '';
+      ((rep && rep.parts) || []).forEach(function (p) { ((p.rules && p.rules.reverted) || []).forEach(function (r) { if (!why && r.rule === rule) why = r.why; }); });
+      return why;
+    }
     function drawsAny(pieces) {
       return Array.prototype.some.call(scene.querySelectorAll('[data-ark-skin-deco]'), function (d) { return pieces.indexOf(PIECE_OF[d.getAttribute('data-ark-skin-deco')]) >= 0; });
     }
@@ -404,14 +416,14 @@
     function check(e) {
       var id = e.layer + '/' + e.name;
       if (e.kind !== 'chrome' && e.kind !== 'palette') return Promise.resolve({ notMeasured: 'A 3D element draws no Ark UI part.' });
-      var own = ownPieces(e), ruled = ruledPieces(e), piece = own[0], samples = e.kind === 'palette' ? [SAMPLE] : win.DefxnSkinSite.SAMPLES.slice();
+      var takenBack = '', own = ownPieces(e), ruled = ruledPieces(e), piece = own[0], samples = e.kind === 'palette' ? [SAMPLE] : win.DefxnSkinSite.SAMPLES.slice();
       function on(n, partner, next) {
         return baseline(e.kind === 'palette' ? 'site' : n, e.kind === 'palette' ? null : partner).then(function (base) {
           return recordFor(e, n, partner).then(function (rec) {
             if (!rec) return { notMeasured: 'The site\'s element table (js/nft/skin-bundle.js) has no ' + id + '.' };
             clearHits();
             return wear(rec).then(function () {
-              if (piece && !drawsAny(own.concat(ruled))) return next();
+              if (piece && !drawsAny(own.concat(ruled))) { takenBack = takenBack || backWhy(e.layer); return next(); }
               return paintedAll().then(function (points) {
                 var m = measure(own, base.readings, points), found = m.found;
                 if (ruled.length) {
@@ -426,6 +438,8 @@
       }
       function attempt(k) {
         if (k < samples.length) return on(samples[k], null, function () { return attempt(k + 1); });
+        // Ark UI took it back everywhere it went: that is the element's own break, not an absence
+        if (takenBack) return { notMeasured: 'Ark UI takes it back on every part it could go on: ' + takenBack + '. It never shows.' };
         if (ORDERED_ELSEWHERE.indexOf(piece) < 0) return { notMeasured: 'Its own rules draw no ' + piece + ' piece on any review sample (' + samples.join(', ') + '), so it draws nothing on a part there.' };
         return partnerFor(e, piece).then(function (p) {
           var none = { notMeasured: 'Neither the review samples (' + samples.join(', ') + ') nor ' + PARTNER_TRIES + ' partner elements draw the ' + piece + ' piece, so the gate saw nothing of it.' };
@@ -461,7 +475,9 @@
     function close() { try { off(); } catch (err) { /* the frame is going */ } frame.remove(); }
     // the painted points the gate reads for one drawn piece, to check the gate itself against what is on screen
     function pointsOf(deco) { return painted(deco); }
-    return { ready: ready, run: run, show: show, close: close, frame: frame, pointsOf: pointsOf };
+    // the element's drawn breaks on the page as it is now, without wearing it again (a check of the gate itself)
+    function measureNow(e) { return paintedAll().then(function (points) { return measure(ownPieces(e), null, points); }); }
+    return { ready: ready, run: run, show: show, close: close, frame: frame, pointsOf: pointsOf, measureNow: measureNow };
   }
 
   root.DefxnSkinGate = { open: open, BREAKS: BREAKS };

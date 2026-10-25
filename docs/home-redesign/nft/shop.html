@@ -237,7 +237,7 @@
     var w = document.getElementById('layersWorld'), u = document.getElementById('layersUi');
     w.textContent = ''; u.textContent = '';
     w.appendChild(layerButton('', 'All', ALL.length));
-    T.CATEGORIES.forEach(function (l) { (WORLD.indexOf(l.key) >= 0 ? w : u).appendChild(layerButton(l.key, l.name, l.elements.length)); });
+    T.CATEGORIES.forEach(function (l) { (WORLD.indexOf(l.key) >= 0 ? w : u).appendChild(layerButton(l.key, l.title, l.elements.length)); });
     var st = document.getElementById('sets'); st.textContent = '';
     Object.keys(SETS).sort().forEach(function (name) {
       var li = el('li'), btn = el('button'); btn.type = 'button';
@@ -261,7 +261,7 @@
     var s = state.q.trim().toLowerCase();
     var out = ALL.filter(function (e) {
       return !e.held && (!state.set || setOf(e) === state.set) && (!state.layer || e.layer === state.layer) && (!state.tiers.length || state.tiers.indexOf(e.tier) >= 0) &&
-        (!s || e.name.toLowerCase().indexOf(s) >= 0 || layerOf(e).name.toLowerCase().indexOf(s) >= 0);
+        (!s || e.name.toLowerCase().indexOf(s) >= 0 || layerOf(e).name.toLowerCase().indexOf(s) >= 0 || layerOf(e).title.toLowerCase().indexOf(s) >= 0);
     });
     var by = { rare: function (a, b) { return a.share - b.share; }, cheap: function (a, b) { return T.price(a) - T.price(b); },
       dear: function (a, b) { return T.price(b) - T.price(a); }, name: function (a, b) { return a.name.localeCompare(b.name); } }[state.sort];
@@ -286,7 +286,7 @@
       b.appendChild(TH.thumb(e, { palette: pal, record: record }));
       var m = el('div', 'meta');
       m.appendChild(el('b', null, e.name)); m.appendChild(el('span', 'price', T.price(e) + ' FXN'));
-      m.appendChild(el('span', 'tier', T.TIERS[e.tier])); m.appendChild(el('span', 'layer', layerOf(e).name));
+      m.appendChild(el('span', 'tier', T.TIERS[e.tier])); m.appendChild(el('span', 'layer', layerOf(e).title));
       b.appendChild(m);
       var f = flagOf(e); if (f) b.appendChild(el('span', 'flag ' + f[1], f[0]));
       b.addEventListener('click', function () { pick(e); });
@@ -319,7 +319,7 @@
     facts.appendChild(el('h2', null, e.name));
     var row = el('div', 'row');
     row.appendChild(el('span', 'tier', T.TIERS[e.tier]));
-    row.appendChild(el('span', null, l.name));
+    row.appendChild(el('span', null, l.title));
     row.appendChild(el('span', null, 'in ' + (Math.round(e.share * 10) / 10) + '% of cards'));
     row.appendChild(el('span', null, bornWith ? 'Yours: born with it' : T.price(e) + ' FXN'));
     facts.appendChild(row);
@@ -353,7 +353,7 @@
     c.lines.forEach(function (line) {
       var li = el('li'), x = el('button', null, '×'); x.type = 'button'; x.setAttribute('aria-label', 'Take off ' + line.to.name);
       x.addEventListener('click', function () { delete state.skin[line.layer.key]; changed(); });
-      li.appendChild(el('span', null, line.layer.name)); li.appendChild(el('b', null, line.to.name));
+      li.appendChild(el('span', null, line.layer.title || line.layer.name)); li.appendChild(el('b', null, line.to.name));
       li.appendChild(el('span', null, line.fxn + ' FXN')); li.appendChild(x);
       ul.appendChild(li);
     });

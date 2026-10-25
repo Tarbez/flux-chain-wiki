@@ -88,9 +88,29 @@ Grid draws the lines between cards ONCE, for the group, so cards in a grid never
 4. Every new category gets its own gate measures where the old five do not reach (a button must keep its label
    readable and its hit area whole).
 
+## 6b. Built: Button, wear-only (2026-10-25)
+
+- The owner chose: Button lives outside the DNA. `layers/worn/01-button/` holds 7 drawings (Plain, Cut Corner,
+  Bracket, Underline, Double, Notch, Ref Tab). `make-layers.mjs` writes them as `DEFXN_WORN`; the table version
+  (`e196847c`) and `order.flx` did not change, so every card keeps its mix.
+- `traits.js` reads a worn element from the skin (`button:Plain`) into `picks`; the recipe sends its drawing and the
+  rule `button: drawn`; Ark UI 0.2.29 draws it on control parts only, under the label, and takes it back where it
+  would cover the label.
+- The review board, the shop and the gate list it. Skin gate: 1 of 7 breaks a part (Underline covers label text on
+  `list` and `confirm`).
+
+## 6c. Built: Badge, Menu, Line, Link, Grid (2026-10-25)
+
+- All wear-only, in `layers/worn/02-badge` to `06-grid` (8, 8, 7, 6, 7 drawings). Ark UI 0.2.31 draws them from one
+  table, `ARK_SKIN_WORN_PIECES`: an outline (button, badge, menu), a bottom line (line), an underline below the part
+  (link) or a repeated tile behind the content (grid). Which parts take each: by kind (controls, rows) or by part
+  name: badges, popovers, mega menus, card grids, stats, text links, and anchors drawn as buttons.
+- Categories show their interface names on the board and in the shop (Background, Glow, Logo, Beam, Nameplate,
+  Accent strip, Icon). The stored keys did not change.
+
 ## 7. Decisions for the owner
 
-0. Where a new category lives. A card's DNA is one element per layer, drawn in layer order
+0. (Decided 2026-10-25: wear-only, for Button.) Where a new category lives. A card's DNA is one element per layer, drawn in layer order
    (`js/nft/traits.js` `draw`). A new birth layer changes the mix of every genesis number and unpins the
    sample cards. The other way: a WEAR-ONLY category, outside the DNA, that a card has only when its owner
    buys or wears one (born cards show none). Button waits on this choice.

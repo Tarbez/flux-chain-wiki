@@ -43,7 +43,7 @@
     SEPARATOR: ['ornament'],
     BUTTON: ['edge', 'button']
   };
-  var FLAT = ['frame', 'edge', 'ornament', 'marker', 'header', 'density', 'button'];
+  var FLAT = ['frame', 'edge', 'ornament', 'marker', 'header', 'density', 'button', 'badge', 'menu', 'line', 'link', 'grid'];
   var VOID = /^(INPUT|IMG|HR|BR|TEXTAREA|SELECT|PROGRESS|METER|VIDEO|AUDIO|IFRAME|CANVAS)$/;
   function squash(v) { return String(v).replace(/[^A-Za-z0-9]/g, '').toUpperCase(); }
 

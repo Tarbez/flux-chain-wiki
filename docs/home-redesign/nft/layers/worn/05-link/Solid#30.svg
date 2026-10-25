@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 8" data-slot="link">
+  <title>Solid: one referential underline</title>
+  <line x1="0" y1="5" x2="120" y2="5" stroke="var(--referential)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

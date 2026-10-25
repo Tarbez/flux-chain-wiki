@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" data-slot="grid">
+  <title>Dot Lattice: a lattice of small faint dots, one every 24 units</title>
+  <circle cx="12" cy="12" r="1" fill="var(--faint)"/>
+  <circle cx="36" cy="12" r="1" fill="var(--faint)"/>
+  <circle cx="60" cy="12" r="1" fill="var(--faint)"/>
+  <circle cx="84" cy="12" r="1" fill="var(--faint)"/>
+  <circle cx="12" cy="36" r="1" fill="var(--faint)"/>
+  <circle cx="36" cy="36" r="1" fill="var(--faint)"/>
+  <circle cx="60" cy="36" r="1" fill="var(--faint)"/>
+  <circle cx="84" cy="36" r="1" fill="var(--faint)"/>
+  <circle cx="12" cy="60" r="1" fill="var(--faint)"/>
+  <circle cx="36" cy="60" r="1" fill="var(--faint)"/>
+  <circle cx="60" cy="60" r="1" fill="var(--faint)"/>
+  <circle cx="84" cy="60" r="1" fill="var(--faint)"/>
+  <circle cx="12" cy="84" r="1" fill="var(--faint)"/>
+  <circle cx="36" cy="84" r="1" fill="var(--faint)"/>
+  <circle cx="60" cy="84" r="1" fill="var(--faint)"/>
+  <circle cx="84" cy="84" r="1" fill="var(--faint)"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 8" data-slot="line">
+  <title>Lead Mark: a plain rule with one short primary mark at its leading end</title>
+  <line x1="0" y1="4" x2="360" y2="4" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="0" y="3" width="12" height="2" fill="var(--primary)"/>
+</svg>

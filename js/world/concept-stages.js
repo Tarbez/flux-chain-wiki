@@ -42,7 +42,7 @@
       else if (step === 4) W.focusOn(null, true);
       else W.focusOn(function (i) { return i === MINE || i === RES0; }, true);
     }
-    function top(ri) { var r = rings[ri]; return V(r.c.x, r.t * 1.1, r.c.z); }
+    function top(ri) { var r = rings[ri]; return V(r.c.x, r.c.y + r.t * 1.1, r.c.z); }
     S.stage({
       name: 'minute',
       target: function (f, asp) { return { aim: HUB.c.clone().add(V(0, 0, 1.5)), dist: W.fit(27, 15, asp, .94), elev: 34, yaw: 0, tilt: 2, n: 0 }; },

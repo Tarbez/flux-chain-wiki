@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="menu">
+  <title>Cut Corner: an outline with the top-left and bottom-right corners cut at 45 degrees, a primary tick on the first cut</title>
+  <path d="M15 1 H359 V225 L345 239 H1 V15 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M5 13 L13 5" fill="none" stroke="var(--primary)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+</svg>

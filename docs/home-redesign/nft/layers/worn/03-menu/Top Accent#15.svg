@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="menu">
+  <title>Top Accent: a faint outline with a short primary bar on the top edge at the leading corner</title>
+  <rect x="1" y="1" width="358" height="238" rx="8" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M12 1 H36" fill="none" stroke="var(--primary)" stroke-width="2" vector-effect="non-scaling-stroke"/>
+</svg>

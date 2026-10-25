@@ -42,6 +42,27 @@ per chrome drawing in `js/nft/chrome/` (see "Skin rules for Ark UI"). Builders l
 | 11-divider | the line above the footer | chrome |
 | 12-emblem | the small mark beside the footer lines | chrome |
 
+## Wear-only categories
+
+`layers/worn/<NN>-<key>/` holds categories that are not in the DNA. No card is born with one. An owner
+buys one in the shop or wears one by name (a skin such as `button:Plain`). They never change a card's
+mix, its odds or the table version, so adding one is safe for every card already born.
+
+| Folder | What it is | Kind |
+|---|---|---|
+| worn/01-button | the outline of every button on a site that wears the card | chrome |
+| worn/02-badge | the outline of every small badge (a status or label word) | chrome |
+| worn/03-menu | the edge of every menu and popover panel | chrome |
+| worn/04-line | the line along the bottom of every row (a list row, a fact, the pager, the tab strip) | chrome |
+| worn/05-link | the underline under every text link | chrome |
+| worn/06-grid | one tile of a quiet pattern repeated behind every group (a card grid, a stats row, a list) | chrome |
+
+A button is drawn on a site's controls (buttons, tab and accordion triggers), never on the card. Its
+box is `0 0 200 56`. The site stretches it to each button: the 24 units at each end and the 14 units at
+the top and bottom keep their shape, and the middle stretches. Draw the corners and ends inside those
+bands. Ark UI takes a button back where its drawing would cover the label, so draw the outline near the
+edge and keep the middle empty.
+
 ## 3D elements
 
 The root is `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" data-build="<builder>">`.
@@ -81,6 +102,12 @@ viewBox unit is one card unit.
 | ornament | `0 0 360 80` | between the facts and the divider, at (56, 478) |
 | divider | `0 0 360 24` | the line above the footer, at (56, 568) |
 | emblem | `0 0 30 34` | beside the two footer lines |
+| button | `0 0 200 56` | not on the card: every button of a site that wears it (wear-only, see above) |
+| badge | `0 0 120 32` | wear-only: every badge; ends 14 and edges 10 units keep their shape, the middle stays empty |
+| menu | `0 0 360 240` | wear-only: every menu and popover panel; ends and edges 40 units keep their shape; draw only within 24 units of the edge |
+| line | `0 0 360 8` | wear-only: the bottom of every row; the 24-unit ends keep their shape |
+| link | `0 0 120 8` | wear-only: just under every text link; the 12-unit ends keep their shape; draw it referential |
+| grid | `0 0 96 96` | wear-only: one tile, repeated whole behind a group; keep it faint, and let lines that leave one edge come back at the opposite edge |
 
 Colours are only these names, written as `var(--name)` in an attribute or a style. The one list is
 `INKS` in `js/nft/card-chrome.js`.

@@ -2,7 +2,7 @@
   "package": "@deadark/sdk",
   "version": "0.2.50",
   "tarball": ".vendor/deadark-sdk-0.2.50.tgz",
-  "sha256": "c4ea3ee206a5217a5db629b2db13184c013e350813b5992894d75eb49df114a7",
+  "sha256": "20272ee8efc6818572300fd53b2e4f5ba3d942ceeaee5b9659e7fe9f65e931ad",
   "sdkRoot": "../../design/deadark-sdk",
-  "updatedAt": "2026-10-25T15:07:57.915Z"
+  "updatedAt": "2026-10-25T15:59:09.321Z"
 }

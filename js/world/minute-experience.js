@@ -81,11 +81,11 @@
   var NETS = rings.filter(function (r) { return r.kind === 'network' && !r.parent; }).map(function (r) { return rings.indexOf(r); });
   var step = 0, shown = -1, trace = W.tween(0), cube0 = 0;
   W.cubes.forEach(function (c, i) { if (c.distanceTo(rings[RES0].c) < W.cubes[cube0].distanceTo(rings[RES0].c)) cube0 = i; });
-  function top(ri) { var r = rings[ri]; return V(r.c.x, r.t * 1.1, r.c.z); }
+  function top(ri) { var r = rings[ri]; return V(r.c.x, r.c.y + r.t * 1.1, r.c.z); }
   /* a close pose on one ring: span is how many ring radii the frame holds across */
   function ring(ri, span, elev, yaw, asp) {
     var r = rings[ri], w = span * r.R;
-    return { aim: V(r.c.x, r.t * .6, r.c.z), dist: W.fit(w, w * .55, asp, .9), elev: elev, yaw: yaw, tilt: 2, n: 0 };
+    return { aim: V(r.c.x, r.c.y + r.t * .6, r.c.z), dist: W.fit(w, w * .55, asp, .9), elev: elev, yaw: yaw, tilt: 2, n: 0 };
   }
   /* the wide pose is the minute view's (concept-stages.js): the whole grid from above */
   function wide(asp, fill, pushLeft) {

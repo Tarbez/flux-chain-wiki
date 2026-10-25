@@ -315,7 +315,7 @@
   function gateButton() {
     var b = document.getElementById('gateRun'), l = layerByKey(layer);
     b.disabled = running || !measurable(l);
-    b.title = measurable(l) ? 'Put every element of ' + l.name + ' on every Ark UI part and measure what breaks' : '3D elements draw no Ark UI part: there is nothing to check here';
+    b.title = measurable(l) ? 'Put every element of ' + l.title + ' on every Ark UI part and measure what breaks' : '3D elements draw no Ark UI part: there is nothing to check here';
   }
   function gateState(t) { document.getElementById('gateState').textContent = t; }
   function fit() {
@@ -348,7 +348,7 @@
     Promise.resolve().then(openGate).then(function () {
       return gate.run(list, {
         stopped: function () { return stopping; },
-        onStep: function (i, n, e) { done = i - 1; gateState(l.name + ': ' + i + ' of ' + n + '. Now ' + e.name + '.'); }
+        onStep: function (i, n, e) { done = i - 1; gateState(l.title + ': ' + i + ' of ' + n + '. Now ' + e.name + '.'); }
       });
     }).then(function (res) {
       // the new measurement replaces this category's old one; other categories keep theirs
@@ -357,7 +357,7 @@
       changed(); drawRail(); drawGrid();
       var flagged = new Set(res.found.map(function (g) { return g.id; })).size;
       var why = {}; res.notMeasured.forEach(function (x) { why[x.why] = (why[x.why] || 0) + 1; });
-      gateState((stopping ? 'Stopped after ' + done + ' of ' + list.length + '. ' : 'Checked ' + list.length + ' in ' + l.name + '. ') +
+      gateState((stopping ? 'Stopped after ' + done + ' of ' + list.length + '. ' : 'Checked ' + list.length + ' in ' + l.title + '. ') +
         flagged + ' broke a part and are proposed for a hold.' +
         Object.keys(why).map(function (w) { return ' ' + why[w] + ' not measured: ' + w; }).join('') +
         (res.unknownKinds.length ? ' Ark UI drew kinds the gate cannot name: ' + res.unknownKinds.join(', ') + '.' : ''));
@@ -394,7 +394,7 @@
       var li = el('li'), b = el('button'); b.type = 'button'; b.setAttribute('aria-pressed', String(l.key === layer));
       var held = l.elements.filter(isHeld).length, sm = el('small');
       sm.appendChild(el('span', null, String(l.elements.length))); if (held) sm.appendChild(el('span', 'h', held + ' held'));
-      b.appendChild(el('span', null, l.name)); b.appendChild(sm);
+      b.appendChild(el('span', null, l.title)); b.appendChild(sm);
       b.addEventListener('click', function () { layer = l.key; picked = null; drawRail(); drawGrid(); });
       li.appendChild(b); ul.appendChild(li);
     });
@@ -432,7 +432,7 @@
         if (show === 'warn' && !w.length && t.parentNode) { t.remove(); shown--; count(); }
       });
     });
-    function count() { document.getElementById('count').innerHTML = '<b>' + shown + '</b> of ' + l.elements.length + ' in ' + l.name; }
+    function count() { document.getElementById('count').innerHTML = '<b>' + shown + '</b> of ' + l.elements.length + ' in ' + l.title; }
     count();
     if (!picked) { var first = grid.firstChild; if (first) pick(l.elements.filter(function (e) { return gridTiles[idOf(e)] === first; })[0]); }
   }
@@ -456,7 +456,7 @@
     var side = document.getElementById('side'), e = picked;
     freeCards(sideCards); side.textContent = '';
     side.appendChild(el('h2', null, e.name));
-    side.appendChild(el('p', null, layerByKey(e.layer).name + ' · ' + T.TIERS[e.tier] + ' · ' + (layerByKey(e.layer).worn ? (Math.round(e.share * 10) / 10) + '% of its category\'s weight (sets its price)' : 'in ' + (Math.round(e.share * 10) / 10) + '% of cards') + (isHeld(e) ? ' · held' : '')));
+    side.appendChild(el('p', null, layerByKey(e.layer).title + ' · ' + T.TIERS[e.tier] + ' · ' + (layerByKey(e.layer).worn ? (Math.round(e.share * 10) / 10) + '% of its category\'s weight (sets its price)' : 'in ' + (Math.round(e.share * 10) / 10) + '% of cards') + (isHeld(e) ? ' · held' : '')));
     var g = gateOf(e);
     if (g.length) {
       side.appendChild(el('p', null, 'The gate proposes a hold. On the site\'s parts it measured:'));
@@ -468,7 +468,7 @@
       side.appendChild(see);
     }
     // a wear-only element (layers/worn/) is drawn on a site's parts, never on the card
-    if (layerByKey(e.layer).worn) { side.appendChild(el('p', null, 'Wear-only: no card is born with it. It is drawn on a site\'s ' + layerByKey(e.layer).name.toLowerCase() + 's, not on the card. Use See it on the parts.')); return; }
+    if (layerByKey(e.layer).worn) { side.appendChild(el('p', null, 'Wear-only: no card is born with it. It is drawn on a site\'s ' + layerByKey(e.layer).title.toLowerCase() + 's, not on the card. Use See it on the parts.')); return; }
     var three = el('div', 'three'); side.appendChild(three);
     var mixes = [Object.assign({}, BASE, { traits: Object.assign({}, REF.traits) })];
     [101, 202].forEach(function (n) { mixes.push(Object.assign(T.sampleRecord(n), {})); });
@@ -483,7 +483,7 @@
   var axes = { row: { layer: 'frame', q: '', page: 0 }, col: { layer: 'corner', q: '', page: 0 } }, cells = [];
   ['row', 'col'].forEach(function (k) {
     var sel = document.getElementById(k + 'Layer');
-    T.LAYERS.forEach(function (l) { var o = el('option', null, l.name); o.value = l.key; sel.appendChild(o); });
+    T.LAYERS.forEach(function (l) { var o = el('option', null, l.title); o.value = l.key; sel.appendChild(o); });
     sel.value = axes[k].layer;
     sel.addEventListener('change', function () { axes[k].layer = sel.value; axes[k].page = 0; drawMatrix(); });
     var qi = document.getElementById(k + 'Q'), t = 0;

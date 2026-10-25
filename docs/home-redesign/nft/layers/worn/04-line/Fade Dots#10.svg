@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 8" data-slot="line">
+  <title>Fade Dots: a rule that thins into dots fading toward both ends</title>
+  <line x1="0" y1="4" x2="360" y2="4" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <line x1="24" y1="4" x2="336" y2="4" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="19" cy="4" r="1.2" fill="var(--line)"/>
+  <circle cx="13" cy="4" r="1" fill="var(--rule)"/>
+  <circle cx="7" cy="4" r="0.8" fill="var(--faint)"/>
+  <circle cx="341" cy="4" r="1.2" fill="var(--line)"/>
+  <circle cx="347" cy="4" r="1" fill="var(--rule)"/>
+  <circle cx="353" cy="4" r="0.8" fill="var(--faint)"/>
+</svg>

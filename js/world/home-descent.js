@@ -401,8 +401,8 @@
   S.homeTags = function () {
     var on = built > .99, rs = W.ringList, tp = V(HC.x - RP * .98, Y0, HC.z - RP * .15), out = [
       { id: 'logo', p: tp, on: on && clear('logo', tp) }];   /* on the logo's far rim, a short leader down to it */
-    if (DEARK != null) { var d = rs[DEARK], dp = V(d.c.x - d.R * .2, d.t * 1.6, d.c.z - d.R); out.push({ id: 'deark', p: dp, on: on && clear('deark', dp) }); }
-    if (CR3 != null) { var c3 = rs[CR3], cp = V(c3.c.x, c3.t * 1.5, c3.c.z - c3.R * .4); out.push({ id: 'cr3tv', p: cp, on: on && clear('cr3tv', cp) }); }   /* over its own ring */
+    if (DEARK != null) { var d = rs[DEARK], dp = V(d.c.x - d.R * .2, d.c.y + d.t * 1.6, d.c.z - d.R); out.push({ id: 'deark', p: dp, on: on && clear('deark', dp) }); }
+    if (CR3 != null) { var c3 = rs[CR3], cp = V(c3.c.x, c3.c.y + c3.t * 1.5, c3.c.z - c3.R * .4); out.push({ id: 'cr3tv', p: cp, on: on && clear('cr3tv', cp) }); }   /* over its own ring */
     return out;
   };
 

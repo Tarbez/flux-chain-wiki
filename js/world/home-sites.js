@@ -108,8 +108,8 @@
   var SPOT = { deark: [-1.0, 5.0, -1.8, -.18, 192], cr3tv: [-1.5, 4.0, -2.4, .2, 205] };
   var spots = NETS.map(function (r) {
     var id = N.IDS[r.i], o = SPOT[id] || [-r.R * .6, 4.6, -r.R * .5, 0, 200];
-    var at = V(r.c.x + o[0], o[1], r.c.z + o[2]), fa = o[4] * W.D2R;
-    var foot = V(r.c.x + Math.cos(fa) * r.R, r.t * (LIFT + 1), r.c.z + Math.sin(fa) * r.R);   /* on top of the rim's tiles */
+    var at = V(r.c.x + o[0], r.c.y + o[1], r.c.z + o[2]), fa = o[4] * W.D2R;
+    var foot = V(r.c.x + Math.cos(fa) * r.R, r.c.y + r.t * (LIFT + 1), r.c.z + Math.sin(fa) * r.R);   /* on top of the rim's tiles */
     return { r: r, id: id, at: at, yaw: o[3], foot: foot, built: (r.at || 0) + 980, from: null, fit: new THREE.Vector3() };
   });
 

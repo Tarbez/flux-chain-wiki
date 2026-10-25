@@ -69,7 +69,7 @@ ArkUI.pageStyles = {
     resolverGuide: ['css/resolver-guide.css', 'css/resolver-lab.css', 'css/block-page.css'],
     resolverMath: ['css/resolver-math.css', 'css/block-page.css'],
     worldResolvers: ['css/world-pages.css', 'css/world-measure.css'],
-    auth: ['css/account.css', 'css/world-pages.css', 'css/cutouts.css', 'css/auth.css'],
+    auth: ['css/world-pages.css', 'css/cutouts.css', 'css/auth.css'],
     account: ['css/account.css', 'css/block-page.css'],
     accountDomains: ['css/account-domains.css', 'css/block-page.css'],
     bundledeployer: ['css/home-flow.css', 'css/block-page.css'],

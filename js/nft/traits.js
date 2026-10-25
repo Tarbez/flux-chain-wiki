@@ -123,6 +123,8 @@
   var KEY_OF = {};
   CATEGORIES.forEach(function (l) { KEY_OF[l.key] = l.key; KEY_OF[uiName(l.key)] = l.key; });
   function uiName(key) { return UI_NAMES[key] || key; }
+  // the name a page shows for a category: its interface name ("accent-strip" -> "Accent strip"); keys stay as written
+  CATEGORIES.forEach(function (l) { var n = uiName(l.key).replace(/-/g, ' '); l.title = n.charAt(0).toUpperCase() + n.slice(1); });
   // (not keyOf: that name is the card's own key, keyOf(record), further down)
   function layerKeyOf(name) { return KEY_OF[String(name || '').trim().toLowerCase()] || null; }
   function pinOf(pins, key) { return pins[key] != null ? pins[key] : pins[uiName(key)]; }

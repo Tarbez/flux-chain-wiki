@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="menu">
+  <title>Plain: one hairline outline around the panel, soft corners</title>
+  <rect x="1" y="1" width="358" height="238" rx="10" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>Stamp: a square-cornered stamp, a dim outline, a rule inside and primary corner blocks</title>
+  <rect x="1" y="1" width="118" height="30" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="4" y="4" width="112" height="24" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="1" y="1" width="3" height="3" fill="var(--primary)"/>
+  <rect x="116" y="1" width="3" height="3" fill="var(--primary)"/>
+  <rect x="1" y="28" width="3" height="3" fill="var(--primary)"/>
+  <rect x="116" y="28" width="3" height="3" fill="var(--primary)"/>
+</svg>

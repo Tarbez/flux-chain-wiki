@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<!-- The CSP below also lets this page call the local FXN ID gate (http://127.0.0.1:4571 to 4575, flux/fxn-auth/scripts/fxn-id-gate-local.mjs), so the sign-in panel can ask it for a v10 Secret Key. Exact origins, no range. Fleet gate nodes are added here once they exist. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'self' http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com ws://127.0.0.1:19501 ws://localhost:19501; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<!-- The CSP below also lets this page call the local FXN ID gate (http://127.0.0.1:4571 to 4575, flux/fxn-auth/scripts/fxn-id-gate-local.mjs), so the sign-in panel can ask it for a v10 Secret Key. Exact origins, no range. The devnet gate committee (https://gate.defxn.com, assets/gate.committee) is allowed too, so /auth can make and open v10 FXN IDs. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'self' https://gate.defxn.com http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com ws://127.0.0.1:19501 ws://localhost:19501; object-src 'none'; base-uri 'none'; form-action 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- The family tab icon: the DEFXN mark in Ember, built by flux/defxn-product-kit (deriveIcon) and
@@ -165,7 +165,7 @@
 <script src="js/pages/catalog.js?v=20261020-w4" defer></script>
 <script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/min/manifest.js?v=3a59afed" defer></script>
+<script src="js/min/manifest.js?v=aeeae881" defer></script>
 <script src="js/ark/page-loader.js?v=20261025-ac1" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
 <script src="js/ark/panel-continuity.js?v=20261024-world1" defer></script>

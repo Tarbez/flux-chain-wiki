@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="menu">
+  <title>Dotted: a dotted outline with solid corners</title>
+  <rect x="1" y="1" width="358" height="238" rx="8" fill="none" stroke="var(--rule)" stroke-dasharray="0 4" stroke-linecap="round" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 20 V9 Q1 1 9 1 H20 M340 1 H351 Q359 1 359 9 V20 M359 220 V231 Q359 239 351 239 H340 M20 239 H9 Q1 239 1 231 V220" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

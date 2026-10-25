@@ -66,11 +66,21 @@
   var order = rings.map(function (r, i) { return i; }).sort(function (a, b) { return rings[a].c.distanceTo(HUB.c) - rings[b].c.distanceTo(HUB.c); });
   var RING_LAG = 110, RING_FOR = 560, TILE_FOR = 420;
   rings.forEach(function (r) { r.at = order.indexOf(r.i) * RING_LAG; });
+  /* FLOATING CHAINS (owner, 2026-10-25: "chains float above the grid instead of lying flat"). Every chain but the
+     kernel hovers: its centre stands HOVER above the grid, and each ring takes its own share of it, so the network
+     reads in layers. The share is derived from the ring's place in the network's order (nearest the kernel first),
+     spread by the golden ratio so neighbours never share a height; nothing is placed by hand. The kernel stays the
+     ground (its logo is inlaid in the grid, home-descent.js). A ring's centre IS its floating centre, so everything
+     placed from it (tiles, logo slot, lines, labels, a page's camera) floats with it; a ring's rise, hover lift and
+     focus still add on top (ringUp). */
+  var HOVER = 1.7;
+  function hoverOf(rank) { return HOVER * (.62 + .76 * ((rank * .618034) % 1)); }
+  rings.forEach(function (r) { if (r !== HUB) r.c.y = hoverOf(order.indexOf(r.i)); });
   /* chains inside chains (network-data.js CHILDREN): each one sits inside its network ring, placed
      by angle and share of the parent's radius, and builds just after its parent */
   (N.CHILDREN || []).forEach(function (ch, j) {
     var p = rings[ch[0]], a = ch[2] * D2R, R = p.R * ch[4], n = ch[5], t = TAU * R / (SLOT * n), ri = rings.length;
-    var c = V(p.c.x + Math.cos(a) * p.R * ch[3], 0, p.c.z + Math.sin(a) * p.R * ch[3]);
+    var c = V(p.c.x + Math.cos(a) * p.R * ch[3], p.c.y, p.c.z + Math.sin(a) * p.R * ch[3]);   /* it floats with its network */
     rings.push({ i: ri, c: c, R: R, t: t, n: n, kind: N.KIND[ri], outer: R + HALF_D * t, parent: p, at: p.at + 380 + j % 5 * 90 });
     order.push(ri);
   });
@@ -149,7 +159,7 @@
   var ySet = k.tileSet(yList);
   var TC = Y.t * 1.2, TS = TC * 1.4, GAP = .35;   /* record tile, chosen tile, gap in the card row */
   /* your ring rises out of the network as it re-forms (so it touches no other ring) and opens wider */
-  var RISE = Y.R * 1.3, RC = Y.R * 1.45;
+  var RISE = Y.c.y + Y.R * 1.3, RC = Y.R * 1.45;   /* RISE is a height above the grid: your ring floats, then rises */
   ySet.liftable = function (q) { return (view === 'home' || RING[view]) && !(view === 'open' && yTile[q].rec === sel); };
   ySet.pickable = function (q) { var j = yTile[q].rec; return j >= 0 && (view === 'home' || RING[view]) && (view !== 'record' || j === sel || j === sel + 1) && !(view === 'open' && j === sel); };
   ySet.onPick = function (q) { if (hooks.pick) hooks.pick(view, yTile[q].rec); };
@@ -190,7 +200,7 @@
   var SLOTS = rings.filter(function (r) { return r.i !== N.HUB && !r.parent; }), DASH = 22;
   SLOTS.forEach(function (r) { r.sr = r.kind === 'network' ? r.R * .17 : Math.min(r.R * .42, r.t * 1.1); });   /* small, so it hides none of the chains inside */
   var slotDisc = k.instanced(new THREE.CylinderGeometry(1, 1, .12, 40).rotateX(Math.PI / 2),
-    new THREE.MeshBasicMaterial({ toneMapped: false }), SLOTS.length, false);   /* unlit and dark: an empty slot, not a plate */
+    new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true, opacity: .62, depthWrite: false }), SLOTS.length, false);   /* unlit and dark: an empty slot, not a plate; dark glass now, so a chain's mark on the grid shows through it */
   var slotDash = k.instanced(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ toneMapped: false }), SLOTS.length * DASH, false);
   var logoFaces = {};
   SLOTS.forEach(function (r) {
@@ -201,8 +211,35 @@
     im.onload = function () { face.material.map = new THREE.Texture(im); face.material.map.needsUpdate = true; face.material.map.colorSpace = THREE.SRGBColorSpace; face.material.opacity = 1; face.material.needsUpdate = true; k.redraw(); };
     im.src = src; k.scene.add(face); logoFaces[r.i] = face;
   });
+  /* ---------- under each floating chain: its shadow and its echo on the grid (2026-10-25) ----------
+     Seen from above, a hover only reads by what it leaves on the ground. Each chain that floats has a soft dark ring
+     of shade on the grid under it and a thin lit circle, its echo, in its own colour: the gap between the chain and
+     its echo is the height it floats at, and it widens when the chain rises for its own page. */
+  var FLOATS = OUTER.filter(function (r) { return r !== HUB; });
+  var echo = k.instanced(new THREE.RingGeometry(.97, 1, 96, 1).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .4 }), FLOATS.length, false);
+  var shade = k.instanced(new THREE.PlaneGeometry(2, 2).rotateX(-Math.PI / 2),
+    new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, depthWrite: false, opacity: .5 }), FLOATS.length, false);
+  echo.renderOrder = 1; shade.renderOrder = 1;
+  (function () {
+    /* a soft band of shade where the ring's tiles are, clear in the middle: drawn grey on black (an alpha map reads green) */
+    var cv = document.createElement('canvas'); cv.width = cv.height = 128;
+    var g = cv.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.fillStyle = '#000'; g.fillRect(0, 0, 128, 128);
+    gr.addColorStop(0, 'rgb(40,40,40)'); gr.addColorStop(.62, 'rgb(70,70,70)'); gr.addColorStop(.8, 'rgb(200,200,200)'); gr.addColorStop(.9, 'rgb(120,120,120)'); gr.addColorStop(1, 'rgb(0,0,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+    shade.material.alphaMap = new THREE.CanvasTexture(cv);
+  })();
+  function paintEcho(dims) {
+    FLOATS.forEach(function (r, i) {
+      var tone = famOf[r.i] || k.C[r.kind] || k.C.muted;
+      echo.setColorAt(i, slotCol.copy(tone).multiplyScalar(.6 * (1 - (dims ? dims[r.i] : 0))));
+    });
+    if (echo.instanceColor) echo.instanceColor.needsUpdate = true;
+  }
   var slotCol = new THREE.Color();
   function paintSlots(dims) {
+    paintEcho(dims);
     SLOTS.forEach(function (r, i) {
       var f = 1 - (dims ? dims[r.i] : 0);
       slotDisc.setColorAt(i, slotCol.copy(k.mix('canvas', 'other', .22)).multiplyScalar(f));
@@ -292,7 +329,7 @@
     var p = r.parent, list = inner[p.i] = inner[p.i] || [];
     if (r.kind === 'ledger') [55, 90, 125].forEach(function (deg) {
       var a = deg * D2R, r0 = r.outer + .1, r1 = p.R - HALF_D * p.t - .15;
-      list.push({ pts: [V(p.c.x + Math.cos(a) * r0, 0, p.c.z + Math.sin(a) * r0), V(p.c.x + Math.cos(a) * r1, 0, p.c.z + Math.sin(a) * r1)], at: r.at + 420, dur: 380, lit: .8 });
+      list.push({ pts: [V(p.c.x + Math.cos(a) * r0, p.c.y, p.c.z + Math.sin(a) * r0), V(p.c.x + Math.cos(a) * r1, p.c.y, p.c.z + Math.sin(a) * r1)], at: r.at + 420, dur: 380, lit: .8 });
     });
     if (r.kind === 'pool') rings.filter(function (s) { return s.parent === p && s.kind === 'token'; })
       .sort(function (s1, s2) { return flat(s1.c, r.c) - flat(s2.c, r.c); }).slice(0, 2)
@@ -313,9 +350,9 @@
     rings.forEach(function (ring) {
       if (ring.kind !== kd) return;
       /* a chain inside a network is named at the network's edge, beside it, never over the centre */
-      if (ring.parent) { var e = rim2(ring.parent, ring.c, .3); labels.push({ kind: kd, p: V(e.x, ring.parent.t * 1.2, e.z), to: null }); return; }
-      labels.push({ kind: kd, p: V(ring.c.x - ring.R * .9, ring.t * 1.55, ring.c.z - ring.R * .35), to: null });   /* over its top left */
-      labels.push({ kind: kd, p: V(ring.c.x + ring.outer + .25, ring.t * .9, ring.c.z), to: null });            /* beside its right side */
+      if (ring.parent) { var e = rim2(ring.parent, ring.c, .3); labels.push({ kind: kd, p: V(e.x, ring.parent.c.y + ring.parent.t * 1.2, e.z), to: null }); return; }
+      labels.push({ kind: kd, p: V(ring.c.x - ring.R * .9, ring.c.y + ring.t * 1.55, ring.c.z - ring.R * .35), to: null });   /* over its top left */
+      labels.push({ kind: kd, p: V(ring.c.x + ring.outer + .25, ring.c.y + ring.t * .9, ring.c.z), to: null });            /* beside its right side */
     });
   });
   cubes.forEach(function (c) { labels.push({ kind: 'computers', p: V(c.p.x + .35, c.p.y + .55, c.p.z), to: null }); });
@@ -342,8 +379,12 @@
   };
   /* how high a ring stands this frame: its own hover lift, focus and rise, plus its parent's
      (a network lifts with everything inside it), less the hub's sink on the FXN page */
+ /* a floating chain lifts off the grid as it builds, and comes back down when the build clock is wound back
+     (download-stage.js); a chain inside a network rides with it */
+  var buildMs = 0, YC = V(0, 0, 0);
+  function liftOff(r) { return r.parent || r === HUB ? 1 : ease.inOut(clamp01((buildMs - r.at - RING_FOR * .5) / 900)); }
   function ringUp(r) {
-    var up = r.t * .32 * ease.glide(ringLift[r.i]) + r.t * .5 * ease.glide(ringFocus[r.i]) + (r === HUB ? 0 : ringRise[r.i] * riseH(r));
+    var up = (r.parent || r === HUB ? 0 : -(1 - liftOff(r)) * r.c.y) + r.t * .32 * ease.glide(ringLift[r.i]) + r.t * .5 * ease.glide(ringFocus[r.i]) + (r === HUB ? 0 : ringRise[r.i] * riseH(r));
     if (r.parent) up += ringUp(r.parent);
     if (r === HUB && api.world && api.world.hubSink) up -= api.world.hubSink;   /* its chains inside sink with it, through ringUp(parent) */
     return up;
@@ -466,7 +507,7 @@
      of light, a bead runs the chain once, then the page opens. */
   var view = 'home', sel = 0, pos = 0, earlier = 0, A = 1.9, stages = {}, NAMES = [];
   var RCR = RC, RCT = TC * 1.16;                           /* the record ring, and the chain's tight ring */
-  var RINGC = Y.c.clone().add(V(0, RISE, 0));           /* your ring's centre once it has risen */
+  var RINGC = V(Y.c.x, RISE, Y.c.z);                     /* your ring's centre once it has risen */
   var FRONT = RINGC.clone().add(V(0, 0, RCR + .5 * TC));  /* where the chosen record stands */
   var LSP = TC * 2.3, LC = RINGC.clone();                 /* links: the chain in a line, oldest on the left */
   var KEY_Y = TC * .7;                                    /* your key stands in the ring's centre, at the tiles' height */
@@ -744,6 +785,7 @@
   }
   function pose(ms, now) {
     step(now); if (cur) apply();
+    buildMs = ms;
     /* the network builds once */
     var sink = api.world.hubSink || 0;
     /* the ring under the pointer lifts as one. The ring a page is about rises out of the network */
@@ -810,6 +852,14 @@
       });
       paintSlots(dims);
     }
+    /* the shadow and echo under each floating chain: the shade tightens and darkens as the chain comes down to the
+       grid, the echo stays where the chain would lie */
+    FLOATS.forEach(function (r, i) {
+      var b = clamp01((ms - r.at) / (RING_FOR + 300)), sc = b <= 0 ? 1e-4 : ease.out(b), h = r.c.y + ringUp(r);
+      echo.setMatrixAt(i, M.compose(SLOTP.set(r.c.x, .025, r.c.z), Q.identity(), SC.set(r.outer * sc, 1, r.outer * sc)));
+      var sw = r.outer * (1.05 + h * .04) * sc;
+      shade.setMatrixAt(i, M.compose(SLOTP.set(r.c.x, .02, r.c.z), Q.identity(), SC.set(sw, 1, sw)));
+    });
     var cd = Math.min(.95, dimF * 1.2) * (1 - cubeFocus);
     if (Math.abs(cd - lastDim) > .001) { lastDim = cd; cubeDim = cd; paintCubes(); }
     /* the logo slots: at each ring's centre, facing the camera, built with the ring */
@@ -830,7 +880,8 @@
       if (lf) { lf.position.copy(SLOTP).addScaledVector(DP.set(0, 0, 1).applyQuaternion(Q), sc * .075); lf.quaternion.copy(Q); lf.scale.setScalar(Math.max(1e-4, sc)); }
     });
 
-    /* your ring */
+    /* your ring, floating as it builds */
+    YC.copy(Y.c).setY(Y.c.y * liftOff(Y));
     if (turn) { var tu = clamp01((now - turn.t0) / turn.dur); pos = turn.from + turn.d * ease.glide(tu); if (tu >= 1) { pos = sel; turn = null; } }
     var m = cur ? cur.m : 0, s = cur ? cur.s : 0, g = cur ? cur.g : 0, l = cur ? cur.l : 0, jn = cur ? cur.j : 0;
     var rr = cur ? cur.rr : RCR, cs = cur ? cur.cs : TS / TC, fold = clamp01(m * 1.9);
@@ -849,8 +900,8 @@
       var bH = build <= 0 ? 0 : ease.back(build), dropH = (1 - ease.out(build)) * 1.4 * Y.t;
       if (tl.rec < 0) {
         /* an empty slot folds away first, flat into the floor, as your ring becomes your chain */
-        ySet.place(qq, k.ringFrame(Y.c, Y.R, th, Y.t * (1 - ease.inOut(fold)), build, M));
-        ySet.placeLink(qq, k.ringFrame(Y.c, Y.R, th + stepY / 2, Y.t * (1 - ease.inOut(fold)), build, M), .62);
+        ySet.place(qq, k.ringFrame(YC, Y.R, th, Y.t * (1 - ease.inOut(fold)), build, M));
+        ySet.placeLink(qq, k.ringFrame(YC, Y.R, th + stepY / 2, Y.t * (1 - ease.inOut(fold)), build, M), .62);
         ySet.tint(qq, homeTint);
         continue;
       }
@@ -859,7 +910,7 @@
       var mj = clamp01(m * 1.25 - (nR - 1 - j) * .05), me = ease.inOut(mj);
       var thC = Math.PI / 2 - rel * stepR, theta = angLerp(th, thC, me);
       var R = lerp(Y.R, rr + .5 * TC * near, me), sc = lerp(Y.t, TC * (1 + (cs - 1) * near), me);
-      var x = Y.c.x + R * Math.cos(theta), z = Y.c.z + R * Math.sin(theta), yaw = Math.PI / 2 - theta, y = RISE * me + (1 - m) * dropH;
+      var x = Y.c.x + R * Math.cos(theta), z = Y.c.z + R * Math.sin(theta), yaw = Math.PI / 2 - theta, y = lerp(Y.c.y * liftOff(Y), RISE, me) + (1 - m) * dropH;
       /* links pose: the chain in a line, oldest on the left, the chosen record pulled forward;
          it unrolls from the chosen record outward (fix 52) */
       if (l > 0) {
@@ -895,7 +946,7 @@
       else { recEdge.set(j, FM, 0, 0, 0); if (recs[j].signedBy && m > .5 && !(j === sel && s > .02)) recEdge.bar(j, 1, FM, -.16, -.43, .5 * wordsIn, .022); }
       statusOn[j] = recs[j].signedBy && !(j === sel && s > .02) ? wordsIn : 0;
       if (statusOn[j] > .01) statusPts[j].set(.38, .38, .015).applyMatrix4(FM);
-      if (m < .5) ySet.placeLink(qq, k.ringFrame(Y.c, Y.R, th + stepY / 2, Y.t * (1 - m * 2), build, M), .62);
+      if (m < .5) ySet.placeLink(qq, k.ringFrame(YC, Y.R, th + stepY / 2, Y.t * (1 - m * 2), build, M), .62);
     }
     /* the card: the chosen tile's body, its corners kept as it widens (fix 18) */
     card.visible = s > .002;

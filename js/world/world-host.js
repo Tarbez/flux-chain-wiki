@@ -176,7 +176,7 @@
     ['DEFXN_NETWORK', 'js/content/network-data.js'], ['DEFXN_RECORDS', 'js/content/records-sample.js'],
     ['DEFXNRingKit', 'js/world/ring-kit.js'],
     ['DEFXN_CAPABILITIES', 'js/content/capabilities-data.js'], ['DEFXN_RESOLVERS', 'js/content/resolvers-data.js'], ['DEFXN_FXN', 'js/content/fxn-data.js'],
-    ['DEFXNScene', 'js/world/chains-scene.js'], [null, 'js/world/stages.js'], [null, 'js/world/glass-kit.js'],
+    ['DEFXNScene', 'js/world/chains-scene.js'], [null, 'js/world/stages.js'], [null, 'js/world/glass-kit.js'], [null, 'js/world/chain-marks.js'],
     ['DEFXN_CONCEPT', 'js/content/concept-data.js'], ['DEFXN_IDENTITY', 'js/content/identity-sample.js'],
     [null, 'js/world/ring-stage.js'], [null, 'js/world/concept-stages.js'], [null, 'js/world/identity-stages.js'], [null, 'js/world/intro-stage.js'], [null, 'js/world/download-stage.js'], [null, 'js/world/auth-stage.js'],
     [null, 'js/world/home-descent.js'], [null, 'js/world/home-helix.js'], [null, 'js/world/home-sites.js'], [null, 'js/world/record-glass.js'],

@@ -12,7 +12,14 @@
      S.glass.plate(shape, opts)               the mesh: { color, opacity, depth }; lies flat (y up)
      S.glass.show(group, views)               the group fades in on those views ({ view: opacity factor }) and out on
                                               every other, with the world's own glide; nothing runs once it settles
-     S.glass.color(token, fallback)           a theme token as a THREE.Color, so the glass follows the theme family */
+     S.glass.color(token, fallback)           a theme token as a THREE.Color, so the glass follows the theme family
+     S.glass.polygon(points)                  a THREE.Shape from a flat list of x, y pairs (an SVG polygon's points)
+     S.glass.stroke(shapes, width)            a flat band of the given width along every outline and hole of the
+                                              shapes: the lit edge of an inlay (a 1px line would vanish at distance)
+     S.glass.inlay(shapes, opts)              a mark laid into the grid (2026-10-25, the chain marks): its body cut dark
+                                              into the floor, a translucent glass sheet of the same shape over it, and
+                                              its lit edge. Lies flat (y up), origin at the shape's 0, 0. Returns the
+                                              group; .paint(accent, canvas) colours it, .amount(a) fades it */
 (function () {
   'use strict';
   var S = window.DEFXNScene;
@@ -60,7 +67,50 @@
     });
     if (moving) { k.wake(60); k.moved(60); }
   });
-  S.glass = { roundRect: roundRect, circle: circle, ring: ring, plate: plate, show: show, color: color };
+  function polygon(pts) {
+    var shape = new THREE.Shape();
+    for (var i = 0; i < pts.length; i += 2) shape[i ? 'lineTo' : 'moveTo'](pts[i], pts[i + 1]);
+    shape.closePath();
+    return shape;
+  }
+  function stroke(shapes, w) {
+    var pos = [], h = w / 2;
+    function band(pts) {
+      for (var i = 0; i < pts.length; i++) {
+        var a = pts[i], b = pts[(i + 1) % pts.length], dx = b.x - a.x, dy = b.y - a.y, l = Math.hypot(dx, dy);
+        if (l < 1e-6) continue;
+        /* each side a quad, run on by half the width at both ends so the corners close */
+        var ux = dx / l * h, uy = dy / l * h, nx = -uy, ny = ux, ax = a.x - ux, ay = a.y - uy, bx = b.x + ux, by = b.y + uy;
+        pos.push(ax + nx, ay + ny, 0, bx + nx, by + ny, 0, bx - nx, by - ny, 0, ax + nx, ay + ny, 0, bx - nx, by - ny, 0, ax - nx, ay - ny, 0);
+      }
+    }
+    shapes.forEach(function (sh) { var e = sh.extractPoints(24); band(e.shape); e.holes.forEach(band); });
+    var geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    return geo.rotateX(-Math.PI / 2);
+  }
+  function inlay(shapes, opts) {
+    opts = opts || {};
+    var g = new THREE.Group();
+    function flat(geo, add) {
+      var m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ toneMapped: false, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending }));
+      m.renderOrder = 2; g.add(m); return m;
+    }
+    var cut = flat(new THREE.ShapeGeometry(shapes, 24).rotateX(-Math.PI / 2));             /* the body, cut dark into the floor */
+    var sheet = plate(shapes, { depth: opts.depth || .05, opacity: opts.opacity == null ? .34 : opts.opacity });   /* the glass over it */
+    sheet.position.y = .02; sheet.renderOrder = 3; g.add(sheet);
+    var edge = flat(stroke(shapes, opts.edge || .05), true); edge.position.y = (opts.depth || .05) + .055; edge.renderOrder = 4;
+    cut.position.y = .004;
+    g.paint = function (accent, canvas) {
+      cut.material.color.copy(canvas).multiplyScalar(.42);
+      sheet.material.color.copy(accent);
+      edge.material.color.copy(accent).multiplyScalar(1.6);
+    };
+    g.amount = function (a) {
+      cut.material.opacity = a; sheet.material.opacity = sheet.userData.base * a; edge.material.opacity = a; g.visible = a > .01;
+    };
+    return g;
+  }
+  S.glass = { roundRect: roundRect, circle: circle, ring: ring, plate: plate, show: show, color: color, polygon: polygon, stroke: stroke, inlay: inlay };
 
   /* ---- the halo over the kernel: intro and home -----------------------------------------------------------------
      A ring of glass with the kernel showing through its centre hole and one port hole per network chain, each port on

@@ -369,7 +369,7 @@
     var g = parts(), badge = makeBadge(g), intro = W.tween(1), rings = W.ringList, MINE = N.MINE, set0 = -1, ELEV = 50;
     var NETS = Object.keys(N.NAMED).map(Number).filter(function (i) { return N.KIND[i] === 'network'; });   /* DEFXN is the kernel in the ground, not a network chain (owner, 2026-10-24) */
     var RESV = rings.filter(function (r) { return r.kind === 'resolver'; }).map(function (r) { return r.i; });
-    function top(ri, h) { var r = rings[ri]; return V(r.c.x, r.t * (h || 1.2), r.c.z); }
+    function top(ri, h) { var r = rings[ri]; return V(r.c.x, r.c.y + r.t * (h || 1.2), r.c.z); }
     var BGP = top(MINE, 1).add(V(0, 3.2, 0));
     /* a line that arcs over the network, so it reads as a reach, not a cut across the rings */
     var A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3(), D = new THREE.Vector3();
