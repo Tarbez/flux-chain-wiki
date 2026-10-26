@@ -55,6 +55,12 @@
   };
   /* the DEFXN mark (the site's own, js/ark/mark-data.js) for the identity's avatar; drawn as a mask in the theme colour */
   function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
+  /* an FXN ID icon: ark-ui's drawn path (24 grid, stroke in the text colour), never an emoji */
+  function iconSvg(d) {
+    var ns = 'http://www.w3.org/2000/svg', s = document.createElementNS(ns, 'svg'), p = document.createElementNS(ns, 'path');
+    s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'auth-wglyph'); s.setAttribute('aria-hidden', 'true'); s.setAttribute('focusable', 'false');
+    p.setAttribute('d', d); s.appendChild(p); return s;
+  }
   function icon(name, cls) { var s = el('span', 'auth-ico' + (cls ? ' ' + cls : '')); s.innerHTML = ICON[name]; return s; }
   function routeHref(key) { var entry = ArkUI.pageCatalog[key]; return entry ? ArkUI.route.href(entry.path) : null; }
   function link(key, cls) { var a = el('a', cls); var href = routeHref(key); if (href) { a.href = href; a.dataset.sceneLink = key; } return a; }
@@ -494,12 +500,12 @@
           inp.addEventListener('input', function () { cvals[st.input.name] = inp.value; });
           lab.appendChild(inp); pane.appendChild(lab);
         } else {
-          var opts = st.key === 'icon' ? ICONS.map(function (c) { return [c.id, c.glyph, c.label]; }) : [['24', '24 words', 'The stronger choice'], ['12', '12 words', 'Quicker to write down']];
+          var opts = st.key === 'icon' ? ICONS.map(function (c) { return [c.id, c.path, c.label]; }) : [['24', '24 words', 'The stronger choice'], ['12', '12 words', 'Quicker to write down']];
           var field = st.key === 'icon' ? 'icon' : 'wordCount';
           var pick = el('div', 'auth-wchoice' + (st.key === 'icon' ? ' is-icons' : '')); pick.setAttribute('role', 'radiogroup'); pick.setAttribute('aria-label', st.label);
           opts.forEach(function (o) {
             var b = el('button', 'auth-wopt'); b.type = 'button'; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(cvals[field] === o[0]));
-            if (st.key === 'icon') { b.appendChild(el('span', 'auth-wglyph', o[1])); b.appendChild(el('small', null, o[2])); b.setAttribute('aria-label', o[2]); }
+            if (st.key === 'icon') { b.appendChild(iconSvg(o[1])); b.appendChild(el('small', null, o[2])); b.setAttribute('aria-label', o[2]); }
             else { b.appendChild(el('b', null, o[1])); b.appendChild(el('small', null, o[2])); }
             b.addEventListener('click', function () {
               cvals[field] = o[0]; pick.querySelectorAll('.auth-wopt').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });

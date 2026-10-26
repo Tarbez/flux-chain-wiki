@@ -254,7 +254,7 @@
          card's lit frame bars outline its body. The ledger keeps its inner glow, on its edge. */
       if (NODE[kind]) {
         m.transparent = true; m.opacity = k.GLASS; m.depthWrite = false;
-        m.roughness = .2; m.metalness = .35; m.clearcoat = 1; m.clearcoatRoughness = .1; m.envMapIntensity = 1;
+        m.roughness = .38; m.metalness = .25; m.clearcoat = .55; m.clearcoatRoughness = .38; m.envMapIntensity = .9;
         m.sheen = .3; m.sheenRoughness = .35;
         m.emissiveMap = k.glassEdge;
         if (kind === 'ledger') m.emissiveIntensity = 1.8; else { m.emissive.copy(m.color); m.emissiveIntensity = 1.5; }

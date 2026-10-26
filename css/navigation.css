@@ -39,7 +39,8 @@
    A current nav segment is the kit's raised segment, not a second fill. */
 #scene .ark-header .dx-bar__brand,
 #scene .ark-header .dx-bar__brand:is([aria-current="page"],:focus-visible,:hover,:active) { background:none; box-shadow:none; }
-#scene .ark-header[data-dx-mode] nav a[aria-current="page"] { background-color:hsl(var(--raised)); }
+/* the mark is a link in the nav too: on home it is the current page, and this outranked line 41 and boxed it in grey */
+#scene .ark-header[data-dx-mode] nav a[aria-current="page"]:not(.dx-bar__brand) { background-color:hsl(var(--raised)); }
 /* a control the row fit moved out (a nav link, or Run DEFXN in the actions) */
 #scene .ark-header .header-collapsed { display:none; }
 #scene .ark-header .native-icon { width:16px; height:16px; flex-basis:16px; }
@@ -65,8 +66,8 @@
 .header-you-avatar svg, .header-you-avatar .native-icon { width:15px; height:15px; }
 [data-you="in"] .header-you-avatar { color:hsl(var(--trust,var(--success))); box-shadow:inset 0 0 0 1px hsl(var(--trust,var(--success)) / .55); }
 .header-you-words { display:flex; flex-direction:column; gap:3px; min-width:0; }
-.header-you-name { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:600 12px/1.1 var(--dx-font-sans,var(--font-sans,sans-serif)); }
-.header-you-net { display:flex; align-items:center; gap:5px; font:500 10px/1.1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-muted)); white-space:nowrap; }
+.header-you-name { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:600 var(--fs-tertiary, 11px)/1.1 var(--dx-font-sans,var(--font-sans,sans-serif)); }
+.header-you-net { display:flex; align-items:center; gap:5px; font:500 var(--fs-tertiary, 11px)/1.1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-muted)); white-space:nowrap; }
 .header-chain-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:hsl(var(--trust,var(--success))); flex:0 0 auto; }
 .header-you-chev { width:12px; height:12px; flex:0 0 auto; color:hsl(var(--text-muted)); transition:transform .15s ease; }
 #scene .ark-header.nav-open .header-you-chev { transform:rotate(180deg); }
@@ -226,12 +227,12 @@
    and not its ladder (measured 2026-10-25, card 27), so a step would stay orange under any skin. */
 #scene .ark-header[data-dx-mode="home"] { --dx-strip-h:36px; gap:6px; }
 #scene .ark-header .dx-bar__actions { gap:6px; }
-#scene .ark-header .dx-switch__trigger { height:36px; padding:0 10px; gap:6px; font:600 12px/1 var(--dx-font-sans); border-radius:var(--dx-radius,8px); }
+#scene .ark-header .dx-switch__trigger { height:36px; padding:0 10px; gap:6px; font:600 var(--fs-tertiary)/1 var(--dx-font-sans); border-radius:var(--dx-radius,8px); }
 #scene .ark-header .dx-switch__trigger .dx-glyph { width:18px; height:18px; }
 #scene .ark-header .dx-bar__nav { margin:0; height:36px; }
-#scene .ark-header .dx-bar__nav a { padding:0 10px; gap:6px; font:500 12px/1 var(--dx-font-sans); }
+#scene .ark-header .dx-bar__nav a { padding:0 10px; gap:6px; font:500 var(--fs-tertiary)/1 var(--dx-font-sans); }
 #scene .ark-header .header-core-links .native-icon { width:14px; height:14px; flex-basis:14px; }
-#scene .ark-header .header-run-link { min-height:36px; padding:0 12px; gap:6px; font:600 12px/1 var(--dx-font-sans); }
+#scene .ark-header .header-run-link { min-height:36px; padding:0 12px; gap:6px; font:600 var(--fs-tertiary)/1 var(--dx-font-sans); }   /* the bar's words are the scale's 11 (owner, 2026-10-25: 12px was off the scale) */
 
 #scene .ark-header .dx-switch__panel {
  --text-strong:inherit; --text:inherit; --text-muted:inherit; --text-faint:inherit;
@@ -376,7 +377,7 @@
 #scene .site-footer-strip nav a[aria-current="page"] { color:hsl(var(--text-strong)); }
 #scene .site-footer-strip nav a[aria-current="page"]::after { content:""; position:absolute; left:10px; right:10px; bottom:3px; height:2px; border-radius:2px; background:hsl(var(--primary)); }
 /* the credit and rights line join the row (css/settings.css still places them on their own) */
-#scene .site-footer-strip :is(.site-credit,.site-copyright) { position:static; font:500 11px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-faint)); }
+#scene .site-footer-strip :is(.site-credit,.site-copyright,.site-price) { position:static; font:500 11px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-faint)); }
 #scene .site-footer-strip .dx-foot__end { gap:12px; }
 /* Back (js/hero-motion.js) closes the row: a small outlined control, the header's shape at its smaller size */
 #scene .site-footer-strip .hero-motion-toggle {
@@ -393,6 +394,11 @@
    (the links scroll sideways when they still do not fit). The credit shows from 1600px. */
 @media(max-width:1599.98px) { #scene .site-footer-strip .site-credit { display:none; } }
 @media(max-width:1023.98px) { #scene .site-footer-strip .site-copyright { display:none; } }
+/* the price says absent in the faint text; a live price reads in the strong text */
+#scene .site-footer-strip .site-price { white-space:nowrap; }
+/* a phone's strip is all links: the price there covered "Interface palette" (390px) */
+@media(max-width:639.98px) { #scene .site-footer-strip .site-price { display:none; } }
+#scene .site-footer-strip .site-price[data-price-state="live"] { color:hsl(var(--text-strong)); }
 @media(max-width:860px) { #scene .site-footer-strip .dx-foot__name { display:none; } }
 @media(max-width:760px) {
  #scene .site-footer-strip { left:8px; right:8px; bottom:8px; }

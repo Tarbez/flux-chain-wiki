@@ -97,13 +97,15 @@
     }
     var cut = flat(new THREE.ShapeGeometry(shapes, 24).rotateX(-Math.PI / 2));             /* the body, cut dark into the floor */
     var sheet = plate(shapes, { depth: opts.depth || .05, opacity: opts.opacity == null ? .34 : opts.opacity });   /* the glass over it */
+    /* a sheet lying flat mirrors the key light into one white flare at some angles: on the ground it is satin glass */
+    sheet.material.roughness = .62; sheet.material.metalness = 0; sheet.material.clearcoat = .15; sheet.material.clearcoatRoughness = .6;
     sheet.position.y = .02; sheet.renderOrder = 3; g.add(sheet);
     var edge = flat(stroke(shapes, opts.edge || .05), true); edge.position.y = (opts.depth || .05) + .055; edge.renderOrder = 4;
     cut.position.y = .004;
     g.paint = function (accent, canvas) {
       cut.material.color.copy(canvas).multiplyScalar(.42);
       sheet.material.color.copy(accent);
-      edge.material.color.copy(accent).multiplyScalar(1.6);
+      edge.material.color.copy(accent).multiplyScalar(1.25);
     };
     g.amount = function (a) {
       cut.material.opacity = a; sheet.material.opacity = sheet.userData.base * a; edge.material.opacity = a; g.visible = a > .01;

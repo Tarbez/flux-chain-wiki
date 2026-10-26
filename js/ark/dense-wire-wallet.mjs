@@ -205,6 +205,23 @@ export class WalletWire {
   close() { if (this.client) this.client.close(); this.client = null; }
 }
 
+/* ---- the FXN price -------------------------------------------------- */
+
+/** FXN's sale price in one currency, as the chain gives it (`FXN_SALE <currency>`, dense-wire
+ *  docs/design/fxn-public-sale.md): its own currency (EUR) from the genesis table, any other through the
+ *  DAO's price signers. -> `{currency, minor, fxn, basis}` (`minor` minor units buy `fxn` FXN) or
+ *  `{absent}` naming why. A price the chain does not give is never worked out here. */
+export async function fxnSalePrice(wire, currency) {
+  const reply = String(await wire.sendLine(`FXN_SALE ${currency}`));
+  const line = reply.split("\n").find((l) => l.startsWith("SALE_PRICE"));
+  if (!line) return { absent: `the node gave no sale price: ${reply.split("\n")[0].slice(0, 80)}` };
+  const f = line.split("\t");
+  if (f[0] === "SALE_PRICE_NONE") return { absent: f.slice(2).join(" ") || `no ${currency} price` };
+  const minor = Number(f[2]), fxn = Number(f[3]);
+  if (!(minor > 0 && fxn > 0)) return { absent: "the price line did not parse" };
+  return { currency: f[1], minor, fxn, basis: f[4] };
+}
+
 /* ---- keys ----------------------------------------------------------- */
 
 export function signerFor(who) { return authKitSigner(who); }

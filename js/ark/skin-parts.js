@@ -59,14 +59,19 @@ var DefxnSkinParts = (function () {
     ['.dx-switch__cap', 'KBD|TEXT'],
     ['.dx-switch__home', 'LINK'],
     ['.dx-switch__trigger', 'BUTTON'],
-    ['.ark-cta, .cta:not(.quiet), .dx-cta:not(.dx-cta--here)', 'PRIMARY|BUTTON'],
+    /* /auth named no part, so a card only recoloured it (skin audit, 2026-10-25): its one action is the primary button,
+       and its four doors are rows like the Products rows (an icon, a title, a line, an arrow) */
+    ['.ark-cta, .cta:not(.quiet), .dx-cta:not(.dx-cta--here), .auth-main', 'PRIMARY|BUTTON'],
+    ['.auth-card', 'ITEM'],
     ['.cta.quiet, .header-run-link', 'SECONDARY|BUTTON'],   /* Get FXN Browser: the bar's one action took no rule (skin audit, 2026-10-25) */
     ['.header-you', 'GHOST|BUTTON'],
     ['.header-account-link', 'BUTTON'],
     ['.ark-link, .nav-route-link, .products-mega-link, .products-mega-all, .products-mega-how', 'LINK'],
     ['.products-mega', 'MEGAMENUPANEL'],
     ['.products-mega-primary, .products-mega-more', 'MEGAMENUCOLUMN'],
-    ['.products-mega-feature, .rx-fleet, .rx-focus, .intro-card', 'CARD'],
+    /* .intro-card is not here: it is the /intro hero's words over the scene, with no box of its own. As a CARD a skin drew
+       a box, a nameplate, corners and a marker on its button around it (owner, skin audit 2026-10-25). */
+    ['.products-mega-feature, .rx-fleet, .rx-focus', 'CARD'],
     ['.products-mega-heading', 'HEADING|TEXT'],
     ['.sheet', 'PANEL'],
     ['.rail', 'ASIDE'],
@@ -88,7 +93,27 @@ var DefxnSkinParts = (function () {
     /* A table drew corners on every level at once: table-wrap, table, tbody, thead and each row. The thead and its row
        share one box, so two sets of corners drew on the same points, and every row carried four corners (skin gate,
        2026-10-25: 71 of 77 corner elements collided on the table). The table keeps its frame on table-wrap and table. */
-    THEAD: ['frame'], TBODY: ['frame'], ROW: ['frame']
+    THEAD: ['frame'], TBODY: ['frame'], ROW: ['frame'],
+    /* The same inside a card: the card's header and footer drew a second set of corners inside the card's own, the two
+       sets meeting at the card's top and bottom corners (site pass, 2026-10-25: /learnings). The card keeps its frame. */
+    CARDHEADER: ['frame'], CARDFOOTER: ['frame'],
+    /* The header bar is 64px tall on every page: an airy density padded its foot by 24px inside that height, and the bar's
+       buttons rose 12px off its middle (skin audit, 2026-10-25, card 27). Nothing overflowed, so no fit check took it back. */
+    MENUBAR: ['density'], NAVMENU: ['density'],
+    /* The site pass over all 83 pages (skin gate, 2026-10-25) measured each of these on 30 or more pages:
+       a tab trigger sits in a tab strip that draws the row's line, and a drawn button outline on each tab covered its
+       label (38 pages); a disclosure panel's accent strip met the trigger's drawing above it (36 pages); the hero's strip
+       ran under the hero's own title (33 pages). The hero keeps its frame. */
+    TABSTRIGGER: ['button'], HERO: ['ornament'],
+    /* An accordion trigger is the same case as a tab trigger: the drawn button outline covered its label, and the
+       accordion's and the tabs' corners met it (site pass, 2026-10-25: 21 pages, every resolutions page) */
+    ACCORDIONTRIGGER: ['button'],
+    /* A disclosure panel and a tab panel have no padding of their own: the site puts one alert, or a list of facts, edge to
+       edge inside them. The disclosure panel's corners sat on the alert's text, its link and its nameplate (site pass,
+       2026-10-25: 19 pages), and the tab panel's strip met the last fact's line (8 pages). The surface inside dresses. */
+    DISCLOSUREPANEL: ['ornament', 'frame'], TABSCONTENT: ['ornament'],
+    // Ark UI lets a part named "<x>-panel" answer to the rules for "<x>" too, so the panel's strip also came by DISCLOSURE
+    DISCLOSURE: ['ornament', 'frame']
   };
   function squash(v) { return String(v).replace(/[^A-Za-z0-9|]/g, '').toUpperCase(); }
   /* the card's per-part rules (Ark UI's part keys, any spelling) less what `off` switches off. `off` is in the site's

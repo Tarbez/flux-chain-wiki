@@ -126,7 +126,12 @@
     /* the icon picked in the create wizard: it is one of the gate's factors, so it shows only while it is being chosen
        and made (the page sends it only then), never on a card after sign-in */
     var glyph = ic && (window.ArkAdminAuth && ArkAdminAuth.FXN_ID_ICONS || []).filter(function (c) { return c.id === ic; })[0];
-    if (glyph && (state === 'create' || state === 'words')) { g.font = '120px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(glyph.glyph, w / 2, h * .82); }
+    if (glyph && glyph.path && (state === 'create' || state === 'words')) {
+      /* ark-ui's drawn path on its 24 grid, scaled to 120px and stroked in the base colour, never an emoji */
+      g.save(); g.translate(w / 2 - 60, h * .82 - 60); g.scale(5, 5);
+      g.strokeStyle = css(C.primary, 1); g.lineWidth = 1.5; g.lineCap = 'round'; g.lineJoin = 'round';
+      g.stroke(new Path2D(glyph.path)); g.restore();
+    }
     plain.tex.needsUpdate = true;
   }
   drawFace();

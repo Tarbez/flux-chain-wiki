@@ -162,7 +162,7 @@
 /* the icon step: ark-ui's nine FXN ID icons, one row */
 .auth-wchoice.is-icons { grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; }
 .auth-wchoice.is-icons .auth-wopt { justify-items: center; padding: 10px 2px 8px; gap: 4px; }
-.auth-wglyph { font-size: var(--fs-primary); line-height: 1; }
+.auth-wglyph { width: var(--fs-primary); height: var(--fs-primary); fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 /* the Emergency Kit, shown once */
 .auth-kit { display: grid; gap: 8px; padding: 14px 18px; border-radius: 4px; border: 1px solid hsl(var(--primary-500) / .7); --tp-alpha: .74; }
 .auth-kit .auth-kit-words { border: 0; padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; }

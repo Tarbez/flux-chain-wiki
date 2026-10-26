@@ -71,6 +71,26 @@
     link.title = journey.title + ': ' + journey.note;
     link.textContent = lead.label; paths.appendChild(link);
   });
+  function money(p) {
+    var n = p.minor / p.fxn / 100;
+    try { return new Intl.NumberFormat('en', { style: 'currency', currency: p.currency, minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(n); }
+    catch (e) { return n.toFixed(2) + ' ' + p.currency; }
+  }
+  function sitePrice(node) {
+    if (!ArkUI.loadWalletModule) return;
+    ArkUI.loadWalletModule().then(function (m) {
+      var wire = new m.WalletWire(m.resolveWireUrl()), got = {};
+      return m.fxnSalePrice(wire, 'USD').then(function (usd) { got.usd = usd; return m.fxnSalePrice(wire, 'EUR'); })
+        .then(function (eur) { got.eur = eur; wire.close(); return got; }, function (error) { wire.close(); throw error; });
+    }).then(function (got) {
+      var shown = !got.usd.absent ? got.usd : !got.eur.absent ? got.eur : null;
+      if (!shown) { node.title = 'The chain gives no FXN price: ' + got.usd.absent + '.'; return; }
+      node.dataset.priceState = 'live';
+      node.textContent = 'FXN ' + money(shown);
+      node.title = (got.eur.absent ? '' : 'Launch price ' + money(got.eur) + ' per FXN. ') +
+        (shown === got.usd ? 'In USD through the DAO\u2019s price signers. ' : 'No fresh USD rate: ' + got.usd.absent + '. ') + 'Read from the FXN chain.';
+    }).catch(function (error) { node.title = 'The FXN price could not be read: ' + error.message; });
+  }
   /* the footer's host keeps the strip's name: the aria-current sync below, the drivers and
      css/navigation.css (its place in the scene) read it */
   var foot = make('div', 'site-footer-strip');
@@ -79,7 +99,15 @@
   if (kit && typeof kit.renderFooter === 'function' && kit.HOME) {
     var credit = make('span', 'site-credit'); credit.textContent = 'Powered, deployed and made by FLX';
     var rights = make('span', 'site-copyright'); rights.textContent = '© ' + new Date().getFullYear() + ' FLX';
-    kit.renderFooter(foot, kit.HOME.id, { links: Array.prototype.slice.call(paths.childNodes), note: [credit, rights, toggle] });
+    /* The coin's price, on every page (owner, 2026-10-25), as the FXN chain gives it: FXN_SALE on the selected node
+       (js/ark/dense-wire-wallet.mjs fxnSalePrice). The launch price is set in euros in the chain's genesis (0.90 EUR);
+       the node gives it in USD, the top currency, through the DAO's price signers. With no fresh USD rate it shows the
+       euro price; with no reply it says so. An absent price is never painted as a number or as 0. */
+    var price = make('span', 'site-price'); price.dataset.priceState = 'absent';
+    price.title = 'The FXN price has not been read from the chain yet.';
+    price.textContent = 'FXN · No price yet';
+    sitePrice(price);
+    kit.renderFooter(foot, kit.HOME.id, { links: Array.prototype.slice.call(paths.childNodes), note: [credit, price, rights, toggle] });
   } else {
     /* no kit (it failed to load): the links and the Back control still reach the page */
     foot.appendChild(paths);

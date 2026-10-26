@@ -59,10 +59,12 @@
   var MIN_HITS = 2;       // one sample on an edge is not a break
   var SAMPLE = '27';      // the plain born review sample: a palette is compared with the site on this card
 
-  function open(host) {
+  /* opts.site: open the real site (index.html) instead of the parts page, for sitePass(). */
+  function open(host, opts) {
+    opts = opts || {};
     var frame = document.createElement('iframe');
     frame.title = 'Ark UI parts, for the skin gate';
-    frame.src = 'primitives.html?size=real';
+    frame.src = opts.site ? '../../../index.html' : 'primitives.html?size=real';
     frame.setAttribute('data-skin-gate', '');
     host.appendChild(frame);
     var win = null, doc = null, scene = null, undo = null;
@@ -70,13 +72,22 @@
     var ready = new Promise(function (resolve, reject) {
       frame.addEventListener('load', function () {
         win = frame.contentWindow; doc = frame.contentDocument; scene = doc.getElementById('scene');
-        if (!win.DefxnSkinSite || !scene) { reject(new Error('The parts page did not load the site\'s skin code. Reload the board.')); return; }
-        // a card this browser holds is put on by the parts page itself: the gate starts from the site's own look
-        win.DefxnSkinSite.remove();
-        var style = doc.createElement('style');
-        style.textContent = '[data-gate-hit]{outline:2px solid hsl(8 80% 64%) !important;outline-offset:2px}';
-        doc.head.appendChild(style);
-        win.DefxnSkinSite.sample(SAMPLE).then(function () { return frames(3); }).then(resolve, reject);
+        // the site mounts its router after load: wait for it (and for the skin code) a little
+        var t0 = Date.now();
+        (function wait() {
+          var siteReady = !opts.site || (win.ArkUI && win.ArkUI.pageRouter && win.ArkUI.pageCatalog);
+          if (win.DefxnSkinSite && scene && siteReady) return start();
+          if (Date.now() - t0 > 20000) return reject(new Error((opts.site ? 'The site' : 'The parts page') + ' did not load the site\'s skin code or its page router in 20 s. Reload the board.'));
+          win.setTimeout(wait, 100);
+        })();
+        function start() {
+          // a card this browser holds is put on by the page itself: the gate starts from the site's own look
+          win.DefxnSkinSite.remove();
+          var style = doc.createElement('style');
+          style.textContent = '[data-gate-hit]{outline:2px solid hsl(8 80% 64%) !important;outline-offset:2px}';
+          doc.head.appendChild(style);
+          win.DefxnSkinSite.sample(SAMPLE).then(function () { return frames(3); }).then(resolve, reject);
+        }
       }, { once: true });
     });
 
@@ -122,9 +133,11 @@
     }
 
     /* ---------- where a break is: the part the page shows it in ---------- */
+    // where a break is: the parts page's tile, or on the site the nearest named part (data-ark-part), else the header or page
     function partOf(node) {
       var t = node.closest('.pg-tile');
       if (t) return t.getAttribute('data-block');
+      if (opts.site) { var p = node.closest('[data-ark-part]'); if (p) return p.getAttribute('data-ark-part'); }
       return node.closest('header') ? 'header' : 'page';
     }
 
@@ -147,13 +160,19 @@
     function rasterize(svg, view) {
       var r = svg.getBoundingClientRect(), cs = win.getComputedStyle(svg);
       if (r.width < 0.5 || r.height < 0.5 || cs.display === 'none' || cs.visibility === 'hidden') return Promise.resolve([]);
+      // a closed accordion keeps its content laid out under hidden="until-found" (content-visibility: hidden), so a piece
+      // in it has a box and paints nothing; checkVisibility() reads that, and the first site pass counted those pieces as
+      // covering the next trigger on 20 pages
+      if (svg.checkVisibility && !svg.checkVisibility()) return Promise.resolve([]);
       // the svg's own box before its CSS transform (a corner is flipped or turned by its transform)
       var w = svg.offsetWidth || parseFloat(cs.width) || r.width, h = svg.offsetHeight || parseFloat(cs.height) || r.height;
       if (!(w > 0) || !(h > 0)) { w = r.width; h = r.height; }
       var m = cs.transform && cs.transform !== 'none' ? new win.DOMMatrix(cs.transform) : null;
       var cw = Math.max(1, Math.ceil(w)), ch = Math.max(1, Math.ceil(h));
-      return new Promise(function (resolve) {
-        var img = new win.Image(), url = win.URL.createObjectURL(new win.Blob([blackened(svg, cw, ch)], { type: 'image/svg+xml' }));
+      return new Promise(function (resolve, reject) {
+        // a data: URL, not a blob: one: the site's Content-Security-Policy allows img-src data: only, and a refused image
+        // read as "nothing painted" on every page (the first site pass measured 0 breaks on 83 pages that way)
+        var img = new win.Image(), url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(blackened(svg, cw, ch));
         img.onload = function () {
           var cv = doc.createElement('canvas'); cv.width = cw; cv.height = ch;
           var c2 = cv.getContext('2d', { willReadFrequently: true }); c2.drawImage(img, 0, 0, cw, ch);
@@ -165,9 +184,10 @@
             var p = [cx + px, cy + py];
             if (inside(p, view)) pts.push(p);
           }
-          win.URL.revokeObjectURL(url); resolve(pts);
+          resolve(pts);
         };
-        img.onerror = function () { win.URL.revokeObjectURL(url); resolve([]); };
+        // never a silent zero: a piece the gate cannot draw is a measurement that did not happen
+        img.onerror = function () { reject(new Error('the gate could not draw a ' + (svg.parentElement && svg.parentElement.getAttribute('data-ark-skin-deco')) + ' piece to read it (the page refused the image)')); };
         img.src = url;
       });
     }
@@ -213,27 +233,62 @@
     }
 
     /* ---------- the page's text: each line box of each text node, outside the pieces ---------- */
+    // text a reader can see: visibility is inherited, so the text's own element says it; opacity 0 on any part around
+    // it hides it too. (The site keeps hidden story layers in the page, and the first site pass counted their words as
+    // "covered" on 41 pages.)
+    function seen(el) {
+      if (win.getComputedStyle(el).visibility === 'hidden') return false;
+      for (var n = el; n && n !== scene; n = n.parentElement) if (Number(win.getComputedStyle(n).opacity) === 0) return false;
+      return true;
+    }
     function textLines() {
-      var out = [], walk = doc.createTreeWalker(scene, win.NodeFilter.SHOW_TEXT), n;
+      var out = [], walk = doc.createTreeWalker(scene, win.NodeFilter.SHOW_TEXT), n, shown = new Map();
       while ((n = walk.nextNode())) {
         if (!n.nodeValue.trim() || !n.parentElement || n.parentElement.closest('[data-ark-skin-deco],script,style,[hidden]')) continue;
+        if (!shown.has(n.parentElement)) shown.set(n.parentElement, seen(n.parentElement));
+        if (!shown.get(n.parentElement)) continue;
         var range = doc.createRange(); range.selectNodeContents(n);
         Array.prototype.forEach.call(range.getClientRects(), function (r) { if (r.width > 1 && r.height > 1) out.push({ el: n.parentElement, rect: shrink(r, 1) }); });
       }
       return out;
     }
-    // the boxes that cut a piece off: its part and the part's ancestors up to the tile, where overflow is hidden or clip
+    /* the boxes that cut a piece off: its part and the part's ancestors up to the tile, where overflow is hidden or clip.
+       Per axis, and only up to the first box that scrolls on that axis: what lies past a scroll box's edge is reached by
+       scrolling, and every box above it cuts the scroll box's view, not the piece. The site's pages scroll inside a
+       hidden host (.continuity-host around the page's scrolling section), so without this every part below the fold
+       read as drawn cut off (site pass, 2026-10-25: the disclosure panel at 780-937px under a host that ends at 836px). */
     function clipBox(host) {
+      var box = { left: -Infinity, top: -Infinity, right: Infinity, bottom: Infinity }, n = host, freeX = false, freeY = false;
+      while (n && n !== scene && !(n.classList && n.classList.contains('pg-tile-body')) && !(freeX && freeY)) {
+        var cs = win.getComputedStyle(n), r = null;
+        if (!freeX && /hidden|clip/.test(cs.overflowX)) { r = n.getBoundingClientRect(); box.left = Math.max(box.left, r.left); box.right = Math.min(box.right, r.right); }
+        if (!freeY && /hidden|clip/.test(cs.overflowY)) { r = r || n.getBoundingClientRect(); box.top = Math.max(box.top, r.top); box.bottom = Math.min(box.bottom, r.bottom); }
+        if (/auto|scroll/.test(cs.overflowX)) freeX = true;
+        if (/auto|scroll/.test(cs.overflowY)) freeY = true;
+        n = n.parentElement;
+      }
+      return box;
+    }
+
+    /* the window a piece is seen through: every box above it that cuts its content off, scroll boxes too. A point outside
+       it is not on screen now (it is scrolled out of view), so it covers nothing: the site's footer strip sits under the
+       page's scroll window, and the first passes counted the hidden bottom corner of an alert below the fold as covering
+       the footer's links. clipBox above still decides "cut off". */
+    function viewBox(host) {
       var box = { left: -Infinity, top: -Infinity, right: Infinity, bottom: Infinity }, n = host;
       while (n && n !== scene && !(n.classList && n.classList.contains('pg-tile-body'))) {
         var cs = win.getComputedStyle(n);
-        if (/hidden|clip/.test(cs.overflowX + cs.overflowY)) {
+        if (/hidden|clip|auto|scroll/.test(cs.overflowX + cs.overflowY)) {
           var r = n.getBoundingClientRect();
           box = { left: Math.max(box.left, r.left), top: Math.max(box.top, r.top), right: Math.min(box.right, r.right), bottom: Math.min(box.bottom, r.bottom) };
         }
         n = n.parentElement;
       }
       return box;
+    }
+    function seenPts(rec) {
+      if (!rec.seen) { var vb = viewBox(rec.host); rec.seen = rec.pts.filter(function (p) { return inside(p, vb); }); }
+      return rec.seen;
     }
 
     /* ---------- contrast: each text line against the colour under it ---------- */
@@ -287,7 +342,12 @@
     // pieces: the chrome pieces whose drawings count for the element; base: the readings its contrast is compared with
     function measure(pieces, base, points) {
       var found = {}, decos = Array.prototype.slice.call(scene.querySelectorAll('[data-ark-skin-deco]')), unknown = {};
-      function add(part, br) { var k = part + '|' + br; found[k] = (found[k] || 0) + 1; }
+      // detail: the same breaks with the piece that made each one (the site pass reports part problems by piece)
+      var detail = {}, current = null;
+      function add(part, br) {
+        var k = part + '|' + br; found[k] = (found[k] || 0) + 1;
+        var dk = k + '|' + (current || 'text colour'); detail[dk] = (detail[dk] || 0) + 1;
+      }
       var lines = textLines(), controls = Array.prototype.slice.call(scene.querySelectorAll(CONTROLS)).filter(function (c) { return !c.closest('[data-ark-skin-deco]') && paints(c); });
       var mine = [], all = decos.map(function (d) {
         var kind = d.getAttribute('data-ark-skin-deco'), piece = PIECE_OF[kind];
@@ -297,6 +357,7 @@
         return rec;
       });
       mine.forEach(function (m) {
+        current = m.piece || m.deco.getAttribute('data-ark-skin-deco');
         if (!m.pts.length) return;
         var part = partOf(m.host), broke = false;
         // a pattern (a worn grid) is drawn behind the content on purpose: only a cut-off counts against it
@@ -305,29 +366,34 @@
           if (outp >= Math.max(3, m.pts.length * 0.1)) { add(part, 'clip'); m.host.setAttribute('data-gate-hit', ''); }
           return;
         }
+        // text, control and deco read only the points on screen; clip reads them all
+        var vis = seenPts(m);
         // text: a line of text that is not inside the piece itself
-        if (hits(m.pts, near(m.box, lines.map(function (l) { return l.rect; }))) >= MIN_HITS) { add(part, 'text'); broke = true; }
+        if (hits(vis, near(m.box, lines.map(function (l) { return l.rect; }))) >= MIN_HITS) { add(part, 'text'); broke = true; }
         // control: one that is not the piece's own part or a part around it
         var foreign = controls.filter(function (c) { return c !== m.host && !c.contains(m.host); }).map(function (c) { return shrink(c.getBoundingClientRect(), 1); });
-        if (hits(m.pts, near(m.box, foreign)) >= MIN_HITS) { add(part, 'control'); broke = true; }
+        if (hits(vis, near(m.box, foreign)) >= MIN_HITS) { add(part, 'control'); broke = true; }
         // clip: the part's box cuts the drawing off
         var cb = clipBox(m.host), out = m.pts.filter(function (p) { return !inside(p, cb); }).length;
         if (out >= Math.max(3, m.pts.length * 0.1)) { add(part, 'clip'); broke = true; }
         // deco: the piece's own drawings paint the same place (a part too small for its four corners)
         var own = {};
-        m.pts.forEach(function (p) { if (p[2] >= 0) (own[p[2]] = own[p[2]] || []).push(p); });
+        vis.forEach(function (p) { if (p[2] >= 0) (own[p[2]] = own[p[2]] || []).push(p); });
         var keys = Object.keys(own);
         for (var a = 0; a < keys.length; a++) for (var b = a + 1; b < keys.length; b++) {
           if (shared(own[keys[a]], cells(own[keys[b]])) >= MIN_HITS) { add(part, 'deco'); broke = true; a = keys.length; break; }
         }
         // deco: another part's piece paints the same place
         all.forEach(function (o) {
-          if (o === m || o.host === m.host || !overlaps(m.box, o.box)) return;
-          if (!o.cells) o.cells = cells(o.pts);
-          if (shared(m.pts, o.cells) >= MIN_HITS) { add(part, 'deco'); broke = true; }
+          // a pattern (a worn grid) lies behind the content on purpose, so a piece over it is not two drawings in one place
+          // (the cards of a card grid counted their corners against the grid's own pattern: site pass, 2026-10-25)
+          if (o === m || o.host === m.host || !overlaps(m.box, o.box) || o.deco.getAttribute('data-ark-skin-place') === 'pattern') return;
+          if (!o.cells) o.cells = cells(seenPts(o));
+          if (shared(vis, o.cells) >= MIN_HITS) { add(part, 'deco'); broke = true; }
         });
         if (broke) m.host.setAttribute('data-gate-hit', '');
       });
+      current = null;
       // contrast: lines the compared look read, that this one does not
       if (base) {
         readings().forEach(function (r, i) {
@@ -336,11 +402,12 @@
           if (r.c.ratio < r.c.min && was.c.ratio >= was.c.min) { add(partOf(r.el), 'contrast'); r.el.setAttribute('data-gate-hit', ''); }
         });
       }
-      return { found: found, unknown: Object.keys(unknown) };
+      return { found: found, detail: detail, unknown: Object.keys(unknown) };
     }
     /* A control that paints nothing is a hit area, not something a piece can cover: Ark UI's choice stretches an input
        at opacity 0 over each option card, and the first corners run counted 36 of 77 corners "covering" it. */
     function paints(c) {
+      if (c.checkVisibility && !c.checkVisibility()) return false;   // inside a closed hidden="until-found" panel
       for (var n = c; n && n !== scene; n = n.parentElement) {
         var cs = win.getComputedStyle(n);
         if (Number(cs.opacity) === 0 || cs.visibility === 'hidden') return false;
@@ -477,7 +544,74 @@
     function pointsOf(deco) { return painted(deco); }
     // the element's drawn breaks on the page as it is now, without wearing it again (a check of the gate itself)
     function measureNow(e) { return paintedAll().then(function (points) { return measure(ownPieces(e), null, points); }); }
-    return { ready: ready, run: run, show: show, close: close, frame: frame, pointsOf: pointsOf, measureNow: measureNow };
+    /* ---------- the site pass: the real pages, every drawn piece at once ----------
+       On the site (open(host, { site: true })) a break is a PART problem: a page's own layout gives a piece no room, or two
+       parts' pieces meet. So the pass wears whole cards, not one element: each review sample, with one element of every
+       wear-only category on top (WORN_SET), and measures every piece. It reports page, sample, part, break and piece. */
+    var ALL_PIECES = Object.keys(PIECE_OF).map(function (k) { return PIECE_OF[k]; }).filter(function (v, i, a) { return a.indexOf(v) === i; });
+    // the first element of each wear-only category, so every worn piece is on the page too
+    function wornSet() {
+      return ((win.DEFXN_TRAITS && win.DEFXN_TRAITS.WORN) || []).map(function (l) { return l.key + ':' + l.elements[0].name; }).join('|');
+    }
+    // the site's pages: every catalog page that is not a redirect, in the catalog's order
+    function pages() {
+      var cat = win.ArkUI.pageCatalog;
+      return Object.keys(cat).filter(function (k) { return !cat[k].redirect; });
+    }
+    function goTo(page) {
+      return new Promise(function (resolve) {
+        var done = false, t = win.setTimeout(finish, 12000);
+        function finish() { if (done) return; done = true; win.clearTimeout(t); win.removeEventListener('ark:route-ready', finish); resolve(); }
+        win.addEventListener('ark:route-ready', finish);
+        Promise.resolve(win.ArkUI.pageRouter.navigate(page, { history: 'none' })).catch(finish);
+      }).then(function () { return frames(4); }).then(settled);
+    }
+    /* the page's entry motion, finished: a world page's .rise items slide in with a transform and a clip
+       (js/world/world-host.js), and the pass measured the /zero rail 56px to the right, cut off by the screen. Endless
+       animations (a pulse, a scene) never finish, so only the ones with an end are waited for, 4 s at most. */
+    function settled() {
+      var ends = (doc.getAnimations ? doc.getAnimations() : []).filter(function (a) {
+        var t = a.effect && a.effect.getComputedTiming ? a.effect.getComputedTiming() : null;
+        return a.playState === 'running' && t && isFinite(t.endTime);
+      }).map(function (a) { return a.finished.catch(function () {}); });
+      if (!ends.length) return Promise.resolve();
+      return Promise.race([Promise.all(ends), new Promise(function (r) { win.setTimeout(r, 4000); })]).then(function () { return frames(2); });
+    }
+    function sitePass(list, opts2) {
+      opts2 = opts2 || {};
+      var out = { found: [], failed: [] }, i = 0;
+      function nextPage() {
+        if (opts2.stopped && opts2.stopped()) return Promise.resolve();
+        var page = list[i++];
+        if (!page) return Promise.resolve();
+        if (opts2.onStep) opts2.onStep(i, list.length, page);
+        off();
+        return goTo(page).then(function () { return wear(null); }).then(function () {
+          var base = readings(), samples = win.DefxnSkinSite.SAMPLES.slice();
+          return samples.reduce(function (chain, n) {
+            return chain.then(function () {
+              return win.DefxnSkinSite.sample(n).then(function (rec) {
+                clearHits();
+                return wear(Object.assign({}, rec, { skin: wornSet() }));
+              }).then(paintedAll).then(function (points) {
+                var m = measure(ALL_PIECES, base, points);
+                Object.keys(m.detail).forEach(function (k) { var p = k.split('|'); out.found.push({ page: page, sample: n, part: p[0], 'break': p[1], piece: p[2], count: m.detail[k] }); });
+              });
+            });
+          }, Promise.resolve());
+        }).catch(function (err) { out.failed.push({ page: page, why: err.message }); }).then(nextPage);
+      }
+      return ready.then(nextPage).then(function () { off(); return out; });
+    }
+    // one page and one sample on screen again, the broken parts outlined, for the owner to see
+    function showPage(page, n) {
+      return ready.then(function () { off(); return goTo(page); }).then(function () { return win.DefxnSkinSite.sample(n); }).then(function (rec) {
+        clearHits();
+        return wear(Object.assign({}, rec, { skin: wornSet() }));
+      }).then(paintedAll).then(function (points) { return measure(ALL_PIECES, null, points); });
+    }
+    return { ready: ready, run: run, show: show, close: close, frame: frame, pointsOf: pointsOf, measureNow: measureNow,
+      pages: function () { return ready.then(pages); }, sitePass: sitePass, showPage: showPage };
   }
 
   root.DefxnSkinGate = { open: open, BREAKS: BREAKS };

@@ -146,7 +146,7 @@
 .intro-world .intro-stage { position: absolute; inset: 0; pointer-events: none; }
 .intro-world::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 58%; pointer-events: none; z-index: 0;
   background: linear-gradient(0deg, hsl(var(--canvas) / .92) 0, hsl(var(--canvas) / .78) 34%, hsl(var(--canvas) / 0) 100%); }
-.intro-world .intro-slot { position: absolute; left: 0; right: 0; bottom: 58px; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 48px;
+.intro-world .intro-slot { --intro-ledger-w: clamp(240px, 21vw, 300px); position: absolute; left: 0; right: 0; bottom: 58px; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: 48px;
   padding: 0 64px max(26px, 4vh) 72px; }
 .intro-card { position: relative; display: flex; flex-direction: column; min-width: 0; max-width: 680px; isolation: isolate; }
 .intro-card::before { content: ''; position: absolute; inset: -40px -120px -20px -72px; z-index: -1; pointer-events: none;
@@ -157,15 +157,18 @@
 .intro-card .eyebrow .dash { width: 66px; height: 1px; background: hsl(var(--text-faint)); }
 .intro-card h1 { width: fit-content; margin: 0; font: 800 var(--fs-display)/.97 var(--font-display); letter-spacing: -.04em; color: hsl(var(--text-strong));
   text-shadow: 0 0 18px hsl(var(--canvas)), 0 0 4px hsl(var(--canvas)); }
-.intro-card h1 b { font-weight: inherit; display: block; white-space: nowrap; }
-.intro-card h1 span { display: block; white-space: nowrap; color: hsl(var(--primary)); }
+/* Each line on one line while it fits beside the ledger; a wider display face (a worn card's mono) wraps it instead of
+   running it under the ledger's numbers (skin audit, 2026-10-25: 1107px of 956px on /intro). */
+.intro-card h1 { width: max-content; max-width: calc(100vw - 72px - 64px - 48px - var(--intro-ledger-w)); }
+.intro-card h1 b { font-weight: inherit; display: block; text-wrap: balance; }
+.intro-card h1 span { display: block; text-wrap: balance; color: hsl(var(--primary)); }
 .intro-lede { margin: max(14px, 2.8vh) 0 0; max-width: 31em; font-size: var(--fs-secondary); line-height: 1.6; color: hsl(var(--text));
   text-shadow: 0 0 14px hsl(var(--canvas)), 0 0 3px hsl(var(--canvas)); }
 .intro-card .intro-go { align-self: flex-start; margin-top: max(18px, 3.6vh); }
 .intro-card .intro-go:focus-visible { outline: 2px solid hsl(var(--text-strong)); outline-offset: 4px; }
 
 /* the ledger: three figures, each a large numeral over its mono name, hairlines between, the source note under */
-.intro-ledger { flex: none; width: clamp(240px, 21vw, 300px); display: grid; gap: 14px; }
+.intro-ledger { flex: none; width: var(--intro-ledger-w, clamp(240px, 21vw, 300px)); display: grid; gap: 14px; }
 .intro-strip { margin: 0; display: grid; gap: 0; border-top: 1px solid hsl(var(--border-default)); }
 .intro-strip div { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; min-width: 0; padding: max(10px, 1.6vh) 0; border-bottom: 1px solid hsl(var(--border-default)); }
 .intro-strip dd { margin: 0; order: 0; font: 700 var(--fs-hero)/1 var(--font-display); letter-spacing: -.03em; color: hsl(var(--text-strong)); font-variant-numeric: tabular-nums; }
@@ -214,7 +217,7 @@
   .intro-doors { order: 2; position: relative; top: auto; right: auto; width: auto; margin: -72px 20px 104px; }
   .intro-door small { white-space: normal; }
   .intro-world .intro-slot { position: relative; bottom: auto; flex-direction: column; align-items: stretch; gap: 28px; min-height: calc(100dvh - 64px); justify-content: flex-end; padding: 0 20px 96px; }
-  .intro-card h1 { font-size: var(--fs-hero); }
+  .intro-card h1 { font-size: var(--fs-hero); width: auto; max-width: none; }
   .intro-card h1 b, .intro-card h1 span { white-space: normal; }
   .intro-ledger { width: auto; }
   .intro-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid hsl(var(--border-default)); }

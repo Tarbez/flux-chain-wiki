@@ -197,8 +197,34 @@
     return was;
   }
 
+  /* Not signed in (ArkUI.accountOpen, js/resolvers/header.js: the panel's action reads the same rule), /account is locked:
+     one card says so and offers the one way in, Connect, to /auth, where the FXN ID file is opened. No view of the
+     account is built and the sign-in panel stays with /auth. When the identity opens (in another tab too), the page
+     mounts again as the account itself. (Owner, 2026-10-25.) */
+  var LOCK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+  function lockedPage(host) {
+    var auth = ArkUI.pageCatalog && ArkUI.pageCatalog.auth, authHref = auth ? ArkUI.route.href(auth.path) : '/auth';
+    var page = ArkUI.page([
+      { block: 'custom', id: 'account-locked', mount: function () {
+        var card = el('section', 'account-locked');
+        card.setAttribute('aria-labelledby', 'account-title');
+        card.appendChild(el('span', 'account-locked-mark', LOCK_SVG));
+        var eyebrow = el('p', 'account-locked-eyebrow'); eyebrow.textContent = 'FXN ID · Account';
+        var title = el('h1', 'account-locked-title'); title.id = 'account-title'; title.textContent = 'Your account is locked.';
+        var lede = el('p', 'account-locked-lede'); lede.textContent = 'Connect your FXN ID file to open your identity, your wallet and your names on this device.';
+        card.appendChild(eyebrow); card.appendChild(title); card.appendChild(lede);
+        card.appendChild(ArkUI.blocks.render({ block: 'actions', id: 'account-connect', props: { items: [{ label: 'Connect', href: authHref, tone: 'primary' }] } }, { from: '/account', onInvalid: 'throw' }));
+        return card;
+      } }
+    ], host, { page: 'account', className: 'account-page account-page--locked', titleId: 'account-title' });
+    var unsubscribe = ArkUI.localIdentity.subscribe(function () { if (ArkUI.accountOpen()) ArkUI.pageRouter.navigate('account', { history: 'none' }); });
+    page.arkDispose = function () { unsubscribe(); };
+    return page;
+  }
+
   ArkUI.pageModules.account = {
     mount: function (host) {
+      if (ArkUI.accountOpen && !ArkUI.accountOpen()) return lockedPage(host);
       var session = accountSession();
       /* ---- the page's state: one place each, painted by the paint* functions below ---------- */
       var identity = ArkUI.localIdentity.current();

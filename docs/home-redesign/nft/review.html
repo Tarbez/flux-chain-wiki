@@ -115,6 +115,13 @@
   .rail .parts-why{margin:0 0 6px;font-size:10.5px}
   .rail ul.parts li{display:flex;justify-content:space-between;gap:6px;padding:3px 8px;font-size:11px}
   .rail ul.parts li b{color:hsl(var(--hold));font-weight:500;white-space:nowrap}
+  .gate .stage{display:grid;grid-template-columns:minmax(0,1fr) 340px}
+  .gate .frame-box{position:relative;overflow:hidden}
+  .gate .site-list{border-left:1px solid hsl(var(--page-line) / .1);overflow:auto;padding:10px 12px;font-size:11px}
+  .gate .site-list[hidden]{display:none}
+  .gate .site-list h3{margin:10px 0 4px;font:500 10px/1.3 "JetBrains Mono",monospace;letter-spacing:.16em;text-transform:uppercase;color:hsl(var(--page-strong))}
+  .gate .site-list button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:3px;padding:3px 6px;cursor:pointer;color:hsl(var(--hold))}
+  .gate .site-list button:hover{background:hsl(var(--page-line) / .08)}
   .side ul.found{margin:0;padding:0 0 0 16px;font-size:11.5px;color:hsl(var(--hold))}
 </style>
 </head>
@@ -125,7 +132,7 @@
     <button type="button" data-tab="one" aria-pressed="true">One layer</button>
     <button type="button" data-tab="two" aria-pressed="false">Two layers</button>
   </div>
-  <div class="sum"><button type="button" class="btn" id="gateRun">Check on the parts</button><span><b id="nGate">0</b> proposed</span><span><b id="nHeld">0</b> held</span><span><b id="nClash">0</b> clashing pairs</span><span class="draft" id="draft"></span>
+  <div class="sum"><button type="button" class="btn" id="gateRun">Check on the parts</button><button type="button" class="btn" id="siteRun">Check the site's pages</button><span><b id="nGate">0</b> proposed</span><span><b id="nHeld">0</b> held</span><span><b id="nClash">0</b> clashing pairs</span><span class="draft" id="draft"></span>
     <button type="button" class="btn" id="discard">Discard draft</button><button type="button" class="btn is-main" id="save">Save review file</button></div>
 </header>
 
@@ -157,7 +164,7 @@
 <section class="gate" id="gate" aria-label="Skin gate" hidden>
   <header><b>Skin gate</b><span id="gateState" role="status" aria-live="polite"></span>
     <button type="button" class="btn" id="gateStop" hidden>Stop</button><button type="button" class="btn" id="gateClose">Close</button></header>
-  <div class="stage" id="gateStage"></div>
+  <div class="stage"><div class="frame-box" id="gateStage"></div><div class="site-list" id="siteList" hidden></div></div>
 </section>
 
 <p class="note"><b>Sample data.</b> Decisions stay in this browser until you save the file. Put <code>review.flx</code> in <code>layers/</code> and run <code>node make-layers.mjs</code>: new cards then leave out held elements and clashing pairs.</p>
@@ -315,6 +322,7 @@
   function gateButton() {
     var b = document.getElementById('gateRun'), l = layerByKey(layer);
     b.disabled = running || !measurable(l);
+    document.getElementById('siteRun').disabled = running;
     b.title = measurable(l) ? 'Put every element of ' + l.title + ' on every Ark UI part and measure what breaks' : '3D elements draw no Ark UI part: there is nothing to check here';
   }
   function gateState(t) { document.getElementById('gateState').textContent = t; }
@@ -328,6 +336,7 @@
     var pane = document.getElementById('gate');
     pane.style.setProperty('--gate-top', document.querySelector('.top').getBoundingClientRect().height + 'px');
     pane.hidden = false;
+    if (gate && gate === siteGate) { siteGate.close(); siteGate = null; gate = null; document.getElementById('siteList').hidden = true; }
     if (!gate) gate = G.open(document.getElementById('gateStage'));
     fit();
     return gate.ready;
@@ -335,7 +344,7 @@
   window.addEventListener('resize', fit);
   document.getElementById('gateClose').addEventListener('click', function () {
     stopping = true;
-    if (!running) { document.getElementById('gate').hidden = true; if (gate) { gate.close(); gate = null; } }
+    if (!running) { document.getElementById('gate').hidden = true; if (gate) { gate.close(); gate = null; } siteGate = null; document.getElementById('siteList').hidden = true; }
   });
   document.getElementById('gateStop').addEventListener('click', function () { stopping = true; });
   document.getElementById('gateRun').addEventListener('click', function () {
@@ -364,6 +373,61 @@
     }).catch(function (err) { gateState('The gate stopped: ' + err.message); })
       .then(function () { running = false; document.getElementById('gateStop').hidden = true; gateButton(); });
   });
+  /* ---------- the site pass: the real pages (skin-gate.js sitePass) ----------
+     Every page of the site, each review sample with one of every wear-only element on top, every piece measured. A break
+     here is a part problem on that page (its layout gives a piece no room, or two parts' pieces meet), listed by page.
+     Click a row to see that page and sample with its broken parts outlined. Nothing here proposes a hold. */
+  var siteGate = null;
+  function openSite() {
+    var pane = document.getElementById('gate');
+    pane.style.setProperty('--gate-top', document.querySelector('.top').getBoundingClientRect().height + 'px');
+    pane.hidden = false;
+    if (gate) { gate.close(); gate = null; }
+    if (!siteGate) siteGate = G.open(document.getElementById('gateStage'), { site: true });
+    gate = siteGate; fit();
+    return siteGate.ready;
+  }
+  function drawSiteList(res) {
+    var box = document.getElementById('siteList'); box.textContent = ''; box.hidden = false;
+    var byPage = {};
+    res.found.forEach(function (f) { var k = f.page; (byPage[k] = byPage[k] || {}); var r = f.part + '|' + f['break'] + '|' + f.piece; (byPage[k][r] = byPage[k][r] || []).push(f.sample); });
+    var pagesWith = Object.keys(byPage);
+    box.appendChild(el('p', null, pagesWith.length ? pagesWith.length + ' pages have a part problem. Click one to see it.' : 'No page has a part problem the gate can measure.'));
+    pagesWith.forEach(function (page) {
+      box.appendChild(el('h3', null, page));
+      Object.keys(byPage[page]).forEach(function (r) {
+        var p = r.split('|'), cards = byPage[page][r].filter(function (v, i, a) { return a.indexOf(v) === i; });
+        var b = el('button', null, p[0] + ' · ' + G.BREAKS[p[1]] + ' (' + p[2] + ') · card ' + cards.join(', '));
+        b.type = 'button';
+        b.addEventListener('click', function () {
+          gateState('Opening ' + page + ' with card ' + cards[0] + '.');
+          siteGate.showPage(page, cards[0]).then(function () { gateState(page + ', card ' + cards[0] + ': the outlined parts are where the gate measured a break. Scroll the page to find them.'); })
+            .catch(function (err) { gateState(page + ' did not open: ' + err.message); });
+        });
+        box.appendChild(b);
+      });
+    });
+    if (res.failed.length) { box.appendChild(el('h3', null, 'Not measured')); res.failed.forEach(function (f) { box.appendChild(el('p', null, f.page + ': ' + f.why)); }); }
+  }
+  document.getElementById('siteRun').addEventListener('click', function () {
+    if (running) return;
+    running = true; stopping = false; gateButton();
+    document.getElementById('gateStop').hidden = false;
+    gateState('Loading the site.');
+    Promise.resolve().then(openSite).then(function () { return siteGate.pages(); }).then(function (list) {
+      return siteGate.sitePass(list, {
+        stopped: function () { return stopping; },
+        onStep: function (i, n, page) { gateState('Site: page ' + i + ' of ' + n + ', ' + page + '.'); }
+      });
+    }).then(function (res) {
+      drawSiteList(res);
+      var pagesWith = new Set(res.found.map(function (f) { return f.page; })).size;
+      gateState((stopping ? 'Stopped. ' : 'Checked the site. ') + pagesWith + ' pages have a part problem' + (res.failed.length ? '; ' + res.failed.length + ' pages were not measured' : '') + '.');
+      window.__siteGateResult = res;   // for a session that reads the run
+    }).catch(function (err) { gateState('The site check stopped: ' + err.message); })
+      .then(function () { running = false; document.getElementById('gateStop').hidden = true; gateButton(); });
+  });
+
   // one element on the parts, the parts it broke outlined: the owner looks before holding it
   function seeOnParts(e) {
     if (running) return;

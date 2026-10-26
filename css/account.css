@@ -175,3 +175,31 @@ html[data-world="on"] #scene .account-card { align-self:stretch; max-width:none;
   html[data-world="on"] #scene .account-card { padding:20px clamp(20px,2.6vw,32px) 18px; }
   html[data-world="on"] #scene .account-cms { padding-top:10px; }
 }
+
+/* ---- locked: not signed in (js/pages/account.js lockedPage) ----------------------------------- */
+/* One card in the site's glass, centred on the page: the lock, what this is, one sentence, and Connect.
+   Type on the scale only: the title at --fs-hero, the line at --fs-secondary, the eyebrow at --fs-tertiary.
+   REDUCTION TEST (docs/PRODUCT-DESIGN-LAWS.md)
+   1 About: your account, which is locked. 2 Dominant action: Connect (to /auth). 3 Know now: that it is locked and why.
+   4 Hidden until asked: everything the account holds. 5 Repeated elsewhere: the panel's Sign in goes to the same /auth.
+   6 Only because the data has it: nothing. 7 Removable: the eyebrow. 8 Leaving keeps state: nothing to keep.
+   9 Returning: the account itself once the identity opens. 10 If a module fails: Connect is a plain link. */
+#scene .ark-page.ark-block-page.account-page--locked { display:grid; place-items:center; align-content:center; padding:24px 16px; overflow:auto; }
+.account-locked {
+  position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:14px;
+  width:100%; max-width:520px; justify-self:center; margin-inline:auto; padding:36px 36px 32px; border:1px solid hsl(var(--border-subtle)); border-radius:4px;
+  background:hsl(var(--canvas) / .72); -webkit-backdrop-filter:blur(12px) saturate(1.1); backdrop-filter:blur(12px) saturate(1.1);
+  box-shadow:0 24px 60px -32px hsl(var(--canvas));
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))) { .account-locked { background:hsl(var(--canvas) / .94); } }
+/* the block page caps its children at 1000px with an id-strength selector; the card is narrower */
+#scene .ark-page.ark-block-page.account-page--locked > .account-locked { max-width:520px; }
+.account-locked-mark {
+  display:grid; place-items:center; width:47px; height:47px; border:1px solid hsl(var(--primary) / .5); border-radius:4px;
+  color:hsl(var(--primary)); background:hsl(var(--primary) / .08);
+}
+.account-locked-mark svg { width:22px; height:22px; }
+.account-locked-eyebrow { margin:6px 0 0; font:600 var(--fs-tertiary)/1.4 var(--font-mono, monospace); letter-spacing:.22em; text-transform:uppercase; color:hsl(var(--text-muted)); }
+.account-locked-title { margin:0; font:800 var(--fs-hero)/1.02 var(--font-display, var(--font-sans)); letter-spacing:-.03em; color:hsl(var(--text-strong)); }
+.account-locked-lede { margin:0 0 10px; max-width:31em; font-size:var(--fs-secondary); line-height:1.5; color:hsl(var(--text)); }
+@media (max-width:520px) { .account-locked { padding:28px 20px 24px; } .account-locked-title { font-size:var(--fs-primary); } }

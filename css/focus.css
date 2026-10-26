@@ -11,7 +11,7 @@
   color:hsl(var(--text-strong));
   background-color:hsl(var(--raised));
 }
-#scene .ark-header a[aria-current="page"] { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--nested)); }
+#scene .ark-header a[aria-current="page"]:not(.dx-bar__brand) { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--nested)); }
 #scene .ark-header a:focus-visible { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--overlay)); }
 #scene .mesh-drag-target:focus-visible { background:hsl(var(--nested)); }
 #scene input[type="range"]:focus-visible { accent-color:hsl(var(--reference)); background-color:hsl(var(--overlay)); }

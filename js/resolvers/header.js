@@ -51,7 +51,7 @@ function lazyHeaderPopover(spec) {
    module, and a wallet module that fails to load (no module support, a
    file: URL) must not take the rest of the header down with it -- a
    mount that fails just hides its own control. */
-var HEADER_WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261024-devnet1';
+var HEADER_WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261025-price1';
 var headerWalletModulePromise = null;
 function loadHeaderWalletModule() {
   if (!headerWalletModulePromise) {
@@ -65,6 +65,7 @@ function loadHeaderWalletModule() {
   }
   return headerWalletModulePromise;
 }
+ArkUI.loadWalletModule = loadHeaderWalletModule;   /* one loader, one versioned path: the footer's price reads through it */
 function shortNetworkLabel(url, knownNetworks) {
   for (var i = 0; i < knownNetworks.length; i++) {
     if (knownNetworks[i].url === url) return knownNetworks[i].label;
@@ -230,6 +231,9 @@ function headerWho() {
    pages are the bar's links and the journeys' first pages, derived. 6 Only because the data has it: the network name.
    7 Removable: the journey tags beside the pages. 8 Leaving keeps state: the network choice is remembered. 9 Returning:
    the panel opens on its first layer. 10 If the wallet module fails: the Network row hides, the rest works. */
+/* Signed in enough to open /account: a session the CMS accepts, or a key unlocked in this tab. Anything less goes to
+   /auth to connect. The one rule: the panel's action and /account's lock both read it (owner, 2026-10-25). */
+ArkUI.accountOpen = function () { var s = headerWho().state; return s === 'in' || s === 'unlocked'; };
 /* What the panel head says and offers, by state: one sentence and one action each. */
 var HEADER_YOU_HEAD = {
   out: ['Sign in to sign records and keep your names.', 'Sign in'],
@@ -309,7 +313,11 @@ ArkUI.register('RHEADER_V1', {
       el.querySelectorAll('.header-you-net-name, .header-you-net-value').forEach(function (node) { node.textContent = net; });
       var head = HEADER_YOU_HEAD[me.state];
       el.querySelectorAll('.header-you-line').forEach(function (node) { node.textContent = head[0]; });
-      el.querySelectorAll('.header-you-go').forEach(function (node) { node.lastChild.textContent = head[1]; });
+      var goKey = ArkUI.accountOpen() ? 'account' : 'auth', goTo = ArkUI.pageCatalog && ArkUI.pageCatalog[goKey];
+      el.querySelectorAll('.header-you-go').forEach(function (node) {
+        node.lastChild.textContent = head[1];
+        if (goTo) { node.href = ArkUI.route.href(goTo.path); node.dataset.sceneLink = goKey; node.dataset.navRoute = goKey; }
+      });
       var t = el.querySelector('.header-you');
       if (t) { t.title = me.name + ' · ' + me.status + ' · ' + net; t.dataset.label = me.name + ', ' + me.status.toLowerCase() + ', on ' + net + '. Open your account, network and pages'; if (!el.classList.contains('nav-open')) t.setAttribute('aria-label', t.dataset.label); }
     };

@@ -77,7 +77,7 @@
   W.after(function (ms) {
     var cur = W.cur(), nb = cur ? Math.min(1, cur.n) : 0, key = '';
     built.forEach(function (b) {
-      var a = ease.inOut(Math.max(0, Math.min(1, (ms - b.r.at - 200) / 700))) * (1 - .55 * nb);
+      var a = ease.inOut(Math.max(0, Math.min(1, (ms - b.r.at - 200) / 700))) * (1 - .7 * nb);
       b.g.amount(a); key += a.toFixed(3);
     });
     if (key !== last) { last = key; k.redraw && k.redraw(); }

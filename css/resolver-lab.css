@@ -14,7 +14,9 @@
 
 /* The steps: Ark's choice, one equal share of the width per step, over the signal rail -- the old
    resolver motif. The glow travels to the chosen step (--progress, set by the page) and stops. */
-.resolver-track {position:relative;padding-bottom:10px;}
+/* min-width:0: the track is a grid item of the scene, and an auto minimum let the steps' content widen it (a card's airy
+   density made it 689px in a 312px column, cut off by the figure: site pass, 2026-10-25). The steps share the width. */
+.resolver-track {position:relative;padding-bottom:10px;min-width:0;}
 .resolver-track .ark-choice__options {width:100%;box-sizing:border-box;flex-wrap:nowrap;}
 .resolver-track .ark-choice__option {flex:1 1 0;min-width:0;}
 .resolver-track .ark-choice__text {width:100%;justify-content:center;white-space:nowrap;}
