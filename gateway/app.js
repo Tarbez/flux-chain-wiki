@@ -37,6 +37,7 @@ import { resolveName as resolveOnChain } from "./resolve-name.js";
 import { fetchVerifiedContent } from "./content.js";
 import { NAME_NODES, GENESIS_PUB_HEX } from "./name-config.js";
 import { FOLDER_SITE_SCHEMA, readFolderSite, pageForAddress, buildPageHtml } from "./folder-site.js";
+import { releaseRequestOf, readRelease, downloadRelease } from "./release.js";
 
 const SITE_SCHEMA = "flux-chain-site/1";
 
@@ -54,6 +55,9 @@ const FAILURE_MESSAGES = {
   PAGE_NOT_FOUND: "This site has no page at this address.",
   NOT_A_PAGE: "This address holds a file of the site, not a page.",
   SITE_LEFT_ARCHIVE: "This page tried to show something from outside its site, so the gateway stopped it.",
+  RELEASE_NONE: "Nothing is published for this download yet.",
+  RELEASE_CONFLICT: "Two releases claim the same place, so this page offers neither.",
+  RELEASE_ADDRESS: "This download address names no product.",
 };
 
 const app = document.getElementById("app");
@@ -332,6 +336,46 @@ function renderFolderSite(site) {
   show(location.pathname, location.hash);
 }
 
+const MIB = 1024 * 1024;
+const PLATFORM_WORDS = { darwin: "macOS", win32: "Windows", linux: "Linux" };
+const ARCH_WORDS = { arm64: "Apple silicon", x64: "Intel" };
+
+/* One release, one action: the file is checked block by block, then as a whole, and only then
+   saved (release.js). Nothing is offered before the owner's signature and the name's proof agree. */
+function renderRelease(name, release) {
+  app.innerHTML = "";
+  footer.hidden = false;
+  footer.textContent = `Signed by the owner of ${name}. Every block is checked before it is saved.`;
+  const wrap = document.createElement("div");
+  wrap.className = "status-page";
+  const h1 = document.createElement("h1");
+  h1.textContent = `${release.filename}`;
+  const p = document.createElement("p");
+  p.textContent = `Version ${release.version} for ${PLATFORM_WORDS[release.platform] || release.platform} (${ARCH_WORDS[release.arch] || release.arch}). ${(release.size / MIB).toFixed(0)} MB.`;
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "release-button";
+  button.textContent = "Download";
+  const progress = document.createElement("p");
+  progress.className = "release-progress";
+  progress.setAttribute("role", "status");
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    const result = await downloadRelease(release, { onProgress: (got, total) => { progress.textContent = `Checked ${(got / MIB).toFixed(0)} of ${(total / MIB).toFixed(0)} MB`; } });
+    if (!result.ok) return renderStatus(result.reason, result.detail);
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(result.blob);
+    link.download = release.filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    progress.textContent = "Saved. The file matches what the owner signed.";
+    button.disabled = false;
+  });
+  wrap.append(h1, p, button, progress);
+  app.appendChild(wrap);
+}
+
 async function main() {
   /* A folder site's frame sent to one of this gateway's own addresses would load the shell inside it. */
   if (window.top !== window) return;
@@ -340,6 +384,15 @@ async function main() {
 
   const resolved = await resolveName(name);
   if (!resolved.ok) return renderStatus(resolved.reason, resolved.detail);
+
+  // /_release/<product>: the shell reads and checks an app release under this name's proven owner.
+  const wanted = releaseRequestOf(location.pathname, location.search);
+  if (wanted?.invalid) return renderStatus("RELEASE_ADDRESS", "Use /_release/<product>, for example /_release/ark-browser.");
+  if (wanted) {
+    const read = await readRelease({ name, ownerHex: resolved.owner, want: wanted });
+    if (!read.ok) return renderStatus(read.reason, read.detail);
+    return renderRelease(name, read.release);
+  }
 
   if (!resolved.record) return renderStatus("NAME_NO_RECORD", `Point ${name} at a site at https://domains.defxn.com.`);
   const target = resolved.record.targets.find((t) => t.type === "blake3_cid");

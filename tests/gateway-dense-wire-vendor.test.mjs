@@ -11,7 +11,10 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const VENDOR = path.join(ROOT, 'gateway', 'vendor', 'dense-wire');
-const FILES = ['flx-domain-proof.mjs', 'flx-dumb-parser.mjs', 'flx-builders.mjs', 'flx-crypto.mjs', 'flx-wire.mjs'];
+// The import closure of the three entry files (verifier, wire client, record reader for app release
+// downloads, gateway/release.js). package.json beside them holds only "type": "module" and is not a copy.
+const FILES = ['flx-domain-proof.mjs', 'flx-dumb-parser.mjs', 'flx-builders.mjs', 'flx-object-builders.mjs', 'flx-crypto.mjs', 'flx-wire.mjs',
+  'flx-resolver-record-client.mjs', 'flx-identity-bridge.mjs', 'flx-launch-blobs.mjs', 'flx-record-grammar.mjs', 'flx-resolver-artifacts.mjs', 'flx-state-grammar.js'];
 
 function sourceDir() {
   return [process.env.DENSE_WIRE_WEB, path.resolve(ROOT, '..', 'defxn-defi-rs', 'dense-wire', 'web'), path.resolve(ROOT, '..', 'defxn-defi-rs-wt-names', 'dense-wire', 'web')]

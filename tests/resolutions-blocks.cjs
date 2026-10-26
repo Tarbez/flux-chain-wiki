@@ -41,7 +41,7 @@ const ICON = /\/(a|button):\d+\/svg:\d+(\/(path|circle|rect|line|polyline|g):\d+
 const ICON_REASON = 'an icon js/hero-motion.js drew inside the old breadcrumb link; Ark\'s breadcrumb draws none';
 const T = 'page:/div:1/section:1/div:2/div:1/(a|div):\\d+';
 const DETAIL = [
-  ['reshaped', /^page:\/div:1\/section:1\/div:2\/div:1\/(a|div):\d+\/span:[12]$/, 'content audit 2026-10-24: a product whose status or line changed to what is true (names, gateway, agreements, monitor, networks, explorer); the tile keeps its key'],
+  ['reshaped', /^page:\/div:1\/section:1\/div:2\/div:1\/(a|div):\d+\/span:[12]$/, 'content audit 2026-10-24: a product whose status or line changed to what is true (names, gateway, agreements, monitor, networks, explorer; 2026-10-26: Mesh packages is Packages and Bundle Deployer is Bundles, an app release is a Bundle); the tile keeps its key'],
   ['reshaped', /^page:\/div:1\/header:1$/, 'the intro became the hero; who it is for and the problem moved to the facts below it'],
   ['reshaped', /^page:\/div:1\/header:1\/p:1$/, 'the position "06 / 20 · Value & finance" reads "Resolution 6 of 20 · Value & finance" (the story pages\' "<sequence> · n of N")'],
   ['reshaped', /^page:\/div:1\/header:1\/div:1$/, 'the actions row keeps the main action; the deeper page beside it is a related page in the pager now, so the hero keeps one row of buttons on a phone'],
@@ -97,6 +97,8 @@ function expectFor(route, census) {
 /* Leaf words of the old page that are on the new page in another form, with the reason (every
    other leaf's words must be in the new page's text). */
 const REWORDED = [
+  /* 2026-10-26 (owner ruling 2026-10-25, naming ledger D30): the product names follow the product catalog: "Mesh packages" is "Packages" (libraries), "Bundle Deployer" is "Bundles" (an app or site release) */
+  [/^page:\/div:1\/section:1\/div:2\/div:1\/(a|div):\d+\/span:1\/strong:1$/, 'a product name follows the catalog: Mesh packages reads Packages, Bundle Deployer reads Bundles'],
   /* content audit 2026-10-24 (owner decision defxn-70): the status word "Ready" became "Works on devnet", and the legend line says what it means */
   [/^page:\/div:1\/section:1\/div:2\/div:1\/(a|div):\d+\/span:1\/span:1$/, 'the product status word reads "Works on devnet" where it read "Ready"'],
   [/^page:\/div:1\/section:1\/p:1\/span:1$/, 'the legend reads "Works on devnet: built and running on devnet" where it read "Ready: usable today"'],

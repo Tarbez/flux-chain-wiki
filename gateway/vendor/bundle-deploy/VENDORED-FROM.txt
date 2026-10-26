@@ -1,0 +1,3 @@
+Vendored byte for byte from flux/bundle-deploy/src/app-release-core.js. Never edit it here:
+fix it at the source and copy it over. It holds the app release rules (fields, signature,
+which releases count) that the FXN Browser updater and bundle-deploy use too.

@@ -128,6 +128,9 @@ function refusalOf(fields, { coded = false } = {}) {
     if (m) [failure, missing, remedy] = [m[1], m[2], m[3]];
   }
   const out = { kind: "error", failure: strip(failure, "failure"), missing: strip(missing, "missing"), remedy: strip(remedy, "remedy"), reason: fields.join("\t") };
+  // An incomplete triple is not a refusal: a refusal with an empty failure, missing or remedy would show the reader a
+  // blank where the node owed them a reason (v4p P6). It stays an error, kept as the node wrote it.
+  if (!out.failure.trim() || !out.missing.trim() || !out.remedy.trim()) return unreadable("a refusal without failure, missing and remedy", fields.join("\t"));
   if (coded) out.code = code;
   return out;
 }
@@ -440,15 +443,20 @@ export function parseChainProvidersReply(reply) {
   const frames = reply.split("\n");
   const head = (frames.shift() ?? "").split("\t");
   if (head[0] !== "CHAIN_PROVIDERS") return { kind: "error", raw: reply };
+  // An empty or non-numeric count is unreadable, never 0 providers (v4p P4b).
+  if (!WHOLE.test(head[2] ?? "")) return unreadable("the provider count is not a whole number", frames.length ? head.join("\t") : reply);
   const declared = Number(head[2]);
   const end = frames.lastIndexOf("CHAIN_PROVIDERS_END");
   if (end < 0) return { kind: "error", reason: "reply had no CHAIN_PROVIDERS_END sentinel" };
   const rows = frames.slice(0, end);
-  const providers = rows.map((line) => {
-    const [, signerHex, reachAddress, heartbeatDeadline, proved] = line.split("\t");
-    return { signerHex, reachAddress, heartbeatDeadline: Number(heartbeatDeadline), proved: parseProvedColumn(proved) };
-  });
-  if (!Number.isInteger(declared) || providers.length !== declared) {
+  const providers = [];
+  for (const line of rows) {
+    // A row that is not `PROVIDER TAB signer TAB reach TAB deadline TAB proved` is unreadable, never a provider (v4p P4).
+    const [tag, signerHex, reachAddress, heartbeatDeadline, proved, ...extra] = line.split("\t");
+    if (tag !== "PROVIDER" || extra.length || !KEY64.test(signerHex ?? "") || reachAddress === undefined || !/^-?\d+$/.test(heartbeatDeadline ?? "")) return unreadable("malformed provider row", line);
+    providers.push({ signerHex, reachAddress, heartbeatDeadline: Number(heartbeatDeadline), proved: parseProvedColumn(proved) });
+  }
+  if (providers.length !== declared) {
     return { kind: "error", reason: `declared ${head[2]} providers, received ${providers.length}` };
   }
   return { kind: "providers", chainId: head[1], providers };
@@ -590,13 +598,13 @@ export class WireClient {
     const parts = reply.split("\t");
     if (parts[0] === "SEG_LATEST") {
       // F2 fix: parts[3] is lines_count, parts[4] is votes fraction.
-      return {
+      return voted({
         kind: "latest",
         root: parts[1],
         sequence: Number(parts[2]),
         linesCount: Number(parts[3]),
         votes: parseFraction(parts[4]),
-      };
+      }, reply);
     }
     return { kind: "error", raw: reply };
   }
@@ -608,14 +616,14 @@ export class WireClient {
     const parts = reply.split("\t");
     if (parts[0] === "SEG_SNAP") {
       // F2 fix: parts[4] is lines_count, parts[5] is votes fraction.
-      return {
+      return voted({
         kind: "snap",
         root: parts[1],
         sequence: Number(parts[2]),
         previousRoot: parts[3],
         linesCount: Number(parts[4]),
         votes: parseFraction(parts[5]),
-      };
+      }, reply);
     }
     return { kind: "error", raw: reply };
   }
@@ -655,16 +663,16 @@ export class WireClient {
     const reply = await this._send(`SEG_SIG\t${root}\t${signerHex}\t${signatureHex}`);
     const parts = reply.split("\t");
     if (parts[0] === "SEG_ACC") {
-      return { kind: "accepted", votes: parseFraction(parts[1]), finalized: false };
+      return voted({ kind: "accepted", votes: parseFraction(parts[1]), finalized: false }, reply);
     }
     if (parts[0] === "SEG_ACC_FIN") {
-      return {
+      return voted({
         kind: "accepted",
         finalized: true,
         root: parts[1],
         applied: Number(parts[2]),
         votes: parseFraction(parts[3]),
-      };
+      }, reply);
     }
     if (parts[0] === "SEG_REJ") {
       return { kind: "rejected", reason: parts[1] ?? "unknown" };
@@ -872,7 +880,7 @@ export class WireClient {
     );
     const parts = reply.split("\t");
     if (parts[0] === "DAO_OPEN") {
-      return { kind: "open", daoId: parts[1], signersBlobCid: parts[2], votes: parseFraction(parts[3]) };
+      return voted({ kind: "open", daoId: parts[1], signersBlobCid: parts[2], votes: parseFraction(parts[3]) }, reply);
     }
     if (parts[0] === "DAO_ERR") return { kind: "error", reason: parts.slice(1).join("\t") };
     return { kind: "error", raw: reply };
@@ -886,15 +894,15 @@ export class WireClient {
     const reply = await this._send(`DAO_SIGN\t${daoId}\t${signerHex}\t${signatureHex}`);
     const parts = reply.split("\t");
     if (parts[0] === "DAO_ACC_FIN") {
-      return {
+      return voted({
         kind: "accepted",
         finalized: true,
         votes: parseFraction(parts[1]),
         signersCid: parts[2],
         quorumCid: parts[3],
-      };
+      }, reply);
     }
-    if (parts[0] === "DAO_ACC") return { kind: "accepted", finalized: false, votes: parseFraction(parts[1]) };
+    if (parts[0] === "DAO_ACC") return voted({ kind: "accepted", finalized: false, votes: parseFraction(parts[1]) }, reply);
     if (parts[0] === "DAO_REJ") return { kind: "rejected", reason: parts.slice(1).join("\t") };
     return { kind: "error", raw: reply };
   }
@@ -906,14 +914,14 @@ export class WireClient {
     const reply = await this._send(`DAO_STATUS\t${daoId}`);
     const parts = reply.split("\t");
     if (parts[0] === "DAO_STAT") {
-      return {
+      return voted({
         kind: "status",
         daoId: parts[1],
         signers: parts[2] ? parts[2].split(",") : [],
         quorumThreshold: Number(parts[3]),
         votes: parseFraction(parts[4]),
         finalized: parts[5] === "1",
-      };
+      }, reply);
     }
     if (parts[0] === "DAO_UNKNOWN") return { kind: "unknown", daoId: parts[1] };
     return { kind: "error", raw: reply };
@@ -925,7 +933,7 @@ export class WireClient {
   async treasuryInitPropose(daoId, treasuryPubkey, boundAt) {
     const reply = await this._send(`TREASURY_INIT_PROPOSE\t${daoId}\t${treasuryPubkey}\t${boundAt}`);
     const parts = reply.split("\t");
-    if (parts[0] === "TI_OPEN") return { kind: "open", daoId: parts[1], votes: parseFraction(parts[2]) };
+    if (parts[0] === "TI_OPEN") return voted({ kind: "open", daoId: parts[1], votes: parseFraction(parts[2]) }, reply);
     if (parts[0] === "TI_ERR") return { kind: "error", reason: parts.slice(1).join("\t") };
     return { kind: "error", raw: reply };
   }
@@ -938,9 +946,9 @@ export class WireClient {
     const reply = await this._send(`TREASURY_INIT_SIGN\t${daoId}\t${signerHex}\t${signatureHex}`);
     const parts = reply.split("\t");
     if (parts[0] === "TI_ACC_FIN") {
-      return { kind: "accepted", finalized: true, votes: parseFraction(parts[1]), quorumCid: parts[2] };
+      return voted({ kind: "accepted", finalized: true, votes: parseFraction(parts[1]), quorumCid: parts[2] }, reply);
     }
-    if (parts[0] === "TI_ACC") return { kind: "accepted", finalized: false, votes: parseFraction(parts[1]) };
+    if (parts[0] === "TI_ACC") return voted({ kind: "accepted", finalized: false, votes: parseFraction(parts[1]) }, reply);
     if (parts[0] === "TI_REJ") return { kind: "rejected", reason: parts.slice(1).join("\t") };
     return { kind: "error", raw: reply };
   }
@@ -952,13 +960,13 @@ export class WireClient {
     const reply = await this._send(`TREASURY_INIT_STATUS\t${daoId}`);
     const parts = reply.split("\t");
     if (parts[0] === "TI_STAT") {
-      return {
+      return voted({
         kind: "status",
         daoId: parts[1],
         treasuryPubkey: parts[2],
         votes: parseFraction(parts[3]),
         finalized: parts[4] === "1",
-      };
+      }, reply);
     }
     if (parts[0] === "TI_UNKNOWN") return { kind: "unknown", daoId: parts[1] };
     return { kind: "error", raw: reply };
@@ -974,7 +982,7 @@ export class WireClient {
       `NATIVE_SPEND_PROPOSE\t${daoId}\t${chainId}\t${toKeyHex}\t${BigInt(amount)}\t${spentAt}`,
     );
     const parts = reply.split("\t");
-    if (parts[0] === "NS_OPEN") return { kind: "open", spendKey: parts[1], votes: parseFraction(parts[2]) };
+    if (parts[0] === "NS_OPEN") return voted({ kind: "open", spendKey: parts[1], votes: parseFraction(parts[2]) }, reply);
     if (parts[0] === "NS_ERR") return { kind: "error", reason: parts.slice(1).join("\t") };
     return { kind: "error", raw: reply };
   }
@@ -987,9 +995,9 @@ export class WireClient {
     const reply = await this._send(`NATIVE_SPEND_SIGN\t${spendKey}\t${signerHex}\t${signatureHex}`);
     const parts = reply.split("\t");
     if (parts[0] === "NS_ACC_FIN") {
-      return { kind: "accepted", finalized: true, votes: parseFraction(parts[1]), quorumCid: parts[2] };
+      return voted({ kind: "accepted", finalized: true, votes: parseFraction(parts[1]), quorumCid: parts[2] }, reply);
     }
-    if (parts[0] === "NS_ACC") return { kind: "accepted", finalized: false, votes: parseFraction(parts[1]) };
+    if (parts[0] === "NS_ACC") return voted({ kind: "accepted", finalized: false, votes: parseFraction(parts[1]) }, reply);
     if (parts[0] === "NS_REJ") return { kind: "rejected", reason: parts.slice(1).join("\t") };
     return { kind: "error", raw: reply };
   }
@@ -1001,7 +1009,7 @@ export class WireClient {
     const reply = await this._send(`NATIVE_SPEND_STATUS\t${spendKey}`);
     const parts = reply.split("\t");
     if (parts[0] === "NS_STAT") {
-      return {
+      return voted({
         kind: "status",
         spendKey: parts[1],
         daoId: parts[2],
@@ -1011,7 +1019,7 @@ export class WireClient {
         spentAt: Number(parts[6]),
         votes: parseFraction(parts[7]),
         finalized: parts[8] === "1",
-      };
+      }, reply);
     }
     if (parts[0] === "NS_UNKNOWN") return { kind: "unknown", spendKey: parts[1] };
     return { kind: "error", raw: reply };
@@ -1026,7 +1034,7 @@ export class WireClient {
     const reply = await this._send(`TREASURY_SPEND_PROPOSE\t${daoId}\t${inputCid}\t${nonce}\t${legsCsv}`);
     const parts = reply.split("\t");
     if (parts[0] === "TS_OPEN") {
-      return { kind: "open", spendKey: parts[1], manifestCid: parts[2], votes: parseFraction(parts[3]) };
+      return voted({ kind: "open", spendKey: parts[1], manifestCid: parts[2], votes: parseFraction(parts[3]) }, reply);
     }
     if (parts[0] === "TS_ERR") return { kind: "error", reason: parts.slice(1).join("\t") };
     return { kind: "error", raw: reply };
@@ -1040,9 +1048,9 @@ export class WireClient {
     const reply = await this._send(`TREASURY_SPEND_SIGN\t${spendKey}\t${signerHex}\t${signatureHex}`);
     const parts = reply.split("\t");
     if (parts[0] === "TS_ACC_FIN") {
-      return { kind: "accepted", finalized: true, votes: parseFraction(parts[1]), quorumCid: parts[2] };
+      return voted({ kind: "accepted", finalized: true, votes: parseFraction(parts[1]), quorumCid: parts[2] }, reply);
     }
-    if (parts[0] === "TS_ACC") return { kind: "accepted", finalized: false, votes: parseFraction(parts[1]) };
+    if (parts[0] === "TS_ACC") return voted({ kind: "accepted", finalized: false, votes: parseFraction(parts[1]) }, reply);
     if (parts[0] === "TS_REJ") return { kind: "rejected", reason: parts.slice(1).join("\t") };
     return { kind: "error", raw: reply };
   }
@@ -1054,14 +1062,14 @@ export class WireClient {
     const reply = await this._send(`TREASURY_SPEND_STATUS\t${spendKey}`);
     const parts = reply.split("\t");
     if (parts[0] === "TS_STAT") {
-      return {
+      return voted({
         kind: "status",
         spendKey: parts[1],
         daoId: parts[2],
         inputCid: parts[3],
         votes: parseFraction(parts[4]),
         finalized: parts[5] === "1",
-      };
+      }, reply);
     }
     if (parts[0] === "TS_UNKNOWN") return { kind: "unknown", spendKey: parts[1] };
     return { kind: "error", raw: reply };
@@ -1479,10 +1487,16 @@ export class WireClient {
   }
 }
 
+/** A `have/need` vote count, or null when the field is missing or not two whole numbers: a count the node did not
+ *  state is never read as 0/0 (v4p P5). */
 function parseFraction(s) {
-  if (!s) return { have: 0, need: 0 };
-  const [h, n] = s.split("/").map(Number);
-  return { have: h || 0, need: n || 0 };
+  const m = /^(\d+)\/(\d+)$/.exec(String(s ?? "").trim());
+  return m ? { have: Number(m[1]), need: Number(m[2]) } : null;
+}
+
+/** A vote-bearing reply whose `have/need` field is unreadable is unreadable as a whole, never a reply with no votes. */
+function voted(out, reply) {
+  return out.votes ? out : unreadable("the reply does not state its votes as have/need", reply);
 }
 
 function parseReply(line) {

@@ -184,6 +184,20 @@
     border-radius: 999px;
   }
 
+  .release-button {
+    margin-top: 24px;
+    padding: 10px 28px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: 0;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .release-button:disabled { opacity: 0.6; cursor: progress; }
+  .release-progress { margin-top: 12px !important; font-family: var(--font-mono); font-size: 0.8rem !important; }
+
   /* A folder site's page fills the window: the site owns everything inside it (app.js renderFolderSite). */
   iframe.folder-site {
     position: fixed;

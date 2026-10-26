@@ -46,11 +46,13 @@ export function isValidFqdn(name) {
 }
 
 /** Build an unsigned genesis LEDGERENTRY and sign it with `privateKey`.
- *  Shape mirrors `chain::genesis` + `chain::entry`. */
-export async function buildGenesis({ privateKey, pubHex, nowSec }) {
+ *  Shape mirrors `chain::genesis_on` + `chain::entry`. `network` names the root the record cites
+ *  (`networkRoot`); it defaults to the devnet, whose root is `GENESIS_PREV`. */
+export async function buildGenesis({ privateKey, pubHex, nowSec, network = NETWORK_DEVNET }) {
   const idRef = await sha256Hex(pubHex); // sha256 of the key's hex-utf8 bytes
   const h = hexOfUtf8(pubHex);
-  const body = `G${pubHex}-Y${Y_LEDGERENTRY}-V1-M${nowSec}-H${h}-J0-C${GENESIS_PREV}-C${idRef}`;
+  const root = await networkRoot(network);
+  const body = `G${pubHex}-Y${Y_LEDGERENTRY}-V1-M${nowSec}-H${h}-J0-C${root}-C${idRef}`;
   const sig = await signHex(privateKey, body);
   return `${body}-S${sig}`;
 }
@@ -206,7 +208,9 @@ export function isClaimableDomainName(name) {
   if (!isValidFqdn(name)) return false;
   const parts = name.split(".");
   if (parts.length !== 2) return false;
-  const [, tld] = parts;
+  const [label, tld] = parts;
+  // a .fxn label of the key-name shape belongs to the key it is made from (keyName), never to a claim
+  if (tld === "fxn" && isKeyNameLabel(label)) return false;
   return tld === "ark" || tld === "deadark" || tld === "fxn";
 }
 
@@ -635,7 +639,9 @@ export function chainLaunchBody({
   pos,
   prevCid,
   carrierChainId,
-  newChainId,
+  label,
+  network,
+  newChainId: givenChainId,
   stakeCid,
   providerSetCid,
   speedParamsCid,
@@ -653,11 +659,14 @@ export function chainLaunchBody({
         `To fix: pass the chain-id that actually carries this launch record.`,
     );
   }
-  if (!isChainIdShape(newChainId)) {
+  // Owner decision 2026-10-25: a person names the label; the word comes from the chosen network
+  // (`launchedChainId`), so a wrong word is never typed. A full id is accepted only when it already ends with a word.
+  const newChainId = label !== undefined ? launchedChainId(label, network) : givenChainId;
+  if (label === undefined && !launchedChainWord(newChainId)) {
     throw new Error(
-      `That new chain-id is not addressable. ` +
-        `Missing: 3-32 lowercase alphanumeric characters (got ${JSON.stringify(newChainId)}). ` +
-        `To fix: choose a chain-id matching [a-z0-9]{3,32}.`,
+      `The launch's new chain id ${JSON.stringify(newChainId)} has no label followed by a network word. ` +
+        `Missing: a label then mainnet or devnet with no dash, 3-32 lowercase letters and digits, such as arkdevnet. ` +
+        `To fix: pass { label, network } and let the builder add the word; never type the word or a dash.`,
     );
   }
   if (newChainId === carrierChainId) {
@@ -1154,6 +1163,111 @@ export function isChainIdShape(value) {
   return typeof value === "string" && /^[a-z0-9]{3,32}$/.test(value);
 }
 
+/** The mainnet's network id, the same literal as `netparams::NETWORK_MAIN`. Every other id is a test network. */
+export const NETWORK_MAIN = "fxn-mainnet";
+
+/** The devnet's id, the same literal as `netparams::NETWORK_DEVNET`. A node with no network set runs as it. */
+export const NETWORK_DEVNET = "fxn-devnet";
+
+/** What a key's first record cites in `C[0]` on `network` (owner, 2026-10-25), mirroring `chain::network_root`.
+ *  A key has one record chain, and every later record links back to its first one, so the first record's root binds
+ *  the whole chain to one network: a record signed on one network is never admitted on another. The devnet keeps the
+ *  64-zero sentinel, so the running devnet's history still replays. Every other network's root is the SHA-256 of
+ *  `fxn-network-root-` and its id. A node names its root in `HEAD_NONE`; prefer that answer to computing it. */
+export async function networkRoot(network) {
+  if (typeof network !== "string" || !/^fxn-[a-z0-9-]{1,28}$/.test(network)) {
+    throw new Error(
+      `The network ${JSON.stringify(network)} is not a network id, so the builder cannot name its root. ` +
+        `Missing: a network id, fxn- then lowercase letters, digits and -, such as ${NETWORK_DEVNET} or ${NETWORK_MAIN}. ` +
+        `To fix: pass the network the page is connected to (BUILD_INFO's fifth field), or the root HEAD_NONE names.`,
+    );
+  }
+  return network === NETWORK_DEVNET ? GENESIS_PREV : sha256Hex(`fxn-network-root-${network}`);
+}
+
+/** The tag `networkCovered` puts first on a non-devnet network, the same bytes as `chain::NETWORK_COVERED_TAG`. */
+export const NETWORK_COVERED_TAG = "FXNNET1";
+
+/** The bytes a signature outside a record chain covers on `network` (a DAO vote, a segment signature, a custody
+ *  release vote), mirroring `chain::network_covered`. Such a signature names no chain position, so the first
+ *  record's root cannot bind it. The devnet's bytes are unchanged. On every other network they are `FXNNET1`, NUL,
+ *  the network id, NUL, then the bytes, so a vote signed on one network never verifies on another. */
+export function networkCovered(network, bytes) {
+  if (network === undefined || network === NETWORK_DEVNET) return bytes;
+  if (typeof network !== "string" || !/^fxn-[a-z0-9-]{1,28}$/.test(network)) {
+    throw new Error(
+      `The network ${JSON.stringify(network)} is not a network id, so the vote cannot be bound to it. ` +
+        `Missing: a network id, fxn- then lowercase letters, digits and -, such as ${NETWORK_DEVNET} or ${NETWORK_MAIN}. ` +
+        `To fix: pass the network the page is connected to (BUILD_INFO's fifth field).`,
+    );
+  }
+  const head = new TextEncoder().encode(`${NETWORK_COVERED_TAG}\0${network}\0`);
+  const out = new Uint8Array(head.length + bytes.length);
+  out.set(head, 0);
+  out.set(bytes, head.length);
+  return out;
+}
+
+/** The closed end words of a launched chain's id, mirroring `chain::LAUNCHED_CHAIN_WORDS` (owner decision,
+ *  2026-10-25). A record splits on `-`, so the word joins the label with no dash on the wire: `arkdevnet`. */
+export const LAUNCHED_CHAIN_WORDS = Object.freeze(["mainnet", "devnet"]);
+
+/** The word a launched chain's id ends with on `network`: `mainnet` on fxn-mainnet, `devnet` on every other
+ *  network. Mirrors `netparams::network_word`. */
+export function networkWord(network) {
+  return network === NETWORK_MAIN ? "mainnet" : "devnet";
+}
+
+/** The end word of a launched chain id (`arkdevnet` -> `devnet`), or null when it has no label before a word.
+ *  Mirrors `chain::launched_chain_word`. */
+export function launchedChainWord(id) {
+  if (!isChainIdShape(id)) return null;
+  return LAUNCHED_CHAIN_WORDS.find((word) => id.length > word.length && id.endsWith(word)) ?? null;
+}
+
+/** The id a launch of `label` gets on `network`: the label, then the network's word, no dash. Mirrors
+ *  `chain::launched_chain_id`; refuses by name a label that cannot make an id. */
+export function launchedChainId(label, network) {
+  if (typeof network !== "string" || !network) {
+    throw new Error(
+      `The launch names no network, so the builder cannot add its word. ` +
+        `Missing: the chosen network id, such as fxn-devnet or ${NETWORK_MAIN}. ` +
+        `To fix: pass the network the page is connected to.`,
+    );
+  }
+  const word = networkWord(network);
+  const id = `${label}${word}`;
+  if (typeof label !== "string" || !/^[a-z0-9]+$/.test(label) || !isChainIdShape(id)) {
+    throw new Error(
+      `The chain label ${JSON.stringify(label)} does not make a chain id on ${network}. ` +
+        `Missing: a label of lowercase letters and digits, 1 to ${32 - word.length} characters. ` +
+        `To fix: choose a shorter label of letters and digits; the builder adds ${word} itself.`,
+    );
+  }
+  return id;
+}
+
+/** How a page shows a chain id: a launched id with a dash before its word (`arkdevnet` -> `ark-devnet`); any other
+ *  id as it is. Display only: the wire never carries the dash. */
+export function chainIdDisplay(id) {
+  const word = launchedChainWord(id);
+  return word ? `${id.slice(0, -word.length)}-${word}` : id;
+}
+
+/** The wire id for what a page shows, parsed from the end word (`ark-devnet` -> `arkdevnet`). Text that is not a
+ *  label, a dash and a word is returned as it is, so a built-in id (`defxn`) passes through. */
+export function chainIdFromDisplay(text) {
+  const value = String(text ?? "").trim();
+  for (const word of LAUNCHED_CHAIN_WORDS) {
+    const suffix = `-${word}`;
+    if (value.endsWith(suffix)) {
+      const id = `${value.slice(0, -suffix.length)}${word}`;
+      if (launchedChainWord(id) === word) return id;
+    }
+  }
+  return value;
+}
+
 /** Recompute a segment's root from its own lines. Mirrors
  *  `chain_segment.rs::segment_root` exactly:
  *    DOMAIN_V1 || seq || prev_len || prev || lines_len || (line_len || line)*
@@ -1234,6 +1348,10 @@ function writeBE64(buf, offset, value) {
     value >>= 8n;
   }
 }
+
+// --- PVA and skins: the builders live in flx-object-builders.mjs (one file a site can vendor alone) ---
+export * from "./flx-object-builders.mjs";
+import { isKeyNameLabel } from "./flx-object-builders.mjs";
 
 /** Convenience: compute CID of a built manifest. */
 export async function cidOf(text) {

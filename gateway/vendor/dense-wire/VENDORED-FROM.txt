@@ -1,7 +1,18 @@
-Vendored byte for byte from flux/defxn-defi-rs/dense-wire/web/ (branch fix/one-name-system,
-worktree flux/defxn-defi-rs-wt-names until it merges). Never edit a file here: fix it at the
-source and copy it over. A drift test in this repo fails when any file differs from the source.
+Vendored byte for byte from flux/defxn-defi-rs/dense-wire/web/ (main). Never edit a file here:
+fix it at the source and copy it over. A drift test in this repo fails when any file differs
+from the source.
 
 Files: flx-domain-proof.mjs (the ONE shared DOM_PROOF verifier), and the files it imports:
-flx-dumb-parser.mjs, flx-builders.mjs, flx-crypto.mjs; plus flx-wire.mjs (the WebSocket line
+flx-dumb-parser.mjs, flx-builders.mjs (and its flx-object-builders.mjs), flx-crypto.mjs; plus flx-wire.mjs (the WebSocket line
 protocol client whose domProof() asks a node).
+
+The set is derived, not listed by hand: every file reachable by import from flx-domain-proof.mjs,
+flx-wire.mjs and flx-resolver-record-client.mjs (12 files on 2026-10-26).
+
+Added 2026-10-26 for app release downloads (release.js): flx-resolver-record-client.mjs (lists
+and decodes the bundle chain's KBUNDLE1 records) and the files it imports:
+flx-identity-bridge.mjs, flx-launch-blobs.mjs, flx-record-grammar.mjs,
+flx-resolver-artifacts.mjs, flx-state-grammar.js. The drift test's FILES list names all twelve.
+
+package.json holds only "type": "module", as dense-wire/web/package.json does, so the .js files here
+(flx-state-grammar.js) load as modules in Node the same way they do in a browser.
