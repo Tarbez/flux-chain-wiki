@@ -16,7 +16,7 @@
 
 import { hexOfUtf8 } from "./flx-dumb-parser.mjs";
 import { sha256Hex } from "./flx-crypto.mjs";
-import { GENESIS_PREV } from "./flx-builders.mjs";
+import { GENESIS_PREV, NETWORK_DEVNET } from "./flx-builders.mjs";
 
 /** Fixed document CIDs. `src/lib.rs::docs()` computes these once from
  *  fixed ASCII strings and caches them in a `OnceLock`; since the inputs
@@ -38,9 +38,11 @@ export const DOCS = Object.freeze({
   asset: "e86896cc2e9953e99f95f863afe2ce7b76cd7b226673ffd09b78e4500eee3972",
 });
 
-/** `issuer_evidence_cid`, src/lib.rs ~119. */
-export async function issuerEvidenceCid(issuerKeyHex) {
-  return sha256Hex(`issuer:${issuerKeyHex}`);
+/** `issuer_evidence_cid_on` (flx-cap-custody): the issuer evidence a receipt cites in C[3] on `network` (owner,
+ *  2026-10-25). The devnet keeps `issuer:<key>`; every other network hashes `issuer:<network>:<key>`, so a receipt
+ *  signed for one network never mints on another. `network` defaults to the devnet. */
+export async function issuerEvidenceCid(issuerKeyHex, network = NETWORK_DEVNET) {
+  return sha256Hex(network === NETWORK_DEVNET ? `issuer:${issuerKeyHex}` : `issuer:${network}:${issuerKeyHex}`);
 }
 
 /** `plan_cid`, src/lib.rs ~122. */
@@ -221,7 +223,10 @@ export async function fulfillment(sender, agreementCid, predCid, successorCid, n
   );
 }
 
-/** `claim_treasury_leg`, src/treasury.rs (cut over to `manifest_custody`
+/** RETIRED for new value (one FXN, step 6): `TREASURY_CLAIM` is refused by
+ *  name; a KNTSPEND1 pays its recipient in native FXN directly.
+ *
+ *  `claim_treasury_leg`, src/treasury.rs (cut over to `manifest_custody`
  *  live — see that commit). A thin wrapper over [`buildReceipt`] below: the
  *  claimant's own self-issued `R-` root credit (issuer == holder ==
  *  claimant), the manifest_custody-shaped counterpart to the old
@@ -284,7 +289,7 @@ export async function slashDestinationCreditCid(slashManifestCid) {
  *  `(0, GENESIS_PREV)` only for a receipt that is never submitted through
  *  that live path (e.g. `claimTreasuryLeg`, consumed directly by
  *  `TREASURY_CLAIM`, which never touches `Ledger::admit` at all). */
-export async function buildReceipt(issuer, pos, prevCid, holderKeyHex, amount, now) {
+export async function buildReceipt(issuer, pos, prevCid, holderKeyHex, amount, now, network = NETWORK_DEVNET) {
   return build(
     [
       ["G", issuer.pubHex],
@@ -297,7 +302,7 @@ export async function buildReceipt(issuer, pos, prevCid, holderKeyHex, amount, n
       ["J", String(pos)],
       ["C", prevCid],
       ["C", DOCS.asset],
-      ["C", await issuerEvidenceCid(issuer.pubHex)],
+      ["C", await issuerEvidenceCid(issuer.pubHex, network)],
       ["T", `${amount}FXN`],
     ],
     [issuer],

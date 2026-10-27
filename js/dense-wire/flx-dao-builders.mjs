@@ -23,10 +23,16 @@
 import { hexOfUtf8 } from "./flx-dumb-parser.mjs";
 import { DOCS } from "./flx-transfer-builders.mjs";
 import { hexOfUtf8C } from "./flx-native-transfer.mjs";
+import { renderBaseChainMintParams as renderMintParams } from "./flx-launch-blobs.mjs";
 
 /** `chain.rs` ~3381-3394. */
 export const DAO_KIND_FOUND = "KDAO1";
 export const DAO_KIND_TREASURY_INIT = "KDAOTREAS1";
+/** W12 (global resolvers): a new kind beside KDAOTREAS1, never an edit of
+ *  it. Same fields, but the record's own G must equal the treasury pubkey
+ *  it names -- see daoTreasuryInitV2 below and dao.rs's own
+ *  TreasuryKeyDidNotSign check. */
+export const DAO_KIND_TREASURY_INIT_V2 = "KDAOTREAS2";
 export const TREASURY_KIND_SPEND = "KTSPEND1";
 export const NATIVE_KIND_MINT = "KNMINT1";
 /** `native_spend.rs` NATIVE_SPEND_KIND. */
@@ -61,7 +67,28 @@ export async function daoTreasuryInit(submitter, pos, prevCid, daoId, daoFoundCi
   return `${text}-S${sig}`;
 }
 
-/** `treasury_spend`, src/chain.rs ~4260-4287. Authorization is entirely
+/** W12: `KDAOTREAS2`, src/chain.rs's `dao_treasury_init_v2`. Byte-identical
+ *  layout to [`daoTreasuryInit`], a new kind beside the old one, never an
+ *  edit of it. `treasury` must be the SAME signer whose pubHex is
+ *  `treasuryPubkey` -- the caller proves control by signing the whole
+ *  record with the treasury key itself; dao.rs's own apply_treasury_init
+ *  independently re-checks that (G must equal the cited treasury pubkey),
+ *  this builder does not enforce it by construction. */
+export async function daoTreasuryInitV2(treasury, pos, prevCid, daoId, daoFoundCid, treasuryPubkey, quorumBlobCid, boundAt) {
+  const h = hexOfUtf8(treasury.pubHex);
+  const w = hexOfUtf8(daoId);
+  const text =
+    `G${treasury.pubHex}-Y${Y_LEDGERENTRY}-V1-M${boundAt}-H${h}-N${BASE_CHAIN_ID}` +
+    `-K${DAO_KIND_TREASURY_INIT_V2}-W${w}-J${pos}-C${prevCid}-C${daoFoundCid}-C${treasuryPubkey}-C${quorumBlobCid}`;
+  const sig = await treasury.signText(text);
+  return `${text}-S${sig}`;
+}
+
+/** RETIRED for new value (one FXN, step 6): a node refuses a new KTSPEND1 by
+ *  name. Use [`nativeTreasurySpend`] (KNTSPEND1) and the NATIVE_SPEND_*
+ *  ceremony instead. Kept to read and rebuild records already on the chain.
+ *
+ *  `treasury_spend`, src/chain.rs ~4260-4287. Authorization is entirely
  *  the cited DAO's own quorum; no amount or destination is re-checked by
  *  `admit()` — `manifestBlobCid` is the content address of the
  *  destination/amount legs (see [`renderPayoutManifest`]). */
@@ -75,17 +102,15 @@ export async function treasurySpend(submitter, pos, prevCid, daoId, daoFoundCid,
   return `${text}-S${sig}`;
 }
 
-/** `{"treasuryKey":"<64-hex>","distributedSupply":N,"computeReserveSupply":N}`
+/** `FLX-MINT-PARAMS-V1 TAB treasuryKey TAB <64-hex> TAB distributedSupply TAB N TAB computeReserveSupply TAB N`
  *  — mirrors the Rust `native_ledger::render_base_chain_mint_params` byte
- *  for byte (same key order, same JSON shape). Published via `BLOB_PUT`,
+ *  for byte (WARCH19 step 5: the blob's own grammar, defined once in
+ *  `flx-launch-blobs.mjs`; it was JSON). Published via `BLOB_PUT`,
  *  then referenced by CID in `baseChainNativeMint`'s own `C[3]` — never
  *  carried as bare digits, because a short number fails the grammar's
  *  own 16-byte floor on a `C` block. */
 export function renderBaseChainMintParams(treasuryKeyHex, distributedSupply, computeReserveSupply) {
-  return (
-    `{"treasuryKey":"${treasuryKeyHex}","distributedSupply":${distributedSupply},` +
-    `"computeReserveSupply":${computeReserveSupply}}`
-  );
+  return renderMintParams(treasuryKeyHex, distributedSupply, computeReserveSupply);
 }
 
 /** Build and sign the base chain's own `NativeMint` — "treat FXN like any
@@ -129,7 +154,7 @@ function writeBE64(buf, offset, value) {
 /** Append `(domain-tag, then each field length-prefixed)` the same way
  *  `dao.rs`'s/`treasury.rs`'s vote-covered-bytes functions do: the domain
  *  tag is NOT length-prefixed, every field after it is. */
-function coveredBytes(domain, fields) {
+export function coveredBytes(domain, fields) {
   const enc = new TextEncoder();
   const domainBytes = enc.encode(domain);
   const fieldBytes = fields.map((f) => enc.encode(f));

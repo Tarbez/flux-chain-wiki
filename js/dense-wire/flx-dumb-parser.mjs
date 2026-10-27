@@ -16,7 +16,7 @@
 // Kind::min_c() (~180-205) are ported below for the five lifecycle kinds
 // (Intent, Offer, Agreement, Fulfillment, ValueObject) alongside the
 // pre-existing LedgerEntry kind. The I/R/T shape checks are ported from
-// the hub's `flx/flux-core/src/roles.rs`'s `primary`/`referential`/
+// `/Volumes/PortableSSD/flx/flux-core/src/roles.rs`'s `primary`/`referential`/
 // `target` resolvers.
 
 const MAX_MANIFEST_LEN = 65_536;
@@ -110,17 +110,14 @@ const SHAPE = {
   H: (p) => p.length > 0 && p.length % 2 === 0 && isLowerHex(p),
   // J: digits (position).
   J: (p) => /^\d+$/.test(p),
-  // C: content address -- USUALLY a 64-char sha256 CID (the genesis
-  // predecessor is the all-zero 64-char sentinel, so it follows the same
-  // shape), but flux-core's own `content()` resolver (roles.rs) is
-  // `opaque` -- no length constraint beyond being a well-formed block --
-  // because a handful of real records (`domain_record_update`'s own
-  // C[2], hex-of-utf8 content, not a CID) put free-form hex content in a
-  // C block instead of W. Found porting `domainRecordUpdate` to JS: a
-  // strict `length === 64` here rejected that real, already-shipping
-  // Rust record shape. Even-length lowercase hex, non-empty -- same
-  // shape W/H already use, since a 64-hex CID trivially satisfies it too.
-  C: (p) => p.length > 0 && p.length % 2 === 0 && isLowerHex(p),
+  // C: content box. flux-core's own `content()` resolver (roles.rs) is
+  // `opaque`: a dash-free alphanumeric payload of at least 16 characters
+  // (`PAYLOAD_FLOORS` C=16). USUALLY a 64-char sha256 CID, but not always:
+  // a padded price field, and a `KDOMREC2` target box (an uppercase type
+  // code, then lowercase hex), are real C payloads the node admits. This
+  // used to require even-length lowercase hex, which refused the record
+  // target boxes the node admits; it now mirrors the Rust rule exactly.
+  C: (p) => p.length >= 16 && /^[A-Za-z0-9]+$/.test(p),
   // S: 128-char lowercase hex (ed25519 sig hex).
   S: (p) => p.length === 128 && isLowerHex(p),
   // K: alphanumeric kind marker (KRSTR1, KEARN1S, ...).
@@ -238,13 +235,23 @@ export class Raw {
   }
 }
 
-/** The raw bytes a given `S` block covers. For a single-signature record
- *  that is everything before the final `-S<hex>`. Matches
- *  `signature_prefixes_of` for one-signer manifests. */
+/** The raw bytes a single-signature record's `S` block covers: everything
+ *  before it. The record must carry exactly ONE `S` block and it must be the
+ *  LAST block, so that `text === prefix + "-S" + sig`. Why (2026-10-21): this
+ *  used to cut at the last "-S" anywhere, so blocks appended AFTER the
+ *  signature (`-C<target>`, `-D1`) were admitted though nobody signed them;
+ *  a node or anyone on the wire could add a record target or fork a CID.
+ *  Throws ParseError(ErrSig) naming which rule failed. */
 export function signaturePrefix(text) {
-  const i = text.lastIndexOf("-S");
-  if (i < 0) throw new ParseError(ErrSig, "no S");
-  return text.slice(0, i);
+  const blocks = String(text).split("-");
+  const sBlocks = blocks.filter((b) => b.startsWith("S"));
+  if (sBlocks.length === 0) throw new ParseError(ErrSig, "no S");
+  if (sBlocks.length !== 1) throw new ParseError(ErrSig, `${sBlocks.length} S blocks; a single-signature record carries exactly one`);
+  const last = blocks[blocks.length - 1];
+  if (!last.startsWith("S")) throw new ParseError(ErrSig, "the signature is not the record's final block (unsigned blocks follow it)");
+  const prefix = text.slice(0, text.length - last.length - 1);
+  if (`${prefix}-${last}` !== text) throw new ParseError(ErrSig, "the record is not its signed prefix plus its signature");
+  return prefix;
 }
 
 export class ParseError extends Error {
