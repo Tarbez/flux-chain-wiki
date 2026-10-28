@@ -1,6 +1,9 @@
 'use strict';
-/* The public header's floating panels (the network pill, the Resolutions menu) run on Ark's popover
-   block, loaded on the first press -- not on open/close, Escape and focus code of the header's own.
+/* The public header's floating panels run on Ark's popover block, loaded on the first press -- not on
+   open/close, Escape and focus code of the header's own. Since 2026-10-25 (owner-confirmed 2026-10-27) the
+   header's one panel is the "you" panel (your account, your network as its own layer, the critical pages);
+   the network pill and the every-page journey menu it replaced are gone. Cases 1-9 drive the shared stub
+   with any trigger; 9b and 10 hold the "you" panel itself.
 
    Why each case exists (docs/ux-audit/ledger.md S12, docs/cms-architecture.md Budget):
    - The core kit has about 10 B of headroom on live routes, so the 3.2 KB popover chunk cannot ride
@@ -245,17 +248,20 @@ const index0 = fs.readFileSync('index.html', 'utf8');
     assert.equal(isOpen(a), true);
   }
 
-  /* ---- 9b. the all-pages MENU: the same popover, with the site's layer stack carried over ---- */
+  /* ---- 9b. the MENU -- since 2026-10-25 the "you" panel (owner-confirmed 2026-10-27): the same popover, with the
+     site's layer stack carried over. Its button is the "you" control: open, it says what closing does; closed, it
+     says again who you are and where (the data-label js/resolvers/header.js refreshAccountNav keeps). ---- */
   {
     const env = boot(), { w, doc } = env, header = doc.querySelector('header');
     const wrap = doc.createElement('span'); wrap.className = 'header-menu';
-    const trigger = doc.createElement('button'); trigger.className = 'nav-toggle'; trigger.type = 'button'; trigger.title = 'All pages'; trigger.setAttribute('aria-label', 'Open all pages');
+    const trigger = doc.createElement('button'); trigger.className = 'nav-toggle header-you'; trigger.type = 'button'; trigger.title = 'Account · Signed out · Mainnet'; trigger.setAttribute('aria-label', 'Open your account, network and pages');
+    trigger.dataset.label = 'Account, signed out, on Mainnet. Open your account, network and pages';
     wrap.append(trigger);
     const menu = doc.createElement('nav'); menu.id = 'primary-navigation'; menu.hidden = true;
     const layer = doc.createElement('div'); layer.className = 'nav-layer'; const link = doc.createElement('a'); link.href = '/x'; layer.append(link); menu.append(layer);
     let resets = 0; menu.navLayers = { reset() { resets++; } };
     header.append(wrap, menu);
-    const pop = w.lazyHeaderPopover({ wrap, trigger, fallback: menu, label: 'Menu', align: 'end', id: 'primary-navigation', content: [layer], menu: header });
+    const pop = w.lazyHeaderPopover({ wrap, trigger, fallback: menu, label: 'Your account, network and pages', align: 'end', id: 'primary-navigation', content: [layer], menu: header });
     header.menuPop = pop;
     assert.deepEqual(env.calls, [], 'building the MENU loads nothing');
     pop.warm(); await tick();
@@ -268,13 +274,14 @@ const index0 = fs.readFileSync('index.html', 'utf8');
     assert.equal(panel.getAttribute('aria-label'), 'Primary');
     now.focus(); now.click(); await tick();
     assert.equal(pop.isOpen(), true); assert(header.classList.contains('nav-open'), 'the header mirrors the open state as .nav-open');
-    assert.equal(now.getAttribute('aria-label'), 'Close all pages');
+    assert.equal(now.getAttribute('aria-label'), 'Close your account, network and pages', 'open, the button says what closing does');
     link.focus();
     const esc = key(w, link, 'Escape');
     await tick();
     assert.equal(esc.defaultPrevented, true, 'Escape while open is consumed: "close the menu", not "go home"');
     assert.equal(pop.isOpen(), false); assert(!header.classList.contains('nav-open'));
-    assert.equal(now.getAttribute('aria-label'), 'Open all pages'); assert.equal(resets, 1, 'closing resets the layer stack to the index');
+    assert.equal(now.getAttribute('aria-label'), 'Account, signed out, on Mainnet. Open your account, network and pages', 'closed, it says who and which network again (its data-label)');
+    assert.equal(resets, 1, 'closing resets the layer stack to the first layer');
     assert.equal(doc.activeElement, now, 'focus returns to the MENU button');
     assert.equal(key(w, doc.body, 'Escape').defaultPrevented, false, 'closed: Escape is left to the page (go home)');
     now.click(); await tick(); doc.body.dispatchEvent(new w.MouseEvent('pointerdown', { bubbles: true })); doc.body.dispatchEvent(new w.MouseEvent('pointerup', { bubbles: true })); await tick();
@@ -288,9 +295,13 @@ const index0 = fs.readFileSync('index.html', 'utf8');
     assert(!/document\.addEventListener\('click'/.test(code), 'no hand-built "press outside" listener on the document');
     assert(!/addEventListener\('focusout', function \(event\) \{\s*if \(!mega/.test(code), 'no hand-built "focus left" listener for the Resolutions menu');
     assert(!/products-open/.test(code), 'the header class that lifted the bar is a CSS :has() on the open popover now');
-    assert(/id: 'header-chain-popover'/.test(code) && /id: 'primary-navigation'/.test(code), 'both panels are built by the one stub');
+    /* since 2026-10-25 (owner-confirmed 2026-10-27) the network is a layer of the "you" panel, not a pill with a
+       popover of its own: the stub builds the one panel, and the old pill's panel is gone */
+    assert(/id: 'primary-navigation'/.test(code) && !/id: 'header-chain-popover'/.test(code), 'the "you" panel is built by the one stub, and the network pill\'s own panel is gone');
+    assert.equal((code.match(/lazyHeaderPopover\(\{/g) || []).length, 1, 'one floating panel in the header: the "you" panel');
     /* loading happens inside the first press, never while the bar is built */
-    const lazyBody = code.slice(code.indexOf('function lazyHeaderPopover'), code.indexOf('function buildHeaderChainPopover'));
+    const lazyBody = code.slice(code.indexOf('function lazyHeaderPopover'), code.indexOf('var HEADER_WALLET_MODULE'));
+    assert(lazyBody.length > 200, 'the stub is found, ending where the wallet module\'s loader begins');
     assert(/function load\(\)[\s\S]*loadScript\('js\/resolvers\/header-popover\.js'\)/.test(lazyBody) && /on && !state\) load\(\)/.test(lazyBody), 'the helper is loaded by load(), which only an open request calls');
     assert(!/loadScript|ArkKit/.test(code.replace(lazyBody, '')), 'nothing else in the header loads a script or reads the kit');
     /* the weight stays in the helper file: the stub is all every route pays for */
@@ -311,5 +322,5 @@ const index0 = fs.readFileSync('index.html', 'utf8');
     assert(gz <= 11883 + 300, `js/resolvers/header.js is ${gz} B gz; every route pays it and the budget allows 12,183 (move code into js/resolvers/header-popover.js)`);
   }
 
-  console.log('PASS: the header\'s network pill and Resolutions menu are Ark popovers loaded on the first press (nothing before it), keep their classes, children and id, close on Escape / an outside press / focus leaving with focus back on the button, one at a time, survive a failed chunk, and the header holds no open/close/Escape code of its own.');
+  console.log('PASS: the header\'s panels (the "you" panel and the stub\'s other triggers) are Ark popovers loaded on the first press (nothing before it), keep their classes, children and id, close on Escape / an outside press / focus leaving with focus back on the button, one at a time, survive a failed chunk, and the header holds no open/close/Escape code of its own.');
 })().catch((error) => { console.error(error); process.exit(1); });

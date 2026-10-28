@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Truss Dropdown: the top seam built as a girder, two rails with a zigzag web at each end and pins at the joints, the leading pin referential, hairline sides and a soft bottom</title>
+  <path d="M1 1 H359 M1 9 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 9 L9 1 L17 9 L25 1 L33 9 M327 9 L335 1 L343 9 L351 1 L359 9" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="9" cy="1.6" r="1.5" fill="var(--referential)"/>
+  <circle cx="25" cy="1.6" r="1.5" fill="var(--dim)"/>
+  <circle cx="335" cy="1.6" r="1.5" fill="var(--dim)"/>
+  <circle cx="351" cy="1.6" r="1.5" fill="var(--dim)"/>
+  <path d="M1 9 V231 Q1 239 9 239 H351 Q359 239 359 231 V9" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

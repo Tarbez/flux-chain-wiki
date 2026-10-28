@@ -4,6 +4,7 @@ ArkManifest.define({
   "title": "Measure pages",
   "route": "/stats/capabilities",
   "group": "page",
+  "meta": {},
   "fields": {
     "COMMON.ROOT": {
       "label": "Shared: root crumb",

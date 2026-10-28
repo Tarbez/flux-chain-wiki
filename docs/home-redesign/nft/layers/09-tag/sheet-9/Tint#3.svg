@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 50" data-slot="tag">
-  <title>Tint: an amber dot, the palette name and a line ending in a hollow circle (sheet 9, piece 04)</title>
+  <title>Tint: an amber dot, GENESIS and the genesis ID, and a line ending in a hollow circle (sheet 9, piece 04)</title>
   <circle cx="5" cy="25" r="7.5" fill="var(--acc)" opacity="0.07"/>
   <circle cx="5" cy="25" r="5.14" fill="var(--acc)" opacity="0.22"/>
   <circle cx="5" cy="25" r="3.2" fill="var(--acc)"/>
-  <text x="18" y="29.2" font-family="JetBrains Mono, monospace" font-size="10.5" letter-spacing="2.1" fill="var(--dim)">PALETTE</text>
+  <text x="18" y="29.2" font-family="JetBrains Mono, monospace" font-size="10.5" letter-spacing="2.1" fill="var(--dim)">GENESIS</text>
   <text x="92" y="29.2" font-family="JetBrains Mono, monospace" font-size="10.5" letter-spacing="1" fill="var(--acc)">//</text>
-  <text x="118" y="29.6" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--ink)" data-field="palette" font-weight="500">PALETTE</text>
-  <line x1="196" y1="25" x2="345.5" y2="25" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="118" y="29.6" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="2.6" fill="var(--ink)" data-field="genesisId" font-weight="500">009</text>
+  <line x1="160" y1="25" x2="345.5" y2="25" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <circle cx="350.5" cy="25" r="4" fill="none" stroke="var(--acc)" stroke-width="3" opacity="0.16"/>
   <circle cx="350.5" cy="25" r="4" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
 </svg>

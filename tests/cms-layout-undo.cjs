@@ -22,7 +22,7 @@ function makeContext(initialDraft) {
   const context = {
     window: { parent: {} }, location: { origin: 'https://defxn.example' },
     ArkLayout: { define: (v) => JSON.parse(JSON.stringify(v)), apply: () => {} },
-    host: {}, cmsRoutePath: () => '/', cmsPreviewSelected: null,
+    host: {}, cmsRoutePath: () => '/', cmsLayoutScope: () => '/', cmsPreviewSelected: null,
     placeCmsLayoutUi: () => {}, emitCmsLayoutSelection: () => {}, cmsRealTree: () => [],
     cmsLayoutDraft: initialDraft, cmsLayoutUndo: [], cmsLayoutRedo: [],
   };

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>Foundry Badge: a cast plate, a hairline outline with a dim rivet in each corner</title>
+  <rect x="1" y="1" width="118" height="30" rx="1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="4.5" cy="4.5" r="1" fill="var(--dim)"/>
+  <circle cx="115.5" cy="4.5" r="1" fill="var(--dim)"/>
+  <circle cx="4.5" cy="27.5" r="1" fill="var(--dim)"/>
+  <circle cx="115.5" cy="27.5" r="1" fill="var(--dim)"/>
+</svg>

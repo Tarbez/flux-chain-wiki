@@ -32,16 +32,9 @@
  box-sizing:border-box; pointer-events:auto;
 }
 .ark-header::after { content:none; }
-/* css/focus.css fills every current or focused header link. The brand is the bare mark: it never
-   gets a box behind it (owner, 2026-10-25). The old selector here was `> a[data-scene-link="zero"]`,
-   which stopped matching when the kit moved the brand inside .dx-bar__family, so the home route
-   and keyboard focus drew a grey tile behind the mark. Its focus ring (the kit's outline) stays.
-   A current nav segment is the kit's raised segment, not a second fill. */
-#scene .ark-header .dx-bar__brand,
-#scene .ark-header .dx-bar__brand:is([aria-current="page"],:focus-visible,:hover,:active) { background:none; box-shadow:none; }
-/* the mark is a link in the nav too: on home it is the current page, and this outranked line 41 and boxed it in grey */
-#scene .ark-header[data-dx-mode] nav a[aria-current="page"]:not(.dx-bar__brand) { background-color:hsl(var(--raised)); }
-/* a control the row fit moved out (a nav link, or Run DEFXN in the actions) */
+/* The brand is the bare mark: css/focus.css leaves it (.header-mark, js/resolvers/header.js) and the nav's links
+   (the kit's raised segment) out of the fill it gives current and focused header links. */
+/* a control the row fit moved out (a nav link, or Get FXN Browser) */
 #scene .ark-header .header-collapsed { display:none; }
 #scene .ark-header .native-icon { width:16px; height:16px; flex-basis:16px; }
 #scene .ark-header .header-core-links .native-icon { opacity:.75; }
@@ -167,206 +160,47 @@
 .network-option.is-selected::before { background:hsl(var(--trust,var(--success))); border-color:hsl(var(--trust,var(--success))); }
 .network-option:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:-2px; }
 
-/* The bar carries the DEFXN mark only (owner, 2026-10-25): no wordmark, no FXN CHAIN, no slash. */
-#scene .ark-header :is(.dx-bar__brand-word,.dx-bar__brand-sub,.dx-bar__sep) { display:none; }
-
 /* ---- One row: the mark alone on the left, every control on the right (owner, 2026-10-25) ----
-   Products, Overview and Mesh Explorer used to sit beside the mark, far from Account and the rest.
-   Now they lead the right-hand cluster. The mark sits in the bar's LEFT PADDING (absolutely
-   placed), so the row fit in js/resolvers/header.js, which subtracts the padding from the room,
-   still counts the mark's space exactly; margins are not counted, so the cluster is pushed right
-   with a margin. */
+   The bar's own dress in home mode is the kit's (assets/kit/defxn-components.css, from
+   flux/defxn-product-kit; moved there from this file 2026-10-28): the mark only, set in the bar's
+   LEFT PADDING; the controls 36px tall in one cluster on the right; from 1040.02px the Products
+   trigger and the nav as one segmented control, then a hairline; the Products panel dressed like
+   the "you" panel, 1200x700 at most, its role tokens inherited so a worn NFT skin reaches it.
+   What stays here is this site's own share of that row. The padding gains the mark's room, so the
+   row fit in js/resolvers/header.js, which subtracts the padding from the room, still counts the
+   mark's space exactly; margins are not counted, so the cluster is pushed right with a margin. */
 #scene .ark-header[data-dx-mode] {
  --hdr-mark-room:40px;   /* the 24px mark + 16px before the cluster could ever reach it */
  padding-left:calc(max(var(--dx-gutter),env(safe-area-inset-left,0px)) + var(--hdr-mark-room));
 }
-#scene .ark-header[data-dx-mode] .dx-bar__brand {
- position:absolute; left:max(var(--dx-gutter),env(safe-area-inset-left,0px));
- top:calc(env(safe-area-inset-top,0px) + (var(--dx-bar-h) - 44px) / 2);
- width:24px; min-width:24px; height:44px;
-}
 /* a phone keeps the 30px the in-row mark took (24px + the 6px gap): 360px had no spare 10px */
 @media(max-width:640px) { #scene .ark-header[data-dx-mode] { --hdr-mark-room:30px; } }
 /* Get FXN Browser leads the cluster (a bar child just before the family, js/resolvers/header.js):
-   it carries the push to the right; when the row fit folds it away, the family takes the push. */
+   it carries the push to the right, so the part after it does not; when the row fit folds it
+   away, the kit's push (on the family) returns. */
 #scene .ark-header[data-dx-mode] .header-run-link { margin-left:auto; flex:0 0 auto; }
-#scene .ark-header[data-dx-mode] .dx-bar__family { margin-left:0; }
-#scene .ark-header[data-dx-mode] .header-run-link.header-collapsed + .dx-bar__family { margin-left:auto; }
-#scene .ark-header[data-dx-mode] .dx-bar__end { margin-left:0; }
+#scene .ark-header[data-dx-mode] .header-run-link:not(.header-collapsed) + * { margin-left:0; }
 
 /* One control shape across the cluster: 36px tall, the kit radius, the kit edge. Get FXN Browser
    was a 999px pill beside 8px squares; it keeps its soft tint: it is the bar's one action. */
 #scene .ark-header .header-run-link { border-radius:var(--dx-radius,8px); }
-
-/* Products + Overview + Mesh Explorer read as ONE segmented control where the nav is in the row:
-   the Products trigger is its first segment. The nav clips its own corners, so whichever links
-   the row fit leaves showing get the rounded ends (the kit rounds :first-child/:last-child, which
-   is wrong once a link is collapsed). The -7px pulls the nav over the 6px bar gap so the two
-   borders overlap into one hairline. */
-@media(min-width:1040.02px) {
- #scene .ark-header[data-dx-mode]:has(.header-core-links > a:not(.header-collapsed)) .dx-switch__trigger { border-radius:var(--dx-radius,8px) 0 0 var(--dx-radius,8px); }
- #scene .ark-header[data-dx-mode]:has(.header-core-links > a:not(.header-collapsed)) .header-core-links { margin-left:-7px; border-radius:0 var(--dx-radius,8px) var(--dx-radius,8px) 0; overflow:hidden; }
- #scene .ark-header[data-dx-mode] .header-core-links > a { border-radius:0; }
- /* a hairline between the pages and the visitor's own controls */
- #scene .ark-header[data-dx-mode] .dx-bar__end { position:relative; padding-left:13px; }
- #scene .ark-header[data-dx-mode] .dx-bar__end::before { content:""; position:absolute; left:6px; top:8px; bottom:8px; width:1px; background:hsl(var(--border-default)); }
-}
-
-/* ---- PRODUCTS: the kit's switcher, dressed like the "you" panel (owner, 2026-10-25) ------------
-   Layout and keys stay the kit's (find, categories rail, list, preview, foot). The look is the
-   "you" panel's above: glass on --overlay, a 2px primary top edge, a 12px radius, mono hairline
-   labels. The owner asked for it bigger: the panel went from 1000x560 to 1200x700 at most. Every size is a
-   step of the type scale (css/page-layout.css, laws 78-83): 18 for names, rows, controls and values, 11 for
-   labels, helper lines and metadata, 29 for the preview's name. The selected row and Open were white blocks:
-   the row now takes the base (--primary), and Open, the one dominant action, the complement (--secondary).
-   The kit remaps every role token inside the panel to its own fixed ink and orange
-   (assets/kit/defxn-components.css, generated from flux/defxn-product-kit). Here they inherit
-   again, so the panel takes the site's theme and a worn NFT skin, which sets them on #scene
-   (js/ark/skin-site.js). Before this, a skin stopped at the panel's edge (measured 2026-10-25:
-   --primary 84 on #scene, 21 inside the panel). Only --primary itself is used, never its numbered steps: a skin sets --primary
-   and not its ladder (measured 2026-10-25, card 27), so a step would stay orange under any skin. */
-#scene .ark-header[data-dx-mode="home"] { --dx-strip-h:36px; gap:6px; }
-#scene .ark-header .dx-bar__actions { gap:6px; }
-#scene .ark-header .dx-switch__trigger { height:36px; padding:0 10px; gap:6px; font:600 var(--fs-tertiary)/1 var(--dx-font-sans); border-radius:var(--dx-radius,8px); }
-#scene .ark-header .dx-switch__trigger .dx-glyph { width:18px; height:18px; }
-#scene .ark-header .dx-bar__nav { margin:0; height:36px; }
-#scene .ark-header .dx-bar__nav a { padding:0 10px; gap:6px; font:500 var(--fs-tertiary)/1 var(--dx-font-sans); }
 #scene .ark-header .header-core-links .native-icon { width:14px; height:14px; flex-basis:14px; }
 #scene .ark-header .header-run-link { min-height:36px; padding:0 12px; gap:6px; font:600 var(--fs-tertiary)/1 var(--dx-font-sans); }   /* the bar's words are the scale's 11 (owner, 2026-10-25: 12px was off the scale) */
-
-#scene .ark-header .dx-switch__panel {
- --text-strong:inherit; --text:inherit; --text-muted:inherit; --text-faint:inherit;
- --surface:inherit; --canvas:inherit; --depth:inherit; --raised:inherit; --nested:inherit;
- --border-subtle:inherit; --border-default:inherit; --border-strong:inherit;
- --reference:inherit; --primary:inherit; --warning:inherit; --secondary:inherit; --secondary-600:inherit; --secondary-ink:inherit;
- --hx-ink:var(--text-strong); --hx-bg:var(--surface); --hx-accent:var(--primary);
- --hx-ground:linear-gradient(hsl(var(--text-strong) / .04),hsl(var(--text-strong) / .04)),hsl(var(--overlay));
- --dx-link:var(--text-strong);
- color-scheme:normal;
-}
-#scene .ark-header[data-dx-mode="home"] .dx-switch__panel {
- left:max(var(--dx-gutter),8px,calc((100vw - 1200px) / 2)); right:auto; width:min(1200px,calc(100vw - 2 * max(var(--dx-gutter),8px)));
- border:1px solid hsl(var(--border-default)); border-top:2px solid hsl(var(--primary)); border-radius:12px;
- background:var(--hx-ground); box-shadow:0 24px 60px hsl(0 0% 0% / .45);
-}
-.dx-switch__panel :focus-visible { outline-color:hsl(var(--primary)); }
-
-/* top: the find box and close */
-.dx-switch__panel .dx-switch__top { padding:12px; gap:10px; }
-.dx-switch__panel .dx-switch__find { height:42px; padding:0 14px; gap:10px; border-radius:8px; background:hsl(var(--text-strong) / .04); box-shadow:inset 0 0 0 1px hsl(var(--border-subtle)); }
-.dx-switch__panel .dx-switch__find:focus-within { box-shadow:inset 0 0 0 1px hsl(var(--primary) / .6); }
-.dx-switch__panel .dx-switch__find .dx-switch__find-input { font:400 var(--fs-secondary)/1.2 var(--dx-font-sans); }
-.dx-switch__panel .dx-switch__close { width:42px; height:42px; border-radius:8px; }
-
-/* rail: one category per row, the selected one in the brand */
-.dx-switch__panel :is(.dx-switch__rail,.dx-switch__stage) { gap:8px; padding:12px; }
-.dx-switch__panel .dx-switch__tabs { gap:2px; }
-.dx-switch__panel .dx-switch__tab { min-height:44px; padding:4px 12px; gap:10px; border-radius:8px; font:500 var(--fs-secondary)/1.2 var(--dx-font-sans); }
-.dx-switch__panel .dx-switch__tab:hover { background:hsl(var(--text-strong) / .06); }
-.dx-switch__panel .dx-switch__tab[aria-selected="true"] { background:hsl(var(--primary) / .12); color:hsl(var(--text-strong)); box-shadow:inset 2px 0 0 hsl(var(--primary)); }
-.dx-switch__panel .dx-switch__tab[aria-selected="true"] .dx-switch__tab-mark { color:hsl(var(--primary)); }
-.dx-switch__panel .dx-switch__tab-mark { width:18px; height:18px; }
-
-/* list: a row per product; the previewed row is tinted with --primary, never a white block */
-.dx-switch__panel .dx-lane__head { padding:2px 8px 6px; }
-.dx-switch__panel .dx-lane__name { font:600 var(--fs-tertiary)/1.4 var(--dx-font-mono); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); }
-.dx-switch__panel :is(.dx-lane__list,.dx-lane,.dx-resolvers,.dx-switch__results) { gap:6px; }
-.dx-switch__panel .dx-product-link {
- grid-template-columns:44px minmax(0,1fr) auto; gap:14px; min-height:0; padding:12px 14px 12px 10px; border-radius:10px;
- background:hsl(var(--text-strong) / .03); box-shadow:inset 0 0 0 1px hsl(var(--border-subtle));
-}
-.dx-switch__panel .dx-product-link:hover { background:hsl(var(--text-strong) / .06); box-shadow:inset 0 0 0 1px hsl(var(--border-default)); }
-.dx-switch__panel .dx-product-link[data-dx-previewed] { background:hsl(var(--primary) / .12); color:hsl(var(--text)); box-shadow:inset 0 0 0 1px hsl(var(--primary) / .45),inset 3px 0 0 hsl(var(--primary)); }
-.dx-switch__panel .dx-product-link:active { background:hsl(var(--primary) / .18); }
-.dx-switch__panel .dx-product-link[data-dx-previewed] :is(.dx-product-link__name,.dx-row__svg) { color:hsl(var(--text-strong)); }
-.dx-switch__panel .dx-product-link[data-dx-previewed] .dx-row__go { color:hsl(var(--primary)); }
-.dx-switch__panel .dx-product-link[data-dx-previewed] :is(.dx-product-link__line,.dx-row__facts,.dx-row__here,.dx-row__facts .dx-badge) { color:hsl(var(--text-muted)); }
-.dx-switch__panel .dx-product-link[data-dx-previewed] .dx-row__mark { background:hsl(var(--primary) / .14); box-shadow:inset 0 0 0 1px hsl(var(--primary) / .35); }
-.dx-switch__panel .dx-product-link[data-dx-previewed] .dx-tag { color:hsl(var(--text-muted)); box-shadow:inset 0 0 0 1px hsl(var(--border-default)); }
-.dx-switch__panel .dx-product-link[data-dx-previewed] .dx-row__facts .dx-badge::before { background:repeating-linear-gradient(-45deg,hsl(var(--text-strong) / .7) 0 1.5px,transparent 1.5px 4px); box-shadow:inset 0 0 0 1px hsl(var(--text-strong) / .7); }
-.dx-switch__panel .dx-row__mark { width:44px; height:44px; border-radius:8px; }
-/* A skin may give a row Ark's icon bullet (a ::before, data-ark-skin-item="icon"). In this grid row it took the first cell
-   and pushed the mark and the words one column right (skin audit, 2026-10-25). Each piece has its own cell, and the
-   bullet sits on the mark's top corner. */
-.dx-switch__panel .dx-product-link > .dx-row__mark { grid-area:1 / 1; }
-.dx-switch__panel .dx-product-link > .dx-row__text { grid-area:1 / 2; }
-.dx-switch__panel .dx-product-link > .dx-row__go { grid-area:1 / 3; }
-.dx-switch__panel .dx-product-link[data-ark-skin-item]::before { grid-area:1 / 1; align-self:start; justify-self:start; margin:-4px 0 0 -4px; position:relative; z-index:1; }
-.dx-switch__panel .dx-product-link__name { font:600 var(--fs-secondary)/1.25 var(--dx-font-sans); letter-spacing:-.01em; }
-.dx-switch__panel .dx-product-link__line { font-size:var(--fs-tertiary); line-height:1.45; }
-.dx-switch__panel .dx-row__facts { gap:12px; margin-top:4px; font-size:var(--fs-tertiary); letter-spacing:.08em; text-transform:uppercase; }
-.dx-switch__panel .dx-row__here { font-size:var(--fs-tertiary); letter-spacing:.1em; }
-.dx-switch__panel .dx-row__tags { gap:4px 6px; margin-top:8px; }
-.dx-switch__panel .dx-tag { min-height:20px; padding:0 8px; gap:5px; font:500 var(--fs-tertiary)/1 var(--dx-font-sans); }
-.dx-switch__panel .dx-badge { font-size:var(--fs-tertiary); gap:6px; }
-.dx-switch__panel .dx-switch__back { min-height:44px; font:600 var(--fs-secondary)/1.2 var(--dx-font-sans); }
-.dx-switch__panel .dx-switch__none { font-size:var(--fs-secondary); }
-
-/* preview: a card on a --primary tint (the base). Open is the view's one dominant action, so it alone takes the
-   complement, --secondary, on its own ink (design laws 71-77). */
-.dx-switch__panel .dx-switch__preview { gap:12px; padding:20px 22px; margin:12px; border-radius:10px; border-color:hsl(var(--primary) / .3); }
-.dx-switch__panel .dx-preview__eyebrow { font:600 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--primary)); }
-.dx-switch__panel .dx-preview__tile { width:56px; height:56px; border-radius:10px; }
-.dx-switch__panel .dx-preview__tile svg { width:34px; height:34px; }
-.dx-switch__panel .dx-preview__title { gap:14px; margin:2px 0; }
-.dx-switch__panel .dx-preview__name { font-size:var(--fs-primary); }
-.dx-switch__panel .dx-preview__what { font-size:var(--fs-secondary); line-height:1.4; }
-.dx-switch__panel :is(.dx-preview__line,.dx-preview__caveat,.dx-preview__here) { font-size:var(--fs-tertiary); line-height:1.5; }
-.dx-switch__panel .dx-facts { gap:8px 16px; padding:12px 0; border-color:hsl(var(--border-subtle)); }
-.dx-switch__panel .dx-facts dt { font:600 var(--fs-tertiary)/1.4 var(--dx-font-mono); letter-spacing:.12em; color:hsl(var(--text-muted)); }
-.dx-switch__panel .dx-facts dd { font-size:var(--fs-secondary); }
-.dx-switch__panel .dx-related { gap:8px; margin-top:4px; }
-.dx-switch__panel .dx-related__label { font:600 var(--fs-tertiary)/1.4 var(--dx-font-mono); letter-spacing:.12em; color:hsl(var(--text-muted)); }
-.dx-switch__panel .dx-related__item { gap:4px; padding:4px 12px; min-height:0; border-radius:0; }
-.dx-switch__panel .dx-related__item:hover .dx-related__arrow { color:hsl(var(--primary)); }
-.dx-switch__panel :is(.dx-related__name,.dx-related__arrow) { font-size:var(--fs-tertiary); }
-.dx-switch__panel .dx-related__line { font-size:var(--fs-tertiary); line-height:1.4; -webkit-line-clamp:1; }
-.dx-switch__panel .dx-cta { min-height:44px; border-radius:8px; background:hsl(var(--secondary)); color:hsl(var(--secondary-ink)); font:600 var(--fs-secondary)/1 var(--dx-font-sans); }
-.dx-switch__panel .dx-cta:is(:hover,:focus-visible) { background:hsl(var(--secondary) / .86); color:hsl(var(--secondary-ink)); }
-.dx-switch__panel .dx-cta:active { background:hsl(var(--secondary) / .8); }
-.dx-switch__panel .dx-cta:focus-visible { outline:2px solid hsl(var(--secondary)); outline-offset:2px; }
-.dx-switch__panel .dx-cta--here { background:hsl(var(--text-strong) / .08); color:hsl(var(--text-muted)); }
-@media(min-width:981px) {
- #scene .ark-header[data-dx-mode="home"] .dx-switch__panel { height:min(700px,calc(100dvh - var(--dx-bar-h) - 24px)); grid-template-columns:220px minmax(0,1fr) minmax(320px,36%); }
-}
-/* a 720px-tall laptop: the preview tightens so Open stays in view */
-@media(min-width:981px) and (max-height:820px) {
- .dx-switch__panel .dx-switch__preview { gap:8px; padding:16px 20px; margin:10px; }
- .dx-switch__panel .dx-switch__preview .dx-preview__foot { bottom:-16px; margin:4px -20px -16px; padding:8px 20px 16px; }
- .dx-switch__panel .dx-preview__tile { width:48px; height:48px; }
- .dx-switch__panel .dx-preview__name { font-size:var(--fs-secondary); }
- .dx-switch__panel .dx-product-link { padding:10px 14px 10px 10px; }
-}
-
-/* foot: the keys and the family home, in the mono hairline voice */
-.dx-switch__panel .dx-switch__foot { padding:8px 14px; min-height:0; }
-.dx-switch__panel .dx-switch__foot :is(.dx-switch__key,.dx-switch__home,.dx-switch__home-name,.dx-switch__cap) { font-size:var(--fs-tertiary); }
-.dx-switch__panel .dx-switch__cap { font-family:var(--dx-font-mono); }
 
 /* ---- The footer: one quiet glass bar in the scene's bottom band (redesigned 2026-10-25, owner: "a disaster") ----
    It was four type styles in one row (16px mono links, a 12px mono copyright, a mono-serif name, an all-caps Back) with
    the settings gear floating outside it. Now it is one bar, dressed like the header: canvas glass, a hairline edge, the
    kit radius. Left: the settings gear (css/settings.css places it; here it is drawn inside the bar) and the family name.
    Middle: the site's section links (one per journey, js/hero-motion.js) in the sans at 13px, the current one marked by
-   the primary underline. Right: the rights line, small and faint, and Back as a small outlined control. The kit's
-   home footer ([data-dx-mode="home"]) keeps its one-row rules; this file only dresses it. */
+   the primary underline. Right: the rights line, small and faint, and Back as a small outlined control. The bar's own
+   dress (the glass, the edge, the 54px room for the gear, the family name from 860.02px) is the kit's home footer
+   ([data-dx-mode="home"], moved there from this file 2026-10-28); this file places the strip and dresses this site's
+   links, lines and controls in it. */
 #scene .site-footer-strip {
  position:absolute; z-index:14; left:max(14px,env(safe-area-inset-left,0px)); right:max(14px,env(safe-area-inset-right,0px)); bottom:max(12px,env(safe-area-inset-bottom,0px));
  height:44px; pointer-events:none;
 }
 #scene .site-footer-strip > :not([data-ark-skin-deco]) { pointer-events:auto; }   /* a card skin's pieces stay unclickable: its corners had caught footer clicks */
-#scene .site-footer-strip .dx-foot {
- box-sizing:border-box; height:44px; padding:0 6px 0 54px; gap:0 4px; align-items:center;
- border:1px solid hsl(var(--border-subtle)); border-radius:12px;
- background:hsl(var(--canvas) / .72); -webkit-backdrop-filter:blur(14px) saturate(1.1); backdrop-filter:blur(14px) saturate(1.1);
- box-shadow:inset 0 1px 0 hsl(var(--text-strong) / .05);
- font-family:var(--dx-font-sans,var(--font-sans,sans-serif));
-}
-/* the family name: the sans, the name strong and its place muted, then a hairline before the links */
-#scene .site-footer-strip .dx-foot__name {
- display:inline-flex; align-items:center; height:24px; padding-right:14px; margin-right:6px; border-right:1px solid hsl(var(--border-default));
- font:600 12px/1 var(--dx-font-sans,var(--font-sans,sans-serif)); letter-spacing:.01em; color:hsl(var(--text-muted)); white-space:nowrap;
-}
 #scene .site-footer-strip nav { gap:2px; }
 #scene .site-footer-strip nav a {
  position:relative; display:inline-flex; align-items:center; height:32px; min-height:32px; padding:0 10px; border-radius:8px;
@@ -378,7 +212,6 @@
 #scene .site-footer-strip nav a[aria-current="page"]::after { content:""; position:absolute; left:10px; right:10px; bottom:3px; height:2px; border-radius:2px; background:hsl(var(--primary)); }
 /* the credit and rights line join the row (css/settings.css still places them on their own) */
 #scene .site-footer-strip :is(.site-credit,.site-copyright,.site-price) { position:static; font:500 11px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-faint)); }
-#scene .site-footer-strip .dx-foot__end { gap:12px; }
 /* Back (js/hero-motion.js) closes the row: a small outlined control, the header's shape at its smaller size */
 #scene .site-footer-strip .hero-motion-toggle {
  position:static; display:inline-flex; align-items:center; height:30px; min-height:30px; padding:0 12px; border:1px solid hsl(var(--border-default)); border-radius:8px;
@@ -399,7 +232,6 @@
 /* a phone's strip is all links: the price there covered "Interface palette" (390px) */
 @media(max-width:639.98px) { #scene .site-footer-strip .site-price { display:none; } }
 #scene .site-footer-strip .site-price[data-price-state="live"] { color:hsl(var(--text-strong)); }
-@media(max-width:860px) { #scene .site-footer-strip .dx-foot__name { display:none; } }
 @media(max-width:760px) {
  #scene .site-footer-strip { left:8px; right:8px; bottom:8px; }
  #scene .site-settings { left:14px; bottom:13px; }

@@ -239,10 +239,17 @@ export function vocabularyOf(files, cache = new Map()) {
    sample article and one theory page, because those routes are derived from content registries the
    page builds at run time. */
 export function loadCatalog() {
-  const context = vm.createContext({ ArkUI: {}, ArkCopy: { text: (key) => key }, console });
-  for (const file of ['js/content/learnings.js', 'js/content/article-index.js', 'js/content/resolutions.js', 'js/content/site-pages.js', 'js/pages/catalog.js'])
-    vm.runInContext(read(file), context, { filename: file });
-  const ArkUI = context.ArkUI;
+  // the editor's canvas (cms-preview=1) also registers its own routes (the Kit). They are read too, so their sheets are
+  // placed like any other module's and are never orphans; editorOnly names their modules, which never decide `shared`
+  // (what every visitor loads).
+  const run = (search) => {
+    const context = vm.createContext({ ArkUI: {}, ArkCopy: { text: (key) => key }, console, location: { search } });
+    for (const file of ['js/content/learnings.js', 'js/content/article-index.js', 'js/content/resolutions.js', 'js/content/site-pages.js', 'js/pages/catalog.js'])
+      vm.runInContext(read(file), context, { filename: file });
+    return context.ArkUI;
+  };
+  const publicKeys = new Set(Object.keys(run('').pageCatalog));
+  const ArkUI = run('?cms-preview=1');
   ArkUI.catalogContentRoutes([{ slug: 'sample-article', title: 'Sample', sections: [{}] }], [{ id: 'sample', route: '/sample' }]);
   const modules = new Map();
   for (const [key, entry] of Object.entries(ArkUI.pageCatalog)) {
@@ -251,7 +258,8 @@ export function loadCatalog() {
     module.keys.push(key);
     entry.scripts.forEach((script) => module.scripts.add(script));
   }
-  return { catalog: ArkUI.pageCatalog, modules, order: ArkUI.styleOrder, pageStyles: ArkUI.pageStyles };
+  const editorOnly = new Set([...modules].filter(([, m]) => m.keys.every((key) => !publicKeys.has(key))).map(([name]) => name));
+  return { catalog: ArkUI.pageCatalog, modules, editorOnly, order: ArkUI.styleOrder, pageStyles: ArkUI.pageStyles };
 }
 
 /* ---------- the derivation ---------- */
@@ -362,7 +370,8 @@ export function derive({ html = read('index.html'), loaded = loadCatalog(), dom 
     perModule.set(name, neededSheets(sheets, vocabulary, reasons));
     why.set(name, reasons);
   }
-  const shared = order.filter((f) => [...perModule.values()].every((set) => set.has(f)));
+  const editorOnly = loaded.editorOnly || new Set();
+  const shared = order.filter((f) => [...perModule].every(([name, set]) => editorOnly.has(name) || set.has(f)));
   const modules = {};
   for (const [name, set] of perModule) modules[name] = order.filter((f) => set.has(f) && !shared.includes(f));
   return { order, shared, modules, why };

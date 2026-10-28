@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Hairline Shadow: a nubbed panel with a faint line offset below and to the right, so it reads as lifted off the page</title>
+  <path d="M9 9 H22 L30 1 L38 9 H347 Q355 9 355 17 V227 Q355 235 347 235 H9 Q1 235 1 227 V17 Q1 9 9 9 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M359 21 V231 Q359 239 351 239 H13" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

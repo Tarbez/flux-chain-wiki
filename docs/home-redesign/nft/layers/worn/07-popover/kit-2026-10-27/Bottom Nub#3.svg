@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Bottom Nub: a panel with its nub on the bottom edge near the trailing corner, for a popover that opens above its trigger</title>
+  <path d="M9 1 H351 Q359 1 359 9 V223 Q359 231 351 231 H338 L330 239 L322 231 H9 Q1 231 1 223 V9 Q1 1 9 1 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

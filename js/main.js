@@ -1577,19 +1577,50 @@
     if (el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     cmsSkin.focusTimer = setTimeout(function () { el.classList.remove('defxn-skin-focus'); }, 2500);
   }
+  /* The Kit's Wear (js/admin/kit.js sends morph: true): the change from the plain page to the skinned one, and back, is
+     one view transition, the new look swept in by a moving clip (CMS_MORPH_CSS below, html.kit-morph). The record is fetched
+     first, so only the apply itself is inside the transition. Without the API, or with reduced motion, it just applies. */
+  /* The sweep's rules live here, not in a page's sheet: any page can be worn in the CMS preview, and the rules must
+     exist before the transition starts. Motion only: a moving clip, never a fade; taking the skin off sweeps back. */
+  var CMS_MORPH_CSS = 'html.kit-morph::view-transition-old(root){animation:none}' +
+    'html.kit-morph::view-transition-new(root){animation:kit-sweep 900ms cubic-bezier(.22,.7,.18,1) both}' +
+    'html.kit-morph.kit-morph-off::view-transition-new(root){animation-name:kit-sweep-back}' +
+    '@keyframes kit-sweep{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}' +
+    '@keyframes kit-sweep-back{from{clip-path:inset(0 0 0 100%)}to{clip-path:inset(0 0 0 0)}}';
+  function cmsMorph(change, off) {
+    var root = document.documentElement;
+    var reducedMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!document.startViewTransition || reducedMotion || document.hidden) return Promise.resolve().then(change);
+    if (!document.getElementById('cms-morph-style')) {
+      var sheet = document.createElement('style'); sheet.id = 'cms-morph-style'; sheet.textContent = CMS_MORPH_CSS; document.head.appendChild(sheet);
+    }
+    root.classList.add('kit-morph'); root.classList.toggle('kit-morph-off', !!off);
+    var t = document.startViewTransition(function () { return Promise.resolve().then(change); });
+    function done() { root.classList.remove('kit-morph', 'kit-morph-off'); }
+    t.finished.then(done, done);
+    return t.updateCallbackDone;
+  }
   function cmsPreviewSkin(data) {
     var site = window.DefxnSkinSite;
     if (!site) { cmsSkinRelay('The skin module is not loaded on this page.'); return; }
     if (!cmsSkin.listening) { cmsSkin.listening = true; document.addEventListener('ark:skin-report', function () { cmsSkinRelay(); }); }
-    var sample = String(data.sample || ''), policy = data.policy && typeof data.policy === 'object' ? data.policy : {};
-    if (!sample) { cmsSkin.key = ''; cmsSkin.sample = ''; cmsSkin.seq++; cmsSkinFocus(''); site.remove(); cmsSkinRelay(); return; }
+    var sample = String(data.sample || ''), policy = data.policy && typeof data.policy === 'object' ? data.policy : {}, morph = data.morph === true;
+    if (!sample) {
+      var had = !!site.active();
+      cmsSkin.key = ''; cmsSkin.sample = ''; cmsSkin.seq++; cmsSkinFocus('');
+      if (morph && had) cmsMorph(function () { site.remove(); }, true).then(function () { cmsSkinRelay(); }); else { site.remove(); cmsSkinRelay(); }
+      return;
+    }
     var key = sample + '\n' + JSON.stringify(policy);
     if (key === cmsSkin.key && site.active()) { cmsSkinRelay(); return; }
     var mine = ++cmsSkin.seq;
     cmsSkin.chain = cmsSkin.chain.then(function () {
       if (mine !== cmsSkin.seq) return null;
       cmsSkin.key = key; cmsSkin.sample = sample;
-      return site.sample(sample).then(function (record) { return site.apply(record, { policy: policy }); })
+      return site.sample(sample).then(function (record) {
+        if (mine !== cmsSkin.seq) return null;
+        return morph ? cmsMorph(function () { return site.apply(record, { policy: policy }); }, false) : site.apply(record, { policy: policy });
+      })
         .then(function () { if (mine === cmsSkin.seq) cmsSkinRelay(); })
         .catch(function (e) { cmsSkin.key = ''; if (mine === cmsSkin.seq) cmsSkinRelay(String(e && e.message || e)); });
     });
@@ -1619,6 +1650,12 @@
        'defxn-cms-skin-report' (cmsSkinRelay). The press on a part row outlines that part's first element. */
     if (data.type === 'defxn-cms-preview-skin' && event.source === window.parent && cmsPreviewQuery) { cmsPreviewSkin(data); return; }
     if (data.type === 'defxn-cms-preview-skin-focus' && event.source === window.parent && cmsPreviewQuery) { cmsSkinFocus(data.selector); return; }
+    /* The Kit (js/admin/kit.js): which board and element the dock chose. The Kit page (js/pages/kit.js) draws it and
+       answers with 'defxn-cms-kit-report'. Off the Kit page there is nothing to show, and nothing happens. */
+    if (data.type === 'defxn-cms-preview-kit' && event.source === window.parent && cmsPreviewQuery) {
+      if (ArkUI.kitPage && typeof ArkUI.kitPage.show === 'function') ArkUI.kitPage.show(String(data.board || ''), String(data.item || ''), Number(data.page) || 0, data.compare === undefined ? undefined : String(data.compare || ''));
+      return;
+    }
     if (data.type === 'flux-chain-preview-theme' && data.theme) {
       if (!window.ArkTheme) return;
       /* editor preview only: show the theme whose colours are being edited (on the public page

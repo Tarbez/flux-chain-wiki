@@ -1,7 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
-  <title>Genesistab: a notched tab holding the genesis ID, joined to the divider line (sheet-3, 02 and 03)</title>
-  <path d="M0 1H46L57 17H0Z" fill="var(--faint)"/>
+  <title>Genesistab: a small notched step rising from the left end of the divider line (sheet-3, 02 and 03)</title>
+  <path d="M0 7H18L25 17H0Z" fill="var(--faint)"/>
   <line x1="0" y1="16.5" x2="360" y2="16.5" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
-  <path d="M0.5 16.5V1.5H46L56.5 16.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
-  <text x="7" y="13.2" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="1.3" fill="var(--dim)">#<tspan font-weight="500" fill="var(--ink)" data-field="genesisId">009</tspan></text>
+  <path d="M0.5 16.5V7.5H18L24.5 16.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
 </svg>

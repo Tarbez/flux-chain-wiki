@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Anchor Dot: a plain panel with a short stem rising from its top edge to a referential dot, the point it is anchored to</title>
+  <path d="M9 13 H351 Q359 13 359 21 V231 Q359 239 351 239 H9 Q1 239 1 231 V21 Q1 13 9 13 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M30 13 V7" fill="none" stroke="var(--referential)" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="30" cy="4" r="3" fill="var(--referential)"/>
+</svg>

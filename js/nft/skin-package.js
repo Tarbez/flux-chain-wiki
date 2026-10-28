@@ -43,7 +43,7 @@
     SEPARATOR: ['ornament'],
     BUTTON: ['edge', 'button']
   };
-  var FLAT = ['frame', 'edge', 'ornament', 'marker', 'header', 'density', 'button', 'badge', 'menu', 'line', 'link', 'grid'];
+  var FLAT = ['frame', 'edge', 'ornament', 'marker', 'header', 'density', 'button', 'badge', 'menu', 'popover', 'dropdown', 'line', 'link', 'grid'];
   var VOID = /^(INPUT|IMG|HR|BR|TEXTAREA|SELECT|PROGRESS|METER|VIDEO|AUDIO|IFRAME|CANVAS)$/;
   function squash(v) { return String(v).replace(/[^A-Za-z0-9]/g, '').toUpperCase(); }
 
@@ -89,6 +89,26 @@
     }
     var chrome = {};
     Object.keys(data.chrome || {}).forEach(function (k) { if (data.chrome[k]) chrome[k] = data.chrome[k]; });
+    /* A nameplate shows the part's own header (Ark UI fills its title and index fields per part; owner, 2026-10-27), never
+       the wearer's name: a package written before then carries the card's name and number in fields "name" and
+       "number". The package is read as written (it never changes); its nameplate is worn with those two fields read as
+       the part's title and index. */
+    /* No drawn piece prints the card's words on a site (owner, 2026-10-27, the category audit; skin-recipe.js chromeData
+       says the same for a fresh recipe). A package written before then carries its words in the drawings: they are
+       read past here, never rewritten, keeping only a nameplate's title and index slots. */
+    Object.keys(chrome).forEach(function (k) {
+      var svg = String(chrome[k].svg || '');
+      if (svg.indexOf('<text') < 0) return;
+      // a nameplate's old name and number slots stay: they become its title and index just below
+      var keep = k === 'nameplate' || k === 'tag' ? /<text\b(?![^>]*data-field="(?:title|index|name|number)")[^>]*>[\s\S]*?<\/text>/g : /<text\b(?![^>]*data-field="(?:title|index)")[^>]*>[\s\S]*?<\/text>/g;
+      chrome[k] = Object.assign({}, chrome[k], { svg: svg.replace(keep, '') });
+    });
+    var plate = chrome.nameplate || chrome.tag;
+    if (plate && /data-field="(name|number)"/.test(plate.svg || '')) {
+      var key = chrome.nameplate ? 'nameplate' : 'tag';
+      chrome[key] = Object.assign({}, plate, { svg: String(plate.svg).replace(/data-field="name"/g, 'data-field="title"').replace(/data-field="number"/g, 'data-field="index"'),
+        fields: (plate.fields || []).map(function (f) { return f === 'name' ? 'title' : f === 'number' ? 'index' : f; }) });
+    }
     return { name: data.name || 'defxn-card-' + String(data.dna).replace(/-/g, '.'), tokens: tokens, chrome: chrome, rules: rules, locks: locks.slice() };
   }
 

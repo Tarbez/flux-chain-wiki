@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Asterism Button: a faint outline with a three-star constellation in each end, the lines stopping short of the stars, the brightest star in the complementary role (the Asterism set)</title>
+  <rect x="1" y="1" width="198" height="54" rx="8" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M8 4L9.120000000000001 6.88L12 8L9.120000000000001 9.120000000000001L8 12L6.88 9.120000000000001L4 8L6.88 6.88Z" fill="var(--complementary)"/>
+  <path d="M19 3L19.56 4.4399999999999995L21 5L19.56 5.5600000000000005L19 7L18.44 5.5600000000000005L17 5L18.44 4.4399999999999995Z" fill="var(--ink)"/>
+  <path d="M7 45L7.5600000000000005 46.44L9 47L7.5600000000000005 47.56L7 49L6.4399999999999995 47.56L5 47L6.4399999999999995 46.44Z" fill="var(--ink)"/>
+  <path d="M11.5 7 L16.5 5.6 M8 12.5 V44.5" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <g transform="rotate(180 100 28)"><path d="M8 5L8.84 7.16L11 8L8.84 8.84L8 11L7.16 8.84L5 8L7.16 7.16Z" fill="var(--ink)"/><path d="M19 3L19.56 4.4399999999999995L21 5L19.56 5.5600000000000005L19 7L18.44 5.5600000000000005L17 5L18.44 4.4399999999999995Z" fill="var(--ink)"/><path d="M7 45L7.5600000000000005 46.44L9 47L7.5600000000000005 47.56L7 49L6.4399999999999995 47.56L5 47L6.4399999999999995 46.44Z" fill="var(--ink)"/><path d="M11.5 7 L16.5 5.6 M8 12.5 V44.5" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+</svg>

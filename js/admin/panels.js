@@ -77,6 +77,8 @@
   function mountWorldView() { mountPanel($('worldPanel'), 'renderWorldPanel', [], 'The 3D world'); }
   /* ---- the Skin lab view (setView('skin')): card skins tried on the real page ---- */
   function mountSkinView() { mountPanel($('skinPanel'), 'renderSkinLabPanel', [], 'The Skin lab'); }
+  /* ---- the Kit view (setView('kit')): the five DEFXN boards on the canvas, and a card worn on them ---- */
+  function mountKitView() { mountPanel($('kitPanel'), 'renderKitPanel', [], 'The Kit'); }
 
   /* ---- THE sheet ------------------------------------------------------------------------ */
   var sheet = { key: '', anchor: null, transient: false, item: null };
@@ -144,7 +146,7 @@
   }
   document.addEventListener('keydown', function (e) {
     if ((e.key !== 'End' && e.key !== 'Home') || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (!e.target.closest || !e.target.closest('#sheet, #themeView, #worldView, #skinView, #studioLeft')) return;
+    if (!e.target.closest || !e.target.closest('#sheet, #themeView, #worldView, #skinView, #kitView, #studioLeft')) return;
     if (moveCaret(e.target, e.key, e.shiftKey)) e.preventDefault();
   });
 
@@ -221,6 +223,6 @@
   }
 
   A.provide({ closeSheet: closeSheet, itemForRoute: itemForRoute, mountRailPane: mountRailPane,
-      mountThemeView: mountThemeView, mountWorldView: mountWorldView, mountSkinView: mountSkinView, openMeshSheet: openMeshSheet, openPageFields: openPageFields,
+      mountThemeView: mountThemeView, mountWorldView: mountWorldView, mountSkinView: mountSkinView, mountKitView: mountKitView, openMeshSheet: openMeshSheet, openPageFields: openPageFields,
       pageFieldsFollow: pageFieldsFollow, refreshPanels: refreshPanels });
 })();

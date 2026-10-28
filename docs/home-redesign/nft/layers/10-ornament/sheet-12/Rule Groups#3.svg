@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Rule Groups: a group of stacked hairlines with one accent run, a small dot grid and three upright lines (sheet 12, micrographics 02)</title>
+  <title>Rule Groups: a group of stacked hairlines with one accent run, a small dot grid and three upright lines (sheet 12, micrographics 02). It prints the card's the join date.</title>
   <path d="M0 26H170M0 34H58M0 42H150M0 50H96" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <path d="M118 34H170M102 50H170" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <path d="M64 34H112" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke"/>
@@ -32,4 +32,6 @@
   <circle cx="270" cy="42" r="0.9" fill="var(--dim)"/>
   <circle cx="270" cy="50" r="0.9" fill="var(--dim)"/>
   <path d="M302 22V56M316 22V56M330 22V56" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <text x="0" y="74" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="2" fill="var(--dim)">JOINED</text>
+  <text x="62" y="74" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--ink)" data-field="joined">JOINED</text>
 </svg>

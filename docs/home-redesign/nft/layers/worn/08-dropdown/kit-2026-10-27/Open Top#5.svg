@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Open Top: no top edge at all, faint sides that strengthen near the bottom into a doubled hem</title>
+  <path d="M1 1 V200 M359 1 V200" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 200 V231 Q1 239 9 239 H351 Q359 239 359 231 V200" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M8 234 H352" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

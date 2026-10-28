@@ -35,7 +35,7 @@ const PAGE = '<section><h1 data-ark-layout-key="k-title">Title</h1><p data-ark-l
 const dom = new JSDOM(`<!doctype html><div id="host">${PAGE}</div>`);
 const { window } = dom;
 const host = window.document.getElementById('host');
-const context = vm.createContext({ window, host, cmsPreviewSelections: [], cmsPreviewSelected: null, cmsRoutePath: () => '/' });
+const context = vm.createContext({ window, host, cmsPreviewSelections: [], cmsPreviewSelected: null, cmsRoutePath: () => '/', cmsLayoutScope: () => '/' });
 /* annotate()/find() are ArkLayout's; here the keys are already in the markup, so they only list
    and look them up */
 window.ArkLayout = {

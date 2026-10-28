@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Arcade Button: a square-cornered outline with a shallow arch inside each end of the top edge, a keystone on each crown, the leading one in the complementary role (the Arcade set)</title>
+  <rect x="1" y="1" width="198" height="54" rx="3" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4 6 A14 14 0 0 1 22 6 M178 6 A14 14 0 0 1 196 6" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4 6 V50 H22 M196 6 V50 H178" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M11.5 3.6L11 1.5H15L14.5 3.6Z" fill="var(--complementary)"/>
+  <path d="M185.5 3.6L185 1.5H189L188.5 3.6Z" fill="var(--dim)"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Tide Dropdown: a hairline top seam and sides, the hem breaking into a two-crest wave at the leading end in the referential role</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V239 M359 1 V239" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M36 239 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 239 Q6 231 11 236 T21 236 T31 236 Q34 239 36 239" fill="none" stroke="var(--referential)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

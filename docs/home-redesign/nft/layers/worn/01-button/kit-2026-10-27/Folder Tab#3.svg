@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Folder Tab: an outline with a raised tab on the leading top edge, the tab drawn in the complementary role</title>
+  <path d="M22 5 H195 Q199 5 199 9 V51 Q199 55 195 55 H5 Q1 55 1 51 V9" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 9 V4 Q1 1 4 1 H19 L22 5" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

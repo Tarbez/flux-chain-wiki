@@ -4,6 +4,7 @@ ArkManifest.define({
   "title": "Stats pages",
   "route": "/stats/now",
   "group": "page",
+  "meta": {},
   "fields": {
     "HERE": {
       "label": "Stats pages: breadcrumb",

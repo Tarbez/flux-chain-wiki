@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Pillars: a faint outline with a solid bar standing inside each end, the trailing bar in the complementary role</title>
+  <rect x="1" y="1" width="198" height="54" rx="3" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4 6 H6 V50 H4 Z" fill="var(--line)"/>
+  <path d="M194 6 H196 V50 H194 Z" fill="var(--complementary)"/>
+</svg>

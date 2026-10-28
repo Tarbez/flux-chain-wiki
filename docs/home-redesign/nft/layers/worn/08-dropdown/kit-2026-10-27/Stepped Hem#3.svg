@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Stepped Hem: a flush rule seam and a bottom whose two corners step in twice</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V229 H5 V234 H10 V239 H350 V234 H355 V229 H359 V1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

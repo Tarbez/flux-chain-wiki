@@ -259,3 +259,5 @@ body.picking { cursor: pointer; }
     mask-composite:subtract;
   }
 }
+/* the rail's fleet run with no verified figure: one quiet line where the tiles go (owner's pick, 2026-10-27) */
+.rx-unverified { margin: 8px 0 0; font: 500 var(--fs-tertiary)/1.4 var(--font-mono); letter-spacing: .08em; color: hsl(var(--text-muted)); }

@@ -1,6 +1,5 @@
 var ArkGlossary=window.ArkGlossary||{map:{}};
 [
-  ["pattern","A definition of a recognizable request or statement shape."],
   ["resolver","A rulebook launched as its own chain: a composition of capabilities plus its own grammar."],
   ["claim","A resolver's stated result. Its signature is its result; whether to rely on that resolver is decided before you send anything: its grammar, its capabilities, who can change it."],
   ["roster","The list of signers eligible to take a decision. A decision record names the roster, the threshold and the approvals collected."],

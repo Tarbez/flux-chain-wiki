@@ -16,7 +16,16 @@ for (const file of ['scripts/serve-site.mjs', 'scripts/publish-host.mjs']) {
   assert(source.includes("'/api/fleet-pulse'"), file + ' must serve the same local pulse route as production');
   assert(source.includes('proxyFleetPulse'), file + ' must use the centralized bounded proxy');
 }
-const home = fs.readFileSync('js/pages/home.js', 'utf8');
-assert(home.includes('ArkPulse.get()') && home.includes('not cumulative ledger growth'), 'home renders live capacity without calling it cumulative growth');
-assert(fs.readFileSync('js/pages/catalog.js', 'utf8').includes("'js/ark/pulse-client.js', 'js/pages/home.js'"), 'home loads the shared pulse client');
-console.log('PASS: /api/fleet-pulse is ordered safely and both browser surfaces use the shared client.');
+/* The home page (the 3D world home since the owner confirmed it on 2026-10-27) reads no live pulse: its rail shows
+   one dated benchmark run (js/content/capabilities-data.js), named as one run with its date. The old check here
+   ("home renders live capacity without calling it cumulative growth", via ArkPulse) guarded a live tile the world
+   home no longer has. What still applies: home never fetches the raw HTTP endpoint, loads no pulse client it does
+   not use, and does not present the dated run as live. */
+const home = fs.readFileSync('js/pages/home.js', 'utf8') + fs.readFileSync('js/world/rail-capabilities.js', 'utf8');
+assert(!home.includes('162.35.26.46') && !/ArkPulse|fleet-pulse/.test(home), 'home reads no live pulse and never the raw HTTP endpoint');
+assert(/zero: \{ module: 'zero', scripts: \[(?![^\]]*pulse-client)[^\]]*\] \}/.test(fs.readFileSync('js/pages/catalog.js', 'utf8')), 'home loads no pulse client it does not use');
+const railWords = Object.entries(JSON.parse(/ArkManifest\.define\(([\s\S]*)\);\s*$/.exec(fs.readFileSync('js/content/manifests/home.js', 'utf8'))[1]).fields)
+  .filter(([key]) => key.startsWith('WORLD.RAIL.')).map(([, field]) => field.value);
+assert(/esc\(words\.oneRun\) \+ ' · ' \+ D\.fleet\.nodes/.test(home), 'the rail names its figures as one run, with its size and date');
+assert(!/(^|[^-\w])live\b/i.test(home.replace(/\/\*[\s\S]*?\*\//g, '') + railWords.join(' ')), 'nothing on the rail calls the dated run live');
+console.log('PASS: /api/fleet-pulse is ordered safely, the stats pages use the shared client, and the world home reads no pulse and shows its run as one dated run.');

@@ -52,7 +52,7 @@
   /* Ark UI's decoration kinds and the chrome piece each one draws (ark-ui.skin.ts, makeDeco callers). Notches are
      Ark UI's own drawing for a frame rule, so they count as the frame's. A kind missing here is reported, not guessed. */
   var PIECE_OF = { frame: 'frame', notches: 'frame', corners: 'corner', nameplate: 'nameplate', 'accent-strip': 'accent-strip',
-    'accent-strip-title': 'accent-strip', divider: 'divider', 'divider-rule': 'divider', 'icon-center': 'icon', 'icon-title': 'icon', button: 'button', badge: 'badge', menu: 'menu', line: 'line', link: 'link', grid: 'grid' };
+    'accent-strip-title': 'accent-strip', divider: 'divider', 'divider-rule': 'divider', 'icon-center': 'icon', 'icon-title': 'icon', button: 'button', badge: 'badge', menu: 'menu', popover: 'popover', dropdown: 'dropdown', line: 'line', link: 'link', grid: 'grid' };
   var SHAPES = 'rect,path,line,circle,ellipse,polygon,polyline,text,use,image';
   var CONTROLS = 'a[href],button,input,select,textarea,[role="button"],[role="tab"],[role="switch"],[role="checkbox"],[role="radio"],[role="menuitem"]';
   var MAX_POINTS = 500;   // painted-shape samples per drawn shape: a piece is never read as one box

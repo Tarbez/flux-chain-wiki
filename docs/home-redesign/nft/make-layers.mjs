@@ -135,7 +135,7 @@ function fail(file, problem, remedy) {
 }
 
 // the chrome slots: each slot's box in card units (the card is 1000 x 700)
-export const SLOTS = { corner: [120, 120], frame: [1000, 700], tag: [360, 50], ornament: [360, 80], divider: [360, 24], emblem: [30, 34], button: [200, 56], badge: [120, 32], menu: [360, 240], line: [360, 8], link: [120, 8], grid: [96, 96] };
+export const SLOTS = { corner: [120, 120], frame: [1000, 700], tag: [360, 50], ornament: [360, 80], divider: [360, 24], emblem: [30, 34], button: [200, 56], badge: [120, 32], menu: [360, 240], popover: [360, 240], dropdown: [360, 240], line: [360, 8], link: [120, 8], grid: [96, 96] };
 const FIELDS = ['genesisId', 'identity', 'name', 'status', 'role', 'network', 'joined', 'serial', 'tagline1', 'tagline2', 'dna', 'number', 'mark', 'palette'];
 
 function attrsOf(svg, file) {
@@ -182,9 +182,11 @@ function readLayers(root, prefix) {
     if (!fm) fail(folder, 'the folder name is not <NN>-<key>', 'Name it like "07-glow": two digits for its place, then a lower-case key.');
     const elements = [];
     const files = [];
+    // a .txt file is a note for contributors (worn/08-dropdown/RULES.txt), not an element
+    const note = (f) => f.startsWith('.') || f.endsWith('.txt');
     for (const f of readdirSync(dir).sort()) {
-      if (f.startsWith('.')) continue;
-      if (statSync(join(dir, f)).isDirectory()) { for (const g of readdirSync(join(dir, f)).sort()) if (!g.startsWith('.')) files.push(f + '/' + g); }
+      if (note(f)) continue;
+      if (statSync(join(dir, f)).isDirectory()) { for (const g of readdirSync(join(dir, f)).sort()) if (!note(g)) files.push(f + '/' + g); }
       else files.push(f);
     }
     for (const file of files) {

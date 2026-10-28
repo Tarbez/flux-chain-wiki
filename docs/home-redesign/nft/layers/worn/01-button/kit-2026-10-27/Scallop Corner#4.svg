@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Scallop Corner: an outline with every corner bitten in by a quarter circle, a complementary arc echoing the trailing top bite</title>
+  <path d="M9 1 H191 A8 8 0 0 0 199 9 V47 A8 8 0 0 0 191 55 H9 A8 8 0 0 0 1 47 V9 A8 8 0 0 0 9 1 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M187 1 A12 12 0 0 0 199 13" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

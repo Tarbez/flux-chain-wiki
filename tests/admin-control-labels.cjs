@@ -19,7 +19,10 @@
        ArkCanvasTransitions / ArkElementMotion / ArkSEO.cleanField for theirs) -- an offered
        value the store drops is the same lie in the other direction;
      - the labels in one control are distinct.
-   Plus the named case: Radius offers "Control" for `control`, and no control anywhere says "Pill". */
+   Plus the named case: Radius offers "Control" for `control`, and no control anywhere says "Pill".
+   One allowed extra (owner-confirmed 2026-10-27): a list written [''].concat(<module list>) offers
+   '' first as "As designed", which clears the setting (the store drops ''); the text Size select
+   is the case. Any other hand-typed entry is still refused. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -79,7 +82,12 @@ for (const call of all) {
   const [, , keyArg, optionsArg, labelArg] = call.args;
   const where = `${call.name} at js/admin/admin.js:${call.line} (${call.args[1]})`;
   assert(!labelArg || !labelArg.startsWith('['), `${where} passes a list of labels -- give a function of the value instead`);
-  const literal = optionsArg.startsWith('[');
+  /* The one allowed extra: [''].concat(<a module's list>) -- '' first, labelled "As designed",
+     meaning "clear the setting" (the store drops it). Every non-empty option still comes from the
+     module that validates it (owner-confirmed 2026-10-27, docs/ux-audit/cms.md P2-8). */
+  const clearable = /^\[''\]\.concat\(([A-Za-z_$][\w$.]*)\)$/.exec(optionsArg);
+  const listName = clearable ? clearable[1] : optionsArg;
+  const literal = optionsArg.startsWith('[') && !clearable;
   const perField = /\bf\./.test(optionsArg) || /\bf\./.test(keyArg);
   const instances = perField
     ? seoFields.filter((f) => (literal ? (optionsArg === '[false, true]' ? f.kind === 'flag' : f.kind === 'onoff') : f.kind === 'enum'))
@@ -103,8 +111,11 @@ for (const call of all) {
       else { const s = row.querySelector('select'); s.value = String(value); s.dispatchEvent(new dom.window.Event('change')); }
       if (call.name === 'ctlSegField') assert.deepEqual(wrote, [value], `${where}: "${shown[i].textContent}" writes ${JSON.stringify(value)}`);
       else assert.deepEqual(wrote, [String(value)], `${where}: "${shown[i].textContent}" writes ${JSON.stringify(value)}`);
-      const keeps = kept(optionsArg, key, value, f);
-      if (keeps !== null) assert(keeps, `${where}: offers ${JSON.stringify(value)}, which its store does not keep for ${key}`);
+      const keeps = kept(listName, key, value, f);
+      if (clearable && value === '') {
+        assert.equal(shown[i].textContent, 'As designed', `${where}: the clearing choice says "As designed"`);
+        assert.equal(keeps, false, `${where}: "As designed" clears ${key}: its store drops ''`);
+      } else if (keeps !== null) assert(keeps, `${where}: offers ${JSON.stringify(value)}, which its store does not keep for ${key}`);
     });
     assert.equal(new Set(shown.map((b) => b.textContent)).size, shown.length, `${where}: labels are distinct`);
     checked++;
@@ -118,4 +129,9 @@ assert(radius && radius.args[3] === 'CMS_RADIUS_TOKENS' && !radius.args[4], 'Rad
 const row = context.ctlSegField({ get: () => '', set() {} }, 'Radius', 'radius', context.CMS_RADIUS_TOKENS);
 assert.deepEqual([...row.querySelectorAll('button')].map((b) => b.textContent), Array.from(L.RADIUS_TOKENS, context.ctlLabel));
 assert(!/'Pill'/.test(ADMIN), 'no control says "Pill": there is no pill radius token');
+
+/* the confirmed Size control (2026-10-27): "As designed" first, then exactly ArkLayout.TYPE_SIZE_TOKENS */
+const size = all.find((c) => c.args[2] === "'textSize'");
+assert(size && size.args[3] === "[''].concat(CMS_TYPE_SIZE_TOKENS)", 'Size offers "As designed" and then ArkLayout.TYPE_SIZE_TOKENS');
+assert.deepEqual(Array.from(context.CMS_TYPE_SIZE_TOKENS), Array.from(L.TYPE_SIZE_TOKENS), 'CMS_TYPE_SIZE_TOKENS is read from ArkLayout, not typed');
 console.log(`PASS: ${checked} segmented/select controls show the label of the value they write, and offer only values their store keeps.`);

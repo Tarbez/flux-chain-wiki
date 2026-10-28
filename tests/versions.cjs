@@ -151,7 +151,7 @@ function memFs() {
 
 /* ---- 2. the 13 real drafts, loaded the way the site loads them ---- */
 function single(file, global, extra) {
-  const context = vm.createContext({ console });
+  const context = vm.createContext({ console, TextEncoder, TextDecoder });   // a browser's text codec, which the FLX grammar (components' stored form) needs
   context.window = context;
   for (const pre of extra || []) vm.runInContext(fs.readFileSync(pre, 'utf8'), context);
   vm.runInContext(fs.readFileSync(`js/content/${file}.js`, 'utf8'), context);
@@ -168,7 +168,7 @@ function single(file, global, extra) {
     settingsDefaults: single('settings-defaults', 'ArkSiteDefaults'),
     seo: single('seo', 'ArkSEO', ['js/content/site-pages.js']),
     layout: single('layout', 'ArkLayout'),
-    components: single('components', 'ArkComponents'),
+    components: single('components', 'ArkComponents', ['js/vendor/flx-state-grammar.js']),
     states: single('states', 'ArkStates'),
     canvasTransitions: single('canvas-transitions', 'ArkCanvasTransitions'),
     elementMotion: single('element-motion', 'ArkElementMotion'),

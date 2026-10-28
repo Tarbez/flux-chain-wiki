@@ -63,7 +63,8 @@
     ['--z-notice-toast', 60],    /* the toasts (.notice-toasts) */
     ['--z-header', 65],          /* the app bar: its menus drop over everything docked (#appBar) */
     ['--z-menu', 70],            /* the More menu (.account-menu) */
-    ['--z-modal', 100]           /* a confirmation dialog over everything (Ark's AlertDialog, ArkKit.arkConfirm: .ark-alert-dialog reads it) */
+    ['--z-modal', 100],          /* a confirmation dialog over everything (Ark's AlertDialog, ArkKit.arkConfirm: .ark-alert-dialog reads it) */
+    ['--z-skip', 110]            /* the "Skip to the page" link, shown only while it has keyboard focus (css/studio-embed.css .cms-skip) */
   ];
   LAYERS.forEach(function (layer) { document.documentElement.style.setProperty(layer[0], String(layer[1])); });
 

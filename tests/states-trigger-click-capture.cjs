@@ -35,7 +35,7 @@ function page({ previewEdit }) {
   const navigations = [];
   /* the scene's own link handler, as js/hero-motion.js registers it: on an element INSIDE the page */
   host.addEventListener('click', (event) => { const t = event.target.closest('[data-scene-link]'); if (t) { event.preventDefault(); navigations.push(t.dataset.sceneLink); } });
-  const context = { document: doc, host, cmsRoutePath: () => '/', cmsComponentsDraft: {}, cmsPreviewQuery: previewEdit, cmsPreviewEdit: previewEdit };
+  const context = { document: doc, host, cmsRoutePath: () => '/', cmsLayoutScope: () => '/', cmsComponentsDraft: {}, cmsPreviewQuery: previewEdit, cmsPreviewEdit: previewEdit };
   context.window = { parent: {} };     /* inside the editor the page is an iframe: parent !== window */
   vm.createContext(context);
   vm.runInContext(fs.readFileSync('js/content/states.js', 'utf8'), context);

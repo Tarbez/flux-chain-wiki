@@ -197,16 +197,16 @@ async function derivePins(route, census, options = {}) {
       tried.add(old.key);
       // Same words, not already pinned -- and, where the old parent's key still names an element,
       // inside it: two "More" buttons are told apart by the place each one was in.
-      let scope = page;
+      let near = page;   /* not `scope`: that is the layout scope this inspect was handed */
       for (let key = old.key.replace(/\/[^/]+$/, ''); key && key !== old.key && /\//.test(key); key = key.replace(/\/[^/]+$/, '')) {
-        if (now.get(key) && page.contains(now.get(key))) { scope = now.get(key); break; }
+        if (now.get(key) && page.contains(now.get(key))) { near = now.get(key); break; }
       }
       // (an element inside a pinned subtree may still be pinned itself: its inherited key is the
       // pin plus its new path, which is not its old key once the subtree's inside changed)
       // ...but not one inside a pin that already claimed these same words (a caption's <p>).
       const claimed = (el) => { const pinned = el.closest('[data-ark-layout-pin]'); return !!pinned && loose(ownText(pinned)) === loose(ownText(el)); };
       const among = (root) => [...root.querySelectorAll('*')].filter((el) => !el.hasAttribute('data-ark-layout-pin') && words(el) === loose(old.text) && !claimed(el));
-      const candidates = among(scope).length ? among(scope) : among(page);
+      const candidates = among(near).length ? among(near) : among(page);
       const sameTag = candidates.filter((el) => el.tagName.toLowerCase() === old.tag);
       const pool = sameTag.length ? sameTag : candidates;
       // innermost: no other candidate inside it -- then, of the elements around it showing the

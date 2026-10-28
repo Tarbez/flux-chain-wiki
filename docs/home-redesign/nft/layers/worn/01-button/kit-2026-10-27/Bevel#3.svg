@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Bevel: an outer and an inner outline joined at the corners by bevel lines, the trailing bottom bevel in the complementary role</title>
+  <rect x="1" y="1" width="198" height="54" rx="0" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="6" y="6" width="188" height="44" rx="0" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 L6 6 M199 1 L194 6 M1 55 L6 50" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M199 55 L194 50" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

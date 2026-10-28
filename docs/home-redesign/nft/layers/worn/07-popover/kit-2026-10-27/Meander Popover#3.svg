@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Meander Popover: a Greek key steps up from the top edge to make the nub, with a small key turned in the far corner (the Meander family)</title>
+  <path d="M9 9 H18 V1 H34 V5 H26 V9 H38 H351 Q359 9 359 17 V231 Q359 239 351 239 H9 Q1 239 1 231 V17 Q1 9 9 9 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M337 233 H353 V225 H345 V229" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

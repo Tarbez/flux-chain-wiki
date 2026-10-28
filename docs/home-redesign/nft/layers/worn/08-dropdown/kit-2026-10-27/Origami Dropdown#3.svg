@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Origami Dropdown: a panel with a small pleat in the top seam at the leading end and its trailing bottom corner dog-eared, the underside of the fold referential</title>
+  <path d="M1 1 H10 L14 6 L18 1 L22 6 L26 1 H359 V219 L339 239 H9 Q1 239 1 231 V1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M339 239 V219 H359" fill="none" stroke="var(--referential)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M14 6 V10 M22 6 V10" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

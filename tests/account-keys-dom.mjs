@@ -122,7 +122,8 @@ function mountAccountPage() {
   w.eval("ArkUI.pageCatalog = { account: { path: '/account' }, 'account/domains': { path: '/account/domains' }, bundledeployer: { path: '/bundle-deployer' }, explorer: { path: '/explore' }, zero: { path: '/' } }; ArkUI.route = { href: function (p) { return p; } }; ArkUI.pageModules = {};");
   const blockScripts = JSON.parse(/ArkUI\.blockScripts = (\[[^\]]+\]);/.exec(fs.readFileSync(path.join(HERE, '..', 'js', 'pages', 'catalog.js'), 'utf8'))[1].replace(/'/g, '"'));
   for (const file of blockScripts.filter((f) => f !== 'js/ark/dash-kit.js').concat(['js/ark/vendor/ark-kit-forms.js'])) run(fs.readFileSync(path.join(HERE, '..', file), 'utf8'));
-  for (const file of ['js/ark/local-identity.js', 'js/ark/local-domains.js']) run(fs.readFileSync(path.join(HERE, '..', file), 'utf8'));
+  // js/ark/account-session.js: the one sign-in session, moved out of js/pages/account.js on 2026-10-25 (catalog.js loads it before the page).
+  for (const file of ['js/ark/local-identity.js', 'js/ark/local-domains.js', 'js/ark/account-session.js']) run(fs.readFileSync(path.join(HERE, '..', file), 'utf8'));
   const liveChunk = fs.readFileSync(path.join(HERE, '..', 'js', 'ark', 'vendor', 'ark-kit-live.js'), 'utf8');
   w.ArkUI.loadScript = () => Promise.resolve().then(() => w.eval(liveChunk)); // the first ArkUI.blocks.update loads Ark's live chunk, as js/ark/page-loader.js does
   for (const source of [BUNDLE_SOURCE, DIRECTORY_TRANSPORT_SOURCE, ED25519_PEM_SOURCE, FLUX_ELEMENTS_SOURCE, AUTHORIZATION_VIEW_SOURCE, AUTHORIZATION_DIALOG_SOURCE, DASH_KIT_SOURCE, ACCOUNT_PAGE_SOURCE]) run(source);

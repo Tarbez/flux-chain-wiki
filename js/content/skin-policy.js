@@ -25,8 +25,12 @@
 var ArkSkinPolicy = (function () {
   'use strict';
 
-  /* the closed rule keys of docs/home-redesign/SKIN-CONTRACT.md, section 3, in the contract's order */
-  var RULES = ['frame', 'edge', 'ornament', 'density', 'marker', 'header', 'layout'];
+  /* the closed rule keys of docs/home-redesign/SKIN-CONTRACT.md, section 3, in the contract's order: the seven structure
+     rules, then the eight worn pieces (Ark UI's ARK_SKIN_WORN_PIECES, in its order; tests/skin-policy.cjs checks the two
+     agree). A worn piece must be switchable too: the site switches the button outline off on tab and accordion
+     triggers (js/ark/skin-parts.js OFF), and a policy that did not know `button` dropped that switch. */
+  var RULES = ['frame', 'edge', 'ornament', 'density', 'marker', 'header', 'layout',
+    'button', 'badge', 'menu', 'popover', 'dropdown', 'line', 'link', 'grid'];
   /* an Ark UI part key in the site's one spelling: upper-case words joined by |, such as CARD, PRIMARY|BUTTON, MEGAMENUPANEL,
      or a block part with its hyphens dropped (section-header is SECTIONHEADER) */
   var PART = /^[A-Z][A-Z0-9]*(?:\|[A-Z][A-Z0-9]*)*$/;

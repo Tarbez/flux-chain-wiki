@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Dot Run: solid round ends joined by a dotted top and bottom edge, a complementary dot on the trailing end</title>
+  <path d="M24 1 H12 A11 11 0 0 0 1 12 V44 A11 11 0 0 0 12 55 H24 M176 1 H188 A11 11 0 0 1 199 12 V44 A11 11 0 0 1 188 55 H176" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M27 1 H174 M27 55 H174" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="0.5 3.5" stroke-linecap="round"/>
+  <circle cx="195" cy="28" r="1.5" fill="var(--complementary)"/>
+</svg>

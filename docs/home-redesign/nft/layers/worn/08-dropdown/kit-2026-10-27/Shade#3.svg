@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Shade: hung like a window shade from a hairline top seam, faint sides, a pull bar above the hem and a short pull at the trailing end</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V239 H359 V1" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M12 232 H348" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M340 232 V239" fill="none" stroke="var(--referential)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

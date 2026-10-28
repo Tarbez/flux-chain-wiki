@@ -1,8 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Tick Ruler: a ruler of short ticks along a faint base line, with one tall cyan tick in the middle (sheet 8)</title>
+  <title>Tick Ruler: a ruler of short ticks along a faint base line, with one tall cyan tick in the middle (sheet 8). It prints the card's the genesis ID after NO..</title>
   <path d="M0 50.5H360" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
   <path d="M0 39V50M6 44V50M12 44V50M18 44V50M24 44V50M30 39V50M36 44V50M42 44V50M48 44V50M54 44V50M60 39V50M66 44V50M72 44V50M78 44V50M84 44V50M90 39V50M96 44V50M102 44V50M108 44V50M114 44V50M120 39V50M126 44V50M132 44V50M138 44V50M144 44V50M150 39V50M156 44V50M162 44V50M168 44V50M174 44V50M186 44V50M192 44V50M198 44V50M204 44V50M210 39V50M216 44V50M222 44V50M228 44V50M234 44V50M240 39V50M246 44V50M252 44V50M258 44V50M264 44V50M270 39V50M276 44V50M282 44V50M288 44V50M294 44V50M300 39V50M306 44V50M312 44V50M318 44V50M324 44V50M330 39V50M336 44V50M342 44V50M348 44V50M354 44V50M360 39V50" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
   <path d="M180 14V60" fill="none" stroke="var(--acc)" stroke-opacity="0.28" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M180 14V60" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linejoin="round"/>
   <rect x="177" y="9" width="6" height="6" fill="var(--acc)"/>
+  <text x="174" y="76" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="2" fill="var(--dim)" text-anchor="end">NO.</text>
+  <text x="186" y="76" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--referential)" data-field="genesisId">GENESIS</text>
 </svg>

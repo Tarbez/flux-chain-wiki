@@ -4,28 +4,8 @@ window.DEFXN_CAPABILITIES = {
  "fleet": {
   "run": "BENCH-013",
   "nodes": 10,
-  "figures": [
-   {
-    "name": "Fleet-wide",
-    "value": 71249,
-    "unit": "ops/s"
-   },
-   {
-    "name": "Swaps",
-    "value": 643632,
-    "unit": "swaps/s"
-   },
-   {
-    "name": "Transfers",
-    "value": 69895,
-    "unit": "transfers/s"
-   },
-   {
-    "name": "Records",
-    "value": 6044992,
-    "unit": "records/s"
-   }
-  ]
+  "figures": [],
+  "unverified": 4
  },
  "runs": [
   {
@@ -172,7 +152,7 @@ window.DEFXN_CAPABILITIES = {
    "crate": "flx-cap-custody",
    "line": "The derived-balance custody index",
    "plain": "Who holds how much, worked out from signed receipts.",
-   "functions": 165,
+   "functions": 167,
    "count": 27,
    "cases": [
     "A receipt from a non issuer is refused",
@@ -284,7 +264,7 @@ window.DEFXN_CAPABILITIES = {
    "crate": "flx-cap-ledger",
    "line": "The event-sourced derived-balance index for every sovereign chain's own native token",
    "plain": "Balances for each network's own native token, worked out from its events.",
-   "functions": 71,
+   "functions": 73,
    "count": 7,
    "cases": [
     "A fill that skips the debit is refused by name",
@@ -463,7 +443,7 @@ window.DEFXN_CAPABILITIES = {
    "crate": "flx-cap-signer",
    "line": "The signer chain",
    "plain": "The history of which key signs for an identity, and the handover to a new key.",
-   "functions": 14,
+   "functions": 16,
    "count": 6,
    "cases": [
     "A handover at a stale sequence is refused",

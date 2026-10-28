@@ -215,7 +215,10 @@
         card.appendChild(eyebrow); card.appendChild(title); card.appendChild(lede);
         card.appendChild(ArkUI.blocks.render({ block: 'actions', id: 'account-connect', props: { items: [{ label: 'Connect', href: authHref, tone: 'primary' }] } }, { from: '/account', onInvalid: 'throw' }));
         return card;
-      } }
+      } },
+      /* The CMS's insertion point for reusable blocks (js/content/components.js), as on the open account: the same key,
+         so a block placed there shows locked and open alike (and the anchor never takes the old shell's page:/div:1). */
+      { insert: 'main', was: 'page:/div:1/div:1' }
     ], host, { page: 'account', className: 'account-page account-page--locked', titleId: 'account-title' });
     var unsubscribe = ArkUI.localIdentity.subscribe(function () { if (ArkUI.accountOpen()) ArkUI.pageRouter.navigate('account', { history: 'none' }); });
     page.arkDispose = function () { unsubscribe(); };
@@ -1405,8 +1408,14 @@
         try {
           var dw = await loadWalletModule();
           var reply = await dw.sendFxn({ who: who, wire: walletWire(dw), amount: amount, recipient: recipient });
-          say(dw.describeSendReply(reply), reply.kind === 'ok' ? 'trust' : 'danger');
+          say(dw.describeSendReply(reply), reply.kind === 'ok' ? 'drift' : 'danger');
           if (reply.kind === 'ok') {
+            // Final only when the chain's lead nodes confirm it (owner rule 2026-10-27); waiting until then.
+            dw.watchSendConfirmed(walletWire(dw), reply).then(function (state) {
+              if (state === 'confirmed') say('Confirmed by the chain\'s lead nodes. The payment is final.', 'trust');
+              else if (state === 'conflict') say('This payment will never be final: a different record from your key was confirmed in its place.', 'danger');
+              else say('Still waiting for the chain\'s lead nodes to confirm this payment. Check again later.', 'drift');
+            });
             Array.prototype.forEach.call(views.wallet.querySelectorAll('#account-send-form input'), function (input) { input.value = ''; });
             showWallet('home');
           }

@@ -65,7 +65,7 @@ function boot({ worldTag = false, ringOwns = false } = {}) {
       return Promise.resolve();
     }
   };
-  w.DefxnSkinParts = { LOCKS: [], policy: () => ({ off: {}, contrast: null }), switchOff: (rules) => rules || {}, watch: () => () => {} };
+  w.DefxnSkinParts = { LOCKS: [], policy: () => ({ off: {}, contrast: null }), switchOff: (rules) => rules || {}, shapeRules: (rules) => rules || {}, watch: () => () => {} };
   w.ArkWorldHost = { covered: false, owns: () => ringOwns };
   w.eval(src);
   return { w, calls, worlds, avatars, samples };

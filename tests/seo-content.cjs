@@ -18,8 +18,14 @@ const pageIds = ArkSEO.pageIds();
 assert(pageIds.indexOf('nav') < 0, 'group "site" (shared chrome, e.g. nav) is not a route and is excluded');
 /* 2026-10-24, the stats section: /stats, /stats/gpu, /stats/ledger and /measured left the site's pages (they are redirects now, ArkUI.pageRedirects), so their
    SEO identities left this list; the new pages' identities are listed, and the week pages are derived from the dated runs (ArkSitePages.statsWeeks), never typed. */
-const extraIds = ['learnings', 'explorer', 'palette', 'resolvers', 'account', 'account/domains', 'treasury', 'deposits', 'stats/now', 'stats/ceiling', 'stats/capabilities', 'how/ask', 'how/work', 'how/check', 'reference', 'chain/record', 'chain/open', 'chain/links', 'identity', 'identity/sign', 'identity/safe', 'identity/you', 'fxn', 'ring', 'works', 'works/resolve', 'works/layers', 'works/life', 'trace', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
-assert.equal(JSON.stringify(pageIds.slice().sort()), JSON.stringify(ArkManifest.all().filter((m) => m.group !== 'site').map((m) => m.id).concat(extraIds).sort()), 'pageIds includes manifest-less lifecycle and nested resolution pages');
+/* 2026-10-27, owner-confirmed: the deployment page (/how-deployment-works) is removed. Its manifest (js/content/manifests/deployment.js)
+   stays because the three agreement chapters read their words from it, so it is a page manifest whose route no page answers: it gets no
+   SEO identity and no sitemap or llms.txt line (ArkSEO's pageless rule). Before that rule an admin save wrote the removed page back
+   into sitemap.xml and llms.txt. /auth (the sign-in page, 2026-10-25) is a page-table row with no manifest, so its identity is listed. */
+assert(!pageIds.includes('deployment'), 'the removed deployment page has no SEO identity');
+const removedPaths = ['/how-deployment-works'];
+const extraIds = ['auth', 'learnings', 'explorer', 'palette', 'resolvers', 'account', 'account/domains', 'treasury', 'deposits', 'stats/now', 'stats/ceiling', 'stats/capabilities', 'how/ask', 'how/work', 'how/check', 'reference', 'chain/record', 'chain/open', 'chain/links', 'identity', 'identity/sign', 'identity/safe', 'identity/you', 'fxn', 'ring', 'works', 'works/resolve', 'works/layers', 'works/life', 'trace', 'lifecycle', ...['intent','offer','agreement','fulfillment','receipt'].map(id=>'lifecycle/'+id), ...ArkResolutions.all().map(item=>'resolutions/'+item.slug)];
+assert.equal(JSON.stringify(pageIds.slice().sort()), JSON.stringify(ArkManifest.all().filter((m) => m.group !== 'site' && !removedPaths.includes(m.route)).map((m) => m.id).concat(extraIds).sort()), 'pageIds includes manifest-less lifecycle and nested resolution pages');
 assert.equal(JSON.stringify(ArkSEO.articleSlugs()), JSON.stringify(LearningContent.articles.map((a) => a.slug)), 'articleSlugs is every article, in order');
 
 // get() is null before define() ever ran.
@@ -75,6 +81,11 @@ const catalogPaths=publicEntries.map(entry=>entry.path).sort();
 assert.deepEqual(Array.from(ArkSEO.routes(manifests,articles),entry=>entry.path).sort(),catalogPaths,'SEO routes match every live public route exactly once');
 for(const entry of publicEntries) if(entry.seoId) assert(pageIds.includes(entry.seoId),'editable SEO exists for '+entry.path);
 const xml = ArkSEO.sitemap({ site: { baseUrl: 'https://example.com' } }, manifests, articles);
+for (const gone of removedPaths) {
+  assert(!Array.from(ArkSEO.routes(manifests, articles)).some((entry) => entry.path === gone), 'the SEO routes leave out the removed ' + gone);
+  assert(!xml.includes('<loc>https://example.com' + gone + '</loc>'), 'sitemap.xml leaves out the removed ' + gone);
+  assert(!new RegExp('https://defxn\\.com' + gone + '[)<]').test(fs.readFileSync('sitemap.xml', 'utf8') + fs.readFileSync('llms.txt', 'utf8')), 'the shipped sitemap.xml and llms.txt leave out the removed ' + gone);
+}
 assert(xml.startsWith('<?xml'), 'sitemap.xml is real XML');
 assert(xml.includes('<loc>https://example.com/</loc>'), 'the home route is listed');
 assert(xml.includes('<loc>https://example.com/about</loc>'), 'the about route is listed');

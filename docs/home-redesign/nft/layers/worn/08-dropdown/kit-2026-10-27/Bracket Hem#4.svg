@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Bracket Hem: a full top seam, faint sides, and only the two bottom corners drawn strong as brackets</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V239 M359 1 V239" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 212 V239 H28 M332 239 H359 V212" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

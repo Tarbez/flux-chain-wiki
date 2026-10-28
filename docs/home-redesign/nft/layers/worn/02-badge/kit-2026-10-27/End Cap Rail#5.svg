@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>End Cap Rail: two rule rails held by short hairline end caps</title>
+  <path d="M1 1 H119 M1 31 H119" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 7 V25 M119 7 V25" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

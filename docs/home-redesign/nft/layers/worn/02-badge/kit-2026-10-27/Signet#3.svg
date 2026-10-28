@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>Signet: a round signet seal at the leading end with a referential centre</title>
+  <circle cx="7" cy="16" r="6" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="7" cy="16" r="1.5" fill="var(--referential)"/>
+  <path d="M7 1 H119 V31 H7" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

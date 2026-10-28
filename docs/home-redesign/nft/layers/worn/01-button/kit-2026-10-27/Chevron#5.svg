@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Chevron: an outline whose two ends point outward, a complementary chevron inside the trailing point</title>
+  <path d="M14 1 H186 L199 28 L186 55 H14 L1 28 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M187 17 L192 28 L187 39" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

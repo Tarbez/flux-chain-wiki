@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Truss Button: two rails, the outline and an inner rail, with a zigzag web between them in each corner band, round pins at the corners and the leading pin in the complementary role (the Truss set)</title>
+  <rect x="1" y="1" width="198" height="54" rx="3" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="5" y="5" width="190" height="46" rx="1" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M6 1 L9 5 L12 1 L15 5 L18 1 L21 5 L24 1" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <g transform="matrix(-1 0 0 1 200 0)"><path d="M6 1 L9 5 L12 1 L15 5 L18 1 L21 5 L24 1" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+  <g transform="matrix(1 0 0 -1 0 56)"><path d="M6 1 L9 5 L12 1 L15 5 L18 1 L21 5 L24 1" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+  <g transform="rotate(180 100 28)"><path d="M6 1 L9 5 L12 1 L15 5 L18 1 L21 5 L24 1" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+  <circle cx="3" cy="3" r="1.6" fill="var(--complementary)"/>
+  <circle cx="197" cy="3" r="1.6" fill="var(--line)"/>
+  <circle cx="3" cy="53" r="1.6" fill="var(--line)"/>
+  <circle cx="197" cy="53" r="1.6" fill="var(--line)"/>
+</svg>

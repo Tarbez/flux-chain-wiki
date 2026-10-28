@@ -262,14 +262,16 @@
   var WAS = {
     'palette-crumbs': { ':root': 'page:/div:1/nav:1', 'breadcrumb-item': 'page:/div:1/nav:1/a:1', 'breadcrumb-item#2': 'page:/div:1/nav:1/span:1' },
     'palette-hero': { ':root': { key: 'page:/div:1/header:1', self: true }, 'eyebrow': 'page:/div:1/header:1/p:1', 'hero-meta': 'page:/div:1/header:1/p:2', 'hero-lede': 'page:/div:1/header:1/p:3' },
+    /* figure-caption #n counts captions in render order, before the parts gallery loads: the Components tab's
+       two figures are #1-#2, so each role tab's "Tonal scale" caption is the second of its pair (#4, #6, #8) */
     'palette-views': {
       'tabs-content': { key: 'page:/div:1/section:1', self: true }, 'tabs-trigger': 'page:/div:1/section:1/h2:1', '[data-ark-slot="components"]': 'page:/div:1/section:1/div:1',
       'tabs-content#2': { key: 'page:/div:1/section:2', self: true }, 'section-title': 'page:/div:1/section:2/h2:1', 'section-lede': 'page:/div:1/section:2/p:1',
-      '[data-ark-slot="shades-primary"]': 'page:/div:1/section:2/div:1', 'figure-caption#3': 'page:/div:1/section:2/p:2', '[data-ark-slot="tones-primary"]': 'page:/div:1/section:2/div:2',
+      '[data-ark-slot="shades-primary"]': 'page:/div:1/section:2/div:1', 'figure-caption#4': 'page:/div:1/section:2/p:2', '[data-ark-slot="tones-primary"]': 'page:/div:1/section:2/div:2',
       'tabs-content#3': { key: 'page:/div:1/section:3', self: true }, 'section-title#2': 'page:/div:1/section:3/h2:1', 'section-lede#2': 'page:/div:1/section:3/p:1',
-      '[data-ark-slot="shades-secondary"]': 'page:/div:1/section:3/div:1', 'figure-caption#5': 'page:/div:1/section:3/p:2', '[data-ark-slot="tones-secondary"]': 'page:/div:1/section:3/div:2',
+      '[data-ark-slot="shades-secondary"]': 'page:/div:1/section:3/div:1', 'figure-caption#6': 'page:/div:1/section:3/p:2', '[data-ark-slot="tones-secondary"]': 'page:/div:1/section:3/div:2',
       'tabs-content#4': { key: 'page:/div:1/section:4', self: true }, 'section-title#3': 'page:/div:1/section:4/h2:1', 'section-lede#3': 'page:/div:1/section:4/p:1',
-      '[data-ark-slot="shades-reference"]': 'page:/div:1/section:4/div:1', 'figure-caption#7': 'page:/div:1/section:4/p:2', '[data-ark-slot="tones-reference"]': 'page:/div:1/section:4/div:2',
+      '[data-ark-slot="shades-reference"]': 'page:/div:1/section:4/div:1', 'figure-caption#8': 'page:/div:1/section:4/p:2', '[data-ark-slot="tones-reference"]': 'page:/div:1/section:4/div:2',
       'accordion-item': { key: 'page:/div:1/section:5', self: true }, 'accordion-trigger': 'page:/div:1/section:5/h2:1',
       ':scope > div:nth-of-type(6) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1)': 'page:/div:1/section:5/p:1', '[data-ark-slot="shades-success"]': 'page:/div:1/section:5/div:1',
       'accordion-item#2': { key: 'page:/div:1/section:6', self: true }, 'accordion-trigger#2': 'page:/div:1/section:6/h2:1',

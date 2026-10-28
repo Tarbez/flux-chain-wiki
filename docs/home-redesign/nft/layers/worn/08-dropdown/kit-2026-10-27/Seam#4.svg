@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Seam: a stitched top seam in short dashes where the panel is sewn to its trigger, hairline sides and a soft bottom</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="3 3"/>
+  <path d="M1 1 V231 Q1 239 9 239 H351 Q359 239 359 231 V1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

@@ -37,6 +37,10 @@
    - The real loader resolves a script's load even when the script throws (a browser reports the
      error on window, not on the <script>); errors are collected per route and fail it.
 
+   - The deployment page (/how-deployment-works) was removed on purpose (owner-confirmed 2026-10-27): its section
+     became a removal check -- no catalog key, alias or redirect answers the address, it opens the not-found page,
+     and no mounted route links it.
+
    Owner test law: run alone, never alongside another suite. The result line prints its own cost. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -47,6 +51,8 @@ const HOST = 'https://defxn.com';
 /* A boot that has not finished in this long is stalled, not slow (tests/ssr-render.cjs's
    STALL_DEADLINE_MS records the measurements behind the same number). */
 const STALL_DEADLINE_MS = 60000;
+/* the removed deployment page's address (owner-confirmed removal, 2026-10-27) */
+const REMOVED_PATH = '/how-deployment-works';
 const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
 
 (async () => {
@@ -112,7 +118,8 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
     }
     assertNoErrors('scene state navigation');
 
-    const ran = { lifecycle: [], deployment: [], how: [], download: [], deploy: [], mechanism: [] };
+    const ran = { lifecycle: [], how: [], download: [], deploy: [], mechanism: [] };
+    const linksToRemoved = [];
     let linkCount = 0, copyKeyCount = 0, blockRoutes = 0;
     /* One route: load its scripts, mount it, exercise it, dispose of it. Throws at its first
        failed check. */
@@ -245,33 +252,16 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
         }
         assert.equal(typeof page.arkDispose, 'function', `${key}: the page can be disposed`);
       }
-      if (key === 'deployment') {
-        ran.deployment.push(key);
-        /* Since 2026-10-19 this page is "Deploy a resolver" on the story template: the three stages
-           (write, launch, serve) are its idea, the six steps its How it works, the hazard, the plan
-           and the earlier agreement chapters its Evidence. The chapters stay reachable, each link
-           still returning to its exact source. */
-        const controls = depthTabs(page);
-        const stages = [...panelOf(page, 0).querySelectorAll('[data-ark-part="step"]')];
-        assert.equal(stages.length, 3, 'deploy story keeps three distinct journey surfaces');
-        assert(words(stages[1]).includes(ArkCopy.text('DEPLOYMENT.SIMPLE.LAUNCH.TEXT')), 'editable explanation survives into the actual stage');
-        controls[1].click();
-        const steps = [...panelOf(page, 1).querySelectorAll('[data-ark-part="accordion-trigger"]')];
-        assert.equal(steps.length, 6, 'the six steps');
-        assert(steps.every((t, i) => t.textContent.trim().startsWith((i + 1) + ' · ')), 'numbered across the page');
-        steps[3].click();
-        assert(words(panelOf(page, 1)).includes(ArkCopy.text('DEPLOYMENT.BODY4')), 'a step opens its text in place');
-        const all = [...page.querySelectorAll('*')];
-        const cards = [...new Set(all.filter((a) => a.dataset.continuityCard && a.dataset.sceneLink).map((a) => a.dataset.continuityCard))];
-        assert.deepEqual(cards, ['how/ask', 'how/work', 'how/check'], 'the agreement chapters are not orphaned, and each link returns to its exact source');
-        assert(all.some((a) => a.getAttribute('href') === 'https://deploy.defxn.com'), 'the page hands off to the Deploy product');
-        assert(all.some((a) => a.getAttribute('href') === 'https://explore.defxn.com'), 'the page hands off to the Explore product');
-        const meshes = [...page.querySelectorAll('.how-deploy-mesh')];
-        assert.equal(meshes.length, 3, 'each stage keeps its own mesh');
-        pointer(stages[1], 'pointerenter'); assert.equal(meshes[1].dataset.active, 'true');
-        pointer(stages[1], 'pointerleave'); assert.equal(meshes[1].dataset.active, 'false');
-        assert(words(page.querySelector('#deploy-status [data-ark-block="callout"]')).includes('Current implementation'), 'implementation boundary remains in sight (folded behind "Show the status" on a phone only)');
-        assert.equal(typeof page.arkDispose, 'function', `${key}: the page can be disposed`);
+      /* The deployment page ("Deploy a resolver", /how-deployment-works, js/pages/deployment.js) was removed on purpose
+         (b0dc2d7; owner-confirmed 2026-10-27). Its checks (three stages, six steps, the chapter cards, the product hand-offs)
+         guarded a page that no longer exists, so they are gone; what replaces them is the removal check after the route loop,
+         fed by this: no mounted page keeps a link whose address is the removed page's own path. The three agreement chapters
+         it linked to (/how-deployment-works/ask, /work, /check) are still routes, checked by the howStory section above. */
+      for (const a of page.querySelectorAll('a[href]')) {
+        let at; try { at = new window.URL(a.getAttribute('href'), window.location.href); } catch { continue; }
+        const trim = (value) => value.split('?')[0].replace(/\/+$/, '');
+        /* a clean path (/how-deployment-works) or a legacy hash (#/how-deployment-works) both open it */
+        if (at.origin === window.location.origin && (trim(at.pathname) === REMOVED_PATH || trim(at.hash.replace(/^#/, '')) === REMOVED_PATH)) linksToRemoved.push(key + ' -> ' + a.getAttribute('href'));
       }
       if (key.startsWith('how/')) {
         ran.how.push(key);
@@ -388,7 +378,9 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
         if (target === 'reference') {
           // dash-kit.js's docLink() bakes doc=...&from=... straight into href
           // (no dataset.routeQuery), so only the route and the doc param are checked.
-          assert(href.startsWith(base + '?doc='), `${key}: reference link ${href} does not open a real document`);
+          // A bare /reference opens a real document too: js/pages/reference.js defaultDoc() derives the overview
+          // from the reference index (2026-10-27: the intro's DOCS door links it bare, so the choice stays derived).
+          assert(href === base || href.startsWith(base + '?doc='), `${key}: reference link ${href} does not open a real document`);
         } else {
           assert.equal(href, resolved(route.href(ArkUI.pageCatalog[target].path) + (link.dataset.routeQuery ? '?' + link.dataset.routeQuery : '')), `${key}: ${target} has a noncanonical href (as written: ${link.getAttribute('href')})`);
         }
@@ -425,7 +417,15 @@ const read = (file) => fs.readFileSync(path.join(ROOT, file), 'utf8');
     assert.equal(inCatalog((key, entry) => entry.module === 'lifecycle'), 1 + ArkUI.lifecycleStages.length, 'the lifecycle overview and each of its stages are routes');
     assert.equal(inCatalog((key, entry) => entry.module === 'howStory'), 3, 'three How it works chapters are routes');
     assert(inCatalog((key, entry) => entry.scripts.includes('js/pages/sheet.js')) > 0, 'the derived reading-depth set is not empty');
-    for (const name of ['deployment', 'download', 'deploy']) assert.deepEqual(passed(ran[name]), failed.has(name) ? [] : [name], `the ${name} checks ran`);
+    for (const name of ['download', 'deploy']) assert.deepEqual(passed(ran[name]), failed.has(name) ? [] : [name], `the ${name} checks ran`);
+    /* The removal of the deployment page (owner-confirmed 2026-10-27): the key, its address and its file are gone, the
+       address opens the not-found page (no alias, no redirect: ArkUI.pageRedirects does not carry it), and no route links it. */
+    assert(!ArkUI.pageCatalog.deployment, 'the deployment key is not in the catalog');
+    assert(!(ArkUI.pageRedirects && ArkUI.pageRedirects.deployment), 'the deployment key is not a redirect either');
+    assert.deepEqual(catalog.filter(([, entry]) => entry.path === REMOVED_PATH || (entry.aliases || []).includes(REMOVED_PATH)).map(([key]) => key), [], 'no catalog entry answers ' + REMOVED_PATH);
+    assert.equal(ArkUI.pageRouter.resolve(REMOVED_PATH), 'notfound', REMOVED_PATH + ' opens the not-found page');
+    assert(!fs.existsSync(path.join(ROOT, 'js/pages/deployment.js')), 'js/pages/deployment.js is gone');
+    assert.deepEqual(linksToRemoved, [], 'no mounted page links the removed ' + REMOVED_PATH);
     return { failures, routes: catalog.length, blockRoutes, linkCount, copyKeyCount, ran: Object.fromEntries(Object.entries(ran).map(([name, keys]) => [name, keys.length])) };
   });
 

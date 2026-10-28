@@ -26,7 +26,8 @@ for(const m of theory){
   const readable='/concept/'+m.title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
   if(readable!==m.route) assert.deepEqual(Array.from(route.aliases||[]),[readable],key+' has the readable alias '+readable);
 }
-const paths=Object.values(ArkUI.pageCatalog).flatMap(e=>[e.path].concat(e.aliases||[]));
+// a retired key (ArkUI.pageRedirects, 2026-10-24/25) carries its new page's path by design: it is that page, not a second one
+const paths=Object.values(ArkUI.pageCatalog).filter(e=>!e.redirect).flatMap(e=>[e.path].concat(e.aliases||[]));
 assert.equal(new Set(paths).size,paths.length,'no address names two pages (a readable alias never shadows another page)');
 // first-visit audit 2026-10-22 (P2): a note's address said "why-the-chain-was-retired" under the title "From one chain to one per
 // identity". Every note answers at an address derived from its title too; the old one stays its own (saved edits are stored under it).

@@ -24,12 +24,16 @@ const ROUTES = {
   works: 'movie', 'works/resolve': 'resolve', 'works/layers': 'layers', 'works/life': 'life',
   trace: 'trace', zero: 'home', intro: 'intro',
   /* 2026-10-25: /account shows one identity over the whole network, the view the identity flow ends on */
-  account: 'idvalue'
+  account: 'idvalue',
+  /* owner-confirmed 2026-10-27: /download is a world page now; /auth stands your FXN ID card on the kernel
+     (js/world/auth-stage.js); the editor's Kit (cms-preview only, so the catalog below is read as the editor's canvas
+     reads it) shows board 05's 3D objects (js/world/kit-stage.js) */
+  download: 'download', auth: 'auth', kit: 'kit'
 };
 const hostSource = fs.readFileSync('js/world/world-host.js', 'utf8');
 
 /* ---------- the catalog, as tests/world-pages.cjs loads it ---------- */
-const context = vm.createContext({ console, ArkUI: {}, document: { write() {} } });
+const context = vm.createContext({ console, ArkUI: {}, document: { write() {} }, location: { search: '?cms-preview=1' } });
 const load = (file) => vm.runInContext(fs.readFileSync(file, 'utf8'), context, { filename: file });
 load('js/content/manifest.js');
 load('js/content/manifests/index.js');
@@ -101,7 +105,11 @@ const wait = (w, ms) => new Promise((resolve) => w.setTimeout(resolve, ms));
   /* state() before the world is ready is kept for the first flight */
   host.state({ r: 'rec-1', step: 3 });
   assert.equal(host.ready, false);
+  /* a fresh load of home waits up to 4 s for the intro's redirect before it flies (js/world/world-host.js start(), owner
+     2026-10-25); no redirect comes here, so the first flight goes to the page that is showing once that wait ends */
   await wait(t.w, 500);
+  assert.equal(t.calls.to.length, 0, 'a fresh home load does not fly before the intro redirect could come');
+  await wait(t.w, 4200);
   assert(host.ready, 'the world starts once its scripts are loaded');
   for (const need of ['js/world/ring-stage.js', 'js/world/concept-stages.js', 'js/world/identity-stages.js', 'js/world/intro-stage.js', 'js/world/home-helix.js', 'js/content/concept-data.js']) {
     /* named globals already present are skipped; the stage files are listed by path */

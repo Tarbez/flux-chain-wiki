@@ -52,16 +52,21 @@ mix, its odds or the table version, so adding one is safe for every card already
 |---|---|---|
 | worn/01-button | the outline of every button on a site that wears the card | chrome |
 | worn/02-badge | the outline of every small badge (a status or label word) | chrome |
-| worn/03-menu | the edge of every menu and popover panel | chrome |
+| worn/03-menu | the edge of every menu: the mega menu panel, a command list, a menu bar's or context menu | chrome |
 | worn/04-line | the line along the bottom of every row (a list row, a fact, the pager, the tab strip) | chrome |
 | worn/05-link | the underline under every text link | chrome |
 | worn/06-grid | one tile of a quiet pattern repeated behind every group (a card grid, a stats row, a list) | chrome |
+| worn/07-popover | the edge of every floating panel that is not a list of choices: a popover, a tooltip, the "you" panel | chrome |
+| worn/08-dropdown | the edge of the panel a select, a combobox or a dropdown menu opens, hanging from its trigger | chrome |
 
 A button is drawn on a site's controls (buttons, tab and accordion triggers), never on the card. Its
 box is `0 0 200 56`. The site stretches it to each button: the 24 units at each end and the 14 units at
 the top and bottom keep their shape, and the middle stretches. Draw the corners and ends inside those
 bands. Ark UI takes a button back where its drawing would cover the label, so draw the outline near the
 edge and keep the middle empty.
+
+A panel wears one outline: `menu`, `popover` or `dropdown`, never two. Ark UI decides which by the panel's name, or by its
+role and the trigger that opens it (design/ark-ui/SKINS.md, "Worn pieces").
 
 ## 3D elements
 
@@ -104,7 +109,9 @@ viewBox unit is one card unit.
 | emblem | `0 0 30 34` | beside the two footer lines |
 | button | `0 0 200 56` | not on the card: every button of a site that wears it (wear-only, see above) |
 | badge | `0 0 120 32` | wear-only: every badge; ends 14 and edges 10 units keep their shape, the middle stays empty |
-| menu | `0 0 360 240` | wear-only: every menu and popover panel; ends and edges 40 units keep their shape; draw only within 24 units of the edge |
+| menu | `0 0 360 240` | wear-only: every menu panel; ends and edges 40 units keep their shape; draw only within 24 units of the edge |
+| popover | `0 0 360 240` | wear-only: every floating panel. It keeps and draws like a menu. Give it a pointer on an edge (a nub, a notch, a tail or an anchor dot), inside the 40-unit ends so it never stretches |
+| dropdown | `0 0 360 240` | wear-only: every panel a select or dropdown opens. It keeps and draws like a menu. Its top edge is where it hangs from its trigger |
 | line | `0 0 360 8` | wear-only: the bottom of every row; the 24-unit ends keep their shape |
 | link | `0 0 120 8` | wear-only: just under every text link; the 12-unit ends keep their shape; draw it referential |
 | grid | `0 0 96 96` | wear-only: one tile, repeated whole behind a group; keep it faint, and let lines that leave one edge come back at the opposite edge |

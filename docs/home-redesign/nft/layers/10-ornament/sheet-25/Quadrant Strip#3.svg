@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Quadrant Strip: four solid quarter discs, each turned a quarter from the last, the first in the accent, then a thick bar and a small square (sheet 25, the Quadrant set)</title>
+  <title>Quadrant Strip: four solid quarter discs, each turned a quarter from the last, the first in the accent, then a thick bar and a small square (sheet 25, the Quadrant set). It prints the card's the role.</title>
   <path d="M0 50H20A20 20 0 0 0 0 30Z" fill="var(--acc)"/><path d="M26 30H46A20 20 0 0 1 26 50Z" fill="var(--ink)"/><path d="M72 30H52A20 20 0 0 0 72 50Z" fill="var(--dim)"/><path d="M98 50H78A20 20 0 0 1 98 30Z" fill="var(--ink)"/><rect x="112" y="38.25" width="86" height="3.5" fill="var(--line)"/><rect x="204" y="36" width="8" height="8" fill="var(--ink)"/>
+  <text x="230" y="45" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="2" fill="var(--dim)">ROLE</text>
+  <text x="276" y="45" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--ink)" data-field="role">ROLE</text>
 </svg>

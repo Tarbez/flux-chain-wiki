@@ -494,6 +494,16 @@ ArkSEO.define({
       "aiSummary": "A DEFXN resolver is a rulebook with its own chain, launched by one signed record and built from shared capabilities. This page lists the first-party resolver chains and capability manifests from a dated snapshot of the code, with the commit and date it was read at; the live view is explore.defxn.com.",
       "aiBlocked": false
     },
+    "auth": {
+      "title": "",
+      "description": "",
+      "ogImage": "",
+      "canonical": "",
+      "schemaType": "",
+      "noindex": false,
+      "aiSummary": "",
+      "aiBlocked": false
+    },
     "account": {
       "title": "Your account — DEFXN",
       "description": "Open your FXN ID file on this device and check its Master ID, Public IDs and wallets. Live FXN holdings, Credits, and mesh standing are not linked until their read contracts are verified.",

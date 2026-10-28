@@ -1,10 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
-  <title>Serial Gate: the rule broken at its centre by the serial between two accent bars, faint long bars outside them (sheet 10, 05-02)</title>
-  <path d="M0 12.5H146" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
-  <rect x="150" y="1" width="1" height="22" fill="var(--faint)"/>
-  <rect x="157" y="4" width="1.6" height="16" fill="var(--acc)"/>
-  <text x="180" y="16.8" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2" fill="var(--ink)" data-field="serial" text-anchor="middle">SERIAL</text>
-  <rect x="201.4" y="4" width="1.6" height="16" fill="var(--acc)"/>
-  <rect x="209" y="1" width="1" height="22" fill="var(--faint)"/>
-  <path d="M214 12.5H360" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <title>Serial Gate: one unbroken rule crossed at its centre by a gate of two accent bars, faint long bars outside them (sheet 10, 05-02)</title>
+  <path d="M0 12.5H360" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="166" y="1" width="1" height="22" fill="var(--faint)"/>
+  <rect x="172" y="4" width="1.6" height="16" fill="var(--acc)"/>
+  <rect x="186.4" y="4" width="1.6" height="16" fill="var(--acc)"/>
+  <rect x="193" y="1" width="1" height="22" fill="var(--faint)"/>
 </svg>

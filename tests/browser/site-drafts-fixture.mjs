@@ -22,7 +22,7 @@ export const BLOCK_TEXT = 'Published state “two” — survives the mesh';
 export const STATE_LABEL = 'Second — published';
 
 function load(root, file, global, needs = []) {
-  const context = vm.createContext({});
+  const context = vm.createContext({ TextEncoder, TextDecoder });   // a browser's text codec, which the FLX grammar (components' stored form) needs
   for (const f of [...needs, `js/content/${file}.js`, `js/content/${file}-data.js`]) vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), context, { filename: f });
   return { api: vm.runInContext(global, context), value: vm.runInContext(`${global}.get()`, context) };
 }
@@ -34,7 +34,7 @@ const here = (v) => JSON.parse(JSON.stringify(v));
    (the browser test discovers one); any key is fine for a pure round trip. */
 export function populatedDrafts(root, { route = '/', memberKey = 'copy:home.TITLE' } = {}) {
   const defaults = load(root, 'settings-defaults', 'ArkSiteDefaults');
-  const components = load(root, 'components', 'ArkComponents');
+  const components = load(root, 'components', 'ArkComponents', ['js/vendor/flx-state-grammar.js']);
   const states = load(root, 'states', 'ArkStates');
   const transitions = load(root, 'canvas-transitions', 'ArkCanvasTransitions');
   const motion = load(root, 'element-motion', 'ArkElementMotion');

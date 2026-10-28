@@ -20,7 +20,17 @@ const mentions = (list, ...words) => list.some((p) => words.every((w) => p.sente
 assert.deepEqual(P.defaults(), { version: 2, off: {}, families: {}, contrast: [] }, 'the default policy is empty: the site behaves as the code defaults say');
 assert.deepEqual(P.sanitize(undefined), P.defaults(), 'no input is the empty policy (a missing draft must not throw)');
 assert.deepEqual(P.sanitize('CARD'), P.defaults(), 'a string is not a policy: it is the empty policy, never a half-read one');
-assert.deepEqual(P.RULES, ['frame', 'edge', 'ornament', 'density', 'marker', 'header', 'layout'], 'the seven rule keys of docs/home-redesign/SKIN-CONTRACT.md, section 3, in its order');
+assert.deepEqual(P.RULES.slice(0, 7), ['frame', 'edge', 'ornament', 'density', 'marker', 'header', 'layout'], 'the seven structure rule keys of docs/home-redesign/SKIN-CONTRACT.md, section 3, in its order');
+/* the worn pieces (owner-confirmed 2026-10-27): the eight rules after them are Ark UI's ARK_SKIN_WORN_PIECES, in its
+   order, read from the installed package, so the site's list can never drift from Ark's. REGRESSION: the policy once knew
+   only the seven, and dropped the site's own switch that keeps the button outline off tab and accordion triggers. */
+{
+  const ark = fs.readFileSync(require('node:path').join(__dirname, '..', 'node_modules/@deadark/ark-ui/dist/ark-ui.skin.js'), 'utf8');
+  const table = /ARK_SKIN_WORN_PIECES = \[([\s\S]*?)\]/.exec(ark);
+  assert.ok(table, 'Ark UI exports ARK_SKIN_WORN_PIECES');
+  const worn = [...table[1].matchAll(/rule: "([a-z]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(P.RULES.slice(7), worn, 'the worn piece rule keys are Ark UI\'s ARK_SKIN_WORN_PIECES, in its order');
+}
 
 const good = P.sanitize({ off: { 'PRIMARY|BUTTON': ['edge'], MEGAMENUPANEL: ['frame', 'edge'], CARD: [] }, families: { Arcade: { off: { CARD: ['frame'] } } },
   contrast: [{ fg: ['--text-faint'], bg: ['--canvas', '--surface'], min: 7 }] });

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>Tide Badge: one hairline swell along the bottom under a faint top line</title>
+  <path d="M1 29 C20 25 40 31 60 28 S100 25 119 29" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 H119" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

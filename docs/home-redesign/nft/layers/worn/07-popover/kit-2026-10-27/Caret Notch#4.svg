@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Caret Notch: a panel whose top edge dips into a small caret notch near the leading corner</title>
+  <path d="M9 1 H22 L30 9 L38 1 H351 Q359 1 359 9 V231 Q359 239 351 239 H9 Q1 239 1 231 V9 Q1 1 9 1 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

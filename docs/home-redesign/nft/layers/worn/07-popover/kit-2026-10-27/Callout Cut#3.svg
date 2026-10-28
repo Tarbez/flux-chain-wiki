@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Callout Cut: a panel with its leading top corner cut away on a diagonal, and a short accent tick in the cut that points out of it</title>
+  <path d="M21 1 H351 Q359 1 359 9 V231 Q359 239 351 239 H9 Q1 239 1 231 V21 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M3 3 L10 10" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

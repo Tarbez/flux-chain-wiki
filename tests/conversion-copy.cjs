@@ -1,3 +1,6 @@
+/* The conversion copy: the words that make a promise (status, boundaries, journey actions, network commands) stay true.
+   2026-10-27, owner-confirmed: the deployment page is removed (its absence is locked; its manifest's words still may not carry the
+   retired certified-fabric claim), and the redesigned /download deck says the build is not published yet and what to do today. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
@@ -36,17 +39,24 @@ assert.match(value('references', 'BODY2'), /nothing here shows that CR3TV or DeA
 assert(!Object.values(manifest('references').fields).some((field) => /running on the fabric today/i.test(field.value)));
 
 const how = manifest('deployment');
-// /how-deployment-works became "Deploy a resolver" on 2026-10-19 (same URL, six steps).
-assert.equal(how.title, 'Deploy a resolver');
-assert.equal(how.meta.next, 'download');
-for (let i = 1; i <= 6; i++) assert(how.fields['STEP' + i] && how.fields['BODY' + i], 'Deploy a resolver includes step ' + i);
+/* /how-deployment-works ("Deploy a resolver", 2026-10-19) was removed on purpose (b0dc2d7; owner-confirmed 2026-10-27). Its title,
+   onward page and six steps were checks of that page, so they are dropped; the page's absence is locked here. Its manifest stays:
+   the three agreement chapters (/how-deployment-works/ask|work|check) read their words from it. */
+{
+  const ctx = vm.createContext({}); vm.runInContext(fs.readFileSync('js/content/site-pages.js', 'utf8'), ctx);
+  assert(!ctx.ArkSitePages.pages().some((row) => row.key === 'deployment' || row.path === '/how-deployment-works'), 'the deployment page is not in the page table');
+}
 // The retired certified-fabric claim ("accepted once the quorum signs it ... 375 times a second")
-// was on this page until 2026-10-19; it must not come back in any form.
-assert(!Object.values(how.fields).some((field) => /quorum|375 times a second|three attestations/i.test(field.value)), 'the retired certified-fabric path is not presented on the deploy page');
+// was on that page until 2026-10-19; the chapters still read these words, so it must not come back in any form.
+assert(!Object.values(how.fields).some((field) => /quorum|375 times a second|three attestations/i.test(field.value)), 'the retired certified-fabric path is not in the words the agreement chapters read');
 
 /* 2026-10-24: /download was "Run DEFXN from source". The browser rebrand and the journey fix made it lead with the browser. The owner named that product DEFXN Grid, then settled on FXN Browser (both 2026-10-24), so the page leads with FXN Browser, which has no public download, and the miner steps stay below. */
 assert.equal(manifest('download').title, 'Get FXN Browser');
-assert(value('download', 'DECK').includes('no download address is published'));
+/* 2026-10-25 redesign (b0dc2d7; owner-confirmed 2026-10-27): the deck says the build is not published yet and names the two things a
+   visitor can do today. It must never present a download as available. */
+assert(value('download', 'DECK').includes('Until it is published, you can do two things today.'), 'the /download deck says the build is not published yet, and what you can do today');
+assert(/Create your FXN ID/.test(value('download', 'DECK')) && /run a miner from source/.test(value('download', 'DECK')), 'the two things: create your FXN ID, or run a miner from source');
+assert(!/download (it|now|here)|is available|get it now/i.test(value('download', 'DECK')), 'the deck never presents a download as available');
 assert.equal(manifest('deploy').title, 'Create or join a network');
 /* the deck leads with what a named network does, then its limit (ledger recheck 2026-10-21: it opened with a list
    of what networks do not do); the limit is still said */

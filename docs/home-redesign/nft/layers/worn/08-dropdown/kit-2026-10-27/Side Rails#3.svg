@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Side Rails: two rails running down from the top seam just inside the sides, a faint outline around them</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V235 Q1 239 5 239 H355 Q359 239 359 235 V1" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M5 1 V233 M355 1 V233" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

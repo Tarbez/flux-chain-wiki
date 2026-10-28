@@ -149,7 +149,7 @@
 
   /* ---------- chrome as plain data ---------- */
   var VIEW = { corner: [0, 0, 120, 120], frame: [0, 0, 1000, 700], tag: [0, 0, 360, 50], ornament: [0, 0, 360, 80], divider: [0, 0, 360, 24], emblem: [0, 0, 30, 34], button: [0, 0, 200, 56],
-    badge: [0, 0, 120, 32], menu: [0, 0, 360, 240], line: [0, 0, 360, 8], link: [0, 0, 120, 8], grid: [0, 0, 96, 96] };
+    badge: [0, 0, 120, 32], menu: [0, 0, 360, 240], popover: [0, 0, 360, 240], dropdown: [0, 0, 360, 240], line: [0, 0, 360, 8], link: [0, 0, 120, 8], grid: [0, 0, 96, 96] };
   var KEEP = {                               // the bands world.js keeps unstretched (keepBands)
     frame: { x: [0, 120, 380, 620, 880, 1000], y: [0, 120, 250, 450, 580, 700] },
     divider: { x: [0, 60, 150, 210, 300, 360], y: [0, 24] },
@@ -159,6 +159,8 @@
     // a grid is one tile, repeated whole in both directions
     badge: { x: [0, 14, 106, 120], y: [0, 10, 22, 32] },
     menu: { x: [0, 40, 320, 360], y: [0, 40, 200, 240] },
+    popover: { x: [0, 40, 320, 360], y: [0, 40, 200, 240] },
+    dropdown: { x: [0, 40, 320, 360], y: [0, 40, 200, 240] },
     line: { x: [0, 24, 336, 360], y: [0, 8] },
     link: { x: [0, 12, 108, 120], y: [0, 8] },
     grid: { x: [0, 0.01, 95.99, 96], y: [0, 0.01, 95.99, 96], tile: { x: [[0.01, 95.99]], y: [[0.01, 95.99]] } }
@@ -181,17 +183,33 @@
     var doc = new DOMParser().parseFromString(text, 'image/svg+xml'), root = doc.documentElement;
     if (root.nodeName !== 'svg') return null;
     Array.prototype.forEach.call(root.querySelectorAll('[data-sketch],title,script'), function (n) { n.parentNode.removeChild(n); });
-    // On a site the nameplate names its wearer: the first field shows the card's name and the second its
-    // number. A sample's status and role ("SAMPLE", "PROTOCOL") meant nothing on a notice (WEAR-AUDIT.md
-    // C12). A nameplate that spells a field one character per cell keeps its cells.
+    // On a site the nameplate carries the words of the part it sits on (owner, 2026-10-27: "those text tags should
+    // become dynamic and part of the rules ... eat the header of that section"; before, it named the wearer: "mira.fxn
+    // #27" on every section). Its first field becomes the part's title and its second the part's index: Ark UI fills them
+    // per part and absorbs the header they repeat (ark-ui.skin.ts fillNameplate). Any further field is left empty, so no
+    // word of the card's record shows on a site. A nameplate that spells a field one character per cell cannot hold a header:
+    // it keeps its cells, empty (every word is removed below).
     var plate = slot === 'tag' && !root.querySelector('[data-char]'), nth = 0;
     Array.prototype.forEach.call(root.querySelectorAll('[data-field]'), function (n) {
-      var f = n.getAttribute('data-field');
-      if (plate) f = ['name', 'number'][nth++] || '';
-      var v = f ? C.fieldOf(record, traits, f) : '', ch = n.getAttribute('data-char');
-      if (plate && f === 'number' && v) v = '#' + v;
+      if (plate) {
+        var role = ['title', 'index'][nth++];
+        if (role) n.setAttribute('data-field', role); else n.removeAttribute('data-field');
+        n.textContent = '';
+        return;
+      }
+      var f = n.getAttribute('data-field'), v = f ? C.fieldOf(record, traits, f) : '', ch = n.getAttribute('data-char');
       n.textContent = ch == null ? v : (v.charAt(+ch) || '');
       n.removeAttribute('data-char');                       // used up: the character is in the text now
+    });
+    // On a site no drawn piece prints the card's words (owner, 2026-10-27, the category audit: 24 ornaments and 5 dividers
+    // printed the wearer's identity, number or DNA under the site's titles, and 21 tags and ornaments named the card's mark
+    // or palette). The only words a piece carries on a site are a nameplate's title and index slots, which Ark UI fills
+    // with the part's own header. Every other word goes, fixed labels too: a label beside a removed value names nothing.
+    // The card itself still draws its words (js/nft/card-chrome.js fills them on the card).
+    Array.prototype.forEach.call(root.querySelectorAll('text'), function (n) {
+      var f = n.getAttribute('data-field');
+      if (f === 'title' || f === 'index') return;
+      n.parentNode.removeChild(n);
     });
     // Ark UI's allow-list takes no style attribute: a style becomes what it does. text-transform
     // changes the text itself; the few presentation properties become attributes of the same name.
@@ -496,15 +514,63 @@
     if (!(m.inset > 0) && (m.ink || 0) > STRIP.heavy) return 'compact';
     return 'keep';
   }
+  /* the hero reads how the card turns its corners, since 72 % of frames are full and the frame alone would give most
+     cards one hero (measured over the 414 frames, 2026-10-27). A ticket hangs a banner, a square corner splits the
+     hero into columns, and a cut corner sets it off-centre. A soft full frame (171 of 414) takes its divider: a plain
+     line centres it, a segmented one splits it, a capped one hangs a banner. A frame that never turns sets it
+     off-centre, and corners alone keep the block's own stack. Weighted over the frames this gives centred 109,
+     split 95, offset 130, banner 72 and stacked 9. */
+  function heroOf(m) {
+    if (m.frame === 'ticket') return 'banner';
+    if (m.edge === 'square') return 'split';
+    if (m.edge === 'cut') return 'offset';
+    if (m.edge === 'soft' && m.frame === 'full') return m.divider === 'segmented' ? 'split' : m.divider === 'capped' ? 'banner' : 'centered';
+    if (m.edge === 'soft') return 'banner';
+    return m.frame === 'corners' ? 'stacked' : 'offset';
+  }
+
+  /* Each page section reads the card piece that does the same job, and a section that one measure would give most cards
+     the same look splits that group by a second measure no other section uses. Measured over cards 1-300 (2026-10-27):
+     quartiles inset 0/0/8, strip period 0.26/0.41/0.67, strip ink 0.022/0.043/0.07, frame curve 0.008/0.032/0.046,
+     tag track 0.138/0.2/0.2. One measure alone gave 77 % of cards one card shape and ~70 % one facts and one list look. */
+  var CURVE = { flat: 0.012, round: 0.04 };
   function layoutsOf(m) {
-    var repeats = (m.period || 0) > STRIP.repeats, strip = m.ornament === 'strip';
+    var repeats = (m.period || 0) > STRIP.repeats, strip = m.ornament === 'strip', double = (m.inset || 0) > 0;
+    var heavy = (m.ink || 0) > STRIP.heavy, curve = m.curve == null ? null : m.curve;
     return {
-      CARD: m.frame === 'ticket' ? 'ticket' : m.frame === 'full' ? 'framed' : m.frame === 'none' ? 'keep' : 'plain',
-      MODAL: m.frame === 'bracket' ? 'sheet' : 'centered',
-      TABSLIST: m.divider === 'segmented' ? 'pills' : m.divider === 'capped' ? 'rail' : m.divider === 'line' ? 'underline' : 'keep',
-      MEGAMENUPANEL: repeats ? 'tiles' : strip ? 'columns' : 'list',
-      POPOVER: repeats ? 'tiles' : 'list',
-      LIST: repeats ? 'tiles' : 'list'
+      // a double-line frame frames its cards; a single line leaves them plain
+      CARD: m.frame === 'ticket' ? 'ticket' : m.frame === 'full' ? (double ? 'framed' : 'plain') : m.frame === 'none' ? 'keep' : 'plain',
+      // a bracket, or a corner that is cut or square, hangs the dialog as a sheet; a soft or unturned corner centres it
+      MODAL: m.frame === 'bracket' || m.edge === 'cut' || m.edge === 'square' ? 'sheet' : 'centered',
+      // a plain line underlines the tabs only when its strip is heavy enough to carry it; a light one keeps the strip's own look
+      TABSLIST: m.divider === 'segmented' ? 'pills' : m.divider === 'capped' ? 'rail' : m.divider === 'line' && (heavy || repeats) ? 'underline' : 'keep',
+      // a repeating strip tiles a panel's items; a heavy one tiles a popover or list too, and lists a mega menu
+      MEGAMENUPANEL: repeats ? 'tiles' : heavy ? 'list' : strip ? 'columns' : 'list',
+      POPOVER: repeats || heavy ? 'tiles' : 'list',
+      LIST: repeats || heavy ? 'tiles' : 'list',
+      // the page's sections (Ark UI ARK_SKIN_SECTION_LAYOUTS)
+      HERO: heroOf(m),
+      // a plain line rules the header only when its strip is heavy enough to carry the weight; a light one stacks
+      SECTIONHEADER: m.divider === 'segmented' ? 'inline' : m.divider === 'capped' ? 'centered' : m.divider === 'line' ? (heavy || repeats ? 'ruled' : 'stacked') : 'stacked',
+      CARDGRID: m.ornament === 'none' ? 'list' : repeats ? 'compact' : heavy ? 'feature' : 'grid',
+      STATS: m.marker === 'index' ? 'ticker' : m.marker === 'icon' ? ((m.iconInk || 0) > INK.light ? 'grid' : 'row') : 'stacked',
+      // the tag's tracking first; the common middle tracking takes the frame's curve: a flat frame runs facts inline,
+      // a round one sets them in columns
+      FACTS: m.track != null && m.track < TRACK.tight ? 'inline' : m.track != null && m.track > TRACK.open ? 'columns'
+        : curve == null ? 'table' : curve < CURVE.flat ? 'inline' : curve > CURVE.round ? 'columns' : 'table',
+      // a soft corner: a double frame lifts its rows into cards, a single one keeps rows
+      LISTROWS: m.edge === 'cut' ? 'cards' : m.edge === 'square' ? 'compact' : double ? 'cards' : 'rows',
+      STEPPER: m.marker === 'index' ? 'numbered' : m.divider === 'line' ? 'line' : 'cards',
+      ALERT: m.frame === 'ticket' ? 'banner' : m.edge === 'cut' ? 'inline' : m.edge === 'soft' ? 'boxed' : 'bar',
+      FIGURE: double ? 'boxed' : m.edge === 'square' || m.edge === 'cut' ? 'side-caption' : 'stacked',
+      QUOTE: m.ornament === 'none' ? 'plain' : repeats ? 'rule' : heavy ? 'pull' : 'boxed',
+      PAGER: m.edge === 'square' ? 'plain' : m.marker === 'index' ? 'stacked' : 'row',
+      ACCORDION: m.edge === 'cut' ? 'cards' : double ? 'boxed' : m.ornament === 'none' ? 'plain' : 'rows',
+      DISCLOSURE: m.divider === 'line' && heavy ? 'ruled' : double ? 'boxed' : 'plain',
+      TABLE: m.divider === 'segmented' ? 'grid' : repeats ? 'striped' : m.frame === 'corners' || m.frame === 'bracket' ? 'open' : 'lined',
+      LANE: m.edge === 'cut' ? 'track' : m.edge === 'square' ? 'box' : m.divider === 'segmented' ? 'track' : m.divider === 'capped' ? 'box' : 'pill',
+      METERLIST: m.marker === 'index' ? 'grid' : (m.iconInk || 0) > INK.light ? 'stacked' : m.ornament === 'none' ? 'compact' : 'rows',
+      TABSCONTENT: double ? 'inset' : m.frame === 'full' && curve != null && curve > CURVE.round ? 'boxed' : 'plain'
     };
   }
 
@@ -512,7 +578,23 @@
   function recipe(record, opts) {
     opts = opts || {};
     var traits = T.pick(record), picks = traits.picks, notes = [], vars = tokens(traits, record), chrome = {};
-    if (traits.review && !traits.review.ok) notes.push('The worn mix has a held element or a clashing pair: a site should not apply it.');
+    // the owner's review (layers/review.flx): a held element is never drawn, and a clashing pair is never drawn together.
+    // A worn-only piece that is held, or clashes, is left off; a birth slot the skin changed to one goes back to the
+    // element the card was born with. The card keeps every other piece it wears.
+    if (traits.review && !traits.review.ok) {
+      var worn = {}; (T.WORN || []).forEach(function (l) { worn[l.key] = true; });
+      var born = {}; (T.elementsOf(traits.genesis) || []).forEach(function (e) { born[e.layer] = e; });
+      var off = function (e, why) {
+        if (!e || picks[e.layer] !== e) return;
+        if (worn[e.layer]) delete picks[e.layer]; else if (born[e.layer]) picks[e.layer] = born[e.layer]; else return;
+        notes.push(e.name + ' (' + e.layer + ') is not drawn: ' + why + '.');
+      };
+      traits.review.held.forEach(function (e) { off(e, 'the owner\'s review holds it'); });
+      traits.review.clashes.forEach(function (pair) {
+        var a = pair[0], b = pair[1], drop = worn[b.layer] || (!worn[a.layer] && b.layer !== a.layer) ? b : a;
+        if (picks[a.layer] === a && picks[b.layer] === b) off(drop, 'it clashes with ' + (drop === a ? b : a).name + ' in the owner\'s review');
+      });
+    }
     if (traits.takenBy) notes.push('Another genesis number was born with the worn mix: a site should not apply it.');
     return needPackage().then(function () { return drawingsOf(traits); }).then(function () {
       // keyed by the interface names Ark UI takes (frame, corner, nameplate, accent-strip, divider, icon)
@@ -526,11 +608,11 @@
       var rules = { frame: m.frame || 'none', edge: m.edge || 'keep', ornament: m.ornament || 'none', marker: m.marker || 'none',
         header: m.header || 'none', layout: 'keep', density: densityOf(m) };
       // each wear-only category the card wears draws its piece, by Ark UI's rule of the same name (ARK_SKIN_WORN_PIECES:
-      // a button on controls, a badge on badges, a menu on menus and popovers, a line on rows, a link under links, a grid
-      // behind groups). A born card wears none, so it sends 'none' for each.
+      // a button on controls, a badge on badges, a menu on menus, a popover on floating panels, a dropdown on the panel a
+      // select or dropdown opens, a line on rows, a link under links, a grid behind groups). A born card wears none, so it sends 'none' for each.
       (T.WORN || []).forEach(function (l) { rules[l.key] = picks[l.key] ? 'drawn' : 'none'; });
-      var layouts = layoutsOf(m);
       var frame = chrome[T.uiName('frame')], curve = frame ? curveOf(frame.svg) : null, voice = voiceOf(curve);
+      var layouts = layoutsOf(Object.assign({ curve: curve }, m));
       if (voice !== 'keep') vars['--font-display'] = 'var(--font-' + voice + ')';
       var type = typeTokens(m, rules);
       Object.keys(type).forEach(function (k) { vars[k] = type[k]; });

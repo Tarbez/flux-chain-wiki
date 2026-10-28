@@ -1,0 +1,123 @@
+/* THE KIT PAGE (js/pages/kit.js, the editor's canvas only): the frame around the owner's five boards.
+   The elements' own styles are their boards' sheets (css/kit-boards-a.css for 01-02, css/kit-boards-b.css for 03-04);
+   this sheet draws only the page: the header, the board switch, the 6 x 5 tile grid, the 3D board's list, and the
+   wear transition. Tokens only (SDK semantics as HSL channels), the type scale only (--fs-*), three font slots.
+   Fits 1280x720 and 1440x900 with no scroll: nine tiles (3 x 3) share the height between the header and the footer
+   strip. A tile is an Ark UI card part, so a worn card draws its own frame, nameplate and strip on it: the tile's outline
+   is a shadow, not a border (a part with its own border gets corners, never the card's frame), nothing on the tile
+   clips (a clipped nameplate is taken back), and the rows leave room for a nameplate and a strip on each edge. */
+
+.kit-world { grid-template-rows: auto minmax(0, 1fr); gap: 22px; padding: 18px 28px 64px; pointer-events: none; }
+.kit-world :where(button) { font: inherit; color: inherit; }
+
+/* ---- header: the board's name and tally on the left, the board switch on the right ---- */
+.kit-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; min-width: 0; }
+.kit-words { min-width: 0; }
+.kit-eyebrow { margin: 0 0 6px; font-size: var(--fs-tertiary); color: hsl(var(--text-muted)); }
+.kit-title { margin: 0; font: 700 var(--fs-primary)/1.05 var(--font-display); letter-spacing: -.02em; color: hsl(var(--text-strong)); }
+.kit-rules { margin: 6px 0 0; font-size: var(--fs-tertiary); line-height: 1.4; color: hsl(var(--text)); }
+.kit-rules[hidden] { display: none; }
+.kit-rules b { color: hsl(var(--primary)); font-weight: 500; letter-spacing: .1em; }
+.kit-controls { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: none; }
+.kit-pager { display: flex; align-items: center; gap: 4px; pointer-events: auto; }
+.kit-step { width: 30px; height: 28px; border: 0; border-radius: 6px; background: hsl(var(--surface) / .72); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); cursor: pointer; font-size: var(--fs-tertiary); color: hsl(var(--text-strong)); }
+.kit-step:disabled { opacity: .4; cursor: default; }
+.kit-where { min-width: 9em; text-align: center; font-size: var(--fs-tertiary); letter-spacing: .1em; color: hsl(var(--text-muted)); }
+.kit-counts { margin: 6px 0 0; font: 500 var(--fs-tertiary)/1.4 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.kit-tabs { display: flex; gap: 4px; pointer-events: auto; padding: 4px; border: 1px solid hsl(var(--border-default)); border-radius: 10px; background: hsl(var(--surface) / .72);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); flex: none; }
+.kit-tab { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border: 0; border-radius: 7px; background: transparent; cursor: pointer;
+  font-size: var(--fs-tertiary); color: hsl(var(--text-muted)); white-space: nowrap; }
+.kit-tab:hover { color: hsl(var(--text-strong)); background: hsl(var(--text-strong) / .05); }
+.kit-tab[aria-selected="true"] { color: hsl(var(--text-strong)); background: hsl(var(--raised)); box-shadow: inset 0 0 0 1px hsl(var(--primary) / .55); }
+.kit-tab-n { color: hsl(var(--primary)); letter-spacing: .1em; }
+@media (max-width: 1360px) { .kit-tab-name { display: none; } }
+
+/* ---- boards 01-04: three columns, three rows, sharing the height; the row gap holds a nameplate and a strip ---- */
+.kit-grid { list-style: none; margin: 0; padding: 0; min-height: 0; display: grid; column-gap: 18px; row-gap: 26px;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); }
+.kit-grid[hidden], .kit-objects[hidden] { display: none; }
+/* the element first, its number and name at the foot: the top edge is the worn card's, where its nameplate sits */
+.kit-tile { position: relative; min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 6px;
+  padding: 12px 16px 12px; border: 0; border-radius: 10px;
+  background: linear-gradient(180deg, hsl(var(--surface) / .92), hsl(var(--canvas) / .88));
+  box-shadow: inset 0 0 0 1px hsl(var(--border-default)); pointer-events: auto; }
+/* a worn nameplate sits on the tile's top edge, half inside it (Ark UI: at least 48px tall): the element starts below
+   it. --kit-plate is how far the drawn nameplate reaches into the tile, measured per tile (js/pages/kit.js fitPlates).
+   The id in the selector outranks the card's density, which sets the padding too. */
+#scene .kit-world .kit-tile[data-ark-skin-header="nameplate"] { padding-top: calc(var(--kit-plate, 26px) + 8px); }
+.kit-tile[data-current] { box-shadow: inset 0 0 0 1px hsl(var(--primary) / .8), 0 0 22px hsl(var(--primary) / .18); }
+.kit-tile-cap { display: flex; align-items: baseline; gap: 8px; min-width: 0; font-size: var(--fs-tertiary); }
+.kit-tile-n { color: hsl(var(--primary)); letter-spacing: .1em; flex: none; }
+.kit-tile-name { color: hsl(var(--text-strong)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.kit-tile-state { margin-left: auto; flex: none; font-size: var(--fs-micro); letter-spacing: .14em; color: hsl(var(--text-muted)); padding: 2px 5px; border: 1px solid hsl(var(--border-default)); border-radius: 4px; }
+.kit-tile[data-status="partial"] .kit-tile-state, .kit-row[data-status="partial"] .kit-tile-state { color: hsl(var(--drift)); border-color: hsl(var(--drift) / .5); }
+.kit-tile[data-status="error"] { box-shadow: inset 0 0 0 1px hsl(var(--danger) / .6); }
+
+/* the element's own box: the renderer owns everything inside it */
+.kit-el { position: relative; min-width: 0; min-height: 0; display: flex; align-items: center; justify-content: center; container-type: size; overflow: hidden; }
+.kit-el-missing { border: 1px dashed hsl(var(--border-default)); border-radius: 8px; padding: 8px; }
+.kit-missing { margin: 0; font-size: var(--fs-tertiary); line-height: 1.4; color: hsl(var(--text-faint)); text-align: center; }
+.kit-partial { margin: 0; font-size: var(--fs-tertiary); line-height: 1.35; letter-spacing: .02em; color: hsl(var(--text-muted)); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ---- board 05: the names on the left, the 3D frame on the right ---- */
+.kit-objects { position: relative; min-height: 0; display: grid; grid-template-columns: clamp(220px, 20vw, 280px) minmax(0, 1fr); gap: 18px; }
+.kit-list { list-style: none; margin: 0; padding: 6px; min-height: 0; overflow: auto; border: 1px solid hsl(var(--border-default)); border-radius: 10px;
+  background: hsl(var(--surface) / .72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); pointer-events: auto; scrollbar-width: thin; }
+.kit-row { display: flex; align-items: center; gap: 6px; }   /* a worn card's marker sits before the row, on its line */
+.kit-row-btn { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 26px; padding: 3px 8px; border: 0; border-radius: 6px; background: transparent;
+  text-align: left; cursor: pointer; font-size: var(--fs-tertiary); color: hsl(var(--text)); }
+.kit-row-btn:hover { background: hsl(var(--text-strong) / .05); color: hsl(var(--text-strong)); }
+.kit-row-btn[aria-pressed="true"] { background: hsl(var(--raised)); color: hsl(var(--text-strong)); box-shadow: inset 2px 0 0 hsl(var(--primary)); }
+.kit-row[data-status="notBuilt"] .kit-row-name { color: hsl(var(--text-faint)); }
+.kit-row-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kit-stage { min-height: 0; }
+.kit-note3d { position: absolute; left: calc(clamp(220px, 20vw, 280px) + 18px); right: 0; bottom: 8px; margin: 0; text-align: center;
+  font-size: var(--fs-tertiary); color: hsl(var(--text-muted)); }
+.kit-note3d[hidden] { display: none; }
+
+/* ---- fit: the wrapper an element draws in; js/pages/kit.js fitOne() zooms it down when it is larger than the tile ---- */
+.kit-fit { display: flex; align-items: center; justify-content: center; width: 100%; min-width: 0; }
+
+/* ---- the tile's Compare button, at the foot beside the name ---- */
+.kit-tile-compare { margin-left: auto; flex: none; height: 22px; padding: 0 8px; border: 0; border-radius: 5px; background: transparent; cursor: pointer;
+  font-size: var(--fs-micro); letter-spacing: .14em; color: hsl(var(--text-muted)); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); }
+.kit-tile-compare:hover { color: hsl(var(--text-strong)); box-shadow: inset 0 0 0 1px hsl(var(--primary) / .7); }
+.kit-tile-state + .kit-tile-compare { margin-left: 6px; }
+
+/* ---- compare: one element in four panes (site look, then each card), over the page and outside #scene ----
+   Fits 1280x720 and 1440x900: four panes in one row on a wide screen, two by two below 1200px. */
+.kit-compare { position: fixed; inset: 72px 24px 24px; z-index: 40; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 18px; padding: 18px 22px 22px;
+  border-radius: 12px; background: hsl(var(--canvas)); box-shadow: inset 0 0 0 1px hsl(var(--border-default)), 0 24px 80px hsl(var(--canvas) / .8);
+  color: hsl(var(--text)); font-family: var(--font-sans); }
+.kit-compare-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.kit-compare-title { margin: 0; font: 700 var(--fs-secondary)/1.2 var(--font-display); color: hsl(var(--text-strong)); }
+.kit-compare-title .mono { font-family: var(--font-mono); color: hsl(var(--primary)); letter-spacing: .1em; margin-right: 4px; }
+.kit-compare-sub { margin: 4px 0 0; font-size: var(--fs-tertiary); color: hsl(var(--text-muted)); }
+.kit-compare-close { width: 32px; height: 32px; border: 0; border-radius: 8px; background: hsl(var(--surface)); color: hsl(var(--text-strong)); cursor: pointer;
+  font-size: var(--fs-secondary); line-height: 1; box-shadow: inset 0 0 0 1px hsl(var(--border-default)); }
+.kit-compare-panes { min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 18px; padding-top: 26px; }
+@media (max-width: 1200px) { .kit-compare-panes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kit-compare-pane { position: relative; min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto auto; gap: 8px; padding: 34px 16px 14px;
+  border-radius: 10px; background: linear-gradient(180deg, hsl(var(--surface) / .92), hsl(var(--canvas) / .88)); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); }
+.kit-compare-el { min-height: 120px; padding: 0 6px; }
+.kit-compare-label { margin: 0; font-size: var(--fs-tertiary); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--primary)); }
+.kit-compare-rules { margin: 0; font-size: var(--fs-tertiary); line-height: 1.4; color: hsl(var(--text-muted)); }
+
+/* ---- all looks: three elements to a step, each in four looks (js/pages/kit.js looks(), per 3) ----
+   A row head names the element; the columns are the site's look and each card, named once above them. */
+.kit-pager .kit-all-looks { margin-left: 8px; height: 28px; }
+.kit-compare-tools { display: flex; align-items: center; gap: 4px; flex: none; }
+.kit-compare-tools .kit-compare-close { margin-left: 10px; }
+.kit-looks-cols { display: grid; grid-template-columns: 150px repeat(4, minmax(0, 1fr)); gap: 0 18px; margin-bottom: -6px; }
+.kit-compare[data-rows="3"] .kit-compare-panes { grid-template-columns: 150px repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 30px 18px; padding-top: 22px; }
+.kit-compare[data-rows="3"] .kit-compare-pane { padding: 30px 12px 10px; }
+.kit-compare[data-rows="3"] .kit-compare-pane > .kit-compare-label { display: none; }
+.kit-compare[data-rows="3"] .kit-compare-pane[data-ark-skin-header="nameplate"] > .kit-compare-label { display: block; }
+.kit-compare[data-rows="3"] .kit-compare-el { min-height: 0; }
+.kit-compare[data-rows="3"] .kit-compare-rules { font-size: var(--fs-micro); line-height: 1.35; }
+.kit-looks-row { margin: 0; align-self: center; display: grid; gap: 4px; font-size: var(--fs-tertiary); letter-spacing: .06em; color: hsl(var(--text-strong)); text-transform: none; }
+.kit-looks-row b { color: hsl(var(--primary)); font-weight: 500; letter-spacing: .14em; }
+.kit-compare-pane[data-status="error"] { box-shadow: inset 0 0 0 1px hsl(var(--danger) / .7); }
+/* all looks has three rows of its own: the header, the column names, the panes (the panes take the height) */
+.kit-compare[data-rows="3"] { grid-template-rows: auto auto minmax(0, 1fr); gap: 12px; }

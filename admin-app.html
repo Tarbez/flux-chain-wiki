@@ -80,6 +80,7 @@
             <button type="button" class="menu-item" id="viewThemeBtn" aria-pressed="false" data-view="theme" title="Colours, fonts, background, search defaults -- beside the live page"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg><span>Site style</span></button>
             <button type="button" class="menu-item" id="viewWorldBtn" aria-pressed="false" data-view="world" title="The 3D world under every page: light, camera, motion, intro -- beside the live page"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg><span>3D world</span></button>
             <button type="button" class="menu-item" id="viewSkinBtn" aria-pressed="false" data-view="skin" title="Try a sample card skin on the real page and choose which rules each part may take -- beside the live page"><svg class="ic" aria-hidden="true"><use href="#i-palette"/></svg><span>Skin lab</span></button>
+            <button type="button" class="menu-item" id="viewKitBtn" aria-pressed="false" data-view="kit" title="The five DEFXN boards, every element live on the canvas, and a card worn on them"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg><span>Kit</span></button>
           </div>
         </div>
         <div class="menu-group" role="group" aria-label="This page and the site">
@@ -302,6 +303,12 @@
     <aside class="dock theme-dock" id="skinView" aria-label="Skin lab" hidden>
       <div id="skinPanel" class="panel-mount"></div>
     </aside>
+
+    <!-- The Kit view: the owner's five DEFXN boards drawn live on the canvas (/kit), and a card worn on them
+         (same dock as the Skin lab; js/admin/kit.js). -->
+    <aside class="dock theme-dock" id="kitView" aria-label="Kit" hidden>
+      <div id="kitPanel" class="panel-mount"></div>
+    </aside>
   </div>
 
   <footer class="studio-statusbar" id="studioStatus" aria-live="off"></footer>
@@ -411,6 +418,8 @@
 <script src="js/admin/shapes.js" defer></script>
 <script src="js/admin/world.js" defer></script>
 <script src="js/admin/skin-lab.js" defer></script>
+<script src="js/content/kit-boards.js" defer></script>
+<script src="js/admin/kit.js" defer></script>
 <script src="js/admin/studio.js" defer></script>
 <script src="js/admin/bridge.js" defer></script>
 <script src="js/admin/history.js" defer></script>

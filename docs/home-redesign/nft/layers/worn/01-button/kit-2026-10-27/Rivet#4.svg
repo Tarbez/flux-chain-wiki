@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Rivet: a square-cornered outline with a rivet in every corner, the trailing bottom rivet in the complementary role</title>
+  <rect x="1" y="1" width="198" height="54" rx="2" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="6" cy="6" r="1.5" fill="var(--dim)"/>
+  <circle cx="194" cy="6" r="1.5" fill="var(--dim)"/>
+  <circle cx="6" cy="50" r="1.5" fill="var(--dim)"/>
+  <circle cx="194" cy="50" r="1.5" fill="var(--complementary)"/>
+</svg>

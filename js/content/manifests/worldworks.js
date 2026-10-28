@@ -4,6 +4,7 @@ ArkManifest.define({
   "title": "How it works pages",
   "route": "/how-it-works",
   "group": "page",
+  "meta": {},
   "fields": {
     "HERE": {
       "label": "Chapters: breadcrumb for this page",

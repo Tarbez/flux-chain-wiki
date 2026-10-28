@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Bead Rows: three rows of beads and short dashes over a hairline with end ticks and a ringed node at its middle (sheet 12, serial 03)</title>
+  <title>Bead Rows: three rows of beads and short dashes over a hairline with end ticks and a ringed node at its middle (sheet 12, serial 03). It prints the card's the serial.</title>
   <circle cx="300" cy="9" r="1.3" fill="var(--ink)"/>
   <circle cx="24" cy="20" r="0.9" fill="var(--dim)"/>
   <circle cx="32" cy="20" r="1.5" fill="var(--ink)"/>
@@ -125,4 +125,6 @@
   <circle cx="180" cy="62" r="8" fill="var(--acc)" opacity="0.16"/>
   <circle cx="180" cy="62" r="5.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <circle cx="180" cy="62" r="2.4" fill="var(--ink)"/>
+  <text x="268" y="77" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="2" fill="var(--dim)" text-anchor="end">SERIAL</text>
+  <text x="336" y="77" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--referential)" data-field="serial" text-anchor="end">SERIAL</text>
 </svg>

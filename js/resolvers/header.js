@@ -282,6 +282,8 @@ ArkUI.register('RHEADER_V1', {
       var brand = el.querySelector('.dx-bar__brand');
       if (brand) {
         brand.dataset.sceneLink = 'zero';
+        /* the site's name for the bare mark: css/focus.css leaves it out of the fills it gives current and focused header links */
+        brand.classList.add('header-mark');
         brand.setAttribute('aria-label', 'DEFXN — home');
         var word = brand.querySelector('.dx-bar__brand-word');
         if (word) word.textContent = ArkCopy.text('NAV.BRAND.NAME');

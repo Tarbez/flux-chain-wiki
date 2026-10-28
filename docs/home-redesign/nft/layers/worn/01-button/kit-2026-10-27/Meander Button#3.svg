@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Meander Button: a square outline with a Greek key hook turned into every corner, the leading top key in the complementary role (the Meander set)</title>
+  <rect x="1" y="1" width="198" height="54" rx="0" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4 13 V4 H15 V10 H8 V7 H12" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <g transform="matrix(-1 0 0 1 200 0)"><path d="M4 13 V4 H15 V10 H8 V7 H12" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+  <g transform="matrix(1 0 0 -1 0 56)"><path d="M4 13 V4 H15 V10 H8 V7 H12" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+  <g transform="rotate(180 100 28)"><path d="M4 13 V4 H15 V10 H8 V7 H12" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+</svg>

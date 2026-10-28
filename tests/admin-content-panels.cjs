@@ -18,7 +18,9 @@
        nothing), and the Code tab's outline shows values, not "[object Object]";
      - the data-driven selects (routes, reference docs, shape pages) write the value their
        label names (tests/admin-control-labels.cjs leaves contentChoices lists to this file);
-     - shapes stay reachable for pages with no manifest (Demo, Lab).
+     - shapes stay reachable for pages with no manifest (Demo, Lab);
+     - a reference-doc option is shown by its name, never its path (docs/ux-audit/cms.md P1-2,
+       owner-confirmed 2026-10-27), and a manifest with no meta still renders its form.
    Runs the real editor modules in jsdom (tests/lib/admin-forms-dom.cjs). */
 const assert = require('node:assert/strict');
 const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
@@ -47,6 +49,19 @@ const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
   assert(!document.getElementById('editor'), 'the forms never needed an #editor element');
   const homeTabs = [...A.renderPageFields(detached(), 'home').querySelectorAll('[role="tab"]')].map((t) => t.textContent);
   assert(homeTabs.includes('Shapes'), 'a page with a background shape keeps its Shapes tab');
+  /* Regression (2026-10-27): meta is optional (js/content/manifest.js) and the world pages'
+     manifests carried none, so renderPageFields read manifest.meta.next off undefined and the
+     form drew nothing. A draft with no meta must still render, with no "Where it goes" fieldset. */
+  {
+    const id = state.ids[0];
+    const kept = state.drafts[id].meta;
+    delete state.drafts[id].meta;
+    let box;
+    assert.doesNotThrow(() => { box = A.renderPageFields(detached(), id); }, 'a manifest without meta still renders');
+    assert(box.querySelector('[role="tab"]'), 'and draws its form');
+    assert(![...box.querySelectorAll('legend')].some((l) => l.textContent === 'Where it goes'), 'with no placement or onward link to offer');
+    if (kept !== undefined) state.drafts[id].meta = kept;
+  }
 
   /* ---- typing: the draft changes, the canvas is asked, the form is not rebuilt ---- */
   const mount = document.getElementById('mount');
@@ -124,7 +139,7 @@ const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
   A.revertItem('page', 'home');
 
   /* ---- data-driven selects write the value their label names ---- */
-  const nav = A.renderPageFields(detached(), state.ids.find((id) => state.drafts[id].meta.next) || 'home');
+  const nav = A.renderPageFields(detached(), state.ids.find((id) => (state.drafts[id].meta || {}).next) || 'home');
   const next = nav.querySelector('#m-the-onward-link-opens');
   if (next) for (const o of [...next.options]) assert.equal(o.textContent, (window.ArkUI.pageCatalog[o.value].title.replace(' — Flux Protocol', '') + '  ' + window.ArkUI.pageCatalog[o.value].path), 'a route option shows its own route');
 
@@ -156,7 +171,18 @@ const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
   assert.equal(docSelect.options[0].textContent, 'Not set', 'a blank link says Not set, not a value it does not have');
   choose(window, docSelect, docSelect.options[1].value);
   assert.equal(state.aDrafts[slug].evidenceHref, 'doc:' + docSelect.options[1].value);
-  assert.equal(docSelect.options[1].textContent, docSelect.options[1].value, 'a doc option shows its own path');
+  /* A doc option is shown by its NAME, never its path; the path is the value it writes
+     (docs/ux-audit/cms.md P1-2, owner-confirmed 2026-10-27). The label is read out of the path by
+     editor.js docLabel(), so the expected names below are the confirmed examples, not a copy of it. */
+  const docOpts = [...docSelect.options].slice(1);
+  assert(docOpts.length, 'the doc picker lists the reference docs');
+  for (const o of docOpts) {
+    assert(o.textContent.trim() && o.textContent !== o.value, `a doc option shows a name, not its path (${o.value})`);
+    assert(!/\//.test(o.textContent) && !/\.md\b/i.test(o.textContent) && !/^docs\b/.test(o.textContent), `a doc option's name carries no path pieces: "${o.textContent}"`);
+  }
+  const byValue = (v) => docOpts.find((o) => o.value === v);
+  if (byValue('docs/evidence/bench-001-verification.md')) assert.equal(byValue('docs/evidence/bench-001-verification.md').textContent, 'Bench 001 verification (evidence)', 'a nested doc names its folder in brackets');
+  if (byValue('docs/deprecated.md')) assert.equal(byValue('docs/deprecated.md').textContent, 'Deprecated', 'a top-level doc is just its name');
   const sections = state.aDrafts[slug].sections.length;
   [...art.querySelectorAll('button')].find((b) => b.textContent === 'Add a section').click();
   assert.equal(state.aDrafts[slug].sections.length, sections + 1, 'Add a section');

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Dash Band: a band of short vertical dashes and dots, tallest in the middle, a few in the accent (reference sheet 1, #06)</title>
+  <title>Dash Band: a band of short vertical dashes and dots, tallest in the middle, a few in the accent (reference sheet 1, #06). It prints the card's the genesis ID after NO. and the network.</title>
   <line x1="4" y1="35.35" x2="4" y2="44.65" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <rect x="3.2" y="30.95" width="1.6" height="1.6" fill="var(--line)"/>
   <line x1="10" y1="35.79" x2="10" y2="44.21" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
@@ -129,4 +129,7 @@
   <line x1="346" y1="36.02" x2="346" y2="43.98" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <line x1="352" y1="35.7" x2="352" y2="44.3" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <rect x="351.2" y="47.1" width="1.6" height="1.6" fill="var(--line)"/>
+  <text x="4" y="16" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="2" fill="var(--dim)">NO.</text>
+  <text x="36" y="16" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--referential)" data-field="genesisId">GENESIS</text>
+  <text x="356" y="16" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--ink)" data-field="network" text-anchor="end">NETWORK</text>
 </svg>

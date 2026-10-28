@@ -1,9 +1,16 @@
 'use strict';
 /* run-tests-timeout-ms: 1500000 -- two jsdom boots of the real site per route, 18 routes. */
 /* THE STORY TEMPLATE (js/pages/story.js): the theory sheets (/concept/*, /dao), the agreement
-   chapters (/how-deployment-works/ask|work|check), "Deploy a resolver" (/how-deployment-works),
-   the agreement lifecycle (/lifecycle and its five stages) and the /concept index, as pages of Ark
-   blocks. Run alone (owner test law); `node tests/story-blocks.cjs /lifecycle /dao` checks some.
+   chapters (/how-deployment-works/ask|work|check), the agreement lifecycle (/lifecycle and its five
+   stages) and the /concept index, as pages of Ark blocks. Run alone (owner test law);
+   `node tests/story-blocks.cjs /lifecycle /dao` checks some.
+
+   2026-10-27, owner-confirmed: "Deploy a resolver" (/how-deployment-works, js/pages/deployment.js) is
+   removed (b0dc2d7). Its source, catalog, words and figure-fold checks guarded a page that no longer
+   exists and are dropped; the removal itself is locked below (no file, no catalog entry). Its frozen
+   census (tests/fixtures/layout-keys/how-deployment-works.tsv) and its reasons in
+   tests/fixtures/story-continuity.cjs stay as evidence of what the page held; REMOVED keeps the route
+   out of the walk. The three agreement chapters it led to stay, with every check.
 
    Named regressions it holds:
    - Seven tab/depth controls with three ARIA models and three label sets for one idea ("The core
@@ -47,14 +54,17 @@ const ICON_REASON = 'an icon js/hero-motion.js (or the old /concept card) drew i
    `node tests/lib/layout-continuity.cjs derive <route>`'s unresolved list, one reason each. */
 const EXPECT = require('./fixtures/story-continuity.cjs');
 
-const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 || process.argv.slice(2).includes(route));
+/* routes removed on purpose (owner-confirmed 2026-10-27): their fixture entries are kept as evidence, not walked */
+const REMOVED = ['/how-deployment-works'];
+const ROUTES = Object.keys(EXPECT).filter((route) => !REMOVED.includes(route)).filter((route) => process.argv.length <= 2 || process.argv.slice(2).includes(route));
 
 (async () => {
   /* ---- the modules are story specs of Ark blocks ------------------------------------------- */
   const story = read('js/pages/story.js');
   assert(/var DEPTH = \[\s*\{ value: 'focus', label: 'The idea' \},\s*\{ value: 'context', label: 'Step by step' \},\s*\{ value: 'reference', label: 'Evidence' \}\s*\];/.test(story), 'ONE depth label set, defined once');
   assert(/block\('tabs', 'depth', \{\s*label: 'Explanation depth', variant: 'segmented'/.test(story), 'the depth control is Ark tabs, segmented');
-  for (const file of ['js/pages/lifecycle.js', 'js/pages/sheet.js', 'js/pages/how-stories.js', 'js/pages/deployment.js']) {
+  assert(!fs.existsSync(path.join(ROOT, 'js/pages/deployment.js')), 'the deployment page (js/pages/deployment.js) is removed');
+  for (const file of ['js/pages/lifecycle.js', 'js/pages/sheet.js', 'js/pages/how-stories.js']) {
     const source = read(file);
     assert(source.includes('ArkUI.story.mount(def'), file + ' is built by the story template');
     assert(!/ArkUI\.el\('(section|header|h1|nav|aside|figure)'/.test(source), file + ': no hand-built page structure is left (sections, headers, h1, navs, asides, figures are blocks)');
@@ -64,9 +74,10 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
   assert(concept.includes('ArkUI.page([') && concept.includes('ArkUI.story.bindTabs('), '/concept is a page of Ark blocks, its question groups bound to the address like the depth control');
   const catalog = read('js/pages/catalog.js');
   assert(/ArkUI\.storyScripts = ArkUI\.blockScripts\.concat\(\[ArkUI\.glossaryScript, 'js\/pages\/story\.js'\]\);/.test(catalog), 'a story route loads the blocks, the glossary and the template');
-  for (const [key, file] of [['lifecycle', 'lifecycle.js'], ["'lifecycle/intent'", 'lifecycle.js'], ["'how/ask'", 'how-stories.js'], ['deployment', 'deployment.js'], ['concept', 'concept.js'], ['dao', 'sheet.js']]) {
+  for (const [key, file] of [['lifecycle', 'lifecycle.js'], ["'lifecycle/intent'", 'lifecycle.js'], ["'how/ask'", 'how-stories.js'], ['concept', 'concept.js'], ['dao', 'sheet.js']]) {
     assert(new RegExp('  ' + key.replace(/[/']/g, (c) => '\\' + c) + ": \\{ module: '[a-zA-Z]+', scripts: ArkUI\\.storyScripts\\.concat\\(\\[(?:'[^']+', )*'js/pages/" + file.replace('.', '\\.')).test(catalog), key + ' loads the story scripts');
   }
+  assert(!/^\s+deployment: \{/m.test(catalog), 'the catalog has no deployment entry');
   assert(catalog.includes("module: 'theory', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/pages/theory.js', 'js/ark/page-kit.js'])"), 'derived theory routes load the story scripts (and the page kit, W4-S14: the case rule and the ways on)');
 
   /* ---- every route: the page, its words, its keys ------------------------------------------- */
@@ -100,11 +111,6 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
         copy('DEPLOYMENT.CHAPTER.BANNER');
         ArkCopy.text(area + '.RECORD').split('\n').forEach((line) => { const row = line.replace(/^\[[\d,\s]+\]\s*/, ''), cut = row.indexOf(': '); if (cut > 0) words.push(row.slice(0, cut), row.slice(cut + 2)); });
         words.push('True after this step', 'Not yet true', 'Explore the signed record', 'What is a resolver');
-      } else if (route === '/how-deployment-works') {
-        ['TITLE', 'INTRO', 'CAUTION.TITLE', 'CAUTION', 'PLANNED.TITLE', 'PLANNED', 'BOUNDARY', 'DEPLOYER.LINK', 'EXPLORE.LINK', 'REGISTRY.LINK', 'AGREEMENT.TITLE', 'AGREEMENT.TEXT', 'ASK.TITLE', 'WORK.TITLE', 'CHECK.TITLE',
-          ...['WRITE', 'LAUNCH', 'SERVE'].flatMap((k) => [k + '.TITLE', k + '.SIGNAL', k + '.TEXT'])].forEach((k) => copy('DEPLOYMENT.SIMPLE.' + k));
-        for (let n = 1; n <= 6; n++) { copy('DEPLOYMENT.STEP' + n); copy('DEPLOYMENT.BODY' + n); }
-        words.push('Current implementation', 'Agreement lifecycle');
       } else if (route === '/concept') {
         copy('CONCEPT.TITLE'); copy('CONCEPT.DECK');
         ArkManifest.group('theory').forEach((m) => { copy(m.id.toUpperCase() + '.TITLE'); words.push(m.title + ' / open explanation'); });
@@ -174,8 +180,9 @@ const ROUTES = Object.keys(EXPECT).filter((route) => process.argv.length <= 2 ||
       assert.deepEqual(seen.depth, DEPTH, route + ': the one depth label set');
       assert.equal(seen.variant, 'segmented', route + ': the depth control is segmented');
       assert.equal(seen.tablists, 1, route + ': one depth control, no second segmented control');
-      // /how-deployment-works also carries the manifest's deploy-flow figure (W4-S13, tests/resolver-page-parts.cjs): a second fold, closed at every width (open it ran to 1.9 screens)
-      assert.deepEqual(seen.figureFold.slice().sort(), route === '/how-deployment-works' || route === '/dao' ? ['always', 'tablet'] : ['tablet'], route + ': the figure folds behind a button at 900px and narrower, never removed');
+      // /dao also carries the manifest's deploy-flow figure (W4-S13, tests/resolver-page-parts.cjs): a second fold, closed at every width (open it ran to 1.9 screens).
+      // /how-deployment-works carried it too until that page was removed (owner-confirmed 2026-10-27).
+      assert.deepEqual(seen.figureFold.slice().sort(), route === '/dao' ? ['always', 'tablet'] : ['tablet'], route + ': the figure folds behind a button at 900px and narrower, never removed');
       assert.equal(seen.unlabelled, 0, route + ': every drawn label is held at 12px or more');
       assert(seen.terms > 0, route + ': the first use of a glossary word is a term');
     }

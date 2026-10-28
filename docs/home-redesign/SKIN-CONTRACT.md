@@ -98,6 +98,21 @@ Each rule key has a closed set of values, and Ark UI implements every value once
 | `header` | `none` `tag` | a panel, popover or dialog gets the card's tag strip on top |
 | `layout` | per part, below | the part's arrangement |
 
+**Worn pieces** (owner-confirmed 2026-10-27). Eight more rule keys follow, one for each wear-only category. Each takes `none` or `drawn`. Ark UI's `ARK_SKIN_WORN_PIECES` decides where each piece is drawn:
+
+| Rule | Drawn on |
+| --- | --- |
+| `button` | buttons, as an outline |
+| `badge` | badges, as an outline |
+| `menu` | menu panels, as an outline |
+| `popover` | floating panels and tooltips, as an outline |
+| `dropdown` | the panel a select, combobox or dropdown menu opens, as an outline |
+| `line` | rows, along the bottom |
+| `link` | text links, underneath |
+| `grid` | groups of cards or stats, as a pattern behind them |
+
+A site's skin policy can switch these off per part, like the seven rules above. DEFXN switches `button` off on tab and accordion triggers.
+
 Layouts are named per part, so each one is designed once:
 - `MEGAMENUPANEL`: `columns` (today), `tiles` (each link a small card), `list`
 - `MENU`: `list`, `tiles`

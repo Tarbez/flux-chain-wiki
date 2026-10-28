@@ -228,7 +228,7 @@
     if (mod && e.key.toLowerCase() === 'y' && !typing) { e.preventDefault(); redo(); return; }
     if (typing || state.live || state.view === 'map') return;
     /* a key pressed in a form panel (the sheet, the Theme view, Media, Vault) is not about the canvas selection */
-    if (e.target.closest && e.target.closest('#sheet, #themeView, #worldView, #skinView, #mediaPane, #vaultPane, #pagesPane')) return;
+    if (e.target.closest && e.target.closest('#sheet, #themeView, #worldView, #skinView, #kitView, #mediaPane, #vaultPane, #pagesPane')) return;
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); postCmsRemoveSelection(); }
   });
   window.addEventListener('resize', layoutStage);

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Pixel: an outline with corners rounded in small square pixel steps, the trailing end column in the complementary role</title>
+  <path d="M7 1 H193 M193 55 H7 V53 H4 V51 H3 V48 H1 V8 H3 V5 H4 V3 H7 V1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M193 1 V3 H196 V5 H197 V8 H199 V48 H197 V51 H196 V53 H193 V55" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

@@ -1,3 +1,6 @@
+/* The state layers (Focus, Context, Inner detail) and the page frames that hold them.
+   2026-10-27, owner-confirmed: the deployment walkthrough is removed (its absence is locked), /account keeps the wide 1600
+   frame, the redesigned /download stands at 1400, and every other page uses the standard 1080 frame. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 
@@ -8,7 +11,10 @@ for (const phrase of ['Focus', 'Context', 'Inner detail', 'Only one semantic lay
 
 const sheet = fs.readFileSync('js/pages/sheet.js', 'utf8');
 const about = fs.readFileSync('js/pages/about.js', 'utf8');
-const deployment = fs.readFileSync('js/pages/deployment.js', 'utf8');
+/* The deployment walkthrough (/how-deployment-works, js/pages/deployment.js) was removed on purpose (b0dc2d7; owner-confirmed
+   2026-10-27). Its three checks (three-stage journey, a mesh per stage, its implementation boundary) guarded a page that no
+   longer exists and are dropped; the file's absence is locked instead. */
+assert(!fs.existsSync('js/pages/deployment.js'), 'the deployment walkthrough is removed');
 const continuity = fs.readFileSync('js/ark/panel-continuity.js', 'utf8');
 /* Since 2026-10-19 the mechanism sheets, the agreement chapters and the lifecycle are one story
    template (js/pages/story.js): the same layers, with one depth control for all of them. */
@@ -24,13 +30,13 @@ assert(/block: 'tabs', id: 'about-views'/.test(about) && /value: 'layers', label
 assert.equal((about.match(/tone: 'primary'/g) || []).length, 1, 'overview exposes one dominant next movement');
 assert(/value: 'evidence', label: copy\('REFERENCE'\)/.test(about), 'overview keeps evidence and verification behind a named view');
 assert(/block: 'callout', id: 'about-boundary'[^\n]*body: copy\('BOUNDARY\.TITLE'\)/.test(about) && about.indexOf("id: 'about-boundary'") < about.indexOf("id: 'about-views'"), 'overview keeps the essential source boundary visible before (outside) the views');
-assert(/block: 'steps', props: \{ label: 'Three stages'/.test(deployment), 'how it works retains its own three-part journey composition');
-assert(deployment.includes("'how-deploy-mesh'") && deployment.includes('fabrics.push'), 'each stage of how it works owns a mesh illustration');
-assert(deployment.includes("title: 'Current implementation'"), 'how it works keeps its implementation boundary visible');
 // 2026-10-19 (W3-GUIDE): the audit found three different page-frame widths (pages-ux-b.md cross-page #4).
-// /explore now sits in the standard 1080 frame (its views measure <=1.22x the viewport there); only the
-// deployment walkthrough and /account keep the wide 1600 canvas.
-assert(continuity.includes("panelPage === 'deployment' || panelPage === 'account' ? 1600 : 1080"), 'only the deployment walkthrough and /account receive the wide desktop canvas; every other page uses the one standard frame');
+// /explore now sits in the standard 1080 frame (its views measure <=1.22x the viewport there). Since 2026-10-27 (owner-confirmed):
+// the deployment walkthrough is gone, /account keeps the wide 1600 canvas, and the redesigned /download (two columns, owner
+// image 2026-10-25) stands at 1400; every other page uses the one standard 1080 frame.
+const width = continuity.match(/var maxWidth = ([^;]+);/);
+assert(width, 'the panel frame width is one expression');
+assert(/panelPage === 'account' \? 1600 : panelPage === 'download' \? 1400 : 1080$/.test(width[1]), 'only /account receives the wide 1600 canvas and /download its 1400 two-column frame; every other page uses the one standard frame');
 
 const explorer = fs.readFileSync('js/pages/explorer.js', 'utf8');
 assert(explorer.includes('mesh-observatory'), 'explorer renders a dedicated observatory surface');

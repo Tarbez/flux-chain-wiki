@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>Pennant: a pennant on a dim staff, pointed at the trailing end</title>
+  <path d="M2 1 H110 L119 16 L110 31 H2" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V31" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

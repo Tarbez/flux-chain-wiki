@@ -195,8 +195,8 @@ html[data-world="on"] #scene .account-card { align-self:stretch; max-width:none;
 /* the block page caps its children at 1000px with an id-strength selector; the card is narrower */
 #scene .ark-page.ark-block-page.account-page--locked > .account-locked { max-width:520px; }
 .account-locked-mark {
-  display:grid; place-items:center; width:47px; height:47px; border:1px solid hsl(var(--primary) / .5); border-radius:4px;
-  color:hsl(var(--primary)); background:hsl(var(--primary) / .08);
+  display:grid; place-items:center; width:47px; height:47px; border:1px solid hsl(var(--primary-400)); border-radius:4px;
+  color:hsl(var(--primary)); background:hsl(var(--primary-100));
 }
 .account-locked-mark svg { width:22px; height:22px; }
 .account-locked-eyebrow { margin:6px 0 0; font:600 var(--fs-tertiary)/1.4 var(--font-mono, monospace); letter-spacing:.22em; text-transform:uppercase; color:hsl(var(--text-muted)); }

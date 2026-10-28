@@ -39,119 +39,148 @@
 # header-chain-popover is kept on purpose when the network pill swaps onto Ark's popover block (classes, id and
 # layout key move with it); `sheet` is the word "sheet" in a page-loader message string (the per-route CSS loader),
 # which the census reads as the CMS's .sheet class. Measured with scripts/ux-component-census.mjs at 50fa86c..d99c5ca.
+# RE-BASED 2026-10-27 (owner-confirmed redesigns): the baseline frozen 2026-10-19..21 predates the 3D world home
+# (js/pages/home.js), the skins and the NFT redesigns. The owner confirmed those designs on 2026-10-27, so the
+# data rows below were re-measured whole (scripts/ux-component-census.mjs census() on the working tree at 0d61b89,
+# including uncommitted work) instead of raised family by family. The notes above stay as the evidence for the
+# old numbers; the previous rows are in git history of this file (last at bdb7e05). Rises taken in this re-base:
+#   hero: classes 14->23, used-classes 5->12, uses 6->25, css-files 17->26, signatures 11->20
+#   eyebrow: classes 37->46, used-classes 19->21, uses 35->50, css-files 24->31, signatures 30->41
+#   pill: classes 16->30, used-classes 10->17, uses 12->31, css-files 8->18, signatures 6->14
+#   button: classes 18->31, used-classes 3->10, uses 3->20, css-files 12->21
+#   card: classes 27->68, used-classes 8->37, uses 10->63, css-files 15->28, signatures 15->37
+#   stat: classes 4->12, used-classes 3->4, uses 4->6, css-files 3->5
+#   step: classes 16->39, used-classes 8->24, uses 8->28, css-files 11->19, signatures 4->13
+#   code: classes 3->7, css-files 2->5
+#   diagram: classes 2->3, used-classes 2->3, uses 2->20, css-files 2->3
+#   tabs: classes 7->17, used-classes 3->9, uses 7->15, css-files 9->10, signatures 3->9
+#   accordion: classes 2->7, css-files 1->4
+#   callout: classes 18->27, used-classes 4->11, uses 8->24, css-files 5->13, signatures 8->13
+#   ctaRow: classes 11->13, used-classes 3->5, uses 4->12, css-files 11->13
+#   breadcrumb: classes 8->13, used-classes 7->9, uses 11->23, css-files 7->10, signatures 3->4
+#   nextLinks: classes 9->12, uses 7->26, css-files 9->11
+#   field: classes 36->53, css-files 16->19
+#   toggle: classes 8->37, css-files 5->10
+#   toast: classes 1->7, css-files 1->2
+#   modal: classes 7->16, used-classes 2->4, uses 5->12, css-files 2->7
+#   empty: classes 4->7, css-files 3->4
+#   sectionHead: signatures 3->4
+#   css: uppercase-rules 60->149, ark-overrides 0->143, ark-override-files 0->5, px-radius-values 15->18, px-font-sizes 39->44
+# Values that fell were taken too. From here the old rule holds again: --check fails on any rise, --ratchet
+# only lowers, and a justified rise is a hand edit with its reason in this header.
 measure	family	value
-classes	hero	14
-used-classes	hero	5
-uses	hero	6
-css-files	hero	17
-classes	eyebrow	37
-used-classes	eyebrow	19
-uses	eyebrow	35
-css-files	eyebrow	24
-classes	pill	16
-used-classes	pill	10
-uses	pill	12
-css-files	pill	8
-classes	button	18
-used-classes	button	3
-uses	button	3
-css-files	button	12
-classes	card	27
-used-classes	card	8
-uses	card	10
-css-files	card	15
-classes	stat	4
-used-classes	stat	3
-uses	stat	4
-css-files	stat	3
-classes	step	16
-used-classes	step	8
-uses	step	8
-css-files	step	11
+classes	hero	23
+used-classes	hero	12
+uses	hero	25
+css-files	hero	26
+classes	eyebrow	46
+used-classes	eyebrow	21
+uses	eyebrow	50
+css-files	eyebrow	31
+classes	pill	30
+used-classes	pill	17
+uses	pill	31
+css-files	pill	18
+classes	button	31
+used-classes	button	10
+uses	button	20
+css-files	button	21
+classes	card	68
+used-classes	card	37
+uses	card	63
+css-files	card	28
+classes	stat	12
+used-classes	stat	4
+uses	stat	6
+css-files	stat	5
+classes	step	39
+used-classes	step	24
+uses	step	28
+css-files	step	19
 classes	table	0
 used-classes	table	0
 uses	table	0
 css-files	table	0
-classes	code	3
+classes	code	7
 used-classes	code	1
 uses	code	1
-css-files	code	2
-classes	diagram	2
-used-classes	diagram	2
-uses	diagram	2
-css-files	diagram	2
-classes	tabs	7
-used-classes	tabs	3
-uses	tabs	7
-css-files	tabs	9
-classes	accordion	2
+css-files	code	5
+classes	diagram	3
+used-classes	diagram	3
+uses	diagram	20
+css-files	diagram	3
+classes	tabs	17
+used-classes	tabs	9
+uses	tabs	15
+css-files	tabs	10
+classes	accordion	7
 used-classes	accordion	0
 uses	accordion	0
-css-files	accordion	1
-classes	callout	18
-used-classes	callout	4
-uses	callout	8
-css-files	callout	5
-classes	ctaRow	11
-used-classes	ctaRow	3
-uses	ctaRow	4
-css-files	ctaRow	11
+css-files	accordion	4
+classes	callout	27
+used-classes	callout	11
+uses	callout	24
+css-files	callout	13
+classes	ctaRow	13
+used-classes	ctaRow	5
+uses	ctaRow	12
+css-files	ctaRow	13
 classes	sectionHead	5
 used-classes	sectionHead	2
-uses	sectionHead	5
-css-files	sectionHead	9
-classes	breadcrumb	8
-used-classes	breadcrumb	7
-uses	breadcrumb	11
-css-files	breadcrumb	7
-classes	nextLinks	9
-used-classes	nextLinks	6
-uses	nextLinks	7
-css-files	nextLinks	9
-classes	field	36
-used-classes	field	17
-uses	field	31
-css-files	field	16
-classes	toggle	8
+uses	sectionHead	4
+css-files	sectionHead	6
+classes	breadcrumb	13
+used-classes	breadcrumb	9
+uses	breadcrumb	23
+css-files	breadcrumb	10
+classes	nextLinks	12
+used-classes	nextLinks	4
+uses	nextLinks	26
+css-files	nextLinks	11
+classes	field	53
+used-classes	field	16
+uses	field	30
+css-files	field	19
+classes	toggle	37
 used-classes	toggle	3
 uses	toggle	6
-css-files	toggle	5
-classes	toast	1
+css-files	toggle	10
+classes	toast	7
 used-classes	toast	0
 uses	toast	0
-css-files	toast	1
-classes	modal	7
-used-classes	modal	2
-uses	modal	5
-css-files	modal	2
-classes	empty	4
+css-files	toast	2
+classes	modal	16
+used-classes	modal	4
+uses	modal	12
+css-files	modal	7
+classes	empty	7
 used-classes	empty	2
 uses	empty	3
-css-files	empty	3
-signatures	hero	11
-signatures	eyebrow	30
-signatures	pill	6
+css-files	empty	4
+signatures	hero	20
+signatures	eyebrow	41
+signatures	pill	14
 signatures	button	-
-signatures	card	15
+signatures	card	37
 signatures	stat	2
-signatures	step	4
+signatures	step	13
 signatures	table	0
 signatures	code	-
 signatures	diagram	-
-signatures	tabs	3
+signatures	tabs	9
 signatures	accordion	-
-signatures	callout	8
+signatures	callout	13
 signatures	ctaRow	-
-signatures	sectionHead	3
-signatures	breadcrumb	3
-signatures	nextLinks	10
+signatures	sectionHead	4
+signatures	breadcrumb	4
+signatures	nextLinks	8
 signatures	field	-
 signatures	toggle	-
 signatures	toast	-
 signatures	modal	-
 signatures	empty	-
-uppercase-rules	css	60
-ark-overrides	css	0
-ark-override-files	css	0
-px-radius-values	css	15
-px-font-sizes	css	39
+uppercase-rules	css	149
+ark-overrides	css	143
+ark-override-files	css	5
+px-radius-values	css	18
+px-font-sizes	css	44

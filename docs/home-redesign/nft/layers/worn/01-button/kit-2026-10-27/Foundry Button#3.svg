@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Foundry Button: an outline with an angled steel plate inside each end, each held by two slotted screws, the leading top screw in the complementary role (the Foundry set)</title>
+  <rect x="1" y="1" width="198" height="54" rx="2" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M22 4 H7 L4 7 V49 L7 52 H22" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="13" cy="9" r="2.5" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M11.4 10.6 L14.6 7.4" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="13" cy="47" r="2.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M11.4 48.6 L14.6 45.4" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <g transform="matrix(-1 0 0 1 200 0)"><path d="M22 4 H7 L4 7 V49 L7 52 H22" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="13" cy="9" r="2.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M11.4 10.6 L14.6 7.4" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="13" cy="47" r="2.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M11.4 48.6 L14.6 45.4" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+</svg>

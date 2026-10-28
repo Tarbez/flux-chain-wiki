@@ -202,7 +202,19 @@ class Blake3Hasher {
         return outputRootBytes(output, outLen);
     }
 }
+// A native BLAKE3 (`@deadark/flux-core-native`'s blake3Digest) a Node host installs once. This file
+// stays browser-safe: it never imports the addon. The pure-JS hasher below is the fallback for a runtime
+// with no native hasher, and the reference the native one is proven equal to.
+let nativeBlake3 = null;
+/** Install `digest(bytes, outLen) -> Uint8Array` as the BLAKE3 every caller here uses; `null` restores pure JS. */
+export function useNativeBlake3(digest) {
+    if (digest !== null && typeof digest !== "function")
+        throw new TypeError("useNativeBlake3 takes a digest function or null");
+    nativeBlake3 = digest;
+}
 export function blake3(bytes, outLen = 32) {
+    if (nativeBlake3)
+        return nativeBlake3(bytes, outLen);
     const hasher = new Blake3Hasher();
     hasher.update(bytes);
     return hasher.finalize(outLen);

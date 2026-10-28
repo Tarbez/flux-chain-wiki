@@ -1,5 +1,9 @@
 // The hand-built UI census (scripts/ux-component-census.mjs) is how each DEFXN polish wave proves it
 // REDUCED duplication instead of adding a parallel copy (docs/ux-audit/components.md §0, §6).
+// Re-based 2026-10-27: the frozen 2026-10-19..21 baseline predated the 3D world home, the skins and
+// the NFT redesigns, which the owner confirmed on 2026-10-27. The baseline's data rows were
+// re-measured whole and its header keeps every earlier note plus a dated RE-BASED note listing each
+// rise taken; from that point the same ratchet applies (no rise without a written reason).
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { spawnSync } = require('node:child_process');
@@ -19,6 +23,9 @@ assert.equal(run.status, 0, 'census --check failed:\n' + run.stdout + run.stderr
 const baseline = fs.readFileSync('docs/ux-audit/component-census-baseline.tsv', 'utf8');
 assert(/^measure\tfamily\tvalue$/m.test(baseline), 'baseline has a measure/family/value header');
 assert(/^signatures\tbutton\t-$/m.test(baseline), 'an unmeasured signature family is "-", never 0');
+// 3b. The 2026-10-27 re-base is recorded in the file, and the notes it rests on were kept.
+assert(/^# RE-BASED 2026-10-27 \(owner-confirmed redesigns\)/m.test(baseline), 'the baseline header records the owner-confirmed re-base of 2026-10-27');
+assert(baseline.indexOf('# Raised by hand 2026-10-19') >= 0 && baseline.indexOf('# Raised by hand 2026-10-19') < baseline.indexOf('# RE-BASED 2026-10-27'), 'the re-base kept the earlier hand-edit notes above it');
 
 // 4. The baseline cannot be regenerated over itself: --init-baseline refuses when one exists.
 const init = spawnSync(process.execPath, ['scripts/ux-component-census.mjs', '--init-baseline'], { encoding: 'utf8' });

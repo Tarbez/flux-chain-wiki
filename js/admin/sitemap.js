@@ -11,7 +11,7 @@
   var state = A.state, $ = A.$, realLinkIndex = A.realLinkIndex, ic = A.ic, openRoute = A.openRoute,
       layoutStage = A.layoutStage, syncHeader = A.syncHeader, schedule = A.schedule;
   /* defined by files loaded after this one: resolved when called */
-  var mountThemeView = A.later('mountThemeView'), mountWorldView = A.later('mountWorldView'), mountSkinView = A.later('mountSkinView');
+  var mountThemeView = A.later('mountThemeView'), mountWorldView = A.later('mountWorldView'), mountSkinView = A.later('mountSkinView'), mountKitView = A.later('mountKitView');
 
   /* =========================================================================
      Sitemap: page tree by address, links on demand, problems flagged
@@ -132,22 +132,26 @@
      shows on the real page as it is picked) 'world' (the 3D world's controls, docked the
      same way; js/admin/panels.js mounts them) and 'skin' (the Skin lab, docked the same way). */
   function setView(v) {
-    if (v !== 'design' && v !== 'map' && v !== 'theme' && v !== 'world' && v !== 'skin') return;
+    if (v !== 'design' && v !== 'map' && v !== 'theme' && v !== 'world' && v !== 'skin' && v !== 'kit') return;
     if (state.view === 'skin' && v !== 'skin' && A.skinLabLeave) A.skinLabLeave();   /* the review skin does not stay on the canvas you edit */
+    var leavingKit = state.view === 'kit' && v !== 'kit';
     /* Site style docks on the right edge, the edge the docked overlays (Page settings, Publishing
        status, Version history: level 'sheet', js/admin/overlay.js) float over. Chosen while one of
        them was open, it opened UNDER it -- at 1500px the dock [1060,1500] lay beneath Versions
        [1080,1500] and showed as a 20px sliver, so choosing it seemed to do nothing (2026-10-19;
        tests/cms-site-style-not-under-sheet.cjs, tests/browser/versions.mjs). What the person just
        chose is the one on top: choosing Site style closes them, as their close button would. */
-    if ((v === 'theme' || v === 'world' || v === 'skin') && A.overlay) A.overlay.closeLevel('sheet', 'view');
+    if ((v === 'theme' || v === 'world' || v === 'skin' || v === 'kit') && A.overlay) A.overlay.closeLevel('sheet', 'view');
     state.view = v;
-    $('shell').classList.toggle('mapview', v === 'map'); $('shell').classList.toggle('themeview', v === 'theme' || v === 'world' || v === 'skin');
-    $('designView').hidden = v === 'map'; $('mapView').hidden = v !== 'map'; $('themeView').hidden = v !== 'theme'; $('worldView').hidden = v !== 'world'; $('skinView').hidden = v !== 'skin';
+    $('shell').classList.toggle('mapview', v === 'map'); $('shell').classList.toggle('themeview', v === 'theme' || v === 'world' || v === 'skin' || v === 'kit');
+    $('designView').hidden = v === 'map'; $('mapView').hidden = v !== 'map'; $('themeView').hidden = v !== 'theme'; $('worldView').hidden = v !== 'world'; $('skinView').hidden = v !== 'skin'; $('kitView').hidden = v !== 'kit';
     if (v === 'map') { mapFocus = state.cmsCurrentRoute; mapZoom = 1; renderSitemap(); } else layoutStage();
     if (v === 'theme') mountThemeView();
     if (v === 'world') mountWorldView();
     if (v === 'skin') mountSkinView();
+    /* the Kit (js/admin/kit.js): its page on the canvas while it is open; the page shown before comes back after */
+    if (leavingKit && A.kitLeave) A.kitLeave();
+    if (v === 'kit') { mountKitView(); if (A.kitEnter) A.kitEnter(); }
     syncHeader(); schedule();
   }
   A.provide({ renderSitemap: renderSitemap, setView: setView });

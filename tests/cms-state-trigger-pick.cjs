@@ -32,7 +32,7 @@ class FakeElement {
 function run(host) {
   const context = {
     host,
-    cmsRoutePath: () => '/',
+    cmsRoutePath: () => '/', cmsLayoutScope: () => '/',
     cmsScopeOf: () => '/',
     cmsLayoutBreakpoint: () => 'desktop',
     cmsLayoutEntry: () => ({}),

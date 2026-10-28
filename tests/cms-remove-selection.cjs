@@ -36,7 +36,7 @@ function makeContext(host, selected) {
     host, cmsPreviewSelected: selected || null, cmsPreviewSelections: selected ? [selected] : [],
     cmsComponentsCommand: function (data) { calls.componentsCommand.push(data); },
     cmsUngroupSelection: function () { calls.ungroup++; },
-    cmsRoutePath: function () { return '/test-route'; },
+    cmsRoutePath: function () { return '/test-route'; }, cmsLayoutScope: function () { return '/test-route'; },
     cmsGroupList: function () { return ['stub-groups']; },
     cmsRealTree: function () { return ['stub-tree']; },
     placeCmsLayoutUi: function () {},

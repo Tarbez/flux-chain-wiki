@@ -408,11 +408,13 @@
       root.appendChild(panelHead(manifest.title, manifest.route, 'page', id));
 
       var contentPanel = h('div', { class: 'editor-tab-flow' });
-      if (manifest.meta.next || manifest.meta.placement) {
+      /* meta is optional (js/content/manifest.js): the world pages' manifests carry none */
+      var meta = manifest.meta || {};
+      if (meta.next || meta.placement) {
         var where = h('fieldset', {}, h('legend', { text: 'Where it goes' }));
-        if (manifest.meta.placement) where.appendChild(metaSelect(manifest, 'meta.placement', 'Shown on the theory page as',
+        if (meta.placement) where.appendChild(metaSelect(manifest, 'meta.placement', 'Shown on the theory page as',
           [{ key: 'row', label: 'A numbered row' }, { key: 'rail', label: 'A link beside the page' }]));
-        if (manifest.meta.next) where.appendChild(metaSelect(manifest, 'meta.next', 'The onward link opens', routeOptions()));
+        if (meta.next) where.appendChild(metaSelect(manifest, 'meta.next', 'The onward link opens', routeOptions()));
         contentPanel.appendChild(where);
       }
       /* A field the page no longer shows says so in its own label ("... (unused on the current

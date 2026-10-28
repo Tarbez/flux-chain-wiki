@@ -1,8 +1,8 @@
 {
   "package": "@deadark/flx-codec",
-  "version": "0.1.1",
-  "tarball": ".vendor/deadark-flx-codec-0.1.1.tgz",
-  "sha256": "aa059f7ce02fdaa9bdf0d9a32bc7d953edf51de6b8b0a35d13549c869734da85",
+  "version": "0.1.2",
+  "tarball": ".vendor/deadark-flx-codec-0.1.2.tgz",
+  "sha256": "6a666d57ed1f1d236ea7bfc7f812f26c0f5ec71c36ce67db828b5edbf1a87dab",
   "sourceRoot": "../../../flx/flx-codec",
-  "updatedAt": "2026-10-25T15:59:12.950Z"
+  "updatedAt": "2026-10-26T21:49:04.122Z"
 }

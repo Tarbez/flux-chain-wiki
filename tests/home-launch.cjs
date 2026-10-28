@@ -1,18 +1,24 @@
 'use strict';
 /* run-tests-timeout-ms: 180000 */
 /* The home page module's own behaviour, in the real page (a jsdom boot through the server render,
-   api/lib/render-core.mjs): what js/pages/home.js does beyond rendering its blocks
-   (tests/home-blocks.cjs holds the blocks, the words and the layout keys).
+   api/lib/render-core.mjs): what js/pages/home.js and the Measured rail it mounts (js/world/rail-capabilities.js)
+   do beyond rendering their words (tests/home-blocks.cjs holds the words, the links and the figures).
+   Since the owner confirmed the 3D world home on 2026-10-27, this locks its reduction test's behaviour:
+   - item 4, hidden until asked: a capability's plain words and checked cases show on a pick in the rail.
+     The rail opens on the capability with the most checked cases; a pick lights its tile (aria-pressed) and its
+     strip segment, and only those, and wipes the focus in;
+   - its speed is "Not measured yet", said in words, never a 0 (a capability with no measurement is absent,
+     not scored nothing: the standing law, and the named regression of the old fleet tile);
+   - item 8, leaving keeps state: the chosen capability resets, so a page mounted again opens on the first;
+   - a rail is mounted once: mounting it again adds nothing;
+   - item 10, if the 3D or the rail's script is missing: the words and the actions still mount (the module
+     only calls the rail when it is there).
 
-   Named regressions:
-   - the fleet signal is a measurement to check, never a 0: absent while loading, absent with its
-     reason when the pulse fails, the reading when it arrives -- and a reading that arrives after
-     the page was left must not touch it;
-   - the reading replaces the tile's value IN PLACE: the tile, its label and its parts stay the same
-     elements, so a pin (a CMS edit saved against the old page) survives it;
-   - the chosen path is remembered when the page is mounted again (it was before the conversion);
-   - choosing an example draws its counterparty in full ink on the map, and only the shown scene
-     runs; leaving the page disposes every scene. */
+   Dropped, with the reason (the thing each guarded is gone with the block home, by the owner's design):
+   - the live fleet tile (absent while loading, the reading in place with its pins, failure, a late response):
+     the world home shows one dated benchmark run, not a live reading, and loads no pulse client;
+   - the remembered path across mounts: the paths are links now, and item 8 says the choice resets;
+   - the transit map inking the chosen example's counterparty: the map and the examples are gone. */
 const assert = require('node:assert/strict');
 const path = require('node:path');
 
@@ -20,80 +26,65 @@ const ROOT = path.resolve(__dirname, '..');
 
 (async () => {
   const { readIndexHtml, inspectDocument, createLocalResources } = await import('../api/lib/render-core.mjs');
-  const result = await inspectDocument({ html: await readIndexHtml(ROOT), url: 'https://defxn.com/', resources: createLocalResources(ROOT), root: ROOT, timeoutMs: 30000 }, async (window) => {
-    const { document, ArkUI } = window;
+  const raw = await inspectDocument({ html: await readIndexHtml(ROOT), url: 'https://defxn.com/', resources: createLocalResources(ROOT), root: ROOT, timeoutMs: 30000 }, async (window) => {
+    const { document, ArkUI, ArkCopy } = window;
     const module = ArkUI.pageModules.zero;
-    const tick = () => new Promise((resolve) => window.setTimeout(resolve, 0));
-    const fleetTile = (page) => page.querySelectorAll('#home-questions [data-ark-block="stats"]')[1].querySelector('[data-ark-part="stat"]');
-    const out = {};
-
-    /* one pending pulse per mount, settled by hand */
-    let settle = null;
-    window.ArkPulse = { get: () => new Promise((resolve, reject) => { settle = { resolve, reject }; }) };
+    const word = (role) => ArkCopy.text('HOME.WORLD.' + role);
+    const D = window.DEFXN_CAPABILITIES;
+    const caps = D.capabilities.slice().sort((a, b) => b.count - a.count || (a.id < b.id ? -1 : 1));
+    const total = caps.reduce((s, c) => s + c.count, 0);
     const mount = () => { const host = document.createElement('div'); document.body.appendChild(host); return module.mount(host); };
+    const focus = (page) => {
+      const f = page.querySelector('[data-cap="focus"]');
+      return { name: f.querySelector('.rx-name').textContent, line: f.querySelector('.rx-line').textContent,
+        facts: [...f.querySelectorAll('.rx-facts dd')].map((dd) => dd.textContent), swap: f.classList.contains('swap') };
+    };
+    const lit = (page) => ({ pressed: [...page.querySelectorAll('[data-cap-id][aria-pressed="true"]')].map((b) => b.dataset.capId),
+      segs: [...page.querySelectorAll('[data-seg].on')].map((s) => s.dataset.seg) });
+    const title = (id) => id.charAt(0).toUpperCase() + id.slice(1);
+    const out = { first: caps[0].id, total, want: {} };
+    const wantFor = (c) => ({ name: title(c.id), line: c.plain || word('RAIL.NOWORDS'), facts: [c.count + ' ' + word('RAIL.OF') + ' ' + total, word('RAIL.NOTMEASURED')] });
 
-    // loading: absent, never 0
+    // opens on the capability with the most checked cases, the focus not wiped
     let page = mount();
-    let tile = fleetTile(page);
-    out.loading = { state: tile.getAttribute('data-state'), text: tile.textContent };
-    // a pin on the tile and its label survives the reading
-    tile.setAttribute('data-ark-layout-pin', 'pin:tile');
-    tile.querySelector('[data-ark-part="stat-label"]').setAttribute('data-ark-layout-pin', 'pin:label');
-    settle.resolve({ data: { nodes: [{ qps: 5 }, { qps: 7 }, { error: 'down' }], aggregate_qps: 12345.4, measured_at_ms: Date.UTC(2026, 9, 19, 12) } });
-    await tick(); await tick();
-    // the first live update loads js/ark/vendor/ark-kit-live.js and patches when it arrives (async)
-    if (ArkUI.blocks.whenLive) await ArkUI.blocks.whenLive();
-    const sameTile = fleetTile(page);
-    out.reading = { same: sameTile === tile, state: sameTile.getAttribute('data-state'), number: (sameTile.querySelector('.ark-stat__number') || {}).textContent, unit: (sameTile.querySelector('[data-ark-part="stat-unit"]') || {}).textContent,
-      detail: (sameTile.querySelector('[data-ark-part="stat-detail"]') || {}).textContent, pins: [sameTile.getAttribute('data-ark-layout-pin'), sameTile.querySelector('[data-ark-part="stat-label"]').getAttribute('data-ark-layout-pin')] };
-    page.arkDispose();
+    out.opened = { lit: lit(page), focus: focus(page) };
+    out.want.first = wantFor(caps[0]);
 
-    // failure: absent, with its reason
-    page = mount();
-    settle.reject(new Error('offline'));
-    await tick(); await tick();
-    tile = fleetTile(page);
-    out.failed = { state: tile.getAttribute('data-state'), text: tile.textContent };
-    page.arkDispose();
+    // a pick lights that capability alone and wipes the focus in
+    const pick = caps[caps.length - 1];
+    page.querySelector(`[data-cap-id="${pick.id}"]`).click();
+    out.picked = { id: pick.id, lit: lit(page), focus: focus(page) };
+    out.want.picked = wantFor(pick);
 
-    // a reading after the page was left is not painted
-    page = mount();
-    tile = fleetTile(page);
-    const before = tile.textContent;
-    page.arkDispose();
-    settle.resolve({ data: { nodes: [], aggregate_qps: 1, measured_at_ms: 0 } });
-    await tick(); await tick();
-    out.late = { unchanged: fleetTile(page).textContent === before };
+    // a rail is mounted once
+    const rail = page.querySelector('aside.rail'), before = rail.innerHTML;
+    window.DEFXNRail.mount(rail, {});
+    out.once = rail.innerHTML === before && rail.dataset.railMounted === '1';
 
-    // the chosen path is remembered across mounts
-    /* the path picker is the "Where do I start?" view's own tabs, the example picker "See it work"'s (the steps inside each scene are tabs too) */
-    const VIEWS = ['start', 'walk', 'model', 'evidence', 'faq']; // the questions' order (js/pages/home.js)
-    const viewTabs = (p, value) => p.querySelectorAll('#home-questions > [data-ark-part="tabs-content"]')[VIEWS.indexOf(value)].querySelector(':scope > [data-ark-block="tabs"]');
-    const pathTab = (p, i) => viewTabs(p, 'start').querySelectorAll(':scope > [data-ark-part="tabs-list"] [role="tab"]')[i];
-    pathTab(page, 2).click();
+    // mounted again: the choice resets to the first
     const again = mount();
-    out.remembered = pathTab(again, 2).getAttribute('aria-selected');
+    out.reset = lit(again);
 
-    // choosing an example inks its counterparty on the map
-    const caseTab = (p, i) => viewTabs(p, 'walk').querySelectorAll(':scope > [data-ark-part="tabs-list"] [role="tab"]')[i];
-    caseTab(again, 2).click(); // Staking
-    out.inked = [...again.querySelectorAll('[data-ark-slot="world"] .world-line[data-selected="true"]')].map((l) => l.getAttribute('data-name'));
-    again.arkDispose();
+    // no rail script: the words and the actions still mount
+    const keep = window.DEFXNRail;
+    window.DEFXNRail = undefined;
+    const bare = mount();
+    window.DEFXNRail = keep;
+    out.bare = { h1: !!bare.querySelector('h1#home-title'), main: !!bare.querySelector('.copy > a.cta'), paths: bare.querySelectorAll('nav.paths a').length,
+      railAction: !!bare.querySelector('aside.rail a.rail-cta'), tiles: bare.querySelectorAll('.rx-tiles > div').length };
     return out;
   });
+  const result = JSON.parse(JSON.stringify(raw)); // plain data: the window's arrays are another realm's
 
-  assert.equal(result.loading.state, 'absent', 'while loading, the fleet tile is absent');
-  assert(/Fleet measurement loading/.test(result.loading.text) && !/\b0\b/.test(result.loading.text.replace(/\d+\s*\/\s*\d+/g, '')), 'and says it is loading, with no number');
-  assert.equal(result.reading.same, true, 'the reading lands in the same tile element (in place)');
-  assert.equal(result.reading.state, 'reading');
-  assert.equal(result.reading.number, '12,345', 'the measured rate, rounded and grouped');
-  assert.equal(result.reading.unit, 'ops/s');
-  assert(/2\/3 nodes reporting/.test(result.reading.detail) && /not cumulative ledger growth/.test(result.reading.detail), 'it says how many nodes reported, and what the number is not');
-  assert.deepEqual(result.reading.pins, ['pin:tile', 'pin:label'], 'pins on the tile and its label survive the reading');
-  assert.equal(result.failed.state, 'absent', 'a failed pulse leaves the tile absent');
-  assert(/Live fleet measurement unavailable/.test(result.failed.text) && /Dated benchmark evidence/.test(result.failed.text), 'with its reason, pointing at the dated evidence');
-  assert.equal(result.late.unchanged, true, 'a late response cannot update a page that was left');
-  assert.equal(result.remembered, 'true', 'the chosen path is remembered when the page is mounted again');
-  assert.deepEqual(result.inked, ['provider.fxn'], 'staking draws provider.fxn in full ink');
-  console.log('PASS: home fleet signal (loading, reading in place with pins kept, failure, late response), remembered path, map follows the example.');
+  assert.deepEqual(result.opened.lit, { pressed: [result.first], segs: [result.first] }, 'the rail opens on the capability with the most checked cases, its tile and its strip segment lit');
+  assert.deepEqual({ ...result.opened.focus, swap: undefined }, { ...result.want.first, swap: undefined }, 'the focus shows its name, its plain words, its checked cases of all, and its speed in words');
+  assert.equal(result.opened.focus.swap, false, 'opening does not wipe the focus in (nothing moves on its own)');
+  assert(!result.opened.focus.facts.some((f) => /^0\b/.test(f.trim())), 'no fact is a 0: a speed not measured is said, never shown as 0');
+  assert.deepEqual(result.picked.lit, { pressed: [result.picked.id], segs: [result.picked.id] }, 'a pick lights that capability alone');
+  assert.deepEqual({ ...result.picked.focus, swap: undefined }, { ...result.want.picked, swap: undefined }, 'and the focus shows it');
+  assert.equal(result.picked.focus.swap, true, 'a pick wipes the focus in');
+  assert.equal(result.once, true, 'a rail is mounted once');
+  assert.deepEqual(result.reset, { pressed: [result.first], segs: [result.first] }, 'mounted again, the chosen capability resets to the first');
+  assert.deepEqual(result.bare, { h1: true, main: true, paths: 3, railAction: true, tiles: 0 }, 'with no rail script, the words, the main action, the three paths and the rail\'s action still mount');
+  console.log('PASS: home rail behaviour: opens on the most-checked capability, a pick lights it alone and wipes the focus in, speed said not zeroed, mounted once, resets on return, and the words and actions mount without the rail.');
 })().catch((error) => { console.error(error); process.exit(1); });

@@ -18,7 +18,11 @@
    - Dead-ish ends (pages-ux-b.md /what-is-a-resolver P2): the lab leads on to /resolvers,
      /resolver-math, /start-from-something-real and the products; every page ends in a pager.
    - Saved CMS data is never rewritten: every old layout key still lands, or is reshaped / retired
-     below with its reason (tests/lib/converted-page.cjs). */
+     below with its reason (tests/lib/converted-page.cjs).
+   - 2026-10-27, owner-confirmed: the /download redesign (b0dc2d7) is locked -- the terminal's step dots and tour
+     button are its only hand-built buttons, its numbered terminal lines and reworded steps 1 and 3 are recorded below,
+     and the old-parts matcher no longer mistakes the template's own [data-story-depth] attribute for the old
+     story-depth part. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -130,7 +134,10 @@ const ROUTES = {
       /* journey audit 2026-10-24: the heading and deck lead with the browser (see reworded); the guide link is the hero's second action */
       [/^id:download-title$/, 'the heading names the browser state; its key stays on the h1'],
       [/^page:\/header:1\/p:1$/, 'the deck opens with the browser and the FXN ID; its key stays on the deck'],
-      [/^page:\/nav:1\/a:1$/, 'the guide link keeps its key; "Create your FXN ID" is the hero\'s new primary action after it']
+      [/^page:\/nav:1\/a:1$/, 'the guide link keeps its key; "Create your FXN ID" is the hero\'s new primary action after it'],
+      /* the /download redesign (b0dc2d7, 2026-10-25; owner-confirmed 2026-10-27) reworded steps 1 and 3 (see reworded) */
+      [/^id:source-step-[13]$/, 'steps 1 and 3 say what to do in plainer words (see reworded); each keeps its key'],
+      [/^page:\/div:1\/section:1\/div:2(\/pre:1\/code:\d+\/span:1)?$/, 'the terminal numbers its lines as an editor does ("1", "2") where it showed a "$" prompt (the number is not copied; Copy takes the commands alone): the same screen and lines, each keeping its key']
     ],
     retired: [
       [/^page:\/header:1\/div:1\/a:1$/, 'the phone-only duplicate of the guide link ("Operator guide →"); the hero\'s one guide action serves every width'],
@@ -151,7 +158,10 @@ const ROUTES = {
       /* journey audit 2026-10-24 (docs/journey/END-TO-END-2026-10-24.md): a newcomer arrives here to get the browser, and no download exists.
          The heading names that state; the miner steps stay below it, introduced by the deck as the page for people who run a miner. */
       [/^id:download-title$/, '"Start a local miner from a trusted checkout." reads "FXN Browser has no public download yet." (the owner named it DEFXN Grid, then settled on FXN Browser, 2026-10-24): the page leads with the browser, the miner steps follow in the deck'],
-      [/^page:\/header:1\/p:1$/, 'the deck opens with the browser and the FXN ID, then points to the miner steps']
+      [/^page:\/header:1\/p:1$/, 'the deck opens with the browser and the FXN ID, then points to the miner steps'],
+      /* the /download redesign (b0dc2d7, 2026-10-25; owner-confirmed 2026-10-27): DOWNLOAD.POINT1.TEXT and POINT3.TEXT */
+      [/^id:source-step-1$/, 'step 1 reads "Install Node.js 22 or newer with npm. The miner also needs a folder it can write to and a free status port." (it read "Use Node.js 22 or newer with npm. The storage directory must be writable and the status port free.")'],
+      [/^id:source-step-3$/, 'step 3 ends "Note the source revision and package version. Keep a copy of the configuration you started with." (it ended "Write down the source revision, package version, configuration and when you looked.")']
     ]
   }
 };
@@ -165,13 +175,21 @@ const ROUTES = {
   }
   for (const file of ['js/pages/resolver-guide.js', 'js/pages/resolver-lab.js', 'js/pages/download.js']) {
     const source = read(file);
-    assert(!/story-depth|guided-step-picker|how-step-button|content-layer-path|lifecycle-boundary/.test(source), file + ' builds none of the old guide parts');
+    /* the old parts were class names; the story template's own [data-story-depth] attribute (which a page may query) is not one
+       of them, so a name counts only where no letter, digit or "-" precedes it (it matched "data-story-depth" until 2026-10-27) */
+    assert(!/(?<![\w-])(story-depth|guided-step-picker|how-step-button|content-layer-path|lifecycle-boundary)\b/.test(source), file + ' builds none of the old guide parts');
     assert(!/ArkUI\.el\('(section|header|h1|nav|figure)'/.test(source) && !/el\('(section|header|h1|nav|figure)'/.test(source), file + ': no hand-built page structure');
   }
   /* ledger recheck 2026-10-21, "/download hand-built" (T11, DN7/P8): the terminal's checks are Ark
      facts and its step buttons Ark actions; only the commands themselves stay the page's own (Ark
      has no command block, P22) */
-  assert(!/el\('(dl|dt|dd|button|a)'/.test(read('js/pages/download.js')) && !/linkEl\(/.test(read('js/pages/download.js')), 'js/pages/download.js: no hand-built key/value list, button or link');
+  /* 2026-10-25 redesign (owner-confirmed 2026-10-27): the terminal's way through gained the step dots (a button per step) and
+     the "play the five steps" tour button. Those two are the only hand-built buttons, each named by its class; Ark's actions
+     row still carries Previous step / Next step and the hand-off. */
+  const downloadSource = read('js/pages/download.js');
+  assert(!/el\('(dl|dt|dd|a)'/.test(downloadSource) && !/linkEl\(/.test(downloadSource), 'js/pages/download.js: no hand-built key/value list or link');
+  assert.deepEqual([...downloadSource.matchAll(/el\('button', '([^']*)'\)/g)].map((m) => m[1]), ['download-dot', 'download-play'], 'js/pages/download.js: the only hand-built buttons are the step dots and the tour button');
+  assert.equal((downloadSource.match(/el\('button'/g) || []).length, 2, 'and no other hand-built button');
 
   const lines = [];
   for (const route of Object.keys(ROUTES).filter((r) => process.argv.length <= 2 || process.argv.slice(2).includes(r))) {

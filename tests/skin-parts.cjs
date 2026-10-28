@@ -13,16 +13,18 @@ const { JSDOM } = require('jsdom');
 const root = path.join(__dirname, '..');
 const P = require('../js/ark/skin-parts.js');
 
-// 1. every class the map names exists in the site's code (header, nav, CTA resolvers, pages, the redesign)
-const sources = ['js/resolvers', 'js/pages', 'js/world', 'docs/home-redesign', 'css'].flatMap((dir) => {
+// 1. every class the map names exists in the site's code (header, nav, CTA resolvers, pages, the redesign, and the
+//    kit's Products switcher in assets/kit, which the map has named since the skin audit of 2026-10-25). A class is
+//    read whole, BEM element included: the switcher's preview has only element classes (.dx-preview__line), no block.
+const sources = ['js/resolvers', 'js/pages', 'js/world', 'docs/home-redesign', 'css', 'assets/kit'].flatMap((dir) => {
   const abs = path.join(root, dir); if (!fs.existsSync(abs)) return [];
   return fs.readdirSync(abs).filter((f) => /\.(js|css|html)$/.test(f)).map((f) => fs.readFileSync(path.join(abs, f), 'utf8'));
 }).join('\n');
-const classes = new Set(P.PARTS.flatMap(([sel]) => (sel.match(/\.[a-z][a-z0-9-]*/g) || []).map((c) => c.slice(1))));
+const classes = new Set(P.PARTS.flatMap(([sel]) => (sel.match(/\.[a-z][a-z0-9_-]*/g) || []).map((c) => c.slice(1))));
 classes.forEach((c) => assert.ok(new RegExp('[\'" .]' + c + '[\'" ,:{)]').test(sources), `the part map names .${c}, but no site source uses that class any more: update js/ark/skin-parts.js`));
 
 // 2-4. naming, never renaming, exact undo, late parts
-const dom = new JSDOM(`<body><header class="ark-header"><nav><a class="ark-link">A</a></nav>
+const dom = new JSDOM(`<body><header class="ark-header"><nav class="dx-bar__nav"><a class="ark-link">A</a></nav>
   <button class="header-products-toggle">Products</button><div class="x" data-ark-part="POPOVER" id="own"></div></header>
   <aside class="rail"><section class="rx-fleet"></section></aside><a class="cta quiet">Go</a></body>`);
 global.MutationObserver = dom.window.MutationObserver;
@@ -47,9 +49,20 @@ return Promise.resolve().then(() => {
   ['--danger', '--success', '--chain-identity', '--net-fxn', '--ember'].forEach((t) => assert.ok(P.LOCKS.includes(t), t + ' is locked on this site'));
   assert.ok(!P.LOCKS.includes('--reference'), '--reference is a role the SDK derives, not a site lock');
   // 6. The card dresses the site by its own rules (the owner, 2026-10-24): every part takes what the card sends, less what
-  //    is switched off. The code switches nothing off by itself; only someone who saw a reason on the real page does, in
-  //    the CMS. (A table here had listed what each part MAY take, and kept most parts bare.)
-  assert.deepEqual(P.OFF, {}, 'the code switches nothing off: the card\'s own rules reach every part');
+  //    is switched off. The code switches a rule off only for a reason measured on the real page and written beside it
+  //    (skin gate and site pass, 2026-10-25); the owner confirmed this list on 2026-10-27. Anything else is switched off
+  //    in the CMS. (A table here had listed what each part MAY take, and kept most parts bare.)
+  assert.deepEqual(JSON.parse(JSON.stringify(P.OFF)), {
+    THEAD: ['frame'], TBODY: ['frame'], ROW: ['frame'], CARDHEADER: ['frame'], CARDFOOTER: ['frame'],
+    MENUBAR: ['density'], NAVMENU: ['density'], TABSTRIGGER: ['button'], HERO: ['ornament'], ACCORDIONTRIGGER: ['button'],
+    DISCLOSUREPANEL: ['ornament', 'frame'], TABSCONTENT: ['ornament'], DISCLOSURE: ['ornament', 'frame']
+  }, 'the code switches off exactly the measured, owner-confirmed list: each one has its reason beside it in js/ark/skin-parts.js');
+  {
+    // every switched-off rule is one the skin policy knows, or the policy drops the switch (REGRESSION 2026-10-27: it knew
+    // only the seven structure rules and dropped `button`, so tab and accordion triggers kept a button outline)
+    const rules = JSON.parse(/var RULES = (\[[^\]]*\])/.exec(fs.readFileSync('js/content/skin-policy.js', 'utf8'))[1].replace(/'/g, '"').replace(/\s+/g, ' '));
+    Object.entries(P.OFF).forEach(([part, list]) => list.forEach((rule) => assert.ok(rules.includes(rule), part + ' switches off ' + rule + ', which js/content/skin-policy.js RULES lacks')));
+  }
   assert.ok(!('ALLOW' in P) && !('rulesFor' in P) && !('limit' in P), 'the retired allow table is gone, so nothing can read it by mistake');
   const sent = { CARD: { frame: 'full', edge: 'cut', header: 'tag' }, 'section-header': { ornament: 'strip' }, 'PRIMARY|BUTTON': { edge: 'cut' } };
   assert.deepEqual(JSON.parse(JSON.stringify(P.switchOff(sent, {}))), sent, 'with nothing switched off, every part keeps every rule');
@@ -58,7 +71,8 @@ return Promise.resolve().then(() => {
   //    a switch only takes away: the policy's and the family's lists are added to the code's, never put back
   const off = P.policy({ off: { CARD: ['edge'] }, families: { Arcade: { off: { CARD: ['frame'] } } } }, 'Arcade').off;
   assert.deepEqual([...off.CARD].sort(), ['edge', 'frame'], 'the family\'s switches add to every card\'s');
-  assert.deepEqual(P.policy({ off: { CARD: ['edge'] } }, 'Other').off, { CARD: ['edge'] }, 'another family keeps only every card\'s switches');
+  assert.deepEqual(JSON.parse(JSON.stringify(P.policy({ off: { CARD: ['edge'] } }, 'Other').off)), Object.assign(JSON.parse(JSON.stringify(P.OFF)), { CARD: ['edge'] }),
+    'another family keeps only the code\'s switches and every card\'s');
   assert.ok(!P.PARTS.some(([sel]) => /products-mega-(chips|rows?)\b/.test(sel)), 'the mega dropdown\'s link chips and rows are not lists or items: a marker there crowds the navbar');
   // 7. the skin is held to the site's own small-text rule, the same one tests/theme-color-contrast.cjs enforces
   const theme = fs.readFileSync(path.join(root, 'tests/theme-color-contrast.cjs'), 'utf8');

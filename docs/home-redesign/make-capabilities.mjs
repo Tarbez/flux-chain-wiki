@@ -17,14 +17,19 @@
    The four fleet figures are BENCH-013's own numbers (one dated run on 10 nodes), the only
    throughput measured today. No capability has its own throughput yet; the rail says so.
    FLEET's "Fleet-wide 71,249 ops/s" is NOT in the BENCH-013 record (checked 2026-10-23: the record's
-   fleet row has swaps/s, 1-shard swaps/s, transfers/s and stores/s only). It stays for the home rail
-   until the owner decides; the Measured page reads RUNS, where every figure names its record line.
+   fleet row has swaps/s, 1-shard swaps/s, transfers/s and stores/s only). The Measured page reads RUNS,
+   where every figure names its record line.
+   The home rail shows a fleet figure only when a VERIFIED record in docs/evidence/registry.md carries it
+   (owner's pick, 2026-10-27). The verified BENCH-013 registry row is one machine and carries none of the
+   four, so the rail shows none and says no fleet run is verified yet. Once the fleet row is verified in
+   the registry, run this again and the figures come back with no page edit (tests/home-blocks.cjs).
 
    Run from this folder:  node make-capabilities.mjs
    Run it again when a capability is launched or its manifest is re-derived. */
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const KERNEL = join(HERE, '../../../defxn-defi-rs');
@@ -40,12 +45,23 @@ export function bannedWords() {
   return [...block.matchAll(/\[\s*'((?:[^'\\]|\\.)*)'\s*,/g)].map((m) => new RegExp(m[1].replace(/\\\\/g, '\\'), 'i'));
 }
 
-const FLEET = { run: 'BENCH-013', nodes: 10, figures: [
+const REGISTRY = join(HERE, '../evidence/registry.md');
+const { parse: parseRegistry } = createRequire(import.meta.url)('../../scripts/build-evidence-registry.cjs');
+
+const FLEET_RUN = { run: 'BENCH-013', nodes: 10, figures: [
   { name: 'Fleet-wide', value: 71249, unit: 'ops/s' },
   { name: 'Swaps', value: 643632, unit: 'swaps/s' },
   { name: 'Transfers', value: 69895, unit: 'transfers/s' },
   { name: 'Records', value: 6044992, unit: 'records/s' }
 ] };
+
+/* the fleet run less every figure no verified registry record carries, written as the record writes it */
+export function verifiedFleet() {
+  const verified = parseRegistry(readFileSync(REGISTRY, 'utf8')).filter((r) => r.verified);
+  const fmt = new Intl.NumberFormat('en-US');
+  const figures = FLEET_RUN.figures.filter((f) => verified.some((r) => r.evidence.includes(fmt.format(f.value) + ' ' + f.unit)));
+  return { run: FLEET_RUN.run, nodes: FLEET_RUN.nodes, figures, unverified: FLEET_RUN.figures.length - figures.length };
+}
 
 /* the two dated runs the Measured page shows, copied from their records (never multiplied) */
 const RUNS = [
@@ -127,7 +143,7 @@ export function build() {
     list.push({ id: m.name || id, version: m.version || null, crate: m.crate || null, line: lineOf(crateDir), plain: plain[(m.name || id).toLowerCase()] || null,
       functions: m.functions, count: m.cases.length, cases: m.cases.filter(clean), throughput: null });
   }
-  return { fleet: FLEET, runs: RUNS, limit: LIMIT, capabilities: list };
+  return { fleet: verifiedFleet(), runs: RUNS, limit: LIMIT, capabilities: list };
 }
 
 function main() {

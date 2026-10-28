@@ -173,14 +173,14 @@ for (const file of fs.readdirSync('api', { recursive: true }).filter((f) => /\.m
     run = build('--check');
     assert(drift(run).some((line) => line.includes('js/min/pages/stray.js')), 'a copy no catalog script builds is drift: ' + drift(run).join(' | '));
 
-    edit('js/min/pages/chain.js', (text) => text + '\n');
+    edit('js/min/pages/world-chain.js', (text) => text + '\n');
     edit('js/min/manifest.js', (text) => text.replace(/"[0-9a-f]{8}"/, '"00000000"'));
     run = build();
     assert.equal(run.status, 0, 'a plain build succeeds:\n' + run.stdout + run.stderr);
     assert(!fs.existsSync(path.join(copy, 'js/min/pages/stray.js')), 'and removes the stray copy');
     run = build('--check');
     assert.equal(run.status, 0, 'after a build everything checks clean again:\n' + run.stdout + run.stderr);
-    assert.equal(fs.readFileSync(path.join(copy, 'js/min/pages/chain.js'), 'utf8'), read('js/min/pages/chain.js'), 'the rebuilt copy is byte-identical to the committed one (the build is deterministic)');
+    assert.equal(fs.readFileSync(path.join(copy, 'js/min/pages/world-chain.js'), 'utf8'), read('js/min/pages/world-chain.js'), 'the rebuilt copy is byte-identical to the committed one (the build is deterministic)');
   } finally {
     fs.rmSync(copy, { recursive: true, force: true });
   }

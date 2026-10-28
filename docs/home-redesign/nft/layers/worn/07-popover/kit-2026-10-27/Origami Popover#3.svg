@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Origami Popover: a paper panel: the nub is a folded flap with its crease drawn, and the far top corner is folded down (the Origami family)</title>
+  <path d="M9 9 H22 L30 1 L38 9 H343 L359 25 V231 Q359 239 351 239 H9 Q1 239 1 231 V17 Q1 9 9 9 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M30 1 V9" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M343 9 V25 H359" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

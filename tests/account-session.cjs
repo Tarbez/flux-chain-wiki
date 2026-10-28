@@ -58,7 +58,8 @@ function browser({ blocked = false } = {}) {
   // the live chunk (the first ArkUI.blocks.update loads it) the way js/ark/page-loader.js does
   window.eval('ArkUI.loadScript = function (src) { return Promise.resolve().then(function () { (0, eval)(__chunk[src]); }); };');
   window.__chunk = { 'js/ark/vendor/ark-kit-live.js': read('js/ark/vendor/ark-kit-live.js') };
-  for (const file of blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/ark/local-identity.js', 'js/ark/local-domains.js'])) run(file);
+  // js/ark/account-session.js: the one sign-in session, moved out of js/pages/account.js on 2026-10-25 (catalog.js loads it before the page).
+  for (const file of blockScripts.concat(['js/ark/vendor/ark-kit-forms.js', 'js/ark/local-identity.js', 'js/ark/local-domains.js', 'js/ark/account-session.js'])) run(file);
   let signer = null, created = 0, disposed = 0, locks = 0, onChange;
   window.ArkAdminAuth = { create(options) {
     created++; onChange = options.onChange;

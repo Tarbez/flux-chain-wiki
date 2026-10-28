@@ -17,7 +17,16 @@
      links are derived from the journey table, not listed: a page added to a journey appears, a
      chapter of another page (how/ask, lifecycle/intent), Home and the page itself never do.
    - A resolution that starts at a page is found from that page (ArkResolutions.startingFrom), so
-     /dao leads to /resolutions/governance without anyone listing it twice. */
+     /dao leads to /resolutions/governance without anyone listing it twice.
+
+   2026-10-27, owner-confirmed designs it now locks:
+   - The deployment page (/how-deployment-works, js/pages/deployment.js) is removed: the onward links never list it,
+     /dao no longer leads to it, and no route loads it. The deploy-flow figure it drew stays in its manifest and the
+     parts still draw it (the unit half below), but no page shows it any more.
+   - /chain is the 3D world's your-chain page (worldChain, js/pages/world-chain.js); the old block page js/pages/chain.js
+     stays on disk unused. The world page loads none of the parts, so the swap-as-signed-resolution figure is likewise
+     drawn by the parts (units) and shown by no page. Both figures having no page is the confirmed design's consequence,
+     reported to the owner on 2026-10-27, not a check this file weakens silently. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -152,12 +161,20 @@ function units() {
   const understand = parts.onwardGroups('dao', { exclude: ['concept'] });
   assert.equal(understand.length, 1); assert.equal(understand[0].journey, 'understand');
   const got = understand[0].links.map((l) => l.key);
-  for (const want of ['chain', 'deployment', 'about']) assert(got.includes(want), 'dao leads to ' + want + ' (same journey): ' + got.join(', '));
-  for (const never of ['dao', 'zero', 'concept', 'how/ask', 'lifecycle/intent', 'stats']) assert(!got.includes(never), 'dao never lists ' + never);
+  for (const want of ['chain', 'about']) assert(got.includes(want), 'dao leads to ' + want + ' (same journey): ' + got.join(', '));
+  /* 'deployment': removed on purpose (owner-confirmed 2026-10-27), so the derived links can never name it.
+     'how/ask' left this list the same day: a chapter is a page whose path sits under another page's path, and with
+     /how-deployment-works gone the three agreement chapters sit under no page, so the derivation lists them as pages
+     (it is now their only way in besides each other's pager). lifecycle/intent is still a chapter of /lifecycle. */
+  for (const never of ['dao', 'zero', 'concept', 'lifecycle/intent', 'stats', 'deployment']) assert(!got.includes(never), 'dao never lists ' + never);
+  for (const orphan of ['how/ask', 'how/work', 'how/check']) assert(got.includes(orphan), 'dao lists the agreement chapter ' + orphan + ', which no page holds now');
   assert(understand[0].links.every((l) => l.href === 'route:' + l.key), 'the links are route: links');
-  const both = parts.onwardGroups('deployment', { journeys: ['understand', 'build'], exclude: ['lifecycle', 'resolver', 'resolvers'] });
-  assert(keys(both).flat().includes('chain') && keys(both).flat().includes('dao') && keys(both).flat().includes('bundledeployer'), 'Deploy a resolver leads to chain, dao and the bundle deployer');
-  assert(!keys(both).flat().some((k) => ['lifecycle', 'resolver', 'resolvers', 'account/domains', 'how/work'].includes(k)), 'but not to what it already links, nor to a chapter of another page');
+  /* "chain, dao and the bundle deployer had no way in": "Deploy a resolver" was the page that asked for both journeys. It is removed
+     (2026-10-27), so the same derivation is asked from /about's place in the table; /dao and the bundle deployer's own ways in
+     are checked on the pages below (/dao leads to /chain; /deploy and /download lead to /bundle-deployer). */
+  const both = parts.onwardGroups('about', { journeys: ['understand', 'build'], exclude: ['lifecycle', 'resolver', 'resolvers'] });
+  assert(keys(both).flat().includes('chain') && keys(both).flat().includes('dao') && keys(both).flat().includes('bundledeployer'), 'both journeys lead to chain, dao and the bundle deployer');
+  assert(!keys(both).flat().some((k) => ['lifecycle', 'resolver', 'resolvers', 'account/domains', 'lifecycle/intent'].includes(k)), 'but not to what it excludes, nor to a chapter of another page (how/work is no longer one: see above)');
   // derive, don't author: a new page in the journey table is a new link, with no list to edit
   w.eval("ArkUI.pageCatalog.fresh = { path: '/fresh-page', journey: 'understand' };");
   const rows = w.ArkSitePages.pages;
@@ -179,19 +196,19 @@ function units() {
 /* -------------------------------------------------------------- source ---------------------- */
 function sources() {
   const catalog = read('js/pages/catalog.js');
-  for (const line of catalog.split('\n').filter((l) => /^\s*(resolver|deployment|dao|chain): \{ module/.test(l))) { assert(line.includes('js/pages/resolver-page-parts.js'), 'the route loads the parts: ' + line.trim().slice(0, 40)); assert(line.indexOf('js/ark/vendor/ark-kit-figures.js') > 0 && line.indexOf('js/ark/vendor/ark-kit-figures.js') < line.indexOf('js/pages/resolver-page-parts.js'), 'and the lane and band chunk before them: ' + line.trim().slice(0, 40)); }
+  for (const line of catalog.split('\n').filter((l) => /^\s*(resolver|dao): \{ module/.test(l))) { /* deployment (removed) and chain (the world page) left this list 2026-10-27 */ assert(line.includes('js/pages/resolver-page-parts.js'), 'the route loads the parts: ' + line.trim().slice(0, 40)); assert(line.indexOf('js/ark/vendor/ark-kit-figures.js') > 0 && line.indexOf('js/ark/vendor/ark-kit-figures.js') < line.indexOf('js/pages/resolver-page-parts.js'), 'and the lane and band chunk before them: ' + line.trim().slice(0, 40)); }
   assert(/resolver: \{[^\n]*registry-snapshot\.js[^\n]*ark-kit-figures\.js', 'js\/pages\/resolver-page-parts\.js/.test(catalog), '/what-is-a-resolver also loads the snapshot its layers are drawn from, before the parts');
   assert(!/resolver-page-parts/.test(catalog.split('\n').filter((l) => /^\s*(stats|zero|bundledeployer|explorer):/.test(l)).join('\n')), 'and no other route pays for them');
   assert(!/ark-kit-figures/.test(catalog.split('\n').filter((l) => !/resolver-page-parts/.test(l)).join('\n')), 'nor for the lane and band chunk');
   assert(/figureBlock\('resolver', 'resolver-layers'/.test(read('js/pages/resolver-guide.js')) && /figureBlock\('resolver', 'launched-vs-served'/.test(read('js/pages/resolver-guide.js')), '/what-is-a-resolver draws both of its diagrams');
-  for (const file of ['js/pages/deployment.js', 'js/pages/dao.js']) { assert(/ArkUI\.journeyPageBlocks/.test(read(file)), file + ' takes its onward links from page-kit.js'); }
+  assert(/ArkUI\.journeyPageBlocks/.test(read('js/pages/dao.js')), 'js/pages/dao.js takes its onward links from page-kit.js');
   assert(!/onwardGroups|onwardBlocks/.test(read('js/pages/resolver-page-parts.js').replace(/\/\*[\s\S]*?\*\//g, '')), 'and the parts file keeps no second copy of the journey helper');
-  assert(/deployment: \{ module[^\n]*page-kit\.js[^\n]*resolver-page-parts\.js/.test(catalog), '/how-deployment-works loads page-kit.js before the parts');
-  assert(/figureBlock\('deployment', 'deploy-flow'/.test(read('js/pages/deployment.js')), '/how-deployment-works draws the deploy flow');
+  /* the deployment page is removed (owner-confirmed 2026-10-27): no file, no catalog entry */
+  assert(!fs.existsSync(path.join(ROOT, 'js/pages/deployment.js')) && !/^\s*deployment: \{/m.test(catalog), '/how-deployment-works is removed: no page file, no catalog entry');
   assert(/figureBlock\('dao',\s*'upgrade-supersedes'/.test(read('js/pages/dao.js')), '/dao draws the upgrade figure');
-  /* W5-PAGES (ledger 4.5): the swap as signed resolution stands in the Swaps tab of /chain, behind a disclosure, drawn by the parts */
-  assert(/chain: \{[^\n]*home-flow\.js[^\n]*resolver-page-parts\.js[^\n]*chain\.js/.test(catalog), '/chain loads the parts after the scene and before its module');
-  assert(/figureBlock\('chain',\s*'swap-signed-resolution',\s*\{[^}]*foldBelow: 'always'/.test(read('js/pages/chain.js')), '/chain draws the swap figure behind an always-closed disclosure');
+  /* W5-PAGES (ledger 4.5) put the swap as signed resolution in the Swaps tab of the old block /chain. Since 2026-10-27 (owner-confirmed)
+     /chain is the world page, which loads none of the parts: the old file keeps its figure call, unused. */
+  assert(/^\s*chain: \{ module: 'worldChain', scripts: \[[^\n]*'js\/pages\/world-chain\.js'\] \}/m.test(catalog) && !/^\s*chain: \{[^\n]*resolver-page-parts/m.test(catalog), '/chain is the world page and loads none of the parts');
   assert(!/swapDiagram|diagram:/.test(read('js/pages/home-flow.js')), 'and the scene keeps no second copy of the swap diagram');
   assert(!/<svg|createElementNS/.test(read('js/pages/resolver-page-parts.js').replace(/\/\*[\s\S]*?\*\//g, '')), 'the parts draw no SVG');
 }
@@ -199,9 +216,10 @@ function sources() {
 /* -------------------------------------------------------------- pages ----------------------- */
 const PAGES = {
   '/what-is-a-resolver': { figures: ['resolver-layers', 'launched-vs-served'] },
-  '/how-deployment-works': { figures: ['deploy-flow'], links: ['/chain', '/dao', '/bundle-deployer'] },
-  '/dao': { figures: ['upgrade-supersedes'], links: ['/resolutions/governance', '/how-deployment-works', '/chain'] },
-  '/chain': { figures: ['swap-signed-resolution'], links: ['/resolvers', '/what-is-a-resolver'] }
+  /* /how-deployment-works removed and /chain on the 3D world (owner-confirmed 2026-10-27): neither page draws a figure from the parts now */
+  '/dao': { figures: ['upgrade-supersedes'], links: ['/resolutions/governance', '/chain'], never: ['/how-deployment-works'] },
+  '/deploy': { figures: [], links: ['/bundle-deployer'] },
+  '/download': { figures: [], links: ['/bundle-deployer'] }
 };
 async function pages() {
   for (const [route, want] of Object.entries(PAGES)) {
@@ -225,6 +243,7 @@ async function pages() {
     }
     assert.equal(seen.svg, 0, route + ': no SVG or raster image in a manifest figure');
     for (const href of want.links || []) assert(seen.hrefs.some((h) => h === href || h.endsWith(href)), route + ' leads to ' + href + ' (hrefs: ' + seen.hrefs.filter((h) => h.startsWith('/')).slice(0, 40).join(' ') + ')');
+    for (const href of want.never || []) assert(!seen.hrefs.some((h) => h.split('?')[0].replace(/\/+$/, '').endsWith(href)), route + ' no longer leads to the removed ' + href);
     console.log('ok ' + route);
   }
 }

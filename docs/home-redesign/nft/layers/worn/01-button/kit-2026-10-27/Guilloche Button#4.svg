@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Guilloche Button: a soft outline with two fine waves interlacing in the leading top corner and the trailing bottom corner, a complementary lens where the first pair crosses (the Guilloche set)</title>
+  <rect x="1" y="1" width="198" height="54" rx="10" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <rect x="3.5" y="3.5" width="193" height="49" rx="8" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4 5 Q8.5 1.5 13 5 T22 5" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M4 5 Q8.5 8.5 13 5 T22 5" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M11.2 5 Q13 3.4 14.8 5 Q13 6.6 11.2 5 Z" fill="var(--complementary)"/>
+  <g transform="rotate(180 100 28)"><path d="M4 5 Q8.5 1.5 13 5 T22 5" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M4 5 Q8.5 8.5 13 5 T22 5" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/></g>
+</svg>

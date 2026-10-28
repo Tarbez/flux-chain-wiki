@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Foundry Dropdown: a flat steel bar for the top seam, held by a slotted screw at each end, the leading screw referential, square sides and plates at the bottom corners</title>
+  <path d="M1 1 H359 M1 9 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="14" cy="5" r="2.4" fill="var(--referential)"/>
+  <path d="M338 5 m-2.4 0 a2.4 2.4 0 1 0 4.8 0 a2.4 2.4 0 1 0 -4.8 0" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M344 5 H348" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 9 V239 H359 V9" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 227 H13 V239 M347 239 V227 H359" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

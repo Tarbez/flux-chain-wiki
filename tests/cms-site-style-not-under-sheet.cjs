@@ -15,7 +15,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { JSDOM } = require('jsdom');
 
-const dom = new JSDOM('<body><div id="shell"></div><div id="designView"></div><div id="mapView" hidden></div><div id="themeView" hidden></div><div id="worldView" hidden></div><div id="skinView" hidden></div>'
+const dom = new JSDOM('<body><div id="shell"></div><div id="designView"></div><div id="mapView" hidden></div><div id="themeView" hidden></div><div id="worldView" hidden></div><div id="skinView" hidden></div><div id="kitView" hidden></div>'
   + '<aside id="versionsPanel"></aside><aside id="sheet"></aside><div id="pop"></div></body>', { runScripts: 'outside-only' });
 const w = dom.window, doc = w.document;
 const calls = [];

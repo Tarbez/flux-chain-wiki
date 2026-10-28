@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Scroll Rail: a faint panel with a scroll rail down the trailing side, its thumb at the top in the referential role</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V233 Q1 239 7 239 H353 Q359 239 359 233 V1" fill="none" stroke="var(--faint)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M352 12 V228" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M352 14 V36" fill="none" stroke="var(--referential)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

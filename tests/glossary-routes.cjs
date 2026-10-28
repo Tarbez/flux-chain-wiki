@@ -30,13 +30,16 @@ const build = (...args) => {
   return said + '\n';
 };
 
-/* The words the pages used and the glossary lacked (docs/ux-audit/ledger.md S5). */
-const ADDED = ['mesh', 'resolution', 'fxn', 'fxn chain', 'bundle', 'tier', 'ops/s', 'dao', 'roster', 'threshold', 'substrate', 'auth kit', 'ghost id', 'miner presence'];
+/* The words the pages used and the glossary lacked (docs/ux-audit/ledger.md S5). Since 2026-10-25 (owner ruling D27,
+   commit b0dc2d7) "Auth Kit" is FXN ID and "Ghost ID" is the FXN ID number; Master ID and Public ID were added with it. */
+const ADDED = ['mesh', 'resolution', 'fxn', 'fxn chain', 'bundle', 'tier', 'ops/s', 'dao', 'roster', 'threshold', 'substrate', 'fxn id', 'master id', 'public id', 'miner presence'];
 /* The routes the ledger names as jargon walls with no glossing, now wired. */
 /* 2026-10-24: stats and stats/ledger left this list: their pages (js/pages/stats.js, stats-ledger.js) are retired from the catalog, which carries the new 3D stats pages
-   (js/pages/world-stats.js) with no glossary terms; their keys are redirects. The files and their glossary files stay. */
-const WIRED = { 'resolver-math': 'resolver-math', resolvers: 'resolvers', explorer: 'explorer', account: 'account' };
-const WIRED_SOURCE = { 'resolver-math': 'js/pages/resolver-math.js', resolvers: 'js/pages/resolvers.js', explorer: 'js/pages/explorer.js', account: 'js/pages/account.js' };
+   (js/pages/world-stats.js) with no glossary terms; their keys are redirects. The files and their glossary files stay.
+   2026-10-27: resolvers left it the same way: the route is the 3D world page (worldResolvers, js/pages/world-measure.js; owner-confirmed
+   2026-10-27) with no glossary terms. js/pages/resolvers.js and its glossary file stay. */
+const WIRED = { 'resolver-math': 'resolver-math', explorer: 'explorer', account: 'account' };
+const WIRED_SOURCE = { 'resolver-math': 'js/pages/resolver-math.js', explorer: 'js/pages/explorer.js', account: 'js/pages/account.js' };
 
 (async () => {
   const entries = builder.parse(read('docs/glossary.md'));
@@ -51,7 +54,7 @@ const WIRED_SOURCE = { 'resolver-math': 'js/pages/resolver-math.js', resolvers: 
       assert(!/\bSource\b|\bSee\b|\.md\b/.test(entry.definition), key + ': the citation is not part of the tooltip: ' + entry.definition);
     }
     const doc = read('docs/glossary.md');
-    for (const term of ['Mesh', 'Resolution', 'FXN', 'FXN chain', 'Bundle', 'Tier', 'Ops/s', 'DAO', 'Roster', 'Threshold', 'Substrate', 'Auth Kit', 'Ghost ID', 'Miner presence'])
+    for (const term of ['Mesh', 'Resolution', 'FXN', 'FXN chain', 'Bundle', 'Tier', 'Ops/s', 'DAO', 'Roster', 'Threshold', 'Substrate', 'FXN ID', 'Master ID', 'Public ID', 'Miner presence'])
       assert(new RegExp('\\*\\*' + term.replace(/[/]/g, '\\/') + '\\*\\* — [^\\n]* Source: ').test(doc), term + ' names its source in the doc');
   });
 
@@ -71,7 +74,7 @@ const WIRED_SOURCE = { 'resolver-math': 'js/pages/resolver-math.js', resolvers: 
 
   await test('a route file adds its terms to the glossary already loaded, and never takes one away (the editor, a saved term block)', () => {
     // Defect guarded: the loader adds the whole glossary beside a saved term block, in either order with the route's own file.
-    const full = read('js/content/glossary.js'), file = 'js/content/glossary/stats.js';
+    const full = read('js/content/glossary.js'), file = 'js/content/glossary/about.js';   // was stats.js: retired with the 3D stats pages, removed as an orphan 2026-10-28
     const route = read(file);
     // window is the global, as in a browser: `var ArkGlossary = window.ArkGlossary || ...` reads what an earlier file left
     const load = (...sources) => { const ctx = vm.createContext({}); ctx.window = ctx; for (const source of sources) vm.runInContext(source, ctx); return Object.keys(ctx.ArkGlossary.map).length; };
@@ -144,7 +147,9 @@ const WIRED_SOURCE = { 'resolver-math': 'js/pages/resolver-math.js', resolvers: 
     assert.deepEqual(over, [], 'every block+terms route fits +30 KB gz with kit + adapter + its glossary (' + (base / 1000).toFixed(2) + ' + file)');
   });
 
-  for (const [route, key] of [['/resolvers', 'resolvers']]) {
+  /* 2026-10-27: was /resolvers, now the 3D world page (owner-confirmed) with no blocks and no terms. /about is a
+     block route with one of the largest route glossaries, so the same promise is measured there (/resolver-math renders 4 terms and /explorer 1, under the 5 this asks). */
+  for (const [route, key] of [['/about', 'about']]) {
     await test(route + ': every term keeps its definition in the tip at mount, as the trigger\'s accessible description, and the server render serialises it', async () => {
       // Defect guarded: a per-route glossary that dropped what the term block promises (pages-ux-a #6): the definition is there before anyone opens anything.
       const whole = new Map(entries.map((entry) => [entry.key, entry.definition]));

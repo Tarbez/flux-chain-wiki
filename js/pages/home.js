@@ -93,11 +93,14 @@
       railCta.firstChild.appendChild(document.createTextNode(copy('RAIL.CTA') + ' ')); railCta.firstChild.insertAdjacentHTML('beforeend', ARROW);
       rail.appendChild(railCta);
       page.appendChild(rail);
+      /* the CMS's insertion point for reusable blocks (js/content/components.js), as every world page has: empty, and
+         out of the layout (css/world-pages.css .world-insert). The block home had one; the world home shipped without it. */
+      var anchor = node('div', 'world-insert'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);
       host.appendChild(page);
 
       if (window.DEFXNRail) DEFXNRail.mount(rail, {
         fleet: copy('RAIL.FLEET'), oneRun: copy('RAIL.ONERUN'), nodes: copy('RAIL.NODES'), checked: copy('RAIL.CHECKED'), checkedCases: copy('RAIL.CHECKEDCASES'),
-        inFocus: copy('RAIL.INFOCUS'), of: copy('RAIL.OF'), speed: copy('RAIL.SPEED'), notMeasured: copy('RAIL.NOTMEASURED'), noWords: copy('RAIL.NOWORDS'),
+        inFocus: copy('RAIL.INFOCUS'), of: copy('RAIL.OF'), speed: copy('RAIL.SPEED'), notMeasured: copy('RAIL.NOTMEASURED'), unverified: copy('RAIL.UNVERIFIED'), noWords: copy('RAIL.NOWORDS'),
         counts: { 'ops/s': copy('RAIL.OPS'), 'swaps/s': copy('RAIL.SWAPS'), 'transfers/s': copy('RAIL.TRANSFERS'), 'records/s': copy('RAIL.RECORDS') }
       });
       return page;

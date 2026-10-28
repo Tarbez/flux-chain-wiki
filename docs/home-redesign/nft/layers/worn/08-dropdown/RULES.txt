@@ -1,0 +1,16 @@
+Dropdown drawing rules (decided 2026-10-27, same box as menu and popover)
+
+Root:     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+Keep:     the ends and edges 40 units keep their shape (9-slice); the middle stretches.
+Draw:     only within 24 units of the edge. The middle stays EMPTY (the options sit there).
+Lines:    stroke-width="1" vector-effect="non-scaling-stroke", fill="none" unless a small solid mark.
+Inks:     named inks only, as var(--name): --ink --dim --line --faint --rule --state
+          --primary --complementary --referential (README "Colours"). No hex, no style attributes.
+No text.  One <title> naming the drawing: "<Name>: what it draws".
+Names:    <Name>#<weight>.svg, unique across 08-dropdown (sub-folders included), weights 2-6,
+          plus one common "Plain#30.svg".
+Language: a panel HANGING FROM ITS TRIGGER: the top edge is where it attaches (a flush or open
+          top, a seam/lip at the top, a drop shadow line, a hinge, side rails running down).
+          It must not read as a menu (list frame) or a popover (floating, with a pointer nub,
+          tail, caret notch or anchor dot - those belong to 07-popover).
+Who wears it: the panel a select, a combobox, a dropdown menu or a date picker opens.

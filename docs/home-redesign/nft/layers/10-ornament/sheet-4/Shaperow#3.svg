@@ -1,8 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Shaperow: a diamond, a circle, a triangle and a square, each with a cyan dot (sheet-4, 21)</title>
+  <title>Shaperow: a diamond, a circle, a triangle and a square, each with a cyan dot (sheet-4, 21). It prints the card's the role.</title>
   <path d="M45 27L58 40L45 53L32 40Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <circle cx="135" cy="40" r="12.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <path d="M225 26.5L238 49L212 49Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <rect x="303" y="28" width="24" height="24" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <circle cx="45" cy="40" r="2" fill="var(--acc)"/><circle cx="135" cy="40" r="2" fill="var(--acc)"/><circle cx="225" cy="41.5" r="2" fill="var(--acc)"/><circle cx="315" cy="40" r="2" fill="var(--acc)"/>
+  <text x="32" y="74" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="2" fill="var(--dim)">ROLE</text>
+  <text x="76" y="74" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--ink)" data-field="role">ROLE</text>
 </svg>

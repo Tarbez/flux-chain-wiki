@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Side Nub: a panel with its nub on the left edge near the top, for a popover that opens beside its trigger</title>
+  <path d="M17 1 H351 Q359 1 359 9 V231 Q359 239 351 239 H17 Q9 239 9 231 V32 L1 24 L9 16 V9 Q9 1 17 1 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

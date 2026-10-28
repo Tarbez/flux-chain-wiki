@@ -7,8 +7,9 @@
    manifests), so a newly launched capability appears here on the next run with no page edit.
 
    Three parts, top to bottom:
-     the fleet run   BENCH-013's four figures as tiles, each named by what it counts, with the
-                     run's date and size. The "ops/s" figure is in no record; the owner decides.
+     the fleet run   the run's figures that a verified registry record carries, as tiles, each named
+                     by what it counts, with the run's date and size. With none verified, one line
+                     says so (owner's pick, 2026-10-27: only verified figures).
      capabilities    one strip that splits the checked cases among the capabilities (the stacked
                      block of the owner's boards, flat), and a grid of all of them, most checked
                      cases first, so none needs scrolling; a pick shows one in focus
@@ -23,7 +24,7 @@
      Words are passed in; these defaults are the mockup's. A rail is mounted once. */
   var DEFAULT_WORDS = {
     fleet: 'The fleet', oneRun: 'One run', nodes: 'nodes', capabilities: 'Capabilities', checkedCases: 'Checked cases', checked: 'checked cases',
-    inFocus: 'In focus', of: 'of', speed: 'Speed', notMeasured: 'Not measured yet', noWords: 'The brief has no plain words for it yet.',
+    inFocus: 'In focus', of: 'of', speed: 'Speed', notMeasured: 'Not measured yet', unverified: 'No fleet run is verified yet.', noWords: 'The brief has no plain words for it yet.',
     counts: { 'ops/s': 'All operations', 'swaps/s': 'Swaps', 'transfers/s': 'Transfers', 'records/s': 'Stored results' }
   };
   function mount(rail, given) {
@@ -42,9 +43,9 @@
     if ($('summary')) $('summary').textContent = '';   /* the fleet's own line carries its date; the footer says devnet */
     var run = D.runs && D.runs.filter(function (r) { return r.id === D.fleet.run; })[0];
     $('fleet').innerHTML = '<div class="rx-row"><h3 class="mono">' + esc(words.fleet) + '</h3><span class="rx-src mono">' + esc(D.fleet.run) + '</span></div>' +
-      '<dl class="rx-tiles">' + D.fleet.figures.map(function (f) {
+      (D.fleet.figures.length ? '<dl class="rx-tiles">' + D.fleet.figures.map(function (f) {
         return '<div><dt>' + esc(COUNTS[f.unit] || f.name) + '</dt><dd><b>' + fmt.format(f.value) + '</b><span>' + esc(f.unit) + '</span></dd></div>';
-      }).join('') + '</dl>' +
+      }).join('') + '</dl>' : '<p class="rx-unverified">' + esc(words.unverified) + '</p>') +
       '<p class="rx-when mono">' + esc(words.oneRun) + ' · ' + D.fleet.nodes + ' ' + esc(words.nodes) + (run ? ' · ' + esc(run.date) : '') + '</p>';
     if (!$('list')) return;   /* home shows the fleet only (record descent, 2026-10-24); the capability grid lives on #/measured */
     $('count').textContent = caps.length + ' · ' + total + ' ' + words.checked;

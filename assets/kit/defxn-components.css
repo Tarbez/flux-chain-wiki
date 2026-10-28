@@ -37,7 +37,7 @@
 
    Mobile-first: the base rules are the phone (320px) rules, and every
    breakpoint is a min-width query in the Responsive section at the end
-   (640.02 / 980.02 / 981 / 1040.02 / 1280 / 1440). Nothing here uses a
+   (640.02 / 860.02 / 980.02 / 981 / 1040.02). Nothing here uses a
    max-width query. */
 
 :root {
@@ -631,7 +631,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 
 /* Home mode (the family home, defxn.com: mountShell mode 'home') ------------
    The home's bar sits in the home's own full-viewport stage and carries the
-   home's own nav and controls, so it differs from a product's bar in four
+   home's own nav and controls, so it differs from a product's bar in these
    ways, each scoped to [data-dx-mode="home"] (no product renders it):
    - the home MEASURES its row and moves links into its own all-pages menu
      one at a time (defxn js/resolvers/header.js), so no bar part shrinks,
@@ -642,32 +642,165 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
    - up to 1040px the nav lives in that menu, and on a phone the bar stays
      ONE row (a product's phone bar wraps its nav onto a second row, which
      would push the home's pages down);
-   - below 1440px the sub-brand steps back and the nav's segments tighten, so
-     the row keeps Overview, How it works and Mesh Explorer at 1280px. */
-.dx-bar[data-dx-mode="home"] { height: var(--dx-bar-h); flex-wrap: nowrap; padding-top: 0; }
+   - the bar carries the DEFXN mark only (owner, 2026-10-25): no word, no
+     sub-brand, no slash. The mark sits in the bar's LEFT PADDING (placed
+     absolutely; the home widens that padding by the mark's room, defxn
+     css/navigation.css --hdr-mark-room), so the row fit, which subtracts the
+     padding from the room, counts the mark's space exactly; every control
+     sits in one cluster on the right, pushed there by its first part;
+   - the controls are 36px tall and the words are the home's type scale
+     (--fs-*, defxn css/page-layout.css), and from 1040.02px the Products
+     trigger and the nav read as ONE segmented control.
+   Moved here from defxn css/navigation.css on 2026-10-28 (owner: the kit
+   styles its own classes), with the values the home showed then. */
+.dx-bar[data-dx-mode="home"] { height: var(--dx-bar-h); flex-wrap: nowrap; padding-top: 0; --dx-strip-h: 36px; gap: 6px; }
 .dx-bar[data-dx-mode="home"] :is(.dx-bar__family, .dx-bar__brand, .dx-switch, .dx-bar__nav, .dx-bar__end) { flex: 0 0 auto; min-width: auto; }
-.dx-bar[data-dx-mode="home"] .dx-bar__nav { display: none; overflow: visible; }
-.dx-bar[data-dx-mode="home"] .dx-bar__nav :is(a, button) { padding: 0 8px; }
-.dx-bar[data-dx-mode="home"] .dx-bar__brand-sub { display: none; }
+.dx-bar[data-dx-mode="home"] .dx-bar__nav { display: none; overflow: visible; margin: 0; height: 36px; }
+.dx-bar[data-dx-mode="home"] .dx-bar__nav :is(a, button) { padding: 0 10px; gap: 6px; font: 500 var(--fs-tertiary)/1 var(--dx-font-sans); }
+.dx-bar[data-dx-mode="home"] :is(.dx-bar__brand-word, .dx-bar__brand-sub, .dx-bar__sep) { display: none; }
+.dx-bar[data-dx-mode="home"] .dx-bar__actions { gap: 6px; }
 .dx-bar[data-dx-mode="home"] .dx-bar__actions > * { flex: 0 0 auto; }
-.dx-bar[data-dx-mode="home"] .dx-switch { position: static; }
-.dx-bar[data-dx-mode="home"] .dx-switch__panel {
-  position: absolute; top: calc(100% + 8px); left: 8px; right: 8px;
-  max-height: calc(100dvh - var(--dx-bar-h) - 24px);
+.dx-bar[data-dx-mode="home"] .dx-bar__brand {
+  position: absolute; left: max(var(--dx-gutter), env(safe-area-inset-left, 0px));
+  top: calc(env(safe-area-inset-top, 0px) + (var(--dx-bar-h) - 44px) / 2);
+  width: 24px; min-width: 24px; height: 44px;
 }
+/* The cluster's push: the family leads it, unless the home puts a control of
+   its own before the family (defxn: Get FXN Browser), which then carries it. */
+.dx-bar[data-dx-mode="home"] .dx-bar__family { margin-left: auto; }
+.dx-bar[data-dx-mode="home"] .dx-bar__end { margin-left: 0; }
+.dx-bar[data-dx-mode="home"] .dx-switch { position: static; }
+.dx-bar[data-dx-mode="home"] .dx-switch__trigger { height: 36px; padding: 0 10px; gap: 6px; font: 600 var(--fs-tertiary)/1 var(--dx-font-sans); border-radius: var(--dx-radius, 8px); }
+.dx-bar[data-dx-mode="home"] .dx-switch__trigger .dx-glyph { width: 18px; height: 18px; }
 
-/* The family home's footer: one row in the home's bottom band, which it
-   shares with the home's own settings control; the section links come first
-   and scroll sideways rather than wrap. */
+/* The home's Products panel wears the home's own panel dress (defxn's "you"
+   panel): glass on --overlay, a 2px --primary top edge, a 12px radius, mono
+   hairline labels, at most 1200x700. Every role token the panel remaps above
+   INHERITS again here, so the panel takes the home's theme and a worn NFT
+   skin, which sets them on the home's stage (defxn js/ark/skin-site.js;
+   measured 2026-10-25: --primary 84 on the stage, 21 inside the panel before
+   this). Only --primary itself is used, never its numbered steps: a skin sets
+   --primary and not its ladder. The selected row takes the base (--primary)
+   and Open, the one dominant action, the complement (--secondary), per the
+   home's design laws 71-77. Sizes are steps of the home's type scale: 18 for
+   names, rows, controls and values, 11 for labels and metadata, 29 for the
+   preview's name. The inner rules hold the specificity they had on the home
+   (:where() adds none), so the kit's own state rules (Find searching) still
+   win over them. */
+.dx-bar[data-dx-mode="home"] .dx-switch__panel {
+  position: absolute; top: calc(100% + 8px);
+  left: max(var(--dx-gutter), 8px, calc((100vw - 1200px) / 2)); right: auto; width: min(1200px, calc(100vw - 2 * max(var(--dx-gutter), 8px)));
+  max-height: calc(100dvh - var(--dx-bar-h) - 24px);
+  --text-strong: inherit; --text: inherit; --text-muted: inherit; --text-faint: inherit;
+  --surface: inherit; --canvas: inherit; --depth: inherit; --raised: inherit; --nested: inherit;
+  --border-subtle: inherit; --border-default: inherit; --border-strong: inherit;
+  --reference: inherit; --primary: inherit; --warning: inherit; --secondary: inherit; --secondary-600: inherit; --secondary-ink: inherit;
+  --hx-ink: var(--text-strong); --hx-bg: var(--surface); --hx-accent: var(--primary);
+  --hx-ground: linear-gradient(hsl(var(--text-strong) / .04), hsl(var(--text-strong) / .04)), hsl(var(--overlay));
+  --dx-link: var(--text-strong);
+  color-scheme: normal;
+  border: 1px solid hsl(var(--border-default)); border-top: 2px solid hsl(var(--primary)); border-radius: 12px;
+  background: var(--hx-ground); box-shadow: 0 24px 60px hsl(0 0% 0% / .45);
+}
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel :focus-visible { outline-color: hsl(var(--primary)); }
+/* top: the find box and close */
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__top { padding: 12px; gap: 10px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__find { height: 42px; padding: 0 14px; gap: 10px; border-radius: 8px; background: hsl(var(--text-strong) / .04); box-shadow: inset 0 0 0 1px hsl(var(--border-subtle)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__find:focus-within { box-shadow: inset 0 0 0 1px hsl(var(--primary) / .6); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__find .dx-switch__find-input { font: 400 var(--fs-secondary)/1.2 var(--dx-font-sans); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__close { width: 42px; height: 42px; border-radius: 8px; }
+/* rail: one category per row, the selected one in the base */
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel :is(.dx-switch__rail, .dx-switch__stage) { gap: 8px; padding: 12px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__tabs { gap: 2px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__tab { min-height: 44px; padding: 4px 12px; gap: 10px; border-radius: 8px; font: 500 var(--fs-secondary)/1.2 var(--dx-font-sans); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__tab:hover { background: hsl(var(--text-strong) / .06); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__tab[aria-selected="true"] { background: hsl(var(--primary) / .12); color: hsl(var(--text-strong)); box-shadow: inset 2px 0 0 hsl(var(--primary)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__tab[aria-selected="true"] .dx-switch__tab-mark { color: hsl(var(--primary)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__tab-mark { width: 18px; height: 18px; }
+/* list: a row per product; the previewed row is tinted with --primary, never a white block */
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-lane__head { padding: 2px 8px 6px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-lane__name { font: 600 var(--fs-tertiary)/1.4 var(--dx-font-mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel :is(.dx-lane__list, .dx-lane, .dx-resolvers, .dx-switch__results) { gap: 6px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link {
+  grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; min-height: 0; padding: 12px 14px 12px 10px; border-radius: 10px;
+  background: hsl(var(--text-strong) / .03); box-shadow: inset 0 0 0 1px hsl(var(--border-subtle));
+}
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link:hover { background: hsl(var(--text-strong) / .06); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link[data-dx-previewed] { background: hsl(var(--primary) / .12); color: hsl(var(--text)); box-shadow: inset 0 0 0 1px hsl(var(--primary) / .45), inset 3px 0 0 hsl(var(--primary)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link:active { background: hsl(var(--primary) / .18); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link[data-dx-previewed] :is(.dx-product-link__name, .dx-row__svg) { color: hsl(var(--text-strong)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link[data-dx-previewed] .dx-row__go { color: hsl(var(--primary)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link[data-dx-previewed] :is(.dx-product-link__line, .dx-row__facts, .dx-row__here, .dx-row__facts .dx-badge) { color: hsl(var(--text-muted)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link[data-dx-previewed] .dx-row__mark { background: hsl(var(--primary) / .14); box-shadow: inset 0 0 0 1px hsl(var(--primary) / .35); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link[data-dx-previewed] .dx-tag { color: hsl(var(--text-muted)); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link[data-dx-previewed] .dx-row__facts .dx-badge::before { background: repeating-linear-gradient(-45deg, hsl(var(--text-strong) / .7) 0 1.5px, transparent 1.5px 4px); box-shadow: inset 0 0 0 1px hsl(var(--text-strong) / .7); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-row__mark { width: 44px; height: 44px; border-radius: 8px; }
+/* A skin may give a row Ark's icon bullet (a ::before, data-ark-skin-item="icon"). In this grid row it took
+   the first cell and pushed the mark and the words one column right (skin audit, 2026-10-25). Each piece
+   has its own cell, and the bullet sits on the mark's top corner. */
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link > .dx-row__mark { grid-area: 1 / 1; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link > .dx-row__text { grid-area: 1 / 2; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link > .dx-row__go { grid-area: 1 / 3; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link[data-ark-skin-item]::before { grid-area: 1 / 1; align-self: start; justify-self: start; margin: -4px 0 0 -4px; position: relative; z-index: 1; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link__name { font: 600 var(--fs-secondary)/1.25 var(--dx-font-sans); letter-spacing: -.01em; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link__line { font-size: var(--fs-tertiary); line-height: 1.45; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-row__facts { gap: 12px; margin-top: 4px; font-size: var(--fs-tertiary); letter-spacing: .08em; text-transform: uppercase; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-row__here { font-size: var(--fs-tertiary); letter-spacing: .1em; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-row__tags { gap: 4px 6px; margin-top: 8px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-tag { min-height: 20px; padding: 0 8px; gap: 5px; font: 500 var(--fs-tertiary)/1 var(--dx-font-sans); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-badge { font-size: var(--fs-tertiary); gap: 6px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__back { min-height: 44px; font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__none { font-size: var(--fs-secondary); }
+/* preview: a card on a --primary tint (the base); Open alone takes the complement, --secondary, on its own ink */
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__preview { gap: 12px; padding: 20px 22px; margin: 12px; border-radius: 10px; border-color: hsl(var(--primary) / .3); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-preview__eyebrow { font: 600 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--primary)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-preview__tile { width: 56px; height: 56px; border-radius: 10px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-preview__tile svg { width: 34px; height: 34px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-preview__title { gap: 14px; margin: 2px 0; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-preview__name { font-size: var(--fs-primary); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-preview__what { font-size: var(--fs-secondary); line-height: 1.4; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel :is(.dx-preview__line, .dx-preview__caveat, .dx-preview__here) { font-size: var(--fs-tertiary); line-height: 1.5; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-facts { gap: 8px 16px; padding: 12px 0; border-color: hsl(var(--border-subtle)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-facts dt { font: 600 var(--fs-tertiary)/1.4 var(--dx-font-mono); letter-spacing: .12em; color: hsl(var(--text-muted)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-facts dd { font-size: var(--fs-secondary); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-related { gap: 8px; margin-top: 4px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-related__label { font: 600 var(--fs-tertiary)/1.4 var(--dx-font-mono); letter-spacing: .12em; color: hsl(var(--text-muted)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-related__item { gap: 4px; padding: 4px 12px; min-height: 0; border-radius: 0; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-related__item:hover .dx-related__arrow { color: hsl(var(--primary)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel :is(.dx-related__name, .dx-related__arrow) { font-size: var(--fs-tertiary); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-related__line { font-size: var(--fs-tertiary); line-height: 1.4; -webkit-line-clamp: 1; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-cta { min-height: 44px; border-radius: 8px; background: hsl(var(--secondary)); color: hsl(var(--secondary-ink)); font: 600 var(--fs-secondary)/1 var(--dx-font-sans); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-cta:is(:hover, :focus-visible) { background: hsl(var(--secondary) / .86); color: hsl(var(--secondary-ink)); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-cta:active { background: hsl(var(--secondary) / .8); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-cta:focus-visible { outline: 2px solid hsl(var(--secondary)); outline-offset: 2px; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-cta--here { background: hsl(var(--text-strong) / .08); color: hsl(var(--text-muted)); }
+/* foot: the keys and the family home, in the mono hairline voice */
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__foot { padding: 8px 14px; min-height: 0; }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__foot :is(.dx-switch__key, .dx-switch__home, .dx-switch__home-name, .dx-switch__cap) { font-size: var(--fs-tertiary); }
+:where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__cap { font-family: var(--dx-font-mono); }
+
+/* The family home's footer: one quiet glass bar in the home's bottom band,
+   dressed like the bar (canvas glass, a hairline edge, a 12px radius). The
+   home's settings control stands inside its left end (defxn css/settings.css
+   places it; the 54px left padding is its room); the section links come first
+   and scroll sideways rather than wrap. The family name shows from 860.02px. */
 .dx-foot[data-dx-mode="home"] {
-  width: 100%; max-width: none; height: 44px; margin: 0; padding: 0; border: 0;
-  flex-wrap: nowrap; gap: 8px 12px;
+  width: 100%; max-width: none; height: 44px; margin: 0; box-sizing: border-box; padding: 0 6px 0 54px;
+  flex-wrap: nowrap; gap: 0 4px; align-items: center;
+  border: 1px solid hsl(var(--border-subtle)); border-radius: 12px;
+  background: hsl(var(--canvas) / .72); -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1);
+  box-shadow: inset 0 1px 0 hsl(var(--text-strong) / .05);
+  font-family: var(--dx-font-sans, var(--font-sans, sans-serif));
 }
 .dx-foot[data-dx-mode="home"] > * { flex: 0 0 auto; }
 .dx-foot[data-dx-mode="home"] .dx-foot__links { flex: 0 1 auto; height: 100%; margin-right: auto; gap: 8px 12px; }
 .dx-foot[data-dx-mode="home"] .dx-foot__links a { min-height: 44px; padding: 0 4px; }
 .dx-foot[data-dx-mode="home"] .dx-foot__end { flex-wrap: nowrap; white-space: nowrap; }
-.dx-foot[data-dx-mode="home"] .dx-foot__name { display: none; }
+/* the family name: the sans, muted, then a hairline before the links */
+.dx-foot[data-dx-mode="home"] .dx-foot__name {
+  display: none; align-items: center; height: 24px; padding-right: 14px; margin-right: 6px; border-right: 1px solid hsl(var(--border-default));
+  font: 600 12px/1 var(--dx-font-sans, var(--font-sans, sans-serif)); letter-spacing: .01em; color: hsl(var(--text-muted)); white-space: nowrap;
+}
 
 /* Onward: a page that explains something hands the reader to the product
    that does it (productHandoff / productLink). One plain sentence, the
@@ -1127,12 +1260,10 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
     grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-areas: "top top" "rail list" "foot foot";
   }
-  .dx-bar[data-dx-mode="home"] .dx-switch__panel { left: var(--dx-gutter); right: auto; }
   .dx-switch__panel[data-dx-depth] :is(.dx-switch__rail, .dx-switch__stage) { display: grid; overflow: auto; }
   .dx-switch__rail { padding: 16px 12px; border-right: 1px solid hsl(var(--border-subtle)); }
   .dx-switch__stage { padding: 16px 12px; }
   .dx-switch__panel .dx-switch__back, .dx-switch__panel .dx-lane__head:not(.dx-switch__results-head) { display: none; }
-  .dx-foot[data-dx-mode="home"] { gap: 16px; }
   .dx-foot[data-dx-mode="home"] .dx-foot__links { gap: 8px 16px; }
   .dx-onward { grid-template-columns: minmax(0, 1fr) auto; margin: 16px 0; padding: 12px 16px; gap: 8px 16px; }
   .dx-onward__words { grid-row: 1 / span 2; grid-column: auto; }
@@ -1149,6 +1280,11 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
   .dx-handoff__self { border: 0; border-left: 1px solid hsl(var(--border-subtle)); border-right: 1px solid hsl(var(--border-subtle)); }
   .dx-strip { grid-template-columns: minmax(0, 1.4fr) repeat(var(--dx-strip-n, 3), minmax(0, 1fr)); }
   .dx-strip__lead { grid-column: auto; }
+}
+
+/* From 860.02px: the family home's footer names itself. */
+@media (min-width: 860.02px) {
+  .dx-foot[data-dx-mode="home"] .dx-foot__name { display: inline-flex; }
 }
 
 /* From 980.02px: the wide grids, the aside, the split hero, and the lanes
@@ -1174,7 +1310,8 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
     grid-template-columns: 232px minmax(0, 1fr) 33%;
     grid-template-areas: "top top top" "rail list preview" "foot foot foot";
   }
-  .dx-bar[data-dx-mode="home"] .dx-switch__panel { left: 4vw; right: auto; width: 92vw; }
+  /* the home's panel: at most 700px tall, the preview at least 320px */
+  .dx-bar[data-dx-mode="home"] .dx-switch__panel { height: min(700px, calc(100dvh - var(--dx-bar-h) - 24px)); grid-template-columns: 220px minmax(0, 1fr) minmax(320px, 36%); }
   .dx-switch__preview { display: grid; overflow: auto; }
   .dx-switch__keys { display: flex; }
   .dx-switch__top { padding: 12px 16px; }
@@ -1194,22 +1331,30 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
   .dx-related__line { -webkit-line-clamp: 1; }
   .dx-product-link { min-height: 72px; padding: 8px 12px 8px 8px; }
   .dx-switch__preview { margin: 8px; }
+  /* the home's preview tightens the same way, on its own steps */
+  :where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__preview { gap: 8px; padding: 16px 20px; margin: 10px; }
+  :where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-switch__preview .dx-preview__foot { bottom: -16px; margin: 4px -20px -16px; padding: 8px 20px 16px; }
+  :where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-preview__tile { width: 48px; height: 48px; }
+  :where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-preview__name { font-size: var(--fs-secondary); }
+  :where(.dx-bar[data-dx-mode="home"]) .dx-switch__panel .dx-product-link { padding: 10px 14px 10px 10px; }
 }
 
 /* From 1040.02px: the family home's nav is in its bar, not its menu. */
 @media (min-width: 1040.02px) { .dx-bar[data-dx-mode="home"] .dx-bar__nav { display: grid; } }
-
-/* From 1280px: the home footer names itself. */
-@media (min-width: 1280px) {
-  .dx-foot[data-dx-mode="home"] .dx-foot__name { display: inline; }
+/* ...and the Products trigger is the first segment of one control with it.
+   The nav clips its own corners, so whichever links the row fit leaves
+   showing get the rounded ends (the kit rounds :first-child/:last-child,
+   which is wrong once the home moves a link out). The -7px pulls the nav
+   over the 6px bar gap so the two edges overlap into one hairline. A hairline
+   then sets the pages apart from the visitor's own controls. */
+@media (min-width: 1040.02px) {
+  .dx-bar[data-dx-mode="home"]:has(.dx-bar__nav > a) .dx-switch__trigger { border-radius: var(--dx-radius, 8px) 0 0 var(--dx-radius, 8px); }
+  .dx-bar[data-dx-mode="home"]:has(.dx-bar__nav > a) .dx-bar__nav { margin-left: -7px; border-radius: 0 var(--dx-radius, 8px) var(--dx-radius, 8px) 0; overflow: hidden; }
+  .dx-bar[data-dx-mode="home"] .dx-bar__nav > a { border-radius: 0; }
+  .dx-bar[data-dx-mode="home"] .dx-bar__end { position: relative; padding-left: 13px; }
+  .dx-bar[data-dx-mode="home"] .dx-bar__end::before { content: ""; position: absolute; left: 6px; top: 8px; bottom: 8px; width: 1px; background: hsl(var(--border-default)); }
 }
 
-/* From 1440px: the family home shows its sub-brand and its nav segments
-   take their full padding. */
-@media (min-width: 1440px) {
-  .dx-bar[data-dx-mode="home"] .dx-bar__brand-sub { display: inline; }
-  .dx-bar[data-dx-mode="home"] .dx-bar__nav :is(a, button) { padding: 0 12px; }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .dx-page *, .dx-page *::before, .dx-page *::after { transition: none !important; animation: none !important; }

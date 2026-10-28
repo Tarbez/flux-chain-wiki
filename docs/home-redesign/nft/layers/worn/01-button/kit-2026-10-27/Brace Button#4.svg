@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Brace Button: each end drawn as a curly brace pointing a beak outward, the leading beak tipped with a complementary dot (the Brace set)</title>
+  <path d="M24 1 H13 Q7 1 7 7 V22 Q7 28 1 28 Q7 28 7 34 V49 Q7 55 13 55 H24" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M176 1 H187 Q193 1 193 7 V22 Q193 28 199 28 Q193 28 193 34 V49 Q193 55 187 55 H176" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M24 1 H176 M24 55 H176" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <circle cx="1.5" cy="28" r="1.5" fill="var(--complementary)"/>
+</svg>

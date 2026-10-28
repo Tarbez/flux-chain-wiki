@@ -396,6 +396,12 @@ ArkManifest.define({
       "section": "Home (3D world), the Measured rail",
       "value": "Not measured yet"
     },
+    "WORLD.RAIL.UNVERIFIED": {
+      "label": "No verified fleet run",
+      "kind": "line",
+      "section": "Home (3D world), the Measured rail",
+      "value": "No fleet run is verified yet."
+    },
     "WORLD.RAIL.NOWORDS": {
       "label": "No plain words yet",
       "kind": "line",

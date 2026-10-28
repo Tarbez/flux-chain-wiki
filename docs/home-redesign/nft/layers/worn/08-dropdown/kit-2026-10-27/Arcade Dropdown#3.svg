@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Arcade Dropdown: a flat top seam resting on two impost blocks, the bottom corners turned as round arches, a referential keystone on the leading arch</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 H11 V6 H1 M349 1 H359 V6 H349" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 6 V219 Q1 239 21 239 H339 Q359 239 359 219 V6" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 6 V1 M359 6 V1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M4.74 235.26 L5.44 231.73 L8.98 231.02 L8.27 234.56 Z" fill="var(--referential)"/>
+</svg>

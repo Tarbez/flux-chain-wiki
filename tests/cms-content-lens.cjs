@@ -82,7 +82,7 @@ function setup(route) {
     ArkLayout: { SHELL: '*' },
     cmsComponentsDraft: { masters: { m1: { label: 'Text block', props: { heading: 'Definition heading', body: 'Body' } } } },
     previewCopyText: (v) => String(v == null ? '' : v).replace(/\s+/g, '').trim(),
-    cmsRoutePath: () => route,
+    cmsRoutePath: () => route, cmsLayoutScope: () => route,
     cmsScopeOf: (el) => (el.closest('[data-ark-page]') ? route : '*'),
     cmsComponentRootOf: (el) => el.closest('[data-ark-component-key]'),
     cmsRectOf: () => ({ left: 0, top: 0, width: 10, height: 10 }),

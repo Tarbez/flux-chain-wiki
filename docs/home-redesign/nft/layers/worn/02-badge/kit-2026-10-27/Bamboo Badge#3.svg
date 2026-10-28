@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>Bamboo Badge: a square hairline label with a double node line near each end</title>
+  <rect x="1" y="1" width="118" height="30" rx="1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M10 1 V31 M12 1 V31 M108 1 V31 M110 1 V31" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

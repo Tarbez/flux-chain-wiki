@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Quadrant Dropdown: a rule seam over a hairline panel whose bottom corners are quarter discs with an inner quarter arc, a referential square at the leading top</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V217 Q1 239 23 239 H337 Q359 239 359 217 V1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M5 217 A18 18 0 0 0 23 235 M355 217 A18 18 0 0 1 337 235" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M5 5 H10 V10 H5 Z" fill="var(--referential)"/>
+</svg>

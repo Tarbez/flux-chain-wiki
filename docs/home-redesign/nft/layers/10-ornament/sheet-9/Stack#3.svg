@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Stack: the network in amber and the mark, stacked beside a vertical line (sheet 9, piece 27)</title>
+  <title>Stack: the network in amber and the join date, stacked beside a vertical line (sheet 9, piece 27)</title>
   <line x1="0.5" y1="4" x2="0.5" y2="76" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <path d="M0.5 12.5H5.5M0.5 50.5H5.5M0.5 67.5H5.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <path d="M0.5 22V38" fill="none" stroke="var(--acc)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity="0.06"/>
@@ -7,6 +7,6 @@
   <path d="M0.5 22V38" fill="none" stroke="var(--acc)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-linecap="square"/>
   <text x="14" y="16" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="2.2" fill="var(--dim)">NETWORK</text>
   <text x="14" y="37" font-family="JetBrains Mono, monospace" font-size="17" letter-spacing="3" fill="var(--acc)" data-field="network" font-weight="500">NETWORK</text>
-  <text x="14" y="55" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="2.2" fill="var(--dim)">MARK</text>
-  <text x="14" y="72" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2.4" fill="var(--ink)" data-field="mark" font-weight="500">MARK</text>
+  <text x="14" y="55" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="2.2" fill="var(--dim)">JOINED</text>
+  <text x="14" y="72" font-family="JetBrains Mono, monospace" font-size="12" letter-spacing="2.4" fill="var(--ink)" data-field="joined" font-weight="500">JOINED</text>
 </svg>

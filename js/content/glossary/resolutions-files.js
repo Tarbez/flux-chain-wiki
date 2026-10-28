@@ -1,5 +1,5 @@
 var ArkGlossary=window.ArkGlossary||{map:{}};
 [
   ["provider","A process that serves a resolver's chain: it announces an address for the chain and, if the resolver composes capabilities, proves it runs them by passing their test vectors."],
-  ["mesh","The peers that find, store and check records together. Taking part means running a correctly configured miner; there is no separate join step."]
+  ["node","One machine in the fleet. It runs a chain-server or a resolver shard, and each node is measured on its own hardware."]
 ].forEach(function(e){ArkGlossary.map[e[0]]={term:e[2]||e[0][0].toUpperCase()+e[0].slice(1),definition:e[1]}});

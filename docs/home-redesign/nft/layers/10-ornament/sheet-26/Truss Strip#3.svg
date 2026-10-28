@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Truss Strip: a bridge girder: two rails, a zigzag web, a pin at every joint and the middle pin in the accent (sheet 26, the Truss set: a girder: two rails with a zigzag web between them, round pins at the joints, one pin in the accent)</title>
+  <title>Truss Strip: a bridge girder: two rails, a zigzag web, a pin at every joint and the middle pin in the accent (sheet 26, the Truss set: a girder: two rails with a zigzag web between them, round pins at the joints, one pin in the accent). It prints the card's the network.</title>
   <path d="M4 26.5H356" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <path d="M4 53.5H356" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
   <path d="M4 26.5V53.5" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
@@ -22,4 +22,6 @@
   <circle cx="312" cy="53.5" r="1.7" fill="var(--dim)"/>
   <circle cx="334" cy="26.5" r="1.7" fill="var(--dim)"/>
   <circle cx="356" cy="53.5" r="1.7" fill="var(--dim)"/>
+  <text x="4" y="74" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="2" fill="var(--dim)">NETWORK</text>
+  <text x="72" y="74" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--ink)" data-field="network">NETWORK</text>
 </svg>

@@ -148,11 +148,18 @@ var ArkSEO = (function () {
      live ArkManifest/LearningContent registries are not populated (site-bundle.mjs reads
      and writes a site object headlessly, never loading every content file into one
      registry) -- omit it in the browser, where those registries are the live content. */
+  /* A page manifest whose route no row of the page table holds names a removed page: its words may still serve other
+     pages (js/content/manifests/deployment.js holds the agreement chapters' words since /how-deployment-works was
+     removed, 2026-10-25), but it is no route, so it gets no SEO identity and no sitemap or llms.txt line. Until
+     2026-10-27 an admin save wrote the removed page back into sitemap.xml and llms.txt (tests/seo-content.cjs). */
+  function pageless(m) {
+    return m.group === 'page' && !!m.route && !sitePages().pages().some(function (row) { return row.path === m.route; });
+  }
   function pageEntries(manifests) {
     var list = manifests || (typeof ArkManifest !== 'undefined' ? ArkManifest.all() : []);
     /* group 'site' (e.g. nav) is shared chrome text, not a route of its own. */
     var out = [];
-    list.filter(function (m) { return m.group !== 'site'; }).forEach(function (manifest) {
+    list.filter(function (m) { return m.group !== 'site' && !pageless(m); }).forEach(function (manifest) {
       out.push({ id: manifest.id, label: manifest.title });
       if (manifest.id !== 'resolutions') return;
       Object.keys(manifest.fields).forEach(function (role) {
@@ -272,7 +279,7 @@ var ArkSEO = (function () {
     var out = [{ path: '/', id: 'home' }];
     function has(path) { return out.some(function (entry) { return entry.path === path; }); }
     sitePages().pages().filter(function (row) { return row.journey; }).forEach(function (row) { if (!has(row.path)) out.push({ path: row.path, id: row.seoId || row.key }); });
-    (manifests || []).filter(function (m) { return m.group !== 'site' && m.route; }).forEach(function (m) {
+    (manifests || []).filter(function (m) { return m.group !== 'site' && m.route && !pageless(m); }).forEach(function (m) {
       if (!has(m.route)) out.push({ path: m.route, id: m.id });
     });
     pageEntries(manifests).filter(function (page) { return page.id.indexOf('resolutions/') === 0; }).forEach(function (page) {

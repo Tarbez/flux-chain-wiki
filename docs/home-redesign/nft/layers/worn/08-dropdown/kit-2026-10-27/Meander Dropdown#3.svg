@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Meander Dropdown: a hairline top seam, square sides and a Greek key hooked into each bottom corner, the leading key referential</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 V239 H359 V1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M6 234 V216 H22 V230 H11 V221 H17 V226" fill="none" stroke="var(--referential)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M354 234 V216 H338 V230 H349 V221 H343 V226" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

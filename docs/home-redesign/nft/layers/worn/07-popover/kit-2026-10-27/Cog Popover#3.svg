@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Cog Popover: the nub is three small square teeth on the top edge near the leading corner, a gear meshing with what opened it (the Cog family)</title>
+  <path d="M9 9 H14 V3 H18 V9 H24 V3 H28 V9 H34 V3 H38 V9 H351 Q359 9 359 17 V231 Q359 239 351 239 H9 Q1 239 1 231 V17 Q1 9 9 9 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

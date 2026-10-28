@@ -63,6 +63,8 @@
     account: 'idvalue',
     /* /auth: your FXN ID card standing on the kernel, its look following the sign-in state (js/world/auth-stage.js) */
     auth: 'auth',
+    /* /kit (editor only): board 05's objects as real 3D in a 6 x 5 grid; boards 01-04 sit over the calm pose (js/world/kit-stage.js) */
+    kit: 'kit',
     /* the stats section (js/world/stats-stage.js): ONE stage for all its pages, so moving between them is a camera flight inside the
        same scene. The page says which part it is at (state s). 'stats/now' comes last so the view's own page (keyOf) is Now. The week
        pages come from the data (ArkSitePages.statsWeeks); stats-stage.js adds them to this map when it loads. /measured is one of
@@ -179,6 +181,7 @@
     ['DEFXNScene', 'js/world/chains-scene.js'], [null, 'js/world/stages.js'], [null, 'js/world/glass-kit.js'], [null, 'js/world/chain-marks.js'],
     ['DEFXN_CONCEPT', 'js/content/concept-data.js'], ['DEFXN_IDENTITY', 'js/content/identity-sample.js'],
     [null, 'js/world/ring-stage.js'], [null, 'js/world/concept-stages.js'], [null, 'js/world/identity-stages.js'], [null, 'js/world/intro-stage.js'], [null, 'js/world/download-stage.js'], [null, 'js/world/auth-stage.js'],
+    [null, 'js/world/object-kit.js'], [null, 'js/world/kit-stage.js'],
     [null, 'js/world/home-descent.js'], [null, 'js/world/home-helix.js'], [null, 'js/world/home-sites.js'], [null, 'js/world/record-glass.js'],
     ['ArkStatsHighlights', 'js/content/stats-highlights.js'], ['ArkSitePages', 'js/content/site-pages.js'], ['ArkStatsScale', 'js/content/stats-scale.js'], [null, 'js/world/stats-stage.js']
   ];

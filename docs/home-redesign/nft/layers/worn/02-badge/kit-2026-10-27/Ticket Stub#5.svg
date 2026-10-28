@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>Ticket Stub: a ticket with a perforated stub line near its leading end</title>
+  <rect x="1" y="1" width="118" height="30" rx="1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M12 2 V30" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="2 2"/>
+</svg>

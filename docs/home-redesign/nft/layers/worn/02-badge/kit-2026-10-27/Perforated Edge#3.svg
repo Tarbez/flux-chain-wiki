@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" data-slot="badge">
+  <title>Perforated Edge: one dashed outline, like a tear-off label</title>
+  <rect x="1" y="1" width="118" height="30" rx="2" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="3 2"/>
+</svg>

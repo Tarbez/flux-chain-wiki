@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Stepped: an outline whose four corners step in twice, the trailing top step in the complementary role</title>
+  <path d="M10 1 H190 M199 9 V47 H195 V52 H190 V55 H10 V52 H5 V47 H1 V9 H5 V4 H10 V1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M190 1 V4 H195 V9 H199" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

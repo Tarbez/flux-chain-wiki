@@ -204,11 +204,11 @@
       function sendCreate3d() { var h = window.ArkWorldHost; if (h && h.ready && h.select) h.select({ s: 'create', b: cstep, ic: cvals.icon }); }
       function startCreate() {
         resetCreate(); creating = !!(window.ArkAdminAuth && ArkAdminAuth.createFxnId); happened = ''; keptSeen = true; paint(true);
-        /* the gate committee is needed at the end: ask for it now, so no one answers six questions for a file this site
+        /* the gate file is needed at the end: ask for it now, so no one answers six questions for a file this site
            cannot make (createFxnId reads the same file and says the same thing) */
         fetch(COMMITTEE_URL, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); }).catch(function (error) {
           if (!creating) return;
-          cerr = 'This site has no FXN ID gate committee yet, so it cannot make a new FXN ID. Missing: the committee file at ' + COMMITTEE_URL + ' (' + error.message + ').';
+          cerr = 'This site has no FXN ID gate file yet, so it cannot make a new FXN ID. Missing: the gate file at ' + COMMITTEE_URL + ' (' + error.message + ').';
           paint(true);
         });
       }

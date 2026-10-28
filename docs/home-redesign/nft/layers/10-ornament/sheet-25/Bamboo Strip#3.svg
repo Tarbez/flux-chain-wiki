@@ -1,4 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" data-slot="ornament">
-  <title>Bamboo Strip: a length of bamboo ringed at two nodes, with three leaves, the largest one in the accent (sheet 25, the Bamboo set)</title>
+  <title>Bamboo Strip: a length of bamboo ringed at two nodes, with three leaves, the largest one in the accent (sheet 25, the Bamboo set). It prints the card's the serial.</title>
   <path d="M0.5 40H199.5M0.5 46H199.5M0.5 40V46M199.5 40V46" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M65 38.4V47.6M67 38.4V47.6M133 38.4V47.6M135 38.4V47.6" fill="none" stroke="var(--ink)" stroke-width="1.1" vector-effect="non-scaling-stroke" opacity="0.85"/><path d="M68 39Q80.5 23.74 106 25Q88.21 35.28 68 39Z" fill="var(--acc)"/><path d="M136 47Q148.71 59.87 172 57Q154.84 48.96 136 47Z" fill="var(--line)"/><path d="M136 39Q143.58 28.8 160 29Q148.88 36.1 136 39Z" fill="var(--line)" opacity="0.7"/>
+  <text x="222" y="36" font-family="JetBrains Mono, monospace" font-size="11" letter-spacing="2" fill="var(--dim)">SERIAL</text>
+  <text x="222" y="56" font-family="JetBrains Mono, monospace" font-size="13" letter-spacing="0.5" fill="var(--referential)" data-field="serial">SERIAL</text>
 </svg>

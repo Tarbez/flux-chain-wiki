@@ -193,6 +193,9 @@ export class WalletWire {
   history(pubHex, limit) { return this._call((c) => nativeHistory(c, BASE_CHAIN_ID, pubHex, limit)); }
   /** -> `HEAD<TAB>...` parsed by WireClient.chainHead. */
   chainHead(pubHex) { return this._call((c) => c.chainHead(pubHex)); }
+  /** -> `{kind:'confirmed'|'waiting'|'error', ...}`: has K of the chain's lead nodes confirmed the record at
+   *  `position` of `pubHex`'s list (`CONFIRMED`)? A payment is final only then. */
+  confirmed(pubHex, position, cid) { return this._call((c) => c.confirmed(pubHex, null, position, cid)); }
   /** -> the raw `NATIVE_SEND_OK`/`NATIVE_SEND_ERR` reply line, parsed by
    *  the caller via `parseNativeSendReply`. */
   sendLine(line) { return this._call((c) => c.send(line)); }
@@ -332,7 +335,7 @@ const SEND_FAILURE_MEANING = {
 };
 
 export function describeSendReply(reply) {
-  if (reply.kind === "ok") return `Sent. Your balance is now ${reply.senderBalance} FXN.`;
+  if (reply.kind === "ok") return `Sent. Waiting for the chain's lead nodes to confirm it. Your balance is now ${reply.senderBalance} FXN.`;
   if (reply.kind === "refused") {
     return `${reply.failure}: ${SEND_FAILURE_MEANING[reply.failure] || "a reason this page does not recognise."} (${reply.remedy})`;
   }
@@ -374,5 +377,21 @@ export async function sendFxn({ who, wire, amount, recipient }) {
     facts: (warning ? [{ label: "Links your ids", value: warning }] : []).concat([{ label: "Amount", value: `${units} FXN` }, { label: "Recipient", value: toKeyHex }]),
     run: (s) => buildNativeTransfer(s, { pos, prev, toKeyHex, chainId: BASE_CHAIN_ID, amount: units, now }).then((r) => r.text),
   });
-  return parseNativeSendReply(await wire.sendLine(`NATIVE_SEND\t${signed}`));
+  const reply = parseNativeSendReply(await wire.sendLine(`NATIVE_SEND\t${signed}`));
+  // The record's place on the sender's list, so the page can ask when the payment is final (`watchSendConfirmed`).
+  return reply.kind === "ok" ? { ...reply, holder: signer.pubHex, position: pos } : reply;
+}
+
+/** Ask every `everyMs` until the chain's lead nodes confirm a sent payment (dense-wire, owner rule 2026-10-27: a
+ *  payment is final only when they confirm it). Asked for this exact record (`reply.cid`). Resolves "confirmed",
+ *  "conflict" (they confirmed a different record in its place: it will never be final) or "waiting" when `timeoutMs`
+ *  passes first (it may still confirm later). A failed ask is retried; it never throws. */
+export async function watchSendConfirmed(wire, reply, { everyMs = 3000, timeoutMs = 5 * 60 * 1000 } = {}) {
+  const until = Date.now() + timeoutMs;
+  while (Date.now() < until) {
+    const status = await wire.confirmed(reply.holder, reply.position, reply.cid).catch(() => null);
+    if (status && (status.kind === "confirmed" || status.kind === "conflict")) return status.kind;
+    await new Promise((resolve) => setTimeout(resolve, everyMs));
+  }
+  return "waiting";
 }

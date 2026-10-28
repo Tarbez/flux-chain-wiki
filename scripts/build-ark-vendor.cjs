@@ -26,6 +26,7 @@
      js/ark/vendor/ark-kit-forms.js             the form blocks, registered into the public kit's registry
                                                 (scripts/ark-kit-forms-entry.js)
      js/ark/vendor/ark-kit-popover.js           the popover block alone (scripts/ark-kit-popover-entry.js)
+     js/ark/vendor/ark-kit-catalog.js           every Ark UI primitive, for the editor's Kit page only (scripts/ark-kit-catalog-entry.js)
      js/ark/vendor/ark-kit-skin.js              the skin layer alone (scripts/ark-kit-skin-entry.js), loaded when a skin is applied
      js/ark/vendor/ark-kit-confirm.js           Ark's modal confirm alone (scripts/ark-kit-confirm-entry.js), loaded when a
                                                 card's seal can ask "Wear it" (js/ark/skin-site.js)
@@ -264,11 +265,20 @@ const PUBLIC_KIT_REPLACEMENTS = [{ pattern: '[\\\\/]blocks[\\\\/]examples\\.js$'
    gzip -9): 78 help + 21 description strings, 6.3 KB raw, 2.1 KB gz of a 26.9 KB public kit. The
    member must be a double-quoted string (tsc's output form) that opens an object or follows a
    comma, so `description: { kind: "text" }` (a prop named description) and `props.description`
-   in render code are untouched. The full kit keeps every word. */
+   in render code are untouched. The full kit keeps every word.
+   A block's `parts` list (its part names, for the editor's Library and describeArkBlocks; the
+   grid blocks derive theirs with a `get parts()` over the item block's) goes too: no renderer,
+   validator or site script reads a block definition's `parts` -- the rendered parts are the
+   data-ark-part attributes, set by the render code. Measured 2026-10-28 (gzip -9, @deadark/ark-ui
+   0.2.56): 396 B gz of the public kit (24,893 -> 24,497), which ark-ui 0.2.42-0.2.56 had grown by 236 B (card
+   actions, icon buttons). A list is stripped only when it is a literal of plain strings, and a
+   getter only when it returns one array, so a spread like `parts: ARK_FIELD_PARTS` stays. */
 // `member` is the regex source (data, not code: the child build gets it through JSON, so its
 // backslashes survive); its two groups keep the opener and its whitespace.
-const stripMember = (keys) => '(^|[{,])(\\s*)(?:' + keys.join('|') + '):\\s*"(?:[^"\\\\\\n]|\\\\.)*"\\s*,?';
-const PUBLIC_KIT_STRIPS = [{ pattern: '[\\\\/]ark-ui[\\\\/]dist[\\\\/]blocks[\\\\/][a-z-]+\\.js$', member: stripMember(['help', 'description']) }];
+const stripMember = (keys, lists) => '(^|[{,])(\\s*)(?:(?:' + keys.join('|') + '):\\s*"(?:[^"\\\\\\n]|\\\\.)*"' +
+  '|(?:' + lists.join('|') + '):\\s*\\[(?:\\s*"[a-z0-9-]+"\\s*,?)*\\s*\\]' +
+  '|(?://[^\\n]*\\s*)*get (?:' + lists.join('|') + ')\\(\\)\\s*\\{\\s*return\\s*\\[[^\\]{}]*\\];?\\s*\\})\\s*,?';
+const PUBLIC_KIT_STRIPS = [{ pattern: '[\\\\/]ark-ui[\\\\/]dist[\\\\/]blocks[\\\\/][a-z-]+\\.js$', member: stripMember(['help', 'description'], ['parts']) }];
 
 const REPLACING_BUILD = `
 const esbuild = require(process.argv[1]);
@@ -364,6 +374,25 @@ function arkKitBanner(packages, variant) {
 /* ---------- the target table ---------- */
 
 const ARK_BLOCKS_CSS_SOURCE = 'dist/ark-ui.blocks.css';
+/* The chart, nav and status blocks' sheet (@deadark/ark-ui 0.2.43+), apart from the base sheet so a route that renders
+   none of them never downloads it (the Kit, /kit, lists it). Its nav icons are CSS masks at ../icons/ark/<name>.svg,
+   relative to the package's dist/: each one it names is copied to assets/ark-icons/ (a folder every host already
+   serves) and the URL is rewritten to match, so the icon set is derived from the sheet, never listed here. */
+const ARK_BLOCK_GROUPS_CSS_SOURCE = 'dist/ark-ui.blocks-groups.css';
+function blockGroupTargets(packages) {
+  const dir = packageDir('@deadark/ark-ui'), file = path.join(dir, ARK_BLOCK_GROUPS_CSS_SOURCE);
+  const version = (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version;
+  if (!fs.existsSync(file)) return [{ out: 'css/ark-blocks-groups.css', notBuilt: '@deadark/ark-ui ' + version + ' ships no ' + ARK_BLOCK_GROUPS_CSS_SOURCE + ' (it arrived in 0.2.43)' }];
+  const source = fs.readFileSync(file, 'utf8'), icons = new Set();
+  const rewritten = source.replace(/url\((["']?)\.\.\/icons\/ark\/([a-z0-9-]+)\.svg\1\)/g, (_m, q, name) => { icons.add(name); return 'url(' + q + '../assets/ark-icons/' + name + '.svg' + q + ')'; });
+  const esbuild = require('esbuild');
+  const css = esbuild.transformSync(rewritten, { loader: 'css', minify: true, legalComments: 'none' }).code;
+  const header = '/* @deadark/ark-ui@' + version + ' ' + ARK_BLOCK_GROUPS_CSS_SOURCE + ', minified by scripts/build-ark-vendor.cjs, icon URLs pointed at assets/ark-icons/. Do not edit; styles live in ark-ui blocks/charts.ts, nav.ts and status.ts. */\n';
+  return [{ out: 'css/ark-blocks-groups.css', build: () => header + css }].concat(Array.from(icons).sort().map((name) => {
+    const svg = path.join(dir, 'icons', 'ark', name + '.svg');
+    return fs.existsSync(svg) ? { out: 'assets/ark-icons/' + name + '.svg', build: () => fs.readFileSync(svg) } : { out: 'assets/ark-icons/' + name + '.svg', notBuilt: 'the sheet names icons/ark/' + name + '.svg and @deadark/ark-ui ' + version + ' does not ship it' };
+  }));
+}
 
 function targets(packages) {
   const blocksCss = path.join(packageDir('@deadark/ark-ui'), ARK_BLOCKS_CSS_SOURCE);
@@ -392,6 +421,8 @@ function targets(packages) {
     { out: 'js/ark/vendor/ark-kit-examples.js', build: () => bundle({ entry: 'scripts/ark-kit-examples-entry.js', globalName: 'ArkKitExamples', legalComments: 'none', banner: '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-examples-entry.js (@deadark/ark-ui@' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' blocks/examples). Do not edit. */' }) },
     // Ark's modal confirm alone, loaded only when a card's seal can ask "Wear it" (js/ark/skin-site.js).
     { out: 'js/ark/vendor/ark-kit-confirm.js', build: () => bundle({ entry: 'scripts/ark-kit-confirm-entry.js', globalName: 'ArkKitConfirm', legalComments: 'none', banner: '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-confirm-entry.js (@deadark/ark-ui@' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' blocks/confirm). Do not edit. */' }) },
+    // Every Ark UI primitive, for the editor's Kit page only (js/pages/kit.js; More > Kit). No public route lists it.
+    { out: 'js/ark/vendor/ark-kit-catalog.js', build: () => bundle({ entry: 'scripts/ark-kit-catalog-entry.js', globalName: 'ArkKitCatalog', legalComments: 'none', alias: SHARED_STYLE_REGISTRY, banner: '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-catalog-entry.js (@deadark/ark-ui@' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' primitives; the editor Kit page only). Do not edit. */' }) },
     // The skin layer alone (NFT skins), loaded only when a skin is applied (js/ark/skin-site.js).
     { out: 'js/ark/vendor/ark-kit-skin.js', build: () => bundle({ entry: 'scripts/ark-kit-skin-entry.js', globalName: 'ArkKitSkin', legalComments: 'none', banner: '/* Generated by scripts/build-ark-vendor.cjs from scripts/ark-kit-skin-entry.js (@deadark/ark-ui/skin). Do not edit. */' }) },
     // The live morph alone, for js/ark/blocks.js to load on a page's first live update.
@@ -404,6 +435,7 @@ function targets(packages) {
     fs.existsSync(blocksCss)
       ? { out: 'css/ark-blocks.css', build: () => minifyBlocksCss(fs.readFileSync(blocksCss, 'utf8'), (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version) }
       : { out: 'css/ark-blocks.css', notBuilt: '@deadark/ark-ui ' + (packages.find((p) => p.name === '@deadark/ark-ui') || {}).version + ' ships no ' + ARK_BLOCKS_CSS_SOURCE + ' yet (components.md Wave 1, U1)' },
+    ...blockGroupTargets(packages),
   ];
 }
 

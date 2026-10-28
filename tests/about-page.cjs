@@ -17,7 +17,9 @@
      carries it now) with the reason below.
    - No feature reduction: the three layers are still drawn and selectable (the drawing follows the
      choice), and every word the page had is still on it -- the flow, the promise, the five counted
-     resolution groups, the pillars, the boundary, the evidence and every link. */
+     resolution groups, the pillars, the boundary, the evidence and every link.
+   2026-10-27, owner-confirmed: the deployment page is removed, so the hero's "Deploy a resolver" link is checked to
+   open /resolutions/deployments and never the removed route. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -71,7 +73,8 @@ const reshaped = {
   'page:/footer:1/details:1/div:1/section:2': '"How to verify it" is the second',
   'page:/footer:1/nav:1': 'the closing links are the pager\'s related links',
   /* first-visit audit 2026-10-22 (P1, "one page has five names"): the link to /how-deployment-works uses that page's
-     one name; "See how DEFXN works" is home's button to this page, so it no longer names two places */
+     one name; "See how DEFXN works" is home's button to this page, so it no longer names two places.
+     2026-10-27 (owner-confirmed): that page is removed; "Deploy a resolver" now opens /resolutions/deployments. */
   'page:/section:1/div:1/div:1': 'the hero\'s actions: "See how DEFXN works" reads "Deploy a resolver", the one name of the page it opens',
   'page:/section:1/div:1/div:1/a:2': '"See how DEFXN works" reads "Deploy a resolver", the one name of the page it opens (home\'s "See how DEFXN works" opens /about)'
 };
@@ -153,7 +156,10 @@ if (require.main === module) (async () => {
   assert.equal(seen.lit, '2', 'choosing a layer lights its slab');
   assert(/Current source boundary/i.test(seen.boundary) && /remain unverified/.test(seen.boundary), 'the source boundary is in sight');
   assert.equal(seen.groups.length, 5, 'resolutions are five counted groups, not a link per resolution');
-  for (const route of ['resolutions', 'deployment', 'resolver', 'concept', 'zero', 'explorer', 'download']) assert(seen.links.includes(route), 'still links ' + route);
+  /* 2026-10-27, owner-confirmed: the deployment page (/how-deployment-works, js/pages/deployment.js) is removed. "Deploy a resolver"
+     now opens the deployments resolution (/resolutions/deployments), and nothing on this page links the removed route. */
+  for (const route of ['resolutions', 'resolutions/deployments', 'resolver', 'concept', 'zero', 'explorer', 'download']) assert(seen.links.includes(route), 'still links ' + route);
+  assert(!seen.links.includes('deployment'), 'no link to the removed deployment page');
   for (const words of /* content audit 2026-10-24: the four headings that promised "no fees" and "every part of your work" were rewritten to what is true */ ['State it. Resolve it. Check it.', 'A site as a signed bundle, not a rented server.', 'Twenty ideas for what a resolver can do.', 'A kernel, the chains on it, and the people who sign.', 'See the resolver chains.', 'READ DEFXN STATUS', 'EXPLORE THE DEFXN MODEL', 'Discovery finds the network.'])
     assert(seen.all.includes(words), 'still says: ' + words);
   assert.equal(seen.refused, 0, 'no block was refused');

@@ -60,7 +60,7 @@ function headingsOf(doc) {
     const page = window.document.querySelector('[data-ark-page="reference"]');
     const index = window.ArkUI.referenceIndex;
     return { doc: page && page.dataset.referenceDoc, scope: page && page.getAttribute('data-ark-layout-scope'),
-      overviews: window.ArkUI.referenceDocs.filter((doc) => index[doc] && /\boverview\b/i.test(index[doc].title)),
+      overviews: Array.from(window.ArkUI.referenceDocs.filter((doc) => index[doc] && /\boverview\b/i.test(index[doc].title))),   // out of the window's realm, so deepEqual compares values
       title: clean((page.querySelector('h1') || { textContent: '' }).textContent), text: page ? page.textContent : '' };
   });
   assert.deepEqual(opened.overviews, ['docs/overview.md'], 'the index names one overview document: ' + opened.overviews.join(' | '));

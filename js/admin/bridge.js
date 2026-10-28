@@ -203,7 +203,8 @@
     state.cmsSourceSite = siteFromState(); state.cmsRoutes = studioRoutes();
     const wanted = state.cmsWantedRoute;
     if (wanted && (state.cmsRoutes.some((r) => r.path === wanted) || itemForRoute(wanted))) { state.cmsWantedRoute = ''; if (notice) notice.close('route-refused'); openRoute(wanted); }
-    else if (!state.cmsRoutes.some((r) => r.path === state.cmsCurrentRoute)) openRoute('/');
+    /* the Kit's page (/kit) is the canvas's own route, in no draft and no catalog the editor reads: it stays while the Kit is open */
+    else if (!state.cmsRoutes.some((r) => r.path === state.cmsCurrentRoute) && !(state.view === 'kit' && state.cmsCurrentRoute === A.KIT_ROUTE)) openRoute('/');
     else postCmsPreviewState();
     schedule();
   }
@@ -250,12 +251,20 @@
     const value = state.versionPreviewSite ? state.versionPreviewSite.skinPolicy : state.skinPolicyDraft;
     return window.ArkSkinPolicy ? ArkSkinPolicy.sanitize(value && typeof value === 'object' ? value : {}) : null;
   }
-  function postSkinNow(force) {
+  function postSkinNow(force, morph) {
     if (!state.cmsConnected || !cmsPreview.contentWindow) return;
     const sample = state.skinChoice || '';
     if (!sample && !force) return;
     const policy = skinToSend(); if (!policy) return;
-    try { cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-skin', sample, policy }, window.location.origin); } catch (error) { /* between routes: the load handler sends it again */ }
+    try { cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-skin', sample, policy, morph: morph === true }, window.location.origin); } catch (error) { /* between routes: the load handler sends it again */ }
+  }
+  /* The Kit's Wear and Take off (js/admin/kit.js): the same message at once, with morph: the canvas sweeps the new
+     look in (js/main.js cmsMorph). false: put on or taken off with no sweep (the view is closing). */
+  function wearPreviewSkin(morph) { clearTimeout(skinTimer); postSkinNow(true, morph !== false); }
+  /* The Kit's board and element (js/admin/kit.js): the Kit page on the canvas draws it (js/pages/kit.js) */
+  function postKit(board, item, page, compare) {
+    if (!state.cmsConnected || !cmsPreview.contentWindow) return;
+    try { cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-kit', board: String(board || ''), item: String(item || ''), page: Number(page) || 0, compare: compare === undefined ? undefined : String(compare || '') }, window.location.origin); } catch (error) { /* between routes: the page reports, and the dock asks again */ }
   }
   function notifyPreviewSkin() {
     clearTimeout(skinTimer);
@@ -444,11 +453,14 @@
     if (event.origin !== window.location.origin || !event.data) return;
     if (event.source !== cmsPreview.contentWindow) return;
     if (event.data.type === 'defxn-cms-skin-report') { if (A.skinReport) A.skinReport(event.data); return; }
+    if (event.data.type === 'defxn-cms-kit-report') { if (A.kitReport) A.kitReport(event.data); return; }
     if (event.data.points) state.cmsInsertPoints = event.data.points;
     /* the selection's commands (js/main.js cmsSelectionCommands: the right-click menu's list), for the toolbar's More menu */
     if (Array.isArray(event.data.commands)) state.cmsSelectionCommands = event.data.commands;
     if (event.data.showing) state.cmsStatesShowing = event.data.showing;
     if (event.data.type === 'defxn-cms-preview-ready') {
+      /* the Kit asks its page again on every ready: a report lost while the canvas loaded would leave the dock waiting */
+      if (state.view === 'kit' && A.kitReady) A.kitReady();
       state.cmsPreviewReady = true;
       let reposted = false;
       if (navigating) { navigating = false; if (postWaiting) { postCmsPreviewState(); reposted = true; } }
@@ -552,7 +564,7 @@
       postCmsElementMotionPreview: postCmsElementMotionPreview, postCmsLayoutCommand: postCmsLayoutCommand,
       postCmsLayoutOperation: postCmsLayoutOperation, postCmsLayoutReset: postCmsLayoutReset,
       notifyPreviewAssets: notifyPreviewAssets, notifyPreviewMesh: notifyPreviewMesh,
-      notifyPreviewState: notifyPreviewState, notifyPreviewTheme: notifyPreviewTheme, notifyPreviewWorld: notifyPreviewWorld, notifyPreviewSkin: notifyPreviewSkin, postSkinFocus: postSkinFocus,
+      notifyPreviewState: notifyPreviewState, notifyPreviewTheme: notifyPreviewTheme, notifyPreviewWorld: notifyPreviewWorld, notifyPreviewSkin: notifyPreviewSkin, postSkinFocus: postSkinFocus, wearPreviewSkin: wearPreviewSkin, postKit: postKit,
       postCmsPreviewLens: postCmsPreviewLens, previewShowsDrafts: previewShowsDrafts,
       refreshCanvasSite: refreshCanvasSite, reloadPreview: reloadPreview,
       postCmsPreviewMode: postCmsPreviewMode, postCmsPreviewState: postCmsPreviewState,

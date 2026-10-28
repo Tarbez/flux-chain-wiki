@@ -16,7 +16,9 @@
      width; the live explorer (stepper, kinds, status, raw observatory) works as before.
    - Every word of each old page is on the converted page (its frozen census), and every old
      layout key still lands, or is reshaped / retired below with its reason
-     (tests/lib/converted-page.cjs). */
+     (tests/lib/converted-page.cjs).
+   - 2026-10-27, owner-confirmed: "Auth Kit" reads "FXN ID" (b0dc2d7), so the one /bundle-deployer leaf that named it is a
+     recorded rewording, and the page is checked to carry the FXN ID words. */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -38,7 +40,8 @@ const ROUTES = {
       [/^page:\/aside:1$/, 'the release aside is Ark\'s callout (in sight from 601px, a press away on a phone); its back link is the pager\'s previous page'],
       /* first-visit audit 2026-10-22: see reworded */
       [/^page:\/header:1\/p:1$/, 'the lede starts with the state (see reworded)'],
-      [/^(id:bundle-(workflow|boundary)-title|page:\/div:2\/section:2\/figure:1\/figcaption:1)$/, 'a tab named by what it holds (see reworded)']
+      [/^(id:bundle-(workflow|boundary)-title|page:\/div:2\/section:2\/figure:1\/figcaption:1)$/, 'a tab named by what it holds (see reworded)'],
+      [/^page:\/div:2\/section:2\/table:1\/tbody:1(\/tr:1(\/td:2)?)?$/, 'the table body, its first row and that row\'s cell say "FXN ID file" for "Auth Kit": the owner\'s rename, 2026-10-25 (see reworded)']
     ],
     retired: [
       [/^page:\/div:1$/, 'the eyebrow and status row; both keep their keys in the hero'],
@@ -53,7 +56,9 @@ const ROUTES = {
       [/^id:bundle-workflow-title$/, '"Three steps. One local tool." is the tab "Steps"'],
       [/^id:bundle-boundary-title$/, '"Choose what you share." is the tab "What becomes public"'],
       [/^page:\/div:2\/section:2\/figure:1\/figcaption:1$/, '"From your machine to the mesh" is the tab "How a bundle travels"'],
-      [/^page:\/div:2\/section:1\/p:1$/, '"Local CLI required" is gone (see retired)']
+      [/^page:\/div:2\/section:1\/p:1$/, '"Local CLI required" is gone (see retired)'],
+      /* the owner renamed "Auth Kit" to "FXN ID" across the site (b0dc2d7, 2026-10-25; confirmed 2026-10-27): the table row keeps its key */
+      [/^page:\/div:2\/section:2\/table:1\/tbody:1\/tr:1\/td:2$/, '"Auth Kit and private signing keys" is "FXN ID file and private signing keys": the owner\'s rename of Auth Kit to FXN ID']
     ] },
   '/deploy': { page: 'deploy', ids: ['deploy-'],
     reshaped: [
@@ -231,6 +236,8 @@ const ROUTES = {
       assert.equal(seen.tabs.length, 3, 'the three parts are tabs');
       assert.equal(seen.handoff, 1, 'the Bundles hand-off (the family kit) stays');
       for (const to of ['/account', '/download', '/resolutions/deployments']) assert(seen.pager.includes(to), '/bundle-deployer leads on to ' + to);
+      /* the reworded leaf above says what the words became, so check it is so: the FXN ID words, and no "Auth Kit" left */
+      assert(seen.text.includes('FXN ID file and private signing keys') && !/Auth Kit/.test(seen.text), '/bundle-deployer names the FXN ID file, not the Auth Kit (owner rename, 2026-10-25)');
     }
     if (route === '/deploy') {
       assert.deepEqual(seen.tabs, ['01 / Check discovery', '02 / Create or select', '03 / Start the miner', '04 / Verify health', '05 / Inspect topology'], 'every step is a named tab');

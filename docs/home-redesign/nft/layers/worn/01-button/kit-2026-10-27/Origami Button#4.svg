@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Origami Button: an outline whose leading corner is folded over, the flap underside in the complementary role, a dashed valley fold beside it and a small folded tip at the trailing corner (the Origami set)</title>
+  <path d="M13 1 H199 V49 L193 55 H1 V13 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M13 1 L1 13 H13 Z" fill="var(--complementary)"/>
+  <path d="M13 1 V13 H1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M20 1 L1 20" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke" stroke-dasharray="2 2"/>
+  <path d="M199 49 H193 V55" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

@@ -1,4 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 24" data-slot="divider">
-  <title>Pin Span: a rule from a small dot to a haloed accent dot, the genesis ID after it (sheet 11, 07-03)</title>
-  <circle cx="3" cy="12" r="2" fill="var(--dim)"/><path d="M7 12.5H292" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="300" cy="12.5" r="6.5" fill="var(--acc)" fill-opacity="0.22"/><circle cx="300" cy="12.5" r="3" fill="var(--acc)"/><text x="314" y="16.6" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--ink)" data-field="genesisId" letter-spacing="1">GENESISID</text>
+  <title>Pin Span: a rule across the whole width, from a small dot to a haloed accent dot at its right end (sheet 11, 07-03)</title>
+  <circle cx="3" cy="12" r="2" fill="var(--dim)"/><path d="M7 12.5H345" fill="none" stroke="var(--rule)" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="352" cy="12.5" r="6.5" fill="var(--acc)" fill-opacity="0.22"/><circle cx="352" cy="12.5" r="3" fill="var(--acc)"/>
 </svg>

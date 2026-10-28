@@ -54,6 +54,9 @@ const only = process.argv.slice(2);
     shared: window.ArkUI.pageStyles.shared.slice()
   }));
   const parsed = new Map(catalog.order.map((file) => [file, tool.parseSheet(read(file))]));
+  /* a sheet a script links itself (tool.lazySheets(): css/nft-card.css, linked by js/ark/skin-site.js) is in no
+     route's list by design, so its :root palette is not a bare page; its class rules are still asked of every route */
+  const lazy = tool.lazySheets();
   const dom = new Map();
   const failures = [], skipped = new Set();
   let checked = 0;
@@ -77,6 +80,7 @@ const only = process.argv.slice(2);
       for (const [sheet, { rules }] of parsed) {
         if (loaded.has(sheet)) continue;
         for (const rule of rules) for (const selector of rule.selectors) {
+          if (lazy.has(sheet) && selector.trim() === ':root') continue;
           const hit = tool.matchesIn(document, selector);
           if (hit === null) skipped.add(selector);
           else if (hit) { bare.push(sheet + ' { ' + selector + ' }'); break; }

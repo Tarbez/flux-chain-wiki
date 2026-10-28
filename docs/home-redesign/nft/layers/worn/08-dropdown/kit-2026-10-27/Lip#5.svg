@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="dropdown">
+  <title>Lip: a top lip as wide as the trigger, the panel hanging a little narrower beneath it on soft shoulders</title>
+  <path d="M1 1 H359" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M1 1 Q5 1 5 5 V231 Q5 237 11 237 H349 Q355 237 355 231 V5 Q355 1 359 1" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

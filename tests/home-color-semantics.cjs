@@ -10,7 +10,18 @@
      semi-saturated action competing with the one main CTA;
    - the selected audience tab was a full secondary-colour block, a large area
      of a bright accent.
-   Each would look fine in a screenshot, which is how they shipped. */
+   Each would look fine in a screenshot, which is how they shipped.
+
+   Since the owner confirmed the 3D world home on 2026-10-27 (js/pages/home.js, css/world-pages.css), the
+   rules are measured on the world home's sheet as well as on css/home-swiss.css (still loaded on every page):
+   - one filled action on the page (the rail's .cta), the main action an outline (.cta.quiet): no second
+     semi-saturated action competes;
+   - the identity colour is spent on those actions and on the heading's accent row only; the rail's figures,
+     the selected capability and the paths stay neutral;
+   - no -100..-400 role shade on the world home either.
+   Superseded by the owner's confirmed design: the heading's LAST row is the accent (js/pages/home.js "the last
+   row is the accent", css/world-pages.css .home-world h1 span). That is one row, not "the second and third
+   lines"; it is held to one row below, and the figures stay monochrome. */
 'use strict';
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -43,10 +54,24 @@ const scales = [...themes.matchAll(/--secondary-scale:([\d.]+);/g)].map((m) => +
 assert(scales.every((s) => s >= .72 && s <= 1), 'accent scales stay within 0.72..1');
 assert(Math.min(...scales) < Math.max(...scales), 'the scale follows luminance: bright and dark accents must not get the same size');
 
-// The main action and the selections are Ark's since 2026-10-19 (js/pages/home.js is a page of Ark
-// blocks): one primary button, painted by the Ark component sheet; the selected tab is a reference mark,
-// never a block of action colour. Nothing on the home page repaints them.
-assert(/tone: 'primary'/.test(fs.readFileSync('js/pages/home.js', 'utf8')) && (fs.readFileSync('js/pages/home.js', 'utf8').match(/tone: 'primary'/g) || []).length === 1, 'one primary action on the home page');
+// The world home (owner-confirmed 2026-10-27): one filled action, the rail's; the main action is the outline.
+// (Before, js/pages/home.js was a page of Ark blocks with one tone: 'primary' button.)
+const homeJs = fs.readFileSync('js/pages/home.js', 'utf8');
+const ctas = [...homeJs.matchAll(/node\('a', '(cta[^']*)'\)/g)].map((m) => m[1]);
+assert.deepEqual(ctas.sort(), ['cta quiet rise', 'cta small rail-cta'], 'the world home builds two actions: the outlined main one and the rail\'s');
+assert.equal(ctas.filter((c) => !/\bquiet\b/.test(c)).length, 1, 'one filled action on the home page');
+const world = fs.readFileSync('css/world-pages.css', 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+const worldRules = [...world.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([, sel, body]) => ({ sel: sel.trim().replace(/^@[^{]*\{\s*/, ''), body }))
+  .filter(({ sel }) => /\.world-page|\.home-world|\.rx-|\.rail/.test(sel));
+assert.deepEqual(world.match(/var\(--(primary|secondary|reference)-[1-4]00\)/g) || [], [], 'css/world-pages.css must not paint with -100..-400 role shades');
+const worldAllowed = /^\.world-page \.cta(\.quiet)?$|^\.home-world h1 span$/;
+for (const { sel, body } of worldRules) {
+  if (!/var\(--(primary|secondary|complement|accent)\)/.test(body)) continue;
+  assert(worldAllowed.test(sel), `"${sel.slice(0, 80)}" paints the world home with the identity colour, but it is not an action or the heading's accent row`);
+}
+assert(/\.home-world h1 span \{[^}]*var\(--primary\)/.test(world) && /h1\.appendChild\(node\(i === rows\.length - 1 && rows\.length > 1 \? 'span' : 'b'/.test(homeJs), 'the accent is the heading\'s last row only');
+for (const sel of ['.rx-tiles b', '.rx-facts dd', '.rx-grid button[aria-pressed="true"]', '.home-world .paths b'])
+  assert(worldRules.some((r) => r.sel === sel) && worldRules.filter((r) => r.sel === sel).every((r) => !/var\(--(primary|secondary|complement|accent)/.test(r.body)), `${sel} stays neutral (numbers and selections are not painted)`);
 assert(!/\.ark-|hl-button|hl-audience-tab/.test(home), 'css/home-swiss.css repaints no Ark block and no old home control');
 assert(!/hl-audience-tab\[aria-selected="true"\] \{[^}]*--secondary/.test(components), 'the selected audience tab is not a block of action colour');
 // The home page keeps the site's own nav (the one every other page shows): no home-only header rules.
@@ -75,4 +100,5 @@ assert(/--dx-mark:var\(--mark-defxn\)/.test(marks), 'the bar\'s mark is the embe
 assert(/\.dx-mark \{[^}]*mask: var\(--dx-mark\)/.test(fs.readFileSync('assets/kit/defxn-components.css', 'utf8')), 'the bar paints the mark through --dx-mark');
 assert(/\.land-coin \{[^}]*--mark-fxn/.test(home), 'FXN amounts in the landscape carry the FXN coin mark');
 console.log('PASS: home colour is data — neutrals plus role bases only, identity colour on the record in flight, ' +
-  'monochrome headline and numbers, luminance-scaled action, anchored bases in all ' + palettes + ' palettes.');
+  'one filled action on the world home with the identity colour on its actions and one heading row only, ' +
+  'monochrome numbers, luminance-scaled action, anchored bases in all ' + palettes + ' palettes.');

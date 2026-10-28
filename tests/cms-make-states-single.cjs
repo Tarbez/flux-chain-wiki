@@ -78,7 +78,7 @@ function menuFor(count) {
   const context = { document: doc, location: { origin: 'http://x' }, host, posted, cmsStatesDraft: { version: 1, routes: {} }, cmsComponentsDraft: {} };
   context.window = { parent: { postMessage: (m) => posted.push(JSON.parse(JSON.stringify(m))) }, ArkLayout: { keyFor: () => 'k-generated' } };
   context.ArkLayout = context.window.ArkLayout;
-  context.cmsSelectionList = () => [nav]; context.cmsRoutePath = () => '/'; context.cmsScopeOfAll = () => '/'; /* page content: the shell case is tests/layout-shell-scope.cjs */ context.cmsRealTree = () => []; context.emitCmsLayoutSelection = () => {};
+  context.cmsSelectionList = () => [nav]; context.cmsRoutePath = () => '/'; context.cmsLayoutScope = () => '/'; context.cmsScopeOfAll = () => '/'; /* page content: the shell case is tests/layout-shell-scope.cjs */ context.cmsRealTree = () => []; context.emitCmsLayoutSelection = () => {};
   vm.createContext(context);
   vm.runInContext(fs.readFileSync('js/content/states.js', 'utf8'), context);
   context.window.ArkStates = context.ArkStates;

@@ -9,7 +9,9 @@
    - the shell depended on browser-only APIs and threw in the SSR pass;
    - home mode painted a product as "current" or set the products' data-dx-theme, which would
      fight this site's own five-family theme system (html[data-theme]);
-   - the site's kit copy drifted from the kit (npm run check in flux/defxn-product-kit). */
+   - the site's kit copy drifted from the kit (npm run check in flux/defxn-product-kit).
+   Since the owner confirmed the 2026-10-25 header on 2026-10-27, it also locks that the bar starts with the
+   skip link (dx-skip, to #main), then the family landmark (brand and switcher). */
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { JSDOM } = require('jsdom');
@@ -65,7 +67,14 @@ assert.equal(typeof shell.refit, 'function');
   assert.equal(shell2.bar, host, 'the existing element became the bar');
   assert.equal(d.querySelectorAll('header').length, 1, 'no second header was created');
   assert(host.classList.contains('dx-bar') && host.getAttribute('data-dx-mode') === 'home');
-  assert.equal(host.firstElementChild.className, 'dx-bar__brand', 'the bar parts come first');
+  /* Since 2026-10-25 (owner-confirmed 2026-10-27) the bar starts with a skip link (Power Design rule 18): the first
+     Tab reaches the content, not the bar's controls. Then the family landmark holds the brand and the switcher. */
+  const parts = [...host.children].map((el) => el.className.split(' ')[0]);
+  assert.deepEqual(parts.slice(0, 2), ['dx-skip', 'dx-bar__family'], 'the bar parts come first: the skip link, then the family');
+  const skip = host.firstElementChild;
+  assert(skip.tagName === 'A' && skip.getAttribute('href') === '#main' && skip.textContent === 'Skip to content', 'the skip link names where it goes');
+  assert.equal(d.querySelector('main').id, 'main', 'the page\'s main element is its target (given the id when it had none)');
+  assert.equal(host.querySelector('.dx-bar__family').firstElementChild.className, 'dx-bar__brand', 'the brand leads the family');
   assert.equal(host.lastElementChild.id, 'primary-navigation', 'the children it already held stay, after the parts');
   assert(!d.body.classList.contains('dx-page'), 'home mode leaves this site\'s page base alone (no .dx-page on body)');
   assert.equal(d.title, 'About — DEFXN site', 'home mode leaves the title to this site\'s SEO data');

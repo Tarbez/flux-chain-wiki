@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 56" data-slot="button">
+  <title>Arrow Tail: an outline with a notched tail at the leading end and a point at the trailing end, the point in the complementary role</title>
+  <path d="M186 1 H1 L12 28 L1 55 H186" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+  <path d="M186 1 L199 28 L186 55" fill="none" stroke="var(--complementary)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>

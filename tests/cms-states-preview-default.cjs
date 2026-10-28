@@ -45,7 +45,7 @@ function preview({ edit = true } = {}) {
     document: doc, host, location: { origin: 'http://x' }, getComputedStyle: dom.window.getComputedStyle,
     window: { parent: { postMessage: (m) => posted.push(plain(m)) } },
     cmsPreviewQuery: true, cmsPreviewEdit: edit, cmsComponentsDraft: {}, cmsPreviewSelections: [], cmsPreviewSelected: null,
-    cmsRoutePath: () => '/', cmsRealTree: () => [], cmsInsertionPoints: () => [], cmsGroupList: () => [],
+    cmsRoutePath: () => '/', cmsLayoutScope: () => '/', cmsRealTree: () => [], cmsInsertionPoints: () => [], cmsGroupList: () => [],
     cmsIsShown: shown, placed: 0,
     /* ArkLayout as js/content/states.js uses it: the keys are already in the markup, so annotate()
        only lists the keyed elements, in document order, as the real one returns them */

@@ -33,7 +33,7 @@ function run() {
   const context = {
     window: { innerWidth: 1280 },
     cmsLayoutDraft: null,
-    cmsRoutePath: () => '/',
+    cmsRoutePath: () => '/', cmsLayoutScope: () => '/',
     cmsSelectionInfo: (element) => ({ route: '/', key: element.getAttribute('data-ark-layout-key'), breakpoint: 'desktop' }),
   };
   vm.createContext(context);

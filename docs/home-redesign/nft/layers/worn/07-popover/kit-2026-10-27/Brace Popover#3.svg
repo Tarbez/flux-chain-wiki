@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" data-slot="popover">
+  <title>Brace Popover: the top edge curls into a brace whose point is the nub, with short brace hooks closing the far corners (the Brace family)</title>
+  <path d="M9 9 H14 Q20 9 22 5 L26 1 L30 5 Q32 9 38 9 H351 Q359 9 359 17 V231 Q359 239 351 239 H9 Q1 239 1 231 V17 Q1 9 9 9 Z" fill="none" stroke="var(--line)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M351 15 Q355 15 355 19 V27" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/><path d="M355 213 V221 Q355 225 351 225" fill="none" stroke="var(--dim)" stroke-width="1" vector-effect="non-scaling-stroke"/>
+</svg>
