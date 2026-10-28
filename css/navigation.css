@@ -252,3 +252,8 @@
  #scene .ark-header .header-you > .header-you-avatar { position:relative; }
  #scene .ark-header .header-you > .header-you-avatar::after { content:""; position:absolute; right:-2px; bottom:-2px; width:7px; height:7px; border-radius:50%; background:hsl(var(--trust,var(--success))); box-shadow:0 0 0 2px hsl(var(--surface)); }
 }
+/* The current header link, but not the brand, and not a nav link: a current nav segment is the kit's raised
+   segment (assets/kit/defxn-components.css), not a second fill. :where() keeps the rule's weight where it was.
+   Moved here from css/focus.css on 2026-10-28: the header's own sheet holds the header's classes. This sheet
+   loads just before focus.css, so the cascade order is unchanged. */
+#scene .ark-header a[aria-current="page"]:not(.header-mark):not(:where(.header-core-links a)) { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--nested)); }

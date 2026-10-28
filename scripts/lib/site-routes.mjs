@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 
-export function readSiteRoutes(root) {
+/* The browser's page catalog (ArkUI.pageCatalog), read in a vm from the same content files the page loads.
+   Each entry carries its path, aliases and the scripts its page loads. */
+export function readPageCatalog(root) {
   const context = vm.createContext({ArkUI:{}, ArkCopy:{text:key=>key}, document:{write(){}}});
   function load(file) { vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),context,{filename:file,timeout:1000}); }
   load('js/content/manifest.js');
@@ -17,9 +19,14 @@ export function readSiteRoutes(root) {
   load('js/content/resolutions.js');
   load('js/content/site-pages.js');
   load('js/pages/catalog.js');
+  return context.ArkUI.pageCatalog;
+}
+
+export function readSiteRoutes(root) {
+  const catalog = readPageCatalog(root);
   // A page's aliases (old addresses such as /explorer, /monitor) are served the shell too,
   // so the router can open the page they now name instead of the host answering 404.
-  return new Set(Object.values(context.ArkUI.pageCatalog).flatMap(entry=>[entry.path, ...(entry.aliases || []).filter(alias=>alias.startsWith('/'))]));
+  return new Set(Object.values(catalog).flatMap(entry=>[entry.path, ...(entry.aliases || []).filter(alias=>alias.startsWith('/'))]));
 }
 
 export function createSiteRouteResolver(routes) {

@@ -1,3 +1,14 @@
-Vendored byte for byte from flux/bundle-deploy/src/app-release-core.js. Never edit it here:
-fix it at the source and copy it over. It holds the app release rules (fields, signature,
-which releases count) that the FXN Browser updater and bundle-deploy use too.
+Vendored byte for byte from flux/bundle-deploy/src/. Never edit these here.
+Fix them at the source and copy them over.
+
+app-release-core.js holds the app release rules: what a signed release holds, and which releases count.
+The FXN Browser updater uses the same rules.
+
+folder-site-core.js was added 2026-10-29. It holds the two site formats, the reader for the
+index format, and the one list of headers a site may set in its _headers file.
+The pack command refuses a _headers rule outside that list.
+The .fxn site server reads the list from this copy, so both judge a site by one list.
+It imports app-release-core.js for the block size, so the two files travel together.
+
+Resync command, from the defxn repo root:
+  cp ../bundle-deploy/src/{app-release-core,folder-site-core}.js gateway/vendor/bundle-deploy/

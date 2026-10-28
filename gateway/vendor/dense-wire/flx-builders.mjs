@@ -72,8 +72,15 @@ export async function buildGenesis({ privateKey, pubHex, nowSec, network = NETWO
  *  V2 fields then `maxFee`, the most FXN in fees the trader signs for on this
  *  intent's row (mm + venue, plus lp on a buy). A launch whose economy
  *  charges any fee admits V3 only; V2 stays admitted where every fee is 0. */
-export function curveSwapTermsCanonical({ side, amountIn, minOut, deadline, nonce, fundCredit, maxFee }) {
+export function curveSwapTermsCanonical({ side, amountIn, minOut, deadline, nonce, fundCredit, maxFee, native }) {
   if (side !== "B" && side !== "S") throw new Error(`side must be B or S, got ${side}`);
+  // Signed resolution (2026-10-28) — V4 (`native: true`): no credit. A buy is funded by its own intent
+  // (`buildNativeBuyIntentWithSigner`), which names the most native FXN it may debit; `maxFee` as V3.
+  if (native) {
+    if (fundCredit !== undefined && fundCredit !== null) throw new Error("a V4 intent names no credit. Missing: nothing. To fix: drop fundCredit, or drop native for a V3 intent");
+    if (!Number.isSafeInteger(maxFee) || maxFee < 0) throw new Error(`maxFee ${maxFee} is not a whole number of FXN units. Missing: maxFee as a non-negative integer. To fix: sign the most FXN you will pay in fees`);
+    return `FLX-CSWAP-TERMS-V4\t${side}\t${amountIn}\t${minOut}\t${deadline}\t${nonce}\t${maxFee}`;
+  }
   if (fundCredit === undefined || fundCredit === null) {
     if (maxFee !== undefined && maxFee !== null) {
       throw new Error("a V3 intent signs maxFee beside the credit it spends. Missing: fundCredit (64 zeros on a sell). To fix: pass fundCredit with maxFee");
@@ -108,6 +115,23 @@ export async function buildCurveSwapIntent({ privateKey, ...rest }) {
  *  vault, ArkAdminAuth) — the `...WithSigner` convention the other builders use. */
 export async function buildCurveSwapIntentWithSigner({ signer, pos, prevCid, chainId, terms, nowSec }) {
   return buildSwapIntentWithSigner(CURVE_SWAP_KIND_INTENT, { signer, pos, prevCid, chainId, terms, nowSec });
+}
+
+/** Signed resolution (2026-10-28) — a native buy intent (`curve::curve_swap_intent_native`): Terms V4 (`native: true`),
+ *  ONE record that is also the buy's funding. It rides the buyer's own BASE list (`N` = the base chain), at the
+ *  buyer's next base position — the list its native transfers and locks take positions on, so a buy and a transfer of
+ *  one key are ordered by the key's own chain — and its `T` box names the most native FXN it may debit
+ *  (`amountIn + maxFee`). Every node moves that much into the intent's keyless hold when it admits the record; the
+ *  signed result pays the fill out of it, and the rest returns to the buyer. Send it with `curveSwapLine` (field 9
+ *  `native`). The terms' deadline must fall within 7,200 s of `nowSec`. */
+export async function buildNativeBuyIntentWithSigner({ signer, pos, prevCid, chainId, terms, nowSec }) {
+  if (terms.side !== "B" || !terms.native) throw new Error("a native buy intent is a buy with native: true terms. Missing: side B and native: true. To fix: build the terms as V4");
+  const debit = BigInt(terms.amountIn) + BigInt(terms.maxFee);
+  const pubHex = signer.pubHex;
+  const termsCid = await curveSwapTermsCid(terms);
+  const body = `G${pubHex}-Y${Y_LEDGERENTRY}-V1-M${nowSec}-H${hexOfUtf8(pubHex)}-K${CURVE_SWAP_KIND_INTENT}-W${hexOfUtf8(chainId)}-Ndefxn-J${pos}-C${prevCid}-T${debit}NATIVE-C${termsCid}`;
+  const sig = await signer.signText(body);
+  return { text: `${body}-S${sig}`, termsCid };
 }
 
 /** Wave 3H/WP11 — the graduated pool's swap intent (`pool::cswap_intent`):
@@ -156,6 +180,8 @@ export function poolSwapLine(chainId, text, terms, delegationCert = "") {
 
 function swapLine(head, chainId, text, terms, delegationCert) {
   const base = `${head}\t${chainId}\t${text}\t${terms.side}\t${terms.amountIn}\t${terms.minOut}\t${terms.deadline}\t${terms.nonce}`;
+  // Signed resolution — V4: field 9 is the word `native`, field 10 the maxFee.
+  if (terms.native) return `${base}\t${delegationCert}\tnative\t${terms.maxFee}`;
   if (terms.fundCredit === undefined || terms.fundCredit === null) {
     return delegationCert ? `${base}\t${delegationCert}` : base;
   }

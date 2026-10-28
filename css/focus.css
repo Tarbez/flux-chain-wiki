@@ -14,9 +14,6 @@
   color:hsl(var(--text-strong));
   background-color:hsl(var(--raised));
 }
-/* The current header link, but not the brand, and not a nav link: a current nav segment is the kit's raised
-   segment (assets/kit/defxn-components.css), not a second fill. :where() keeps the rule's weight where it was. */
-#scene .ark-header a[aria-current="page"]:not(.header-mark):not(:where(.header-core-links a)) { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--nested)); }
 #scene .ark-header a:not(:where(.header-mark)):focus-visible { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--overlay)); }
 #scene .mesh-drag-target:focus-visible { background:hsl(var(--nested)); }
 #scene input[type="range"]:focus-visible { accent-color:hsl(var(--reference)); background-color:hsl(var(--overlay)); }

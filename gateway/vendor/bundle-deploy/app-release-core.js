@@ -42,8 +42,16 @@ export const APP_RELEASE_FIELDS = Object.freeze([
    `xchacha20-poly1305` chunk frame, flux/remote-env src/crypto/artifact.mjs); `size` and `sha256` describe that
    frame. `sealed` names Remote's signed key epoch (stored as a blob, one sealed copy of the content key per tester)
    and the plaintext the frame opens to. A public release has no `sealed`, and its signing text is unchanged:
-   JSON drops an undefined field. */
-export const SEALED_ALGORITHM = 'xchacha20-poly1305-chunked/1';
+   JSON drops an undefined field.
+   Since 2026-10-29 a sealed release may also be Remote's frame version 2 (AES-256-GCM), and new sealed releases
+   are: a tester opens it in a web page with the browser's own crypto (remote-env src/crypto/open-web.mjs), and
+   browsers have no ChaCha20-Poly1305. Releases sealed before then stay valid and open in Node and Electron. */
+export const SEALED_ALGORITHM_XCHACHA = 'xchacha20-poly1305-chunked/1';
+export const SEALED_ALGORITHM_AES = 'aes-256-gcm-chunked/1';
+/** What a new sealed release is sealed with. */
+export const SEALED_ALGORITHM = SEALED_ALGORITHM_AES;
+/** Every algorithm a sealed release may name. */
+export const SEALED_ALGORITHMS = Object.freeze([SEALED_ALGORITHM_XCHACHA, SEALED_ALGORITHM_AES]);
 
 const CID = /^[0-9a-f]{64}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
@@ -100,7 +108,7 @@ export function appReleaseProblems(value) {
   if (base64Bytes(f.ownerPublicKey || '')?.length !== 32) problems.push('ownerPublicKey is not a 32-byte base64 Ed25519 key');
   if (f.sealed !== undefined) {
     const s = f.sealed;
-    if (!s || typeof s !== 'object' || s.algorithm !== SEALED_ALGORITHM) problems.push(`sealed.algorithm is not ${SEALED_ALGORITHM}`);
+    if (!s || typeof s !== 'object' || !SEALED_ALGORITHMS.includes(s.algorithm)) problems.push(`sealed.algorithm is not one of ${SEALED_ALGORITHMS.join(', ')}`);
     else {
       if (!CID.test(s.epochCid || '')) problems.push('sealed.epochCid is not a BLAKE3 content ID');
       if (!Number.isSafeInteger(s.plaintextSize) || s.plaintextSize < 0) problems.push('sealed.plaintextSize is not a whole number of bytes');

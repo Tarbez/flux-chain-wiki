@@ -38,6 +38,7 @@ import { fetchVerifiedContent } from "./content.js";
 import { NAME_NODES, GENESIS_PUB_HEX } from "./name-config.js";
 import { FOLDER_SITE_SCHEMA, readFolderSite, pageForAddress, buildPageHtml } from "./folder-site.js";
 import { releaseRequestOf, readRelease, downloadRelease } from "./release.js";
+import { makeTesterKey, openTesterRelease, saveWithLink, saveOpenedFile } from "./tester.js";
 
 const SITE_SCHEMA = "flux-chain-site/1";
 
@@ -63,19 +64,21 @@ const FAILURE_MESSAGES = {
 const app = document.getElementById("app");
 const footer = document.getElementById("page-footer");
 
+/** "de.defxn.com" and "de.fxn" both name "de.fxn": the second is the name itself, opened in a browser whose DNS
+ *  asks fxn-dns (2026-10-28). */
 function labelFromHostname(hostname) {
-  const suffix = ".defxn.com";
-  if (hostname.toLowerCase().endsWith(suffix)) {
-    return hostname.slice(0, -suffix.length).toLowerCase();
+  const host = hostname.toLowerCase();
+  for (const suffix of [".defxn.com", ".fxn"]) {
+    if (host.endsWith(suffix)) return host.slice(0, -suffix.length);
   }
-  return hostname.toLowerCase();
+  return host;
 }
 
 function renderStatus(reason, detail) {
   const message = FAILURE_MESSAGES[reason] || "Something went wrong reading this address.";
   app.innerHTML = "";
   footer.hidden = false;
-  footer.textContent = "Served from the Flux mesh";
+  footer.textContent = "Served from the FXN chain";
   const wrap = document.createElement("div");
   wrap.className = "status-page";
   wrap.dataset.tone = "error";
@@ -124,7 +127,7 @@ function renderSite(site) {
   footer.innerHTML = "";
   const verified = document.createElement("span");
   verified.className = "verified";
-  verified.textContent = "Served from the Flux mesh — this page verified its signature itself";
+  verified.textContent = "Served from the FXN chain — this page verified its signature itself";
   footer.appendChild(verified);
 
   const home = site.manifests.find((m) => m.route === "/") || site.manifests[0];
@@ -376,6 +379,163 @@ function renderRelease(name, release) {
   app.appendChild(wrap);
 }
 
+/* A sealed release: a closed tester group's (2026-10-29). Two actions, one per state: open it with a tester key
+   (the dominant one), or make a tester key. Each action swaps the panel in place, and Back returns to the facts.
+   A refusal shows inside the panel it came from, so what the tester typed and chose stays (tester.js does the work). */
+function renderTesterRelease(name, release) {
+  app.innerHTML = "";
+  footer.hidden = false;
+  footer.textContent = `Signed by the owner of ${name}. Every block is checked before the app is offered.`;
+  const wrap = document.createElement("div");
+  wrap.className = "status-page tester";
+  app.appendChild(wrap);
+  const mb = (bytes) => `${Math.max(1, Math.round(bytes / MIB))} MB`;
+  const el = (tag, className, text) => {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+  const button = (text, primary, onClick) => {
+    const node = el("button", primary ? "release-button" : "text-button", text);
+    node.type = "button";
+    node.addEventListener("click", onClick);
+    return node;
+  };
+  const field = (labelText, input) => {
+    const label = el("label", "tester-field");
+    label.append(el("span", "tester-label", labelText), input);
+    return label;
+  };
+  const idInput = () => {
+    const input = el("input");
+    input.type = "text";
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.maxLength = 64;
+    input.placeholder = "one word, such as your first name";
+    return input;
+  };
+  const refusalBox = () => el("div", "refusal");
+  const showRefusal = (box, result) => {
+    box.replaceChildren(el("p", "refusal-failure", result.failure), el("p", null, `Needs ${result.missing.replace(/\.$/, "")}.`), el("p", null, `Next: ${result.remedy}`), el("span", "status-code", result.code));
+  };
+  const show = (...nodes) => wrap.replaceChildren(...nodes);
+
+  function home() {
+    const platform = `${PLATFORM_WORDS[release.platform] || release.platform} (${ARCH_WORDS[release.arch] || release.arch})`;
+    show(
+      el("h1", null, release.filename),
+      el("p", null, `Version ${release.version} for ${platform}. ${mb(release.sealed.plaintextSize)}.`),
+      el("p", "tester-meta", `Release ${release.sequence} · sealed for its testers · signed by the owner of ${name}`),
+      el("p", null, "Only a tester the owner added can open it."),
+      button("Open with my tester key", true, openPanel),
+      button("Make my tester key", false, makePanel),
+    );
+  }
+
+  function makePanel() {
+    const input = idInput();
+    const box = refusalBox();
+    const make = button("Make key", true, async () => {
+      make.disabled = true;
+      const made = await makeTesterKey(input.value.trim());
+      make.disabled = false;
+      if (!made.ok) return showRefusal(box, made);
+      saveWithLink(made.keyText, made.filename, "text/plain");
+      madePanel(made);
+    });
+    show(
+      el("h1", null, "Make your tester key"),
+      el("p", null, "Type the name the owner knows you by. This page makes the key on this device, and the key never leaves it."),
+      field("Identity id", input),
+      box,
+      make,
+      button("Back", false, home),
+    );
+    input.focus();
+  }
+
+  function madePanel(made) {
+    const status = el("p", "release-progress", "");
+    status.setAttribute("role", "status");
+    const line = el("pre", "tester-line", made.line);
+    const copy = button("Copy line", true, async () => {
+      try {
+        await navigator.clipboard.writeText(made.line);
+        status.textContent = "Copied. Paste it into a message to the owner.";
+      } catch {
+        getSelection().selectAllChildren(line);
+        status.textContent = "Select the line and copy it.";
+      }
+    });
+    show(
+      el("h1", null, "Send this line to the owner"),
+      el("p", null, `Your key file is saved as ${made.filename}. Keep it. You need it to open the release, and nobody can make it again.`),
+      line,
+      copy,
+      status,
+      el("p", "tester-meta", "The owner adds your line and releases again. Then open this page again and choose Open with my tester key."),
+      button(`Save ${made.filename} again`, false, () => saveWithLink(made.keyText, made.filename, "text/plain")),
+      button("Back", false, home),
+    );
+  }
+
+  function openPanel() {
+    const keyInput = el("input");
+    keyInput.type = "file";
+    const input = idInput();
+    const box = refusalBox();
+    const progress = el("p", "release-progress", "");
+    progress.setAttribute("role", "status");
+    const open = button("Open release", true, async () => {
+      box.replaceChildren();
+      const file = keyInput.files?.[0];
+      if (!file) return showRefusal(box, { code: "TESTER_KEY_MISSING", failure: "No key file is chosen.", missing: "the key file you saved when you made your tester key.", remedy: "choose it, then open the release." });
+      open.disabled = true;
+      const keyText = await file.text();
+      const result = await openTesterRelease(release, {
+        identityId: input.value.trim(),
+        keyText,
+        onProgress: (got, total, phase) => {
+          progress.textContent = phase === "key" ? "Checking your key against the release" : `Checked ${mb(got)} of ${mb(total)}`;
+        },
+      });
+      open.disabled = false;
+      progress.textContent = "";
+      if (!result.ok) return showRefusal(box, result);
+      openedPanel(result);
+    });
+    show(
+      el("h1", null, "Open with your tester key"),
+      field("Key file", keyInput),
+      field("Identity id, as in the line you sent", input),
+      box,
+      open,
+      progress,
+      button("Back", false, home),
+    );
+  }
+
+  function openedPanel(result) {
+    const status = el("p", "release-progress", "");
+    status.setAttribute("role", "status");
+    const save = button(`Save ${release.filename}`, true, async () => {
+      const saved = await saveOpenedFile(result.bytes, release.filename);
+      status.textContent = saved.ok ? "Saved." : "Not saved. Choose Save again.";
+    });
+    show(
+      el("h1", null, "The app matches the owner's signature"),
+      el("p", null, `${release.filename}, ${mb(result.bytes.length)}. Its size and SHA-256 match the release.`),
+      el("p", "tester-meta", `SHA-256 ${result.sha256}`),
+      save,
+      status,
+    );
+  }
+
+  home();
+}
+
 async function main() {
   /* A folder site's frame sent to one of this gateway's own addresses would load the shell inside it. */
   if (window.top !== window) return;
@@ -391,7 +551,7 @@ async function main() {
   if (wanted) {
     const read = await readRelease({ name, ownerHex: resolved.owner, want: wanted });
     if (!read.ok) return renderStatus(read.reason, read.detail);
-    return renderRelease(name, read.release);
+    return read.release.sealed ? renderTesterRelease(name, read.release) : renderRelease(name, read.release);
   }
 
   if (!resolved.record) return renderStatus("NAME_NO_RECORD", `Point ${name} at a site at https://domains.defxn.com.`);

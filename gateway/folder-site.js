@@ -191,6 +191,14 @@ export function buildPageHtml(site, pagePath, doc) {
   };
 
   for (const base of doc.querySelectorAll("base")) base.remove();
+  /* A site's own CSP meta is removed (2026-10-28). Its 'self' names the site's own host, and in this frame the
+     page has an opaque origin, so 'self' matches nothing and every stylesheet and script, now a data: URL, was
+     refused: defxn.com's page showed as bare text at de.defxn.com. site-frame.html's own CSP still governs the
+     page (no network at all, only data: and inline), and it is the boundary; the site's rule could only narrow
+     it further, never widen it. */
+  for (const meta of doc.querySelectorAll("meta[http-equiv]")) {
+    if (/^content-security-policy$/i.test(meta.getAttribute("http-equiv").trim())) meta.remove();
+  }
   for (const element of doc.querySelectorAll("[src]")) {
     if (!/^i?frame$/i.test(element.localName)) setFileUrl(element, "src");
   }

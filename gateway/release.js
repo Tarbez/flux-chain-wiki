@@ -10,7 +10,10 @@
    the same rules the FXN Browser updater uses) -> each 8 MiB block from /fxn-store/v1/<cid>, refused
    unless its BLAKE3 is its ID -> the whole file refused unless its SHA-256 is the signed one -> saved.
 
-   The node is never trusted: every byte is checked against what the owner signed. */
+   The node is never trusted: every byte is checked against what the owner signed.
+
+   A sealed release (a closed tester group's, bundle-deploy `release --sealed-for`) is read the same way and
+   counts only when no public release does: the tester view opens it (tester.js). A public reader never gets one. */
 import { WireClient } from "./vendor/dense-wire/flx-wire.mjs";
 import { createResolverRecordClient } from "./vendor/dense-wire/flx-resolver-record-client.mjs";
 import { settleAppReleases, latestAppRelease } from "./vendor/bundle-deploy/app-release-core.js";
@@ -40,11 +43,16 @@ export async function readRelease({ name, ownerHex, want, nodes = NAME_NODES }) 
     try {
       const reader = createResolverRecordClient({ wire, resolverChainId: BUNDLE_CHAIN_ID, kindMarker: KIND });
       const rows = await reader.listRecords();
-      const { releases, rejected } = await settleAppReleases(rows, { name, ...want }, ownerHex);
-      const latest = latestAppRelease(releases);
-      if (latest.ok) return { ok: true, release: latest.release, rejected };
-      if (latest.code === "RELEASE_CONFLICT") {
-        return { ok: false, reason: "RELEASE_CONFLICT", detail: `${latest.conflicting.length} releases claim sequence ${latest.sequence}. The owner publishes the intended one again at sequence ${latest.sequence + 1}.` };
+      const open = await settleAppReleases(rows, { name, ...want }, ownerHex);
+      const latest = latestAppRelease(open.releases);
+      if (latest.ok) return { ok: true, release: latest.release, rejected: open.rejected };
+      const closed = await settleAppReleases(rows, { name, ...want, sealed: true }, ownerHex);
+      const latestSealed = latestAppRelease(closed.releases);
+      if (latestSealed.ok) return { ok: true, release: latestSealed.release, rejected: closed.rejected };
+      const rejected = [...open.rejected, ...closed.rejected];
+      const conflict = [latest, latestSealed].find((l) => l.code === "RELEASE_CONFLICT");
+      if (conflict) {
+        return { ok: false, reason: "RELEASE_CONFLICT", detail: `${conflict.conflicting.length} releases claim sequence ${conflict.sequence}. The owner publishes the intended one again at sequence ${conflict.sequence + 1}.` };
       }
       const why = rejected.length ? ` ${rejected.length} were refused: ${rejected.map((r) => r.why).join("; ")}.` : "";
       return { ok: false, reason: "RELEASE_NONE", detail: `${name} has no ${want.product} release for ${want.platform}-${want.arch} on channel ${want.channel}.${why}` };
@@ -64,30 +72,40 @@ function bytesOfBase64(text) {
   return bytes;
 }
 
+/** Block `index` of `release`, refused unless its length and BLAKE3 match the signed list.
+ *  -> { ok: true, bytes } | { ok: false, reason, detail } */
+export async function fetchReleaseBlock(release, index, { fetchImpl = (url) => fetch(url) } = {}) {
+  const cid = release.blocks[index];
+  const expected = index === release.blocks.length - 1 ? release.size - release.blockBytes * index : release.blockBytes;
+  let response;
+  try {
+    response = await fetchImpl(`${CONTENT_ROUTE}${cid}`);
+  } catch (error) {
+    return { ok: false, reason: "CONTENT_UNREACHABLE", detail: `Block ${index + 1} of ${release.blocks.length}: ${error.message}` };
+  }
+  if (!response.ok) return { ok: false, reason: "CONTENT_UNREACHABLE", detail: `Block ${index + 1} of ${release.blocks.length}: the node answered ${response.status}.` };
+  let bytes;
+  try {
+    const body = await response.json();
+    if (body?.ok !== true || typeof body.data_base64 !== "string") throw new Error("the answer carries no data_base64");
+    bytes = bytesOfBase64(body.data_base64);
+  } catch (error) {
+    return { ok: false, reason: "CONTENT_MALFORMED", detail: `Block ${index + 1}: ${error.message}` };
+  }
+  if (bytes.length !== expected || hexOf(blake3(bytes)) !== cid) {
+    return { ok: false, reason: "CONTENT_MISMATCH", detail: `Block ${index + 1} does not match its ID ${cid}.` };
+  }
+  return { ok: true, bytes };
+}
+
 /** Every block, checked, then the whole file. -> { ok: true, blob } | { ok: false, reason, detail } */
 export async function downloadRelease(release, { onProgress = () => {}, fetchImpl = (url) => fetch(url) } = {}) {
   const parts = [];
   let received = 0;
-  for (const [index, cid] of release.blocks.entries()) {
-    const expected = index === release.blocks.length - 1 ? release.size - release.blockBytes * index : release.blockBytes;
-    let response;
-    try {
-      response = await fetchImpl(`${CONTENT_ROUTE}${cid}`);
-    } catch (error) {
-      return { ok: false, reason: "CONTENT_UNREACHABLE", detail: `Block ${index + 1} of ${release.blocks.length}: ${error.message}` };
-    }
-    if (!response.ok) return { ok: false, reason: "CONTENT_UNREACHABLE", detail: `Block ${index + 1} of ${release.blocks.length}: the node answered ${response.status}.` };
-    let bytes;
-    try {
-      const body = await response.json();
-      if (body?.ok !== true || typeof body.data_base64 !== "string") throw new Error("the answer carries no data_base64");
-      bytes = bytesOfBase64(body.data_base64);
-    } catch (error) {
-      return { ok: false, reason: "CONTENT_MALFORMED", detail: `Block ${index + 1}: ${error.message}` };
-    }
-    if (bytes.length !== expected || hexOf(blake3(bytes)) !== cid) {
-      return { ok: false, reason: "CONTENT_MISMATCH", detail: `Block ${index + 1} does not match its ID ${cid}.` };
-    }
+  for (let index = 0; index < release.blocks.length; index += 1) {
+    const block = await fetchReleaseBlock(release, index, { fetchImpl });
+    if (!block.ok) return block;
+    const bytes = block.bytes;
     parts.push(bytes);
     received += bytes.length;
     onProgress(received, release.size);

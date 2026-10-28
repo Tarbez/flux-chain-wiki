@@ -1,0 +1,10 @@
+Vendored byte for byte from flux/remote-env/src/crypto/open-web.mjs. Never edit it here:
+fix it at the source and copy it over.
+
+open-web.mjs opens a sealed app release with WebCrypto alone: the key epoch's signature, the tester's
+grant (X25519, HKDF-SHA-256, AES-256-GCM) and the AES-256-GCM chunk frame (version 2). It is the
+same code Node runs against Remote's own sealing, so the page and bundle-deploy open-sealed agree byte
+for byte. The tester view (tester.js) uses it. It imports nothing.
+
+Resync command, from the defxn repo root:
+  cp ../remote-env/src/crypto/open-web.mjs gateway/vendor/remote-env/
