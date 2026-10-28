@@ -719,11 +719,29 @@ export class WireClient {
    *    -> HEAD_NONE<TAB><holder>  (this node holds no chain for that holder:
    *       the next record goes at pos 0 citing GENESIS_PREV)
    *    -> HEAD_ERR<TAB><code><TAB><reason> */
-  async chainHead(holderHex) {
-    const reply = await this._send(`HEAD\t${holderHex}`);
+  async chainHead(holderHex, chain) {
+    // Build 4: with `chain`, the holder's list on that launched chain.
+    const reply = await this._send(chain ? `HEAD\t${holderHex}\t${chain}` : `HEAD\t${holderHex}`);
     const parts = reply.split("\t");
     if (parts[0] === "HEAD") return { kind: "head", holder: parts[1], length: Number(parts[2]), headCid: parts[3] };
     if (parts[0] === "HEAD_NONE") return { kind: "none", holder: parts[1] };
+    return { kind: "error", raw: reply };
+  }
+
+  /** `CONFIRMED<TAB><holder><TAB><chain or -><TAB><position><TAB><record cid>` (Z3, owner rule 2026-10-27: a receiver
+   *  waits until the chain's lead nodes confirm a payment). Asked for the exact record (its sha256), so a key that
+   *  signed two records at one position never sees both read as final. A wallet shows a payment as waiting until
+   *  this says `confirmed`, and as never final on `conflict`.
+   *    -> CONFIRMED<TAB><holder><TAB><chain><TAB><position><TAB><segment sequence>
+   *    -> CONFLICT<TAB><holder><TAB><chain><TAB><position><TAB><the cid certified there instead>
+   *    -> WAITING<TAB><holder><TAB><chain><TAB><position><TAB><K><TAB><signers>
+   *    -> CONFIRMED_ERR<TAB><code><TAB><reason> */
+  async confirmed(holderHex, chain, position, cid) {
+    const reply = await this._send(`CONFIRMED\t${holderHex}\t${chain || "-"}\t${position}\t${cid}`);
+    const parts = reply.split("\t");
+    if (parts[0] === "CONFIRMED") return { kind: "confirmed", chain: parts[2], position: Number(parts[3]), sequence: Number(parts[4]) };
+    if (parts[0] === "CONFLICT") return { kind: "conflict", chain: parts[2], position: Number(parts[3]), certified: parts[4] };
+    if (parts[0] === "WAITING") return { kind: "waiting", chain: parts[2], position: Number(parts[3]), k: Number(parts[4]), signers: Number(parts[5]) };
     return { kind: "error", raw: reply };
   }
 
@@ -1025,7 +1043,10 @@ export class WireClient {
     return { kind: "error", raw: reply };
   }
 
-  /** `TREASURY_SPEND_PROPOSE<TAB><dao_id><TAB><input_cid><TAB><nonce><TAB><dest>:<amount>,...`.
+  /** RETIRED (one FXN, step 6): the node answers `TS_ERR<TAB>Retired<TAB>failure<TAB>missing<TAB>remedy`.
+   *  Use `nativeSpendPropose` (KNTSPEND1) instead.
+   *
+   *  `TREASURY_SPEND_PROPOSE<TAB><dao_id><TAB><input_cid><TAB><nonce><TAB><dest>:<amount>,...`.
    *  `legs` is `[destination, amount][]`.
    *    -> TS_OPEN<TAB><spend_key><TAB><manifest_cid><TAB><have>/<need>
    *    -> TS_ERR<TAB><reason> */
@@ -1075,7 +1096,10 @@ export class WireClient {
     return { kind: "error", raw: reply };
   }
 
-  /** `TREASURY_CLAIM<TAB><spend_cid><TAB><claimTreasuryLeg receipt text>`.
+  /** RETIRED (one FXN, step 6): the node answers `TREASURY_CLAIM_ERR<TAB>Retired<TAB>failure<TAB>missing<TAB>remedy`.
+   *  A KNTSPEND1 pays its recipient in native FXN with no claim step.
+   *
+   *  `TREASURY_CLAIM<TAB><spend_cid><TAB><claimTreasuryLeg receipt text>`.
    *  `spendCid` is its own leading field now (cut over to a
    *  `manifest_custody` `R-` receipt, src/treasury.rs::claim_leg — an
    *  `R-`'s fixed grammar has no field of its own for "which spend is this
@@ -1269,8 +1293,9 @@ export class WireClient {
    *  that holder yet (a fresh identity that hasn't submitted a genesis).
    *    -> HEAD<TAB><holder><TAB><length><TAB><cid>
    *    -> HEAD_NONE<TAB><holder> */
-  async head(pubHex) {
-    const reply = await this._send(`HEAD\t${pubHex}`);
+  async head(pubHex, chain) {
+    // Build 4: with `chain`, the key's list on that launched chain.
+    const reply = await this._send(chain ? `HEAD\t${pubHex}\t${chain}` : `HEAD\t${pubHex}`);
     const parts = reply.split("\t");
     if (parts[0] === "HEAD") {
       return { kind: "head", holder: parts[1], length: Number(parts[2]), cid: parts[3] };
@@ -1364,8 +1389,9 @@ export class WireClient {
    *    { kind: "ok", cid }                          — admitted AND settled; ownership moved.
    *    { kind: "domain-purchase-refused", cid, reason } — admitted (the record
    *      is on the chain), but the real settlement check refused: the
-   *      referenced `manifest_custody` credit was not live/held/unspent for
-   *      the agreed price, so ownership did NOT move. `reason` is a human-
+   *      buyer's native name lock at C[6] does not pay this purchase (one FXN,
+   *      step 6), so ownership did NOT move. A purchase whose C[6] is not a
+   *      native lock the node holds is refused at admission (`err`). `reason` is a human-
    *      readable explanation (what failed, what was missing, the remedy).
    *    { kind: "err", code, reason }                — admission itself was refused
    *      (malformed shape, bad signature, chain break, ...); never submitted.

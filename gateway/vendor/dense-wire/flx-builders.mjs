@@ -60,8 +60,11 @@ export async function buildGenesis({ privateKey, pubHex, nowSec, network = NETWO
 /** Byte-exact port of `pool::SwapTerms::canonical` (wave 2C), both grammars.
  *  V1 (no `fundCredit` given): `FLX-CSWAP-TERMS-V1` NUL-delimited — the
  *  unbacked lane's grammar. V2 (`fundCredit` given): `FLX-CSWAP-TERMS-V2`
- *  TAB-delimited, the credit a BUY spends (a Live custody credit held by
- *  the signer for at least `amountIn`) or 64 zeros on a SELL. `side` is
+ *  TAB-delimited, what funds a BUY or 64 zeros on a SELL. Since one FXN
+ *  step 4 a buy's `fundCredit` is the CID of the buyer's native FXN lock
+ *  (KNLOCK1 on `nlocks`, base chain, purpose `buy`, beneficiary the pool
+ *  escrow, holding at least `amountIn`, deadline after the intent's;
+ *  flx-native-locks.mjs); a custody credit is refused. `side` is
  *  "B" or "S"; on a curve sell `amountIn` is bps of the seller's balance.
  *  A backed launch admits V2 only.
  *
@@ -79,7 +82,7 @@ export function curveSwapTermsCanonical({ side, amountIn, minOut, deadline, nonc
   }
   const credit = side === "S" ? NO_FUND_CREDIT : String(fundCredit);
   if (side === "B" && (!/^[0-9a-f]{64}$/.test(credit) || credit === NO_FUND_CREDIT)) {
-    throw new Error("a V2 buy names the credit it spends: a 64-hex custody credit CID. Missing: fundCredit. To fix: fund the buy (MANIFEST_RECEIPT) and pass that credit's CID");
+    throw new Error("a V2 buy names the native FXN lock that funds it. Missing: fundCredit, the 64-hex CID of a KNLOCK1 (purpose buy, beneficiary the pool escrow). To fix: lock FXN first (flx-native-locks.mjs buildNativeLock with buyLockTerms) and pass that lock's CID");
   }
   const v2 = `${side}\t${amountIn}\t${minOut}\t${deadline}\t${nonce}\t${credit}`;
   if (maxFee === undefined || maxFee === null) return `FLX-CSWAP-TERMS-V2\t${v2}`;
@@ -509,10 +512,12 @@ export async function buildDomainTransferV2WithSigner({ signer, pos, prevCid, fq
 
 /** Build and sign a KDOMBUY1 marketplace purchase. Mirrors the Rust
  *  `chain::domain_purchase`. Seller-submitted; price is REQUIRED.
- *  `settlementValueObjectCid` (C[6]) is the CID of a live `manifest_custody`
- *  credit the SELLER now holds for exactly the price (see
- *  `flx-transfer-builders.mjs` `buildReceipt`/`buildTransfer` and
- *  `WireClient.manifestSubmit`); the node verifies and consumes it. */
+ *  `settlementValueObjectCid` (C[6]) is the CID of the buyer's native FXN
+ *  lock (KNLOCK1 on the `nlocks` chain, purpose `name`, base chain, locked
+ *  by the buyer for the seller, for exactly the price, with a deadline after
+ *  the purchase). The purchase that moves the name pays that lock to the
+ *  seller (one FXN, step 6). A C[6] naming a `manifest_custody` credit is the
+ *  retired path: a node refuses a new one by name. Price asset must be FXN. */
 export async function buildDomainPurchase({ privateKey, pubHex, ...rest }) {
   return buildDomainPurchaseWithSigner({ signer: keySigner(privateKey, pubHex), ...rest });
 }
@@ -539,11 +544,10 @@ export async function buildDomainPurchaseWithSigner({ signer, pos, prevCid, fqdn
   if (typeof settlementValueObjectCid !== "string" || settlementValueObjectCid.length === 0) {
     throw new Error(
       `That purchase carries no payment reference. ` +
-        `Missing: C[6] = the CID of a real manifest_custody credit the seller now holds, ` +
-        `proving payment (got ${JSON.stringify(settlementValueObjectCid)}). ` +
-        `To fix: submit a buildReceipt/buildTransfer manifest crediting the seller first ` +
-        `(see flx-transfer-builders.mjs + WireClient.manifestSubmit), then pass the ` +
-        `resulting credit's CID here.`,
+        `Missing: C[6] = the CID of the buyer's native FXN lock for the seller ` +
+        `(KNLOCK1, purpose name, exactly the price; got ${JSON.stringify(settlementValueObjectCid)}). ` +
+        `To fix: have the buyer lock the price first (flx-native-locks.mjs buildNativeLock ` +
+        `with nameLockTerms), then pass that lock's CID here.`,
     );
   }
   const [asset, amount] = price;
