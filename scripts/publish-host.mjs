@@ -38,6 +38,7 @@ import { PublishRefusal, publisherFromArgs } from './lib/publisher.mjs';
 import { defaultProjectRoot } from './lib/site-bundle.mjs';
 import { verifyPublishedResolution } from './lib/resolve-check.mjs';
 import { proxyFleetPulse } from './lib/fleet-pulse-proxy.mjs';
+import { FLEET_STATS_ROUTES, proxyFleetStats } from './lib/fleet-stats.mjs';
 
 const DEFAULT_RESOLVER_BASE = 'https://gateway.deadark.com';
 
@@ -141,6 +142,11 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
       if (url.pathname === '/api/fleet-pulse') {
         if (req.method !== 'GET') return send(res, 405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
         return proxyFleetPulse(res);
+      }
+      // The live stats feeds (docs/stats/LIVE-DATA-CONTRACT.md), asked of DEFXN_STATS_NODE over the dense-wire wire.
+      if (FLEET_STATS_ROUTES[url.pathname]) {
+        if (req.method !== 'GET') return send(res, 405, { ok: false, error: 'METHOD_NOT_ALLOWED' });
+        return proxyFleetStats(res, FLEET_STATS_ROUTES[url.pathname], url.searchParams);
       }
 
       if (req.method === 'POST') {

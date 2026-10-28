@@ -129,6 +129,19 @@
 .ws-legend .sw-swap { width: 8px; height: 8px; background: hsl(var(--text-muted) / .75); }
 .ws-legend .sw-none { width: 16px; height: 0; border-radius: 0; border-top: 2px dotted hsl(var(--text-faint)); }
 .ws-legend .sw-run { background: hsl(var(--signal) / .55); }
+/* a bead on the live line: one interaction the node resolved (muted: the accent stays on the answer) */
+.ws-legend .sw-dot { width: 7px; height: 7px; border-radius: 50%; background: hsl(var(--text-muted)); }
+/* Operations: each capability, live, folded under the card. Type on the scale (11 / 18). */
+.ws-live { margin: calc(10px * var(--g)) 0 0; border-top: 1px solid hsl(var(--text-faint) / .35); padding-top: 8px; }
+.ws-live summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font: 500 11px/1.4 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.ws-live summary small { font: 400 11px/1.4 var(--font-mono); letter-spacing: 0; text-transform: none; color: hsl(var(--text-faint)); }
+.ws-live table { width: 100%; margin-top: 6px; border-collapse: collapse; font: 400 11px/1.35 var(--font-sans); color: hsl(var(--text)); display: block; max-height: 40vh; overflow: auto; }
+.ws-live th, .ws-live td { padding: 4px 8px 4px 0; text-align: left; vertical-align: top; border-bottom: 1px solid hsl(var(--text-faint) / .2); }
+.ws-live thead th { font: 500 11px/1.3 var(--font-mono); color: hsl(var(--text-muted)); position: sticky; top: 0; background: hsl(var(--surface)); }
+.ws-live tbody th { font-weight: 500; color: hsl(var(--text-strong)); }
+.ws-live td b { font: 600 11px/1.3 var(--font-mono); color: hsl(var(--text-strong)); }
+.ws-live td.none b, .ws-live p.none b { font-weight: 500; color: hsl(var(--text-muted)); }
+.ws-live td small, .ws-live p.none small { display: block; color: hsl(var(--text-muted)); }
 /* the 3D's labels: an operation's name under its columns, what is not built, a station's name on the overview */
 .wp-tags .tag.tick.grp b { font: 600 11px/1.2 var(--font-sans); letter-spacing: 0; color: hsl(var(--text-strong)); }
 .wp-tags .tag.tick.grp.hot b { color: hsl(var(--signal)); }
