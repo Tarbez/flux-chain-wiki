@@ -16,7 +16,7 @@
 // Kind::min_c() (~180-205) are ported below for the five lifecycle kinds
 // (Intent, Offer, Agreement, Fulfillment, ValueObject) alongside the
 // pre-existing LedgerEntry kind. The I/R/T shape checks are ported from
-// `/Volumes/PortableSSD/flx/flux-core/src/roles.rs`'s `primary`/`referential`/
+// `flx/flux-core/src/roles.rs`'s `primary`/`referential`/
 // `target` resolvers.
 
 const MAX_MANIFEST_LEN = 65_536;
