@@ -87,7 +87,10 @@ function fieldsOf(command, row, tag, count) {
    STATS_LIVE <measured_at_ms> <window_ms> <interval_ms> <node name>
    CAP <capability id> <requests> <errors> <p50_ms|-> <p95_ms|->
    RES <resolver id> <batches> <swaps> <batch_ms_mean|-> <send_ms_mean|-> <busy_pct|->
-   INT <at_ms> <capability id|-> <resolver id> <latency_ms|-> <ok 1|0>
+   INT <at_ms> <capability id|-> <resolver id|-> <latency_ms|-> <ok 1|0>   (resolver - : no resolver grammar claims the
+       record, e.g. a swap, a native transfer or a base-chain record; the row is kept with resolver null)
+   CAP and RES lines may carry ids the site does not list (e.g. perf): they are passed on, and the pages show only the ids
+   they know. interval_ms is the node's bucket (1000 ms by default), window_ms the rolling window (60000 ms by default).
    END                                                                               (fields tab-separated)       */
 export function parseStatsLive(reply) {
   const C = 'STATS_LIVE';
@@ -105,17 +108,19 @@ export function parseStatsLive(reply) {
   for (const row of rows) {
     const tag = row.split('\t', 1)[0];
     if (tag === 'CAP') {
-      const f = fieldsOf(C, row, 'CAP', 6), key = id(C, row, 'capability id', f[1]);
+      const f = fieldsOf(C, row, 'CAP', 6), key = f[1];
+      if (!ID.test(key)) continue; // an id this host cannot name is skipped, not a failure; the pages list only the ids they know
       if (out.capabilities[key]) throw new StatsShapeError(C, `capability ${key} listed twice`);
       out.capabilities[key] = { requests: whole(C, row, 'requests', f[2]), errors: whole(C, row, 'errors', f[3]), p50_ms: decimalOrNull(C, row, 'p50_ms', f[4]), p95_ms: decimalOrNull(C, row, 'p95_ms', f[5]) };
     } else if (tag === 'RES') {
-      const f = fieldsOf(C, row, 'RES', 7), key = id(C, row, 'resolver id', f[1]);
+      const f = fieldsOf(C, row, 'RES', 7), key = f[1];
+      if (!ID.test(key)) continue; // as CAP: skipped, not a failure (the node also counts its own, e.g. perf)
       if (out.resolvers[key]) throw new StatsShapeError(C, `resolver ${key} listed twice`);
       out.resolvers[key] = { batches: whole(C, row, 'batches', f[2]), swaps: whole(C, row, 'swaps', f[3]), batch_ms_mean: decimalOrNull(C, row, 'batch_ms_mean', f[4]), send_ms_mean: decimalOrNull(C, row, 'send_ms_mean', f[5]), busy_pct: decimalOrNull(C, row, 'busy_pct', f[6]) };
     } else if (tag === 'INT') {
       const f = fieldsOf(C, row, 'INT', 6);
       if (f[5] !== '0' && f[5] !== '1') throw new StatsShapeError(C, `ok must be 1 or 0: ${row.slice(0, 160)}`);
-      out.interactions.push({ at_ms: whole(C, row, 'at_ms', f[1]), capability: idOrNull(C, row, 'capability id', f[2]), resolver: id(C, row, 'resolver id', f[3]), latency_ms: decimalOrNull(C, row, 'latency_ms', f[4]), node: out.node, ok: f[5] === '1' });
+      out.interactions.push({ at_ms: whole(C, row, 'at_ms', f[1]), capability: idOrNull(C, row, 'capability id', f[2]), resolver: idOrNull(C, row, 'resolver id', f[3]), latency_ms: decimalOrNull(C, row, 'latency_ms', f[4]), node: out.node, ok: f[5] === '1' });
     }
     // any other line is a later addition to the format: skipped, so an older host still reads a newer node
   }
@@ -293,14 +298,20 @@ export function createFleetStats({
   const cache = new Map(); // command -> { at, promise }
   function read(command, parse) {
     const hit = cache.get(command);
-    if (hit && now() - hit.at < cacheMs) return hit.promise;
+    if (hit && now() - hit.at < hit.ttl) return hit.promise;
     const at = now();
     const promise = (askNode ? askNode(command) : ask(node, command, timeoutMs)).then((reply) => ({ value: parse(reply), readAt: at }));
-    cache.set(command, { at, promise });
+    const entry = { at, promise, ttl: cacheMs };
+    cache.set(command, entry);
+    // a live reply is kept at most half the node's interval, so the page never receives a reading already stale (2 x interval_ms)
+    promise.then((r) => { if (r.value.interval_ms > 0) entry.ttl = Math.min(cacheMs, r.value.interval_ms / 2); }, () => {});
     promise.catch(() => {}); // a failure is cached for the same period: a node that is down is not asked once per visitor
     return promise;
   }
   const live = () => read('STATS_LIVE', parseStatsLive);
+  /* age_ms: how old the reading is by this host's clock when it answers. The page judges staleness from it, so a visitor
+     whose clock is off by seconds does not see a fresh reading as stale (interval_ms is 1000 ms by default). */
+  const aged = (body) => Object.assign(body, { age_ms: Math.max(0, now() - body.measured_at_ms) });
   const runs = () => read('PERF_RUNS', parsePerfRuns);
 
   return {
@@ -311,17 +322,17 @@ export function createFleetStats({
         return { status: 503, body: { ok: false, error: 'FLEET_STATS_NOT_CONFIGURED', detail: 'This host has no stats node. Set DEFXN_STATS_NODE to a chain-server WebSocket URL (for example ws://127.0.0.1:19501/ws) and restart it.' } };
       }
       try {
-        if (kind === 'interactions') return { status: 200, body: interactionsAnswer((await live()).value, Number(searchParams.get('limit') || MAX_INTERACTIONS)) };
+        if (kind === 'interactions') return { status: 200, body: aged(interactionsAnswer((await live()).value, Number(searchParams.get('limit') || MAX_INTERACTIONS))) };
         if (kind === 'resolvers') {
           const [l, r] = await Promise.allSettled([live(), runs()]);
           if (l.status === 'rejected') throw l.reason;
-          return { status: 200, body: resolversAnswer(l.value.value, r.status === 'fulfilled' ? r.value.value : null) };
+          return { status: 200, body: aged(resolversAnswer(l.value.value, r.status === 'fulfilled' ? r.value.value : null)) };
         }
         if (kind === 'runs') { const r = await runs(); return { status: 200, body: runsAnswer(r.value, node || null, r.readAt) }; }
         if (kind === 'capabilities') {
           const [l, r] = await Promise.allSettled([live(), runs()]);
           if (l.status === 'rejected') throw l.reason;
-          return { status: 200, body: capabilitiesAnswer(l.value.value, r.status === 'fulfilled' ? r.value.value : null, r.status === 'rejected' ? describe(r.reason) : null) };
+          return { status: 200, body: aged(capabilitiesAnswer(l.value.value, r.status === 'fulfilled' ? r.value.value : null, r.status === 'rejected' ? describe(r.reason) : null)) };
         }
         return { status: 404, body: { ok: false, error: 'FLEET_STATS_UNKNOWN', detail: `no stats route named ${kind}` } };
       } catch (error) {

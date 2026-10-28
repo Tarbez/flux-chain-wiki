@@ -98,6 +98,7 @@
     count(feed, data.interval_ms, 'interval_ms');
     if (data.window_ms != null) count(feed, data.window_ms, 'window_ms');
     if (data.node != null) text(feed, data.node, 'node');
+    if (data.age_ms != null) count(feed, data.age_ms, 'age_ms');
   }
   /* targets a benchmark run could not drive: { id: { reason, run } } */
   function notBuilt(feed, data) {
@@ -117,7 +118,7 @@
       object(F, x, at);
       count(F, x.at_ms, at + '.at_ms');
       textOrNull(F, x.capability, at + '.capability');
-      text(F, x.resolver, at + '.resolver');
+      textOrNull(F, x.resolver, at + '.resolver');   /* null: no resolver grammar claims the record (a swap, a native transfer) */
       countOrNull(F, x.latency_ms, at + '.latency_ms');
       text(F, x.node, at + '.node');
       if (typeof x.ok !== 'boolean') throw malformed(F, at + '.ok', 'true or false');
@@ -194,13 +195,21 @@
         if (body && typeof body.detail === 'string') error.detail = body.detail;
         throw error;
       }
-      return { endpoint: endpoint, data: check(await response.json()) };
+      var data = check(await response.json());
+      /* the host's age_ms, counted on from when it arrived: the visitor's clock never has to agree with the node's */
+      if (typeof data.age_ms === 'number') Object.defineProperty(data, 'received_at_ms', { value: Date.now(), enumerable: false });
+      return { endpoint: endpoint, data: data };
     } finally {
       clearTimeout(timer);
     }
   }
-  /* A reading older than 2 x interval_ms is stale (contract, "No reading"). */
-  function stale(data, now) { return !data || !(data.interval_ms > 0) || (now || Date.now()) - data.measured_at_ms > 2 * data.interval_ms; }
+  /* A reading older than 2 x interval_ms is stale (contract, "No reading"). Its age is the host's age_ms plus the time since it
+     arrived, or, from a host that does not send age_ms, now - measured_at_ms. */
+  function age(data, now) {
+    now = now || Date.now();
+    return typeof data.age_ms === 'number' && data.received_at_ms ? data.age_ms + (now - data.received_at_ms) : now - data.measured_at_ms;
+  }
+  function stale(data, now) { return !data || !(data.interval_ms > 0) || age(data, now) > 2 * data.interval_ms; }
 
   var STATS = Object.freeze({
     interactions: '/api/fleet-interactions?limit=100',
@@ -211,7 +220,7 @@
 
   window.ArkPulse = Object.freeze({
     endpoint: DEFAULT_ENDPOINT, validate: validate, get: get,
-    stats: STATS, stale: stale,
+    stats: STATS, stale: stale, age: age,
     validateInteractions: validateInteractions, validateCapabilities: validateCapabilities, validateResolvers: validateResolvers, validateRuns: validateRuns,
     interactions: function (options) { return read(STATS.interactions, validateInteractions, options); },
     capabilities: function (options) { return read(STATS.capabilities, validateCapabilities, options); },

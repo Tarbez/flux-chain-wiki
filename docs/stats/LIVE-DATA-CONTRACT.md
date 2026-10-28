@@ -37,7 +37,9 @@ When a route cannot answer, it replies with a 5xx code and `{ "ok": false, "erro
 
 What the routes add to the tables below:
 
-- Every live answer carries `node` (the node's name) and `interval_ms`. The page reads `interval_ms` to decide when a reading is stale.
+- Every live answer carries `node` (the node's name), `interval_ms` and `age_ms`. `interval_ms` is the node's bucket, 1000 ms by default, and `window_ms` is 60000 ms by default. `age_ms` is how old the reading is by the host's clock when it answers. The page adds the time since the answer arrived and calls the reading stale past `2 x interval_ms`, so the visitor's clock never has to agree with the node's. The host keeps a live reply for at most half of `interval_ms`.
+- `interactions[].resolver` is `null` when no resolver grammar claims the record: a swap, a native transfer or a base-chain record. The row is kept.
+- `capabilities` and `resolvers` may hold ids the site does not list. The node counts its own `perf` resolver, for example. The pages show only the ids in `DEFXN_CAPABILITIES` and `DEFXN_RESOLVERS`.
 - `/api/fleet-capabilities` carries `tested_ceiling_run`, the run that reached the ceiling. It also carries `runs_error`, which says why every ceiling is null when `PERF_RUNS` could not be read.
 - `/api/fleet-capabilities` and `/api/fleet-resolvers` carry `not_built`, as `{ id: { reason, run } }`. It names each target the newest run could not drive, with the node's reason. A later run that measured the target clears it.
 - `runs[].figures[]` and `runs[].ceiling[]` carry `target` (`cap`, `res` or `fleet`) and `target_id`. `runs[].absent[]` lists `{ target, id, reason }` for each target a run could not drive. `runs[].record_cid` is the signed record's CID. `runs[].id` is `PERF-<yyyymmdd>-<n>` for a run the schedule made.
@@ -94,7 +96,7 @@ Page: Now (the line in front of the canyon). Reason shown today: "The fleet does
 | `interval_ms` | ms | How often the fleet refreshes the list |
 | `interactions[].at_ms` | ms since epoch | When the interaction finished |
 | `interactions[].capability` | capability id | One of `DEFXN_CAPABILITIES.capabilities[].id`, or `null` when the interaction used none |
-| `interactions[].resolver` | resolver id | One of `DEFXN_RESOLVERS.resolvers[].id` |
+| `interactions[].resolver` | resolver id | One of `DEFXN_RESOLVERS.resolvers[].id`, or `null` when no resolver grammar claims the record |
 | `interactions[].latency_ms` | ms | Client send to signed result received, measured at the node that resolved it. Not network time to the visitor |
 | `interactions[].node` | text | `nodes[].name` |
 | `interactions[].ok` | boolean | The result was signed and stored |

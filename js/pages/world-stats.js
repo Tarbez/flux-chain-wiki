@@ -30,6 +30,7 @@
   var T = function (key, vars) { return W.text('WORLDSTATS.' + key, vars); };
   function H() { return window.ArkStatsHighlights || {}; }
   function caps() { return (window.DEFXN_CAPABILITIES || {}).capabilities || []; }
+  function resolverIds() { return ((window.DEFXN_RESOLVERS || {}).resolvers || []).map(function (r) { return r.id; }); }
   function title(id) { return id.charAt(0).toUpperCase() + id.slice(1); }
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
   var DATE = typeof Intl !== 'undefined' ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : null;
@@ -76,7 +77,7 @@
     return T('LIVE.OFFLINE');
   }
   function settle(name, rec) {
-    if (rec.status === 'ok' && FEEDS[name].live && ArkPulse.stale(rec.data)) rec = { status: 'stale', data: rec.data, why: T('LIVE.STALE', { age: ago(rec.data.measured_at_ms) }), at: rec.at };
+    if (rec.status === 'ok' && FEEDS[name].live && ArkPulse.stale(rec.data)) rec = { status: 'stale', data: rec.data, why: T('LIVE.STALE', { age: liveAgo(rec.data) }), at: rec.at };
     feeds[name] = rec; if (name === 'pulse') pulse = rec;
   }
   function delayOf(name) {
@@ -110,6 +111,8 @@
       if (!listeners.length) Object.keys(timers).forEach(function (name) { clearTimeout(timers[name]); delete timers[name]; });
     };
   }
+  /* how old a live reading is, by the host's age_ms (ArkPulse.age), so a visitor's clock does not have to agree with the node's */
+  function liveAgo(data) { return ago(Date.now() - ArkPulse.age(data)); }
   /* a fact with no reading: the feed's reason, or the wait line */
   function noReading(label, rec, extra) { return Object.assign({ label: label, none: rec.status === 'wait' ? T('LIVE.WAIT') : rec.why }, extra || {}); }
   function fmt2(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: n < 10 ? 2 : n < 100 ? 1 : 0 }); }
@@ -257,11 +260,12 @@
       /* live traffic: requests a second over every capability the node lists, in its window (GET /api/fleet-capabilities) */
       var cr = feeds.capabilities, live;
       if (cr.status === 'ok') {
-        var rows = Object.keys(cr.data.capabilities).map(function (id) { return cr.data.capabilities[id]; });
+        /* only the capabilities this site lists (the node may count others) */
+        var rows = caps().map(function (c) { return cr.data.capabilities[c.id]; }).filter(Boolean);
         var rates = rows.filter(function (c) { return c.per_second != null; });
         live = rates.length
           ? { label: T('STORY.LIVE.TAG'), value: fmt2(rates.reduce(function (a, c) { return a + c.per_second; }, 0)), unit: T('UNIT.REQ.S'),
-              sub: T('NOW.LIVE.SUB', { errors: fmt(rows.reduce(function (a, c) { return a + c.errors; }, 0)), s: fmt(Math.round(cr.data.window_ms / 1000)), node: cr.data.node || '', age: ago(cr.data.measured_at_ms) }) }
+              sub: T('NOW.LIVE.SUB', { errors: fmt(rows.reduce(function (a, c) { return a + c.errors; }, 0)), s: fmt(Math.round(cr.data.window_ms / 1000)), node: cr.data.node || '', age: liveAgo(cr.data) }) }
           : { label: T('STORY.LIVE.TAG'), none: T('LIVE.NOCAPS') };
       } else live = noReading(T('STORY.LIVE.TAG'), cr);
       /* the newest benchmark run the node filed (GET /api/fleet-runs), with the ISO week it belongs to */
@@ -309,7 +313,7 @@
       var rec = feeds.capabilities, rows = liveCaps(), open = ui.live.open;
       ui.live.textContent = '';
       var sum = node('summary'); sum.appendChild(node('span', null, T('CAP.LIVE.TITLE')));
-      sum.appendChild(node('small', 'mono', rec.status === 'ok' ? T('CAP.LIVE.META', { s: fmt(Math.round(rec.data.window_ms / 1000)), node: rec.data.node || '', age: ago(rec.data.measured_at_ms) }) : T('NONE')));
+      sum.appendChild(node('small', 'mono', rec.status === 'ok' ? T('CAP.LIVE.META', { s: fmt(Math.round(rec.data.window_ms / 1000)), node: rec.data.node || '', age: liveAgo(rec.data) }) : T('NONE')));
       ui.live.appendChild(sum); ui.live.open = open;
       if (!rows) { var p = node('p', 'none'); p.appendChild(node('b', null, T('NONE'))); p.appendChild(node('small', null, rec.status === 'wait' ? T('LIVE.WAIT') : rec.why)); ui.live.appendChild(p); return; }
       var table = node('table'), head = node('tr');
@@ -371,12 +375,13 @@
       /* resolver load now (GET /api/fleet-resolvers): swaps a second over every resolver, and the batch and send times of the busiest one */
       var rr = feeds.resolvers;
       if (rr.status === 'ok') {
-        var ids = Object.keys(rr.data.resolvers), secs = rr.data.window_ms / 1000;
+        /* only the resolvers this site lists (the node also counts its own, e.g. perf) */
+        var known = resolverIds(), ids = Object.keys(rr.data.resolvers).filter(function (id) { return known.indexOf(id) >= 0; }), secs = rr.data.window_ms / 1000;
         if (!ids.length || !(secs > 0)) rows.push({ label: T('CEIL.RES'), none: T('LIVE.NORES') });
         else {
           var busy = ids.reduce(function (a, id) { return !a || rr.data.resolvers[id].swaps > rr.data.resolvers[a].swaps ? id : a; }, null), b = rr.data.resolvers[busy];
           rows.push({ label: T('CEIL.RES'), value: fmt2(ids.reduce(function (a, id) { return a + rr.data.resolvers[id].swaps; }, 0) / secs), unit: T('UNIT.SWAPS.S'),
-            sub: T('CEIL.RES.SUB', { resolver: title(busy), batch: b.batch_ms_mean == null ? T('NONE') : fmt2(b.batch_ms_mean) + ' ' + T('UNIT.MS'), send: b.send_ms_mean == null ? T('NONE') : fmt2(b.send_ms_mean) + ' ' + T('UNIT.MS'), node: rr.data.node || '', age: ago(rr.data.measured_at_ms) }), wide: true });
+            sub: T('CEIL.RES.SUB', { resolver: title(busy), batch: b.batch_ms_mean == null ? T('NONE') : fmt2(b.batch_ms_mean) + ' ' + T('UNIT.MS'), send: b.send_ms_mean == null ? T('NONE') : fmt2(b.send_ms_mean) + ' ' + T('UNIT.MS'), node: rr.data.node || '', age: liveAgo(rr.data) }), wide: true });
         }
       } else rows.push(noReading(T('CEIL.RES'), rr, { wide: true }));
       /* the newest stress or ceiling run (contract section 5): its highest rate and at how many connections */
