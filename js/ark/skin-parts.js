@@ -74,6 +74,7 @@ var DefxnSkinParts = (function () {
     ['.products-mega-feature, .rx-fleet, .rx-focus', 'CARD'],
     ['.products-mega-heading', 'HEADING|TEXT'],
     ['.sheet', 'PANEL'],
+    ['.admin-auth-panel', 'MODAL'],   /* the signing review (js/ark/authorization-dialog.js), in the dialog layer below */
     ['.rail', 'ASIDE'],
     ['.tabs', 'TABSLIST'],
     ['.tabs [role="tab"]', 'TABSTRIGGER']
@@ -183,6 +184,19 @@ var DefxnSkinParts = (function () {
   function undoOf(added) {
     return function () { added.forEach(function (el) { if (el.hasAttribute(MARK)) { el.removeAttribute('data-ark-part'); el.removeAttribute(MARK); } }); added.length = 0; };
   }
+  /* The dialog layer: Ark UI's own "dialogs" portal, a direct child of <body> (its confirm mounts there). A skin goes on the
+     site wrapper (#scene), and a dialog appended to <body> sat outside it, so no card ever dressed it (WEAR-AUDIT E10: the
+     signing review kept the site's look under every card). Ark UI dresses a role="dialog" child of a portal, so the site's
+     own dialogs mount here. Found or made, never two. */
+  function dialogs(doc) {
+    doc = doc || document;
+    var all = doc.querySelectorAll('[data-ark-portal="dialogs"]');
+    for (var i = 0; i < all.length; i++) if (all[i].parentNode === doc.body) return all[i];
+    var layer = doc.createElement('div');
+    layer.setAttribute('data-ark-portal', 'dialogs');
+    doc.body.appendChild(layer);
+    return layer;
+  }
   function mark(root) { var added = []; sweep(root || document.body, added); return undoOf(added); }
   /* parts that mount after the skin lands: one observer, child lists only, stopped with the skin */
   function watch(root) {
@@ -196,6 +210,6 @@ var DefxnSkinParts = (function () {
     return function () { obs.disconnect(); undo(); };
   }
 
-  return { PARTS: PARTS, LOCKS: LOCKS, OFF: OFF, CONTRAST: CONTRAST, FRAMED: FRAMED, policy: policy, switchOff: switchOff, shapeRules: shapeRules, mark: mark, watch: watch };
+  return { PARTS: PARTS, LOCKS: LOCKS, dialogs: dialogs, OFF: OFF, CONTRAST: CONTRAST, FRAMED: FRAMED, policy: policy, switchOff: switchOff, shapeRules: shapeRules, mark: mark, watch: watch };
 })();
 if (typeof module === 'object' && module.exports) module.exports = DefxnSkinParts;

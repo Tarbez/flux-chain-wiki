@@ -1,8 +1,8 @@
 {
   "package": "@deadark/ark-ui",
-  "version": "0.2.56",
-  "tarball": ".vendor/deadark-ark-ui-0.2.56.tgz",
-  "sha256": "2a25e47dd22b8188a8ae28c4d70ea487c869e800c62190f1c3beaac6923a637e",
+  "version": "0.2.59",
+  "tarball": ".vendor/deadark-ark-ui-0.2.59.tgz",
+  "sha256": "eb429d9c8ecb1d53f37a3bab909719ec4442ff43a30ee61015bfc58d16209cc4",
   "sourceRoot": "../../../design/ark-ui",
-  "updatedAt": "2026-10-27T13:06:09.631Z"
+  "updatedAt": "2026-10-29T02:32:23.400Z"
 }

@@ -1625,6 +1625,23 @@
         .catch(function (e) { cmsSkin.key = ''; if (mine === cmsSkin.seq) cmsSkinRelay(String(e && e.message || e)); });
     });
   }
+  /* The Skin lab's picker (WEAR-AUDIT I2, I8): every sample card, derived by DefxnSkinSite.sampleCards, as
+     'defxn-cms-skin-cards' { cards: [{ number, worn }] }, then each card's picture, one at a time, as 'defxn-cms-skin-card'
+     { number, picture } (or { number, error }). `have` lists the numbers the editor already holds a picture of. One run at a time. */
+  var cmsCardsRun = null;
+  function cmsSkinCards(have) {
+    var site = window.DefxnSkinSite, held = Array.isArray(have) ? have.map(String) : [];
+    function post(msg) { try { window.parent.postMessage(msg, location.origin); } catch (e) { /* the editor is gone */ } }
+    if (!site || !site.sampleCards) { post({ type: 'defxn-cms-skin-cards', cards: [], error: 'The skin module is not loaded on this page.' }); return; }
+    if (cmsCardsRun) return;
+    cmsCardsRun = site.sampleCards().then(function (cards) {
+      post({ type: 'defxn-cms-skin-cards', cards: cards.map(function (c) { return { number: c.number, worn: c.worn }; }) });
+      return cards.filter(function (c) { return held.indexOf(c.number) < 0; }).reduce(function (chain, c) {
+        return chain.then(function () { return site.picture(c.number); }).then(function (url) { post({ type: 'defxn-cms-skin-card', number: c.number, picture: url }); },
+          function (e) { post({ type: 'defxn-cms-skin-card', number: c.number, error: String(e && e.message || e) }); });
+      }, Promise.resolve());
+    }, function (e) { post({ type: 'defxn-cms-skin-cards', cards: [], error: String(e && e.message || e) }); }).then(function () { cmsCardsRun = null; });
+  }
   /* named so a state held back during an inline edit can be applied once it ends (cmsEndInline) */
   function cmsOnMessage(event) {
     if (event.origin !== location.origin) return;
@@ -1650,6 +1667,7 @@
        'defxn-cms-skin-report' (cmsSkinRelay). The press on a part row outlines that part's first element. */
     if (data.type === 'defxn-cms-preview-skin' && event.source === window.parent && cmsPreviewQuery) { cmsPreviewSkin(data); return; }
     if (data.type === 'defxn-cms-preview-skin-focus' && event.source === window.parent && cmsPreviewQuery) { cmsSkinFocus(data.selector); return; }
+    if (data.type === 'defxn-cms-preview-skin-cards' && event.source === window.parent && cmsPreviewQuery) { cmsSkinCards(data.have); return; }
     /* The Kit (js/admin/kit.js): which board and element the dock chose. The Kit page (js/pages/kit.js) draws it and
        answers with 'defxn-cms-kit-report'. Off the Kit page there is nothing to show, and nothing happens. */
     if (data.type === 'defxn-cms-preview-kit' && event.source === window.parent && cmsPreviewQuery) {

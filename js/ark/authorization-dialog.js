@@ -96,7 +96,9 @@
       panel.appendChild(h('p', { class: 'admin-auth-safety', text: view.safety }));
       var footer = h('footer', {}, h('button', { type: 'button', class: 'btn', text: 'Cancel' }), h('button', { type: 'button', class: 'btn primary', 'data-autofocus': true, text: 'Approve scopes & sign' }));
       panel.appendChild(footer);
-      backdrop.appendChild(panel); dialog.appendChild(backdrop); document.body.appendChild(dialog);
+      backdrop.appendChild(panel); dialog.appendChild(backdrop);
+      // in the dialog layer (DefxnSkinParts.dialogs), so a worn card dresses the review as it dresses the page (WEAR-AUDIT E10)
+      (window.DefxnSkinParts && window.DefxnSkinParts.dialogs ? window.DefxnSkinParts.dialogs() : document.body).appendChild(dialog);
       var cancelButton = footer.children[0], approveButton = footer.children[1], settled = false;
       function finish(ok) { if (settled) return; settled = true; dialog.remove(); resolve(ok); }
       function busy() { return dialog.state === 'signing'; }

@@ -270,6 +270,12 @@
     clearTimeout(skinTimer);
     skinTimer = setTimeout(() => postSkinNow(true), 60);
   }
+  /* the Skin lab's picker asks the canvas for every sample card and its picture (js/main.js cmsSkinCards); have: the
+     numbers it already holds a picture of */
+  function postSkinCards(have) {
+    if (!state.cmsConnected || !cmsPreview.contentWindow) return false;
+    try { cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-skin-cards', have: (have || []).map(String) }, window.location.origin); return true; } catch (error) { return false; }
+  }
   function postSkinFocus(selector) {
     if (!state.cmsConnected || !cmsPreview.contentWindow) return;
     try { cmsPreview.contentWindow.postMessage({ type: 'defxn-cms-preview-skin-focus', selector: String(selector || '') }, window.location.origin); } catch (error) { /* the page is changing */ }
@@ -453,6 +459,7 @@
     if (event.origin !== window.location.origin || !event.data) return;
     if (event.source !== cmsPreview.contentWindow) return;
     if (event.data.type === 'defxn-cms-skin-report') { if (A.skinReport) A.skinReport(event.data); return; }
+    if (event.data.type === 'defxn-cms-skin-cards' || event.data.type === 'defxn-cms-skin-card') { if (A.skinCards) A.skinCards(event.data); return; }
     if (event.data.type === 'defxn-cms-kit-report') { if (A.kitReport) A.kitReport(event.data); return; }
     if (event.data.points) state.cmsInsertPoints = event.data.points;
     /* the selection's commands (js/main.js cmsSelectionCommands: the right-click menu's list), for the toolbar's More menu */
@@ -564,7 +571,7 @@
       postCmsElementMotionPreview: postCmsElementMotionPreview, postCmsLayoutCommand: postCmsLayoutCommand,
       postCmsLayoutOperation: postCmsLayoutOperation, postCmsLayoutReset: postCmsLayoutReset,
       notifyPreviewAssets: notifyPreviewAssets, notifyPreviewMesh: notifyPreviewMesh,
-      notifyPreviewState: notifyPreviewState, notifyPreviewTheme: notifyPreviewTheme, notifyPreviewWorld: notifyPreviewWorld, notifyPreviewSkin: notifyPreviewSkin, postSkinFocus: postSkinFocus, wearPreviewSkin: wearPreviewSkin, postKit: postKit,
+      notifyPreviewState: notifyPreviewState, notifyPreviewTheme: notifyPreviewTheme, notifyPreviewWorld: notifyPreviewWorld, notifyPreviewSkin: notifyPreviewSkin, postSkinFocus: postSkinFocus, postSkinCards: postSkinCards, wearPreviewSkin: wearPreviewSkin, postKit: postKit,
       postCmsPreviewLens: postCmsPreviewLens, previewShowsDrafts: previewShowsDrafts,
       refreshCanvasSite: refreshCanvasSite, reloadPreview: reloadPreview,
       postCmsPreviewMode: postCmsPreviewMode, postCmsPreviewState: postCmsPreviewState,

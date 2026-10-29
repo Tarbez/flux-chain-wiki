@@ -17,7 +17,7 @@
    and the record light out of every skin.
 
    A real card is the signed-in identity's PVA on the chain (chainCard below; CHAIN-BUILD.md). For review, a
-   sample still comes in by the address: ?skin-sample=27|263|512 (the NFT session's three samples) tries one on
+   sample still comes in by the address: ?skin-sample=<number> (any sample card: sampleCards below) tries one on
    for that page. Record 009 is never shown on the site.
    A card the wearer keeps is held on this device by js/nft/wear.js (DefxnWear), after Ark UI's confirm; see
    "a card the wearer holds" below. Nothing else is stored. */
@@ -186,7 +186,10 @@ var DefxnSkinSite = (function () {
   function wear(root, skin, family, given, state) {
     var rules = DefxnSkinParts.policy(given, family);
     skin.rules = DefxnSkinParts.shapeRules(DefxnSkinParts.switchOff(skin.rules, rules.off), ArkKitSkin.arkSkinFamilyOfName);
-    var stopParts = DefxnSkinParts.watch(root);
+    /* the dialog layer too: Ark UI dresses a dialog there, and its panel needs its part name first (E10). Watched before
+       the skin applies, so a dialog that opens later is named before Ark UI dresses it. */
+    var stopRoot = DefxnSkinParts.watch(root), stopDialogs = DefxnSkinParts.dialogs ? DefxnSkinParts.watch(DefxnSkinParts.dialogs()) : function () {};
+    var stopParts = function () { stopRoot(); stopDialogs(); };
     var res = ArkKitSkin.applyArkSkin(root, skin, { locks: DefxnSkinParts.LOCKS, contrast: rules.contrast });   /* held to the site's own contrast rule, and any the policy adds */
     if (!res.ok) { stopParts(); throw new Error('Ark UI refused the skin: ' + (res.errors || []).join('; ')); }
     on = Object.assign({ root: root, stopParts: stopParts, recipe: null, card: null }, state);
@@ -203,7 +206,7 @@ var DefxnSkinSite = (function () {
       if (n && Number(n[1]) === 9) throw new Error('card 9 is never shown on this site');
       undress(); strip();
       var root = wrapper(), skin = DefxnSkinPackage.toArkSkin(data, { keys: partKeys(), derive: ArkKitSkin.deriveSkinTokens });
-      var res = wear(root, skin, data.family || null, options && options.policy, { card: n ? { number: n[1], record: data.record } : { object: o[1], record: data.record } });
+      var res = wear(root, skin, data.family || null, options && options.policy, { card: n ? { number: n[1], record: data.record, dna: data.dna, table: data.table } : { object: o[1], record: data.record, dna: data.dna, table: data.table } });
       root.dispatchEvent(new CustomEvent('defxn:skin', { bubbles: true, detail: { on: true, record: data.record, theme: { vars: skin.tokens } } }));
       return { result: res, arrival: settled(root, res).then(function () { return playArrival(root, data.arrival, false); }) };
     });
@@ -232,14 +235,69 @@ var DefxnSkinSite = (function () {
       return function () { ArkKitSkin.removeArkSkin(pane); unmark(); };
     });
   }
-  /* one review sample's card record, by its number (27, 263 or 512); refuses any other, 009 included */
+  /* Every sample card a review may try (WEAR-AUDIT I2), derived, never listed by hand: the NFT session's three skin
+     samples first (a born card, one worn over its birth, one wearing a whole set: DefxnSkin.samples), then every other
+     .fxn record in js/nft/cards-data.js. 009 carries a .eth name and is never offered. Resolves to
+     [{ number, record, worn }], number without leading zeros; read once per page. SAMPLES stays the three skin samples. */
+  var cardsListed = null;
+  function sampleCards() {
+    if (!cardsListed) {
+      cardsListed = needs().then(function () {
+        var out = [], seen = {};
+        var skins = DefxnSkin.samples();
+        skins.concat(window.DEFXN_CARDS || []).forEach(function (r, i) {
+          var num = String(Number(r.genesisId || r.number));   /* genesisId is zero-padded ("027") */
+          if (seen[num] || num === '9' || !/^[1-9][0-9]{0,8}$/.test(num) || (i >= skins.length && !/\.fxn$/i.test(r.name || ''))) return;
+          seen[num] = true;
+          out.push({ number: num, record: r, worn: !!r.skin });
+        });
+        return out;
+      });
+      cardsListed.catch(function () { cardsListed = null; });
+    }
+    return cardsListed;
+  }
+  /* one sample card's record, by its number ("27" or "027"); refuses any other, 009 included */
   function sample(n) {
     n = String(n);
-    if (SAMPLES.indexOf(n) < 0) return Promise.reject(new Error(n + ' is not a review sample. Use one of ' + SAMPLES.join(', ') + '.'));
-    return needs().then(function () {
-      var rec = DefxnSkin.samples().filter(function (r) { return Number(r.genesisId || r.number) === Number(n); })[0];   /* genesisId is zero-padded ("027") */
-      if (!rec) throw new Error('the NFT samples have no card ' + n);
-      return rec;
+    var num = /^[0-9]{1,9}$/.test(n) ? String(Number(n)) : '';
+    if (!num || num === '0' || num === '9') return Promise.reject(new Error(n + ' is not a review sample. Card 9 is never shown on this site; DefxnSkinSite.sampleCards() lists the numbers a review can try.'));
+    return sampleCards().then(function (cards) {
+      var hit = cards.filter(function (c) { return c.number === num; })[0];
+      if (!hit) throw new Error(n + ' is not a review sample. Use one of ' + cards.map(function (c) { return c.number; }).join(', ') + '.');
+      return Object.assign({}, hit.record);
+    });
+  }
+  /* One sample card as a picture: a PNG data address of the whole card, drawn by the card's own renderer and its own
+     export (js/nft/card.js: DefxnCard.mount, then DefxnCard.toCanvas). It is drawn off screen, outside the skinned
+     wrapper, and taken away at once. For the CMS Skin lab's picker (WEAR-AUDIT I2, I8): the owner sees each card, not its
+     number. width: the card's width in CSS pixels (default 160); the picture is twice that. */
+  function picture(n, width) {
+    var host = null, made = null;
+    return sample(n).then(function (rec) {
+      return art().then(function () { return window.DefxnCard ? null : load(NFT + 'card.js'); }).then(function () {
+        host = document.createElement('div');
+        host.setAttribute('aria-hidden', 'true');
+        host.style.cssText = 'position:fixed;left:-10000px;top:0;width:' + (width || 160) + 'px;pointer-events:none';
+        document.body.appendChild(host);
+        made = DefxnCard.mount(host, rec, {});
+        return made.ready;
+      });
+    }).then(function (card) {
+      if (!card) throw new Error('the card was taken away before it drew');
+      return painted(card).then(function () { return DefxnCard.toCanvas(card, 2); });
+    }).then(function (canvas) {
+      return canvas.toDataURL('image/png');
+    }).finally(function () { if (made) made.unmount(); if (host) host.remove(); });
+  }
+  /* the card's 3D art has painted (js/nft/card.js marks it is-new), or 6 s have passed: the picture then has its words
+     and pieces without the art. One observer on the card's class, no loop. */
+  function painted(card) {
+    return new Promise(function (resolve) {
+      if (card.classList.contains('is-new')) return resolve();
+      var obs = new MutationObserver(function () { if (card.classList.contains('is-new')) done(); }), timer = setTimeout(done, 6000);
+      function done() { obs.disconnect(); clearTimeout(timer); resolve(); }
+      obs.observe(card, { attributes: true, attributeFilter: ['class'] });
     });
   }
   /* The review way in: ?skin-sample=<number> tries one of the NFT session's samples on for this page (DefxnWear.tryOn:
@@ -306,14 +364,57 @@ var DefxnSkinSite = (function () {
     if (!link || !worn || zone) return;
     var host = link.parentNode.insertBefore(document.createElement('div'), link);
     host.className = 'header-user-zone';
-    zone = { host: host, made: DefxnUserNav.mount(host, wrapper(), { nav: wrapper().querySelector('.ark-header'), name: siteName(location.host), check: checkName, popover: window.lazyHeaderPopover, cards: menuCards }) };
+    zone = { host: host, made: DefxnUserNav.mount(host, wrapper(), { nav: wrapper().querySelector('.ark-header'), name: siteName(location.host), check: checkName, popover: window.lazyHeaderPopover, cards: menuCards, pieces: menuPieces, picture: menuPicture }) };
   }
-  /* the wearer's own skins as menu rows, only while the card on is the wearer's PVA: [{ label, wear() }] */
+  /* The card's pieces for the wearer's menu (WEAR-AUDIT F9): one link per layer, each opening that piece's item in the
+     shop, with the card and what it wears over its birth in the address, so the shop shows the same card. Derived from
+     the DNA the page wears (the package header's, checked against this page's layer table), so a list can never name a
+     piece the page does not wear. The wear-only pieces (layers/worn) ride in a card's skin, not its DNA, and are not
+     listed yet. It needs the layer table, which a kept card has not loaded: the menu asks only when its list opens.
+     Resolves to [{ layer, name, href }]. */
+  var SHOP = 'docs/home-redesign/nft/shop.html';
+  function menuPieces() {
+    var c = window.DefxnWear && DefxnWear.current, card = on && on.card;
+    if (!c || !card || !card.dna) return Promise.resolve([]);
+    return needs().then(function () {
+      var T = DEFXN_TRAITS, table = window.DEFXN_LAYERS_TABLE;
+      if (card.table && table && card.table !== table) throw new Error('this card was dressed from layer table ' + card.table + ', and this page has table ' + table + '. Reload the page, then open the list again');
+      var worn = T.elementsOf(card.dna), born = c.number ? T.elementsOf(T.dnaAt(Number(c.number))) : c.object ? T.elementsOf(T.dnaOfObject(c.object)) : worn, skin = {};
+      worn.forEach(function (e, i) { if (e && born[i] !== e) skin[e.layer] = e.name; });
+      var base = new URLSearchParams();
+      if (c.number) base.set('genesisId', c.number);
+      if (T.skinText(skin)) base.set('skin', T.skinText(skin));
+      return worn.filter(Boolean).map(function (e) {
+        var q = new URLSearchParams(base), layer = T.CATEGORIES.filter(function (l) { return l.key === e.layer; })[0];
+        q.set('layer', e.layer); q.set('item', e.layer + '/' + e.name);
+        return { layer: layer ? layer.title : e.layer, name: e.name, href: at(SHOP) + '?' + q.toString() };
+      });
+    });
+  }
+  /* The card's logo art for the wearer's menu (WEAR-AUDIT D5): the card's art cut square around its mark
+     (DefxnScene.avatar), in the wearer's own zone and never on a site part, with the pieces the page wears. It loads the
+     card's 3D engine, so the menu asks only once it is open. Resolves to the avatar ({ ready, remove }), or null with no
+     card on. */
+  function menuPicture(host) {
+    var c = window.DefxnWear && DefxnWear.current, card = on && on.card;
+    if (!c || !card) return Promise.resolve(null);
+    var record = c.number ? sample(c.number) : chainCard().then(function (r) {
+      if (!r || r.objectId !== c.object) throw new Error('the card on is not the signed-in identity\'s PVA, so its record is not here');
+      return r;
+    });
+    return record.then(function (rec) {
+      return art().then(function () { return window.DefxnScene ? null : load(NFT + 'scene.js'); }).then(function () {
+        var picks = null;
+        if (card.dna) { picks = {}; DEFXN_TRAITS.elementsOf(card.dna).forEach(function (e) { if (e) picks[e.layer] = e; }); }
+        return DefxnScene.avatar(host, rec, picks ? { picks: picks } : {});
+      });
+    });
+  }
+  /* the wearer's own PVA and skins as menu rows, whenever the chain read verifies a PVA for the signed-in identity,
+     whatever card is on now (a sample included: F4): [{ label, wear() }]. None when it finds no PVA. */
   function menuCards() {
-    var c = DefxnWear.current;
-    if (!c || !c.object) return Promise.resolve([]);
     return chainCards().then(function (cards) {
-      if (!cards || cards.record.objectId !== c.object) return [];
+      if (!cards) return [];
       var rows = [{ label: 'your PVA', wear: function () { return tryRecord(cards.record); } }];
       return rows.concat(cards.skins.map(function (s) { return { label: 'skin ' + s.label, wear: function () { return tryRecord(withSkin(cards.record, s.skin)); } }; }));
     }).catch(function (e) { console.info('[skin-site] Your skins were not read (' + e.message + ').'); return []; });
@@ -446,7 +547,7 @@ var DefxnSkinSite = (function () {
   }
   function squash(v) { return String(v).replace(/[^A-Za-z0-9]/g, '').toUpperCase(); }
 
-  return { apply: apply, applyPackage: applyPackage, remove: remove, preview: preview, restoreHeld: restoreHeld, heldNumber: heldNumber, chainCard: chainCard, chainCards: chainCards, withSkin: withSkin, mintSkin: mintSkin, acceptSkin: acceptSkin, giveSkin: giveSkin, endSale: endSale, activatePva: activatePva, tryRecord: tryRecord, sealIn: sealIn, cardComponents: cardComponents, siteName: siteName, HELD_KEY: HELD_KEY, sample: sample, fromAddress: fromAddress, report: report, ruleKey: ruleKey, art: art, SAMPLES: SAMPLES.slice(),
+  return { apply: apply, applyPackage: applyPackage, remove: remove, preview: preview, restoreHeld: restoreHeld, heldNumber: heldNumber, chainCard: chainCard, chainCards: chainCards, withSkin: withSkin, mintSkin: mintSkin, acceptSkin: acceptSkin, giveSkin: giveSkin, endSale: endSale, activatePva: activatePva, tryRecord: tryRecord, sealIn: sealIn, cardComponents: cardComponents, siteName: siteName, HELD_KEY: HELD_KEY, sample: sample, sampleCards: sampleCards, picture: picture, fromAddress: fromAddress, report: report, ruleKey: ruleKey, art: art, SAMPLES: SAMPLES.slice(),
     active: function () { return on ? on.recipe || on.card : null; } };
 })();
 if (typeof module === 'object' && module.exports) module.exports = DefxnSkinSite;

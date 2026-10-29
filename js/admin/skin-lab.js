@@ -22,14 +22,19 @@
   /* defined by files loaded after this one: resolved when called */
   var notifyPreviewSkin = A.later('notifyPreviewSkin'), postSkinFocus = A.later('postSkinFocus'), syncSkinDot = A.later('syncSkinDot'), setView = A.later('setView');
 
-  /* the three review samples (DefxnSkinSite.SAMPLES): the canvas refuses any other number, so the picker
-     offers only these. A card is named by its sample number; no other card is offered here. */
+  /* The picker offers every sample card the canvas derives (DefxnSkinSite.sampleCards: the three skin samples and every
+     other .fxn record in js/nft/cards-data.js; 009 never), each shown as a picture of the card (DefxnSkinSite.picture, the
+     card's own renderer), so the owner picks a card by its look (WEAR-AUDIT I2, I8). Until the canvas answers, it offers the
+     three skin samples (DefxnSkinSite.SAMPLES) by number. */
   var SAMPLES = ['27', '263', '512'];
+  /* js/admin/bridge.js's; false when no canvas is connected (the lab then shows numbers and asks again on its next draw) */
+  function postSkinCards(have) { return typeof A.postSkinCards === 'function' ? A.postSkinCards(have) : false; }
   var FILTERS = [['rules', 'With rules'], ['problems', 'Taken back'], ['all', 'All parts']];
-  var lab = { report: null, filter: 'rules', scope: 'site', error: '' };   /* what the canvas last said, and the view's own choices */
+  var lab = { report: null, filter: 'rules', scope: 'site', error: '', cards: null, pictures: {}, failed: {}, asked: false };   /* what the canvas last said, and the view's own choices */
   state.skinChoice = state.skinChoice || '';
 
   function sampleLabel(n) { return 'Sample card ' + n; }
+  function cardNumbers() { return lab.cards ? lab.cards.map(function (c) { return c.number; }) : SAMPLES; }
   /* the name the policy holds for a part the report names: the canvas resolves it (DefxnSkinSite.ruleKey), so Ark UI's
      lower-case block parts (card, alert, tabs-list) take the switches of CARD, ALERT, TABSLIST. null: no rule reaches it */
   function policyKey(key) {
@@ -163,18 +168,36 @@
     return box;
   }
 
+  function choose(value) {
+    if (value === state.skinChoice) return;
+    state.skinChoice = value; lab.report = null; lab.error = '';
+    postSkinFocus('');
+    notifyPreviewSkin();
+    repaintPanels('skinPolicy');
+  }
+  /* one tile per card: its picture once the canvas has drawn it, its number until then */
+  function pickTile(value, label, picture, note) {
+    var on = state.skinChoice === value;
+    var b = h('button', { type: 'button', class: 'skin-card', 'data-sample': value, 'aria-pressed': on ? 'true' : 'false', 'aria-label': label + (note ? ', ' + note : '') });
+    if (picture) b.appendChild(h('img', { src: picture, alt: '', width: '320', height: '224', loading: 'lazy' }));
+    else b.appendChild(h('span', { class: 'skin-card-blank', 'aria-hidden': 'true', text: value || '—' }));
+    b.appendChild(h('span', { class: 'skin-card-name', text: value ? value + (note ? ' · ' + note : '') : 'Site' }));
+    b.addEventListener('click', function () { choose(value); });
+    return b;
+  }
   function pickControl() {
-    var select = h('select', { id: 'skin-pick', 'aria-label': 'Card skin to try' });
-    select.appendChild(h('option', { value: '', text: 'Site’s own look' }));
-    SAMPLES.forEach(function (n) { select.appendChild(h('option', { value: n, text: sampleLabel(n) })); });
-    select.value = state.skinChoice;
-    select.addEventListener('change', function () {
-      state.skinChoice = select.value; lab.report = null; lab.error = '';
-      postSkinFocus('');
-      notifyPreviewSkin();
-      repaintPanels('skinPolicy');
+    if (!lab.asked) lab.asked = postSkinCards(Object.keys(lab.pictures)) === true;
+    var grid = h('div', { id: 'skin-pick', class: 'skin-cards', role: 'group', 'aria-label': 'Card skin to try' });
+    grid.appendChild(pickTile('', 'Site’s own look', '', ''));
+    (lab.cards || SAMPLES.map(function (n) { return { number: n, worn: false }; })).forEach(function (c) {
+      grid.appendChild(pickTile(c.number, sampleLabel(c.number), lab.pictures[c.number] || '', c.worn ? 'worn' : ''));
     });
-    return h('div', { class: 'skin-pick-row' }, h('label', { for: 'skin-pick', text: 'Try on this page' }), select);
+    var waiting = lab.cards ? lab.cards.filter(function (c) { return !lab.pictures[c.number] && !lab.failed[c.number]; }).length : 0;
+    var failed = Object.keys(lab.failed);
+    var rowsOut = [h('p', { class: 'skin-pick-label', text: 'Try on this page' }), grid];
+    if (waiting) rowsOut.push(h('p', { class: 'hint', role: 'status', text: 'Drawing ' + waiting + (waiting === 1 ? ' card.' : ' cards.') }));
+    if (failed.length) rowsOut.push(h('p', { class: 'hint', text: 'No picture for card ' + failed.join(', ') + ': ' + lab.failed[failed[0]] + '. Its number still applies it.' }));
+    return h.apply(null, ['div', { class: 'skin-pick-cards' }].concat(rowsOut));
   }
   function scopeControl() {
     var fam = family();
@@ -252,11 +275,21 @@
     if (state.view === 'skin') repaintPanels('skinPolicy');
   }
   /* the view closed: the review skin leaves the canvas you edit */
+  /* the canvas's list of sample cards, then each card's picture (js/main.js cmsSkinCards) */
+  function skinCards(message) {
+    if (message.type === 'defxn-cms-skin-cards') {
+      if (message.error) { lab.asked = false; console.info('[skin-lab] The sample cards did not load: ' + message.error); }
+      else lab.cards = (message.cards || []).filter(function (c) { return /^[1-9][0-9]{0,8}$/.test(String(c.number)); }).map(function (c) { return { number: String(c.number), worn: !!c.worn }; });
+    } else if (message.picture && /^data:image\/png;base64,/.test(message.picture)) { lab.pictures[String(message.number)] = message.picture; delete lab.failed[String(message.number)]; }
+    else if (message.error) lab.failed[String(message.number)] = String(message.error);
+    if (state.view === 'skin') repaintPanels('skinPolicy');
+  }
   function skinLabLeave() {
+    lab.asked = false;   /* a new visit asks again for any card still without a picture */
     postSkinFocus('');
     if (!state.skinChoice) return;
     state.skinChoice = ''; lab.report = null; lab.error = '';
     notifyPreviewSkin();
   }
-  A.provide({ renderSkinLabPanel: renderSkinLabPanel, revertSkinPolicy: revertSkinPolicy, skinReport: skinReport, skinLabLeave: skinLabLeave });
+  A.provide({ renderSkinLabPanel: renderSkinLabPanel, revertSkinPolicy: revertSkinPolicy, skinReport: skinReport, skinCards: skinCards, skinLabLeave: skinLabLeave });
 })();

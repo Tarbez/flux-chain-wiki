@@ -96,7 +96,7 @@
          Resolving null here made the page say "sign in and try again", which was wrong:
          the person was signed in, and chose not to share. */
       if (data.error) waiter.reject(Object.assign(new Error(identityErrorMessage(data.error)), { code: data.error }));
-      else waiter.resolve(data.identity || null);
+      else waiter.resolve(waiter.card ? { identity: data.identity || null, card: data.card || null } : (data.identity || null));
       return;
     }
     if (data.type === 'flux-broker:signed' && pendingSigns[data.requestId]) {
@@ -118,16 +118,24 @@
     return 'The defxn identity window could not sign this: ' + (code || 'unknown error') + '.';
   }
 
+  function askIdentity(card) {
+    return new Promise(function (resolve, reject) {
+      pendingIdentity.push({ resolve: resolve, reject: reject, card: card });
+      var ask = card ? { type: 'flux-broker:request-identity', card: true } : { type: 'flux-broker:request-identity' };
+      whenReady(function () { try { popup.postMessage(ask, BROKER_ORIGIN); } catch (e) { reject(e); } });
+      try { popup && popup.focus(); } catch (_) {}
+    });
+  }
+
   window.ArkBroker = {
     /* -> Promise<{publicKeyB64, displayName} | null>; rejects with code 'denied' when the
        person chooses not to share with this site. */
-    getIdentity: function () {
-      return new Promise(function (resolve, reject) {
-        pendingIdentity.push({ resolve: resolve, reject: reject });
-        whenReady(function () { try { popup.postMessage({ type: 'flux-broker:request-identity' }, BROKER_ORIGIN); } catch (e) { reject(e); } });
-        try { popup && popup.focus(); } catch (_) {}
-      });
-    },
+    getIdentity: function () { return askIdentity(false); },
+    /* -> Promise<{ identity, card }>: as getIdentity, and the broker may add the wearer's card
+       ({ object, record }: the PVA object id and its DFXNCARD1 line) when the person ticks "Show my card too"
+       for this site. card is null otherwise. It is the broker's copy, unchecked: verify it against the chain
+       with DefxnCardCarry.verify (js/nft/card-carry.js) before you wear anything from it. */
+    getIdentityWithCard: function () { return askIdentity(true); },
     /* request: {title, description, action, capability, manifest, signingMessage}
        -> Promise<{publicKeyB64, signature}> */
     requestSignature: function (request) {

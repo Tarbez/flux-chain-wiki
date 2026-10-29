@@ -368,6 +368,15 @@ legend { padding: 0 4px; margin-left: -4px; }
    taken back is danger, calm but plain. */
 #studioRoot .cms-skin .skin-pick-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; align-items: center; margin: 12px 0 0; }
 #studioRoot .cms-skin .skin-pick-row label { margin: 0; font-size: 12px; color: hsl(var(--text-strong)); }
+/* the picker: every sample card as a picture of the card (WEAR-AUDIT I2, I8); the one on is outlined in --reference */
+.cms-skin .skin-pick-cards { margin: 12px 0 0; }
+.cms-skin .skin-pick-label { margin: 0 0 6px; font: 600 var(--fs-tertiary, 11px)/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.cms-skin .skin-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 6px; }
+.cms-skin .skin-card { display: grid; gap: 3px; padding: 3px; border: 1px solid hsl(var(--border-subtle)); border-radius: 6px; background: transparent; color: hsl(var(--text-muted)); cursor: pointer; font: inherit; }
+.cms-skin .skin-card[aria-pressed="true"] { border-color: hsl(var(--reference)); color: hsl(var(--text-strong)); box-shadow: 0 0 0 1px hsl(var(--reference)); }
+.cms-skin .skin-card img, .cms-skin .skin-card-blank { display: block; width: 100%; height: auto; aspect-ratio: 10 / 7; object-fit: contain; border-radius: 4px; }
+.cms-skin .skin-card-blank { display: grid; place-items: center; background: hsl(var(--nested)); font: 600 var(--fs-tertiary, 11px)/1 var(--mono); }
+.cms-skin .skin-card-name { font: 500 var(--fs-tertiary, 11px)/1.2 var(--mono); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cms-skin .skin-note { margin: 12px 0 8px; }
 .cms-skin .skin-note[data-tone="danger"] { color: hsl(var(--danger)); }
 .cms-skin .skin-filter { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 8px; }

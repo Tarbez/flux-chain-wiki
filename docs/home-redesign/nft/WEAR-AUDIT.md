@@ -698,3 +698,49 @@ against copied sites, new elements made from the card, and timelines in the CMS 
 | J1 | In part | a dense-wire session | KASSET1 is merged: flux/defxn-defi-rs main, flx-cap-object, commit d9d474a (2026-10-23). Missing: a browser reader and mint path for it in dense-wire's web client (dense-wire/web), then the site's wiring. |
 | J2 | Open | site session | The identity broker carries no card yet. |
 | J3 | Fixed |  | Wearing asks first (loop 7). |
+
+### 2026-10-29: open items closed on the site, and the owner's decisions kept as built
+
+Appended. The table above is left as it was written; these lines supersede its rows for E10, F9, I2, I8 and D5.
+None of it is tested: the design is not confirmed (tests law), and the owner looks at it himself.
+
+- **E10, the rest of it.** Ark UI's own confirm was dressed since loop 13. The site's signing review
+  (`js/ark/authorization-dialog.js`) still mounted on `<body>`, outside the skinned wrapper, so no card reached it.
+  It now mounts in Ark UI's dialog layer (`DefxnSkinParts.dialogs()`: the `data-ark-portal="dialogs"` child of
+  `<body>`, found or made). Ark UI dresses a dialog there. The skin also watches that layer, so the review's panel is
+  named MODAL before Ark UI dresses it. Two dialogs stay outside the layer: the Kit's compare view, because it shows
+  the site's own look beside each card and must not wear one, and the identity broker's dialog (`js/broker/broker.js`),
+  which belongs to the site-trust work.
+- **F9.** The wearer's menu has a closed list, "Your card's pieces in the shop". It opens to one link per layer,
+  and each link opens `shop.html` at that piece: `item`, `layer`, the card's number, and what it wears over its birth.
+  The list is derived from the DNA the page wears, checked against the page's layer table
+  (`DefxnSkinSite` `menuPieces`). It loads the layer table only when the list opens. No site part prints a word.
+  Not listed yet: the wear-only pieces (layers/worn), which ride in a card's skin, not its DNA, and a real card's
+  pieces open the shop without its record, because the shop takes no object id.
+- **I2 and I8.** The Skin lab offers every sample card, derived and never listed by hand: the three skin samples, then
+  every other .fxn record in `js/nft/cards-data.js`. That is 10 cards, and 009 is never offered
+  (`DefxnSkinSite.sampleCards`). Each card shows as a picture drawn by the card's own renderer and its PNG export
+  (`DefxnSkinSite.picture`, `DefxnCard.toCanvas`). The canvas sends the pictures one at a time. The picker is a grid
+  of those pictures, not a list of numbers. `?skin-sample=` takes any of the 10. Still not built: a picture of each
+  candidate rule on its part (I8's second half).
+- **D5.** The card's logo art (the art cut square around its mark, `DefxnScene.avatar`, with the pieces the page
+  wears) now shows in the wearer's menu, beside the card's name, on every page. It is drawn only when the menu opens,
+  because it loads the 3D engine. The audit's other place, a watermark in the page panel's corner, stays out: the
+  card's world leaves the mark out on purpose, because a site shows its own mark (`js/nft/scene.js`), and the
+  owner's rules keep card art off the site's parts.
+
+Kept as built, waiting for the owner (nothing changed for these):
+
+- **A8, rarity mark.** Rules never come from rarity, and nothing on a site marks a card's rarity.
+- **D4, particles.** Particles set the pieces' arrival stagger. They draw no texture on a site's surfaces.
+- **D7, art as a page background.** The art reaches the page only behind one panel, as a 3D still. The grid stays the
+  site's one background.
+- **D9, dividers.** A divider draws only on parts the card's rules and Ark UI's kind table give one. It carries no data.
+- **E6, icons.** Action icons never change. Decorative icons keep the site's set.
+- **B9, the kit button.** "Run DEFXN" keeps the site's colour under every card.
+- **ELEMENT-ROLES-PLAN § 7, decision 1.** Only the hero takes a full frame (`DefxnSkinParts.FRAMED = ['HERO']`).
+  Section headers take corners.
+- **§ 7, decision 2.** Only the drawn categories take roles. The 3D categories (backdrop, aura, mark, signal,
+  particles) take none.
+- **§ 7, decision 3.** Button was built first, as a wear-only category (§ 6b). Badge, Menu, Line, Link and Grid
+  followed (§ 6c). The owner has not confirmed the order.

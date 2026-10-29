@@ -26,6 +26,16 @@
                  signs only as the public id it was shown. Showing a second
                  public id to the same site warns first: that site could then
                  link the two forever.
+     CARD        (J2, 2026-10-29) a site that asks with { card: true } may also
+                 get the wearer's card: the PVA object id and the card record
+                 line of the card this device keeps on defxn.com (DFXNWEAR1-O,
+                 js/nft/wear.js). Only after the person ticks "Show my card
+                 too" for that exact origin, only to that origin, and only when
+                 the kept card's record names the public id being shared (a
+                 card kept for another id would link the two). This page has no
+                 network (connect-src 'none'), so it checks nothing on the
+                 chain: the site verifies the card against its own chain read
+                 (js/nft/card-carry.js) and builds the wear itself.
 
    There is no "sign everything from this origin" switch and none should be
    added here -- that would turn the allowlist into the consent, which is
@@ -45,6 +55,8 @@
     the way queuedSignRequest is. */
   var sharedWith = Object.create(null); /* origin -> public id key: the person said yes to showing
     that public id to that origin, in this tab. Cleared when a different file is opened. */
+  var cardWith = Object.create(null); /* origin -> true (the person ticked "Show my card too") or false
+    (asked, and not ticked). Same life as sharedWith. */
   var shareQueue = []; /* identity requests from origins with no yes yet, asked one at a time */
   var shareAsking = null; /* the request the share prompt shows now */
   var everReceivedRequest = false; /* has ANY *.defxn.com page ever actually asked
@@ -77,6 +89,25 @@
   function publicFields(id) {
     return { publicKeyB64: hexToB64(id.key), displayName: id.name };
   }
+  /* The card this device keeps on defxn.com (DefxnWear.KEY), when it is a real card (DFXNWEAR1-O) whose record
+     names this public id: { object, record }, else null. Reads boxes by position (wear.js and skin-package.js are
+     the grammars; this page does not load them): the wear's head line, then the package's first line, whose R box is
+     the card record as hex. The site that receives it checks it again on the chain. */
+  function unhex(h) { var a = new Uint8Array(h.length / 2); for (var i = 0; i < a.length; i++) a[i] = parseInt(h.substr(i * 2, 2), 16); return new TextDecoder().decode(a); }
+  function keptCard(keyHex) {
+    var text = null;
+    try { text = window.localStorage.getItem('defxn.wear'); } catch (_) { return null; }
+    var lines = String(text || '').split('\n'), head = (lines[0] || '').split('-'), skin = (lines[1] || '').split('-');
+    if (head[0] !== 'DFXNWEAR1' || !/^O[0-9a-f]{64}$/.test(head[1] || '') || skin[0] !== 'DFXNSKIN1') return null;
+    var r = skin.filter(function (b) { return /^R(?:[0-9a-f]{2})+$/.test(b); })[0];
+    if (!r) return null;
+    var record;
+    try { record = unhex(r.slice(1)); } catch (_) { return null; }
+    var boxes = record.split('-'), object = head[1].slice(1);
+    if (boxes[0] !== 'DFXNCARD1' || boxes.indexOf('O' + object) !== 1 || boxes.indexOf('I' + String(keyHex || '').toLowerCase()) !== 2) return null;
+    return { object: object, record: record };
+  }
+  function wantsCard(event) { return Boolean(event.data && event.data.card === true); }
   /* The public id a site signs as: the one it was shown, else the current one. */
   function idFor(origin) { return idByKey(sharedWith[origin]) || (who && who.publicId) || null; }
   function reply(event, message) {
@@ -100,6 +131,11 @@
   function needsAsk(origin) {
     var shared = idByKey(sharedWith[origin]);
     return !shared || Boolean(who.publicId && who.publicId.key !== shared.key);
+  }
+  /* A site that knows the id, and now asks for the card it was never asked about, is asked once more. */
+  function needsAskFor(event) {
+    if (needsAsk(event.origin)) return true;
+    return wantsCard(event) && !(event.origin in cardWith) && Boolean(keptCard(sharedWith[event.origin]));
   }
 
   /* Reuses the exact dialog authorizePublish() in js/admin/admin.js builds,
@@ -209,7 +245,10 @@
 
   function shareIdentity(event) {
     var id = idByKey(sharedWith[event.origin]);
-    reply(event, { type: 'flux-broker:identity', identity: id ? publicFields(id) : null });
+    var message = { type: 'flux-broker:identity', identity: id ? publicFields(id) : null };
+    var card = id && wantsCard(event) && cardWith[event.origin] === true ? keptCard(id.key) : null;
+    if (card) message.card = card;   /* absent unless asked for, ticked, and kept for this id */
+    reply(event, message);
     $('brokerStatus').textContent = event.origin + ' knows you as ' + (id ? id.name : '') + ' now. Switch back to that tab to continue.';
   }
 
@@ -217,14 +256,14 @@
      The prompt names the exact origin, because a <label>.defxn.com page
      may be someone else's site. */
   function askToShare(event) {
-    if (!needsAsk(event.origin)) { shareIdentity(event); return; }
+    if (!needsAskFor(event)) { shareIdentity(event); return; }
     shareQueue.push(event);
     showNextShare();
   }
 
   function showNextShare() {
     if (shareAsking) return;
-    while (shareQueue.length && !needsAsk(shareQueue[0].origin)) shareIdentity(shareQueue.shift());
+    while (shareQueue.length && !needsAskFor(shareQueue[0])) shareIdentity(shareQueue.shift());
     var box = $('brokerShare');
     if (!shareQueue.length) { box.hidden = true; box.textContent = ''; return; }
     var event = shareAsking = shareQueue.shift();
@@ -245,16 +284,28 @@
     var list = h('div', { class: 'gate-actions', role: 'radiogroup', 'aria-labelledby': 'brokerShareQuestion' });
     ids.forEach(function (id) {
       var input = h('input', { type: 'radio', name: 'brokerShareId', value: id.key, checked: id.key === picked });
-      input.addEventListener('change', function () { picked = id.key; });
+      input.addEventListener('change', function () { picked = id.key; drawCard(); });
       list.appendChild(h('label', {}, input, document.createTextNode(' ' + id.name + (id.label ? ' · ' + id.label : ''))));
     });
     box.appendChild(list);
     box.appendChild(h('p', { class: 'hint', text: 'The site sees that id’s key and name. It cannot sign with them. Each signature asks you again.' }));
+    /* The card, only when the site asked for it and this device keeps a real card for the picked id. Unticked
+       until the person ticks it. */
+    var cardBox = h('div', { class: 'gate-actions' }), cardTick = null;
+    function drawCard() {
+      cardBox.textContent = ''; cardTick = null;
+      var card = wantsCard(event) && keptCard(picked);
+      if (!card) return;
+      cardTick = h('input', { type: 'checkbox', name: 'brokerShareCard' });
+      cardBox.appendChild(h('label', {}, cardTick, document.createTextNode(' Show my card too: PVA ' + card.object.slice(0, 6) + '…' + card.object.slice(-4) + ', as I wear it on defxn.com.')));
+    }
+    drawCard();
+    box.appendChild(cardBox);
     var deny = h('button', { type: 'button', class: 'btn', text: 'Don’t share' });
     var allow = h('button', { type: 'button', class: 'btn primary', text: 'Share with ' + event.origin });
     box.appendChild(h('div', { class: 'gate-actions' }, deny, allow));
     deny.addEventListener('click', function () { answerShare(null); });
-    allow.addEventListener('click', function () { answerShare(picked); });
+    allow.addEventListener('click', function () { answerShare(picked, cardTick ? cardTick.checked : null); });
     box.hidden = false;
     allow.focus();
   }
@@ -275,9 +326,10 @@
     back.focus();
   }
 
-  function answerShare(key) {
+  function answerShare(key, withCard) {
     var event = shareAsking;
     if (!event) return;
+    if (key && withCard !== null && withCard !== undefined) cardWith[event.origin] = withCard === true;
     if (!who) { shareAsking = null; queuedIdentityRequests.push(event); showNextShare(); return; }
     var before = idByKey(sharedWith[event.origin]);
     var after = key && idByKey(key);
@@ -330,7 +382,7 @@
     onChange: function (identity) {
       /* A new file (a new identity object) forgets every share. Switching public id in the same file does not:
          a site keeps the id it was shown, and askToShare warns before it sees another. */
-      if (!identity || identity !== who) sharedWith = Object.create(null);
+      if (!identity || identity !== who) { sharedWith = Object.create(null); cardWith = Object.create(null); }
       who = identity || null;
       renderStatus();
       if (who) {

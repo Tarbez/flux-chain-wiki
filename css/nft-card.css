@@ -205,6 +205,15 @@
 .defxn-user__bare{padding:.375rem .75rem;border-radius:999px;border:1px solid hsl(var(--border-default,0 0% 100% / .16));font:500 .8125rem/1.2 var(--font-sans,system-ui,sans-serif)}
 .defxn-user__bare[hidden]{display:none}
 @media (max-width:640px){.defxn-user .defxn-seal__text{display:none}}
+/* the card's logo art beside its name (WEAR-AUDIT D5), and its pieces as links to the shop (F9). Type on the scale. */
+.defxn-user__card{display:flex;align-items:center;gap:.75rem}
+.defxn-user__art{flex:none;width:47px;height:47px;border-radius:6px;overflow:hidden;background:hsl(var(--nested,0 0% 10%))}
+.defxn-user__art canvas{display:block;width:100%;height:100%}
+.defxn-user__pieces summary{cursor:pointer;color:hsl(var(--text-muted,0 0% 60%));font:600 var(--fs-tertiary,11px)/1.4 var(--font-mono,ui-monospace,monospace);letter-spacing:.08em;text-transform:uppercase}
+.defxn-user__pieces ul{display:grid;gap:.125rem;margin:.375rem 0 0;padding:0;list-style:none;max-height:12rem;overflow:auto}
+.defxn-user__pieces a{display:flex;justify-content:space-between;gap:.75rem;padding:.25rem .375rem;border-radius:4px;color:hsl(var(--text-strong,0 0% 96%));text-decoration:none;font-size:var(--fs-tertiary,11px)}
+.defxn-user__pieces a:hover,.defxn-user__pieces a:focus-visible{background:hsl(var(--surface,0 0% 6%))}
+.defxn-user__pieces a span{color:hsl(var(--text-muted,0 0% 60%));font-family:var(--font-mono,ui-monospace,monospace)}
 
 /* CARD COMPONENTS (js/nft/card-components.js): new elements made from the visitor's own card. Words are the site's
    faces at 12 px or more. The drawings sit behind or beside the words and are never in their way. */

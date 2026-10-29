@@ -10,5 +10,9 @@
                    lowercase hex: the only key whose name claims count. Empty means no
                    key is pinned yet, and the shell says so instead of rendering anything.
    Set both at deploy time; this file is the one place they live. */
-export const NAME_NODES = ["wss://nodes.defxn.com/ws"];
-export const GENESIS_PUB_HEX = "";
+/* Devnet, as deployed 2026-10-28 (flux/devnet-deploy-2026-10-23/DEPLOY.md, "Fresh devnet on the owner's genesis
+   key"): CHAIN_SERVER_GENESIS_KEY in node.env on bk2 and mk2, derived from the owner's FXN ID (fxn-id genesis-key).
+   nodes.defxn.com runs the old chain-server with no genesis key, so names verify only on devnet until mainnet
+   is founded. Public key only. */
+export const NAME_NODES = ["wss://devnet.defxn.com/ws"];
+export const GENESIS_PUB_HEX = "242a1c15d39cbc0b1cea654b069f06f641be7c87761d895845e0013921ce84a8";

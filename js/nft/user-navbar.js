@@ -16,11 +16,15 @@
    DefxnUserNav.mount(host, root, opts) -> { remove() }
      host   the element the site gives (header.js's .header-user-zone); never found by this file
      root   the element the skin goes on (the same root the site gives DefxnWear)
-     opts   { nav, name (from the names system), check (resolveName, bound by the site),
+     opts   { nav, name (from the names system), check (resolveName, bound by the site), reports (the site's scam
+              report read, DefxnSiteCheck's reports(name); absent until the site has the shared verifier),
               popover(spec) -> a controller (the header's lazyHeaderPopover; spec = { wrap, trigger, fallback, label,
-              align, id, content }), samples: [{ number, label, wear: () -> Promise of a wear }] (review only),
+              align, id, content }), samples: [{ number, label, wear: () -> Promise of a wear }] (review only; each row reads "Try sample <label>"),
               cards: () -> Promise of [{ label, wear: () -> Promise }] (the wearer's own PVA and skins, read from the
-              chain by the site; each wear() tries that card on) }
+              chain by the site; each wear() tries that card on),
+              pieces: () -> Promise of [{ layer, name, href }] (the card's pieces, each a link to its shop item; asked
+              when the list opens: WEAR-AUDIT F9), picture: (host) -> Promise of { remove() } (draws the card's logo art
+              into host; asked once the menu shows: D5) }
    Needs js/nft/wear.js and js/nft/site-check.js. */
 (function (root) {
   'use strict';
@@ -65,26 +69,66 @@
       var who = document.createElement('p'); who.className = 'defxn-user__who';
       who.textContent = c ? c.title + (c.name ? ', ' + c.name : '') + (c.palette ? ' · ' + c.palette : '') + (c.held ? '. This device keeps it.' : '. A reload drops it.')
         : 'No card is on. Try one first. Nothing is kept until you say yes.';
-      rows.appendChild(who);
-      check = C.row(rows, { name: opts.name, check: opts.check });
+      if (art) { art.remove(); art = null; }
+      if (c && typeof opts.picture === 'function') {
+        // the card's logo art beside its name, in the wearer's own zone; drawn only once the menu shows (it loads the 3D engine)
+        var head = document.createElement('div'), face = document.createElement('span');
+        head.className = 'defxn-user__card'; face.className = 'defxn-user__art'; face.setAttribute('aria-hidden', 'true');
+        head.appendChild(face); head.appendChild(who); rows.appendChild(head);
+        art = whenShown(face, function () { return opts.picture(face); });
+      } else rows.appendChild(who);
+      check = C.row(rows, { name: opts.name, check: opts.check, reports: opts.reports });
       var acts = document.createElement('div'); acts.className = 'defxn-user__acts';
       if (c && !c.held) acts.appendChild(act('Wear it', function () { return W.offer(rootEl); }, true));   // the menu's one main action
       if (c) acts.appendChild(c.held ? act('Take off', function () { W.takeOff(rootEl); }) : act('Stop trying', function () { return W.stopTrying(rootEl); }));
       (opts.samples || []).forEach(function (s) {
         if (c && String(c.number) === String(Number(s.number))) return;
-        acts.appendChild(act('Try ' + s.label, function () { return s.wear().then(function (w) { return W.tryOn(rootEl, w); }); }));
+        var sb = acts.appendChild(act('Try sample ' + s.label, function () { return s.wear().then(function (w) { return W.tryOn(rootEl, w); }); }));
+        sb.setAttribute('data-defxn-sample', '');
       });
       rows.appendChild(acts);
+      if (c && typeof opts.pieces === 'function') rows.appendChild(piecesList());
       // the wearer's own skins arrive from the chain after the menu draws; a later redraw drops a late answer
       if (typeof opts.cards === 'function') {
         var drawn = ++drawCount;
         Promise.resolve().then(opts.cards).then(function (list) {
           if (drawn !== drawCount) return;
-          (list || []).forEach(function (card) { acts.appendChild(act('Try ' + card.label, card.wear)); });
+          // real cards go before the samples: a sample is the fallback, and its row says so ("Try sample ...")
+          var first = acts.querySelector('[data-defxn-sample]');
+          (list || []).forEach(function (card) { acts.insertBefore(act('Try ' + card.label, card.wear), first); });
         }, function (e) { console.info('[defxn-user] Your skins did not load: ' + e.message); });
       }
     }
-    var drawCount = 0;
+    var drawCount = 0, art = null;
+    /* run(host) once host is on screen (the menu opened); remove() stops the wait or takes the drawing away */
+    function whenShown(host, run) {
+      var made = null, gone = false, io = null;
+      function go() { if (io) io.disconnect(); io = null; Promise.resolve().then(run).then(function (m) { if (gone && m && m.remove) m.remove(); else made = m; }, function (e) { console.info('[defxn-user] The card\'s art did not draw: ' + e.message); }); }
+      if (typeof IntersectionObserver === 'function') { io = new IntersectionObserver(function (es) { if (es.some(function (x) { return x.isIntersecting; })) go(); }); io.observe(host); } else go();
+      return { remove: function () { gone = true; if (io) io.disconnect(); if (made && made.remove) made.remove(); } };
+    }
+    /* the card's pieces: a closed list that asks for them on first open, each row a link to that piece in the shop */
+    function piecesList() {
+      var box = document.createElement('details'), sum = document.createElement('summary'), list = document.createElement('ul'), asked = false;
+      box.className = 'defxn-user__pieces'; sum.textContent = 'Your card\u2019s pieces in the shop';
+      box.appendChild(sum); box.appendChild(list);
+      box.addEventListener('toggle', function () {
+        if (!box.open || asked) return;
+        asked = true;
+        Promise.resolve().then(opts.pieces).then(function (items) {
+          (items || []).forEach(function (p) {
+            var li = document.createElement('li'), a = document.createElement('a'), kind = document.createElement('span');
+            a.href = p.href; kind.textContent = p.layer; a.appendChild(kind); a.appendChild(document.createTextNode(p.name));
+            li.appendChild(a); list.appendChild(li);
+          });
+          if (!items || !items.length) { var none = document.createElement('li'); none.textContent = 'This card names no pieces to list.'; list.appendChild(none); }
+        }, function (e) {
+          asked = false;
+          var li = document.createElement('li'); li.textContent = 'The pieces did not load: ' + e.message + '. Close the list and open it again to retry.'; list.textContent = ''; list.appendChild(li);
+        });
+      });
+      return box;
+    }
     var pop = null;
     if (typeof opts.popover === 'function') pop = opts.popover({ wrap: wrap, trigger: trigger, fallback: panel, label: 'Your card', align: 'end', id: id, content: [rows] });
     else {
@@ -96,7 +140,7 @@
     return {
       remove: function () {
         document.removeEventListener('defxn:wear', draw);
-        seal.remove(); if (check) check.remove();
+        seal.remove(); if (check) check.remove(); if (art) art.remove();
         if (pop && pop.want) pop.want(false);
         if (opts.nav) opts.nav.removeAttribute('data-defxn-user');
         var top = wrap.isConnected ? wrap : host.querySelector('.defxn-user');
