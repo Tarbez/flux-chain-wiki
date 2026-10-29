@@ -120,12 +120,18 @@ export function appReleaseProblems(value) {
 
 /** Resolves true only for `ownerPublicKey`'s valid Ed25519 signature over the signing text. Await it. */
 export async function appReleaseSignatureVerifies(value) {
-  const key = base64Bytes(value?.ownerPublicKey || '');
-  const signature = base64Bytes(value?.signature || '');
+  return ed25519TextVerifies(value?.ownerPublicKey, value?.signature, appReleaseSigningText(value));
+}
+
+/** Resolves true only when `signatureB64` is `keyB64`'s Ed25519 signature over `text` as UTF-8. Native WebCrypto.
+ *  Site releases (site-release-core.js) verify through this one function too. */
+export async function ed25519TextVerifies(keyB64, signatureB64, text) {
+  const key = base64Bytes(keyB64 || '');
+  const signature = base64Bytes(signatureB64 || '');
   if (key?.length !== 32 || signature?.length !== 64) return false;
   try {
     const publicKey = await crypto.subtle.importKey('raw', key, { name: 'Ed25519' }, false, ['verify']);
-    return await crypto.subtle.verify({ name: 'Ed25519' }, publicKey, signature, new TextEncoder().encode(appReleaseSigningText(value)));
+    return await crypto.subtle.verify({ name: 'Ed25519' }, publicKey, signature, new TextEncoder().encode(text));
   } catch {
     return false;
   }

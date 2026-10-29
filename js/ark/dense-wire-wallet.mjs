@@ -40,6 +40,7 @@ import { authKitSigner, base64ToHex } from "../dense-wire/flx-identity-bridge.mj
 import { BASE_CHAIN_ID } from "../dense-wire/flx-dao-builders.mjs";
 import { nativeBalance, nativeHistory, buildNativeTransfer, parseNativeSendReply } from "../dense-wire/flx-native-transfer.mjs";
 import { sha256Hex } from "../dense-wire/flx-crypto.mjs";
+import { parseDecimalsReply, pow10 } from "../dense-wire/flx-amount.mjs";
 
 const WIRE_TIMEOUT_MS = 15000;
 
@@ -199,6 +200,9 @@ export class WalletWire {
   /** -> the raw `NATIVE_SEND_OK`/`NATIVE_SEND_ERR` reply line, parsed by
    *  the caller via `parseNativeSendReply`. */
   sendLine(line) { return this._call((c) => c.send(line)); }
+  /** -> the parsed reply to `<tag> TAB <text>` (`{kind:'ok', cid}` or the node's refusal). With `chainHead`, this makes
+   *  a WalletWire the `wire` flx-signing-guard.mjs's chainPosition / submitAtPosition take (the safe spend on /account). */
+  submit(tag, text) { return this._call((c) => c.submit(tag, text)); }
   /** -> `{kind:'found', text} | {kind:'miss'} | {kind:'error', raw}` --
    *  read a content-addressed blob (e.g. a published FXN metadata
    *  document) by CID. Passthrough so `flx-token-meta.mjs::loadTokenMeta`
@@ -212,17 +216,26 @@ export class WalletWire {
 
 /** FXN's sale price in one currency, as the chain gives it (`FXN_SALE <currency>`, dense-wire
  *  docs/design/fxn-public-sale.md): its own currency (EUR) from the genesis table, any other through the
- *  DAO's price signers. -> `{currency, minor, fxn, basis}` (`minor` minor units buy `fxn` FXN) or
- *  `{absent}` naming why. A price the chain does not give is never worked out here. */
+ *  DAO's price signers. -> `{currency, minor, fxn, basis}` (`minor` minor units buy `fxn` whole FXN) or
+ *  `{absent}` naming why. A price the chain does not give is never worked out here. The node prices base units
+ *  (90 cents buy 10^9 base units at 9 decimals), so the line is scaled by the decimals the node gives (`DECIMALS`). */
 export async function fxnSalePrice(wire, currency) {
   const reply = String(await wire.sendLine(`FXN_SALE ${currency}`));
   const line = reply.split("\n").find((l) => l.startsWith("SALE_PRICE"));
   if (!line) return { absent: `the node gave no sale price: ${reply.split("\n")[0].slice(0, 80)}` };
   const f = line.split("\t");
   if (f[0] === "SALE_PRICE_NONE") return { absent: f.slice(2).join(" ") || `no ${currency} price` };
-  const minor = Number(f[2]), fxn = Number(f[3]);
-  if (!(minor > 0 && fxn > 0)) return { absent: "the price line did not parse" };
-  return { currency: f[1], minor, fxn, basis: f[4] };
+  if (!/^[1-9][0-9]*$/.test(f[2] || "") || !/^[1-9][0-9]*$/.test(f[3] || "")) return { absent: "the price line did not parse" };
+  let decimals;
+  try {
+    const got = parseDecimalsReply(await wire.sendLine(`DECIMALS\t${BASE_CHAIN_ID}`));
+    if (got.refused) return { absent: `the node gave no FXN decimals: ${got.refused.failure}` };
+    decimals = got.decimals;
+  } catch (error) {
+    return { absent: `the node gave no FXN decimals (${error && error.message ? error.message : "no answer"})` };
+  }
+  // minor units per whole FXN = minor x 10^decimals / fxn base units, kept as the pair so nothing is rounded here
+  return { currency: f[1], minor: Number(BigInt(f[2]) * pow10(decimals)), fxn: Number(f[3]), basis: f[4] };
 }
 
 /* ---- keys ----------------------------------------------------------- */
@@ -282,25 +295,24 @@ function approvedOnly(signer, approved) {
   };
 }
 
-/** Full scoped-authorization review, then the real signature. Every signing surface on this site goes through it (an FXN
- *  send here, a skin mint in js/ark/chain-cards.mjs): `action`, `scope`, `authority`, `configuration` and `denies`
- *  name what this one signature authorizes. Refuses
- *  outright if that modal is not loaded: per the workspace law, every
- *  signing surface shows the full modal, so a missing modal means no
- *  signature, never a silent fallback. */
-export async function reviewAndSign({ who, signer, wireUrl, title, description, claims, manifest, facts, run,
+/** The full scoped-authorization review of `unsigned` (the exact text, or the hex of the exact bytes, about to be
+ *  signed), then `run()` once the holder approves. Every signing surface on this site goes through it: an FXN send
+ *  here, a skin mint in js/ark/chain-cards.mjs, a safe approval and a safe spend in js/ark/fxn-holdings.mjs.
+ *  `action`, `scope`, `authority`, `configuration` and `denies` name what this one signature authorizes. Refuses
+ *  outright if that modal is not loaded: per the workspace law, every signing surface shows the full modal, so a
+ *  missing modal means no signature, never a silent fallback. */
+export async function reviewThen({ who, pubHex, wireUrl, title, description, claims, manifest, facts, unsigned, run,
   action = "native.transfer", scope = "fxn.transfer", authority = "(none: a holder-signed FXN transfer, not a DAO action)",
   configuration = "dense-wire native-token grammar · KNXFER1", denies = "scope does not authorize any other amount, recipient or chain" }) {
   const dialog = window.ArkUI && window.ArkUI.authorizationDialog;
   if (!dialog || !window.ArkAuthorizationView) {
     throw new Error("The signing review did not load (js/ark/authorization-dialog.js). Nothing was signed. Reload the page and try again.");
   }
-  const unsigned = await bytesToSign(signer.pubHex, run);
   const digest = await sha256Hex(unsigned);
   const view = window.ArkAuthorizationView.scopedAuthorizationView({
     title,
     description: description + " Review exactly what this signs before approving. Nothing is signed or sent until you approve.",
-    requester: (who.displayName ? who.displayName + " · " : "") + signer.pubHex,
+    requester: (who.displayName ? who.displayName + " · " : "") + pubHex,
     network: "dense-wire · " + wireUrl,
     authority,
     configuration,
@@ -318,7 +330,14 @@ export async function reviewAndSign({ who, signer, wireUrl, title, description, 
   });
   const approved = await dialog.confirm(view, { action, capability: scope });
   if (!approved) throw new Error("Signing cancelled. Nothing was signed or sent.");
-  return run(approvedOnly(signer, unsigned));
+  return run();
+}
+
+/** `reviewThen` for a builder that signs text itself: the bytes shown are the builder's own (`bytesToSign`), and the
+ *  signature after approval must cover exactly them (`approvedOnly`). */
+export async function reviewAndSign({ signer, run, ...review }) {
+  const unsigned = await bytesToSign(signer.pubHex, run);
+  return reviewThen({ ...review, pubHex: signer.pubHex, unsigned, run: () => run(approvedOnly(signer, unsigned)) });
 }
 
 /* ---- send ------------------------------------------------------------- */
@@ -334,25 +353,27 @@ const SEND_FAILURE_MEANING = {
   AmountTooLarge: "that amount is too large for a signed balance on this ledger.",
 };
 
-export function describeSendReply(reply) {
-  if (reply.kind === "ok") return `Sent. Waiting for the chain's lead nodes to confirm it. Your balance is now ${reply.senderBalance} FXN.`;
+/** `show` prints base units with their unit (js/ark/fxn-holdings.mjs `fxnText`); without it, base units are named as such. */
+export function describeSendReply(reply, show = (n) => `${n} base units`) {
+  if (reply.kind === "ok") return `Sent. Waiting for the chain's lead nodes to confirm it. Your balance is now ${show(reply.senderBalance)}.`;
   if (reply.kind === "refused") {
     return `${reply.failure}: ${SEND_FAILURE_MEANING[reply.failure] || "a reason this page does not recognise."} (${reply.remedy})`;
   }
   return `Unexpected reply from the chain-server: ${reply.raw}`;
 }
 
-/** Send `amount` FXN to `recipientKey`, reviewed and signed by `who`,
+/** Send `amount` base units (a BigInt: the page reads the typed FXN with js/ark/fxn-holdings.mjs `parseFxn`, at the
+ *  node's decimals) to `recipientKey`, shown in the review by `show` (`fxnText`), reviewed and signed by `who`,
  *  submitted over `wire`. Resolves to the parsed NATIVE_SEND reply
  *  (`{kind:'ok', cid, senderBalance}` on success) -- never throws for an
  *  ordinary refusal, only for a real failure to even ask (bad key, no
  *  chain head, cancelled review, network error). */
-export async function sendFxn({ who, wire, amount, recipient }) {
-  const signer = signerFor(who);
+export async function sendFxn({ who, wire, amount, recipient, signer = signerFor(who), show = (n) => `${n} base units` }) {
   const toKeyHex = normalizeKey(recipient);
-  if (toKeyHex === signer.pubHex) throw new Error("The recipient is the same key you're signed in as. Nothing would move.");
-  const units = BigInt(String(amount).trim());
-  if (!(units > 0n)) throw new Error("Enter a whole, positive amount of FXN to send.");
+  if (toKeyHex === signer.pubHex) throw new Error("The recipient is the key you send from. Nothing would move. Pick another recipient, or send from another of your keys.");
+  if (typeof amount !== "bigint") throw new Error("The amount was not read as base units. Missing: the typed amount at FXN's decimals. To fix: reload the page and enter the amount again.");
+  const units = amount;
+  if (!(units > 0n)) throw new Error("The amount is 0. Missing: an amount of FXN above 0. To fix: enter the amount again.");
   // Owner, 2026-10-25: a send between two of your own public ids (or one and your root) is public forever, and it
   // shows anyone that both are you. The review says so first. `linkRisk` reads the opened file only; it sends nothing.
   const risk = who.linkRisk ? await who.linkRisk(signer.pubHex, toKeyHex) : null;
@@ -370,11 +391,11 @@ export async function sendFxn({ who, wire, amount, recipient }) {
   const now = Date.now();
   const signed = await reviewAndSign({
     who, signer, wireUrl: wire.url,
-    title: risk ? `Warning: send ${units} FXN to your own ${risk.to}` : `Send ${units} FXN to ${short(toKeyHex)}`,
+    title: risk ? `Warning: send ${show(units)} to your own ${risk.to}` : `Send ${show(units)} to ${short(toKeyHex)}`,
     description: (warning ? warning + " " : "") + "This is the whole action: your signature alone moves the value, the recipient does nothing.",
-    claims: [`evidence recipient ${toKeyHex}`, `evidence amount ${units}FXN`, `evidence chain ${BASE_CHAIN_ID}`],
-    manifest: { schema: "dense-wire.native-transfer/1", sender: signer.pubHex, recipient: toKeyHex, amount: units.toString() + "FXN", chainId: BASE_CHAIN_ID, at: now },
-    facts: (warning ? [{ label: "Links your ids", value: warning }] : []).concat([{ label: "Amount", value: `${units} FXN` }, { label: "Recipient", value: toKeyHex }]),
+    claims: [`evidence recipient ${toKeyHex}`, `evidence amount ${units} base units`, `evidence chain ${BASE_CHAIN_ID}`],
+    manifest: { schema: "dense-wire.native-transfer/1", sender: signer.pubHex, recipient: toKeyHex, amount: units.toString(), unit: "base units", chainId: BASE_CHAIN_ID, at: now },
+    facts: (warning ? [{ label: "Links your ids", value: warning }] : []).concat([{ label: "Amount", value: `${show(units)} (${units} base units)` }, { label: "Recipient", value: toKeyHex }]),
     run: (s) => buildNativeTransfer(s, { pos, prev, toKeyHex, chainId: BASE_CHAIN_ID, amount: units, now }).then((r) => r.text),
   });
   const reply = parseNativeSendReply(await wire.sendLine(`NATIVE_SEND\t${signed}`));

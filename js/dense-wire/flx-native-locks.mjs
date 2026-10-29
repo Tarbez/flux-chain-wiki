@@ -25,6 +25,7 @@
 //
 // Exports only; no top-level work. Native Web Crypto only.
 
+import { MAX_AMOUNT } from "./flx-amount.mjs";
 import { resolverRecordBody, isChainIdShape } from "./flx-builders.mjs";
 import { sha256Hex } from "./flx-crypto.mjs";
 import { utf8OfHex } from "./flx-dumb-parser.mjs";
@@ -50,13 +51,16 @@ export const PURPOSE = Object.freeze({
   POOL: "pool",
   BOUNTY: "bounty",
   CREATOR_BOND: "creator-bond",
+  RENT: "rent",
 });
 /** How long a buy's lock outlives its intent. The node needs the lock's deadline strictly after the intent's
  *  (`native_swap::CODE_LOCK_ENDS_TOO_SOON`); past that, a longer margin only delays the refund of a lock no fill spent. */
 export const BUY_LOCK_MARGIN_SECS = 60;
 
 const KEY64 = /^[0-9a-f]{64}$/;
-const I64_MAX = 9223372036854775807n;
+/** The largest amount one lock may hold: the ledger's largest balance, i128::MAX base units (2026-10-29: the ledger
+ *  is 128-bit, so a bridged 18-decimal coin fits; it was i64::MAX). */
+const I64_MAX = MAX_AMOUNT;
 
 function refuse(failure, missing, remedy) {
   return Object.assign(new Error(`${failure}. Missing: ${missing}. To fix: ${remedy}`), { failure, missing, remedy });
@@ -67,7 +71,7 @@ function wholeAmount(value, what) {
   try {
     n = BigInt(value);
   } catch {
-    throw refuse(`${what} ${JSON.stringify(String(value))} is not a whole number`, `${what} as a whole number of FXN above zero`, "pass a positive integer or BigInt");
+    throw refuse(`${what} ${JSON.stringify(String(value))} is not a whole number`, `${what} as a whole number of base units above zero`, "pass a positive integer or BigInt");
   }
   if (n <= 0n || n > I64_MAX) throw refuse(`${what} ${n} is out of range`, `${what} from 1 to ${I64_MAX}`, "lock a positive amount");
   return n;
@@ -122,7 +126,11 @@ export async function buildNativeRefund(signer, { pos, prev, lock, amount, nowSe
 }
 
 /** What a buy's lock must say (`native_swap::screen_buy`): base chain, purpose `buy`, the launch's pool escrow, at
- *  least `amountIn`, and a deadline strictly after the intent's. Feed the result to `buildNativeLock`. */
+ *  least `amountIn`, and a deadline strictly after the intent's. Feed the result to `buildNativeLock`.
+ *
+ *  Retired for new buys (signed resolution, 2026-10-28): a node refuses a new lock-funded buy by name
+ *  (`LockFundedBuyRetired`). A buy is one record now: `buildNativeBuyIntentWithSigner` in flx-builders.mjs, whose intent
+ *  names its own debit. Kept so pages can still read and refund locks made for buys before. */
 export async function buyLockTerms({ chainId, amountIn, intentDeadline, marginSecs = BUY_LOCK_MARGIN_SECS }) {
   if (!isChainIdShape(chainId)) throw refuse(`the launch ${JSON.stringify(chainId)} is not a chain id`, "the launched chain's id", "pick a launched token");
   if (!Number.isSafeInteger(intentDeadline)) throw refuse("the intent has no deadline", "the deadline the intent signs, in seconds", "set the intent's deadline first");
@@ -135,6 +143,13 @@ export async function buyLockTerms({ chainId, amountIn, intentDeadline, marginSe
 export function nameLockTerms({ sellerKey, price, deadline }) {
   if (!KEY64.test(String(sellerKey))) throw refuse("the seller is not a key", "the seller's 64-hex key (the name's owner, DOM_WHO)", "read the owner with DOM_WHO");
   return { chain: BASE_CHAIN_ID, amount: wholeAmount(price, "the price"), beneficiary: sellerKey, deadline, purpose: PURPOSE.NAME };
+}
+
+/** A name's rent lock (`native_locks::PURPOSE_RENT`): the holder locks exactly the rent for the DAO's ops safe
+ *  (`DOM_RENT_QUOTE` names it); only the KDOMRENT1 that names the lock pays it out. */
+export function rentLockTerms({ opsSafe, amount, deadline }) {
+  if (!KEY64.test(String(opsSafe))) throw refuse("the ops safe is not an address", "the ops safe's 64-hex address (DOM_RENT_QUOTE)", "read it with DOM_RENT_QUOTE");
+  return { chain: BASE_CHAIN_ID, amount: wholeAmount(amount, "the rent"), beneficiary: opsSafe, deadline, purpose: PURPOSE.RENT };
 }
 
 /** `native_locks::read` for a lock or a refund: what the signed text says, or null when it is not one. Checks no

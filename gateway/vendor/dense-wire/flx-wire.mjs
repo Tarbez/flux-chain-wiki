@@ -1405,15 +1405,24 @@ export class WireClient {
     return this.submit("DOMAIN_PURCHASE", body);
   }
 
+  /** Submit a `KDOMRENT1` built by `buildDomainRent` (owner rulings 2026-10-29). Lock the rent first (flx-native-locks
+   *  `rentLockTerms`) and wait until the lock applies. A rent the node refuses before admission comes back as
+   *  `{ kind: "err" }` naming the failure, what is missing and the remedy; a rent admitted but not applied replies
+   *  `DOMAIN_REFUSED`. */
+  domainRent(body) {
+    return this.submit("DOMAIN_RENT", body);
+  }
+
   // --- Domain protocol: reads. Mirrors `chain_server.rs::handle_domain_command`'s
   // doc comment exactly -- see that comment before changing any of these. ---
 
   /** `DOM_WHO<TAB><fqdn>` — current owner of a claimed name, as this node
    *  asserts it (use `domProof` + `verifyDomainProof` to check it yourself).
-   *    -> DOM_OWNER<TAB><fqdn><TAB><owner pubkey hex><TAB><head entry cid><TAB><claim|transfer|purchase>
-   *    -> DOM_NONE<TAB><fqdn> */
+   *    -> DOM_OWNER<TAB><fqdn><TAB><owner pubkey hex><TAB><head entry cid><TAB><claim|transfer|purchase><TAB><free|paid|grace><TAB><paid until|->
+   *    -> DOM_NONE<TAB><fqdn>[<TAB>lapsed<TAB><grace ended at> | <TAB>wrong-ending<TAB><ending this network serves>]
+   *  `state`/`paidUntil` are null from a node before name rent (owner rulings 2026-10-29). */
   async domWho(fqdn) {
-    const reply = await this._send(`DOM_WHO\t${fqdn}`);
+    const reply = (await this._send(`DOM_WHO\t${fqdn}`)).replace(/\n$/, "");
     const parts = reply.split("\t");
     if (parts[0] === "DOM_OWNER") {
       return {
@@ -1422,9 +1431,25 @@ export class WireClient {
         ownerPubHex: parts[2],
         entryCid: parts[3],
         source: parts[4],
+        state: parts[5] ?? null,
+        paidUntil: parts[6] && parts[6] !== "-" ? Number(parts[6]) : null,
       };
     }
-    if (parts[0] === "DOM_NONE") return { kind: "none", fqdn: parts[1] };
+    if (parts[0] === "DOM_NONE") return { kind: "none", fqdn: parts[1], why: parts[2] ?? null, detail: parts[3] ?? null };
+    return { kind: "error", raw: reply };
+  }
+
+  /** `DOM_RENT_QUOTE<TAB><years>` — what `years` (1 to 10) of a name cost now, and who is paid.
+   *    -> DOM_RENT_QUOTE<TAB><years><TAB><fxn><TAB><currency><TAB><minor>/<fxn><TAB><pool|lastpool:<at>|sale><TAB><ops safe><TAB><ending>
+   *    -> DOM_RENT_NONE<TAB><failure><TAB><missing><TAB><remedy>   (a test network, or no ops safe yet) */
+  async domRentQuote(years) {
+    const reply = (await this._send(`DOM_RENT_QUOTE\t${years}`)).replace(/\n$/, "");
+    const p = reply.split("\t");
+    if (p[0] === "DOM_RENT_QUOTE") {
+      const [minor, fxn] = p[4].split("/").map(Number);
+      return { kind: "quote", years: Number(p[1]), fxn: Number(p[2]), currency: p[3], price: { minor, fxn }, source: p[5], payee: p[6], ending: p[7] };
+    }
+    if (p[0] === "DOM_RENT_NONE") return { kind: "none", failure: p[1], missing: p[2], remedy: p[3] };
     return { kind: "error", raw: reply };
   }
 

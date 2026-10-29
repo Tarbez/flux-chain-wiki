@@ -6,11 +6,12 @@
 // What a node sends (`DOM_PROOF<TAB><name>`, see chain_server.rs
 // `handle_domain_command`):
 //
-//   DOM_PROOF_LINE<TAB><signed entry>     the claim, then every transfer and
-//   ...                                   purchase to the current owner,
-//   DOM_PROOF_LINE<TAB><signed entry>     oldest first, then the current
-//   DOM_PROOF_END<TAB><name><TAB><count>  record (KDOMREC2) if there is one
-//   (or DOM_NONE<TAB><name>)
+//   DOM_PROOF_LINE<TAB><signed entry>     the current term's claim, then every
+//   ...                                   transfer and purchase to the current
+//   DOM_PROOF_LINE<TAB><signed entry>     owner, oldest first, each followed by
+//   DOM_PROOF_END<TAB><name><TAB><count>  the rents (KDOMRENT1) paid under it,
+//                                         then the current record (KDOMREC2)
+//   (or DOM_NONE<TAB><name>[<TAB>why<TAB>detail])
 //
 // What this checks, entry by entry, without trusting the node that answered:
 //   - every entry parses as a LEDGERENTRY, its H is its own G, it carries
@@ -25,8 +26,19 @@
 //     previous entry established and names that entry's CID in C[1]; for
 //     v2 and purchase, the new owner's own signature over the dual-sig
 //     sub-message verifies (and a purchase carries a price);
+//   - each KDOMRENT1 is signed by the owner then and names the ownership
+//     entry then in C[1];
 //   - a trailing KDOMREC2 is signed by the current owner and names the
-//     current ownership entry as its link.
+//     current ownership entry as its link;
+//   - with `network` pinned (owner rulings 2026-10-29): the name is under the
+//     one ending that network serves (.fxn on fxn-mainnet, .fxndev on every
+//     test network), and on the mainnet the term is recomputed from the
+//     entries: paid until the claim's M plus every rent's years, each rent
+//     inside the grace and at most ten years ahead, no move after the grace.
+//     A name in its grace or lapsed at `nowSec` is refused (`InGrace`,
+//     `Lapsed`) with its `term`, so a consumer that only checks `verified`
+//     never renders it. A test network's names are free: a rent there is
+//     refused.
 //
 // What it cannot check, and says so in `notChecked` (never reported as
 // checked):
@@ -35,7 +47,11 @@
 //     latest;
 //   - a purchase's payment: the custody credit its C[6] names is custody
 //     state, not in the proof; the node that admitted it verified and
-//     consumed it.
+//     consumed it;
+//   - a rent's payment: the lock its C[4] names and the price at its M are
+//     node state; the node that admitted it checked both;
+//   - without `network`, the ending and the term are not checked, and
+//     `notChecked` says so. Pin it.
 
 import { admit, signaturePrefix, utf8OfHex, hexOfUtf8 } from "./flx-dumb-parser.mjs";
 import { sha256Hex, verifyHex } from "./flx-crypto.mjs";
@@ -43,12 +59,19 @@ import {
   DOMAIN_KIND_BUY,
   DOMAIN_KIND_CLAIM,
   DOMAIN_KIND_RECORD_UPDATE,
+  DOMAIN_KIND_RENT,
   DOMAIN_KIND_XFER,
   DOMAIN_KIND_XFER2,
+  GRACE_SECS,
+  NETWORK_MAIN,
   decodePriceField,
   dualSigSubmessage,
+  extendTerm,
   isClaimableDomainName,
+  nameEnding,
   readRecordEntry,
+  readRentEntry,
+  termState,
 } from "./flx-builders.mjs";
 
 const HEX64 = /^[0-9a-f]{64}$/;
@@ -76,19 +99,29 @@ export function parseDomainProofReply(reply) {
 
 /** Verify a name's ownership proof against a pinned genesis key.
  *
- *  Input: `{ fqdn, entries, genesisPubHex }` — `entries` as
- *  `parseDomainProofReply` returns them (or `WireClient.domProof`).
+ *  Input: `{ fqdn, entries, genesisPubHex, network?, nowSec? }` — `entries` as
+ *  `parseDomainProofReply` returns them (or `WireClient.domProof`); `network`
+ *  is the network id the consumer trusts (`fxn-mainnet`, `fxn-devnet`, ...),
+ *  `nowSec` the clock the term is judged at (default: now).
  *
  *  Resolves to (never throws):
  *    { kind: "verified", fqdn, owner, ownerEntryCid, claimCid,
  *      chain: [{ kind, cid, signer, owner, price }],   // claim first; price [asset, amount] or null
+ *      rents: [{ cid, years, amount, paidUntil }],
+ *      term: null | { state: "free" } | { state: "paid", paidUntil, graceUntil },   // null without `network`
  *      record: null | { cid, linkCid, priorRecordCid, updatedAt, targets: [{ type, value }] },
  *      notChecked: [string, ...] }
+ *    { kind: "refused", code: "InGrace" | "Lapsed", ..., term }   // a name past its paid term
  *    { kind: "refused", code, failure, missing, remedy, at? }   // `at` = entry index */
-export async function verifyDomainProof({ fqdn, entries, genesisPubHex } = {}) {
+export async function verifyDomainProof({ fqdn, entries, genesisPubHex, network, nowSec } = {}) {
   if (!isClaimableDomainName(fqdn)) {
-    return refuse("WrongName", `${JSON.stringify(fqdn)} is not a name this chain carries`, "a flat name, one label plus .ark, .deadark or .fxn", "ask about a name such as \"nodes.fxn\"");
+    return refuse("WrongName", `${JSON.stringify(fqdn)} is not a name this chain carries`, "a flat name, one label plus .fxn or .fxndev", "ask about a name such as \"nodes.fxn\"");
   }
+  const ending = fqdn.slice(fqdn.lastIndexOf(".") + 1);
+  if (network !== undefined && nameEnding(network) !== ending) {
+    return refuse("WrongEnding", `${fqdn} ends in .${ending}, and network ${network} serves .${nameEnding(network)} names only`, `a name ending in .${nameEnding(network)}`, `a .${ending} name answers only on the network that serves .${ending}; never accept it from ${network}`);
+  }
+  const paidNetwork = network === NETWORK_MAIN;
   if (!HEX64.test(genesisPubHex ?? "")) {
     return refuse("NoGenesisKey", "no genesis key was pinned to check the claim against", "the chain's genesis public key (CHAIN_SERVER_GENESIS_KEY), 64 lowercase hex", "pin the genesis key your client trusts and verify again");
   }
@@ -143,10 +176,32 @@ export async function verifyDomainProof({ fqdn, entries, genesisPubHex } = {}) {
   let head = claim.cid;
   const chain = [{ kind: claim.kind, cid: claim.cid, signer: claim.signer, owner, price: null }];
   const notChecked = ["freshness: a node can withhold a newer transfer or record; this proves the entries are genuine and chained, not that they are the latest"];
+  if (network === undefined) notChecked.push("term: no network was pinned, so the ending and paid-until were not checked; pass network to verifyDomainProof");
   let record = null;
+  const rents = [];
+  let paidUntil = Number(claim.raw.payload("M"));
 
   for (let i = 1; i < read.length; i++) {
     const e = read[i];
+    if (e.kind === DOMAIN_KIND_RENT) {
+      if (network !== undefined && !paidNetwork) {
+        return refuse("UnexpectedEntry", `entry ${i} is a rent, and network ${network} charges none`, "no rent on a test network", "ask another node for the proof", i);
+      }
+      if (e.signer !== owner) return refuse("NotCurrentOwner", `rent ${i} was signed by ${e.signer}, who did not hold ${fqdn} then`, `a rent signed by ${owner}`, "ask another node for the proof", i);
+      let rent;
+      try {
+        rent = readRentEntry(e.raw);
+      } catch (err) {
+        return refuse("Grammar", `rent ${i} does not read (${err.message})`, "a KDOMRENT1 whose boxes all read", "ask another node for the proof", i);
+      }
+      if (rent.linkCid !== head) return refuse("StalePriorEntry", `rent ${i} names ${rent.linkCid}, not the ownership entry then ${head}`, `C[1] = ${head}`, "ask another node for the proof", i);
+      const next = extendTerm(paidUntil, rent.m, rent.years);
+      if (next.refused) return refuse("RentOutsideTerm", next.refused[0], next.refused[1], "ask another node for the proof; a node admits no such rent", i);
+      paidUntil = next.until;
+      rents.push({ cid: e.cid, years: rent.years, amount: rent.amount, paidUntil });
+      notChecked.push(`payment: rent ${e.cid} names lock ${rent.lockCid}; the lock and the price at its M are node state (the admitting node checked both)`);
+      continue;
+    }
     if (e.kind === DOMAIN_KIND_RECORD_UPDATE) {
       if (i !== read.length - 1) return refuse("UnexpectedEntry", `a record sits at entry ${i}, before the end of the ownership chain`, "the record last", "ask another node for the proof", i);
       if (e.signer !== owner) {
@@ -169,6 +224,9 @@ export async function verifyDomainProof({ fqdn, entries, genesisPubHex } = {}) {
     }
     if (e.signer !== owner) {
       return refuse("NotCurrentOwner", `entry ${i} was signed by ${e.signer}, who did not own ${fqdn} then`, `a signature from ${owner}`, "ask another node for the proof", i);
+    }
+    if (paidNetwork && termState(paidUntil, Number(e.raw.payload("M"))) === "lapsed") {
+      return refuse("MoveAfterLapse", `entry ${i} moves ${fqdn} after its grace ended at ${paidUntil + GRACE_SECS}`, "a move while the name is paid or in its grace", "ask another node for the proof; a node admits no such move", i);
     }
     const prior = e.raw.c(1);
     if (prior !== head) {
@@ -202,5 +260,17 @@ export async function verifyDomainProof({ fqdn, entries, genesisPubHex } = {}) {
     chain.push({ kind: e.kind, cid: e.cid, signer: e.signer, owner, price });
   }
 
-  return { kind: "verified", fqdn, owner, ownerEntryCid: head, claimCid: claim.cid, chain, record, notChecked };
+  let term = null;
+  if (network !== undefined && !paidNetwork) term = { state: "free" };
+  if (paidNetwork) {
+    const now = nowSec ?? Math.floor(Date.now() / 1000);
+    term = { state: termState(paidUntil, now), paidUntil, graceUntil: paidUntil + GRACE_SECS };
+    if (term.state === "grace") {
+      return { ...refuse("InGrace", `${fqdn} was paid until ${paidUntil} and is in its grace until ${term.graceUntil}`, "a paid term", "only the holder can renew it now (KDOMRENT1); do not resolve it until then"), term };
+    }
+    if (term.state === "lapsed") {
+      return { ...refuse("Lapsed", `${fqdn} was paid until ${paidUntil}, and its grace ended at ${term.graceUntil}`, "a paid term", "the name is free to claim again; treat it as unowned"), term };
+    }
+  }
+  return { kind: "verified", fqdn, owner, ownerEntryCid: head, claimCid: claim.cid, chain, rents, term, record, notChecked };
 }

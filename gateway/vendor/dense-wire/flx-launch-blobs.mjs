@@ -20,6 +20,8 @@
 // Readers read JSON (on chain forever, unchanged verdicts) AND the blob's own grammar, and refuse anything else by name:
 // the failure, the missing thing, the remedy. Writers write only the new form.
 
+import { MAX_AMOUNT, MAX_DECIMALS } from "./flx-amount.mjs";
+
 export const PROVIDER_SET_HEADER = "FLX-PROVIDER-SET-V1";
 export const STAKE_INPUTS_HEADER = "FLX-STAKE-INPUTS-V1";
 export const SPEED_PARAMS_HEADER = "FLX-SPEED-PARAMS-V1";
@@ -27,6 +29,10 @@ export const TOKEN_SPEC_HEADER = "FLX-TOKEN-SPEC-V1";
 export const MINT_PARAMS_HEADER = "FLX-MINT-PARAMS-V1";
 
 const COUNT = "count";
+/** An amount in base units, up to i128::MAX (2026-10-29, `launch_blobs::Payload::Amount`). */
+const AMOUNT = "amount";
+/** A chain's decimals, 0 to 24 (2026-10-29, `launch_blobs::Payload::Decimals`). */
+const DECIMALS = "decimals";
 const HEX64 = "hex64";
 const SYMBOL = "symbol";
 
@@ -43,14 +49,15 @@ const KINDS = {
     header: TOKEN_SPEC_HEADER,
     noun: "token spec",
     labels: [
-      ["symbol", SYMBOL], ["totalSupply", COUNT], ["distributedSupply", COUNT], ["computeRewardResolverCid", HEX64],
+      ["symbol", SYMBOL], ["totalSupply", AMOUNT], ["distributedSupply", AMOUNT], ["computeRewardResolverCid", HEX64],
       ["economyCid", HEX64], ["fairLaunchSecs", COUNT], ["walletCapBps", COUNT], ["creatorBond", COUNT], ["feePips", COUNT], ["genesisCid", HEX64],
+      ["decimals", DECIMALS],
     ],
   },
   mintParams: {
     header: MINT_PARAMS_HEADER,
     noun: "base chain mint params",
-    labels: [["treasuryKey", HEX64], ["distributedSupply", COUNT], ["computeReserveSupply", COUNT]],
+    labels: [["treasuryKey", HEX64], ["distributedSupply", AMOUNT], ["computeReserveSupply", AMOUNT], ["decimals", DECIMALS]],
   },
 };
 
@@ -75,9 +82,14 @@ function refuse(kind, code, failure, missing, remedy) {
 const isHex64 = (t) => typeof t === "string" && /^[0-9a-f]{64}$/.test(t);
 const isSymbol = (t) => typeof t === "string" && /^[A-Z0-9]+$/.test(t);
 const isCountText = (t) => typeof t === "string" && /^(0|[1-9][0-9]*)$/.test(t) && BigInt(t) <= U64_MAX;
+const isAmountText = (t) => typeof t === "string" && /^(0|[1-9][0-9]*)$/.test(t) && BigInt(t) <= MAX_AMOUNT;
+const isDecimalsText = (t) => typeof t === "string" && /^(0|[1-9][0-9]*)$/.test(t) && Number(t) <= MAX_DECIMALS;
 
 function fits(rule, token) {
-  return rule === COUNT ? isCountText(token) : rule === HEX64 ? isHex64(token) : isSymbol(token);
+  if (rule === COUNT) return isCountText(token);
+  if (rule === AMOUNT) return isAmountText(token);
+  if (rule === DECIMALS) return isDecimalsText(token);
+  return rule === HEX64 ? isHex64(token) : isSymbol(token);
 }
 
 /** A count as the JS number it is, or a BigInt past 2^53 (a u64 does not fit a double). */
@@ -152,7 +164,7 @@ function readOwn(kind, text) {
     next = at + 1;
     const [label, rule] = spec.labels[at];
     if (!fits(rule, rest[i + 1])) throw refuse(kind, "PAYLOAD", `(${spec.header}) has ${JSON.stringify(rest[i + 1])} for ${label}, which breaks its payload rule`, "counts as plain decimals without leading zeros that fit u64, hex as 64 lowercase hex characters, symbols as A-Z and 0-9", "correct the value");
-    doc[label] = rule === COUNT ? countValue(rest[i + 1]) : rest[i + 1];
+    doc[label] = rule === COUNT || rule === AMOUNT || rule === DECIMALS ? countValue(rest[i + 1]) : rest[i + 1];
   }
   return doc;
 }

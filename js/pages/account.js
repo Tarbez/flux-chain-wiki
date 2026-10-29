@@ -243,6 +243,13 @@
       var walletSendable = false, walletBusy = false, meshBusy = false, contactsWorking = false;
       var rail = { contacts: null, invites: null, domains: ArkUI.localDomains ? ArkUI.localDomains.list().length : 0 };
       var contactRows = { accepted: [], incoming: [], outgoing: [], found: [] };
+      /* your FXN: the keys' balances, the safes, the transfers (null = not read yet. Each read's own `why` says what failed),
+         and the spend being approved (null until terms are set or a spend link opens one) */
+      var holdings = { keys: null, keysWhy: '', safes: null, safesWhy: '', history: null, historyWhy: '' };
+      var spend = null, spendBusy = false, sendFrom = '';
+      var HISTORY_SHOWN = 12;
+      /* the formatters the views need before js/ark/fxn-holdings.mjs loads; replaced by the module's own once it does */
+      var holdingsApi = { fxn: function (n) { return String(n); }, fxnUnit: function () { return 'base units'; }, fxnText: function (n) { return String(n) + ' base units'; }, dateOf: function (sec) { return new Date(sec * 1000).toISOString().slice(0, 10); } };
 
       function stateOf(next) {
         var unlocked = !!(next && session.isUnlocked());
@@ -310,14 +317,28 @@
           title: next ? (authenticated ? 'Signed in.' : (unlocked ? 'Ready.' : 'Choose your FXN ID file again')) : 'Open your account',
           body: next ? (authenticated ? 'Publishing is available. Each signature opens a review first.' : unlocked ? 'Secure access is available for this session.' : 'Choose your FXN ID file to restore secure access.') : 'Choose your FXN ID file to open your account on this device.' };
       }
+      /* Your FXN (owner, 2026-10-29): what your keys hold, and what sits in the genesis safes you sign for. Each tile
+         opens the view that lists its parts. A number the chain did not answer says why, never 0. */
       function walletStats() {
-        var fxn = { label: plainLine(wallet.symbol || 'FXN', 48), format: 'plain' };
+        var fxn = { label: 'In your keys', format: 'plain', action: 'wallet-keys' };
         if (wallet.balance == null) fxn.absent = { kind: 'unavailable', reason: wallet.message };
-        else { fxn.value = wallet.balance; fxn.detail = wallet.message; }
+        else { fxn.value = wallet.balance; fxn.unit = plainLine(holdingsApi.fxnUnit() === 'FXN' ? (wallet.symbol || 'FXN') : holdingsApi.fxnUnit(), 16); fxn.detail = wallet.message; }
         if (wallet.logo) fxn.logo = { image: wallet.logo };
-        return { label: 'Balances', items: [fxn, { label: 'Credits', absent: { kind: 'not-built', reason: 'Credit balances are not available yet.' } }] };
+        return { label: 'Your FXN', columns: 3, items: [fxn, safesTile(), { label: 'Credits', absent: { kind: 'not-built', reason: 'Credit balances are not available yet.' } }] };
       }
-      function keyProps() { return { label: 'Your public key', columns: 1, items: [{ term: 'Your public key', value: wallet.key || null, mono: true }] }; }
+      function safesTile() {
+        var tile = { label: 'In safes you sign for', format: 'plain', action: 'wallet-safes' }, got = holdings.safes;
+        if (!got) tile.absent = { kind: 'unavailable', reason: holdings.safesWhy || 'Reading the safes\u2026' };
+        else if (got.kind !== 'ok') tile.absent = { kind: 'unavailable', reason: got.why || 'The node did not answer the safes read.' };
+        else if (!got.onCouncil.length) { tile.value = 'None'; tile.detail = 'None of your keys is on the ' + got.daoId + ' council.'; }
+        else if (got.total == null) tile.absent = { kind: 'unavailable', reason: 'The node left the safe balances out.' };
+        else {
+          tile.value = holdingsApi.fxn(got.total); tile.unit = holdingsApi.fxnUnit();
+          tile.detail = got.signed.length + ' safes \u00b7 ' + (got.unlockedTotal == null ? 'unlocked amount not read' : holdingsApi.fxnText(got.unlockedTotal) + ' unlocked now');
+        }
+        return tile;
+      }
+      function keyProps() { return { label: 'Your public key', columns: 1, items: [{ term: 'Public ID in use', value: wallet.key || null, mono: true }] }; }
       function meshDefaults(message) {
         return { status: 'Not verified', message: message || 'Verify this identity on the selected DEFXN network.', detail: false,
           record: '—', verification: '—', updated: '—', provenance: '—', standing: 'Not linked', standingMessage: 'A verified account link is required to show network status.' };
@@ -344,17 +365,142 @@
       function walletRowProps() {
         return { label: 'Wallet', items: [
           { label: 'Send FXN', action: 'wallet-send', tone: 'primary', disabled: !walletSendable },
+          { label: 'History', action: 'wallet-history', tone: 'ghost', disabled: !walletSendable },
           { label: 'Copy public key', action: 'wallet-copy-key', tone: 'ghost', disabled: !walletSendable },
           { label: 'Refresh', action: 'wallet-refresh', tone: 'ghost' }] };
       }
-      /* the send form: the values go to the page (the form never posts); a zero or fractional amount is refused in its
-         own field, with what is needed and how to fix it, before anything is reviewed or signed */
+      /* the send form: the values go to the page (the form never posts); the amount is typed in FXN with up to the coin's
+         decimals (js/ark/fxn-holdings.mjs parseFxn), and a zero or unreadable amount is refused in its own field, with what is needed and how to fix it, before anything is reviewed or signed */
       function sendFormProps() {
         return { label: 'Send FXN', fields: [
-          { name: 'amount', label: 'Amount (FXN)', type: 'number', min: 1, step: 1, required: true, placeholder: '0', autocomplete: 'off' },
+          sendFromField(),
+          { name: 'amount', label: 'Amount (FXN)', type: 'text', inputmode: 'decimal', required: true, placeholder: '0.5', autocomplete: 'off' },
           { name: 'recipient', label: 'Recipient key', type: 'text', required: true, autocomplete: 'off', placeholder: 'Paste the recipient\u2019s public key' }],
           submit: { label: 'Review & sign', action: 'wallet-send-submit', tone: 'primary', disabled: !walletSendable || walletBusy, busy: walletBusy, busyLabel: 'Signing\u2026' },
           actions: [{ label: '\u2190 Wallet', action: 'wallet-back', tone: 'ghost' }] };
+      }
+      /* ---- your FXN: keys, safes, a spend from a safe, history (js/ark/fxn-holdings.mjs) ------------------------
+         Owner, 2026-10-29: the page showed one key's balance, so it read 0 while the mint paid the genesis allocation
+         into fxndao's safes. These views list every key the FXN ID holds and every safe one of them signs for, and
+         let a council signer approve and send a spend of an unlocked part to one of their keys. */
+      function keyLabel(k) { return plainLine(k.name + (k.balance != null ? ' \u00b7 ' + holdingsApi.fxnText(k.balance) : ''), 64); }
+      /* the keys that can sign a send on this sign-in: every Public ID, the wallets of the one in use, the genesis key */
+      function sendFromField() {
+        var rows = (holdings.keys || []).filter(function (k) { return k.signer; });
+        var options = rows.length ? rows.map(function (k) { return { value: k.key, label: keyLabel(k) }; })
+          : [{ value: 'current', label: 'The Public ID in use' }];
+        var field = { name: 'from', label: 'From', type: 'select', options: options };
+        var chosen = sendFrom && options.some(function (o) { return o.value === sendFrom; }) ? sendFrom : (rows.filter(function (k) { return k.current; })[0] || {}).key;
+        if (chosen) field.value = chosen;
+        return field;
+      }
+      function short(key) { return key ? String(key).slice(0, 8) + '\u2026' + String(key).slice(-6) : ''; }
+      function keysViewProps() {
+        var got = holdings.keys, council = holdings.safes && holdings.safes.kind === 'ok' ? holdings.safes.onCouncil : [];
+        return { label: 'Your keys', empty: { reason: holdings.keysWhy || 'Reading your keys\u2026', remedy: 'Choose your FXN ID file if this stays empty.' },
+          items: (got || []).map(function (k) {
+            var item = { id: k.key, title: plainLine(k.name, 96), meta: short(k.key) + ' \u00b7 ' + (k.balance != null ? holdingsApi.fxnText(k.balance) : 'No reading: ' + plainLine(k.why || 'no answer', 48)),
+              actions: [{ label: 'Copy key', action: 'fxn-copy-key', tone: 'ghost' }] };
+            if (k.current) item.status = { label: 'In use', tone: 'trust' };
+            else if (council.indexOf(k.key) >= 0) item.status = { label: 'Council signer', tone: 'reference' };
+            else if (k.kind === 'wallet' && !k.published) item.status = { label: 'Private', tone: 'hidden' };
+            if (k.signer && k.balance != null && k.balance > 0n) item.actions.unshift({ label: 'Send from', action: 'fxn-send-from', tone: 'secondary' });
+            return item;
+          }) };
+      }
+      var PATH_STATUS = { council: { label: 'Council spends', tone: 'trust' }, sale: { label: 'Sale only', tone: 'reference' }, vote: { label: 'Holder vote', tone: 'drift' }, budget: { label: 'Budgets only', tone: 'drift' }, unknown: { label: 'Unknown kind', tone: 'warning' } };
+      function safesViewProps() {
+        var got = holdings.safes;
+        if (!got || got.kind !== 'ok') return { label: 'Safes you sign for', items: [], empty: { reason: got ? (got.why || 'The node did not answer the safes read.') : 'Reading the safes\u2026', remedy: 'Press Refresh, or pick another network below.' } };
+        if (!got.onCouncil.length) return { label: 'Safes you sign for', items: [], empty: { reason: 'None of your keys is on the ' + got.daoId + ' council, so you sign for no safe.', remedy: 'Sign in with the FXN ID whose genesis key is on the council.' } };
+        return { label: 'Safes you sign for', empty: { reason: 'The plan names no safe.' }, items: got.signed.map(function (sf) {
+          var f = holdingsApi.fxn;
+          var item = { id: sf.label, title: plainLine(sf.label + ' safe \u00b7 ' + (sf.balance != null ? holdingsApi.fxnText(sf.balance) : 'balance not read'), 96),
+            meta: plainLine((sf.unlocked != null ? f(sf.unlocked) + ' unlocked' : 'unlocked not read') + ' \u00b7 ' + (sf.stillLocked != null ? f(sf.stillLocked) + ' locked' : 'locked not read') + (sf.next ? ' \u00b7 next ' + holdingsApi.dateOf(sf.next) : ''), 96),
+            detail: [sf.schedule ? sf.schedule + '.' : 'No schedule in the plan.', sf.how, sf.created ? '' : 'Its create record is not on the chain yet.'].filter(Boolean).join(' '),
+            status: PATH_STATUS[sf.path] || PATH_STATUS.unknown };
+          if (sf.path === 'council' && sf.created) item.actions = [{ label: 'Spend', action: 'safe-spend', tone: 'secondary', disabled: !(sf.unlocked > 0) }];
+          return item;
+        }) };
+      }
+      function heldFactsProps() {
+        var got = holdings.safes, items = [];
+        if (got && got.kind === 'ok') got.held.forEach(function (h) { items.push({ term: plainLine(h.label.charAt(0).toUpperCase() + h.label.slice(1), 48), value: (h.balance != null ? holdingsApi.fxnText(h.balance) + '. ' : 'Not read. ') + h.how }); });
+        if (!items.length) items.push({ term: 'Held by rule', value: null });
+        return { label: 'Held by rule, no signer', columns: 2, items: items };
+      }
+      /* a spend: terms first (amount and the key it goes to), then the approvals; one primary at a time, the step that
+         waits on you */
+      function spendSafe() { var got = holdings.safes; return got && got.kind === 'ok' && spend ? got.safes.filter(function (sf) { return sf.label === spend.label; })[0] : null; }
+      function spendTermsFormProps() {
+        var sf = spendSafe(), keys = (holdings.keys || []);
+        var options = keys.map(function (k) { return { value: k.key, label: keyLabel(k) }; });
+        if (!options.length) options = [{ value: 'none', label: 'Your keys are not read yet', disabled: true }];
+        var fields = [{ name: 'amount', label: 'Amount (FXN)', type: 'text', inputmode: 'decimal', required: true, autocomplete: 'off', placeholder: '0.5',
+          hint: sf && sf.unlocked != null ? holdingsApi.fxnText(sf.unlocked) + ' unlocked now.' : 'The unlocked amount was not read.' }];
+        var to = { name: 'to', label: 'To your key', type: 'select', options: options };
+        var current = keys.filter(function (k) { return k.current; })[0];
+        if (current) to.value = current.key;
+        fields.push(to);
+        return { label: 'Spend terms', fields: fields, submit: { label: 'Approve as me', action: 'spend-terms', tone: 'primary', busy: spendBusy, busyLabel: 'Signing\u2026', disabled: spendBusy },
+          actions: [{ label: '\u2190 Safes', action: 'wallet-safes', tone: 'ghost' }] };
+      }
+      function spendApprovedBy() { return spend && spend.checked ? spend.checked.good : new Map(); }
+      function spendTermsFacts() {
+        var sf = spendSafe(), to = spend && (holdings.keys || []).filter(function (k) { return k.key === spend.to; })[0];
+        return { label: 'Spend terms', columns: 2, items: [
+          { term: 'From safe', value: sf ? sf.label : (spend && spend.label) || null },
+          { term: 'Amount', value: spend && spend.amount ? holdingsApi.fxnText(spend.amount) : null },
+          { term: 'To', value: spend ? (to ? to.name + ', ' + short(spend.to) : spend.to) : null, mono: !to },
+          { term: 'Approvals', value: spend && sf ? spendApprovedBy().size + ' of ' + sf.threshold : null }] };
+      }
+      function spendCouncilProps() {
+        var got = holdings.safes, approved = spendApprovedBy();
+        var signers = got && got.kind === 'ok' ? got.plan.head.signers : [];
+        return { label: 'Council approvals', empty: { reason: 'The council was not read.', remedy: 'Press Refresh.' }, items: signers.map(function (key, i) {
+          var mine = got.onCouncil.indexOf(key) >= 0;
+          return { id: key, title: 'Signer ' + (i + 1) + (mine ? ' (you)' : ''), meta: short(key), status: approved.has(key) ? { label: 'Approved', tone: 'trust' } : { label: 'Waiting', tone: 'drift' } };
+        }) };
+      }
+      function spendHeadProps() {
+        var sf = spendSafe();
+        if (!spend || !spend.atMs) return { tone: 'info', title: 'Spend from the ' + ((spend && spend.label) || '') + ' safe', body: 'Set the amount and the key it goes to, then approve. The spend needs ' + (sf ? sf.threshold + ' of ' + sf.signers.length : 'the council\u2019s') + ' council approvals before it can be sent.' };
+        var st = spendStage();
+        if (st.ready) return { tone: 'success', title: 'Ready to send', body: 'The spend has enough council approvals. Review it, then send it to the network.' };
+        if (st.mineDone) return { tone: 'drift', title: 'Waiting for the council', body: 'Copy the spend link and send it to the other council signers. Paste the lines they send back.' };
+        return { tone: 'drift', title: 'Your approval is missing', body: 'Check the terms, then approve them as a council signer.' };
+      }
+      function spendStage() {
+        var sf = spendSafe(), have = spendApprovedBy();
+        var mineDone = holdings.safes && holdings.safes.kind === 'ok' && holdings.safes.onCouncil.some(function (k) { return have.has(k); });
+        return { ready: !!(sf && have.size >= sf.threshold), mineDone: mineDone };
+      }
+      function spendLinesProps() {
+        var st = spendStage();
+        return { label: 'Approval lines', fields: [{ name: 'lines', label: 'Approval lines from the council', type: 'textarea', rows: 3, autocomplete: 'off', placeholder: '<signer key> <signature>',
+          hint: 'One line per signer. Paste the lines the other signers send you.' }],
+          submit: { label: 'Check approvals', action: 'spend-check', tone: 'secondary' },
+          actions: [{ label: 'Approve as me', action: 'spend-approve', tone: st.mineDone ? 'ghost' : 'primary', disabled: spendBusy || st.mineDone },
+            { label: 'Copy spend link', action: 'spend-link', tone: st.mineDone && !st.ready ? 'primary' : 'ghost' }] };
+      }
+      function spendGoProps() {
+        var st = spendStage();
+        return { label: 'Send the spend', items: [{ label: 'Review and send', action: 'spend-submit', tone: st.ready ? 'primary' : 'secondary', disabled: !st.ready || spendBusy, busy: spendBusy, busyLabel: 'Sending\u2026' },
+          { label: 'New terms', action: 'spend-reset', tone: 'ghost' }, { label: '\u2190 Safes', action: 'wallet-safes', tone: 'ghost' }] };
+      }
+      function historyProps() {
+        var got = holdings.history, names = new Map((holdings.keys || []).map(function (k) { return [k.key, k.name]; }));
+        /* the other side named where the page knows it: the genesis mint's holder and the safes */
+        if (holdings.safes && holdings.safes.kind === 'ok') {
+          names.set(holdings.safes.plan.head.treasury, 'the genesis mint');
+          holdings.safes.safes.forEach(function (sf) { names.set(sf.address, 'the ' + sf.label + ' safe'); });
+        }
+        if (!got) return { label: 'Transfers', items: [], empty: { reason: holdings.historyWhy || 'Reading your transfers\u2026' } };
+        return { label: 'Transfers', empty: { reason: 'None of your keys has sent or received FXN on this network.', remedy: 'Share a key from Your keys to receive FXN.' },
+          items: got.rows.slice(0, HISTORY_SHOWN).map(function (row, i) {
+            var words = holdingsApi.describeTransfer(row, names);
+            return { id: 'h' + i, title: plainLine(words.title, 96), meta: plainLine(words.meta, 96), status: row.kind === 'sent' ? { label: 'Sent', tone: 'reference' } : { label: row.kind === 'received' ? 'Received' : plainLine(row.kind, 24), tone: 'trust' } };
+          }) };
       }
       function meshActionProps() {
         return { label: 'Network check', items: [{ label: 'Verify identity', action: 'mesh-verify', tone: 'primary', disabled: !identity || meshBusy, busy: meshBusy, busyLabel: 'Verifying\u2026' }] };
@@ -370,7 +516,7 @@
           return Object.assign(tile, extra || {});
         }
         var standing = mesh.standing, status = mesh.status;
-        var fxn = { label: plainLine(wallet.symbol || 'FXN', 48), action: 'rail-defi', format: 'plain' };
+        var fxn = { label: plainLine(holdingsApi.fxnUnit() === 'FXN' ? (wallet.symbol || 'FXN') : 'Base units', 48) + ' in your keys', action: 'rail-defi', format: 'plain' };
         if (wallet.balance == null) fxn.absent = { kind: 'unavailable', reason: wallet.message }; else fxn.value = wallet.balance;
         return { label: 'Your account at a glance', columns: 4, items: [
           fxn,
@@ -422,7 +568,7 @@
         }
         var addresses = (who && who.walletAddresses) || [];
         var delegations = (who && who.walletDelegations) || {};
-        return { label: 'Signing wallets', empty: { reason: 'No signing wallets yet.', remedy: 'Add one below; each can then be rotated, revoked or delegated on its own.' },
+        return { label: 'Signing wallets', empty: { reason: 'No signing wallets yet.', remedy: 'Add one below. Each one can then be rotated, revoked or delegated on its own.' },
           items: once(addresses.map(function (address) {
             var delegation = delegations[address], item = { id: address, title: address };
             if (delegation) item.meta = delegation.revoked ? 'delegation revoked' : 'delegated to identity';
@@ -531,6 +677,46 @@
         refs.sendForm = make({ block: 'form', id: 'account-send-form', props: sendFormProps(), was: WAS['account-send-form'] }); remember('sendForm', sendFormProps());
         send.appendChild(refs.sendForm);
         node.appendChild(send);
+        /* depth, not length: each part of your FXN is its own view in the card, opened from its tile or button, with
+           the way back to the wallet at its foot */
+        var back = { label: '\u2190 Wallet', action: 'wallet-back', tone: 'ghost' };
+        var keysView = el('div', 'account-wallet-form'); keysView.setAttribute('data-account-wallet-view', 'keys'); keysView.hidden = true;
+        keysView.appendChild(el('p', 'account-hint', 'Every key in your FXN ID file and what it holds on the selected network.'));
+        refs.fxnKeys = make({ block: 'list', id: 'account-fxn-keys', props: keysViewProps() }); remember('fxnKeys', keysViewProps());
+        keysView.appendChild(refs.fxnKeys);
+        keysView.appendChild(make({ block: 'actions', id: 'account-fxn-keys-back', props: { items: [back] } }));
+        node.appendChild(keysView);
+        var safesView = el('div', 'account-wallet-form'); safesView.setAttribute('data-account-wallet-view', 'safes'); safesView.hidden = true;
+        refs.safesHint = safesView.appendChild(el('p', 'account-hint', 'The genesis mint paid the allocation into these safes. FXN reaches your keys only when the council approves a spend of an unlocked part.'));
+        refs.safes = make({ block: 'list', id: 'account-safes', props: safesViewProps() }); remember('safes', safesViewProps());
+        safesView.appendChild(refs.safes);
+        refs.held = make({ block: 'facts', id: 'account-safes-held', props: heldFactsProps() }); remember('held', heldFactsProps());
+        safesView.appendChild(refs.held);
+        safesView.appendChild(make({ block: 'actions', id: 'account-safes-back', props: { items: [back] } }));
+        node.appendChild(safesView);
+        var spendView = el('div', 'account-wallet-form'); spendView.setAttribute('data-account-wallet-view', 'spend'); spendView.hidden = true;
+        refs.spendHead = make({ block: 'callout', id: 'account-spend-head', props: spendHeadProps() }); remember('spendHead', spendHeadProps());
+        spendView.appendChild(refs.spendHead);
+        views.spendTerms = el('div', 'account-wallet-form');
+        refs.spendTermsForm = make({ block: 'form', id: 'account-spend-terms', props: spendTermsFormProps() }); remember('spendTermsForm', spendTermsFormProps());
+        views.spendTerms.appendChild(refs.spendTermsForm);
+        spendView.appendChild(views.spendTerms);
+        views.spendBoard = el('div', 'account-wallet-form'); views.spendBoard.hidden = true;
+        refs.spendFacts = make({ block: 'facts', id: 'account-spend-facts', props: spendTermsFacts() }); remember('spendFacts', spendTermsFacts());
+        refs.spendCouncil = make({ block: 'list', id: 'account-spend-council', props: spendCouncilProps() }); remember('spendCouncil', spendCouncilProps());
+        refs.spendLines = make({ block: 'form', id: 'account-spend-lines', props: spendLinesProps() }); remember('spendLines', spendLinesProps());
+        refs.spendGo = make({ block: 'actions', id: 'account-spend-go', props: spendGoProps() }); remember('spendGo', spendGoProps());
+        [refs.spendFacts, refs.spendCouncil, refs.spendLines, refs.spendGo].forEach(function (b) { views.spendBoard.appendChild(b); });
+        spendView.appendChild(views.spendBoard);
+        refs.spendStatus = make({ block: 'status-line', id: 'account-spend-status', props: statusProps('') }); remember('spendStatus', statusProps(''));
+        spendView.appendChild(refs.spendStatus);
+        node.appendChild(spendView);
+        var historyView = el('div', 'account-wallet-form'); historyView.setAttribute('data-account-wallet-view', 'history'); historyView.hidden = true;
+        historyView.appendChild(el('p', 'account-hint', 'FXN sent and received by every key in your FXN ID file, newest first.'));
+        refs.history = make({ block: 'list', id: 'account-history', props: historyProps() }); remember('history', historyProps());
+        historyView.appendChild(refs.history);
+        historyView.appendChild(make({ block: 'actions', id: 'account-history-back', props: { items: [back] } }));
+        node.appendChild(historyView);
         refs.sendStatus = make({ block: 'status-line', id: 'account-send-status', props: statusProps(''), was: WAS['account-send-status'] }); remember('sendStatus', statusProps(''));
         node.appendChild(refs.sendStatus);
         node.appendChild(pin(el('div', 'account-wallet-network', '<span class="account-wallet-network-label">Network</span><div class="network-options" data-account-fxn-network></div>'), WALLET + '/div:2'));
@@ -635,9 +821,10 @@
             if (!cards || !cards.skins.length || !side.isConnected) return;
             side.appendChild(make({ block: 'list', id: 'account-nft-skins', props: { label: 'Your skins' + (cards.skins.length > 3 ? ' (3 of ' + cards.skins.length + ')' : ''),
               items: cards.skins.slice(0, 3).map(function (sk) { return { id: sk.id, title: sk.label, meta: 'skin ' + sk.id.slice(0, 8), actions: [{ label: 'Copy gift link', action: 'skin-link', tone: 'ghost' }, { label: 'Copy sale link', action: 'skin-sale-link', tone: 'ghost' }] }; }) } }));
-            /* the price a sale link asks: the taker's FXN is then held for the skin, and paid to you when you give it */
+            /* the price a sale link asks, typed in FXN and carried in the link as base units (fxn-holdings.mjs parseFxn):
+               the taker's FXN is then held for the skin, and paid to you when you give it */
             refs.saleForm = side.appendChild(make({ block: 'form', id: 'account-nft-sale', props: { label: 'Sale link', fields: [
-              { name: 'price', label: 'Price in FXN', type: 'number', autocomplete: 'off', placeholder: '100' },
+              { name: 'price', label: 'Price in FXN', type: 'text', autocomplete: 'off', placeholder: '12.5' },
               { name: 'days', label: 'Days the buyer\u2019s FXN waits for you', type: 'number', value: '3', autocomplete: 'off' }],
               submit: { label: 'Use this price', action: 'skin-sale-price', tone: 'secondary' } } }));
           }, function () { /* the card itself already said what it could read */ });
@@ -670,12 +857,19 @@
         node.setAttribute('aria-label', 'Skin trade');
         node.appendChild(el('p', 'account-nft-kicker')).textContent = end ? 'A sale that ended' : take ? (price ? 'A skin for sale' : 'A skin for you') : 'Give a skin';
         tradeNote = node.appendChild(el('p', 'account-nft-note'));
-        tradeNote.textContent = end ? 'If the owner did not give you the skin in time, take your FXN back.'
-          : take ? (price ? 'Skin ' + take.slice(0, 8) + ' is for sale for ' + price + ' FXN. Your FXN wait up to ' + days + ' days, and go to the owner only when the skin moves to you.'
-            : 'Someone wants to give you skin ' + take.slice(0, 8) + '. Accept it, then send the link you get back.')
-          : 'Someone accepted skin ' + give.slice(0, 8) + '. Give it to move it to them. You cannot take it back.';
+        /* the link's price is base units; it prints at the node's decimals once they are read (base units until then) */
+        function saleNote() {
+          tradeNote.textContent = end ? 'If the owner did not give you the skin in time, take your FXN back.'
+            : take ? (price ? 'Skin ' + take.slice(0, 8) + ' is for sale for ' + holdingsApi.fxnText(price) + '. Your FXN wait up to ' + days + ' days, and go to the owner only when the skin moves to you.'
+              : 'Someone wants to give you skin ' + take.slice(0, 8) + '. Accept it, then send the link you get back.')
+            : 'Someone accepted skin ' + give.slice(0, 8) + '. Give it to move it to them. You cannot take it back.';
+        }
+        saleNote();
+        if (take && price) Promise.all([loadWalletModule(), loadHoldingsModule()]).then(function (got) {
+          return got[1].readDecimals(walletWire(got[0]));
+        }).then(function () { if (tradeAsk && tradeAsk.step === 'take') saleNote(); }, function () { /* the note keeps base units */ });
         tradeAsk = end ? { step: 'end', edge: end } : take ? { step: 'take', id: take, price: price, days: days } : { step: 'give', id: give, edge: q.get('consent') };
-        var label = end ? 'Take my FXN back' : take ? (price ? 'Accept and pay ' + price + ' FXN' : 'Accept this skin') : 'Give this skin';
+        var label = end ? 'Take my FXN back' : take ? (price ? 'Accept and pay' : 'Accept this skin') : 'Give this skin';
         node.appendChild(make({ block: 'actions', id: 'account-trade-act', props: { items: [{ label: label, action: 'skin-trade', tone: 'primary' }] } }));
         return node;
       }
@@ -689,11 +883,11 @@
         run.then(function (res) {
           if (res.kind === 'accepted') {
             var link = location.origin + '/account?give-skin=' + res.id + '&consent=' + res.edge;
-            tradeNote.textContent = (res.sale ? 'Paid ' + res.price + ' FXN into the sale. ' : 'Accepted. ') + 'Send this link to the owner, ' + res.owner.slice(0, 8) + '\u2026: ' + link
+            tradeNote.textContent = (res.sale ? 'Paid ' + holdingsApi.fxnText(res.price) + ' into the sale. ' : 'Accepted. ') + 'Send this link to the owner, ' + res.owner.slice(0, 8) + '\u2026: ' + link
               + (res.sale ? ' If the skin has not moved by ' + new Date(res.deadline * 1000).toLocaleString() + ', open ' + location.origin + '/account?end-sale=' + res.edge + ' to take your FXN back.' : '');
             copyText(link, 'Link copied. Send it to the owner.');
-          } else if (res.kind === 'given') tradeNote.textContent = 'Given. The skin is now ' + res.to.slice(0, 8) + '\u2026\u2019s.' + (res.paid ? ' You received ' + res.paid + ' FXN.' : '');
-          else if (res.kind === 'returned') tradeNote.textContent = 'Your ' + res.amount + ' FXN are back in your wallet.';
+          } else if (res.kind === 'given') tradeNote.textContent = 'Given. The skin is now ' + res.to.slice(0, 8) + '\u2026\u2019s.' + (res.paid ? ' You received ' + holdingsApi.fxnText(res.paid) + '.' : '');
+          else if (res.kind === 'returned') tradeNote.textContent = 'Your ' + holdingsApi.fxnText(res.amount) + ' are back in your wallet.';
           else tradeNote.textContent = res.failure + ' Missing: ' + res.missing + '. To fix: ' + res.remedy + '.';
         }, function (error) { tradeNote.textContent = error.message; });
       }
@@ -815,6 +1009,18 @@
           'wallet-send-submit': function (detail) { runSend(detail.values); },
           'wallet-copy-key': function () { copyText(wallet.key, 'Key copied.'); },
           'wallet-refresh': function () { loadWallet(); },
+          'wallet-keys': function () { showWallet('keys'); },
+          'wallet-safes': function () { showWallet('safes'); },
+          'wallet-history': function () { showWallet('history'); loadHistory(); },
+          'fxn-copy-key': function (detail) { if (/^[0-9a-f]{64}$/.test(detail.item || '')) copyText(detail.item, 'Key copied. Share it to receive FXN.'); },
+          'fxn-send-from': function (detail) { sendFrom = detail.item || ''; paint('sendForm', sendFormProps()); showWallet('send'); },
+          'safe-spend': function (detail) { openSpend({ label: detail.item }); },
+          'spend-terms': function (detail) { spendTerms(detail.values); },
+          'spend-approve': function () { spendApprove(); },
+          'spend-check': function () { spendCheck(true); },
+          'spend-link': function () { spendLink(); },
+          'spend-submit': function () { spendSubmit(); },
+          'spend-reset': function () { if (spend) openSpend({ label: spend.label }); },
           'mesh-verify': function () { checkMesh(); },
           'rail-defi': function () { openTab('defi'); },
           'rail-contacts': function () { openTab('contacts'); },
@@ -840,14 +1046,23 @@
             }, function (error) { activateNote.textContent = error.message; });
           },
           'skin-sale-price': function (detail) {
-            salePrice = { price: String(detail.values.price || '').trim(), days: String(detail.values.days || '3').trim() };
-            refs.nftNote.textContent = /^[1-9][0-9]*$/.test(salePrice.price) ? 'Sale links now ask ' + salePrice.price + ' FXN. Press Copy sale link by a skin.' : 'Set a price: a whole number of FXN, 1 or more.';
+            /* typed FXN -> base units at the node's decimals (fxn-holdings.mjs parseFxn); the link carries the base units */
+            var typed = String(detail.values.price || '').trim(), days = String(detail.values.days || '3').trim();
+            salePrice = null;
+            Promise.all([loadWalletModule(), loadHoldingsModule()]).then(function (got) {
+              return got[1].readDecimals(walletWire(got[0])).then(function () { return got[1]; });
+            }).then(function (fh) {
+              var units = fh.parseFxn(typed);
+              if (units <= 0n) { refs.nftNote.textContent = 'Set a price above zero, in FXN.'; return; }
+              salePrice = { units: units.toString(), text: fh.fxnText(units), days: days };
+              refs.nftNote.textContent = 'Sale links now ask ' + salePrice.text + '. Press Copy sale link by a skin.';
+            }, function (error) { refs.nftNote.textContent = error.message; });
           },
           'skin-sale-link': function (detail) {
-            var price = salePrice ? salePrice.price : '', days = (salePrice && salePrice.days) || '3';
-            if (!/^[1-9][0-9]*$/.test(price)) { refs.nftNote.textContent = 'Set a price first: a whole number of FXN, 1 or more.'; return; }
+            var price = salePrice ? salePrice.units : '', days = (salePrice && salePrice.days) || '3';
+            if (!/^[1-9][0-9]*$/.test(price)) { refs.nftNote.textContent = 'Set a price first, in FXN, above zero.'; return; }
             if (!/^([1-9]|[12][0-9]|30)$/.test(days)) { refs.nftNote.textContent = 'Set the days the buyer\u2019s FXN waits: 1 to 30.'; return; }
-            if (/^[0-9a-f]{64}$/.test(detail.item || '')) copyText(location.origin + '/account?take-skin=' + detail.item + '&price=' + price + '&days=' + days, 'Sale link copied: ' + price + ' FXN. Send it to the buyer.');
+            if (/^[0-9a-f]{64}$/.test(detail.item || '')) copyText(location.origin + '/account?take-skin=' + detail.item + '&price=' + price + '&days=' + days, 'Sale link copied: ' + salePrice.text + '. Send it to the buyer.');
           },
           'skin-link': function (detail) { if (/^[0-9a-f]{64}$/.test(detail.item || '')) copyText(location.origin + '/account?take-skin=' + detail.item, 'Trade link copied. Send it to the person who should get the skin.'); },
           'nft-mint': function () {
@@ -1029,7 +1244,7 @@
          switcher (`fields.fxnNetwork`): the old hardcoded production-only
          endpoint had no way to point this tab at a local devnet node for
          testing, found the same day this balance bug was. */
-      var WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261016-listbox1';
+      var WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261029-decimals1';
       var FXN_META_MODULE = 'js/ark/fxn-meta.mjs?v=20261016-fxnmeta1';
       var CREDITS_UNAVAILABLE = 'Credit balances are not available yet.';
       var walletModule = null;
@@ -1237,7 +1452,7 @@
               return wire.sendLine('RESOLVER_RECORD\t' + record).then(function (reply) {
                 wire.close();
                 var line = String(reply).trim();
-                if (!/^OK\b/.test(line)) throw new Error('The chain did not take the link: ' + line + '. Missing: a wallet that has never sent anything. To fix: publish a wallet before it sends; for one that already sent, make a new wallet.');
+                if (!/^OK\b/.test(line)) throw new Error('The chain did not take the link: ' + line + '. Missing: a wallet that has never sent anything. To fix: publish a wallet before it sends. For one that already sent, make a new wallet.');
               }, function (error) { wire.close(); throw error; });
             };
             /* the file was not saved after an earlier publish: the chain may already hold this exact link */
@@ -1361,7 +1576,40 @@
       function resetWallet(message) {
         walletGeneration += 1;
         setWallet({ balance: null, display: '—', message: message || 'Sign in to check', key: '' });
+        holdings = { keys: null, keysWhy: '', safes: null, safesWhy: message || '', history: null, historyWhy: '' };
+        spend = null;
+        paintHoldings();
         setSendable(false);
+      }
+
+      /* js/ark/fxn-holdings.mjs: your keys, the safes you sign for, a spend from a safe and the transfers. Loaded on first
+         use like the wallet module, and handed that module (`dw`) so the page and it share one copy. */
+      var HOLDINGS_MODULE = 'js/ark/fxn-holdings.mjs?v=20261029-decimals1';
+      var holdingsModule = null;
+      function loadHoldingsModule() {
+        if (!holdingsModule) {
+          holdingsModule = Promise.resolve().then(function () {
+            var path = (location.protocol === 'file:' ? '' : '/') + HOLDINGS_MODULE;
+            return import(new URL(path, document.baseURI).href);
+          }).then(function (m) { holdingsApi = m; return m; }).catch(function (error) {
+            holdingsModule = null;
+            throw new Error('The safes and keys reader could not load (' + text(error && error.message, 'module error') + ').');
+          });
+        }
+        return holdingsModule;
+      }
+      function paintHoldings() {
+        var got = holdings.safes;
+        /* the plan's own start and council, said once above the rows */
+        if (refs.safesHint) refs.safesHint.textContent = 'The genesis mint paid the allocation into these safes. FXN reaches your keys only when the council approves a spend of an unlocked part.'
+          + (got && got.kind === 'ok' ? ' Schedules run from ' + holdingsApi.dateOf(got.plan.head.start) + '. ' + got.plan.head.threshold + ' of ' + got.plan.head.signers.length + ' council signers approve each spend.' : '');
+        paint('balances', walletStats());
+        paint('fxnKeys', keysViewProps());
+        paint('safes', safesViewProps());
+        paint('held', heldFactsProps());
+        paint('sendForm', sendFormProps());
+        paintSpend();
+        syncRail();
       }
 
       async function loadWallet() {
@@ -1378,20 +1626,163 @@
           var key = dw.signerFor(who).pubHex;
           setWallet({ key: key });
           setSendable(!walletBusy);
-          // `link.balance` returns a BigInt, or `null` when this chain-
-          // server has no FXN ledger to answer from (absent, never a
-          // cosmetic zero -- `native_ledger.rs`'s own distinction).
-          var amount = await link.balance(key);
+          var fh = await loadHoldingsModule();
           if (token !== walletGeneration || !page.isConnected) return;
-          if (amount === null) {
-            setWallet({ balance: null, display: 'Unavailable', message: 'FXN is not available on this network.' });
+          // Every key the FXN ID holds, each read with NATIVE_BALANCE (a BigInt, or null when this network has no FXN
+          // ledger: absent, never a cosmetic zero -- native_ledger.rs's own distinction).
+          var keys = fh.yourKeys(who);
+          if (!keys.length) keys = [{ key: key, kind: 'public-id', name: 'Public ID in use', current: true, signer: function () { return dw.signerFor(who); } }];
+          await fh.readDecimals(link);   // FXN's decimals, once per node: every amount below prints through them
+          var read = await fh.readKeyBalances(link, keys);
+          if (token !== walletGeneration || !page.isConnected) return;
+          holdings.keys = read.rows; holdings.keysWhy = '';
+          if (read.total === null) {
+            setWallet({ balance: null, display: 'Unavailable', message: 'No key was read: ' + text(read.rows[0] && read.rows[0].why, 'the node did not answer') + '.' });
           } else {
-            setWallet({ balance: amount.toString(), display: amount.toString(), message: amount === 0n ? 'No FXN in this account.' : 'Available balance' });
+            setWallet({ balance: fh.fxn(read.total), display: fh.fxn(read.total),
+              message: (read.total === 0n ? 'None of your ' + keys.length + ' keys holds FXN yet.' : 'Across your ' + keys.length + ' keys.') + (read.unread ? ' ' + read.unread + ' not read.' : '') });
           }
+          paintHoldings();
+          // The genesis safes, from the mint's own plan (FXN_GENESIS_PLAN, read by js/genesis-safes.js's parsePlan).
+          var safes = await fh.readSafes(link, keys.map(function (k) { return k.key; }));
+          if (token !== walletGeneration || !page.isConnected) return;
+          holdings.safes = safes;
+          paintHoldings();
+          openSpendFromAddress();
         } catch (error) {
           if (token !== walletGeneration || !page.isConnected) return;
           setWallet({ balance: null, display: 'Unavailable', message: walletError(error, 'Balance unavailable. Try again.') });
+          if (!holdings.safes) { holdings.safesWhy = text(error && error.message, 'The safes were not read.'); paintHoldings(); }
         }
+      }
+
+      /* The transfers of every key, read when the History view opens (NATIVE_HISTORY, newest first). */
+      var historyGeneration = 0;
+      async function loadHistory() {
+        var who = ArkUI.accountSession.current();
+        if (!who || !holdings.keys) { holdings.historyWhy = 'Your keys are not read yet. Press Refresh, then open History again.'; paint('history', historyProps()); return; }
+        var token = ++historyGeneration;
+        holdings.history = null; holdings.historyWhy = 'Reading your transfers\u2026'; paint('history', historyProps());
+        try {
+          var dw = await loadWalletModule(), fh = await loadHoldingsModule();
+          var got = await fh.readHistory(walletWire(dw), holdings.keys, 50);
+          if (token !== historyGeneration || !page.isConnected) return;
+          holdings.history = got;
+          paint('history', historyProps());
+          var shown = Math.min(got.rows.length, HISTORY_SHOWN);
+          say(got.rows.length > shown ? 'Showing the newest ' + shown + ' of ' + got.rows.length + ' transfers.' : (got.unread ? got.unread + ' of your keys were not read. Press History again to retry.' : ''), got.unread ? 'warning' : undefined);
+        } catch (error) {
+          if (token !== historyGeneration || !page.isConnected) return;
+          holdings.historyWhy = 'Your transfers were not read: ' + text(error && error.message, 'the node did not answer') + '. Press History again to retry.';
+          paint('history', historyProps());
+        }
+      }
+
+      /* ---- a spend from a safe ------------------------------------------------------------------
+         Terms (safe, amount, key, time) are fixed by the first approval and carried by the spend link, so every
+         council signer signs the same bytes. Each step refuses before anything is signed, naming what failed, what is
+         missing and how to fix it (fxn-holdings.mjs spendRefusal); every signature opens the full review first. */
+      function refusalText(why) { return why.failure + ' Missing: ' + why.missing + '. To fix: ' + why.remedy + '.'; }
+      function linesField() { return views.wallet.querySelector('#account-spend-lines textarea'); }
+      function paintSpend() {
+        if (!refs.spendHead) return;
+        var fixed = !!(spend && spend.atMs);
+        views.spendTerms.hidden = fixed; views.spendBoard.hidden = !fixed;
+        paint('spendHead', spendHeadProps());
+        paint('spendTermsForm', spendTermsFormProps());
+        paint('spendFacts', spendTermsFacts());
+        paint('spendCouncil', spendCouncilProps());
+        var field = linesField(), lines = field ? field.value : '';
+        paint('spendLines', spendLinesProps());
+        field = linesField(); if (field && field.value !== lines) field.value = lines;   /* a repaint never drops pasted lines */
+        paint('spendGo', spendGoProps());
+      }
+      function setSpendBusy(value) { spendBusy = !!value; paintSpend(); }
+      function openSpend(terms) {
+        spend = { label: terms.label, to: terms.to || '', amount: terms.amount || '', atMs: terms.atMs || 0, checked: null };
+        result('spendStatus', '');
+        var field = linesField(); if (field) field.value = '';
+        paintSpend();
+        openTab('defi');
+        showWallet('spend');
+        var sf = spendSafe();
+        if (holdings.safes && holdings.safes.kind === 'ok' && !sf) result('spendStatus', 'The ' + terms.label + ' safe is not in the ' + holdings.safes.daoId + ' plan. Missing: a safe the plan names. To fix: open the spend from the Safes list.', 'danger');
+        if (spend.atMs) spendCheck(false);
+      }
+      /* ?safe-spend=<label>.<to>.<amount>.<at ms>: a spend link another council signer sent. It opens once the safes are read. */
+      var spendFromAddressDone = false;
+      function openSpendFromAddress() {
+        if (spendFromAddressDone || !holdings.safes || holdings.safes.kind !== 'ok') return;
+        var asked = null;
+        try { asked = new URLSearchParams(location.search).get('safe-spend'); } catch (_error) { asked = null; }
+        if (!asked) return;
+        spendFromAddressDone = true;
+        var terms = holdingsApi.decodeSpend(asked);
+        if (!terms) { openTab('defi'); showWallet('safes'); say('The spend link does not read. Missing: <safe>.<key>.<amount>.<time>. To fix: ask the signer to copy the link again.', 'danger'); return; }
+        openSpend(terms);
+      }
+      async function spendTerms(values) {
+        if (!spend || spendBusy) return;
+        var who = ArkUI.accountSession.current(), fh = await loadHoldingsModule();
+        var typed = String(values && values.amount != null ? values.amount : '').trim(), amount;
+        try { amount = fh.parseFxn(typed).toString(); } catch (error) { result('spendStatus', text(error && error.message, 'The amount does not read.'), 'danger'); return; }
+        var next = { label: spend.label, to: String(values && values.to || '').trim(), amount: amount, atMs: Date.now() };
+        var why = holdings.safes && holdings.safes.kind === 'ok' ? fh.spendRefusal(holdings.safes, next) : { failure: 'The safes are not read.', missing: 'the network\u2019s plan', remedy: 'press Refresh on the wallet' };
+        if (why) { result('spendStatus', refusalText(why), 'danger'); return; }
+        spend = Object.assign(spend, next, { checked: null });
+        await spendApprove(who);
+      }
+      async function spendApprove() {
+        var who = ArkUI.accountSession.current();
+        if (!who || !spend || !spend.atMs || spendBusy) return;
+        setSpendBusy(true);
+        try {
+          var dw = await loadWalletModule(), fh = await loadHoldingsModule();
+          var line = await fh.approveSpend(dw, { who: who, wire: walletWire(dw), safes: holdings.safes, terms: spend });
+          var field = linesField();
+          if (field && field.value.indexOf(line) < 0) field.value = [field.value.trim(), line].filter(Boolean).join('\n');
+          spend.mine = line;
+          await spendCheck(false);
+          copyLine(line);
+        } catch (error) {
+          result('spendStatus', text(error && error.message, 'Not signed.'), /cancel/i.test(error && error.message || '') ? 'drift' : 'danger');
+        } finally { setSpendBusy(false); }
+      }
+      function copyLine(line) {
+        var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(line) : Promise.reject(new Error('no clipboard'));
+        clip.then(function () { result('spendStatus', 'Approved. Your approval line is copied. Send it, with the spend link, to the signer who sends the spend.', 'trust'); },
+          function () { result('spendStatus', 'Approved. Copy your line from the box below and send it to the signer who sends the spend.', 'trust'); });
+      }
+      async function spendCheck(report) {
+        if (!spend || !spend.atMs || !holdings.safes || holdings.safes.kind !== 'ok') return;
+        var fh = await loadHoldingsModule(), field = linesField();
+        var got = await fh.checkApprovals(holdings.safes, spend, field ? field.value : '');
+        spend.checked = got;
+        paintSpend();
+        var sf = spendSafe();
+        if (got.bad.length) result('spendStatus', 'Not counted: ' + got.bad.join('; ') + '. Missing: lines signed for these exact terms. To fix: remove them, and ask that signer to approve from the spend link.', 'danger');
+        else if (report) result('spendStatus', got.good.size + ' of ' + (sf ? sf.threshold : '?') + ' approvals check against these terms.', sf && got.good.size >= sf.threshold ? 'trust' : 'drift');
+      }
+      function spendLink() {
+        if (!spend || !spend.atMs) return;
+        var link = location.origin + '/account?safe-spend=' + holdingsApi.encodeSpend(spend);
+        var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(link) : Promise.reject(new Error('no clipboard'));
+        clip.then(function () { result('spendStatus', 'Spend link copied. Each council signer opens it, approves and sends you their line.', 'trust'); },
+          function () { result('spendStatus', 'Copy is blocked in this browser. Send this link by hand: ' + link); });
+      }
+      async function spendSubmit() {
+        var who = ArkUI.accountSession.current();
+        if (!who || !spend || !spend.atMs || spendBusy) return;
+        await spendCheck(false);
+        setSpendBusy(true);
+        try {
+          var dw = await loadWalletModule(), fh = await loadHoldingsModule();
+          var done = await fh.submitSpend(dw, { who: who, wire: walletWire(dw), safes: holdings.safes, terms: spend, approvals: spend.checked ? spend.checked.good : new Map() });
+          result('spendStatus', 'Sent. The chain moved ' + fh.fxnText(spend.amount) + ' from the ' + spend.label + ' safe. Record ' + done.cid.slice(0, 12) + '\u2026.', 'trust');
+          loadWallet();
+        } catch (error) {
+          result('spendStatus', text(error && error.message, 'Not sent.'), /cancel/i.test(error && error.message || '') ? 'drift' : 'danger');
+        } finally { setSpendBusy(false); }
       }
 
       /* One send at a time; the review modal is opened by the module.
@@ -1406,9 +1797,14 @@
         walletBusy = true;
         setSendable(false);
         try {
-          var dw = await loadWalletModule();
-          var reply = await dw.sendFxn({ who: who, wire: walletWire(dw), amount: amount, recipient: recipient });
-          say(dw.describeSendReply(reply), reply.kind === 'ok' ? 'drift' : 'danger');
+          var dw = await loadWalletModule(), fh = await loadHoldingsModule();
+          await fh.readDecimals(walletWire(dw));
+          var units = fh.parseFxn(amount);   // typed FXN -> base units at the node's decimals; refuses with what to type
+          // From: one of your keys that can sign on this sign-in (the Public ID in use when none was picked)
+          sendFrom = String(values && values.from || '').trim();
+          var from = (holdings.keys || []).filter(function (k) { return k.key === sendFrom && k.signer; })[0];
+          var reply = await dw.sendFxn({ who: who, wire: walletWire(dw), amount: units, recipient: recipient, signer: from ? from.signer() : dw.signerFor(who), show: fh.fxnText });
+          say(dw.describeSendReply(reply, fh.fxnText), reply.kind === 'ok' ? 'drift' : 'danger');
           if (reply.kind === 'ok') {
             // Final only when the chain's lead nodes confirm it (owner rule 2026-10-27); waiting until then.
             dw.watchSendConfirmed(walletWire(dw), reply).then(function (state) {

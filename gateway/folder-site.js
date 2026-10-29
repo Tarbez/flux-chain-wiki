@@ -11,6 +11,12 @@
    the frame never fetches anything. A reference to a file the archive does not hold is left as it is
    and the CSP blocks it.
 
+   A flux-folder-site/2 site (an index plus 8 MiB blocks, vendor/bundle-deploy/folder-site-core.js) lists
+   its files without their bytes. index-site.js fetches only what one page needs: loadPageFiles below
+   walks the page's references (the same ones buildPageHtml rewrites) and the style sheets they import,
+   and returns a view of the site whose needed files carry their verified bytes. A file left without
+   bytes counts as not held, so its reference stays as written and the CSP blocks it.
+
    A service worker could not do this: Chromium does not let a service worker answer for an
    opaque-origin document (measured 2026-10-23), and a worker serving the site on the label origin would
    hand the site that origin. */
@@ -62,6 +68,9 @@ export function readFolderSite(decoded) {
   }
   return { ok: true, site: { entry: payload.entry, files } };
 }
+
+/* A file whose bytes are here: every /1 file, and a /2 file once its blocks are fetched. */
+const held = (file) => Boolean(file && file.bytes);
 
 function encodePath(path) {
   return path.split("/").map(encodeURIComponent).join("/");
@@ -126,24 +135,33 @@ export function dataUrlOf(file) {
 
 const isCss = (file) => /^text\/css\b/i.test(file.contentType);
 
+/* The references CSS makes to other files, read by rewriteCss and by loadPageFiles alike. */
+const CSS_URL = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^"')\s]*))\s*\)/gi;
+const CSS_IMPORT = /@import\s+(?:"([^"]*)"|'([^']*)')/gi;
+
+/* The attributes that name a file of the site, read by buildPageHtml and by loadPageFiles alike.
+   [src] skips frames and iframes: a frame is never filled from the archive. */
+const FILE_ATTRIBUTES = [["[src]", "src"], ["video[poster]", "poster"], ["link[href]", "href"], ["image[href]", "href"]];
+const isFrame = (element) => /^i?frame$/i.test(element.localName);
+
 /** CSS text from the file at `cssPath` -> the same CSS with every url() and @import that names a file in
  *  the archive replaced by a data: URL. An imported style sheet is rewritten the same way, once per chain. */
 export function rewriteCss(site, cssPath, text, chain = new Set([cssPath])) {
   const inline = (ref) => {
     const target = resolveReference(site, cssPath, ref);
-    if (target.kind !== "site" || !target.file) return null;
+    if (target.kind !== "site" || !held(target.file)) return null;
     if (!isCss(target.file)) return dataUrlOf(target.file);
     if (chain.has(target.path)) return null;
     const css = rewriteCss(site, target.path, textDecoder.decode(target.file.bytes), new Set([...chain, target.path]));
     return dataUrlOf({ contentType: target.file.contentType, bytes: textEncoder.encode(css) });
   };
   return text
-    .replace(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^"')\s]*))\s*\)/gi, (whole, dq, sq, bare) => {
+    .replace(CSS_URL, (whole, dq, sq, bare) => {
       const ref = dq ?? sq ?? bare;
       const data = inline(ref);
       return data ? `url("${data}")` : whole;
     })
-    .replace(/@import\s+(?:"([^"]*)"|'([^']*)')/gi, (whole, dq, sq) => {
+    .replace(CSS_IMPORT, (whole, dq, sq) => {
       const data = inline(dq ?? sq);
       return data ? `@import url("${data}")` : whole;
     });
@@ -153,7 +171,7 @@ function rewriteSrcset(site, fromPath, value) {
   return value.split(",").map((candidate) => {
     const [ref, ...descriptor] = candidate.trim().split(/\s+/);
     const target = resolveReference(site, fromPath, ref);
-    const url = target.kind === "site" && target.file ? dataUrlOf(target.file) : ref;
+    const url = target.kind === "site" && held(target.file) ? dataUrlOf(target.file) : ref;
     return [url, ...descriptor].join(" ");
   }).join(", ");
 }
@@ -180,7 +198,7 @@ const NAVIGATION_SCRIPT_URL = `data:text/javascript;base64,${base64Of(textEncode
 export function buildPageHtml(site, pagePath, doc) {
   const fileUrl = (ref) => {
     const target = resolveReference(site, pagePath, ref);
-    if (target.kind !== "site" || !target.file) return null;
+    if (target.kind !== "site" || !held(target.file)) return null;
     if (!isCss(target.file)) return dataUrlOf(target.file);
     const css = rewriteCss(site, target.path, textDecoder.decode(target.file.bytes));
     return dataUrlOf({ contentType: target.file.contentType, bytes: textEncoder.encode(css) });
@@ -199,13 +217,10 @@ export function buildPageHtml(site, pagePath, doc) {
   for (const meta of doc.querySelectorAll("meta[http-equiv]")) {
     if (/^content-security-policy$/i.test(meta.getAttribute("http-equiv").trim())) meta.remove();
   }
-  for (const element of doc.querySelectorAll("[src]")) {
-    if (!/^i?frame$/i.test(element.localName)) setFileUrl(element, "src");
+  for (const [selector, attribute] of FILE_ATTRIBUTES) {
+    for (const element of doc.querySelectorAll(selector)) if (!isFrame(element)) setFileUrl(element, attribute);
   }
   for (const element of doc.querySelectorAll("[srcset]")) element.setAttribute("srcset", rewriteSrcset(site, pagePath, element.getAttribute("srcset")));
-  for (const element of doc.querySelectorAll("video[poster]")) setFileUrl(element, "poster");
-  for (const element of doc.querySelectorAll("link[href]")) setFileUrl(element, "href");
-  for (const element of doc.querySelectorAll("image[href]")) setFileUrl(element, "href");
   for (const style of doc.querySelectorAll("style")) style.textContent = rewriteCss(site, pagePath, style.textContent);
   for (const element of doc.querySelectorAll("[style]")) element.setAttribute("style", rewriteCss(site, pagePath, element.getAttribute("style")));
 
@@ -227,4 +242,61 @@ export function buildPageHtml(site, pagePath, doc) {
 
   const doctype = doc.doctype ? `<!DOCTYPE ${doc.doctype.name}>` : "";
   return { html: doctype + doc.documentElement.outerHTML, title: doc.title };
+}
+
+/** Every reference a parsed page makes to a file: the attributes buildPageHtml rewrites, srcset
+ *  candidates, and url() / @import in <style> and style="". -> [ref] as written. */
+function pageReferences(doc) {
+  const refs = [];
+  for (const [selector, attribute] of FILE_ATTRIBUTES) {
+    for (const element of doc.querySelectorAll(selector)) if (!isFrame(element)) refs.push(element.getAttribute(attribute));
+  }
+  for (const element of doc.querySelectorAll("[srcset]")) {
+    for (const candidate of element.getAttribute("srcset").split(",")) refs.push(candidate.trim().split(/\s+/)[0]);
+  }
+  for (const style of doc.querySelectorAll("style")) refs.push(...cssReferences(style.textContent));
+  for (const element of doc.querySelectorAll("[style]")) refs.push(...cssReferences(element.getAttribute("style")));
+  return refs;
+}
+
+function cssReferences(text) {
+  const refs = [];
+  for (const match of String(text).matchAll(CSS_URL)) refs.push(match[1] ?? match[2] ?? match[3]);
+  for (const match of String(text).matchAll(CSS_IMPORT)) refs.push(match[1] ?? match[2]);
+  return refs;
+}
+
+/** The files the page at `pagePath` (parsed into `doc`) needs, given their bytes.
+ *  `loadBytes(file)` -> Promise<Uint8Array | null>: the file's verified bytes, or null to leave it out
+ *  (it then counts as not held). It throws to refuse the page, for example on a block that does not
+ *  match its ID. Style sheets are read as they arrive, so the files they import are fetched too.
+ *  -> a view of `site` (same entry, its own files map) to give buildPageHtml. `site` is not changed.
+ *  A /1 site's files already hold their bytes, so nothing is fetched for it. */
+export async function loadPageFiles(site, pagePath, doc, loadBytes) {
+  const files = new Map(site.files);
+  const view = { ...site, files };
+  const seen = new Set();
+  let queue = [];
+  const want = (fromPath, ref) => {
+    const target = resolveReference(view, fromPath, ref);
+    if (target.kind !== "site" || !target.file || seen.has(target.path)) return;
+    seen.add(target.path);
+    queue.push(target.path);
+  };
+  for (const ref of pageReferences(doc)) want(pagePath, ref);
+  while (queue.length) {
+    const batch = queue;
+    queue = [];
+    await Promise.all(batch.map(async (path) => {
+      const file = files.get(path);
+      if (held(file)) return;
+      const bytes = await loadBytes(file);
+      if (bytes) files.set(path, { ...file, bytes });
+    }));
+    for (const path of batch) {
+      const file = files.get(path);
+      if (held(file) && isCss(file)) for (const ref of cssReferences(textDecoder.decode(file.bytes))) want(path, ref);
+    }
+  }
+  return view;
 }

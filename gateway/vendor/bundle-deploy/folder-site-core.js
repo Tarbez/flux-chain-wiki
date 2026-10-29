@@ -20,6 +20,10 @@
      2. The headers a site may set for itself in `_headers`, and the
         parser for that file. pack refuses a rule outside the list, and
         the server drops it, so both judge one file by one list.
+     3. The archive a folder packs to (folderSiteArchiveInput,
+        folderSiteIndexArchiveInput), the content types and the skipped
+        names, shared by `bundle-deploy pack` and the public Bundles page
+        (web/), which packs a folder in the browser (2026-10-29).
 
    Pure and browser-safe: no node: imports. The boxed shell can import it
    once it reads /2.
@@ -31,6 +35,78 @@ export const FOLDER_SITE_INDEX_SCHEMA = 'flux-folder-site/2';
 
 /** Block size for /2 sites: the app-release block, so both go up with the same put-batch. */
 export const SITE_BLOCK_BYTES = APP_BLOCK_BYTES;
+
+/* The archive a folder packs to, written once so the CLI (src/folder-archive.js) and the public Bundles page (web/)
+   pack one folder to the same bytes and the same ID: files in code-unit path order, a fixed archive id and time (a
+   publish time lives on the release record), nothing gzipped (gzip output differs between zlib builds). */
+export const SITE_ARCHIVE_ID = 'flux-folder-site';
+export const SITE_ARCHIVE_CREATED_AT = '1970-01-01T00:00:00.000Z';
+
+/** Files a folder carries by accident: system litter, never site content. A folder of this name is skipped whole. */
+export const SKIPPED_NAMES = Object.freeze(new Set(['.DS_Store', 'Thumbs.db', '.git']));
+
+const CONTENT_TYPES = {
+  '.html': 'text/html; charset=utf-8', '.htm': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.md': 'text/markdown; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8', '.svg': 'image/svg+xml',
+  '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.webp': 'image/webp', '.avif': 'image/avif', '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2', '.woff': 'font/woff', '.ttf': 'font/ttf', '.otf': 'font/otf',
+  '.mp4': 'video/mp4', '.webm': 'video/webm', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav',
+  '.pdf': 'application/pdf',
+};
+
+/** The content type a packed file is served with, from its name's extension (as node:path extname reads it). */
+export function contentTypeFor(file) {
+  const base = String(file).split('/').pop();
+  const dot = base.lastIndexOf('.');
+  const ext = dot > 0 ? base.slice(dot).toLowerCase() : '';
+  return CONTENT_TYPES[ext] || 'application/octet-stream';
+}
+
+/** Code-unit order, not locale order, so every machine lists the same files the same way. */
+export function comparePaths(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+const strictUtf8 = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
+
+function base64OfBytes(bytes) {
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(binary);
+}
+
+/** utf8 when the bytes are valid UTF-8 (they then round-trip exactly), else base64. */
+function assetPayload(bytes) {
+  try { return { payload: strictUtf8.decode(bytes), encoding: 'utf8' }; }
+  catch { return { payload: base64OfBytes(bytes), encoding: 'base64' }; }
+}
+
+/**
+ * encodeArchive's input for a /1 site. `files` = [{ path, contentType, bytes }] in comparePaths order.
+ * The archive holds one route, `site` ({ schema, entry, files: [paths] }), and one asset per file.
+ */
+export function folderSiteArchiveInput({ entry, files }) {
+  return {
+    archiveId: SITE_ARCHIVE_ID,
+    createdAt: SITE_ARCHIVE_CREATED_AT,
+    entry,
+    routes: [{ routeId: 'site', path: '/', payload: { schema: FOLDER_SITE_SCHEMA, entry, files: files.map((f) => f.path) } }],
+    assets: files.map((f) => ({ path: f.path, contentType: f.contentType, ...assetPayload(f.bytes), compression: 'identity' })),
+  };
+}
+
+/** encodeArchive's input for a /2 index. `files` = [{ path, contentType, size, blocks }] in comparePaths order. */
+export function folderSiteIndexArchiveInput({ entry, files }) {
+  return {
+    archiveId: SITE_ARCHIVE_ID,
+    createdAt: SITE_ARCHIVE_CREATED_AT,
+    entry,
+    routes: [{ routeId: 'site', path: '/', payload: folderSiteIndexPayload({ entry, files }) }],
+    assets: [],
+  };
+}
 
 export const HEADERS_FILE = '_headers';
 export const HEADERS_FILE_MAX_BYTES = 64 * 1024;

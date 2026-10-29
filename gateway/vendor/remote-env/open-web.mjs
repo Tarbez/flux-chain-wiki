@@ -2,6 +2,8 @@
 // artifact.mjs write, read in a web page or in Node through globalThis.crypto.subtle. No node: import, so a
 // browser loads this file as it is. The DEFXN gateway's tester page vendors it byte for byte
 // (flux/defxn/gateway/vendor/remote-env/); fix it here and copy it over.
+// Its helpers (canonical JSON, the chunk nonce and AAD, the frame constants) are exported for seal-web.mjs, the
+// WebCrypto SEAL side (2026-10-29), so both sides read one definition.
 //
 // What it opens: a grant of algorithm x25519-hkdf-sha256-aes-256-gcm, and a chunk frame of version 2 (AES-256-GCM).
 // What it refuses: the XChaCha20-Poly1305 kinds (grant algorithm x25519-hkdf-sha256-xchacha20-poly1305, frame
@@ -15,14 +17,14 @@
 export const GRANT_ALGORITHM_AES = 'x25519-hkdf-sha256-aes-256-gcm';
 export const GRANT_ALGORITHM_XCHACHA = 'x25519-hkdf-sha256-xchacha20-poly1305';
 // Equal to sealed-grant.mjs GRANT_INFO_AES.
-const GRANT_INFO_AES = 'flux.remote-env.sealed-grant.aes-256-gcm.v1';
+export const GRANT_INFO_AES = 'flux.remote-env.sealed-grant.aes-256-gcm.v1';
 export const FRAME_VERSION_XCHACHA = 1;
 export const FRAME_VERSION_AES = 2;
-const MAGIC = 'FLXAEADv';
-const HEADER_SIZE = 8 + 4 + 4 + 24 + 8 + 4;
-const TAG = 16;
+export const MAGIC = 'FLXAEADv';
+export const HEADER_SIZE = 8 + 4 + 4 + 24 + 8 + 4;
+export const TAG = 16;
 // PKCS#8 for an X25519 private key: a fixed 16-byte prefix, then the 32 key bytes (sealed-release.js uses the same).
-const X25519_PKCS8_PREFIX = [0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x6e, 0x04, 0x22, 0x04, 0x20];
+export const X25519_PKCS8_PREFIX = [0x30, 0x2e, 0x02, 0x01, 0x00, 0x30, 0x05, 0x06, 0x03, 0x2b, 0x65, 0x6e, 0x04, 0x22, 0x04, 0x20];
 
 export class OpenError extends Error {
   constructor(code, failure, missing, remedy) {
@@ -33,9 +35,9 @@ export class OpenError extends Error {
 }
 
 const subtle = () => globalThis.crypto?.subtle;
-const utf8 = (text) => new TextEncoder().encode(text);
+export const utf8 = (text) => new TextEncoder().encode(text);
 
-function concat(...parts) {
+export function concat(...parts) {
   const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let at = 0;
   for (const part of parts) { out.set(part, at); at += part.length; }
@@ -70,7 +72,7 @@ function bytesOfHex(hex) {
 // The canonical JSON the epoch is signed and addressed over. The one rule lives in
 // flux/defi-library/src/canonicalAddressing.mjs; that file imports node:crypto at its top, so a browser cannot
 // load it, and this is the same three lines. The comparison against epoch.mjs's verifyEpoch checks they agree.
-function stableStringify(v) {
+export function stableStringify(v) {
   return Array.isArray(v)
     ? `[${v.map(stableStringify).join(',')}]`
     : v && typeof v === 'object'
@@ -187,14 +189,14 @@ export async function openContentKeyWeb({ epochRecord, recipient }) {
   }
 }
 
-function chunkNonce12(baseNonce, chunkIndex) {
+export function chunkNonce12(baseNonce, chunkIndex) {
   const nonce = baseNonce.slice(0, 12);
   let index = BigInt(chunkIndex);
   for (let i = 11; i >= 4; i -= 1) { nonce[i] ^= Number(index & 0xffn); index >>= 8n; }
   return nonce;
 }
 
-function chunkAad(chunkIndex, plaintextTotal) {
+export function chunkAad(chunkIndex, plaintextTotal) {
   const aad = new Uint8Array(16);
   const view = new DataView(aad.buffer);
   view.setBigUint64(0, BigInt(chunkIndex));

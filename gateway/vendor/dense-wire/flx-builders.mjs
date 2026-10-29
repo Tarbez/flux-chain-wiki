@@ -5,6 +5,7 @@
 
 import { hexOfUtf8, utf8OfHex, signaturePrefix } from "./flx-dumb-parser.mjs";
 import { sha256Hex, signHex, signBytesHex } from "./flx-crypto.mjs";
+import { mulDivCeil } from "./flx-amount.mjs";
 
 export const ROSTER_KIND_ANNOUNCE = "KRSTR1";
 export const ROSTER_KIND_LEAVE = "KRSTR1LEAVE";
@@ -14,6 +15,8 @@ export const DOMAIN_KIND_CLAIM = "KDOMCLAIM2";
 export const DOMAIN_KIND_RECORD_UPDATE = "KDOMREC2";
 export const DOMAIN_KIND_XFER2 = "KDOMXFER2";
 export const DOMAIN_KIND_BUY = "KDOMBUY1";
+/** A name's rent payment (`name_rent::DOMAIN_KIND_RENT`). */
+export const DOMAIN_KIND_RENT = "KDOMRENT1";
 export const RECORD_GENESIS_PREV = "0".repeat(64);
 export const RESOLVER_KIND_LAUNCH = "KRESOLV1";
 /** Round four (r4a): a backed launch's `KCHAIN1` (`chain::chain_launch`). */
@@ -216,7 +219,7 @@ export async function buildPeerAnnounce({
   return `${body}-S${sig}`;
 }
 
-// --- Name ownership and records (`.ark` / `.deadark` / `.fxn`) ---------------
+// --- Name ownership, rent and records (`.fxn` / `.fxndev`) --------------------
 //
 // dense-wire is the only authority for these names. Every builder below
 // mirrors `src/chain.rs` byte for byte; `resolvers/domain/builder-vectors.tsv`
@@ -229,24 +232,103 @@ export async function buildPeerAnnounce({
 // JSON) were never admitted by a live node and are removed, not kept as
 // legacy; no past record was rewritten.
 
+/** The endings this chain carries today (`name_rent::NAME_ENDINGS`): `.fxn` on the mainnet, `.fxndev` on every
+ *  test network (owner ruling 2026-10-29). Other endings wait for their chain's ending claim. */
+export const NAME_ENDINGS = Object.freeze(["fxn", "fxndev"]);
+
 /** Same rule as the Rust `is_claimable_domain_name`, used by EVERY domain
- *  verb: exactly one label plus one of the three mesh TLDs (`nodes.fxn`,
- *  never `nodes.defxn.fxn`). `resolvers/domain/name-vectors.tsv` is read by
- *  the Rust tests and by `test/domain-names.test.mjs`, so the two cannot drift. */
+ *  verb: exactly one label plus `.fxn` or `.fxndev` (`nodes.fxn`, never
+ *  `nodes.defxn.fxn`). Which ending a network serves is `nameEnding`.
+ *  `resolvers/domain/name-vectors.tsv` is read by the Rust tests and by
+ *  `test/domain-names.test.mjs`, so the two cannot drift. */
 export function isClaimableDomainName(name) {
   if (!isValidFqdn(name)) return false;
   const parts = name.split(".");
   if (parts.length !== 2) return false;
   const [label, tld] = parts;
-  // a .fxn label of the key-name shape belongs to the key it is made from (keyName), never to a claim
-  if (tld === "fxn" && isKeyNameLabel(label)) return false;
-  return tld === "ark" || tld === "deadark" || tld === "fxn";
+  // a label of the key-name shape belongs to the key it is made from (keyName), never to a claim
+  if (isKeyNameLabel(label)) return false;
+  return NAME_ENDINGS.includes(tld);
+}
+
+// --- Name rent (owner rulings 2026-10-29; Rust `name_rent.rs`) ---------------
+// `resolvers/domain/rent-vectors.tsv` is read by the Rust tests and by
+// `test/name-rent.test.mjs`, so the two cannot drift.
+
+/** A `.fxn` name's price: 300 euro cents a year, 1 to 10 whole years, paid in FXN. */
+export const RENT_CURRENCY = "EUR";
+export const RENT_MINOR_PER_YEAR = 300;
+export const RENT_MAX_YEARS = 10;
+/** A year of 365 days and the 45-day grace, in seconds (`fxn_genesis::YEAR`, `name_rent::GRACE_SECS`). */
+export const YEAR_SECS = 365 * 86_400;
+export const GRACE_SECS = 45 * 86_400;
+
+/** The ending `network` serves: `fxn` on the mainnet (`NETWORK_MAIN`, below), `fxndev` on every test network
+ *  (`name_rent::name_ending`). */
+export function nameEnding(network) {
+  return network === NETWORK_MAIN ? "fxn" : "fxndev";
+}
+
+/** Where a name paid through `paidUntil` stands at `now` (unix seconds): "paid", "grace" or "lapsed"
+ *  (`name_rent::term_state`). A test network's names are "free" and never reach this. */
+export function termState(paidUntil, now) {
+  if (now <= paidUntil) return "paid";
+  if (now <= paidUntil + GRACE_SECS) return "grace";
+  return "lapsed";
+}
+
+/** The new paid-until after paying `years` at clock `m` on a name paid through `paidUntil`
+ *  (`name_rent::extend_term`): `{ until }`, or `{ refused: [failure, missing, remedy] }`. */
+export function extendTerm(paidUntil, m, years) {
+  if (!Number.isInteger(years) || years < 1 || years > RENT_MAX_YEARS) {
+    return { refused: [`the payment is for ${years} years`, `a whole number of years from 1 to ${RENT_MAX_YEARS}`, `pay for 1 to ${RENT_MAX_YEARS} years`] };
+  }
+  if (termState(paidUntil, m) === "lapsed") {
+    return { refused: [`the name was paid until ${paidUntil}, and its grace ended at ${paidUntil + GRACE_SECS}, before this payment at ${m}`, "a payment stamped no later than the end of the grace", "the name is free to claim again: claim it anew, then pay"] };
+  }
+  const until = paidUntil + years * YEAR_SECS;
+  const furthest = m + RENT_MAX_YEARS * YEAR_SECS;
+  if (until > furthest) {
+    const room = Math.floor(Math.max(0, furthest - paidUntil) / YEAR_SECS);
+    return { refused: [`${years} years would leave the name paid until ${until}, more than ${RENT_MAX_YEARS} years past this payment at ${m}`, `at most ${room} more years now`, `pay for ${room} years or fewer`] };
+  }
+  return { until };
+}
+
+/** FXN base units (BigInt) `years` cost when `minor` cents buy `fxn` FXN base units: the whole payment rounded up
+ *  once, to the next base unit (`name_rent::rent_due`). At 9 decimals and 0.90 EUR per FXN, one year is
+ *  3333333334n (3.333333334 FXN). `null` for a zero price. Ask a node `DOM_RENT_QUOTE` for the price in force; print
+ *  it with `formatAmount` from flx-amount.mjs. */
+export function rentDue(years, minor, fxn) {
+  return mulDivCeil(BigInt(years) * BigInt(RENT_MINOR_PER_YEAR), BigInt(fxn), BigInt(minor));
+}
+
+/** Read a `KDOMRENT1` (`name_rent::read_rent`): `{ fqdn, linkCid, years, amount, lockCid, m }`. Throws on a shape the
+ *  node refuses. `raw` is `admit(text)` from flx-dumb-parser. */
+export function readRentEntry(raw) {
+  if (raw.payload("K") !== DOMAIN_KIND_RENT) throw new Error(`not a ${DOMAIN_KIND_RENT}`);
+  const fqdn = utf8OfHex(raw.payload("W") ?? "");
+  if (!isClaimableDomainName(fqdn)) throw new Error("W is not a flat .fxn or .fxndev name");
+  if (raw.cCount() !== 5) throw new Error("a rent carries exactly C[1] head, C[2] years, C[3] FXN, C[4] lock");
+  const whole = (hex) => {
+    const t = decodePriceField(hex ?? "");
+    if (!/^(0|[1-9][0-9]*)$/.test(t)) throw new Error(`${JSON.stringify(t)} is not a whole number`);
+    return Number(t);
+  };
+  const linkCid = raw.c(1);
+  const lockCid = raw.c(4);
+  if (!/^[0-9a-f]{64}$/.test(linkCid ?? "") || !/^[0-9a-f]{64}$/.test(lockCid ?? "")) throw new Error("C[1] and C[4] are 64 lowercase hex");
+  const years = whole(raw.c(2));
+  const amount = BigInt(decodePriceField(raw.c(3) ?? ""));
+  if (years < 1 || years > RENT_MAX_YEARS) throw new Error("years are 1 to 10");
+  if (amount < 1n) throw new Error("the FXN paid (base units) is above 0");
+  return { fqdn, linkCid, years, amount, lockCid, m: Number(raw.payload("M")) };
 }
 
 function refuseName(fqdn, what) {
   return new Error(
     `That name is not one this chain will ${what}. ` +
-      `Missing: a flat name, exactly one label plus .ark, .deadark or .fxn (got ${JSON.stringify(fqdn)}). ` +
+      `Missing: a flat name, exactly one label plus .fxn or .fxndev (got ${JSON.stringify(fqdn)}). ` +
       `To fix: use a name like "nodes.fxn" (lowercase [a-z0-9-], no sub-labels).`,
   );
 }
@@ -420,7 +502,7 @@ export function decodeTarget(boxPayload) {
 export function readRecordEntry(raw) {
   if (raw.payload("K") !== DOMAIN_KIND_RECORD_UPDATE) throw new Error(`K is ${raw.payload("K")}, not ${DOMAIN_KIND_RECORD_UPDATE}`);
   const fqdn = utf8OfHex(raw.payload("W") ?? "");
-  if (!isClaimableDomainName(fqdn)) throw new Error("W must be hex-of-utf8 of one label plus .ark, .deadark or .fxn");
+  if (!isClaimableDomainName(fqdn)) throw new Error("W must be hex-of-utf8 of one label plus .fxn or .fxndev");
   const linkCid = raw.c(1);
   const priorRecordCid = raw.c(2);
   if (!/^[0-9a-f]{64}$/.test(linkCid ?? "") || linkCid === RECORD_GENESIS_PREV) throw new Error("C[1] must be the ownership entry CID");
@@ -580,6 +662,33 @@ export async function buildDomainPurchaseWithSigner({ signer, pos, prevCid, fqdn
   const body =
     `${domainEntryHead(signer.pubHex, DOMAIN_KIND_BUY, fqdn, pos, prevCid, nowSec)}-C${prior}-C${buyerPubHex}-C${buyerSigHex}` +
     `-C${encodePriceField(asset)}-C${encodePriceField(amount)}-C${settlementValueObjectCid}`;
+  return signDomainEntry(signer, body);
+}
+
+/** Build and sign a KDOMRENT1: the holder pays `amount` whole FXN for `years` (1 to 10) through its native lock
+ *  `lockCid` (flx-native-locks.mjs `rentLockTerms`: purpose rent, beneficiary the ops safe `DOM_RENT_QUOTE` names),
+ *  naming the current ownership head `headCid` (DOM_WHO). Mirrors the Rust `chain::domain_rent` byte for byte. */
+export async function buildDomainRent({ privateKey, pubHex, ...rest }) {
+  return buildDomainRentWithSigner({ signer: keySigner(privateKey, pubHex), ...rest });
+}
+
+export async function buildDomainRentWithSigner({ signer, pos, prevCid, fqdn, headCid, years, amount, lockCid, nowSec }) {
+  if (!isClaimableDomainName(fqdn)) throw refuseName(fqdn, "take rent for");
+  requireCid(headCid, "ownership head CID", `read the current head with DOM_WHO ${fqdn} and use its CID.`);
+  requireCid(lockCid, "rent lock CID", "lock the rent first (flx-native-locks.mjs rentLockTerms), then pass that lock's CID.");
+  if (!Number.isInteger(years) || years < 1 || years > RENT_MAX_YEARS) {
+    throw new Error(`A rent buys 1 to ${RENT_MAX_YEARS} whole years. Missing: years in 1..${RENT_MAX_YEARS} (got ${JSON.stringify(years)}). To fix: pick 1 to ${RENT_MAX_YEARS} years.`);
+  }
+  let units = null;
+  try {
+    units = typeof amount === "bigint" || (typeof amount === "string" && /^[0-9]+$/.test(amount)) || Number.isSafeInteger(amount) ? BigInt(amount) : null;
+  } catch {
+    units = null;
+  }
+  if (units === null || units < 1n) {
+    throw new Error(`A rent pays FXN in base units. Missing: an amount of 1 base unit or more (got ${JSON.stringify(String(amount))}). To fix: pay what DOM_RENT_QUOTE names.`);
+  }
+  const body = `${domainEntryHead(signer.pubHex, DOMAIN_KIND_RENT, fqdn, pos, prevCid, nowSec)}-C${headCid}-C${encodePriceField(String(years))}-C${encodePriceField(units.toString())}-C${lockCid}`;
   return signDomainEntry(signer, body);
 }
 

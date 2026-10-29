@@ -7,10 +7,16 @@
    genesis key. The node is not trusted: a proof that does not verify is refused by
    name, a name the chain does not hold is "no such name", and nothing falls back to
    the retired names/* registry (the Explorer `names` source this shell read until
-   2026-10-23). */
+   2026-10-23).
+
+   The network decides the ending (2026-10-29, docs/FXN-NAME-RENT-DESIGN.md): `.fxn` on
+   fxn-mainnet, `.fxndev` on every test network, from the shared `nameEnding`. The network
+   is name-config.js NETWORK when set, else the first node's BUILD_INFO. The verifier gets
+   the network and the clock, so a name in its grace or lapsed is refused by name and its
+   site is never shown. */
 import { WireClient } from "./vendor/dense-wire/flx-wire.mjs";
 import { verifyDomainProof } from "./vendor/dense-wire/flx-domain-proof.mjs";
-import { isClaimableDomainName } from "./vendor/dense-wire/flx-builders.mjs";
+import { isClaimableDomainName, nameEnding } from "./vendor/dense-wire/flx-builders.mjs";
 
 export const NAME_AUTHORITY_URL = "https://domains.defxn.com";
 
@@ -26,6 +32,28 @@ export function closeWireClient(client) {
   try { client.close(); } catch {}
   const pending = client.ready;
   if (pending && typeof pending.then === "function") pending.then(() => { try { client.close(); } catch {} }, () => {});
+}
+
+/** The network this shell serves and its one ending: `network` when pinned, else the first node whose
+ *  BUILD_INFO names one (its fifth field).
+ *  -> { ok: true, network, ending, from } | { ok: false, reason: "NAME_UNRESOLVABLE", detail } */
+export async function servedNetwork({ network = "", nodes = [], wireClient = (url) => new WireClient(url) } = {}) {
+  if (network) return { ok: true, network, ending: nameEnding(network), from: "pin" };
+  const failures = [];
+  for (const url of nodes) {
+    const client = wireClient(url);
+    try {
+      await client.ready;
+      const fields = String(await client.send("BUILD_INFO\t")).trim().split("\t");
+      if (fields[0] === "BUILD_INFO" && /^fxn-[a-z0-9-]+$/.test(fields[4] ?? "")) return { ok: true, network: fields[4], ending: nameEnding(fields[4]), from: url };
+      failures.push(`${url}: names no network in BUILD_INFO`);
+    } catch (error) {
+      failures.push(`${url}: ${describe(error)}`);
+    } finally {
+      closeWireClient(client);
+    }
+  }
+  return { ok: false, reason: "NAME_UNRESOLVABLE", detail: `No name node said which network it runs (${failures.join("; ") || "no node is configured"}). The gateway's operator can pin it in gateway/name-config.js (NETWORK).` };
 }
 
 /** Ask the nodes in order; the first that answers wins (DOM_NONE is an answer).
@@ -50,9 +78,15 @@ export async function askDomainProof({ nodes, fqdn, wireClient = (url) => new Wi
 /** -> { ok: true, name, owner, ownerEntryCid, record: { cid, targets, updatedAt } | null,
  *       source, notChecked }
  *    | { ok: false, reason, detail }   reason is one of app.js's FAILURE_MESSAGES keys */
-export async function resolveName({ name, nodes, genesisPubHex, askProof = null } = {}) {
+export async function resolveName({ name, nodes, genesisPubHex, network, nowSec = Math.floor(Date.now() / 1000), askProof = null } = {}) {
   if (!isClaimableDomainName(name)) {
-    return { ok: false, reason: "NAME_NOT_FOUND", detail: `${name} is not a name the chain carries: one label plus .fxn, .ark or .deadark.` };
+    return { ok: false, reason: "NAME_NOT_FOUND", detail: `${name} is not a name the chain carries: one label plus .fxn or .fxndev.` };
+  }
+  if (!network) {
+    return { ok: false, reason: "GATEWAY_NOT_CONFIGURED", detail: "This gateway does not know which network it serves, so it cannot tell which ending is its own. Pin it in gateway/name-config.js (NETWORK)." };
+  }
+  if (!name.endsWith(`.${nameEnding(network)}`)) {
+    return { ok: false, reason: "NAME_WRONG_ENDING", detail: `${name} is not a name of ${network}, which serves .${nameEnding(network)} names only. Open it on the network that serves its ending.` };
   }
   if (!/^[0-9a-f]{64}$/.test(genesisPubHex || "")) {
     return { ok: false, reason: "GATEWAY_NOT_CONFIGURED", detail: "This gateway has no genesis key pinned (gateway/name-config.js, GENESIS_PUB_HEX), so it cannot tell a real owner from a forged one." };
@@ -69,10 +103,15 @@ export async function resolveName({ name, nodes, genesisPubHex, askProof = null 
   if (reply.kind !== "proof") {
     return { ok: false, reason: "NAME_UNRESOLVABLE", detail: `${node} answered with something that is not a proof (${reply.reason || reply.kind}).` };
   }
-  const verified = await verifyDomainProof({ fqdn: name, entries: reply.entries, genesisPubHex });
+  const verified = await verifyDomainProof({ fqdn: name, entries: reply.entries, genesisPubHex, network, nowSec });
+  if (verified.kind === "refused" && (verified.code === "InGrace" || verified.code === "Lapsed")) {
+    /* Past its paid term: the page says so and who may act, and never renders the site. */
+    const reason = verified.code === "InGrace" ? "NAME_UNPAID" : "NAME_LAPSED";
+    return { ok: false, reason, detail: `${verified.failure} Missing: ${verified.missing} To fix: ${verified.remedy} (${NAME_AUTHORITY_URL})`, term: verified.term };
+  }
   if (verified.kind !== "verified") {
     /* Refused by name: the page never renders what a bad proof points at. */
     return { ok: false, reason: "PROOF_INVALID", detail: `${verified.failure} Missing: ${verified.missing} To fix: ${verified.remedy}` };
   }
-  return { ok: true, name, owner: verified.owner, ownerEntryCid: verified.ownerEntryCid, record: verified.record, source: node, notChecked: verified.notChecked };
+  return { ok: true, name, owner: verified.owner, ownerEntryCid: verified.ownerEntryCid, record: verified.record, term: verified.term, source: node, notChecked: verified.notChecked };
 }

@@ -3,7 +3,8 @@
    ark-miner-cli/ops/caddy/defxn-wildcard.caddy). No build step, matching this
    project's own convention (see ../scripts/serve-site.mjs).
 
-   Flow: location.hostname -> "<label>.fxn" -> DOM_PROOF over a name node's
+   Flow: location.hostname -> "<label>.<ending>" (.fxn on the mainnet, .fxndev on a test
+   network: resolve-name.js servedNetwork) -> DOM_PROOF over a name node's
    WebSocket line protocol (name-config.js) -> verified with the ONE shared
    verifier (resolve-name.js; vendor/dense-wire/flx-domain-proof.mjs) against the
    pinned genesis key -> the record's blake3_cid target -> GET
@@ -13,7 +14,9 @@
    directory's VENDORED-FROM.txt) -> render. A "flux-chain-site/1" archive (a
    defxn CMS site) gets the template below. A "flux-folder-site/1" archive (a
    plain folder, bundle-deploy pack) runs as its own pages in a sandboxed frame
-   with no network (folder-site.js, site-frame.html).
+   with no network (folder-site.js, site-frame.html). A "flux-folder-site/2"
+   archive is an index of 8 MiB blocks: each page's files are fetched block by
+   block and checked when the page is shown (index-site.js).
 
    Names come only from dense-wire (docs/DEFXN-NAMES-ONE-SYSTEM.md). Until
    2026-10-23 this shell read the Explorer `names` source (GUN names/*) and
@@ -33,10 +36,11 @@
    failure set is for a different content shape (dense-encoding-v4 CMS posts)
    entirely. */
 import { decodeArchiveAsync } from "./vendor/flx-codec/index.js";
-import { resolveName as resolveOnChain } from "./resolve-name.js";
+import { resolveName as resolveOnChain, servedNetwork } from "./resolve-name.js";
 import { fetchVerifiedContent } from "./content.js";
-import { NAME_NODES, GENESIS_PUB_HEX } from "./name-config.js";
-import { FOLDER_SITE_SCHEMA, readFolderSite, pageForAddress, buildPageHtml } from "./folder-site.js";
+import { NAME_NODES, GENESIS_PUB_HEX, NETWORK } from "./name-config.js";
+import { FOLDER_SITE_SCHEMA, readFolderSite, pageForAddress, buildPageHtml, loadPageFiles } from "./folder-site.js";
+import { FOLDER_SITE_INDEX_SCHEMA, readIndexSite, createBlockReader, BlockRefusal } from "./index-site.js";
 import { releaseRequestOf, readRelease, downloadRelease } from "./release.js";
 import { makeTesterKey, openTesterRelease, saveWithLink, saveOpenedFile } from "./tester.js";
 
@@ -46,6 +50,9 @@ const FAILURE_MESSAGES = {
   NAME_NOT_FOUND: "No such name. Nothing is claimed at this address.",
   NAME_NO_RECORD: "This name has an owner but points nowhere yet.",
   NAME_UNRESOLVABLE: "No name node answered, so this address cannot be read right now.",
+  NAME_WRONG_ENDING: "This name belongs to another network, so this gateway does not open it.",
+  NAME_UNPAID: "This name's paid term has ended. Its holder can still renew it, so its site is not shown.",
+  NAME_LAPSED: "This name lapsed without a payment. Anyone can claim it again.",
   PROOF_INVALID: "The name node sent an ownership proof that does not verify. This page refuses to render what it points at.",
   GATEWAY_NOT_CONFIGURED: "This gateway has no genesis key pinned, so it cannot verify any name.",
   CONTENT_UNREACHABLE: "This site's content is not reachable right now.",
@@ -64,11 +71,11 @@ const FAILURE_MESSAGES = {
 const app = document.getElementById("app");
 const footer = document.getElementById("page-footer");
 
-/** "de.defxn.com" and "de.fxn" both name "de.fxn": the second is the name itself, opened in a browser whose DNS
- *  asks fxn-dns (2026-10-28). */
-function labelFromHostname(hostname) {
+/** "de.defxn.com" and "de.<ending>" both name "de.<ending>", the ending this gateway's network serves (.fxndev on
+ *  the devnet): the second is the name itself, opened in a browser whose DNS asks fxn-dns (2026-10-28). */
+function labelFromHostname(hostname, ending) {
   const host = hostname.toLowerCase();
-  for (const suffix of [".defxn.com", ".fxn"]) {
+  for (const suffix of [".defxn.com", `.${ending}`]) {
     if (host.endsWith(suffix)) return host.slice(0, -suffix.length);
   }
   return host;
@@ -102,8 +109,8 @@ function renderStatus(reason, detail) {
   app.appendChild(wrap);
 }
 
-async function resolveName(name) {
-  return resolveOnChain({ name, nodes: NAME_NODES, genesisPubHex: GENESIS_PUB_HEX });
+async function resolveName(name, network) {
+  return resolveOnChain({ name, nodes: NAME_NODES, genesisPubHex: GENESIS_PUB_HEX, network });
 }
 
 function decodeSite(decoded) {
@@ -283,10 +290,12 @@ function renderSite(site) {
 /* A folder site's pages, one sandboxed frame per page (folder-site.js says why). The shell keeps the
    address bar: a link inside the site asks for its page by message, and the shell shows it. A frame that
    loads anything after its page (a script sent it to another address) is replaced by a refusal. */
-function renderFolderSite(site) {
+function renderFolderSite(site, loadBytes = async (file) => file.bytes) {
   let current = null;
+  let shown = 0;
 
-  function show(pathname, hash) {
+  async function show(pathname, hash) {
+    const turn = ++shown;
     const page = pageForAddress(site, pathname);
     if (!page.ok) {
       current = null;
@@ -296,8 +305,22 @@ function renderFolderSite(site) {
       current = null;
       return renderStatus("NOT_A_PAGE", `${pathname} is ${page.file.contentType}. A page of the site can show it.`);
     }
-    const doc = new DOMParser().parseFromString(new TextDecoder().decode(page.file.bytes), "text/html");
-    const { html, title } = buildPageHtml(site, page.path, doc);
+    /* A /2 page and its files arrive block by block; a /1 site holds them already. */
+    let doc;
+    let view;
+    try {
+      const bytes = await loadBytes(page.file);
+      if (!bytes) throw new BlockRefusal("CONTENT_TOO_LARGE", `${pathname} is ${page.file.size} bytes, more than this gateway shows as one page.`);
+      doc = new DOMParser().parseFromString(new TextDecoder().decode(bytes), "text/html");
+      view = await loadPageFiles(site, page.path, doc, loadBytes);
+    } catch (error) {
+      if (turn !== shown) return;
+      current = null;
+      if (error instanceof BlockRefusal) return renderStatus(error.reason, error.detail);
+      throw error;
+    }
+    if (turn !== shown) return; /* another page was asked for while this one loaded */
+    const { html, title } = buildPageHtml(view, page.path, doc);
     document.title = title || location.hostname;
 
     const frame = document.createElement("iframe");
@@ -321,6 +344,8 @@ function renderFolderSite(site) {
     app.replaceChildren(frame);
   }
 
+  const go = (pathname, hash) => show(pathname, hash).catch((error) => renderStatus("CONTENT_MALFORMED", error?.message || String(error)));
+
   window.addEventListener("message", (event) => {
     if (!current || event.source !== current.frame.contentWindow) return;
     const data = event.data;
@@ -332,11 +357,11 @@ function renderFolderSite(site) {
       const url = new URL(data.href, location.origin);
       if (url.origin !== location.origin) return;
       history.pushState(null, "", url.pathname + url.search + url.hash);
-      show(url.pathname, url.hash);
+      go(url.pathname, url.hash);
     }
   });
-  window.addEventListener("popstate", () => show(location.pathname, location.hash));
-  show(location.pathname, location.hash);
+  window.addEventListener("popstate", () => go(location.pathname, location.hash));
+  go(location.pathname, location.hash);
 }
 
 const MIB = 1024 * 1024;
@@ -539,10 +564,12 @@ function renderTesterRelease(name, release) {
 async function main() {
   /* A folder site's frame sent to one of this gateway's own addresses would load the shell inside it. */
   if (window.top !== window) return;
-  const label = labelFromHostname(location.hostname);
-  const name = `${label}.fxn`;
+  const served = await servedNetwork({ network: NETWORK, nodes: NAME_NODES });
+  if (!served.ok) return renderStatus(served.reason, served.detail);
+  const label = labelFromHostname(location.hostname, served.ending);
+  const name = `${label}.${served.ending}`;
 
-  const resolved = await resolveName(name);
+  const resolved = await resolveName(name, served.network);
   if (!resolved.ok) return renderStatus(resolved.reason, resolved.detail);
 
   // /_release/<product>: the shell reads and checks an app release under this name's proven owner.
@@ -573,6 +600,11 @@ async function main() {
     const folder = readFolderSite(decoded);
     if (!folder.ok) return renderStatus(folder.reason, folder.detail);
     return renderFolderSite(folder.site);
+  }
+  if (schema === FOLDER_SITE_INDEX_SCHEMA) {
+    const index = readIndexSite(decoded);
+    if (!index.ok) return renderStatus(index.reason, index.detail);
+    return renderFolderSite(index.site, createBlockReader({ site: index.site }));
   }
 
   const site = decodeSite(decoded);
