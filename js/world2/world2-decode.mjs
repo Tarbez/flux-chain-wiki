@@ -157,7 +157,14 @@ export function decodeInto(w, text) {
 export async function fetchWorld() {
   const res = await fetch(worldPath('world.flx'), { cache: 'no-cache' });
   if (!res.ok) throw new Error('world.flx: ' + res.status);
-  return decodeText(await res.text());
+  return decodeText(swapGroup(await res.text()));
+}
+/* a test switch: ?wswap=<group cid now>:<older group cid>:<its bytes> draws an older copy of a view's group in its place.
+   It exists so the owner can see what an unused file in world/ looked like (scripts/world-unused-page.mjs); without
+   the key the text is unchanged */
+function swapGroup(text) {
+  const m = typeof location === 'object' && /[?&#]wswap=([0-9a-f]{64}):([0-9a-f]{64}):(\d+)/.exec(location.search + location.hash);
+  return m ? text.replace(new RegExp('C' + m[1] + '-A\\d+', 'g'), 'C' + m[2] + '-A' + m[3]) : text;
 }
 
 /* a frame blob by content id: immutable by construction, so the cache may keep it for ever */
@@ -174,11 +181,20 @@ export function fetchBlob(cid) {
 
 /* the items' words (a NAMES record's blob, tab separated text, one line per item or tag): the lines parsed into the maps the stage
    asks. item lines are keyed "<item>:<instance or *>"; tag lines by id. */
+/* a words file's text by content id, requested once per page: its bytes never change. The board's warm-up asked for every
+   loaded group's words again after each group (2026-10-30: the same file 29 times in 6 s). A failed request is
+   forgotten, so a later call may try again. Each caller parses its own copy, so no caller sees another's changes. */
+const texts = new Map();
+function textOf(cid) {
+  if (!texts.has(cid)) texts.set(cid, fetch(worldPath(cid + '.txt'), { cache: 'force-cache' }).then((res) => {
+    if (!res.ok) throw new Error(cid + '.txt: ' + res.status);
+    return res.text();
+  }).catch((e) => { texts.delete(cid); throw e; }));
+  return texts.get(cid);
+}
 export async function fetchNames(cid) {
-  const res = await fetch(worldPath(cid + '.txt'), { cache: 'force-cache' });
-  if (!res.ok) throw new Error(cid + '.txt: ' + res.status);
   const items = new Map(), tags = [];
-  for (const line of (await res.text()).split('\n')) {
+  for (const line of (await textOf(cid)).split('\n')) {
     if (!line) continue;
     const c = line.split('\t');
     if (c[0] === 'item') items.set(c[1] + ':' + c[2], { item: Number(c[1]), name: c[3], act: c[4], hook: c[5], arg: c[6], view: c[7], key: c[8], value: c[9] });
@@ -201,9 +217,7 @@ export function fetchGroup(w, view) {
 }
 /* a text blob of tab separated lines, as arrays of columns (the chain group's words) */
 export async function fetchLines(cid) {
-  const res = await fetch(worldPath(cid + '.txt'), { cache: 'force-cache' });
-  if (!res.ok) throw new Error(cid + '.txt: ' + res.status);
-  return (await res.text()).split('\n').filter(Boolean).map((l) => l.split('\t'));
+  return (await textOf(cid)).split('\n').filter(Boolean).map((l) => l.split('\t'));
 }
 
 /* the instance a part starts with, read from the blob: the host reads the ground plate's centre and radius this

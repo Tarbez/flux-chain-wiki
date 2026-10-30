@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unused world files</title>
+<style>
+:root{--canvas:#0d0f0e;--surface:#151817;--nested:#1b1f1d;--text:#e6e8e7;--muted:#8c9490;--line:#262b29;--accent:#5fd39a;--warn:#e2b450}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--canvas:#f6f7f6;--surface:#fff;--nested:#f0f2f1;--text:#161a18;--muted:#5b625f;--line:#dde1df;--accent:#16794a;--warn:#8a6100}}
+:root[data-theme="dark"]{--canvas:#0d0f0e;--surface:#151817;--nested:#1b1f1d;--text:#e6e8e7;--muted:#8c9490;--line:#262b29;--accent:#5fd39a;--warn:#e2b450}
+*{box-sizing:border-box}body{background:var(--canvas);color:var(--text);font:14px/1.5 system-ui,sans-serif;margin:0;padding:24px 16px}
+main{max-width:1200px;margin:0 auto}h1{font-size:29px;margin:0 0 4px}p{color:var(--muted);margin:4px 0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.bar button{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px 10px;font:inherit;cursor:pointer}.bar button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.k{font:11px/1.4 ui-monospace,monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.id{font:12px ui-monospace,monospace;word-break:break-all}.views b{color:var(--accent);font-weight:600}
+pre{background:var(--nested);border-radius:6px;padding:8px;margin:0;font:11px/1.45 ui-monospace,monospace;max-height:180px;overflow:auto;white-space:pre}
+canvas{width:100%;height:200px;background:var(--nested);border-radius:6px;display:block}
+.now{color:var(--warn)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}figure{margin:0}figure img{width:100%;border-radius:6px;display:block;border:1px solid var(--line);cursor:zoom-in}figcaption{font:11px ui-monospace,monospace;color:var(--muted);margin-top:2px}summary{cursor:pointer;color:var(--muted)}a{color:inherit}
+</style></head><body><main>
+<h1>Unused world files</h1>
+<p>0 files in <code>flux/defxn/world/</code>, 0.00 MB. Nothing the site loads names them. They are older copies that an encoder run replaced. Each card shows the file, its view and the file that holds that view now.</p>
+<p>Built 2026-10-30 21:18 UTC by <code>node scripts/world-unused-page.mjs</code>. A new encoder run can change this list: build the page again before deleting.</p>
+<div class="bar" id="bar"></div>
+<div class="grid" id="grid"></div>
+</main>
+<script type="module">
+const CARDS = [];
+const grid = document.getElementById('grid'), bar = document.getElementById('bar');
+const kinds = ['all', ...new Set(CARDS.map(c => c.ext))];
+let pick = 'all';
+for (const k of kinds) { const b = document.createElement('button'); b.textContent = k === 'all' ? 'All ' + CARDS.length : '.' + k + ' ' + CARDS.filter(c => c.ext === k).length; b.onclick = () => { pick = k; draw(); }; b.dataset.k = k; bar.append(b); }
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const short = id => id.slice(0, 12) + '…';
+/* measured0..measured35 are the steps of one view: show the view once, with its number of steps */
+const fold = vs => { const n = new Map(); for (const v of vs) { const b = v.replace(/[0-9]+$/, '') || v; n.set(b, (n.get(b) || 0) + (b === v ? 0 : 1)); } return [...n].map(([b, k]) => k ? b + ' (' + k + ' steps)' : b); };
+function card(c) {
+  const el = document.createElement('article'); el.className = 'card';
+  el.innerHTML = '<div class="k">.' + c.ext + ' · ' + (c.size / 1024).toFixed(1) + ' KB · written ' + c.mtime + '</div>'
+    + '<div class="id"><a href="/world/' + c.f + '" target="_blank">' + esc(c.f) + '</a></div>'
+    + '<div>' + esc(c.what) + '</div>'
+    + '<div class="views">View: ' + (c.views.length ? fold(c.views).map(v => '<b>' + esc(v) + '</b>').join(', ') : 'not named') + '</div>'
+    + '<div>Named by: ' + (c.by.length ? c.by.map(b => short(b.f) + (b.used ? ' (in use)' : ' (also unused)')).join(', ') : 'no file') + '</div>'
+    + (c.now.length ? '<div class="now">That view now: ' + c.now.map(short).join(', ') + '</div>' : '')
+    + (c.shot && (c.shot.hasOld || c.shot.hasNow) ? '<div class="pair">' + (c.shot.hasOld ? '<figure><img loading="lazy" src="unused-shots/' + c.shot.old + '" alt=""><figcaption>Old: ' + esc(c.shot.view) + (c.ext === 'flx' ? '' : ', from ' + short(c.shot.group)) + '</figcaption></figure>' : '') + (c.shot.hasNow ? '<figure><img loading="lazy" src="unused-shots/' + c.shot.now + '" alt=""><figcaption>Now</figcaption></figure>' : '') + '</div>' + (c.shot.note ? '<div class="k">Old view reported: ' + esc(c.shot.note.split('\n')[0]) + '</div>' : '') : '')
+    + '<details><summary>Grammar text</summary><div class="pv"></div></details>';
+  return el;
+}
+async function preview(c, box) {
+  const url = '/world/' + c.f;
+  if (c.ext !== 'txt' && c.ext !== 'flx') box.closest('details').open = true;
+  if (c.ext === 'txt' || c.ext === 'flx') {
+    const t = await fetch(url).then(r => r.text()); const lines = t.split('\n');
+    const pre = document.createElement('pre'); pre.textContent = lines.slice(0, 40).join('\n') + (lines.length > 40 ? '\n… ' + (lines.length - 40) + ' more lines' : ''); box.append(pre);
+  } else if (c.ext === 'mesh') {
+    const { readMesh, meshFloats } = await import('/fxn-3d/engine/formats/mesh.mjs');
+    const buf = new Uint8Array(await fetch(url).then(r => r.arrayBuffer()));
+    const m = readMesh(buf), g = meshFloats(m, { unitNormals: true });
+    const cv = document.createElement('canvas'); box.append(cv); drawMesh(cv, g, m);
+    const k = document.createElement('div'); k.className = 'k'; k.textContent = m.verts + ' vertices · ' + (m.indices / 3) + ' triangles · drag to turn'; box.append(k);
+  } else {
+    const b = await fetch(url).then(r => r.arrayBuffer()); const f = new Float32Array(b, 0, Math.min(24, b.byteLength >> 2));
+    const pre = document.createElement('pre'); pre.textContent = 'First numbers (float32):\n' + Array.from(f, x => +x.toFixed(4)).join('  '); box.append(pre);
+  }
+}
+/* a shaded drawing in 2D: triangles sorted far to near, lit from the upper left. Draws once, and again only while dragged. */
+function drawMesh(cv, g, m) {
+  let yaw = .7, pitch = .45;
+  const paint = () => {
+    const r = cv.getBoundingClientRect(), dpr = devicePixelRatio || 1; cv.width = r.width * dpr; cv.height = r.height * dpr;
+    const x = cv.getContext('2d'), P = g.pos, N = g.nrm, I = g.idx, s = Math.max(...m.half) || 1;
+    const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const rot = (a, b, c) => { const X = a * cy - c * sy, Z = a * sy + c * cy; return [X, b * cp - Z * sp, b * sp + Z * cp]; };
+    const k = Math.min(cv.width, cv.height) * .42 / s, ox = cv.width / 2, oy = cv.height / 2, tris = [];
+    for (let t = 0; t < I.length; t += 3) {
+      const v = [0, 1, 2].map(j => { const i = I[t + j] * 3; return rot(P[i] - m.centre[0], P[i + 1] - m.centre[1], P[i + 2] - m.centre[2]); });
+      const i0 = I[t] * 3, n = rot(N[i0], N[i0 + 1], N[i0 + 2]);
+      tris.push({ v, z: (v[0][2] + v[1][2] + v[2][2]) / 3, l: Math.max(.15, -.45 * n[0] + .65 * n[1] - .6 * n[2]) });
+    }
+    tris.sort((a, b) => b.z - a.z);
+    x.clearRect(0, 0, cv.width, cv.height);
+    for (const t of tris) { const c = Math.round(60 + 170 * t.l); x.fillStyle = 'rgb(' + c + ',' + c + ',' + c + ')'; x.beginPath(); t.v.forEach((p, j) => x[j ? 'lineTo' : 'moveTo'](ox + p[0] * k, oy - p[1] * k)); x.closePath(); x.fill(); }
+  };
+  paint();
+  cv.onpointerdown = e => { const sx = e.clientX, sy0 = e.clientY, y0 = yaw, p0 = pitch; cv.setPointerCapture(e.pointerId); cv.onpointermove = ev => { yaw = y0 + (ev.clientX - sx) * .01; pitch = Math.max(-1.5, Math.min(1.5, p0 + (ev.clientY - sy0) * .01)); paint(); }; cv.onpointerup = () => { cv.onpointermove = null; }; };
+}
+function draw() {
+  for (const b of bar.children) b.setAttribute('aria-pressed', b.dataset.k === pick);
+  grid.textContent = '';
+  for (const c of CARDS.filter(c => pick === 'all' || c.ext === pick)) { const el = card(c); grid.append(el); preview(c, el.querySelector('.pv')).catch(e => { el.querySelector('.pv').textContent = 'Could not read it: ' + e.message; }); }
+}
+draw();
+grid.addEventListener('click', e => { if (e.target.tagName === 'IMG') window.open(e.target.src, '_blank'); });
+</script></body></html>
