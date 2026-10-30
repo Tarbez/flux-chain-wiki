@@ -1,0 +1,12 @@
+page=/auth seg=1 action=first-visit at=0.0-8.1s three:[start=250 stop=5083 frames=51 ms=4250 end=0 regions=144414431343] fxn3d:[start=83 stop=3500 frames=27 ms=2250 end=0 regions=122212221121] flag=TIME-DIFFERS
+page=/auth seg=2 action=hover:396,417 at=8.1-9.9s three:[start=667 stop=917 frames=3 ms=250 end=0 regions=001000000010] fxn3d:[start=667 stop=1083 frames=6 ms=500 end=0 regions=003000000030] flag=TIME-DIFFERS
+page=/auth seg=3 action=hover:231,540 at=9.9-11.5s three:[start=1000 stop=1167 frames=2 ms=167 end=0 regions=000011000000] fxn3d:[start=917 stop=1333 frames=6 ms=500 end=0 regions=003010000020] flag=ONLY-FXN3D
+page=/auth seg=4 action=hover:561,540 at=11.5-13.1s three:[start=1333 stop=1500 frames=3 ms=250 end=1 regions=001000000010] fxn3d:[start=1167 stop=1583 frames=6 ms=500 end=1 regions=003000000030] flag=TIME-DIFFERS
+page=/auth seg=5 action=go:/download at=13.1-17.7s three:[start=1417 stop=3917 frames=25 ms=2083 end=0 regions=222143213322] fxn3d:[start=0 stop=3250 frames=18 ms=1500 end=0 regions=112122111211] flag=none
+page=/auth seg=6 action=back:/download at=17.7-21.3s three:[start=2083 stop=3333 frames=14 ms=1167 end=0 regions=232223222322] fxn3d:[start=1750 stop=2917 frames=15 ms=1250 end=0 regions=333323332333] flag=none
+page=/auth seg=7 action=go:/ at=21.3-25.9s three:[start=2750 stop=4167 frames=18 ms=1500 end=0 regions=233322331223] fxn3d:[start=2000 stop=3500 frames=19 ms=1583 end=0 regions=233223321232] flag=none
+page=/auth seg=8 action=back:/ at=25.9-29.5s three:[start=3083 stop=3500 frames=6 ms=500 end=1 regions=111111111101] fxn3d:[start=2250 stop=3417 frames=15 ms=1250 end=1 regions=333333331333] flag=TIME-DIFFERS
+page=/auth seg=9 action=go:/about at=29.5-34.0s three:[start=0 stop=4417 frames=21 ms=1750 end=1 regions=222322231223] fxn3d:[start=0 stop=3917 frames=16 ms=1333 end=0 regions=221111111111] flag=none
+page=/auth seg=10 action=back:/about at=34.0-37.8s three:[start=0 stop=583 frames=5 ms=417 end=0 regions=011100010001] fxn3d:[start=3000 stop=3583 frames=5 ms=417 end=1 regions=111111111110] flag=none
+page=/auth seg=11 action=go:/explore at=37.8-42.5s three:[start=1083 stop=2000 frames=12 ms=1000 end=0 regions=122212221222] fxn3d:[start=0 stop=4583 frames=23 ms=1917 end=1 regions=232212221122] flag=TIME-DIFFERS
+page=/auth seg=12 action=back:/explore at=42.5-46.4s three:[start=250 stop=917 frames=9 ms=750 end=0 regions=211111121012] fxn3d:[start=3417 stop=3667 frames=4 ms=333 end=1 regions=011101110011] flag=TIME-DIFFERS

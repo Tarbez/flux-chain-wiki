@@ -64,6 +64,7 @@
      page built from blocks sits in (js/ark/blocks.js ArkUI.page). Before components.css, which is
      last. -->
 <link rel="stylesheet" href="css/world.css?v=20261024-tags1" />
+<link rel="stylesheet" href="css/world-pages.css?v=20261025-ac1" />
 <link rel="stylesheet" href="css/ark-blocks.css?v=20261026-ark43" />
 <link rel="stylesheet" href="css/components.css?v=20261020-w4" />
 </head>
@@ -165,7 +166,7 @@
 <script src="js/pages/catalog.js?v=20261026-kit" defer></script>
 <script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/min/manifest.js?v=22a761e5" defer></script>
+<script src="js/min/manifest.js?v=4a2c5223" defer></script>
 <script src="js/ark/page-loader.js?v=20261025-ac1" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
 <script src="js/ark/panel-continuity.js?v=20261024-world1" defer></script>
@@ -204,8 +205,8 @@
 <script src="js/content/mesh-settings.js" defer></script>
 <script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/halo/shaders.js" defer></script>
-<!-- The 3D world under every page. It loads Three.js and its own files after first paint; js/zero-webgl.js below is its fallback. -->
-<script src="js/world/world-host.js?v=20261025-w5" defer></script>
+<!-- The 3D world under every page: the grammar world (docs/design/world-grammar), the only world. ?world=off turns it off (js/world2/world2-host.mjs). -->
+<script type="module" src="js/world2/world2-host.mjs?v=20261030-w6"></script>
 <!-- NFT skins (docs/home-redesign/SKIN-CONTRACT.md): the site's part map and its one skin entry. Ark UI's skin chunk and the card recipe load only when a skin is applied. -->
 <script src="js/ark/skin-parts.js?v=20261025-audit1" defer></script>
 <script src="js/ark/skin-site.js?v=20261025-gate1" defer></script>

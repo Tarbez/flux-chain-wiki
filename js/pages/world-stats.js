@@ -79,13 +79,21 @@
   }
   function track(ctx, d) {
     function go() {
-      var m = measure(ctx.f); if (m.pt === pad.pt && m.pb === pad.pb) return;
+      ctx.arm && ctx.arm(); var m = measure(ctx.f); if (m.pt === pad.pt && m.pb === pad.pb) return;
       pad = m; var h = W.host(); if (h && h.select) h.select(d.world(ctx.st));
     }
     ctx.pads = go;
     var ro = window.ResizeObserver ? new ResizeObserver(go) : null;
     if (ro) { ctx.f.ro = ro; ro.observe(ctx.f.stage); var kp = ctx.f.stage.querySelector('.ws-kpis'); if (kp) ro.observe(kp); var was = ctx.dispose; ctx.dispose = function () { ro.disconnect(); if (was) was(); }; }
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+    /* The legend rises and the readings fade in after fonts load (Web Animations and CSS transitions), so the first measure reads them mid-motion. Every animation on a
+       box measure() reads, or on an ancestor that moves it, is asked once for its finished promise; when it resolves the box is final, and go() measures again. It is an
+       event, not a poll, and go() does nothing when pt and pb are unchanged. */
+    var seen = new WeakSet();
+    function arm(el) { for (var n = el; n && n.getAnimations; n = n.parentElement) n.getAnimations().forEach(function (a) { if (!seen.has(a)) { seen.add(a); a.finished.then(go, function () {}); } }); }
+    ctx.arm = function () { arm(ctx.f.stage); arm(ctx.f.stage.querySelector('.ws-kpis')); arm(ctx.f.stage.querySelector('.ws-legend')); };
+    ctx.arm();
+    ctx.f.stage.addEventListener('transitionend', go); ctx.f.stage.addEventListener('animationend', go);
   }
 
   /* a tick on a ruler or a title of one, placed by the world on its 3D point (no leader, no collision: a ruler is always read in full) */

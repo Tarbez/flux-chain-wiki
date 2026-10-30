@@ -1,0 +1,173 @@
+[
+  {
+    "letter": "K",
+    "name": "record kind",
+    "payload": "closed-set",
+    "values": [
+      "CFG",
+      "BLOB",
+      "GEO",
+      "MAT",
+      "TINT",
+      "TOKEN",
+      "OBJ",
+      "PART",
+      "RING",
+      "FACE",
+      "CELL",
+      "KNOT",
+      "VIEW",
+      "LABEL",
+      "SHEET"
+    ],
+    "example": "CFG"
+  },
+  {
+    "letter": "I",
+    "name": "index",
+    "payload": "digits",
+    "example": "3"
+  },
+  {
+    "letter": "J",
+    "name": "second index",
+    "payload": "digits",
+    "example": "1"
+  },
+  {
+    "letter": "G",
+    "name": "shape",
+    "payload": "digits",
+    "example": "12"
+  },
+  {
+    "letter": "F",
+    "name": "face, draw or slot",
+    "payload": "digits",
+    "example": "2"
+  },
+  {
+    "letter": "O",
+    "name": "offset or draw order",
+    "payload": "digits",
+    "example": "1024"
+  },
+  {
+    "letter": "A",
+    "name": "byte count",
+    "payload": "digits",
+    "example": "2048"
+  },
+  {
+    "letter": "Q",
+    "name": "row",
+    "payload": "digits",
+    "example": "40"
+  },
+  {
+    "letter": "N",
+    "name": "name",
+    "payload": "lowercase-alphanumeric",
+    "example": "glass"
+  },
+  {
+    "letter": "X",
+    "name": "hex text",
+    "payload": "lowercase-hex",
+    "evenLength": true,
+    "minLength": 2,
+    "example": "3035"
+  },
+  {
+    "letter": "C",
+    "name": "content id",
+    "payload": "lowercase-hex",
+    "evenLength": true,
+    "minLength": 64,
+    "example": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "letter": "V",
+    "name": "value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "2p4"
+  },
+  {
+    "letter": "W",
+    "name": "second value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "m1p5"
+  },
+  {
+    "letter": "U",
+    "name": "third value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "0"
+  },
+  {
+    "letter": "T",
+    "name": "fourth value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "1p25"
+  },
+  {
+    "letter": "S",
+    "name": "fifth value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "0p46"
+  },
+  {
+    "letter": "B",
+    "name": "sixth value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "1"
+  },
+  {
+    "letter": "H",
+    "name": "seventh value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "16"
+  },
+  {
+    "letter": "D",
+    "name": "eighth value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "0"
+  },
+  {
+    "letter": "E",
+    "name": "ninth value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "0p8"
+  },
+  {
+    "letter": "P",
+    "name": "tenth value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "1p2"
+  },
+  {
+    "letter": "R",
+    "name": "eleventh value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "0"
+  },
+  {
+    "letter": "L",
+    "name": "twelfth value",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "0"
+  }
+]

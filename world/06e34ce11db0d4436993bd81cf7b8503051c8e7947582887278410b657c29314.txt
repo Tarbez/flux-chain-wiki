@@ -1,0 +1,52 @@
+recid	0	project-notes
+recid	1	design-direction
+recid	2	client-feedback
+recid	3	research-summary
+recid	4	initial-concept
+rec	0	chain	Project notes	Open	Choose	all
+rec	0	record	Project notes	Open	Next in chain	selnext
+rec	0	links	Project notes	Open	Choose	all
+rec	0	open	Project notes	Open	Choose	notsel
+rec	1	chain	Design direction	Open	Choose	all
+rec	1	record	Design direction	Open	Next in chain	selnext
+rec	1	links	Design direction	Open	Choose	all
+rec	1	open	Design direction	Open	Choose	notsel
+rec	2	chain	Client feedback	Open	Choose	all
+rec	2	record	Client feedback	Open	Next in chain	selnext
+rec	2	links	Client feedback	Open	Choose	all
+rec	2	open	Client feedback	Open	Choose	notsel
+rec	3	chain	Research summary	Open	Choose	all
+rec	3	record	Research summary	Open	Next in chain	selnext
+rec	3	links	Research summary	Open	Choose	all
+rec	3	open	Research summary	Open	Choose	notsel
+rec	4	chain	Initial concept	Open	Choose	all
+rec	4	record	Initial concept	Open	Next in chain	selnext
+rec	4	links	Initial concept	Open	Choose	all
+rec	4	open	Initial concept	Open	Choose	notsel
+pane	0	record	Rev 07	Earlier version, kept on file
+pane	1	record	Rev 06	Earlier version, kept on file
+pane	2	record	Rev 05	Earlier version, kept on file
+plate	plate0	record	REV 08	Project notes	12 MAR 2024	SIGNED
+plate	plate1	record	REV 07	Design direction	03 MAR 2024	SIGNED
+plate	plate2	record	REV 04	Client feedback	28 FEB 2024	
+plate	plate3	record	REV 03	Research summary	14 FEB 2024	
+plate	plate4	record	REV 01	Initial concept	02 FEB 2024	
+plate	plate5	rev	REV 07
+plate	plate6	rev	REV 06
+plate	plate7	rev	REV 05
+plate	plate8	person
+spot	0	key	chain,links
+spot	1	oldest	chain
+spot	2	newest	chain
+spot	3	next	record
+spot	4	rec-project-notes	links
+spot	5	rec-design-direction	links
+spot	6	rec-client-feedback	links
+spot	7	rec-research-summary	links
+spot	8	rec-initial-concept	links
+spot	9	ghosts	links
+spot	10	rel-0	links
+spot	11	rel-1	links
+gate	chain	m	0.92
+gate	record	m	0.92
+gate	links	l	0.92

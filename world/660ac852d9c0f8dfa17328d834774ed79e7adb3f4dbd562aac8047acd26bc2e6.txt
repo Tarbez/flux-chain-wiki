@@ -1,0 +1,22 @@
+item	1	*	Identity chain	Open	pickRing	1	ring	i	identity-1
+item	2	0	Project notes	Open your chain	pick	0	chain		
+item	2	2	Design direction	Open your chain	pick	1	chain		
+item	2	5	Client feedback	Open your chain	pick	2	chain		
+item	2	7	Research summary	Open your chain	pick	3	chain		
+item	2	10	Initial concept	Open your chain	pick	4	chain		
+item	3	*	Resolver chain	Open	pickRing	3	ring	i	resolver-1
+item	4	*	Resolver chain	Open	pickRing	4	ring	i	resolver-2
+item	5	*	Identity chain	Open	pickRing	5	ring	i	identity-3
+item	6	*	DeArk · DARO	Open	pickRing	6	ring	i	deark
+item	7	*	Resolver chain	Open	pickRing	7	ring	i	resolver-3
+item	8	*	Identity chain	Open	pickRing	8	ring	i	identity-4
+item	9	*	Identity chain	Open	pickRing	9	ring	i	identity-5
+item	10	*	CR3TV · CR3	Open	pickRing	10	ring	i	cr3tv
+item	11	*	FXN · The first chain	Open	pickRing	11	ring	i	fxn
+item	12	*	Identity chain	Open	pickRing	12	ring	i	identity-6
+item	13	*	Identity chain	Open	pickRing	13	ring	i	identity-7
+item	14	*	Resolver chain	Open	pickRing	14	ring	i	resolver-4
+item	38	*	DEFXN · The base chain kernel	Open	open	0	layers	s	0
+tag	logo	DEFXN	The base chain kernel		above
+tag	deark	DeArk		small	above
+tag	cr3tv	CR3TV		small	above

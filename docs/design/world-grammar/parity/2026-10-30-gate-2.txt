@@ -1,0 +1,196 @@
+gate=static files_scanned=1363 files_using_threejs=21 files_mentioning_only=34
+file=css/account.css kind=mention via=scene packed=1
+file=css/auth.css kind=mention via=scene packed=1
+file=css/cutouts.css kind=mention via=scene,call packed=1
+file=css/download.css kind=mention via=scene packed=1
+file=css/skin-site.css kind=mention via=scene packed=1
+file=css/world-pages.css kind=mention via=scene packed=1
+file=css/world.css kind=mention via=scene packed=1
+file=docs/home-redesign/concept-views.js kind=mention via=scene packed=0
+file=docs/home-redesign/grid-look/grid-look.js kind=use via=call packed=0
+file=docs/home-redesign/grid-look/index.html kind=use via=lib packed=0
+file=docs/home-redesign/home-mockup.html kind=use via=lib,scene packed=0
+file=docs/home-redesign/identity-flow.js kind=mention via=scene packed=0
+file=docs/home-redesign/intro-view.js kind=mention via=scene packed=0
+file=docs/home-redesign/nft/skin-gate.js kind=mention via=scene packed=0
+file=docs/home-redesign/ring-view.js kind=mention via=scene packed=0
+file=index.html kind=mention via=scene packed=1
+file=js/ark/scene-state.js kind=mention via=scene packed=1
+file=js/ark/skin-site.js kind=mention via=scene packed=1
+file=js/content/site-pages.js kind=mention via=scene packed=1
+file=js/content/stats-scale.js kind=mention via=scene packed=1
+file=js/min/world/minute-experience.js kind=mention via=scene packed=1
+file=js/nft/art3d.js kind=mention via=scene packed=1
+file=js/pages/account.js kind=mention via=scene packed=1
+file=js/pages/auth.js kind=mention via=scene packed=1
+file=js/pages/catalog.js kind=mention via=scene packed=1
+file=js/pages/download.js kind=mention via=scene packed=1
+file=js/pages/home.js kind=mention via=scene packed=1
+file=js/pages/intro.js kind=mention via=scene packed=1
+file=js/pages/kit.js kind=mention via=scene packed=1
+file=js/pages/world-chain.js kind=mention via=scene packed=1
+file=js/pages/world-identity.js kind=mention via=scene packed=1
+file=js/pages/world-measure.js kind=mention via=scene packed=1
+file=js/pages/world-minute.js kind=mention via=scene packed=1
+file=js/pages/world-stats.js kind=mention via=scene packed=1
+file=js/vendor/three-r180-defxn.js kind=use via=library packed=1
+file=js/world/auth-stage.js kind=use via=call,scene-file packed=1
+file=js/world/chain-marks.js kind=use via=call,scene-file packed=1
+file=js/world/chains-scene.js kind=use via=call,scene-file packed=1
+file=js/world/concept-stages.js kind=use via=call,scene-file packed=1
+file=js/world/download-stage.js kind=use via=call,scene-file packed=1
+file=js/world/glass-kit.js kind=use via=call,scene-file packed=1
+file=js/world/home-descent.js kind=use via=call,scene-file packed=1
+file=js/world/home-helix.js kind=use via=call,scene-file packed=1
+file=js/world/home-sites.js kind=use via=call,scene-file packed=1
+file=js/world/identity-stages.js kind=use via=call,scene-file packed=1
+file=js/world/kit-stage.js kind=use via=call,scene-file packed=1
+file=js/world/object-kit.js kind=use via=call,scene-file packed=1
+file=js/world/record-glass.js kind=use via=call,scene-file packed=1
+file=js/world/ring-kit.js kind=use via=call,scene-file packed=1
+file=js/world/stages.js kind=use via=call,scene-file packed=1
+file=js/world/stats-stage.js kind=use via=call,scene-file packed=1
+file=js/world/world-host.js kind=use via=lib,scene packed=1
+file=js/world2/world2-host.mjs kind=mention via=scene packed=1
+file=js/zero-webgl.js kind=mention via=scene packed=1
+file=world/card.html kind=mention via=scene packed=1
+gate=dynamic pages=138 pages_loading_threejs=5
+page=/broker.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/chain.html source=html nav=ok three_requests=12 three_global=0 errors=0 http_4xx5xx=0 verdict=USES-THREE loaded=js/vendor/three-r180-defxn.js,js/world/ring-kit.js,js/world/chains-scene.js,js/world/stages.js,js/world/ring-stage.js,js/world/concept-stages.js,+6
+page=/docs/home-redesign/defxn-concept.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/grid-look/index.html source=html nav=ok three_requests=1 three_global=0 errors=0 http_4xx5xx=0 verdict=USES-THREE loaded=js/vendor/three-r180-defxn.js
+page=/docs/home-redesign/home-mockup.html source=html nav=ok three_requests=12 three_global=0 errors=0 http_4xx5xx=0 verdict=USES-THREE loaded=js/vendor/three-r180-defxn.js,js/world/ring-kit.js,js/world/chains-scene.js,js/world/stages.js,js/world/ring-stage.js,js/world/concept-stages.js,+6
+page=/docs/home-redesign/nft/card.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/elements.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/engine-demo.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/index.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/primitives.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/review.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/shop.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/skin-audit.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/studio.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/wear-audit.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/wear-loops.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/wear.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/world.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/record-open.html source=html nav=ok three_requests=12 three_global=0 errors=0 http_4xx5xx=0 verdict=USES-THREE loaded=js/vendor/three-r180-defxn.js,js/world/ring-kit.js,js/world/chains-scene.js,js/world/stages.js,js/world/ring-stage.js,js/world/concept-stages.js,+6
+page=/docs/home-redesign/record.html source=html nav=ok three_requests=12 three_global=0 errors=0 http_4xx5xx=0 verdict=USES-THREE loaded=js/vendor/three-r180-defxn.js,js/world/ring-kit.js,js/world/chains-scene.js,js/world/stages.js,js/world/ring-stage.js,js/world/concept-stages.js,+6
+page=/docs/ux-audit/nft-skin-coverage.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/gateway/index.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=1 verdict=clean http="404 /app.js"
+page=/gateway/site-frame.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/index.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/legacy/index.monolith.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/world/card.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/world/look-test.html source=html nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/ source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/intro source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/about source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/explore source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/explorer source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/palette source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/what-is-a-resolver source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolver-math source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolvers source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/start-from-something-real source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/auth source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/account source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/account/domains source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/bundle-deployer source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/treasury source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/deposits source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/stats/now source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=1 verdict=clean http="502 /api/fleet-pulse"
+page=/stats source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=1 verdict=clean http="502 /api/fleet-pulse"
+page=/monitor source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=1 verdict=clean http="502 /api/fleet-pulse"
+page=/stats/fleet source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=1 verdict=clean http="502 /api/fleet-pulse"
+page=/stats/week-41 source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=1 verdict=clean http="502 /api/fleet-pulse"
+page=/stats/week-42 source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=1 verdict=clean http="502 /api/fleet-pulse"
+page=/stats/capabilities source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/measured source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/stats/ledger source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/stats/ceiling source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/stats/gpu source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/stats/resolver source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-deployment-works/ask source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-deployment-works/work source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-deployment-works/check source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/reference source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/lifecycle source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/lifecycle/intent source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/lifecycle/offer source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/lifecycle/agreement source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/lifecycle/fulfillment source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/lifecycle/receipt source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/chain source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/chain/record source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/chain/open source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/chain/links source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/identity source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/identity/sign source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/identity/safe source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/identity/you source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/fxn source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/ring source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works/resolve source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works/layers source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works/life source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/trace source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/dao source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/download source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/deploy source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/not-found source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/website source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/content source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/files source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/deployments source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/payments source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/finance source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/community source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/communications source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/collaborations source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/governance source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/intelligence source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/data source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/algorithms source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/information source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/rules source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/network source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/encryptions source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/automation source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/productivity source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/resolutions/logistics source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/why-the-chain-was-retired source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/from-one-chain-to-one-per-identity source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/one-substrate-many-networks source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/governance-without-a-validator-set source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/governance-without-a-standing-signer-set source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/how-we-got-fast-and-what-we-got-wrong source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/how-we-got-fast-and-everything-we-got-wrong source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/the-grammar-does-almost-no-work source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/a-resolver-by-construction source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/a-finance-resolver-by-construction source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/learnings/the-chain-prototype-is-the-chosen-path source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/purpose source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/networks source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/depth source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/checkable-agreements source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/practice source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/authority source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/notes source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/activation source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/studio source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/network-evidence source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/spec source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/concept/benchmarks source=route nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/?preview source=sweep nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works?s=1 source=sweep nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works?s=3 source=sweep nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works?s=4 source=sweep nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works?s=5 source=sweep nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/how-it-works?s=9 source=sweep nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/download?step=0 source=sweep nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/download?step=4 source=sweep nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+gate=result static_files=21 dynamic_pages=5 exit=1

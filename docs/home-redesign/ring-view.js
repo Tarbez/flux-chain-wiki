@@ -14,7 +14,7 @@
    4 the other kinds (chips). 5 nothing; the lede on home names the kinds, this page explains one.
    6 nothing. 7 nothing more. 8-9 the ring rides in the address. 10 every ring but the two named
    networks says it shows a kind, not a live chain; the page reads with no 3D.
-   The stage (the ring that rises) moved to js/world/ring-stage.js (2026-10-24, the 3D port); this file is the words and the DOM.
+   The stage (the ring that rises) is the grammar world (js/world2/world2-board.mjs, 2026-10-30); this file is the words and the DOM.
    Loaded after stages.js and before app.js, so its words are ready before the app shows the view. */
 (function () {
   'use strict';

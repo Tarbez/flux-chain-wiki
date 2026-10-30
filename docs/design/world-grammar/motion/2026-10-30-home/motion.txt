@@ -1,0 +1,11 @@
+page=/ seg=1 action=first-visit at=0.0-8.0s three:[start=167 stop=4083 frames=24 ms=2000 end=0 regions=022112211001] fxn3d:[start=167 stop=3667 frames=26 ms=2167 end=0 regions=022112211001] flag=none
+page=/ seg=2 action=hover:211,780 at=8.0-9.6s three:[start=833 stop=1167 frames=3 ms=250 end=0 regions=001001100000] fxn3d:[start=500 stop=833 frames=5 ms=417 end=0 regions=022002200000] flag=none
+page=/ seg=3 action=hover:37,866 at=9.6-11.2s three:[start=1083 stop=1083 frames=1 ms=83 end=0 regions=000000000000] fxn3d:[start=750 stop=750 frames=1 ms=83 end=0 regions=000000000000] flag=none
+page=/ seg=4 action=go:/stats/now at=11.2-15.8s three:[start=1167 stop=3000 frames=22 ms=1833 end=0 regions=133213321222] fxn3d:[start=750 stop=3000 frames=27 ms=2250 end=0 regions=233224222422] flag=none
+page=/ seg=5 action=back:/stats/now at=15.8-19.3s three:[start=1417 stop=3250 frames=23 ms=1917 end=0 regions=334334433322] fxn3d:[start=1000 stop=2833 frames=17 ms=1417 end=0 regions=133224312122] flag=none
+page=/ seg=6 action=go:/chain at=19.3-23.9s three:[start=1667 stop=3750 frames=25 ms=2083 end=0 regions=243434423432] fxn3d:[start=1250 stop=3250 frames=25 ms=2083 end=0 regions=343334323333] flag=none
+page=/ seg=7 action=back:/chain at=23.9-27.4s three:[start=2083 stop=3417 frames=17 ms=1417 end=1 regions=333333332323] fxn3d:[start=1500 stop=3167 frames=17 ms=1417 end=0 regions=233223322222] flag=none
+page=/ seg=8 action=go:/resolvers at=27.4-32.0s three:[start=0 stop=4250 frames=27 ms=2250 end=0 regions=243224422332] fxn3d:[start=2250 stop=4417 frames=12 ms=1000 end=0 regions=011112111111] flag=TIME-DIFFERS
+page=/ seg=9 action=back:/resolvers at=32.0-35.5s three:[start=2583 stop=3417 frames=11 ms=917 end=1 regions=221122221222] fxn3d:[start=2000 stop=3750 frames=13 ms=1083 end=1 regions=122222322122] flag=none
+page=/ seg=10 action=go:/resolutions at=35.5-40.0s three:[start=0 stop=4250 frames=20 ms=1667 end=0 regions=122222222112] fxn3d:[start=2250 stop=3750 frames=7 ms=583 end=0 regions=111110011001] flag=TIME-DIFFERS
+page=/ seg=11 action=back:/resolutions at=40.0-43.6s three:[start=3083 stop=3417 frames=5 ms=417 end=1 regions=110111111100] fxn3d:[start=2083 stop=3500 frames=16 ms=1333 end=1 regions=233123332322] flag=TIME-DIFFERS

@@ -1,0 +1,94 @@
+kind	p1chip	block	1.6	1.04	0.12	0.012	1
+kind	p1cpad	block	0.17	0.12	0.03	0.003	0
+kind	p1cword	text	0.92	0.5
+kind	p1cedge	glowcube
+kind	p1ring	block	0.38	0.34	0.1	0.010000000000000002	0
+kind	p1app	block	1.25	0.84	0.08	0.008	1
+kind	p1bar	block	1.21	0.15	0.05	0.005000000000000001	0
+kind	p1lines	text	1.1	0.55
+kind	p1mini	block	0.2	0.24	0.06	0.006	0
+kind	p1cube	block	0.66	0.66	0.66	0.066	1
+kind	p1prod	block	0.34	0.42	0.08	0.008	0
+kind	p1dots	dots
+kind	p2win	block	2.5	1.72	0.1	0.010000000000000002	1
+kind	p2bar	block	2.46	0.2	0.06	0.006	0
+kind	p2ask	text	2.25	1.38
+kind	p2req	text	2.25	1.38
+kind	p2edge	glowcube
+kind	p2pad	block	2.4	0.12	1.6	0.012	1
+kind	p2chip	block	1.6	1.04	0.12	0.012	1
+kind	p2cpad	block	0.17	0.12	0.03	0.003	0
+kind	p2cword	text	0.92	0.5
+kind	p2cedge	glowcube
+kind	p2rack	block	1.5	0.44	1.1	0.044000000000000004	1
+kind	p2lights	glowsphere
+kind	p2print	glowarc
+kind	p2cross	glowtorus
+kind	p2xbar	glowcube
+kind	p2dots	dots
+kind	p2lit	lit
+kind	p3plinth	block	3.9	0.22	3.9	0.022000000000000002	1
+kind	p3chip	block	1.6	1.04	0.12	0.012	1
+kind	p3cpad	block	0.17	0.12	0.03	0.003	0
+kind	p3cword	text	0.92	0.5
+kind	p3cedge	glowcube
+kind	p3vault	glass	2.7	2.7	2.7	0.27
+kind	p3solid	glowcube
+kind	p3dash	glowcube
+kind	p3icon0	text	2.43	2.43
+kind	p3icon1	text	2.43	2.43
+kind	p3icon2	text	2.43	2.43
+kind	p4badge	mesh
+kind	p4rim	glowhex
+kind	p4face	text	1.1	1.1
+kind	p4slab	block	2.4	0.62	0.08	0.008	1
+kind	p4words	text	2.3	0.56
+kind	p4deck	block	2.3	0.09	1.5	0.009	1
+kind	p4lid	block	2.2	1.38	0.07	0.007000000000000001	1
+kind	p4phone	block	0.8	1.6	0.09	0.009	1
+kind	p4lscr	text	2	1.2
+kind	p4pscr	text	0.68	1.38
+kind	p4edge	glowcube
+kind	p4lit	lit
+kind	p5badge	mesh
+kind	p5rim	glowhex
+kind	p5face	text	1.1	1.1
+kind	p5lit	lit
+kind	p5dots	dots
+tone	22	graphite	10	6	0.52	1
+tone	23	dark	10	6	0.45	1
+tone	24	deep	10	4	0.3	1
+tone	25	teal	4	8	0.35	1
+tone	26	slate	1	10	0.58	1
+tone	27	slate135	26	26	0	1.35
+tone	28	dark55	23	23	0	0.55
+plate	p1cword	chip	0.92	0.5	.AUTH	.FXN
+plate	p2cword	chip	0.92	0.5	.AUTH	.FXN
+plate	p3cword	chip	0.92	0.5	.AUTH	.FXN
+plate	p1lines	applines	1.1	0.55
+plate	p2ask	share	2.25	1.38	A SITE ASKS WHO YOU ARE	Share your identity?	Share	Don’t share
+plate	p2req	request	2.25	1.38	AN APP ASKS YOU TO SIGN	What will be signed	For which network	For how long
+plate	p3icon0	icon	2.43	2.43	0
+plate	p3icon1	icon	2.43	2.43	1
+plate	p3icon2	icon	2.43	2.43	2
+plate	p4face	person	1.1	1.1
+plate	p5face	person	1.1	1.1
+plate	p4words	name	2.3	0.56	alex.fxn	SAMPLE
+plate	p4lscr	screen	2	1.2	alex.fxn
+plate	p4pscr	screen	0.68	1.38	alex.fxn
+spot	idstart	key	-49.1347	17.15	-21.3455	i	0.3
+spot	idstart	apps	-52.4847	18.02	-21.5455	i	0.85
+spot	idstart	chains	-45.0847	18.02	-21.5455	i	0.9199999999999999
+spot	idstart	resolvers	-52.3847	15.47	-20.6455	i	0.99
+spot	idstart	products	-45.1847	15.47	-20.6455	i	1.06
+spot	idsign	request	-39.1347	17.45	-21.3455		0
+spot	idsign	key	-34.9847	16.2	-21.2455		0
+spot	idsign	server	-31.1847	16.37	-21.3455		0
+spot	idsafe	facet-0	-22.0227	17.2825	-21.0469	i	0.6
+spot	idsafe	facet-1	-18.3338	16	-21.5494	i	0.6
+spot	idsafe	facet-2	-19.4085	17.55	-22.3664	i	0.6
+spot	idyou	badge	-5.2347	17.85	-21.3455	i	0.3
+spot	idyou	device-0	-11.0529	16.1679	-21.4766	i	0.8
+spot	idyou	device-1	-3.1168	16.35	-21.1137	i	0.9
+spot	idvalue	you	-4.7847	6.3091	-21.3455	i	0.2
+focus	idvalue	2	6	10	11

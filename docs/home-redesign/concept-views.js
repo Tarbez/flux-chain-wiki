@@ -15,7 +15,7 @@
    layers, Life of a resolver. Every glossary word on these pages and the others gets a short
    definition on hover or focus (the brief's "The words").
 
-   The 3D of these pages moved to js/world/concept-stages.js (2026-10-24, the 3D port); this file is the words and the DOM.
+   The 3D of these pages is the grammar world (js/world2/world2-board.mjs, records in world/world.flx, 2026-10-30); this file is the words and the DOM.
    Loaded after stages.js and before app.js: it adds its views to the page before the app reads them.
    Every view reads with no 3D. Every animation settles.
 

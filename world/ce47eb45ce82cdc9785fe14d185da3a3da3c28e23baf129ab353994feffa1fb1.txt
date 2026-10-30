@@ -1,0 +1,56 @@
+kind	bi0	block	4.6	0.14	2.7	0.014	1
+pview	bi0	identity
+kind	bi1	block	4.4	2.75	0.12	0.012	1
+pview	bi1	identity
+kind	bi2	block	1.05	0.1	0.72	0.01	1
+pview	bi2	identity
+kind	bi3	block	2.7	2	0.1	0.01	1
+pview	bi3	identity
+kind	bi4	block	2.66	0.22	0.06	0.006	1
+pview	bi4	identity
+kind	bi5	block	1.6	1.6	1.6	0.16	1
+pview	bi5	identity
+kind	bi6	block	0.38	0.46	0.1	0.01	1
+pview	bi6	identity
+kind	bi7	glowcube
+pview	bi7	identity
+kind	bip0	text
+pview	bip0	identity
+kind	bip1	text
+pview	bip1	identity
+kind	bip2	text
+pview	bip2	identity
+kind	bip3	text
+pview	bip3	identity
+kind	bin0	beads	dots	240	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+pview	bin0	identity
+kind	bin1	beads	dots	240	16
+pview	bin1	identity
+kind	bin2	beads	lit	200	16
+pview	bin2	identity
+kind	bin3	beads	lit	200	14
+pview	bin3	identity
+mixtone	22	6	0.52	10	0.48
+mixtone	23	6	0.45	10	0.55
+mixtone	24	4	0.1625	6	0.3375	8	0.0875	10	0.4125
+mixtone	25	1	0.588	10	0.812
+mixtone	26	0	0.175	6	0.585	10	0.24
+plate	bip0	ops	3.9	2.3	plain	-	-	0	512	fillStyle	1	rgba(8,16,14,.92)	fillRect	4	0	0	512	302	font	1	500 22px "JetBrains Mono", ui-monospace, monospace	letterSpacing	1	3px	fillStyle	1	@muted	fillText	3	FXN ID · ON THIS DEVICE	40	60	font	1	700 64px "Inter Tight", Inter, system-ui, sans-serif	letterSpacing	1	-1px	fillStyle	1	@strong	fillText	3	.auth.fxn	40	150	font	1	500 28px "Inter Tight", Inter, system-ui, sans-serif	letterSpacing	1	-1px	fillStyle	1	@muted	fillText	3	One key file for every network.	40	200	fillText	3	It stays on this device. It is never uploaded.	40	240
+plate	bip1	ops	2.3	1.45	plain	-	-	0	512	fillStyle	1	rgba(232,228,218,.96)	fillRect	4	0	0	512	323	font	1	500 22px "JetBrains Mono", ui-monospace, monospace	letterSpacing	1	3px	fillStyle	1	#3d4743	fillText	3	AN APP ASKS YOU TO SIGN	32	52	fillStyle	1	rgba(0,0,0,.18)	fillRect	4	32	72	448	2	font	1	600 34px "Inter Tight", Inter, system-ui, sans-serif	letterSpacing	1	-1px	fillStyle	1	#121a17	fillText	3	What will be signed	32	132	fillText	3	For which network	32	184	fillText	3	For how long	32	236
+plate	bip2	ops	0.92	0.62	plain	-	-	0	512	font	1	500 60px "JetBrains Mono", ui-monospace, monospace	letterSpacing	1	6px	fillStyle	1	@strong	fillText	3	.AUTH	34	165.6	fillText	3	.FXN	34	282.9
+plate	bip3	ops	2.6	1.1	plain	-	-	0	512	font	1	700 120px "Inter Tight", Inter, system-ui, sans-serif	letterSpacing	1	-1px	fillStyle	1	@strong	fillText	3	radio.fxn	30	140	font	1	500 30px "JetBrains Mono", ui-monospace, monospace	letterSpacing	1	4px	fillStyle	1	@muted	fillText	3	NEVER RADIO.DEFXN.FXN	34	200	fillStyle	1	@muted	fillRect	4	30	188	239	2
+statekey	identity	s
+stateid	identity	s0	id
+stateid	identity	s1	names
+spot	identity	device	14.5758	11	-10.1212	tb	0.05		1	lt
+spot	identity	file	18.6758	11.8	-10.5712	tb	0.05		1	lt
+spot	identity	app	12.6758	14.05	-11.2212	tb	0.05		1	lt
+spot	identity	name	14.1758	14.3	-11.3712	tb	0.95		1	gt
+spot	identity	domain	15.3758	10.75	-10.8212	tb	0.95		1	gt
+spot	identity	owner	18.9758	12.7	-11.6212	tb	0.95		1	gt
+spot	identity	device	14.5758	11	-10.1212	tb	0.05		1	lt
+spot	identity	file	18.6758	11.8	-10.5712	tb	0.05		1	lt
+spot	identity	app	12.6758	14.05	-11.2212	tb	0.05		1	lt
+spot	identity	name	14.1758	14.3	-11.3712	tb	0.95		1	gt
+spot	identity	domain	15.3758	10.75	-10.8212	tb	0.95		1	gt
+spot	identity	owner	18.9758	12.7	-11.6212	tb	0.95		1	gt

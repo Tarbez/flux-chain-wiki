@@ -979,10 +979,17 @@ body.no-scene .sheet,body.no-webgl .sheet{border-radius:var(--rx,12px) / var(--r
 <link rel="stylesheet" href="identity-flow.css?v=20261023a">
 <!-- the home's Measured rail (rail-capabilities.js) -->
 <link rel="stylesheet" href="rail.css?v=20261023a">
+<style>
+/* the grammar world's canvas (js/world2/world2-host.mjs makes the layer; the board used to draw .scene > canvas with Three.js) */
+.world-layer{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.world-layer>canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.world-layer:not([data-flown])>canvas{visibility:hidden}
+body.no-scene .world-layer{display:none}
+</style>
 </head>
-<body data-view="home" class="first">
+<body id="scene" data-view="home" class="first">
 
-<div class="scene" aria-hidden="true"><canvas id="chains"></canvas></div>
+<div class="scene" aria-hidden="true" data-ark-layer="persistent"></div><!-- the grammar world puts its canvas in front of this (js/world2/world2-board.mjs) -->
 <div class="scrim" aria-hidden="true"><i class="home"></i><i class="page"></i><i class="open"></i></div>
 <div class="callouts" aria-hidden="true">
   <span class="callout" data-ui data-kind="fxn"><i></i><span>DEFXN<small>The base chain kernel</small></span></span>
@@ -994,7 +1001,7 @@ body.no-scene .sheet,body.no-webgl .sheet{border-radius:var(--rx,12px) / var(--r
   <span class="callout" data-ui data-kind="computers"><i></i><span>Computers</span></span>
 </div>
 
-<header class="top" data-kit="top"></header>
+<header class="top ark-header" data-kit="top"></header>
 
 <main class="views">
 
@@ -1374,37 +1381,26 @@ body.no-scene .sheet,body.no-webgl .sheet{border-radius:var(--rx,12px) / var(--r
 <div class="tags" data-for="fxn" aria-hidden="true"></div>
 <div class="tags" data-for="ring" aria-hidden="true"><span class="tag hot" data-tag="name"></span></div>
 
-<footer class="foot" data-kit="foot"></footer>
+<footer class="foot site-footer-strip" data-kit="foot"></footer>
 <div class="hover-tag" aria-hidden="true"><b></b><span></span></div>
 <div class="mock" role="group" aria-label="Mockup controls" data-kit="mock"></div>
 
-<script src="../../js/vendor/three-r180-defxn.js"></script>
-<script src="../../js/ark/mark-data.js?v=20261024a"></script>
-<script src="../../js/content/network-data.js?v=20261023m"></script>
-<script src="../../js/content/records-sample.js?v=20261023m"></script>
-<script src="kit-ui.js?v=20261023m"></script>
-<script src="../../js/world/ring-kit.js?v=20261023m"></script>
-<script src="../../js/content/capabilities-data.js?v=20261023m"></script>
-<script src="../../js/content/resolvers-data.js?v=20261023m"></script>
-<script src="../../js/content/fxn-data.js?v=20261023m"></script>
-<script src="../../js/world/chains-scene.js?v=20261024b"></script>
-<script src="../../js/world/stages.js?v=20261023m"></script>
-<script src="../../js/content/concept-data.js?v=20261024b"></script>
-<script src="../../js/content/identity-sample.js?v=20261024b"></script>
-<script src="../../js/world/ring-stage.js?v=20261024b"></script>
-<script src="../../js/world/concept-stages.js?v=20261024b"></script>
-<script src="../../js/world/identity-stages.js?v=20261024b"></script>
-<script src="../../js/world/intro-stage.js?v=20261024b"></script>
-<script src="ring-view.js?v=20261024b"></script>
-<script src="concept-views.js?v=20261024b"></script>
-<script src="identity-flow.js?v=20261024b"></script>
-<script src="trace-view.js?v=20261024a"></script>
-<script src="intro-view.js?v=20261024b"></script>
-<script src="../../js/world/home-descent.js?v=20261024b"></script>
-<script src="../../js/world/home-helix.js?v=20261024b"></script>
-<script src="../../js/world/home-sites.js?v=20261024a"></script>
-<script src="../../js/world/record-glass.js?v=20261024a"></script>
-<script src="app.js?v=20261023m"></script>
-<script src="../../js/world/rail-capabilities.js?v=20261023m"></script>
+<script type="module" src="../../js/world2/world2-board.mjs?v=20261030-b1"></script><!-- the board's 3D: the grammar world (fxn-3d); the classic scripts below are deferred so they run after it, in order -->
+<script defer src="../../js/ark/mark-data.js?v=20261024a"></script>
+<script defer src="../../js/content/network-data.js?v=20261023m"></script>
+<script defer src="../../js/content/records-sample.js?v=20261023m"></script>
+<script defer src="kit-ui.js?v=20261023m"></script>
+<script defer src="../../js/content/capabilities-data.js?v=20261023m"></script>
+<script defer src="../../js/content/resolvers-data.js?v=20261023m"></script>
+<script defer src="../../js/content/fxn-data.js?v=20261023m"></script>
+<script defer src="../../js/content/concept-data.js?v=20261024b"></script>
+<script defer src="../../js/content/identity-sample.js?v=20261024b"></script>
+<script defer src="ring-view.js?v=20261024b"></script>
+<script defer src="concept-views.js?v=20261024b"></script>
+<script defer src="identity-flow.js?v=20261024b"></script>
+<script defer src="trace-view.js?v=20261024a"></script>
+<script defer src="intro-view.js?v=20261024b"></script>
+<script defer src="app.js?v=20261023m"></script>
+<script defer src="../../js/world/rail-capabilities.js?v=20261023m"></script>
 </body>
 </html>

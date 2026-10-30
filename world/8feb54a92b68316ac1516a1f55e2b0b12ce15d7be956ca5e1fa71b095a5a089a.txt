@@ -1,0 +1,1077 @@
+kind	fx0	block	0.19778337414559982	0.62	0.14	0.014	1
+pview	fx0	fxn
+lift	fx0	0.12	0.16
+mixtone	22	4	0.65	8	0.35
+mixtone	23	0	0.35	6	0.65
+pickp	fxn	s0	fx0	0	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	1	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	2	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	3	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	4	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	5	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	6	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	7	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	8	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	9	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	10	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	11	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	12	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	13	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	14	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	15	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	16	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	17	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	18	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	19	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	20	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	21	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	22	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	23	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	24	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	25	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	26	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	27	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	28	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	29	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	30	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	31	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	32	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	33	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	34	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	35	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	36	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	37	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	38	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	39	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	40	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	41	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	42	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	43	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	44	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	45	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	46	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s0	fx0	47	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s0	fx0	48	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s0	fx0	49	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s0	fx0	50	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	51	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	52	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	53	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	54	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	55	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	56	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	57	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	58	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	59	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s0	fx0	60	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s0	fx0	61	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s0	fx0	62	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s0	fx0	63	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s0	fx0	64	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s0	fx0	65	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s0	fx0	66	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s0	fx0	67	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s0	fx0	68	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	69	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	70	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	71	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	72	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	73	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	74	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	75	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	76	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s0	fx0	77	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s0	fx0	78	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s0	fx0	79	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s0	fx0	80	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s0	fx0	81	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s0	fx0	82	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s0	fx0	83	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	84	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	85	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	86	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	87	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	88	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	89	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	90	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	91	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	92	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	93	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	94	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	95	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	96	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	97	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	98	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s0	fx0	99	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	0	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	1	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	2	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	3	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	4	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	5	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	6	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	7	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	8	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	9	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	10	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	11	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	12	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	13	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	14	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	15	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	16	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	17	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	18	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	19	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	20	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	21	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	22	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	23	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	24	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	25	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	26	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	27	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	28	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	29	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	30	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	31	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	32	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	33	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	34	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	35	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	36	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	37	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	38	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	39	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	40	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	41	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	42	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	43	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	44	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	45	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	46	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s1	fx0	47	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s1	fx0	48	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s1	fx0	49	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s1	fx0	50	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	51	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	52	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	53	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	54	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	55	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	56	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	57	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	58	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	59	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s1	fx0	60	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s1	fx0	61	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s1	fx0	62	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s1	fx0	63	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s1	fx0	64	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s1	fx0	65	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s1	fx0	66	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s1	fx0	67	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s1	fx0	68	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	69	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	70	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	71	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	72	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	73	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	74	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	75	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	76	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s1	fx0	77	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s1	fx0	78	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s1	fx0	79	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s1	fx0	80	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s1	fx0	81	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s1	fx0	82	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s1	fx0	83	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	84	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	85	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	86	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	87	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	88	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	89	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	90	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	91	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	92	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	93	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	94	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	95	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	96	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	97	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	98	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s1	fx0	99	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	0	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	1	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	2	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	3	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	4	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	5	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	6	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	7	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	8	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	9	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	10	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	11	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	12	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	13	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	14	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	15	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	16	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	17	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	18	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	19	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	20	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	21	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	22	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	23	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	24	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	25	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	26	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	27	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	28	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	29	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	30	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	31	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	32	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	33	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	34	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	35	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	36	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	37	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	38	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	39	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	40	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	41	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	42	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	43	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	44	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	45	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	46	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s2	fx0	47	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s2	fx0	48	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s2	fx0	49	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s2	fx0	50	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	51	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	52	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	53	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	54	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	55	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	56	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	57	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	58	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	59	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s2	fx0	60	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s2	fx0	61	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s2	fx0	62	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s2	fx0	63	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s2	fx0	64	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s2	fx0	65	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s2	fx0	66	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s2	fx0	67	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s2	fx0	68	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	69	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	70	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	71	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	72	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	73	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	74	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	75	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	76	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s2	fx0	77	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s2	fx0	78	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s2	fx0	79	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s2	fx0	80	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s2	fx0	81	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s2	fx0	82	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s2	fx0	83	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	84	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	85	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	86	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	87	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	88	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	89	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	90	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	91	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	92	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	93	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	94	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	95	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	96	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	97	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	98	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s2	fx0	99	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	0	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	1	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	2	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	3	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	4	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	5	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	6	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	7	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	8	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	9	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	10	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	11	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	12	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	13	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	14	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	15	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	16	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	17	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	18	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	19	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	20	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	21	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	22	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	23	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	24	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	25	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	26	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	27	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	28	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	29	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	30	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	31	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	32	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	33	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	34	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	35	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	36	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	37	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	38	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	39	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	40	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	41	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	42	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	43	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	44	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	45	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	46	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s3	fx0	47	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s3	fx0	48	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s3	fx0	49	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s3	fx0	50	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	51	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	52	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	53	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	54	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	55	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	56	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	57	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	58	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	59	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s3	fx0	60	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s3	fx0	61	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s3	fx0	62	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s3	fx0	63	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s3	fx0	64	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s3	fx0	65	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s3	fx0	66	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s3	fx0	67	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s3	fx0	68	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	69	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	70	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	71	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	72	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	73	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	74	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	75	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	76	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s3	fx0	77	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s3	fx0	78	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s3	fx0	79	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s3	fx0	80	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s3	fx0	81	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s3	fx0	82	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s3	fx0	83	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	84	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	85	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	86	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	87	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	88	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	89	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	90	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	91	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	92	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	93	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	94	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	95	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	96	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	97	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	98	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s3	fx0	99	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	0	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	1	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	2	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	3	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	4	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	5	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	6	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	7	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	8	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	9	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	10	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	11	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	12	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	13	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	14	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	15	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	16	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	17	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	18	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	19	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	20	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	21	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	22	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	23	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	24	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	25	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	26	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	27	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	28	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	29	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	30	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	31	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	32	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	33	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	34	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	35	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	36	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	37	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	38	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	39	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	40	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	41	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	42	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	43	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	44	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	45	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	46	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s4	fx0	47	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s4	fx0	48	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s4	fx0	49	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s4	fx0	50	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	51	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	52	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	53	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	54	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	55	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	56	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	57	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	58	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	59	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s4	fx0	60	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s4	fx0	61	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s4	fx0	62	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s4	fx0	63	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s4	fx0	64	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s4	fx0	65	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s4	fx0	66	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s4	fx0	67	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s4	fx0	68	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	69	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	70	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	71	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	72	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	73	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	74	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	75	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	76	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s4	fx0	77	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s4	fx0	78	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s4	fx0	79	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s4	fx0	80	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s4	fx0	81	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s4	fx0	82	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s4	fx0	83	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	84	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	85	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	86	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	87	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	88	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	89	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	90	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	91	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	92	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	93	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	94	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	95	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	96	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	97	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	98	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s4	fx0	99	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	0	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	1	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	2	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	3	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	4	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	5	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	6	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	7	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	8	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	9	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	10	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	11	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	12	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	13	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	14	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	15	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	16	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	17	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	18	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	19	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	20	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	21	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	22	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	23	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	24	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	25	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	26	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	27	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	28	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	29	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	30	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	31	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	32	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	33	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	34	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	35	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	36	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	37	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	38	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	39	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	40	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	41	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	42	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	43	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	44	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	45	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	46	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s5	fx0	47	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s5	fx0	48	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s5	fx0	49	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s5	fx0	50	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	51	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	52	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	53	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	54	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	55	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	56	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	57	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	58	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	59	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s5	fx0	60	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s5	fx0	61	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s5	fx0	62	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s5	fx0	63	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s5	fx0	64	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s5	fx0	65	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s5	fx0	66	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s5	fx0	67	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s5	fx0	68	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	69	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	70	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	71	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	72	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	73	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	74	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	75	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	76	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s5	fx0	77	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s5	fx0	78	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s5	fx0	79	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s5	fx0	80	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s5	fx0	81	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s5	fx0	82	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s5	fx0	83	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	84	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	85	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	86	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	87	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	88	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	89	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	90	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	91	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	92	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	93	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	94	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	95	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	96	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	97	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	98	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s5	fx0	99	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	0	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	1	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	2	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	3	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	4	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	5	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	6	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	7	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	8	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	9	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	10	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	11	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	12	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	13	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	14	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	15	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	16	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	17	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	18	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	19	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	20	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	21	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	22	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	23	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	24	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	25	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	26	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	27	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	28	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	29	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	30	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	31	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	32	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	33	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	34	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	35	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	36	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	37	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	38	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	39	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	40	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	41	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	42	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	43	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	44	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	45	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	46	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s6	fx0	47	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s6	fx0	48	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s6	fx0	49	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s6	fx0	50	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	51	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	52	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	53	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	54	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	55	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	56	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	57	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	58	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	59	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s6	fx0	60	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s6	fx0	61	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s6	fx0	62	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s6	fx0	63	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s6	fx0	64	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s6	fx0	65	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s6	fx0	66	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s6	fx0	67	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s6	fx0	68	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	69	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	70	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	71	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	72	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	73	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	74	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	75	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	76	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s6	fx0	77	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s6	fx0	78	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s6	fx0	79	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s6	fx0	80	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s6	fx0	81	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s6	fx0	82	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s6	fx0	83	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	84	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	85	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	86	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	87	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	88	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	89	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	90	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	91	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	92	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	93	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	94	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	95	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	96	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	97	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	98	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s6	fx0	99	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	0	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	1	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	2	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	3	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	4	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	5	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	6	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	7	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	8	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	9	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	10	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	11	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	12	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	13	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	14	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	15	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	16	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	17	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	18	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	19	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	20	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	21	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	22	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	23	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	24	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	25	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	26	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	27	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	28	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	29	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	30	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	31	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	32	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	33	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	34	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	35	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	36	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	37	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	38	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	39	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	40	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	41	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	42	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	43	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	44	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	45	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	46	Mining · 47%	Choose	stagePick	fxn	mining	0
+pickp	fxn	s7	fx0	47	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s7	fx0	48	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s7	fx0	49	Investing fund · 3%	Choose	stagePick	fxn	investing	0
+pickp	fxn	s7	fx0	50	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	51	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	52	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	53	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	54	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	55	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	56	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	57	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	58	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	59	Public sale · 10%	Choose	stagePick	fxn	sale	0
+pickp	fxn	s7	fx0	60	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s7	fx0	61	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s7	fx0	62	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s7	fx0	63	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s7	fx0	64	Service fund · 5%	Choose	stagePick	fxn	service	0
+pickp	fxn	s7	fx0	65	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s7	fx0	66	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s7	fx0	67	Buyback · 3%	Choose	stagePick	fxn	buyback	0
+pickp	fxn	s7	fx0	68	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	69	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	70	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	71	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	72	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	73	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	74	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	75	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	76	Creator · 9%	Choose	stagePick	fxn	creator	0
+pickp	fxn	s7	fx0	77	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s7	fx0	78	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s7	fx0	79	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s7	fx0	80	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s7	fx0	81	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s7	fx0	82	Co-founder · 6%	Choose	stagePick	fxn	cofounder	0
+pickp	fxn	s7	fx0	83	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	84	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	85	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	86	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	87	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	88	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	89	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	90	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	91	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	92	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	93	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	94	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	95	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	96	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	97	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	98	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s7	fx0	99	Operations · 17%	Choose	stagePick	fxn	operations	0
+pickp	fxn	s8	fx0	0	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	1	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	2	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	3	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	4	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	5	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	6	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	7	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	8	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	9	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	10	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	11	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	12	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	13	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	14	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	15	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	16	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	17	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	18	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	19	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	20	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	21	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	22	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	23	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	24	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	25	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	26	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	27	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	28	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	29	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	30	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	31	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	32	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	33	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	34	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	35	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	36	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	37	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	38	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	39	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	40	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	41	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	42	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	43	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	44	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	45	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	46	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	47	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	48	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	49	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	50	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	51	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	52	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	53	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	54	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	55	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	56	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	57	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	58	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	59	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	60	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	61	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	62	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	63	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	64	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s8	fx0	65	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	66	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	67	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	68	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	69	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	70	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	71	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	72	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	73	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	74	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	75	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	76	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	77	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	78	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	79	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	80	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	81	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	82	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	83	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	84	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	85	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	86	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	87	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	88	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	89	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	90	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	91	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	92	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	93	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	94	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	95	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	96	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	97	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	98	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s8	fx0	99	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	0	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	1	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	2	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	3	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	4	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	5	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	6	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	7	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	8	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	9	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	10	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	11	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	12	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	13	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	14	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	15	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	16	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	17	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	18	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	19	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	20	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	21	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	22	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	23	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	24	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	25	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	26	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	27	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	28	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	29	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	30	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	31	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	32	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	33	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	34	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	35	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	36	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	37	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	38	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	39	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	40	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	41	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	42	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	43	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	44	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	45	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	46	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	47	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	48	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	49	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	50	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	51	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	52	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	53	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	54	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	55	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	56	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	57	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	58	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	59	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	60	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	61	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	62	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	63	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	64	Computers · 65%	Choose	stagePick	fxn	computers	0
+pickp	fxn	s9	fx0	65	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	66	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	67	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	68	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	69	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	70	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	71	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	72	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	73	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	74	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	75	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	76	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	77	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	78	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	79	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	80	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	81	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	82	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	83	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	84	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	85	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	86	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	87	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	88	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	89	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	90	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	91	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	92	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	93	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	94	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	95	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	96	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	97	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	98	Network fund · 35%	Choose	stagePick	fxn	fund	0
+pickp	fxn	s9	fx0	99	Network fund · 35%	Choose	stagePick	fxn	fund	0
+stagger	fx0	sw	974	380	594	-6	0
+statekey	fxn	g
+stateid	fxn	s0	mining
+stateid	fxn	s1	investing
+stateid	fxn	s2	sale
+stateid	fxn	s3	service
+stateid	fxn	s4	buyback
+stateid	fxn	s5	creator
+stateid	fxn	s6	cofounder
+stateid	fxn	s7	operations
+stateid	fxn	s8	computers
+stateid	fxn	s9	fund
+spot	fxn	g-public	-5.7293	5.7051	0.6813	ft	0.5		1	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479	ft	0.5		1	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287	ft	0.5		1	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384		0		0	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048		0		0	gt
+spot	fxn	part	-4.383	6.4051	-3.0538	ft	0.5		1	lt
+spot	fxn	g-public	-5.7293	5.7051	0.6813	ft	0.5		1	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479	ft	0.5		1	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287	ft	0.5		1	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384		0		0	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048		0		0	gt
+spot	fxn	part	-1.8438	6.4051	2.3271	ft	0.5		1	lt
+spot	fxn	g-public	-5.7293	5.7051	0.6813	ft	0.5		1	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479	ft	0.5		1	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287	ft	0.5		1	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384		0		0	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048		0		0	gt
+spot	fxn	part	-0.0242	6.4051	2.7086	ft	0.5		1	lt
+spot	fxn	g-public	-5.7293	5.7051	0.6813	ft	0.5		1	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479	ft	0.5		1	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287	ft	0.5		1	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384		0		0	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048		0		0	gt
+spot	fxn	part	1.1008	6.4051	0.4018	ft	0.5		1	lt
+spot	fxn	g-public	-5.7293	5.7051	0.6813	ft	0.5		1	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479	ft	0.5		1	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287	ft	0.5		1	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384		0		0	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048		0		0	gt
+spot	fxn	part	1.6632	6.4051	0.0118	ft	0.5		1	lt
+spot	fxn	g-public	-5.7293	5.7051	0.6813	ft	0.5		1	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479	ft	0.5		1	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287	ft	0.5		1	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384		0		0	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048		0		0	gt
+spot	fxn	part	2.3322	6.4051	-1.0122	ft	0.5		1	lt
+spot	fxn	g-public	-5.7293	5.7051	0.6813	ft	0.5		1	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479	ft	0.5		1	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287	ft	0.5		1	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384		0		0	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048		0		0	gt
+spot	fxn	part	2.4436	6.4051	-2.1634	ft	0.5		1	lt
+spot	fxn	g-public	-5.7293	5.7051	0.6813	ft	0.5		1	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479	ft	0.5		1	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287	ft	0.5		1	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384		0		0	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048		0		0	gt
+spot	fxn	part	1.4513	6.4051	-3.8287		0		0	gt
+spot	fxn	g-public	-5.7293	5.7051	0.6813		0		0	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479		0		0	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287		0		0	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384	ft	0.5		1	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048	ft	0.5		1	gt
+spot	fxn	part	-4.324	6.4051	-0.3964		0		0	lt
+spot	fxn	g-public	-5.7293	5.7051	0.6813		0		0	lt
+spot	fxn	g-team	2.4436	5.7051	-1.479		0		0	lt
+spot	fxn	g-ops	1.4513	5.7051	-3.8287		0		0	lt
+spot	fxn	g-computers	-5.9378	5.7051	0.1384	ft	0.5		1	gt
+spot	fxn	g-fund	2.3408	5.7051	-2.6048	ft	0.5		1	gt
+spot	fxn	part	2.3408	6.4051	-2.6048		0		0	lt

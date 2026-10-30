@@ -1,0 +1,624 @@
+strokeStyle	c:acc:0.55
+fillStyle	c:acc:0.55
+lineWidth	1.476
+lineCap	round
+lineJoin	round
+beginPath
+lineTo	97.7172	102.39
+lineTo	61.5	123.3
+lineTo	25.2828	102.39
+lineTo	25.2828	60.57
+lineTo	61.5	39.66
+lineTo	97.7172	60.57
+closePath
+stroke
+save
+globalAlpha	1
+mark	c:acc:1	30.75	50.73	61.5	61.5
+restore
+font	500 12px @--font-mono
+letterSpacing	1px
+textAlign	center
+textBaseline	middle
+fillStyle	c:ink:1
+fillText	FXN ID	61.5	162.96
+font	500 14px @--font-mono
+letterSpacing	2px
+textAlign	left
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	FXN ID	13.58	22
+font	500 12px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.85
+fillText	fxn1q8…7k2d	13.58	85.8
+save
+globalAlpha	0.9
+mark	c:acc:1	152.54	12.1	28.6	28.6
+restore
+strokeStyle	c:acc:0.55
+fillStyle	c:acc:0.55
+lineWidth	1.26
+lineCap	round
+lineJoin	round
+beginPath
+lineTo	83.4171	87.99
+lineTo	52.5	105.84
+lineTo	21.5829	87.99
+lineTo	21.5829	52.29
+lineTo	52.5	34.44
+lineTo	83.4171	52.29
+closePath
+stroke
+save
+globalAlpha	1
+mark	c:acc:1	26.25	43.89	52.5	52.5
+restore
+font	500 11px @--font-mono
+letterSpacing	1px
+textAlign	center
+textBaseline	middle
+fillStyle	c:ink:1
+fillText	FXN ID	52.5	140.28
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	3.93
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	19.45	26.2
+arcTo	58.75	26.2	58.75	60.26	5.24
+arcTo	58.75	60.26	14.21	60.26	5.24
+arcTo	14.21	60.26	14.21	26.2	5.24
+arcTo	14.21	26.2	58.75	26.2	5.24
+closePath
+stroke
+beginPath
+arc	48.27	43.23	3.93	0	6.2832
+fill
+font	600 18px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:1
+fillText	Wallet	14.21	81.22
+font	500 12px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.7
+fillText	3 identities	14.21	107.42
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	3.93
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	162.4	94.32
+lineTo	182.7	94.32
+moveTo	174.58	86.46
+lineTo	182.7	94.32
+lineTo	174.58	102.18
+stroke
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	7.44
+lineCap	round
+lineJoin	round
+beginPath
+arc	62	47.12	14.88	0	6.2832
+stroke
+beginPath
+moveTo	33.728	95.48
+bezierCurveTo	35.216	69.44	48.608	66.464	62	66.464
+bezierCurveTo	75.392	66.464	88.784	69.44	90.272	95.48
+stroke
+font	500 17px @--font-mono
+letterSpacing	2px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.8
+fillText	ROUTE	7.04	13.5
+font	500 17px @--font-mono
+letterSpacing	2px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.8
+fillText	LOOKUP	7.04	13.5
+font	500 17px @--font-mono
+letterSpacing	2px
+textAlign	left
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	RESOLVE	7.04	13.5
+font	600 17px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:1
+fillText	Bundle	12	75.48
+font	500 11px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.7
+fillText	4 items	12	95.46
+strokeStyle	c:acc:0.9
+fillStyle	c:acc:0.9
+lineWidth	2.22
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	12	33.3
+lineTo	138	33.3
+stroke
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	2.62
+lineCap	round
+lineJoin	round
+beginPath
+arc	28.42	39.3	18.34	0	6.2832
+stroke
+beginPath
+ellipse	28.42	39.3	8.253	18.34	0	0	6.2832
+stroke
+beginPath
+moveTo	10.08	39.3
+lineTo	46.76	39.3
+stroke
+font	600 18px @--font-mono
+letterSpacing	2px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:1
+fillText	subzero.fxn	14.21	86.46
+font	500 10px @--font-mono
+letterSpacing	1px
+strokeStyle	c:acc:0.9
+fillStyle	c:acc:0.9
+lineWidth	2
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	23.642	103.228
+arcTo	63.882	103.228	63.882	122.092	9.432
+arcTo	63.882	122.092	14.21	122.092	9.432
+arcTo	14.21	122.092	14.21	103.228	9.432
+arcTo	14.21	103.228	63.882	103.228	9.432
+closePath
+stroke
+font	500 10px @--font-mono
+letterSpacing	1px
+textAlign	center
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	Owned	39.046	113.66
+font	500 11px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.75
+fillText	PERMISSIONS	8.3	13.86
+font	500 11px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.75
+fillText	SIGNATURE	8.3	13.86
+font	500 11px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	IDENTITY	8.3	13.86
+fillStyle	c:ink:0.35
+fillRect	8.3	39.6	116.2	3.96
+fillStyle	c:ink:0.35
+fillRect	8.3	54.45	91.3	3.96
+fillStyle	c:ink:0.35
+fillRect	8.3	69.3	66.4	3.96
+font	500 16px @--font-mono
+letterSpacing	2px
+textAlign	left
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	Permissions	12.96	24.83
+fillStyle	c:acc:0.9
+beginPath
+arc	16.2	61.12	4.775	0	6.2832
+fill
+font	600 14px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.92
+fillText	identity	27.54	61.12
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	2.7504
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	134.9235	61.12
+lineTo	139.5648	65.9332
+lineTo	147.816	55.963
+stroke
+fillStyle	c:acc:0.9
+beginPath
+arc	16.2	93.59	4.775	0	6.2832
+fill
+font	600 14px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.92
+fillText	access	27.54	93.59
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	2.7504
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	134.9235	93.59
+lineTo	139.5648	98.4032
+lineTo	147.816	88.433
+stroke
+fillStyle	c:acc:0.9
+beginPath
+arc	16.2	126.06	4.775	0	6.2832
+fill
+font	600 14px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.92
+fillText	trust	27.54	126.06
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	2.7504
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	134.9235	126.06
+lineTo	139.5648	130.8732
+lineTo	147.816	120.903
+stroke
+fillStyle	c:acc:0.9
+beginPath
+arc	16.2	158.53	4.775	0	6.2832
+fill
+font	600 14px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.92
+fillText	ownership	27.54	158.53
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	2.7504
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	134.9235	158.53
+lineTo	139.5648	163.3432
+lineTo	147.816	153.373
+stroke
+save
+globalAlpha	1
+mark	c:acc:1	2.45	2.45	44.1	44.1
+restore
+save
+globalAlpha	1
+mark	c:acc:1	28.8	11.96	64.4	64.4
+restore
+save
+globalAlpha	1
+mark	c:acc:1	4.4	4.4	79.2	79.2
+restore
+fillStyle	c:ink:0.3
+fillRect	15.9	20.6	53	4.12
+fillStyle	c:ink:0.3
+fillRect	15.9	30.9	53	4.12
+fillStyle	c:ink:0.3
+fillRect	15.9	41.2	53	4.12
+fillStyle	c:ink:0.3
+fillRect	15.9	51.5	53	4.12
+fillStyle	c:acc:1
+beginPath
+arc	84.8	82.4	5.15	0	6.2832
+fill
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	4.305
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	15.6	61.5
+bezierCurveTo	31.2	12.3	46.8	12.3	50.7	55.35
+bezierCurveTo	54.6	86.1	70.2	76.26	81.9	46.74
+bezierCurveTo	93.6	24.6	101.4	67.65	117	61.5
+bezierCurveTo	128.7	56.58	136.5	49.2	152.1	54.12
+stroke
+font	500 12px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.8
+fillText	fxn1q8…7k2d	15.6	103.32
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	3.075
+lineCap	round
+lineJoin	round
+beginPath
+arc	169.65	100.86	11.07	0	6.2832
+stroke
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	1.968
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	165.345	100.86
+lineTo	168.666	104.304
+lineTo	174.57	97.17
+stroke
+save
+globalAlpha	1
+mark	c:acc:1	1.65	1.65	62.7	62.7
+restore
+font	500 11px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	Syncing	10.08	15.84
+fillStyle	c:ink:0.18
+fillRect	10.08	39.6	105.84	4.4
+fillStyle	c:acc:0.95
+fillRect	10.08	39.6	65.6208	4.4
+fillStyle	c:ink:0.18
+fillRect	10.08	54.56	105.84	4.4
+fillStyle	c:acc:0.95
+fillRect	10.08	54.56	40.2192	4.4
+fillStyle	c:ink:0.18
+fillRect	10.08	69.52	105.84	4.4
+fillStyle	c:acc:0.95
+fillRect	10.08	69.52	84.672	4.4
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	2.618
+lineCap	round
+lineJoin	round
+beginPath
+arc	32.13	38.08	20.23	0	6.2832
+stroke
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	2.618
+lineCap	round
+lineJoin	round
+beginPath
+arc	32.13	34.51	4.76	0	6.2832
+stroke
+beginPath
+moveTo	23.086	49.98
+bezierCurveTo	23.562	41.65	27.846	40.698	32.13	40.698
+bezierCurveTo	36.414	40.698	40.698	41.65	41.174	49.98
+stroke
+font	600 17px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:1
+fillText	subzero	61.88	29.75
+font	500 10px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.7
+fillText	fxn1q8…7k2d	61.88	49.98
+font	500 9px @--font-mono
+letterSpacing	1px
+strokeStyle	c:acc:0.9
+fillStyle	c:acc:0.9
+lineWidth	2
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	19.9325	84.7875
+arcTo	62.795	84.7875	62.795	100.8525	8.0325
+arcTo	62.795	100.8525	11.9	100.8525	8.0325
+arcTo	11.9	100.8525	11.9	84.7875	8.0325
+arcTo	11.9	84.7875	62.795	84.7875	8.0325
+closePath
+stroke
+font	500 9px @--font-mono
+letterSpacing	1px
+textAlign	center
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	FXN ID	37.3475	93.82
+font	500 9px @--font-mono
+letterSpacing	1px
+strokeStyle	c:acc:0.9
+fillStyle	c:acc:0.9
+lineWidth	2
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	77.9675	84.7875
+arcTo	120.83	84.7875	120.83	100.8525	8.0325
+arcTo	120.83	100.8525	69.935	100.8525	8.0325
+arcTo	69.935	100.8525	69.935	84.7875	8.0325
+arcTo	69.935	84.7875	120.83	84.7875	8.0325
+closePath
+stroke
+font	500 9px @--font-mono
+letterSpacing	1px
+textAlign	center
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	devnet	95.3825	93.82
+setLineDash	3.63,3.63
+strokeStyle	c:ink:0.45
+fillStyle	c:ink:0.45
+lineWidth	2.178
+lineCap	round
+lineJoin	round
+beginPath
+arc	89.5	41.14	20.57	0	6.2832
+stroke
+setLineDash	0
+strokeStyle	c:ink:0.45
+fillStyle	c:ink:0.45
+lineWidth	2.42
+lineCap	round
+lineJoin	round
+beginPath
+arc	89.5	37.51	4.84	0	6.2832
+stroke
+beginPath
+moveTo	80.304	53.24
+bezierCurveTo	80.788	44.77	85.144	43.802	89.5	43.802
+bezierCurveTo	93.856	43.802	98.212	44.77	98.696	53.24
+stroke
+font	600 12px @--font-sans
+letterSpacing	0px
+textAlign	center
+textBaseline	middle
+fillStyle	c:ink:0.6
+fillText	No identity yet	89.5	89.54
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	3.025
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	153.94	12.1
+lineTo	153.94	29.04
+moveTo	141.41	20.57
+lineTo	166.47	20.57
+stroke
+save
+globalAlpha	1
+mark	c:acc:1	2.9	2.9	52.2	52.2
+restore
+font	500 13px @--font-mono
+letterSpacing	2px
+textAlign	center
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	Verifying	66	11
+save
+strokeStyle	c:warn:1
+fillStyle	c:warn:1
+lineWidth	4.158
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	29.7	28.71
+lineTo	52.569	68.211
+lineTo	6.831	68.211
+closePath
+stroke
+fillRect	27.8289	42.0156	3.7422	14.9688
+beginPath
+arc	29.7	61.974	2.4948	0	6.2832
+fill
+restore
+font	600 15px @--font-mono
+letterSpacing	2px
+textAlign	left
+textBaseline	middle
+fillStyle	c:warn:1
+fillText	DEFXN DEVNET	61.38	35.64
+font	600 11px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.8
+fillText	Not for production use.	61.38	65.34
+save
+globalAlpha	1
+mark	c:acc:1	1.8	1.8	32.4	32.4
+restore
+font	500 12px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:acc:1
+fillText	Session	9.4	18
+font	600 11px @--font-sans
+letterSpacing	0px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.9
+fillText	Active	24.44	42
+save
+globalAlpha	1
+mark	c:acc:1	2.9	2.9	52.2	52.2
+restore
+fillStyle	c:acc:0.9
+beginPath
+arc	10.2	17.82	2.475	0	6.2832
+fill
+font	500 7px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.92
+fillText	VALID	17.34	17.82
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	1.4256
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	85.6215	17.82
+lineTo	88.0272	20.3148
+lineTo	92.304	15.147
+stroke
+fillStyle	c:acc:0.9
+beginPath
+arc	10.2	47.52	2.475	0	6.2832
+fill
+font	500 7px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.92
+fillText	SIGNED	17.34	47.52
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	1.4256
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	85.6215	47.52
+lineTo	88.0272	50.0148
+lineTo	92.304	44.847
+stroke
+fillStyle	c:acc:0.9
+beginPath
+arc	10.2	77.22	2.475	0	6.2832
+fill
+font	500 7px @--font-mono
+letterSpacing	1px
+textAlign	left
+textBaseline	middle
+fillStyle	c:ink:0.92
+fillText	TRUSTED	17.34	77.22
+strokeStyle	c:acc:1
+fillStyle	c:acc:1
+lineWidth	1.4256
+lineCap	round
+lineJoin	round
+beginPath
+moveTo	85.6215	77.22
+lineTo	88.0272	79.7148
+lineTo	92.304	74.547
+stroke

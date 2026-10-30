@@ -8,10 +8,10 @@
 
    What it shows: one board at a time, nine elements per page (3 x 3), in the board's own order.
      boards 01-04  each element drawn by its renderer (js/kit/board-*.js, registered in DefxnKit) on a tile
-     board 05      the page's nine 3D objects in the world under the page (js/world/kit-stage.js, the 'kit' view),
+     board 05      the page's nine 3D objects in the world under the page (js/world2/world2-kit.mjs, the 'kit' view, drawn by the fxn-3d world look from world/kit.flx),
                    their names in a list on the left; choosing one flies the camera to it
    Nothing here lists what is built. A 2D element is built when DefxnKit has its renderer, a 3D one when the kit stage
-   can build it (DEFXNScene.kit.built()); every other element shows "Not built" and names what is missing.
+   can build it (ArkWorldHost.kit.built()); every other element shows "Not built" and names what is missing.
 
    Each card dresses the page by its own rules. A tile is an Ark UI card part (data-ark-part="CARD"), so the worn
    card's own drawings (its frame or corners, its nameplate, its accent strip) and its measured rules (frame, edge,
@@ -45,17 +45,18 @@
   function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
   function two(n) { return n < 10 ? '0' + n : String(n); }
   function reduced() { return ArkUI.prefersReducedMotion ? ArkUI.prefersReducedMotion() : false; }
-  function scene() { return window.DEFXNScene || null; }
   function world() { return window.ArkWorldHost || null; }
+  /* the Kit's 3D (world2-kit.mjs) answers through the host once the camera has flown to /kit: built(), screen(id), selected() */
+  function kit3d() { var h = world(); return h && h.kit && typeof h.kit.built === 'function' ? h.kit : null; }
 
   /* ---- what is built: derived, never listed ---------------------------------------------------- */
   function worldState() {
-    var h = world(), S = scene();
-    if (S && S.kit && typeof S.kit.built === 'function') return 'ready';
+    var h = world();
+    if (kit3d()) return 'ready';
     if (!h || h.failed || (h.owns && !h.owns())) return 'off';
     return 'loading';
   }
-  function built3d() { var S = scene(); return S && S.kit && S.kit.built ? S.kit.built() : []; }
+  function built3d() { var k = kit3d(); return k ? k.built() : []; }
   function statusOf(item) {
     if (item.board !== '05') return KIT.status(item.id);
     var w = worldState();
@@ -67,7 +68,7 @@
     if (status === 'off') return 'The 3D world is off on this device (it needs WebGL 2), so this object cannot be shown.';
     if (status === 'loading') return 'The 3D world is still loading.';
     if (status === 'notBuilt') return item.board === '05'
-      ? 'Not built. The 3D kit has no builder for ' + item.id + ' yet (js/world/object-kit.js).'
+      ? 'Not built. The Kit records hold no object for ' + item.id + ' (scripts/kit-encode.mjs reads js/world/object-kit.js).'
       : 'Not built. No renderer is registered for ' + item.id + ' yet (js/kit/board-' + item.board + '.js).';
     return '';
   }
@@ -463,6 +464,8 @@
       function waitForWorld() {
         var h = world();
         if (h && h.whenReady) h.whenReady(function () { if (page.isConnected && cur.board === '05') show('05', cur.item, cur.page); });
+        /* the Kit stands once the camera has flown to /kit and its records have loaded (world2-kit.mjs): the host says so */
+        window.addEventListener('ark:kit-ready', function () { if (page.isConnected && cur.board === '05') show('05', cur.item, cur.page); }, { once: true });
         clearTimeout(waitTimer);
         waitTimer = setTimeout(function () { if (page.isConnected && cur.board === '05') show('05', cur.item, cur.page); }, 4000);
       }

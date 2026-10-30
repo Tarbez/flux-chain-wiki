@@ -1,0 +1,12 @@
+page=/chain seg=1 action=first-visit at=0.0-8.3s three:[start=500 stop=6833 frames=8 ms=667 end=0 regions=001100010000] fxn3d:[start=167 stop=3167 frames=16 ms=1333 end=0 regions=101100110001] flag=TIME-DIFFERS
+page=/chain seg=2 action=hover:412,813 at=8.3-10.3s three:[start=1750 stop=1917 frames=3 ms=250 end=1 regions=000001000100] fxn3d:[start=667 stop=1000 frames=5 ms=417 end=0 regions=000002000200] flag=none
+page=/chain seg=3 action=hover:552,813 at=10.3-12.0s three:[start=0 stop=1250 frames=11 ms=917 end=0 regions=000005000200] fxn3d:[start=none stop=none frames=0 ms=0 end=0 regions=000000000000] flag=ONLY-THREE
+page=/chain seg=4 action=hover:1108,382 at=12.0-13.7s three:[start=83 stop=333 frames=4 ms=333 end=0 regions=000002000000] fxn3d:[start=1083 stop=1500 frames=6 ms=500 end=1 regions=000003000300] flag=TIME-DIFFERS
+page=/chain seg=5 action=go:/ at=13.7-18.7s three:[start=83 stop=4250 frames=34 ms=2833 end=0 regions=232225222432] fxn3d:[start=1333 stop=3667 frames=28 ms=2333 end=0 regions=244324432443] flag=none
+page=/chain seg=6 action=back:/ at=18.7-22.8s three:[start=3000 stop=3167 frames=3 ms=250 end=0 regions=010001100000] fxn3d:[start=1667 stop=3500 frames=23 ms=1917 end=1 regions=554455545553] flag=TIME-DIFFERS
+page=/chain seg=7 action=go:/identity/you at=22.8-28.3s three:[start=917 stop=5417 frames=19 ms=1583 end=1 regions=122122222222] fxn3d:[start=0 stop=4417 frames=27 ms=2250 end=0 regions=222223221323] flag=none
+page=/chain seg=8 action=back:/identity/you at=28.3-31.9s three:[start=0 stop=3500 frames=11 ms=917 end=1 regions=111122210021] fxn3d:[start=2333 stop=3417 frames=14 ms=1167 end=1 regions=222222210011] flag=none
+page=/chain seg=9 action=go:/chain/record at=31.9-36.6s three:[start=0 stop=4250 frames=27 ms=2250 end=0 regions=333334433443] fxn3d:[start=0 stop=4000 frames=27 ms=2250 end=0 regions=332344434444] flag=none
+page=/chain seg=10 action=back:/chain/record at=36.6-40.2s three:[start=3250 stop=3583 frames=4 ms=333 end=1 regions=111111111111] fxn3d:[start=3083 stop=3500 frames=6 ms=500 end=1 regions=111111111111] flag=TIME-DIFFERS
+page=/chain seg=11 action=go:/download at=40.2-46.0s three:[start=0 stop=5667 frames=21 ms=1750 end=1 regions=121113111211] fxn3d:[start=0 stop=3917 frames=18 ms=1500 end=0 regions=112223322333] flag=none
+page=/chain seg=12 action=back:/download at=46.0-50.1s three:[start=0 stop=3333 frames=10 ms=833 end=0 regions=221122211111] fxn3d:[start=0 stop=500 frames=5 ms=417 end=0 regions=000011001100] flag=TIME-DIFFERS

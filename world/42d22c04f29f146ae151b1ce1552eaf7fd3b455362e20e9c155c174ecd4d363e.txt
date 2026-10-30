@@ -1,0 +1,25 @@
+title	0	FXN ID
+title	1	DEFXN network
+network	Network
+signer	Signing as you	No signer
+panel	0	2.2	1.55
+panel	1	2.3	1.55
+clock	0.0012	0.4	0.7	0.3	220	verify	create6
+words	0	none	No file open	dim	Choose your file	dim	Not signed in	dim	Waiting for file
+words	1	file	File chosen	on	Read on this device	on	Locked	dim	Waiting for file
+words	2	verify	File read	on	Opening	run	Checking	run	Waiting for file
+words	3	connected	Open	on	Signed in	on	This tab	on	Ready
+words	4	missing	File not open	bad	Details saved	on	Choose again	bad	Not signed in
+words	5	create	New file	run	Made here	on	Not saved yet	dim	Waiting for file
+words	6	words	File made	on	Words on screen	run	Not saved yet	dim	Waiting for file
+words	7	saved	File saved	on	In your downloads	on	Choose it	run	Waiting for file
+words	8	fail	Refused	bad	Nothing opened	dim	Choose a file	run	Not signed in
+words	9	offline	Open	on	Offline	bad	This tab	on	Offline
+words	10	ended	Closed	dim	Not signed in	dim	Choose your file	run	Not signed in
+words	11	create0	New file	run	Made here	on	Not saved yet	dim	Waiting for file
+words	12	create1	New file	run	Made here	on	Not saved yet	dim	Waiting for file
+words	13	create2	New file	run	Made here	on	Not saved yet	dim	Waiting for file
+words	14	create3	New file	run	Made here	on	Not saved yet	dim	Waiting for file
+words	15	create4	New file	run	Made here	on	Not saved yet	dim	Waiting for file
+words	16	create5	New file	run	Made here	on	Not saved yet	dim	Waiting for file
+words	17	create6	New file	run	Made here	on	Not saved yet	dim	Waiting for file

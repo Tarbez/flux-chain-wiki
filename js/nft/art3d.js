@@ -2,10 +2,10 @@
 
    Art3D.build(mark, key, picks) turns one card's picked elements into a MODEL: lists of blocks,
    glass cubes, points of light, lines, light streaks, glowing bars and glass spheres. Art3D.paint()
-   draws the model once with three.js (js/vendor/three-r180-defxn.js at the site root) into the card's art canvas, and
+   draws the model once with the grammar renderer (js/nft/card-gl.mjs, one shared card context) into the card's art canvas, and
    again only while a hover tilts it. Nothing here runs an idle frame loop.
 
-   SEPARATE ON PURPOSE. This is the NFT's own 3D, with its own renderer, light and look. It does not
+   SEPARATE ON PURPOSE. This is the NFT's own 3D, with its own card context, light and look. It does not
    run on the home's ring kit (js/world/ring-kit.js): the cards are the owner's brand, not a part of the
    site's world (owner decision, 2026-10-24). It borrows only the kit's speed rules: no shadow pass on
    a moving frame, and a cap near 2.6 million drawn pixels (card.js).
@@ -56,7 +56,7 @@
    while it paints, holds the shared renderer with it. When the last holder is done, the renderer and
    its GPU memory are freed (Art3D.release); the next draw makes a new one.
 
-   Needs, in order: js/vendor/three-r180-defxn.js, js/ark/mark-data.js, a layer table (the full
+   Needs, in order: js/ark/mark-data.js, js/nft/card-gl.mjs (this file loads it by URL), a layer table (the full
    layers-bundle.js or js/nft/skin-bundle.js), js/nft/traits.js. */
 (function () {
   'use strict';
@@ -103,6 +103,8 @@
       img.onerror = function () { reject(new Error('The DEFXN mark did not decode: check the data URI in js/ark/mark-data.js.')); };
       img.src = window.DEFXN_MARK;
     });
+    // the mark and the grammar renderer arrive together: a caller that has the mark can paint at once
+    markReady = Promise.all([markReady, loadGL()]).then(function (r) { return r[0]; });
     return markReady;
   }
   function readMark(img) {
@@ -966,7 +968,7 @@
   function solid(model) {
     if (model._solid) return model._solid;
     var r = model.markRange, out = Object.assign(new Model(), model);
-    delete out._scene; delete out._solid;
+    delete out._scene; delete out._solid; delete out._cg;   /* the copy is a new model: its GPU scene is written from its own, thicker, mark (the copy of the card's cached scene drew the thin mark in the object view) */
     if (!r) return (model._solid = out);
     ['cubes', 'glasses', 'points'].forEach(function (k) {
       var lo = r[k][0], hi = r[k][1], zs = [];
@@ -984,137 +986,24 @@
     return (model._solid = out);
   }
 
-  /* ---------- three.js ---------- */
-  var THREE = null, Dep = window.DEFXNDependencies, R = null, ENV = null, CAM = null, MAT = null, GEO = null;
-  var GEN = 0;                               // the renderer's generation: release() starts a new one
-  function renderer() {
-    if (R !== null) return R || null;
-    try {
-      if (!Dep || !Dep.THREE) throw new Error('js/vendor/three-r180-defxn.js is not loaded');
-      THREE = Dep.THREE;
-      R = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-      R.setPixelRatio(1); R.setClearColor(0x000000, 0);
-      R.outputColorSpace = THREE.SRGBColorSpace; R.toneMapping = THREE.NoToneMapping;
-      R.shadowMap.enabled = true; R.shadowMap.type = THREE.PCFSoftShadowMap;
-      var pm = new THREE.PMREMGenerator(R); ENV = pm.fromScene(new Dep.RoomEnvironment(), 0.04).texture; pm.dispose();
-      CAM = new THREE.PerspectiveCamera(FOV, W / H, 20, 6000); CAM.position.set(0, 0, DIST); CAM.lookAt(0, 0, 0);
-      makeMaterials();
-    } catch (err) {
-      R = false;
-      console.error('The card draws its art flat: 3D needs WebGL and three.js (' + err.message + ').');
-    }
-    return R || null;
-  }
-  function additive(vs, fs, uniforms, side) {
-    return new THREE.ShaderMaterial({
-      vertexShader: vs, fragmentShader: fs, uniforms: uniforms || {}, transparent: true, depthWrite: false,
-      blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor,
-      blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneFactor, side: side || THREE.DoubleSide
+  /* ---------- the grammar renderer ----------
+     The drawing is js/nft/card-gl.mjs: it writes this model's primitives as parts of the grammar renderer and draws them in
+     ONE shared card context (js/world2/world2-gl.mjs createCardContext). This file keeps the model and the 2D after-effects.
+     The module loads here, by URL beside this script, and loadMark() waits for it, so every build and paint that follows a
+     loadMark() draws on the first call, as it did with one shared Three.js renderer. */
+  var GL = null, glReady = null, SELF = document.currentScript && document.currentScript.src;
+  function loadGL() {
+    if (glReady) return glReady;
+    glReady = import(new URL('card-gl.mjs', SELF || document.baseURI + 'js/nft/art3d.js').href).then(function () {
+      GL = window.DefxnCardGL;
+      return GL.ready;
+    }).catch(function (err) {
+      console.error('The card draws its art flat: js/nft/card-gl.mjs did not load (' + err.message + ').');
+      return false;
     });
+    return glReady;
   }
-  var OUT = 'gl_FragColor = vec4(c, max(max(c.r, c.g), c.b));';
-  function makeMaterials() {
-    GEO = { round: new Dep.RoundedBoxGeometry(1, 1, 1, 2, 0.14), box: new THREE.BoxGeometry(1, 1, 1), plane: new THREE.PlaneGeometry(1, 1).translate(0, 0.5, 0), ball: new THREE.SphereGeometry(1, 48, 32) };
-    MAT = {
-      cube: new THREE.MeshStandardMaterial({ roughness: 0.4, metalness: 0.08 }),
-      glass: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.06, metalness: 0, transparent: true, opacity: 0.12, depthWrite: false, envMapIntensity: 2.2, clearcoat: 1, clearcoatRoughness: 0.05 }),
-      line: additive('attribute vec3 aColor; varying vec3 vC; void main(){ vC = aColor; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-        'varying vec3 vC; void main(){ vec3 c = vC; ' + OUT + ' }'),
-      point: additive('attribute vec3 aColor; attribute float aSize; attribute float aSoft; uniform float uScale; varying vec3 vC; varying float vS;void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = max(1.0, aSize * uScale / -mv.z); vC = aColor; vS = aSoft; }',
-        'varying vec3 vC; varying float vS; void main(){ float r = length(gl_PointCoord - 0.5) * 2.0; float a = vS > 0.5 ? exp(-r * r * 4.0) : smoothstep(1.0, 0.55, r); if (a < 0.01) discard; vec3 c = vC * a; ' + OUT + ' }',
-        { uScale: { value: 1 } }),
-      quad: additive('attribute vec3 aColor; attribute vec2 aMode; varying vec3 vC; varying vec2 vM; varying vec2 vUv;void main(){ vC = aColor; vM = aMode; vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.0); }',
-        'varying vec3 vC; varying vec2 vM; varying vec2 vUv; void main(){ float t = vUv.y, a; float edge = 1.0 - abs(vUv.x - 0.5) * 2.0;if (vM.x < 0.5) a = pow(1.0 - t, 1.3); else if (vM.x < 1.5) a = sin(t * 3.14159); else a = pow(1.0 - t, 1.4) * step(0.14, fract(t * vM.y));a *= mix(1.0, edge, 0.6); vec3 c = vC * a; ' + OUT + ' }'),
-      bar: additive('attribute vec3 aColor; varying vec3 vC; varying vec3 vN; varying vec3 vV;void main(){ vC = aColor; vec4 mv = modelViewMatrix * instanceMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * mat3(instanceMatrix) * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
-        'varying vec3 vC; varying vec3 vN; varying vec3 vV; void main(){ float f = 0.45 + 0.55 * pow(1.0 - abs(dot(vN, vV)), 1.5); vec3 c = vC * f; ' + OUT + ' }'),
-      sphere: additive('varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }',
-        'uniform vec3 uColor; uniform float uAlpha; varying vec3 vN; varying vec3 vV; void main(){ float f = pow(1.0 - abs(dot(vN, vV)), 2.6); vec3 c = uColor * uAlpha * (0.025 + f); ' + OUT + ' }',
-        { uColor: { value: new THREE.Vector3(1, 1, 1) }, uAlpha: { value: 1 } }, THREE.FrontSide)
-    };
-  }
-  function lin(rgb) { var c = new THREE.Color(); c.setRGB(rgb[0], rgb[1], rgb[2], THREE.SRGBColorSpace); return c; }
-  function placed(o, e) {
-    o.position.set(e.x, e.y, e.z);
-    if (e.dir) { o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(e.dir[0], e.dir[1], e.dir[2])); }
-    else if (e.rot) o.rotation.set(e.rot[0] || 0, e.rot[1] || 0, e.rot[2] || 0);
-    else o.rotation.set(0, 0, 0);
-    o.scale.set(e.sx || 1, e.sy || 1, e.sz || 1); o.updateMatrix();
-    return o.matrix;
-  }
-  function sceneOf(model) {
-    if (model._scene && model._scene.gen === GEN) return model._scene;
-    var scene = new THREE.Scene(), group = new THREE.Group(), o = new THREE.Object3D();
-    scene.environment = ENV; scene.environmentIntensity = 0.5;
-    group.position.set(MX - W / 2, H / 2 - MY, 0); scene.add(group);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    var key = new THREE.DirectionalLight(0xffffff, 2.6);
-    key.position.set(-420 + group.position.x, 560, 900); key.target.position.copy(group.position);
-    key.castShadow = true; key.shadow.mapSize.set(2048, 2048);
-    var sc = key.shadow.camera; sc.left = -520; sc.right = 520; sc.top = 520; sc.bottom = -520; sc.near = 100; sc.far = 3000;
-    key.shadow.bias = -0.0004; key.shadow.normalBias = 0.8;
-    scene.add(key); scene.add(key.target);
-    var rim = new THREE.DirectionalLight(0xffffff, 1.3); rim.position.set(700, 260, -500); scene.add(rim);
-
-    if (model.cubes.length) {
-      var cm = new THREE.InstancedMesh(GEO.round, MAT.cube, model.cubes.length);
-      model.cubes.forEach(function (e, i) { cm.setMatrixAt(i, placed(o, e)); cm.setColorAt(i, lin(e.c)); });
-      cm.castShadow = cm.receiveShadow = true; cm.frustumCulled = false; group.add(cm);
-    }
-    var lp = [], lc = [];
-    function seg(a, b, c) { lp.push(a.x, a.y, a.z, b.x, b.y, b.z); lc.push(c[0], c[1], c[2], c[0], c[1], c[2]); }
-    if (model.glasses.length) {
-      var gm = new THREE.InstancedMesh(GEO.round, MAT.glass, model.glasses.length), corners = [];
-      for (var i = 0; i < 8; i++) corners.push(new THREE.Vector3(i & 1 ? 0.5 : -0.5, i & 2 ? 0.5 : -0.5, i & 4 ? 0.5 : -0.5));
-      var EDGES = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]];
-      model.glasses.forEach(function (e, k) {
-        var mtx = placed(o, e).clone(), pts = corners.map(function (v) { return v.clone().applyMatrix4(mtx); }), c = [e.c[0] * e.a, e.c[1] * e.a, e.c[2] * e.a];
-        gm.setMatrixAt(k, mtx);
-        EDGES.forEach(function (ed) { seg(pts[ed[0]], pts[ed[1]], c); });
-      });
-      gm.frustumCulled = false; gm.renderOrder = 1; group.add(gm);
-    }
-    model.lines.forEach(function (l) {
-      var p = l.p, n = p.length / 3, c = [l.c[0] * l.a, l.c[1] * l.a, l.c[2] * l.a];
-      for (var i = 0; i < n - 1 + (l.closed ? 1 : 0); i++) {
-        var j = (i + 1) % n;
-        lp.push(p[i * 3], p[i * 3 + 1], p[i * 3 + 2], p[j * 3], p[j * 3 + 1], p[j * 3 + 2]); lc.push(c[0], c[1], c[2], c[0], c[1], c[2]);
-      }
-    });
-    if (lp.length) {
-      var lg = new THREE.BufferGeometry();
-      lg.setAttribute('position', new THREE.Float32BufferAttribute(lp, 3)); lg.setAttribute('aColor', new THREE.Float32BufferAttribute(lc, 3));
-      var ls = new THREE.LineSegments(lg, MAT.line); ls.frustumCulled = false; ls.renderOrder = 2; group.add(ls);
-    }
-    if (model.points.length) {
-      var pp = [], pc = [], ps = [], pf = [];
-      model.points.forEach(function (e) { pp.push(e.x, e.y, e.z); pc.push(e.c[0] * e.a, e.c[1] * e.a, e.c[2] * e.a); ps.push(e.s); pf.push(e.soft ? 1 : 0); });
-      var pg = new THREE.BufferGeometry();
-      pg.setAttribute('position', new THREE.Float32BufferAttribute(pp, 3)); pg.setAttribute('aColor', new THREE.Float32BufferAttribute(pc, 3));
-      pg.setAttribute('aSize', new THREE.Float32BufferAttribute(ps, 1)); pg.setAttribute('aSoft', new THREE.Float32BufferAttribute(pf, 1));
-      var pts3 = new THREE.Points(pg, MAT.point); pts3.frustumCulled = false; pts3.renderOrder = 3; group.add(pts3);
-    }
-    if (model.quads.length) {
-      var qg = GEO.plane.clone(), qm = new THREE.InstancedMesh(qg, MAT.quad, model.quads.length), qc = [], qmode = [];
-      model.quads.forEach(function (e, i) {
-        o.position.set(e.x, e.y, e.z); o.rotation.set(0, 0, e.ang); o.scale.set(e.w, e.len, 1); o.updateMatrix();
-        qm.setMatrixAt(i, o.matrix); qc.push(e.c[0] * e.a, e.c[1] * e.a, e.c[2] * e.a); qmode.push(e.mode, e.segs);
-      });
-      qg.setAttribute('aColor', new THREE.InstancedBufferAttribute(new Float32Array(qc), 3));
-      qg.setAttribute('aMode', new THREE.InstancedBufferAttribute(new Float32Array(qmode), 2));
-      qm.frustumCulled = false; qm.renderOrder = 4; group.add(qm);
-    }
-    if (model.bars.length) {
-      var bg = GEO.box.clone(), bm = new THREE.InstancedMesh(bg, MAT.bar, model.bars.length), bc = [];
-      model.bars.forEach(function (e, i) { bm.setMatrixAt(i, placed(o, e)); bc.push(e.c[0] * e.a, e.c[1] * e.a, e.c[2] * e.a); });
-      bg.setAttribute('aColor', new THREE.InstancedBufferAttribute(new Float32Array(bc), 3));
-      bm.frustumCulled = false; bm.renderOrder = 5; group.add(bm);
-    }
-    model.spheres.forEach(function (e) {
-      var mt = MAT.sphere.clone(); mt.uniforms.uColor.value.set(e.c[0], e.c[1], e.c[2]); mt.uniforms.uAlpha.value = e.a;
-      var s = new THREE.Mesh(GEO.ball, mt); s.position.set(e.x, e.y, e.z); s.scale.setScalar(e.r); s.renderOrder = 6; group.add(s);
-    });
-    return (model._scene = { scene: scene, group: group, key: key, gen: GEN });
-  }
+  loadGL();
 
   // the same model drawn flat, for a browser with no WebGL
   function flat(ctx, model, s) {
@@ -1136,23 +1025,14 @@
   // opts.moving: a frame inside a hover or a turn. Like the home's ring kit, it skips the shadows
   // (and the shadow pass) while things move. The caller draws one full frame when the motion stops.
   function paint(target, model, pw, ph, tilt, opts) {
-    var s = pw / W, gl = renderer(), object = !!(opts && opts.object), moving = !!(opts && opts.moving);
+    var s = pw / W, object = !!(opts && opts.object), moving = !!(opts && opts.moving);
     [target.art, target.glow].forEach(function (c) { if (c.width !== pw || c.height !== ph) { c.width = pw; c.height = ph; } });
     var ctx = target.art.getContext('2d');
     ctx.clearRect(0, 0, pw, ph);
-    if (gl) {
-      var sc = sceneOf(object ? solid(model) : model);
-      sc.group.rotation.set(tilt.x, tilt.y, 0);
-      if (object) sc.group.position.set((opts && opts.shift) || 0, 0, 0); else sc.group.position.set(MX - W / 2, H / 2 - MY, 0);
-      sc.key.castShadow = pw >= 1000 && !moving;
-      var aspect = (opts && opts.aspect) || W / H, zoom = (object && opts.zoom) || 1;
-      var fov = 2 * Math.atan(Math.tan(FOV / 2 * Math.PI / 180) / zoom) * 180 / Math.PI;
-      if (CAM.aspect !== aspect || CAM.fov !== fov) { CAM.aspect = aspect; CAM.fov = fov; CAM.updateProjectionMatrix(); }
-      gl.setSize(pw, ph, false);
-      MAT.point.uniforms.uScale.value = ph / (2 * Math.tan(fov / 2 * Math.PI / 180));
-      gl.render(sc.scene, CAM);
-      ctx.drawImage(gl.domElement, 0, 0);
-    } else flat(ctx, model, s);
+    // the shared card context draws; the pixels are copied out, as from the old shared renderer
+    var out = GL ? GL.paint(object ? solid(model) : model, pw, ph, tilt, opts) : null;
+    if (out) ctx.drawImage(out, 0, 0);
+    else flat(ctx, model, s);
     // the text side stays dark, and the words on the art's side stay readable
     if (!object) {
     ctx.globalCompositeOperation = 'destination-in';
@@ -1211,50 +1091,27 @@
     })();
   }
 
-  // start the 3D engine while the page is still loading: create the renderer, build the light
-  // probe and compile every material once on a tiny scene, so the first card draws at full speed
+  // start the 3D engine while the page is still loading: make the context, upload the room and compile every
+  // program once on a tiny scene, so the first card draws at full speed
   function warm() {
-    var gl = renderer();
-    if (!gl) return;
+    if (!GL || !GL.ok()) return;
     var m = new Model();
     m.cube(0, 0, 0, 10, 10, 10, [1, 1, 1]); m.glass(20, 0, 0, 10, 10, 10, [1, 1, 1], 0.5); m.point(0, 20, 0, 4, [1, 1, 1], 1, true);
     m.line([0, 0, 0, 10, 10, 0], [1, 1, 1], 1); m.quad(0, 0, 0, 0, 2, 20, [1, 1, 1], 1, 'peak'); m.bar(0, -20, 0, 4, 10, 4, [1, 1, 1], 0.5); m.sphere(-20, 0, 0, 6, [1, 1, 1], 0.5);
     m.haze = [1, 1, 1];
     var t = { art: document.createElement('canvas'), glow: document.createElement('canvas') };
     paint(t, m, 1000, 700, REST); paint(t, m, 400, 280, REST);   // with and without shadows
+    GL.dispose(m);
   }
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(function () { schedule(warm); }, { timeout: 300 });
-  else setTimeout(function () { schedule(warm); }, 0);
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(function () { schedule(function () { loadGL().then(warm); }); }, { timeout: 300 });
+  else setTimeout(function () { schedule(function () { loadGL().then(warm); }); }, 0);
 
-  // free a model's GPU scenes (its card view and its solid view). It builds them again if drawn
-  function dispose(model) {
-    [model, model && model._solid].forEach(function (m) {
-      var sc = m && m._scene;
-      if (!sc) return;
-      // the shared geometry and materials stay, unless release() already freed them
-      var geo = GEO || {}, mat = MAT || {};
-      sc.scene.traverse(function (o) {
-        if (o.isInstancedMesh) o.dispose();
-        if (o.geometry && o.geometry !== geo.round && o.geometry !== geo.ball && o.geometry !== geo.box && o.geometry !== geo.plane) o.geometry.dispose();
-        if (o.material && Object.keys(mat).every(function (k) { return mat[k] !== o.material; })) o.material.dispose();
-        if (o.shadow && o.shadow.map) o.shadow.map.dispose();
-      });
-      m._scene = null;
-    });
-  }
+  // free a model's GPU buffers (its card view and its solid view). They are written again if it is drawn
+  function dispose(model) { if (GL) GL.dispose(model); }
 
-  // free the shared renderer, its light probe, materials and geometry: for a page the last card left.
-  // Models drawn before keep their numbers; their GPU scenes are rebuilt by the next renderer.
-  function release() {
-    if (!R) { if (R === false) R = null; return false; }
-    if (MAT) Object.keys(MAT).forEach(function (k) { if (MAT[k] && MAT[k].dispose) MAT[k].dispose(); });
-    if (GEO) Object.keys(GEO).forEach(function (k) { if (GEO[k] && GEO[k].dispose) GEO[k].dispose(); });
-    if (ENV) ENV.dispose();
-    R.dispose();
-    if (R.forceContextLoss) R.forceContextLoss();
-    R = null; ENV = null; CAM = null; MAT = null; GEO = null; GEN++;
-    return true;
-  }
+  // free the shared context, its room and buffers: for a page the last card left.
+  // Models drawn before keep their numbers; their GPU buffers are rebuilt by the next draw.
+  function release() { return GL ? GL.release() : false; }
 
   // the holders of the renderer: release() runs when the last one is done
   var holders = 0;

@@ -1,0 +1,15 @@
+kind	bmn0	beads	lit	200	14
+pview	bmn0	minute
+kind	bmn1	beads	lit	200	18
+pview	bmn1	minute
+statekey	minute	s
+beat	minute	s1	0	1	2	5	8	9	12	13
+beat	minute	s2	0	16	18	20	22	24	26
+beat	minute	s3	0	3	4	7	14
+beat	minute	s4	1	-
+beat	minute	s5	1	2	3
+spot	minute	focus	-6.1847	2.2101	-21.3455		0	s1	1	gt
+spot	minute	focus	5.0571	1.5729	6.9006		0	s2	1	gt
+spot	minute	focus	-0.7516	3.226	-18.2913		0	s3	1	gt
+spot	minute	focus	1.2886	2.3	-11.9135		0	s4	1	gt
+spot	minute	focus	-6.1847	2.2101	-21.3455		0	s5	1	gt

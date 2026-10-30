@@ -1,0 +1,74 @@
+[
+  {
+    "letter": "W",
+    "name": "record kind",
+    "payload": "closed-set",
+    "values": [
+      "MESH",
+      "TEX",
+      "PLACE"
+    ],
+    "example": "MESH"
+  },
+  {
+    "letter": "R",
+    "name": "view",
+    "payload": "lowercase-alphanumeric",
+    "example": "auth"
+  },
+  {
+    "letter": "C",
+    "name": "content id",
+    "payload": "lowercase-hex",
+    "evenLength": true,
+    "minLength": 64,
+    "example": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "letter": "A",
+    "name": "byte count",
+    "payload": "digits",
+    "example": "31904"
+  },
+  {
+    "letter": "I",
+    "name": "texture slot",
+    "payload": "digits",
+    "example": "0"
+  },
+  {
+    "letter": "X",
+    "name": "x",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "0"
+  },
+  {
+    "letter": "Y",
+    "name": "y",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "4p2"
+  },
+  {
+    "letter": "Z",
+    "name": "z",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "m1p5"
+  },
+  {
+    "letter": "D",
+    "name": "height",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "6p3"
+  },
+  {
+    "letter": "U",
+    "name": "turn",
+    "payload": "lowercase-alphanumeric",
+    "pattern": "^(0|m?[1-9][0-9]{0,8}|m?(0|[1-9][0-9]{0,8})p[0-9]{0,5}[1-9])$",
+    "example": "m14"
+  }
+]

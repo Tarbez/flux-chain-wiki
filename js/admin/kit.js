@@ -163,7 +163,7 @@
         root.appendChild(list);
       }
       root.appendChild(h('p', { class: 'hint', text: 'Every value on the Kit is sample data. The Kit changes nothing on the site, so there is nothing to save.' }));
-      root.appendChild(A.devDetails([['Boards', 'js/content/kit-boards.js'], ['Renderers', 'js/kit/board-01.js to board-04.js'], ['3D objects', 'js/world/object-kit.js, js/world/kit-stage.js'], ['Page', 'js/pages/kit.js (canvas only, /kit)']]));
+      root.appendChild(A.devDetails([['Boards', 'js/content/kit-boards.js'], ['Renderers', 'js/kit/board-01.js to board-04.js'], ['3D objects', 'js/world2/world2-kit.mjs (records: world/kit.flx, written by scripts/kit-encode.mjs from js/world/object-kit.js and kit-stage.js)'], ['Page', 'js/pages/kit.js (canvas only, /kit)']]));
     });
     return container;
   }

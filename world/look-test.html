@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>look test</title>
+<style>html, body { margin: 0; height: 100%; overflow: hidden; background: #0a100d; } #scene, #world, #cardout, #cardtwo { position: fixed; inset: 0; width: 100%; height: 100%; display: none; } #scene { display: block; }</style>
+</head>
+<body>
+<canvas id="scene"></canvas><canvas id="world"></canvas><canvas id="cardout"></canvas><canvas id="cardtwo" style="inset:auto 0 0 auto;width:50%;height:50%"></canvas>
+<script type="module">
+/* TEST PAGE, not shipped, and the renderer's test page: the shared renderer features of docs/design/world-grammar/
+   NFT-SKINS.md (the 11 gaps) and VIEWS.md ("What the grammar renderer lacks") each have one scene here, drawn through
+   the same js/world2/world2-gl.mjs and world2-mesh.mjs a view or a card calls: window.__look.scene(name) draws one
+   frame of a scene on demand (nothing loops), window.__look.time(n) times n frames of the one on screen, and
+   __look.scenes lists the names. The first part below checks the render lane's look inputs without the editor
+   (docs/design/editor/LOOK.md, "Render"). It draws made boxes with an emissive material, a 50% transparent material, a red point light, a spot
+   light and a sun, all through lightFrom().setLook() and drawPieces() of js/world2/world2-mesh.mjs, with a look state
+   shaped as edit-log.mjs state.look. window.__look.run(n, extra) times n frames with `extra` more point lights.
+   Draws on demand: one frame at load, one per call; nothing loops. */
+import { projection, view, eyeOf, FOV, afterRestore } from '../js/world2/world2-gl.mjs';
+import { roundedBoxShape, createCardProgram, uploadMesh, drawPieces, lightFrom } from '/fxn-3d/js/render/world2-mesh.mjs';
+const canvas = document.getElementById('scene'), stat = window.__look = { ready: false, error: null };
+/* the made box, half extents .5: a generated unit box (a rounded box of radius .001), the same blob layout the editor's box has */
+const D2R = Math.PI / 180, flat = Array.from({ length: 54 }, (_, i) => [.7, .72, .75][i % 3] * .8);
+/* a box centred at (x,y,z) with full size (sx,sy,sz): the blob's quantized space is -1..1 times its half extents */
+const boxAt = (m, x, y, z, sx, sy, sz) => new Float32Array([m.half[0] * sx, 0, 0, 0, 0, m.half[1] * sy, 0, 0, 0, 0, m.half[2] * sz, 0, x, y, z, 1]);
+async function start() {
+  const gl = canvas.getContext('webgl2', { alpha: false, antialias: true, depth: true, powerPreference: 'high-performance' });
+  if (!gl) { stat.error = 'no WebGL2'; return; }
+  const mesh = roundedBoxShape([255, 255, 255, 255], .001, 1), prog = createCardProgram(gl), up = uploadMesh(gl, mesh);
+  const light = lightFrom(new Float32Array(flat));
+  const W = canvas.width = innerWidth, H = canvas.height = innerHeight, proj = new Float32Array(16), vw = new Float32Array(16);
+  projection(proj, FOV, 1, 500, { x: 0, y: 0, w: W, h: H }, W, H);
+  const eye = eyeOf([0, .6, 0], 52, 24 * D2R, -18 * D2R); view(vw, eye, [0, .6, 0]);
+  /* the look state, as state.look: lights by id (kind 0 point, 1 sun, 2 spot), the world */
+  const L = (id, kind, pos, color, strength, size) => ({ id, kind, pos, color, strength, size, alive: true });
+  const look = { world: { r: .05, g: .06, b: .08, strength: .22, exposure: 1.1 }, lights: {
+    1: L(1, 0, [-3, 1.6, 2], [1, .05, .04], 14, 0), 2: L(2, 2, [2.5, 6, 3], [1, .95, .8], 7, 36), 3: L(3, 1, [-30, 26, -8], [1, .95, .9], .5, 0) } };
+  const grey = { rgb: [.5, .5, .5], metal: 0, rough: .6, emission: 0, opacity: 1 };
+  const items = [
+    { m: boxAt(mesh, 0, -.25, 0, 12, .5, 8), mat: { ...grey, rgb: [.35, .36, .38] } },
+    { m: boxAt(mesh, -1.6, .8, -.4, 1.4, 1.6, 1.4), mat: { rgb: [1, .45, .1], metal: 0, rough: .5, emission: 1.6, opacity: 1 } },   /* emissive */
+    { m: boxAt(mesh, .4, .6, .6, 1.2, 1.2, 1.2), mat: { rgb: [.3, .6, 1], metal: 0, rough: .3, emission: 0, opacity: .5 } },   /* 50% transparent */
+    { m: boxAt(mesh, 2.2, .7, -.6, 1.4, 1.4, 1.4), mat: { ...grey, metal: 1, rough: .25 } },
+    { m: boxAt(mesh, 0, .5, -2.2, 1, 1, 1), mat: { ...grey, rgb: [.8, .8, .8] } }
+  ].map(i => ({ up, model: i.m, o: { mode: 0, post: 1, mat: i.mat } }));
+  const px = new Uint8Array(4);
+  const render = () => { light.setLook(look); gl.viewport(0, 0, W, H); gl.clearColor(...light.background, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND); drawPieces(gl, prog, items, proj, vw, eye, light); };
+  afterRestore(gl, () => render());   /* a lost WebGL context is rebuilt by the engine; draw the current state once (fxn-3d context-guard.mjs) */
+  /* n timed frames, each ended by a 1 x 1 readPixels so the GPU has finished; `extra` more point lights fill the 8 */
+  stat.run = (n, extra) => {
+    const saved = look.lights, all = { ...saved };
+    for (let i = 0; i < (extra || 0); i++) all[10 + i] = L(10 + i, 0, [Math.cos(i) * 4, 1.5, Math.sin(i) * 3], [.3, .5 + i * .05, .9], .5, 0);
+    look.lights = all; const t = [];
+    for (let i = 0; i < n; i++) { const a = performance.now(); render(); gl.readPixels(W >> 1, H >> 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); t.push(performance.now() - a); }
+    look.lights = saved; t.sort((a, b) => a - b); return { median: t[n >> 1], lights: light.lights.n + 1, size: W + 'x' + H };
+  };
+  stat.pixel = (x, y) => { gl.readPixels(Math.round(x * W), Math.round((1 - y) * H), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); return Array.from(px); };
+  render(); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); stat.ready = true;
+}
+start().catch(e => { stat.error = String(e.message || e); console.error(e); });
+/* the feature scenes (world/look-scenes.mjs), installed on the same window.__look */
+import('./look-scenes.mjs').then(m => { m.install(stat, { w: innerWidth, h: innerHeight }); stat.scenesReady = true; }).catch(e => { stat.scenesError = String(e.message || e); console.error(e); });
+</script>
+</body>
+</html>

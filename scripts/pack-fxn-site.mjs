@@ -41,6 +41,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readPageCatalog, readSiteRoutes } from './lib/site-routes.mjs';
+import { engineDir, engineBrowserFiles } from './lib/fxn-3d-closure.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BUNDLE_DEPLOY = path.resolve(ROOT, '..', 'bundle-deploy');
@@ -52,7 +53,8 @@ const ADMIN_FOLDER = 'js/admin';
 
 /* Why each other top-level entry stays out. An entry not named here is left out and reported as unknown. */
 const LEFT_OUT = {
-  'admin.html': 'the editor door, loopback only (.vercelignore)',
+  'world': 'shipped by stageSite from its records: world.flx, card.flx and the content-addressed files they name; the test pages and unnamed blobs stay out',
+  'admin.html':'the editor door, loopback only (.vercelignore)',
   'admin-app.html': 'the editor, loopback only (.vercelignore)',
   'broker.html': 'the identity broker is pinned to https://defxn.com/broker.html (js/ark/broker-client.js); a copy here would be a second broker origin nothing calls',
   api: 'server code; nothing runs it on a static host. render.mjs only serves index.html to people, which the route files replace',
@@ -134,6 +136,19 @@ function stageSite(stage) {
   const adminFiles = [...new Set(catalog.flatMap((entry) => entry.scripts || []).filter((file) => file.startsWith(`${ADMIN_FOLDER}/`)))].sort();
 
   for (const folder of SHIP_FOLDERS) copyTree(path.join(ROOT, folder), path.join(stage, folder), (relative) => relative === ADMIN_FOLDER);
+  /* the 3D engine's browser modules live in the sibling repo flux/fxn-3d (moved 2026-10-29); the world host imports
+     them as /fxn-3d/<path>. The pack ships exactly the files serve-site.mjs mounts: the derived closure of the renderer
+     and the sampler (scripts/lib/fxn-3d-closure.mjs), read from the one copy in fxn-3d, at the same paths. */
+  const engine = engineDir(ROOT);
+  for (const rel of engineBrowserFiles(engine)) { const to = path.join(stage, 'fxn-3d', rel); fs.mkdirSync(path.dirname(to), { recursive: true }); fs.copyFileSync(path.join(engine, rel), to); }
+  /* world/: the ?world=2 world's records and the content-addressed files they name, derived from the records (never a
+     folder copy: world/ also holds test pages and blobs no record names any more) */
+  const worldDir = path.join(ROOT, 'world'), shipWorld = ['world.flx', 'card.flx', 'kit.flx'].filter((f) => fs.existsSync(path.join(worldDir, f)));
+  const named = new Set();
+  for (const f of shipWorld) for (const m of fs.readFileSync(path.join(worldDir, f), 'latin1').matchAll(/-C([0-9a-f]{64})/g)) named.add(m[1]);
+  for (const f of fs.readdirSync(worldDir)) { const cid = f.slice(0, 64); if (named.has(cid) && /^[0-9a-f]{64}\.[a-z]+$/.test(f)) shipWorld.push(f); }
+  fs.mkdirSync(path.join(stage, 'world'), { recursive: true });
+  for (const f of shipWorld) fs.copyFileSync(path.join(worldDir, f), path.join(stage, 'world', f));
   for (const file of adminFiles) {
     fs.mkdirSync(path.dirname(path.join(stage, file)), { recursive: true });
     fs.copyFileSync(path.join(ROOT, file), path.join(stage, file));

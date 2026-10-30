@@ -36,7 +36,7 @@
      SHAPES[layerKey]                 one line: what the layer shapes
 
    Nothing here runs an idle frame loop. The art is painted once per card and cut again only when a
-   box changes size. Needs, in order: js/ark/mark-data.js, js/vendor/three-r180-defxn.js, layers-bundle.js,
+   box changes size. Needs, in order: js/ark/mark-data.js, layers-bundle.js,
    js/nft/cards-data.js, js/nft/traits.js, js/nft/art3d.js, js/nft/card-chrome.js, js/nft/card.js,
    js/nft/skin-recipe.js (js/ paths are at the site root). Styles: css/nft-card.css. */
 (function () {

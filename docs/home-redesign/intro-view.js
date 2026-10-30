@@ -5,7 +5,7 @@
    action: a click leaves for home (#/), the camera dives from the overview into the network, and the card
    grows toward you and closes to its centre as it goes (motion only: a scale and a wipe, never a fade).
    A fresh load at the site's root opens here; inside the site, "#/" is home as before.
-   The stage moved to js/world/intro-stage.js (2026-10-24, the 3D port); this file is the card and its words.
+   The 3D is the grammar world (js/world2/world2-board.mjs, records in world/world.flx, 2026-10-30); this file is the card and its words.
    Counts come from the data files, never typed: network chains (network-data.js), capabilities and
    resolvers (their manifests' files), products (the brief). */
 (function () {

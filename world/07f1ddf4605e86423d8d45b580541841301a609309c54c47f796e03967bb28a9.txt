@@ -1,0 +1,64 @@
+kind	rv0	block	1	1	0.28	0.028	1
+pview	rv0	resolve
+kind	rv0g	block	1	1	1	0.005	0
+pview	rv0g	resolve
+kind	rv1	block	1	1	0.28	0.028	1
+pview	rv1	resolve
+kind	rv1g	block	1	1	1	0.005	0
+pview	rv1g	resolve
+kind	rv2	block	1	1	0.28	0.028	0
+pview	rv2	resolve
+kind	rv2g	block	1	1	1	0.005	0
+pview	rv2g	resolve
+kind	rv3	glass	1	1	0.28	0.028	0
+pview	rv3	resolve
+kind	rv3l	block	1	0.24	0.12	0.012	1
+pview	rv3l	resolve
+kind	rv3e	glowcube
+pview	rv3e	resolve
+kind	rv3g	block	1	1	1	0.005	0
+pview	rv3g	resolve
+kind	rv4	block	1	0.42	0.8	0.042	1
+pview	rv4	resolve
+kind	rvm0	block	1	1	1	0.1	1	0	0.45	0.35	0.3	0.8
+pview	rvm0	resolve
+kind	rvm1	text
+pview	rvm1	resolve
+kind	rvm2	text
+pview	rvm2	resolve
+kind	rvm3	text
+pview	rvm3	resolve
+kind	rvm4	text
+pview	rvm4	resolve
+kind	rvn0	beads	lit	200	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1	1
+pview	rvn0	resolve
+kind	rvn1	beads	dots	240	12	12
+pview	rvn1	resolve
+kind	rvn2	beads	dots	240	10	10	10
+pview	rvn2	resolve
+kind	rvn3	beads	lit	200	1	1	1
+pview	rvn3	resolve
+kind	rvn4	beads	dots	240	1	1	1
+pview	rvn4	resolve
+kind	rvn5	beads	lit	200	10
+pview	rvn5	resolve
+kind	rvn6	beads	lit	200	8
+pview	rvn6	resolve
+kind	rvn7	beads	lit	200	10	10
+pview	rvn7	resolve
+mixtone	22	6	0.12	10	0.88
+mixtone	23	6	0.55	10	0.45
+mixtone	24	4	0.65	8	0.35
+plate	rvm1	ops	0.78	0.78	alpha	canvas	network	0.35	128	fillStyle	1	#000	fillRect	4	0	0	128	128	fillStyle	1	#fff	strokeStyle	1	#fff	lineWidth	1	7	lineCap	1	round	beginPath	0	moveTo	2	30	38	lineTo	2	98	38	stroke	0	beginPath	0	moveTo	2	30	58	lineTo	2	98	58	stroke	0	beginPath	0	moveTo	2	30	78	lineTo	2	70	78	stroke	0	strokeRect	4	24	22	80	84
+plate	rvm2	ops	0.78	0.78	alpha	canvas	network	0.35	128	fillStyle	1	#000	fillRect	4	0	0	128	128	fillStyle	1	#fff	strokeStyle	1	#fff	lineWidth	1	7	lineCap	1	round	beginPath	0	moveTo	2	30	38	lineTo	2	98	38	stroke	0	beginPath	0	moveTo	2	30	58	lineTo	2	98	58	stroke	0	beginPath	0	moveTo	2	30	78	lineTo	2	70	78	stroke	0	strokeRect	4	24	22	80	84
+plate	rvm3	ops	0.78	0.78	alpha	canvas	network	0.35	128	fillStyle	1	#000	fillRect	4	0	0	128	128	fillStyle	1	#fff	strokeStyle	1	#fff	lineWidth	1	7	lineCap	1	round	beginPath	0	moveTo	2	30	38	lineTo	2	98	38	stroke	0	beginPath	0	moveTo	2	30	58	lineTo	2	98	58	stroke	0	beginPath	0	moveTo	2	30	78	lineTo	2	70	78	stroke	0	strokeRect	4	24	22	80	84
+plate	rvm4	ops	0.78	0.78	alpha	canvas	network	0.35	128	fillStyle	1	#000	fillRect	4	0	0	128	128	fillStyle	1	#fff	strokeStyle	1	#fff	lineWidth	1	7	lineCap	1	round	beginPath	0	moveTo	2	30	38	lineTo	2	98	38	stroke	0	beginPath	0	moveTo	2	30	58	lineTo	2	98	58	stroke	0	beginPath	0	moveTo	2	30	78	lineTo	2	70	78	stroke	0	strokeRect	4	24	22	80	84
+statekey	resolve	step
+spot	resolve	alice	-5.3242	13.502	3.1788	t	0.75		1	gt
+spot	resolve	bob	-5.3242	9.78	3.1788	t	0.75		1	gt
+spot	resolve	resolver	-1.3242	12.478	3.1788		0		1	gt
+spot	resolve	result	2.1758	12.266	3.6788	t	2.75		1	gt
+spot	resolve	copies	5.7758	13.4	2.6788	t	3.8		1	gt
+spot	resolve	c1	2.1758	10.25	3.6788	t	4.35		1	gt
+spot	resolve	c2	-4.6422	13.051	3.3638	t	4.8		1	gt
+spot	resolve	c3	-4.6422	10.351	3.3638	t	4.95		1	gt

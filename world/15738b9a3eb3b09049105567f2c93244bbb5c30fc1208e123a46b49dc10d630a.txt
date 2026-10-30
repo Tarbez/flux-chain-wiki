@@ -1,0 +1,812 @@
+kind	rs0	block	1	1	1	0.1	1
+pview	rs0	resolvers
+kind	rs1	block	1	1	1	0.1	1
+pview	rs1	resolvers
+kind	rsm0	wire
+pview	rsm0	resolvers
+kind	rsm1	wire
+pview	rsm1	resolvers
+kind	rsn0	beads	lit	200	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10	10
+pview	rsn0	resolvers
+lift	rs0	0.12	0.16
+lift	rs1	0.12	0.16
+mixtone	22	4	0.65	8	0.35
+mixtone	23	0	0.35	6	0.65
+mixtone	24	6	0.25	10	0.75
+mixtone	25	0	0.0875	6	0.1625	8	0.75
+pickp	resolvers	s0	rs0	0	Custody	Chosen	stagePick	resolver	custody	0
+pickp	resolvers	s0	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s0	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s0	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s0	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s0	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s0	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s0	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s0	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s0	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s0	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s0	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s0	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s0	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s0	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s0	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s0	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s0	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s0	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s0	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s0	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s0	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s0	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s0	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s0	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s0	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s0	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s0	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s0	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s0	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s0	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s0	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s0	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s1	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s1	rs0	1	Balance	Chosen	stagePick	resolver	balance	0
+pickp	resolvers	s1	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s1	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s1	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s1	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s1	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s1	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s1	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s1	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s1	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s1	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s1	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s1	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s1	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s1	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s1	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s1	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s1	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s1	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s1	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s1	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s1	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s1	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s1	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s1	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s1	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s1	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s1	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s1	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s1	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s1	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s1	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s2	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s2	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s2	rs0	2	Domain	Chosen	stagePick	resolver	domain	0
+pickp	resolvers	s2	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s2	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s2	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s2	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s2	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s2	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s2	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s2	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s2	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s2	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s2	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s2	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s2	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s2	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s2	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s2	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s2	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s2	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s2	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s2	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s2	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s2	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s2	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s2	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s2	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s2	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s2	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s2	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s2	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s2	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s3	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s3	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s3	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s3	rs0	3	Records	Chosen	stagePick	resolver	records	0
+pickp	resolvers	s3	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s3	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s3	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s3	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s3	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s3	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s3	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s3	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s3	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s3	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s3	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s3	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s3	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s3	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s3	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s3	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s3	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s3	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s3	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s3	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s3	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s3	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s3	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s3	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s3	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s3	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s3	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s3	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s3	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s4	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s4	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s4	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s4	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s4	rs0	4	DAO	Chosen	stagePick	resolver	dao	0
+pickp	resolvers	s4	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s4	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s4	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s4	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s4	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s4	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s4	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s4	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s4	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s4	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s4	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s4	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s4	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s4	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s4	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s4	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s4	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s4	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s4	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s4	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s4	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s4	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s4	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s4	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s4	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s4	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s4	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s4	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s5	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s5	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s5	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s5	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s5	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s5	rs0	5	Treasury	Chosen	stagePick	resolver	treasury	0
+pickp	resolvers	s5	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s5	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s5	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s5	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s5	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s5	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s5	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s5	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s5	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s5	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s5	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s5	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s5	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s5	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s5	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s5	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s5	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s5	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s5	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s5	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s5	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s5	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s5	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s5	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s5	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s5	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s5	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s6	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s6	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s6	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s6	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s6	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s6	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s6	rs0	6	Stake	Chosen	stagePick	resolver	stake	0
+pickp	resolvers	s6	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s6	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s6	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s6	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s6	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s6	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s6	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s6	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s6	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s6	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s6	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s6	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s6	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s6	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s6	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s6	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s6	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s6	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s6	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s6	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s6	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s6	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s6	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s6	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s6	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s6	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s7	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s7	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s7	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s7	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s7	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s7	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s7	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s7	rs0	7	Slash	Chosen	stagePick	resolver	slash	0
+pickp	resolvers	s7	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s7	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s7	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s7	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s7	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s7	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s7	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s7	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s7	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s7	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s7	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s7	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s7	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s7	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s7	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s7	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s7	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s7	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s7	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s7	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s7	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s7	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s7	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s7	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s7	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s8	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s8	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s8	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s8	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s8	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s8	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s8	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s8	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s8	rs0	8	Payout	Chosen	stagePick	resolver	payout	0
+pickp	resolvers	s8	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s8	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s8	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s8	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s8	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s8	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s8	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s8	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s8	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s8	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s8	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s8	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s8	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s8	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s8	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s8	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s8	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s8	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s8	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s8	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s8	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s8	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s8	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s8	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s9	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s9	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s9	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s9	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s9	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s9	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s9	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s9	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s9	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s9	rs0	9	Service pool	Chosen	stagePick	resolver	servicepool	0
+pickp	resolvers	s9	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s9	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s9	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s9	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s9	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s9	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s9	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s9	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s9	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s9	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s9	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s9	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s9	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s9	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s9	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s9	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s9	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s9	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s9	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s9	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s9	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s9	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s9	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s10	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s10	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s10	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s10	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s10	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s10	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s10	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s10	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s10	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s10	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s10	rs0	10	Attest	Chosen	stagePick	resolver	attest	0
+pickp	resolvers	s10	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s10	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s10	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s10	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s10	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s10	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s10	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s10	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s10	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s10	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s10	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s10	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s10	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s10	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s10	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s10	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s10	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s10	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s10	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s10	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s10	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s10	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s11	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s11	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s11	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s11	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s11	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s11	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s11	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s11	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s11	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s11	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s11	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s11	rs0	11	Audit	Chosen	stagePick	resolver	audit	0
+pickp	resolvers	s11	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s11	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s11	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s11	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s11	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s11	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s11	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s11	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s11	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s11	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s11	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s11	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s11	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s11	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s11	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s11	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s11	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s11	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s11	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s11	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s11	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s12	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s12	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s12	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s12	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s12	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s12	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s12	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s12	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s12	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s12	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s12	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s12	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s12	rs0	12	ACL	Chosen	stagePick	resolver	acl	0
+pickp	resolvers	s12	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s12	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s12	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s12	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s12	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s12	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s12	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s12	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s12	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s12	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s12	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s12	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s12	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s12	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s12	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s12	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s12	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s12	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s12	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s12	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s13	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s13	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s13	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s13	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s13	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s13	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s13	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s13	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s13	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s13	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s13	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s13	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s13	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s13	rs0	13	Compute	Chosen	stagePick	resolver	compute	0
+pickp	resolvers	s13	rs0	14	Storage	Choose · grammar not specified	stagePick	resolver	storage	0
+pickp	resolvers	s13	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s13	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s13	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s13	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s13	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s13	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s13	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s13	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s13	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s13	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s13	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s13	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s13	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s13	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s13	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s13	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s13	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s13	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+pickp	resolvers	s14	rs0	0	Custody	Choose	stagePick	resolver	custody	0
+pickp	resolvers	s14	rs0	1	Balance	Choose	stagePick	resolver	balance	0
+pickp	resolvers	s14	rs0	2	Domain	Choose	stagePick	resolver	domain	0
+pickp	resolvers	s14	rs0	3	Records	Choose	stagePick	resolver	records	0
+pickp	resolvers	s14	rs0	4	DAO	Choose	stagePick	resolver	dao	0
+pickp	resolvers	s14	rs0	5	Treasury	Choose	stagePick	resolver	treasury	0
+pickp	resolvers	s14	rs0	6	Stake	Choose	stagePick	resolver	stake	0
+pickp	resolvers	s14	rs0	7	Slash	Choose	stagePick	resolver	slash	0
+pickp	resolvers	s14	rs0	8	Payout	Choose	stagePick	resolver	payout	0
+pickp	resolvers	s14	rs0	9	Service pool	Choose	stagePick	resolver	servicepool	0
+pickp	resolvers	s14	rs0	10	Attest	Choose	stagePick	resolver	attest	0
+pickp	resolvers	s14	rs0	11	Audit	Choose	stagePick	resolver	audit	0
+pickp	resolvers	s14	rs0	12	ACL	Choose	stagePick	resolver	acl	0
+pickp	resolvers	s14	rs0	13	Compute	Choose · grammar not specified	stagePick	resolver	compute	0
+pickp	resolvers	s14	rs0	14	Storage	Chosen	stagePick	resolver	storage	0
+pickp	resolvers	s14	rs1	0	Attest	See its checked cases	stagePick	capability	attest	0
+pickp	resolvers	s14	rs1	1	Challenge	See its checked cases	stagePick	capability	challenge	0
+pickp	resolvers	s14	rs1	2	Commit	See its checked cases	stagePick	capability	commit	0
+pickp	resolvers	s14	rs1	3	Custody	See its checked cases	stagePick	capability	custody	0
+pickp	resolvers	s14	rs1	4	Delegation	See its checked cases	stagePick	capability	delegation	0
+pickp	resolvers	s14	rs1	5	Edge	See its checked cases	stagePick	capability	edge	0
+pickp	resolvers	s14	rs1	6	Escrow	See its checked cases	stagePick	capability	escrow	0
+pickp	resolvers	s14	rs1	7	Ledger	See its checked cases	stagePick	capability	ledger	0
+pickp	resolvers	s14	rs1	8	Lineage	See its checked cases	stagePick	capability	lineage	0
+pickp	resolvers	s14	rs1	9	Mark	See its checked cases	stagePick	capability	mark	0
+pickp	resolvers	s14	rs1	10	Multisig	See its checked cases	stagePick	capability	multisig	0
+pickp	resolvers	s14	rs1	11	Object	See its checked cases	stagePick	capability	object	0
+pickp	resolvers	s14	rs1	12	Quota	See its checked cases	stagePick	capability	quota	0
+pickp	resolvers	s14	rs1	13	Receipt	See its checked cases	stagePick	capability	receipt	0
+pickp	resolvers	s14	rs1	14	Recompute	See its checked cases	stagePick	capability	recompute	0
+pickp	resolvers	s14	rs1	15	Seal	See its checked cases	stagePick	capability	seal	0
+pickp	resolvers	s14	rs1	16	Signer	See its checked cases	stagePick	capability	signer	0
+pickp	resolvers	s14	rs1	17	Xdomain	See its checked cases	stagePick	capability	xdomain	0
+statekey	resolvers	id
+stateid	resolvers	s0	custody
+stateid	resolvers	s1	balance
+stateid	resolvers	s2	domain
+stateid	resolvers	s3	records
+stateid	resolvers	s4	dao
+stateid	resolvers	s5	treasury
+stateid	resolvers	s6	stake
+stateid	resolvers	s7	slash
+stateid	resolvers	s8	payout
+stateid	resolvers	s9	servicepool
+stateid	resolvers	s10	attest
+stateid	resolvers	s11	audit
+stateid	resolvers	s12	acl
+stateid	resolvers	s13	compute
+stateid	resolvers	s14	storage
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt
+spot	resolvers	name	-14.9842	13.528	-2.8212		0		1	gt
+spot	resolvers	cap-attest	-15.6042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-challenge	-14.5842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-commit	-13.5642	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-custody	-12.5442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-delegation	-11.5242	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-edge	-10.5042	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-escrow	-9.4842	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-ledger	-8.4642	7.53	-2.0212		0		1	gt
+spot	resolvers	cap-lineage	-7.4442	7.53	-2.0212		0		0	gt
+spot	resolvers	cap-mark	-15.6042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-multisig	-14.5842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-object	-13.5642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-quota	-12.5442	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-receipt	-11.5242	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-recompute	-10.5042	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-seal	-9.4842	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-signer	-8.4642	6.51	-2.0212		0		0	gt
+spot	resolvers	cap-xdomain	-7.4442	6.51	-2.0212		0		0	gt

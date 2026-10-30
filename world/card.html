@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>card</title>
+<style>
+  /* the canvas tone of the site's dark theme, as cardfxn.html sets it; the palette below reads these when present */
+  :root { --canvas: 18 7.5% 3.6%; --text-muted: 18 1.3% 65.7%; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
+  body { background: hsl(var(--canvas)); }
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  #line { position: fixed; left: 16px; bottom: 14px; margin: 0; font: 500 11px/1 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .12em; color: hsl(var(--text-muted)); opacity: .7; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<p id="line">card.flx</p>
+<script type="module">
+/* The card from the blob (docs/design/world-grammar/MESH.md), standalone: its own WebGL2 context, the grammar
+   renderer's exported camera maths (projection, view, eyeOf, FOV), the card module's program for the card, the
+   kernel plate and the beam. The camera is the auth view's target (js/world/auth-stage.js): aim at CY x .55 over
+   the kernel, fit(RH x 4.3, RH x 3.1, aspect, .96), elevation 22, yaw -14; every size comes from the PLACE
+   record (height = RH x 1.32, centre = CY), so nothing of the stage is typed here. Draws on demand: a drag turns
+   the card, a resize refits; no loop runs while nothing changes. Pixel ratio capped at 1.5. */
+import { projection, view, eyeOf, FOV, afterRestore } from '../js/world2/world2-gl.mjs';
+import { fetchCard, mountCard, createCardProgram, uploadMesh, drawMesh, quantizedShape, lightFrom } from '/fxn-3d/js/render/world2-mesh.mjs';
+
+const canvas = document.getElementById('scene'), line = document.getElementById('line');
+const D2R = Math.PI / 180, TAN = Math.tan(FOV / 2 * D2R);
+const stat = window.__card = { firstFrameAt: 0, tris: 0, calls: 0, ready: false, error: null };
+
+/* the 18 tones from the theme tokens when the page has them, else the site's dark theme hexes (the host's table) */
+const TOKENS = [['--chain-identity', '#bcc3c8'], ['--chain-resolver', '#667e88'], ['--chain-token', '#525a5d'], ['--chain-pool', '#8e8a9f'], ['--chain-network', '#378f7c'], ['--chain-ledger', '#3aa88a'], ['--chain-other', '#525a5d'], null,
+  ['--signal', '#3fd1a8'], ['--text-muted', '#9aa3a8'], ['--canvas', '#0a100d'], ['--record', '#e6e1d8'], ['--text-strong', '#f3f8f4'], ['--text', '#c3cdd6'], ['--net-fxn', '#3d8f7c'], ['--net-deark', '#b5764a'], ['--net-cr3tv', '#b07890'], ['--ember', '#f7752a']];
+function hslToRgb(h, s, l) { h = ((h % 360) + 360) / 360; s /= 100; l /= 100; const f = n => { const k = (n + h * 12) % 12, a = s * Math.min(l, 1 - l); return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); }; return [f(0), f(8), f(4)]; }
+const hexToRgb = hex => { const n = parseInt(hex.slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; };
+const toLinear = c => c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4);
+function readPalette() {
+  const css = getComputedStyle(document.body), out = new Float32Array(54);
+  const tok = i => { const t = TOKENS[i], v = css.getPropertyValue(t[0]).trim(); const rgb = v ? hslToRgb(...v.split(/\s+/).map(parseFloat)) : hexToRgb(t[1]); return rgb.map(toLinear); };
+  for (let i = 0; i < 18; i++) { const c = i === 7 ? tok(0).map((a, k) => a + (tok(12)[k] - a) * .25) : tok(i); out.set(c, i * 3); }
+  return out;
+}
+const srgbByte = lin => Math.round(255 * (lin <= .0031308 ? lin * 12.92 : 1.055 * Math.pow(lin, 1 / 2.4) - .055));
+
+/* shapes in the blob's layout: a disc facing +Y (the plate), a ring (its rim), a cylinder from y -1 to 1 (the beam) */
+function disc(segs) { const pos = [0, 0, 0], nrm = [0, 1, 0], idx = []; for (let i = 0; i <= segs; i++) { const a = i / segs * 2 * Math.PI; pos.push(Math.cos(a), 0, Math.sin(a)); nrm.push(0, 1, 0); } for (let i = 0; i < segs; i++) idx.push(0, i + 2, i + 1); return { pos, nrm, idx }; }
+function ring(segs, inner) { const pos = [], nrm = [], idx = []; for (let i = 0; i <= segs; i++) { const a = i / segs * 2 * Math.PI, x = Math.cos(a), z = Math.sin(a); pos.push(x * inner, 0, z * inner, x, 0, z); nrm.push(0, 1, 0, 0, 1, 0); if (i < segs) { const k = i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); } } return { pos, nrm, idx }; }
+function cylinder(segs) { const pos = [], nrm = [], idx = []; for (let i = 0; i <= segs; i++) { const a = i / segs * 2 * Math.PI, x = Math.cos(a), z = Math.sin(a); pos.push(x, -1, z, x, 1, z); nrm.push(x, 0, z, x, 0, z); if (i < segs) { const k = i * 2; idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); } } return { pos, nrm, idx }; }
+const scaleAt = (x, y, z, sx, sy, sz) => new Float32Array([sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, x, y, z, 1]);
+
+async function start() {
+  const gl = canvas.getContext('webgl2', { alpha: true, antialias: true, premultipliedAlpha: true, powerPreference: 'high-performance', depth: true, stencil: false });
+  if (!gl) { stat.error = 'no WebGL2'; line.textContent = 'card.flx · no WebGL2'; return; }
+  const palette = readPalette(), light = lightFrom(palette);
+  const tone = i => [palette[i * 3], palette[i * 3 + 1], palette[i * 3 + 2]];
+  const t0 = performance.now(), marks = stat.marks = { start: Math.round(t0) };   /* where the time before the first frame goes */
+  let card;
+  try { card = await fetchCard('auth'); } catch (e) { stat.error = String(e.message || e); line.textContent = 'card.flx · ' + stat.error; return; }
+  marks.fetched = Math.round(performance.now());
+  const prog = createCardProgram(gl); marks.program = Math.round(performance.now());
+  const mounted = mountCard(gl, card, prog); marks.uploaded = Math.round(performance.now());
+  const place = card.place, RH = place.height / 1.32, CY = place.y, HUB = [place.x, 0, place.z];
+  /* the plate: canvas leaned to other by .07 (home-descent.js paintLogo); its rim and the beam in the signal tone */
+  const canvasT = tone(10), otherT = tone(6), signalT = tone(8);
+  const plateRgb = canvasT.map((c, k) => srgbByte(c + (otherT[k] - c) * .07)), signalRgb = signalT.map(srgbByte);
+  const plate = uploadMesh(gl, quantizedShape(...Object.values(disc(96)), [...plateRgb, 255]));
+  const rim = uploadMesh(gl, quantizedShape(...Object.values(ring(96, .992)), [...signalRgb, 255]));
+  const beam = uploadMesh(gl, quantizedShape(...Object.values(cylinder(24)), [...signalRgb, 255]));
+  const BEAM_H = 7.5, RP = RH * 1.02;
+
+  /* the camera: the auth view's target, refitted on resize; a drag adds a turn to the card and a tilt to the eye */
+  const proj = new Float32Array(16), vw = new Float32Array(16);
+  let W = 1, H = 1, dist = 70, turn = 0, tilt = 0;
+  /* ?aim=card looks at the card's centre instead of the stage's CY x .55: the same camera the Three.js test page's
+     orbit controls settle on, for a side-by-side at one zoom */
+  const q = new URLSearchParams(location.search), aim = [HUB[0], q.get('aim') === 'card' ? CY : CY * .55, HUB[2]], elev = 22, yaw = -14;
+  const fit = (w, h, asp, f) => Math.max(w / (f * 2 * TAN * asp), h / (f * 2 * TAN));
+  function resize() {
+    const cw = innerWidth, ch = innerHeight, dpr = Math.min(devicePixelRatio || 1, 1.5, Math.sqrt(2.6e6 / (cw * ch)));   /* the contract's cap: 1.5 and about 2.6 million pixels */
+    W = Math.max(1, Math.round(cw * dpr)); H = Math.max(1, Math.round(ch * dpr)); canvas.width = W; canvas.height = H;
+    const asp = cw / ch; dist = fit(asp < .9 ? RH * 3.2 : RH * 4.3, RH * 3.1, asp, .96);
+    projection(proj, FOV, 1, 500, { x: 0, y: 0, w: cw, h: ch }, cw, ch);
+  }
+  function render() {
+    const eye = eyeOf(aim, dist, (elev + tilt) * D2R, yaw * D2R); view(vw, eye, aim);
+    gl.viewport(0, 0, W, H); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST); gl.depthMask(true); gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);   /* double-sided materials */
+    const post = { post: 1, fogDist: dist };
+    drawMesh(gl, prog, plate, scaleAt(HUB[0], .03, HUB[2], RP, 1, RP), [], proj, vw, eye, light, { mode: 1, ...post });
+    mounted.draw(proj, vw, eye, light, { yaw: turn, ...post });
+    /* light that adds: the rim and the beam's core and glow, no depth write */
+    gl.depthMask(false); gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+    drawMesh(gl, prog, rim, scaleAt(HUB[0], .034, HUB[2], RP * 1.008, 1, RP * 1.008), [], proj, vw, eye, light, { mode: 1, tint: [1.1, 1.1, 1.1, 1], ...post });
+    drawMesh(gl, prog, beam, scaleAt(HUB[0], .03 + BEAM_H / 2, HUB[2], .045, BEAM_H / 2, .045), [], proj, vw, eye, light, { mode: 2, ...post });
+    drawMesh(gl, prog, beam, scaleAt(HUB[0], .03 + BEAM_H / 2, HUB[2], .24, BEAM_H / 2, .24), [], proj, vw, eye, light, { mode: 2, tint: [1, 1, 1, .28], ...post });
+    gl.depthMask(true); gl.disable(gl.BLEND);
+    stat.tris = mounted.stats.tris + plate.tris + rim.tris + beam.tris * 2; stat.calls = mounted.stats.calls + 4;
+  }
+  /* draw on demand: one frame per change, coalesced; nothing runs between changes */
+  let raf = 0;
+  function draw() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; render(); }); }
+  afterRestore(gl, draw);   /* a lost WebGL context is rebuilt by the engine; draw the current state once (fxn-3d context-guard.mjs) */
+  /* a 1 x 1 readPixels after the draw waits for the GPU, so the time measured is a frame on screen, not a queue */
+  const px = new Uint8Array(4);
+  stat.redraw = function () { const a = performance.now(); render(); gl.readPixels(W >> 1, H >> 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); return performance.now() - a; };
+  stat.pixel = function (x, y) { gl.readPixels(Math.round(x * W), Math.round((1 - y) * H), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); return Array.from(px); };
+
+  resize(); render(); marks.drawn = Math.round(performance.now());
+  gl.readPixels(W >> 1, H >> 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);   /* the frame is on the GPU before the time is taken */
+  stat.firstFrameAt = performance.now(); stat.ready = true; stat.loadMs = Math.round(stat.firstFrameAt - t0);
+  stat.bytes = card.mesh.buffer.byteLength; stat.cid = card.cid; stat.verts = card.mesh.verts; stat.draws = card.mesh.draws.length;
+  addEventListener('resize', () => { resize(); draw(); });
+  /* drag to turn: the card turns about +Y with the pointer's x, the eye tilts a little with y */
+  let down = null;
+  canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, turn, tilt }; canvas.setPointerCapture(e.pointerId); canvas.style.cursor = 'grabbing'; });
+  canvas.addEventListener('pointermove', e => { if (!down) return; turn = down.turn + (e.clientX - down.x) * .4; tilt = Math.max(-20, Math.min(40, down.tilt - (e.clientY - down.y) * .15)); draw(); });
+  const up = () => { down = null; canvas.style.cursor = 'grab'; };
+  canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
+}
+start().catch(e => { stat.error = String(e.message || e); line.textContent = 'card.flx · ' + stat.error; console.error(e); });
+</script>
+</body>
+</html>

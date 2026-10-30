@@ -337,7 +337,7 @@ function vocabularies(html, loaded, cache) {
   const perModule = new Map();
   for (const [name, module] of loaded.modules) perModule.set(name, vocabularyOf([...module.scripts], cache).files);
   /* what every module loads: the shared libraries. A page that stands on the 3D world (home and the intro load no
-     Ark blocks, js/world/world-host.js) is left out of the intersection, or it would be empty and every library
+     Ark blocks, js/world2/world2-host.mjs) is left out of the intersection, or it would be empty and every library
      would be read as that module's own words. */
   const withBlocks = [...perModule.values()].filter((files) => files.includes('js/ark/blocks.js'));
   const common = withBlocks.reduce((all, files) => all.filter((f) => files.includes(f)));

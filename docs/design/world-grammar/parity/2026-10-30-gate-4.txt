@@ -1,0 +1,60 @@
+gate=static files_scanned=1372 files_using_threejs=20 files_mentioning_only=32
+file=css/account.css kind=mention via=scene packed=1
+file=css/auth.css kind=mention via=scene packed=1
+file=css/cutouts.css kind=mention via=scene,call packed=1
+file=css/download.css kind=mention via=scene packed=1
+file=css/skin-site.css kind=mention via=scene packed=1
+file=css/world-pages.css kind=mention via=scene packed=1
+file=css/world.css kind=mention via=scene packed=1
+file=docs/home-redesign/nft/skin-gate.js kind=mention via=scene packed=0
+file=index.html kind=mention via=scene packed=1
+file=js/admin/kit.js kind=use via=scene packed=0
+file=js/ark/scene-state.js kind=mention via=scene packed=1
+file=js/ark/skin-site.js kind=mention via=scene packed=1
+file=js/content/site-pages.js kind=mention via=scene packed=1
+file=js/content/stats-scale.js kind=mention via=scene packed=1
+file=js/min/world/minute-experience.js kind=mention via=scene packed=1
+file=js/nft/art3d.js kind=mention via=scene packed=1
+file=js/pages/account.js kind=mention via=scene packed=1
+file=js/pages/auth.js kind=mention via=scene packed=1
+file=js/pages/catalog.js kind=mention via=scene packed=1
+file=js/pages/download.js kind=mention via=scene packed=1
+file=js/pages/home.js kind=mention via=scene packed=1
+file=js/pages/intro.js kind=mention via=scene packed=1
+file=js/pages/kit.js kind=use via=scene packed=1
+file=js/pages/world-chain.js kind=mention via=scene packed=1
+file=js/pages/world-identity.js kind=mention via=scene packed=1
+file=js/pages/world-measure.js kind=mention via=scene packed=1
+file=js/pages/world-minute.js kind=mention via=scene packed=1
+file=js/pages/world-stats.js kind=mention via=scene packed=1
+file=js/vendor/three-r180-defxn.js kind=use via=library packed=1
+file=js/world/auth-stage.js kind=use via=call,scene-file packed=1
+file=js/world/chain-marks.js kind=use via=call,scene-file packed=1
+file=js/world/chains-scene.js kind=use via=call,scene-file packed=1
+file=js/world/concept-stages.js kind=use via=call,scene-file packed=1
+file=js/world/download-stage.js kind=use via=call,scene-file packed=1
+file=js/world/glass-kit.js kind=use via=call,scene-file packed=1
+file=js/world/home-descent.js kind=use via=call,scene-file packed=1
+file=js/world/home-helix.js kind=use via=call,scene-file packed=1
+file=js/world/home-sites.js kind=use via=call,scene-file packed=1
+file=js/world/identity-stages.js kind=use via=call,scene-file packed=1
+file=js/world/kit-stage.js kind=use via=call,scene-file packed=1
+file=js/world/object-kit.js kind=use via=call,scene-file packed=1
+file=js/world/record-glass.js kind=use via=call,scene-file packed=1
+file=js/world/ring-kit.js kind=use via=call,scene-file packed=1
+file=js/world/stages.js kind=use via=call,scene-file packed=1
+file=js/world/stats-stage.js kind=use via=call,scene-file packed=1
+file=js/world/world-host.js kind=use via=lib,scene packed=1
+file=js/world2/world2-board.mjs kind=mention via=scene packed=1
+file=js/world2/world2-helix.mjs kind=mention via=scene packed=1
+file=js/world2/world2-host.mjs kind=mention via=scene packed=1
+file=js/world2/world2-kit.mjs kind=mention via=scene packed=1
+file=js/zero-webgl.js kind=mention via=scene packed=1
+file=world/card.html kind=mention via=scene packed=1
+gate=dynamic pages=5 pages_loading_threejs=0
+page=/docs/home-redesign/grid-look/index.html source=arg nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/studio.html source=arg nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/primitives.html source=arg nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/wear.html source=arg nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+page=/docs/home-redesign/nft/skin-audit.html source=arg nav=ok three_requests=0 three_global=0 errors=0 http_4xx5xx=0 verdict=clean
+gate=result static_files=20 dynamic_pages=0 exit=1

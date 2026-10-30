@@ -1,0 +1,28 @@
+kind	ly0	block	8.4	0.16	4.4	0.016	1
+pview	ly0	layers
+kind	ly1	block	0.26	0.3	0.08	0.008	0
+pview	ly1	layers
+kind	ly2	block	1	1	1	0.1	0
+pview	ly2	layers
+kind	ly3	block	1	1	1	0.1	0
+pview	ly3	layers
+kind	lyn0	beads	lit	200	10	10	10	10	10
+pview	lyn0	layers
+mixtone	22	4	0.195	6	0.315	8	0.105	10	0.385
+mixtone	23	4	0.039	6	0.423	8	0.021	10	0.517
+mixtone	24	6	0.4542	10	0.5458
+mixtone	25	6	0.471	10	0.529
+mixtone	26	1	0.0252	6	0.423	10	0.5518
+mixtone	27	1	0.126	6	0.315	10	0.559
+mixtone	28	0	0.35	6	0.65
+mixtone	29	0	0.1575	6	0.2925
+mixtone	30	4	0.65	8	0.35
+mixtone	31	4	0.2925	8	0.1575
+mixtone	32	0	0.105	6	0.559	10	0.336
+mixtone	33	0	0.0315	4	0.455	6	0.1677	8	0.245	10	0.1008
+mixtone	34	0	0.063	1	0.168	6	0.3354	10	0.4336
+mixtone	35	0	0.1071	1	0.2856	6	0.57018	10	0.73712
+statekey	layers	s
+spot	layers	plate-0	9.5758	10.3	5.3788		0		1	gt
+spot	layers	plate-1	9.5758	12.865	5.3788		0		1	gt
+spot	layers	plate-2	9.5758	15.43	6.0788		0		1	gt

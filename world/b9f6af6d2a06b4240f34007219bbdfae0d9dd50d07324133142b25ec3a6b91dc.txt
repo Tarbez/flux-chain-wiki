@@ -1,0 +1,34 @@
+same	s1t	s0t
+kind	s0b	pane	3	2.3	0.1	0.01	0.82	0.05	0.1	1	0.04	0.7
+site	s0b	0	all
+kind	s0e	glowcube
+site	s0e	0	all
+kind	s0t	text
+site	s0t	0	all
+kind	s0r	rod	8
+site	s0r	0	end
+kind	s0f	glowsphere
+site	s0f	0	none
+kind	s0d	glowsphere
+site	s0d	0	all
+kind	s1b	pane	3	2.3	0.1	0.01	0.82	0.05	0.1	1	0.04	0.7
+site	s1b	1	all
+kind	s1e	glowcube
+site	s1e	1	all
+kind	s1t	text
+site	s1t	1	all
+kind	s1r	rod	8
+site	s1r	1	end
+kind	s1f	glowsphere
+site	s1f	1	none
+kind	s1d	glowsphere
+site	s1d	1	all
+kind	s0c	ctl
+site	s0c	0	none
+kind	s1c	ctl
+site	s1c	1	none
+mixtone	22	10	0.616	4	0.084
+mixtone	23	8	0.975	12	0.525
+mixtone	24	8	1.2
+mixtone	25	8	2
+mixtone	26	8	1.6

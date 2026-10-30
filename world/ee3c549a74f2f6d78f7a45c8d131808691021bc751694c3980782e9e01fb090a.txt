@@ -1,0 +1,29 @@
+kind	mvn0	beads	lit	200	14
+pview	mvn0	movie
+kind	mvn1	beads	lit	200	18
+pview	mvn1	movie
+kind	mvn2	beads	lit	200	20	20	20
+pview	mvn2	movie
+kind	mvn3	beads	lit	200	26
+pview	mvn3	movie
+statekey	movie	s
+beat	movie	s0	0	-
+beat	movie	s1	0	1	2	5	8	9	12	13
+beat	movie	s2	0	2
+beat	movie	s3	0	0	6	10	11
+beat	movie	s4	1	2	3
+beat	movie	s5	1	2	6	10	11
+beat	movie	s6	0	6
+beat	movie	s7	0	-
+beat	movie	s8	0	-
+beat	movie	s9	0	0	2
+spot	movie	focus	-6.1847	2.2101	-21.3455		0	s0	0	gt
+spot	movie	focus	-6.1847	2.2101	-21.3455		0	s1	1	gt
+spot	movie	focus	-6.1847	2.2101	-21.3455		0	s2	1	gt
+spot	movie	focus	-0.0242	1.5599	-1.8212		0	s3	1	gt
+spot	movie	focus	-0.7516	3.226	-18.2913		0	s4	1	gt
+spot	movie	focus	8.8759	2.6521	-13.7099		0	s5	1	gt
+spot	movie	focus	8.8759	2.6521	-13.7099		0	s6	1	gt
+spot	movie	focus	-6.1847	2.2101	-21.3455		0	s7	0	gt
+spot	movie	focus	-6.1847	2.2101	-21.3455		0	s8	0	gt
+spot	movie	focus	-0.0242	1.5599	-1.8212		0	s9	1	gt

@@ -7,7 +7,7 @@
 
    What this file does NOT hold is whether an element is built. That is derived: an element is built when a
    renderer is registered for its id (js/kit/registry.js, DefxnKit.register; boards 01-04 in js/kit/board-*.js)
-   or when the 3D kit stage has a builder for it (board 05, js/world/kit-stage.js). An element with neither is
+   or when the 3D kit has an object for it (board 05: js/world2/world2-kit.mjs, from world/kit.flx). An element with neither is
    "Not built" on the Kit page, never an empty box and never a 0.
 
    Ids are '<board>-<slug>' (01-primary-button). They are addresses: a renderer, a 3D builder and the Kit page all

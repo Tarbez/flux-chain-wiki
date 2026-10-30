@@ -1,0 +1,1131 @@
+kind	bp0	block	0.95	0.82	0.2	0.02	1
+pview	bp0	products
+kind	bp1	cyl	28
+pview	bp1	products
+lift	bp0	0.12	0.16
+mixtone	22	6	0.052	10	0.048	11	0.9
+mixtone	23	6	0.4784	10	0.4416	11	0.08
+mixtone	24	6	0.25	10	0.75
+pick	products	s0	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s0	1	Code	Build	products	s	code	1
+pick	products	s0	2	DB Studio	building	products	s	code	1
+pick	products	s0	3	Grammar	Build	products	s	code	1
+pick	products	s0	4	Resolver Studio	building	products	s	code	1
+pick	products	s0	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s0	6	Bundles	building	products	s	ship	1
+pick	products	s0	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s0	8	Remote	planned	products	s	ship	1
+pick	products	s0	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s0	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s0	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s0	12	Storage	building	products	s	resolve	1
+pick	products	s0	13	Claims	Network	products	s	resolve	1
+pick	products	s0	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s0	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s0	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s0	17	Inbox	building	products	s	social	1
+pick	products	s0	18	Posts	building	products	s	social	1
+pick	products	s0	19	Play	building	products	s	social	1
+pick	products	s0	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s0	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s0	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s0	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s0	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s0	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s1	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s1	1	Code	Build	products	s	code	1
+pick	products	s1	2	DB Studio	building	products	s	code	1
+pick	products	s1	3	Grammar	Build	products	s	code	1
+pick	products	s1	4	Resolver Studio	building	products	s	code	1
+pick	products	s1	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s1	6	Bundles	building	products	s	ship	1
+pick	products	s1	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s1	8	Remote	planned	products	s	ship	1
+pick	products	s1	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s1	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s1	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s1	12	Storage	building	products	s	resolve	1
+pick	products	s1	13	Claims	Network	products	s	resolve	1
+pick	products	s1	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s1	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s1	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s1	17	Inbox	building	products	s	social	1
+pick	products	s1	18	Posts	building	products	s	social	1
+pick	products	s1	19	Play	building	products	s	social	1
+pick	products	s1	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s1	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s1	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s1	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s1	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s1	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s2	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s2	1	Code	Build	products	s	code	1
+pick	products	s2	2	DB Studio	building	products	s	code	1
+pick	products	s2	3	Grammar	Build	products	s	code	1
+pick	products	s2	4	Resolver Studio	building	products	s	code	1
+pick	products	s2	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s2	6	Bundles	building	products	s	ship	1
+pick	products	s2	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s2	8	Remote	planned	products	s	ship	1
+pick	products	s2	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s2	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s2	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s2	12	Storage	building	products	s	resolve	1
+pick	products	s2	13	Claims	Network	products	s	resolve	1
+pick	products	s2	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s2	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s2	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s2	17	Inbox	building	products	s	social	1
+pick	products	s2	18	Posts	building	products	s	social	1
+pick	products	s2	19	Play	building	products	s	social	1
+pick	products	s2	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s2	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s2	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s2	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s2	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s2	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s3	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s3	1	Code	Build	products	s	code	1
+pick	products	s3	2	DB Studio	building	products	s	code	1
+pick	products	s3	3	Grammar	Build	products	s	code	1
+pick	products	s3	4	Resolver Studio	building	products	s	code	1
+pick	products	s3	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s3	6	Bundles	building	products	s	ship	1
+pick	products	s3	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s3	8	Remote	planned	products	s	ship	1
+pick	products	s3	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s3	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s3	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s3	12	Storage	building	products	s	resolve	1
+pick	products	s3	13	Claims	Network	products	s	resolve	1
+pick	products	s3	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s3	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s3	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s3	17	Inbox	building	products	s	social	1
+pick	products	s3	18	Posts	building	products	s	social	1
+pick	products	s3	19	Play	building	products	s	social	1
+pick	products	s3	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s3	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s3	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s3	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s3	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s3	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s4	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s4	1	Code	Build	products	s	code	1
+pick	products	s4	2	DB Studio	building	products	s	code	1
+pick	products	s4	3	Grammar	Build	products	s	code	1
+pick	products	s4	4	Resolver Studio	building	products	s	code	1
+pick	products	s4	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s4	6	Bundles	building	products	s	ship	1
+pick	products	s4	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s4	8	Remote	planned	products	s	ship	1
+pick	products	s4	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s4	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s4	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s4	12	Storage	building	products	s	resolve	1
+pick	products	s4	13	Claims	Network	products	s	resolve	1
+pick	products	s4	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s4	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s4	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s4	17	Inbox	building	products	s	social	1
+pick	products	s4	18	Posts	building	products	s	social	1
+pick	products	s4	19	Play	building	products	s	social	1
+pick	products	s4	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s4	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s4	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s4	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s4	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s4	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s5	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s5	1	Code	Build	products	s	code	1
+pick	products	s5	2	DB Studio	building	products	s	code	1
+pick	products	s5	3	Grammar	Build	products	s	code	1
+pick	products	s5	4	Resolver Studio	building	products	s	code	1
+pick	products	s5	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s5	6	Bundles	building	products	s	ship	1
+pick	products	s5	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s5	8	Remote	planned	products	s	ship	1
+pick	products	s5	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s5	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s5	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s5	12	Storage	building	products	s	resolve	1
+pick	products	s5	13	Claims	Network	products	s	resolve	1
+pick	products	s5	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s5	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s5	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s5	17	Inbox	building	products	s	social	1
+pick	products	s5	18	Posts	building	products	s	social	1
+pick	products	s5	19	Play	building	products	s	social	1
+pick	products	s5	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s5	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s5	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s5	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s5	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s5	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s6	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s6	1	Code	Build	products	s	code	1
+pick	products	s6	2	DB Studio	building	products	s	code	1
+pick	products	s6	3	Grammar	Build	products	s	code	1
+pick	products	s6	4	Resolver Studio	building	products	s	code	1
+pick	products	s6	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s6	6	Bundles	building	products	s	ship	1
+pick	products	s6	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s6	8	Remote	planned	products	s	ship	1
+pick	products	s6	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s6	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s6	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s6	12	Storage	building	products	s	resolve	1
+pick	products	s6	13	Claims	Network	products	s	resolve	1
+pick	products	s6	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s6	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s6	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s6	17	Inbox	building	products	s	social	1
+pick	products	s6	18	Posts	building	products	s	social	1
+pick	products	s6	19	Play	building	products	s	social	1
+pick	products	s6	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s6	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s6	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s6	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s6	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s6	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s7	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s7	1	Code	Build	products	s	code	1
+pick	products	s7	2	DB Studio	building	products	s	code	1
+pick	products	s7	3	Grammar	Build	products	s	code	1
+pick	products	s7	4	Resolver Studio	building	products	s	code	1
+pick	products	s7	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s7	6	Bundles	building	products	s	ship	1
+pick	products	s7	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s7	8	Remote	planned	products	s	ship	1
+pick	products	s7	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s7	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s7	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s7	12	Storage	building	products	s	resolve	1
+pick	products	s7	13	Claims	Network	products	s	resolve	1
+pick	products	s7	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s7	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s7	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s7	17	Inbox	building	products	s	social	1
+pick	products	s7	18	Posts	building	products	s	social	1
+pick	products	s7	19	Play	building	products	s	social	1
+pick	products	s7	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s7	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s7	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s7	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s7	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s7	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s8	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s8	1	Code	Build	products	s	code	1
+pick	products	s8	2	DB Studio	building	products	s	code	1
+pick	products	s8	3	Grammar	Build	products	s	code	1
+pick	products	s8	4	Resolver Studio	building	products	s	code	1
+pick	products	s8	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s8	6	Bundles	building	products	s	ship	1
+pick	products	s8	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s8	8	Remote	planned	products	s	ship	1
+pick	products	s8	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s8	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s8	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s8	12	Storage	building	products	s	resolve	1
+pick	products	s8	13	Claims	Network	products	s	resolve	1
+pick	products	s8	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s8	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s8	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s8	17	Inbox	building	products	s	social	1
+pick	products	s8	18	Posts	building	products	s	social	1
+pick	products	s8	19	Play	building	products	s	social	1
+pick	products	s8	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s8	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s8	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s8	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s8	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s8	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s9	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s9	1	Code	Build	products	s	code	1
+pick	products	s9	2	DB Studio	building	products	s	code	1
+pick	products	s9	3	Grammar	Build	products	s	code	1
+pick	products	s9	4	Resolver Studio	building	products	s	code	1
+pick	products	s9	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s9	6	Bundles	building	products	s	ship	1
+pick	products	s9	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s9	8	Remote	planned	products	s	ship	1
+pick	products	s9	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s9	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s9	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s9	12	Storage	building	products	s	resolve	1
+pick	products	s9	13	Claims	Network	products	s	resolve	1
+pick	products	s9	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s9	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s9	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s9	17	Inbox	building	products	s	social	1
+pick	products	s9	18	Posts	building	products	s	social	1
+pick	products	s9	19	Play	building	products	s	social	1
+pick	products	s9	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s9	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s9	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s9	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s9	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s9	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s10	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s10	1	Code	Build	products	s	code	1
+pick	products	s10	2	DB Studio	building	products	s	code	1
+pick	products	s10	3	Grammar	Build	products	s	code	1
+pick	products	s10	4	Resolver Studio	building	products	s	code	1
+pick	products	s10	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s10	6	Bundles	building	products	s	ship	1
+pick	products	s10	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s10	8	Remote	planned	products	s	ship	1
+pick	products	s10	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s10	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s10	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s10	12	Storage	building	products	s	resolve	1
+pick	products	s10	13	Claims	Network	products	s	resolve	1
+pick	products	s10	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s10	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s10	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s10	17	Inbox	building	products	s	social	1
+pick	products	s10	18	Posts	building	products	s	social	1
+pick	products	s10	19	Play	building	products	s	social	1
+pick	products	s10	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s10	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s10	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s10	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s10	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s10	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s11	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s11	1	Code	Build	products	s	code	1
+pick	products	s11	2	DB Studio	building	products	s	code	1
+pick	products	s11	3	Grammar	Build	products	s	code	1
+pick	products	s11	4	Resolver Studio	building	products	s	code	1
+pick	products	s11	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s11	6	Bundles	building	products	s	ship	1
+pick	products	s11	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s11	8	Remote	planned	products	s	ship	1
+pick	products	s11	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s11	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s11	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s11	12	Storage	building	products	s	resolve	1
+pick	products	s11	13	Claims	Network	products	s	resolve	1
+pick	products	s11	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s11	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s11	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s11	17	Inbox	building	products	s	social	1
+pick	products	s11	18	Posts	building	products	s	social	1
+pick	products	s11	19	Play	building	products	s	social	1
+pick	products	s11	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s11	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s11	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s11	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s11	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s11	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s12	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s12	1	Code	Build	products	s	code	1
+pick	products	s12	2	DB Studio	building	products	s	code	1
+pick	products	s12	3	Grammar	Build	products	s	code	1
+pick	products	s12	4	Resolver Studio	building	products	s	code	1
+pick	products	s12	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s12	6	Bundles	building	products	s	ship	1
+pick	products	s12	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s12	8	Remote	planned	products	s	ship	1
+pick	products	s12	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s12	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s12	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s12	12	Storage	building	products	s	resolve	1
+pick	products	s12	13	Claims	Network	products	s	resolve	1
+pick	products	s12	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s12	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s12	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s12	17	Inbox	building	products	s	social	1
+pick	products	s12	18	Posts	building	products	s	social	1
+pick	products	s12	19	Play	building	products	s	social	1
+pick	products	s12	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s12	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s12	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s12	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s12	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s12	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s13	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s13	1	Code	Build	products	s	code	1
+pick	products	s13	2	DB Studio	building	products	s	code	1
+pick	products	s13	3	Grammar	Build	products	s	code	1
+pick	products	s13	4	Resolver Studio	building	products	s	code	1
+pick	products	s13	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s13	6	Bundles	building	products	s	ship	1
+pick	products	s13	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s13	8	Remote	planned	products	s	ship	1
+pick	products	s13	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s13	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s13	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s13	12	Storage	building	products	s	resolve	1
+pick	products	s13	13	Claims	Network	products	s	resolve	1
+pick	products	s13	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s13	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s13	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s13	17	Inbox	building	products	s	social	1
+pick	products	s13	18	Posts	building	products	s	social	1
+pick	products	s13	19	Play	building	products	s	social	1
+pick	products	s13	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s13	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s13	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s13	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s13	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s13	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s14	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s14	1	Code	Build	products	s	code	1
+pick	products	s14	2	DB Studio	building	products	s	code	1
+pick	products	s14	3	Grammar	Build	products	s	code	1
+pick	products	s14	4	Resolver Studio	building	products	s	code	1
+pick	products	s14	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s14	6	Bundles	building	products	s	ship	1
+pick	products	s14	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s14	8	Remote	planned	products	s	ship	1
+pick	products	s14	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s14	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s14	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s14	12	Storage	building	products	s	resolve	1
+pick	products	s14	13	Claims	Network	products	s	resolve	1
+pick	products	s14	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s14	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s14	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s14	17	Inbox	building	products	s	social	1
+pick	products	s14	18	Posts	building	products	s	social	1
+pick	products	s14	19	Play	building	products	s	social	1
+pick	products	s14	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s14	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s14	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s14	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s14	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s14	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s15	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s15	1	Code	Build	products	s	code	1
+pick	products	s15	2	DB Studio	building	products	s	code	1
+pick	products	s15	3	Grammar	Build	products	s	code	1
+pick	products	s15	4	Resolver Studio	building	products	s	code	1
+pick	products	s15	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s15	6	Bundles	building	products	s	ship	1
+pick	products	s15	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s15	8	Remote	planned	products	s	ship	1
+pick	products	s15	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s15	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s15	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s15	12	Storage	building	products	s	resolve	1
+pick	products	s15	13	Claims	Network	products	s	resolve	1
+pick	products	s15	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s15	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s15	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s15	17	Inbox	building	products	s	social	1
+pick	products	s15	18	Posts	building	products	s	social	1
+pick	products	s15	19	Play	building	products	s	social	1
+pick	products	s15	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s15	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s15	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s15	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s15	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s15	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s16	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s16	1	Code	Build	products	s	code	1
+pick	products	s16	2	DB Studio	building	products	s	code	1
+pick	products	s16	3	Grammar	Build	products	s	code	1
+pick	products	s16	4	Resolver Studio	building	products	s	code	1
+pick	products	s16	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s16	6	Bundles	building	products	s	ship	1
+pick	products	s16	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s16	8	Remote	planned	products	s	ship	1
+pick	products	s16	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s16	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s16	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s16	12	Storage	building	products	s	resolve	1
+pick	products	s16	13	Claims	Network	products	s	resolve	1
+pick	products	s16	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s16	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s16	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s16	17	Inbox	building	products	s	social	1
+pick	products	s16	18	Posts	building	products	s	social	1
+pick	products	s16	19	Play	building	products	s	social	1
+pick	products	s16	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s16	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s16	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s16	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s16	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s16	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s17	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s17	1	Code	Build	products	s	code	1
+pick	products	s17	2	DB Studio	building	products	s	code	1
+pick	products	s17	3	Grammar	Build	products	s	code	1
+pick	products	s17	4	Resolver Studio	building	products	s	code	1
+pick	products	s17	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s17	6	Bundles	building	products	s	ship	1
+pick	products	s17	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s17	8	Remote	planned	products	s	ship	1
+pick	products	s17	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s17	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s17	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s17	12	Storage	building	products	s	resolve	1
+pick	products	s17	13	Claims	Network	products	s	resolve	1
+pick	products	s17	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s17	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s17	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s17	17	Inbox	building	products	s	social	1
+pick	products	s17	18	Posts	building	products	s	social	1
+pick	products	s17	19	Play	building	products	s	social	1
+pick	products	s17	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s17	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s17	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s17	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s17	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s17	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s18	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s18	1	Code	Build	products	s	code	1
+pick	products	s18	2	DB Studio	building	products	s	code	1
+pick	products	s18	3	Grammar	Build	products	s	code	1
+pick	products	s18	4	Resolver Studio	building	products	s	code	1
+pick	products	s18	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s18	6	Bundles	building	products	s	ship	1
+pick	products	s18	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s18	8	Remote	planned	products	s	ship	1
+pick	products	s18	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s18	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s18	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s18	12	Storage	building	products	s	resolve	1
+pick	products	s18	13	Claims	Network	products	s	resolve	1
+pick	products	s18	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s18	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s18	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s18	17	Inbox	building	products	s	social	1
+pick	products	s18	18	Posts	building	products	s	social	1
+pick	products	s18	19	Play	building	products	s	social	1
+pick	products	s18	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s18	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s18	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s18	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s18	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s18	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s19	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s19	1	Code	Build	products	s	code	1
+pick	products	s19	2	DB Studio	building	products	s	code	1
+pick	products	s19	3	Grammar	Build	products	s	code	1
+pick	products	s19	4	Resolver Studio	building	products	s	code	1
+pick	products	s19	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s19	6	Bundles	building	products	s	ship	1
+pick	products	s19	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s19	8	Remote	planned	products	s	ship	1
+pick	products	s19	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s19	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s19	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s19	12	Storage	building	products	s	resolve	1
+pick	products	s19	13	Claims	Network	products	s	resolve	1
+pick	products	s19	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s19	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s19	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s19	17	Inbox	building	products	s	social	1
+pick	products	s19	18	Posts	building	products	s	social	1
+pick	products	s19	19	Play	building	products	s	social	1
+pick	products	s19	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s19	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s19	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s19	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s19	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s19	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s20	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s20	1	Code	Build	products	s	code	1
+pick	products	s20	2	DB Studio	building	products	s	code	1
+pick	products	s20	3	Grammar	Build	products	s	code	1
+pick	products	s20	4	Resolver Studio	building	products	s	code	1
+pick	products	s20	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s20	6	Bundles	building	products	s	ship	1
+pick	products	s20	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s20	8	Remote	planned	products	s	ship	1
+pick	products	s20	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s20	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s20	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s20	12	Storage	building	products	s	resolve	1
+pick	products	s20	13	Claims	Network	products	s	resolve	1
+pick	products	s20	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s20	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s20	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s20	17	Inbox	building	products	s	social	1
+pick	products	s20	18	Posts	building	products	s	social	1
+pick	products	s20	19	Play	building	products	s	social	1
+pick	products	s20	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s20	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s20	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s20	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s20	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s20	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s21	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s21	1	Code	Build	products	s	code	1
+pick	products	s21	2	DB Studio	building	products	s	code	1
+pick	products	s21	3	Grammar	Build	products	s	code	1
+pick	products	s21	4	Resolver Studio	building	products	s	code	1
+pick	products	s21	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s21	6	Bundles	building	products	s	ship	1
+pick	products	s21	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s21	8	Remote	planned	products	s	ship	1
+pick	products	s21	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s21	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s21	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s21	12	Storage	building	products	s	resolve	1
+pick	products	s21	13	Claims	Network	products	s	resolve	1
+pick	products	s21	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s21	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s21	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s21	17	Inbox	building	products	s	social	1
+pick	products	s21	18	Posts	building	products	s	social	1
+pick	products	s21	19	Play	building	products	s	social	1
+pick	products	s21	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s21	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s21	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s21	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s21	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s21	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s22	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s22	1	Code	Build	products	s	code	1
+pick	products	s22	2	DB Studio	building	products	s	code	1
+pick	products	s22	3	Grammar	Build	products	s	code	1
+pick	products	s22	4	Resolver Studio	building	products	s	code	1
+pick	products	s22	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s22	6	Bundles	building	products	s	ship	1
+pick	products	s22	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s22	8	Remote	planned	products	s	ship	1
+pick	products	s22	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s22	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s22	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s22	12	Storage	building	products	s	resolve	1
+pick	products	s22	13	Claims	Network	products	s	resolve	1
+pick	products	s22	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s22	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s22	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s22	17	Inbox	building	products	s	social	1
+pick	products	s22	18	Posts	building	products	s	social	1
+pick	products	s22	19	Play	building	products	s	social	1
+pick	products	s22	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s22	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s22	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s22	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s22	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s22	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s23	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s23	1	Code	Build	products	s	code	1
+pick	products	s23	2	DB Studio	building	products	s	code	1
+pick	products	s23	3	Grammar	Build	products	s	code	1
+pick	products	s23	4	Resolver Studio	building	products	s	code	1
+pick	products	s23	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s23	6	Bundles	building	products	s	ship	1
+pick	products	s23	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s23	8	Remote	planned	products	s	ship	1
+pick	products	s23	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s23	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s23	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s23	12	Storage	building	products	s	resolve	1
+pick	products	s23	13	Claims	Network	products	s	resolve	1
+pick	products	s23	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s23	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s23	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s23	17	Inbox	building	products	s	social	1
+pick	products	s23	18	Posts	building	products	s	social	1
+pick	products	s23	19	Play	building	products	s	social	1
+pick	products	s23	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s23	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s23	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s23	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s23	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s23	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s24	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s24	1	Code	Build	products	s	code	1
+pick	products	s24	2	DB Studio	building	products	s	code	1
+pick	products	s24	3	Grammar	Build	products	s	code	1
+pick	products	s24	4	Resolver Studio	building	products	s	code	1
+pick	products	s24	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s24	6	Bundles	building	products	s	ship	1
+pick	products	s24	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s24	8	Remote	planned	products	s	ship	1
+pick	products	s24	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s24	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s24	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s24	12	Storage	building	products	s	resolve	1
+pick	products	s24	13	Claims	Network	products	s	resolve	1
+pick	products	s24	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s24	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s24	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s24	17	Inbox	building	products	s	social	1
+pick	products	s24	18	Posts	building	products	s	social	1
+pick	products	s24	19	Play	building	products	s	social	1
+pick	products	s24	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s24	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s24	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s24	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s24	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s24	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s25	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s25	1	Code	Build	products	s	code	1
+pick	products	s25	2	DB Studio	building	products	s	code	1
+pick	products	s25	3	Grammar	Build	products	s	code	1
+pick	products	s25	4	Resolver Studio	building	products	s	code	1
+pick	products	s25	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s25	6	Bundles	building	products	s	ship	1
+pick	products	s25	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s25	8	Remote	planned	products	s	ship	1
+pick	products	s25	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s25	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s25	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s25	12	Storage	building	products	s	resolve	1
+pick	products	s25	13	Claims	Network	products	s	resolve	1
+pick	products	s25	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s25	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s25	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s25	17	Inbox	building	products	s	social	1
+pick	products	s25	18	Posts	building	products	s	social	1
+pick	products	s25	19	Play	building	products	s	social	1
+pick	products	s25	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s25	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s25	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s25	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s25	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s25	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s26	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s26	1	Code	Build	products	s	code	1
+pick	products	s26	2	DB Studio	building	products	s	code	1
+pick	products	s26	3	Grammar	Build	products	s	code	1
+pick	products	s26	4	Resolver Studio	building	products	s	code	1
+pick	products	s26	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s26	6	Bundles	building	products	s	ship	1
+pick	products	s26	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s26	8	Remote	planned	products	s	ship	1
+pick	products	s26	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s26	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s26	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s26	12	Storage	building	products	s	resolve	1
+pick	products	s26	13	Claims	Network	products	s	resolve	1
+pick	products	s26	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s26	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s26	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s26	17	Inbox	building	products	s	social	1
+pick	products	s26	18	Posts	building	products	s	social	1
+pick	products	s26	19	Play	building	products	s	social	1
+pick	products	s26	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s26	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s26	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s26	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s26	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s26	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s27	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s27	1	Code	Build	products	s	code	1
+pick	products	s27	2	DB Studio	building	products	s	code	1
+pick	products	s27	3	Grammar	Build	products	s	code	1
+pick	products	s27	4	Resolver Studio	building	products	s	code	1
+pick	products	s27	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s27	6	Bundles	building	products	s	ship	1
+pick	products	s27	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s27	8	Remote	planned	products	s	ship	1
+pick	products	s27	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s27	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s27	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s27	12	Storage	building	products	s	resolve	1
+pick	products	s27	13	Claims	Network	products	s	resolve	1
+pick	products	s27	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s27	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s27	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s27	17	Inbox	building	products	s	social	1
+pick	products	s27	18	Posts	building	products	s	social	1
+pick	products	s27	19	Play	building	products	s	social	1
+pick	products	s27	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s27	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s27	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s27	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s27	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s27	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s28	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s28	1	Code	Build	products	s	code	1
+pick	products	s28	2	DB Studio	building	products	s	code	1
+pick	products	s28	3	Grammar	Build	products	s	code	1
+pick	products	s28	4	Resolver Studio	building	products	s	code	1
+pick	products	s28	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s28	6	Bundles	building	products	s	ship	1
+pick	products	s28	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s28	8	Remote	planned	products	s	ship	1
+pick	products	s28	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s28	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s28	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s28	12	Storage	building	products	s	resolve	1
+pick	products	s28	13	Claims	Network	products	s	resolve	1
+pick	products	s28	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s28	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s28	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s28	17	Inbox	building	products	s	social	1
+pick	products	s28	18	Posts	building	products	s	social	1
+pick	products	s28	19	Play	building	products	s	social	1
+pick	products	s28	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s28	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s28	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s28	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s28	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s28	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s29	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s29	1	Code	Build	products	s	code	1
+pick	products	s29	2	DB Studio	building	products	s	code	1
+pick	products	s29	3	Grammar	Build	products	s	code	1
+pick	products	s29	4	Resolver Studio	building	products	s	code	1
+pick	products	s29	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s29	6	Bundles	building	products	s	ship	1
+pick	products	s29	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s29	8	Remote	planned	products	s	ship	1
+pick	products	s29	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s29	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s29	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s29	12	Storage	building	products	s	resolve	1
+pick	products	s29	13	Claims	Network	products	s	resolve	1
+pick	products	s29	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s29	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s29	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s29	17	Inbox	building	products	s	social	1
+pick	products	s29	18	Posts	building	products	s	social	1
+pick	products	s29	19	Play	building	products	s	social	1
+pick	products	s29	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s29	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s29	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s29	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s29	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s29	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s30	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s30	1	Code	Build	products	s	code	1
+pick	products	s30	2	DB Studio	building	products	s	code	1
+pick	products	s30	3	Grammar	Build	products	s	code	1
+pick	products	s30	4	Resolver Studio	building	products	s	code	1
+pick	products	s30	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s30	6	Bundles	building	products	s	ship	1
+pick	products	s30	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s30	8	Remote	planned	products	s	ship	1
+pick	products	s30	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s30	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s30	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s30	12	Storage	building	products	s	resolve	1
+pick	products	s30	13	Claims	Network	products	s	resolve	1
+pick	products	s30	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s30	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s30	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s30	17	Inbox	building	products	s	social	1
+pick	products	s30	18	Posts	building	products	s	social	1
+pick	products	s30	19	Play	building	products	s	social	1
+pick	products	s30	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s30	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s30	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s30	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s30	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s30	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s31	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s31	1	Code	Build	products	s	code	1
+pick	products	s31	2	DB Studio	building	products	s	code	1
+pick	products	s31	3	Grammar	Build	products	s	code	1
+pick	products	s31	4	Resolver Studio	building	products	s	code	1
+pick	products	s31	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s31	6	Bundles	building	products	s	ship	1
+pick	products	s31	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s31	8	Remote	planned	products	s	ship	1
+pick	products	s31	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s31	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s31	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s31	12	Storage	building	products	s	resolve	1
+pick	products	s31	13	Claims	Network	products	s	resolve	1
+pick	products	s31	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s31	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s31	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s31	17	Inbox	building	products	s	social	1
+pick	products	s31	18	Posts	building	products	s	social	1
+pick	products	s31	19	Play	building	products	s	social	1
+pick	products	s31	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s31	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s31	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s31	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s31	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s31	25	Flux Launch	DeFi	products	s	defi	1
+pick	products	s32	0	Repo	repo.defxn.com	products	s	code	1
+pick	products	s32	1	Code	Build	products	s	code	1
+pick	products	s32	2	DB Studio	building	products	s	code	1
+pick	products	s32	3	Grammar	Build	products	s	code	1
+pick	products	s32	4	Resolver Studio	building	products	s	code	1
+pick	products	s32	5	Domains	domains.defxn.com	products	s	ship	1
+pick	products	s32	6	Bundles	building	products	s	ship	1
+pick	products	s32	7	Packages	registry.defxn.com	products	s	ship	1
+pick	products	s32	8	Remote	planned	products	s	ship	1
+pick	products	s32	9	Deploy	deploy.defxn.com	products	s	resolve	1
+pick	products	s32	10	Explore	explore.defxn.com	products	s	resolve	1
+pick	products	s32	11	Node	nodes.defxn.com	products	s	resolve	1
+pick	products	s32	12	Storage	building	products	s	resolve	1
+pick	products	s32	13	Claims	Network	products	s	resolve	1
+pick	products	s32	14	DAO	dao.defxn.com	products	s	govern	1
+pick	products	s32	15	Treasury	treasury.defxn.com	products	s	govern	1
+pick	products	s32	16	Genesis	genesis.defxn.com	products	s	govern	1
+pick	products	s32	17	Inbox	building	products	s	social	1
+pick	products	s32	18	Posts	building	products	s	social	1
+pick	products	s32	19	Play	building	products	s	social	1
+pick	products	s32	20	Radio	radio.defxn.com	products	s	social	1
+pick	products	s32	21	PVA	pva.defxn.com	products	s	assets	1
+pick	products	s32	22	Collections	collections.defxn.com	products	s	assets	1
+pick	products	s32	23	Market	market.defxn.com	products	s	assets	1
+pick	products	s32	24	Books	books.defxn.com	products	s	assets	1
+pick	products	s32	25	Flux Launch	DeFi	products	s	defi	1
+statekey	products	s
+stateid	products	s0	code
+stateid	products	s1	code.repo
+stateid	products	s2	code.code
+stateid	products	s3	code.db-studio
+stateid	products	s4	code.grammar
+stateid	products	s5	code.resolver-studio
+stateid	products	s6	ship
+stateid	products	s7	ship.domains
+stateid	products	s8	ship.bundles
+stateid	products	s9	ship.packages
+stateid	products	s10	ship.remote
+stateid	products	s11	resolve
+stateid	products	s12	resolve.deploy
+stateid	products	s13	resolve.explore
+stateid	products	s14	resolve.node
+stateid	products	s15	resolve.storage
+stateid	products	s16	resolve.claims
+stateid	products	s17	govern
+stateid	products	s18	govern.dao
+stateid	products	s19	govern.treasury
+stateid	products	s20	govern.genesis
+stateid	products	s21	social
+stateid	products	s22	social.inbox
+stateid	products	s23	social.posts
+stateid	products	s24	social.play
+stateid	products	s25	social.radio
+stateid	products	s26	assets
+stateid	products	s27	assets.pva
+stateid	products	s28	assets.collections
+stateid	products	s29	assets.market
+stateid	products	s30	assets.books
+stateid	products	s31	defi
+stateid	products	s32	defi.flux-launch
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s0	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s0	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s0	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s0	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s0	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s0	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s0	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s1	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s1	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s1	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s1	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s1	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s1	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s1	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s2	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s2	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s2	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s2	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s2	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s2	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s2	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s3	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s3	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s3	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s3	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s3	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s3	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s3	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s4	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s4	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s4	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s4	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s4	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s4	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s4	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s5	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s5	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s5	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s5	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s5	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s5	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s5	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s6	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s6	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s6	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s6	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s6	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s6	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s6	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s7	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s7	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s7	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s7	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s7	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s7	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s7	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s8	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s8	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s8	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s8	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s8	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s8	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s8	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s9	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s9	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s9	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s9	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s9	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s9	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s9	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s10	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s10	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s10	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s10	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s10	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s10	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s10	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s11	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s11	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s11	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s11	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s11	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s11	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s11	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s12	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s12	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s12	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s12	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s12	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s12	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s12	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s13	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s13	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s13	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s13	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s13	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s13	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s13	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s14	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s14	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s14	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s14	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s14	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s14	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s14	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s15	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s15	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s15	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s15	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s15	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s15	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s15	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s16	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s16	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s16	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s16	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s16	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s16	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s16	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s17	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s17	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s17	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s17	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s17	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s17	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s17	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s18	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s18	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s18	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s18	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s18	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s18	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s18	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s19	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s19	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s19	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s19	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s19	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s19	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s19	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s20	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s20	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s20	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s20	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s20	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s20	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s20	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s21	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s21	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s21	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s21	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s21	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s21	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s21	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s22	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s22	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s22	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s22	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s22	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s22	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s22	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s23	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s23	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s23	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s23	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s23	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s23	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s23	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s24	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s24	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s24	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s24	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s24	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s24	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s24	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s25	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s25	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s25	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s25	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s25	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s25	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s25	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s26	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s26	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s26	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s26	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s26	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s26	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s26	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s27	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s27	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s27	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s27	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s27	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s27	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s27	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s28	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s28	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s28	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s28	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s28	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s28	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s28	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s29	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s29	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s29	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s29	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s29	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s29	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s29	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s30	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s30	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s30	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s30	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s30	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s30	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s30	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s31	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s31	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s31	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s31	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s31	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s31	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s31	1	gt
+spot	products	lane-0	-20.6742	10.58	-11.8212		0	s32	1	gt
+spot	products	lane-1	-19.1242	11.63	-11.8212		0	s32	1	gt
+spot	products	lane-2	-17.5742	10.58	-11.8212		0	s32	1	gt
+spot	products	lane-3	-16.0242	12.68	-11.8212		0	s32	1	gt
+spot	products	lane-4	-14.4742	11.63	-11.8212		0	s32	1	gt
+spot	products	lane-5	-12.9242	11.63	-11.8212		0	s32	1	gt
+spot	products	lane-6	-11.3742	15.03	-10.4212		0	s32	1	gt

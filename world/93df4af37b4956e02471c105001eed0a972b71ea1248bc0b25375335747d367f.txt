@@ -1,0 +1,44 @@
+kind	lf0	block	1	1	1	0.1	1
+pview	lf0	life
+kind	lf1	block	1	1	1	0.1	1
+pview	lf1	life
+kind	lf2	block	1	1	0.28	0.028	1
+pview	lf2	life
+kind	lf2g	block	1	1	1	0.005	0
+pview	lf2g	life
+kind	lf3	block	1	1	0.28	0.028	0
+pview	lf3	life
+kind	lf3g	block	1	1	1	0.005	0
+pview	lf3g	life
+kind	lf4	block	0.42	0.5	0.12	0.012	1
+pview	lf4	life
+kind	lf5	block	1	0.5	0.9	0.05	1
+pview	lf5	life
+kind	lf6	cyl	32
+pview	lf6	life
+kind	lfn0	beads	dots	240	6	6	6	6	6	6	6	6	6	6	6	6
+pview	lfn0	life
+kind	lfn1	beads	lit	200	14	14	14	14	14	14	14	14	14	14	14	14
+pview	lfn1	life
+kind	lfn2	beads	dots	240	8	8	8	8
+pview	lfn2	life
+kind	lfn3	beads	lit	200	6
+pview	lfn3	life
+kind	lfn4	beads	lit	200	10
+pview	lfn4	life
+kind	lfn5	beads	lit	200	12	12	12	12
+pview	lfn5	life
+mixtone	22	1	0.42	10	0.58
+mixtone	23	4	0.65	8	0.35
+mixtone	24	0	0.1925	6	0.5915	10	0.216
+mixtone	25	6	0.12	10	0.88
+mixtone	26	6	0.234	10	0.216	11	0.55
+mixtone	27	6	0.52	10	0.48
+mixtone	28	4	0.182	6	0.3744	8	0.098	10	0.3456
+statekey	life	s
+spot	life	caps	24.3758	13.45	3.1788	t	0.4		1	gt
+spot	life	grammar	30.3758	13.05	3.3788	t	0.8		1	gt
+spot	life	chain	27.9758	8.9	4.2788	t	1.9		1	gt
+spot	life	key	27.9758	13.8	3.3788	t	2.8		1	gt
+spot	life	provider	32.1758	10.7	2.8788	t	3.6		1	gt
+spot	life	state	27.1358	12.43	3.6288	t	1.9		1	gt
