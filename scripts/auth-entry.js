@@ -22,21 +22,12 @@
 
    "Keep me signed in" (owner, 2026-10-24: "every auth create the session of
    that 1 day, 3 day, 7 day and 14 days ... on reload your auth still works but
-   that's your own risk"). After an open, the panel offers ark-ui's remember
-   picker, set to "Only this tab". Choosing a window saves what reopens the
-   identity into ark-ui's persisted-secret vault (a non-extractable AES-GCM key
-   in IndexedDB, expiry checked on every read), one vault per `product` on this
-   origin. What is saved is the opened identity's material, the same things
-   flux-db-studio's auth-kit mode keeps: the FXN ID file as it was opened, the
-   recovery phrase it opened to, and the wallet secret keys inside it. The PIN,
-   password, key word, icon and v10 Secret Key are never saved; this file never
-   receives them. On load, an unexpired record reopens the identity without the
-   file: the root is rebuilt from the phrase and must equal the file's root key,
-   or the record is deleted. Sign-out and "Forget now" delete it. An expired
-   record is deleted by the vault on read. The risk note says the honest limit
-   from the vault's own header: it stops a copy of the disk, not a harmful
-   script running on this site during the window. The record is written in its
-   own grammar (see REMEMBER_LABELS below), never as JSON.
+   that's your own risk") is ark-ui's since 2026-10-29: the session keeps,
+   restores and forgets the sign-in (`keep` on createAuthKitSession), the panel
+   draws the windows, and this file writes none of it. The kept record is the
+   file, the phrase and the wallet keys, in ark-ui's persisted-secret vault,
+   under this site's own scope so records written before the move still open.
+   See design/ark-ui/ark-ui.flux-auth-keep.ts for the record and its limits.
 
    `identity.signWithWallet` closes a real gap: `openAuthKit`'s decrypted
    secret already carries the wallet's own key (`AuthKitSecret.walletSecretKey`)
@@ -103,10 +94,8 @@
 
    Build: node scripts/build-auth.cjs  ->  js/admin/auth.js (a classic script).
    ===================================================================== */
-import { createAuthKitSession, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit, parseAuthKit, encodeAuthKitEnvelope, canonicalAuthKitRootKey } from '@deadark/ark-ui/flux-auth';
+import { createAuthKitSession, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit, encodeAuthKitEnvelope } from '@deadark/ark-ui/flux-auth';
 import { createArkAuthKitPanel } from '@deadark/ark-ui/flux-auth-ui';
-import { createPersistedSecretVault, rememberMeDurationMs } from '@deadark/ark-ui/flux-auth-persisted-secret';
-import { createArkRememberMePicker, ARK_AUTH_SESSION_STYLES } from '@deadark/ark-ui/flux-auth-session-dom';
 import { createFluxRootHandle, fluxRootFromMnemonic, FLUX_ROOT_DERIVATION } from 'fxn-auth/root-from-mnemonic';
 import { createRootIdentitySigningHandle } from 'deadark-identity-core/root-signing-handle';
 import { createWalletSigningHandle } from 'fxn-auth/wallet-signing-handle';
@@ -115,6 +104,7 @@ import { createWalletDelegation, signWalletDelegation } from 'fxn-auth/wallet-de
 import { reduceWalletRegistry } from 'fxn-auth/wallet-registry';
 import { rankDiscovery } from 'fxn-auth-client/wallet-mesh';
 import { addPublicId, addWalletToPublicId, describePublicIds, linkRisk, openPublicIds, publishWallet, seedSigner } from 'fxn-auth/public-ids';
+import { openSealedKey } from 'fxn-auth/sealed-key';
 import { GENESIS_KEY_LABEL, rootDerivedKey } from 'fxn-auth/root-keys';
 import { createAuthKitV10 } from 'fxn-auth/auth-kit-create';
 import { releaseSecretKeyForKit, parseCommittee, enrollWithGate } from 'fxn-auth/fxn-id-gate';
@@ -158,75 +148,6 @@ async function findLiveWalletLink(links, walletAddress) {
     if (current.body.walletAddress === walletAddress) return current;
   }
   return null;
-}
-
-/* ---- The remembered sign-in: one record in this store's own grammar ----
-   Boxes are joined by '-'. A box takes the longest label it starts with, and its payload must
-   match that label's rule. Free text enters as hex of its UTF-8 bytes, so no payload holds a '-'.
-     FXR  the record's version, the digit 1                 first box, once
-     K    the FXN ID file as it was opened                   once
-     M    the recovery phrase the file opened to             once
-     W    the preferred wallet's secret key                  at most once
-     S    one wallet's secret key: hex address '.' hex key   any number
-   The record exists only inside the persisted-secret vault, encrypted under its non-extractable
-   key. Nothing else reads it, so nothing here is reserved for any other resolver. */
-const HEX = '(?:[0-9a-f]{2})+';
-const REMEMBER_LABELS = {
-  FXR: /^1$/,
-  K: new RegExp('^' + HEX + '$'),
-  M: new RegExp('^' + HEX + '$'),
-  W: new RegExp('^' + HEX + '$'),
-  S: new RegExp('^' + HEX + '\\.' + HEX + '$'),
-};
-const REMEMBER_LABEL_ORDER = Object.keys(REMEMBER_LABELS).sort((a, b) => b.length - a.length);
-const utf8Hex = (text) => Array.from(new TextEncoder().encode(text), (byte) => byte.toString(16).padStart(2, '0')).join('');
-const hexUtf8 = (hex) => new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(hex.match(/../g), (pair) => parseInt(pair, 16)));
-
-function encodeRemembered({ kitText, mnemonic, walletSecretKey, walletSecretKeys }) {
-  const boxes = ['FXR1', 'K' + utf8Hex(kitText), 'M' + utf8Hex(mnemonic)];
-  if (walletSecretKey) boxes.push('W' + utf8Hex(walletSecretKey));
-  for (const [address, key] of Object.entries(walletSecretKeys || {})) boxes.push('S' + utf8Hex(address) + '.' + utf8Hex(key));
-  return boxes.join('-');
-}
-
-function decodeRemembered(record) {
-  const boxes = String(record).split('-');
-  if (boxes[0] !== 'FXR1') throw new Error('The kept sign-in is not a version this page reads.');
-  const out = { kitText: '', mnemonic: '', walletSecretKey: '', walletSecretKeys: {} };
-  for (const box of boxes.slice(1)) {
-    const label = REMEMBER_LABEL_ORDER.find((name) => box.startsWith(name));
-    const payload = label ? box.slice(label.length) : '';
-    if (!label || label === 'FXR' || !REMEMBER_LABELS[label].test(payload)) throw new Error('The kept sign-in has a part this page does not read.');
-    if (label === 'K') out.kitText = hexUtf8(payload);
-    else if (label === 'M') out.mnemonic = hexUtf8(payload);
-    else if (label === 'W') out.walletSecretKey = hexUtf8(payload);
-    else { const [address, key] = payload.split('.'); out.walletSecretKeys[hexUtf8(address)] = hexUtf8(key); }
-  }
-  if (!out.kitText || !out.mnemonic) throw new Error('The kept sign-in is missing its FXN ID file or its phrase.');
-  return out;
-}
-
-/* Words for the remember block. One idea per sentence (docs/COPY-LAWS.md). */
-const KEEP_WORDS = {
-  keptUntil: (when) => 'Kept on this browser until ' + when + '.',
-  forget: 'Forget now',
-  forgotten: 'Forgotten on this browser. A reload signs you out.',
-  saveRefused: 'This browser could not keep your sign-in. Its site storage is off or full. You stay signed in on this tab. Allow storage for this site, then choose a time again.',
-  restoreRefused: 'Your kept sign-in could not be opened, so this browser deleted it. Choose your FXN ID file to sign in again.',
-};
-
-const KEEP_STYLES = '.ark-session-keep { display: grid; gap: 8px; margin-top: 12px; } .ark-session-keep[hidden] { display: none; }';
-
-function installKeepStyles() {
-  if (typeof document === 'undefined' || document.getElementById('ark-session-keep-styles')) return;
-  const style = document.createElement('style');
-  style.id = 'ark-session-keep-styles';
-  style.textContent = ARK_AUTH_SESSION_STYLES + KEEP_STYLES;
-  (document.head || document.documentElement).appendChild(style);
-}
-
-function formatUntil(at) {
-  return new Date(at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
 /* The genesis key of an opened FXN ID as `{ key, seed }` (hex), the shape seedSigner takes; null when the root is not
@@ -293,7 +214,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
       active.vault = vault;
       active.ids = await openPublicIds(vault, active.secret.mnemonic);
       active.shown = await describePublicIds(active.ids);
-      refreshKept();
+      void session.updateOpened({ vault: active.vault, secret: active.secret });
     }
     const identity = Object.freeze({
       // The public id this page signs as. Getters: usePublicId switches it.
@@ -396,6 +317,16 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
         const wallet = needId().wallets.find((x) => x.published != null);
         if (!wallet) throw new Error('This Public ID has no published wallet, so a page cannot sign with one next to it. Missing: a wallet whose link is public. To fix: publish a wallet\'s link on your account page first.');
         return hexToBase64(await seedSigner(wallet).signText(text));
+      },
+      // A document key sealed to this Public ID's published wallet (K5 suite box-x25519-aesgcm), opened
+      // here so the wallet's seed never leaves this file. Returns the key as hex. FXN Browser asks for it
+      // once per shared document, when the person accepts an invite
+      // (flux/ark-browser/planning/apps-sharing-and-live.md step 2).
+      openSealedKey: async (wrapHex) => {
+        const wallet = needId().wallets.find((x) => x.published != null);
+        if (!wallet) throw new Error('This Public ID has no published wallet, so nothing sealed to it can be opened. Missing: a wallet whose link is public. To fix: publish a wallet\'s link on your account page first.');
+        const key = await openSealedKey(wallet, String(wrapHex || ''));
+        try { return Array.from(key, (b) => b.toString(16).padStart(2, '0')).join(''); } finally { key.fill(0); }
       },
       /**
        * Mints and persists a real additional wallet, signed by this
@@ -558,8 +489,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
     onChange(identity);
   }
 
-  let keptRefused = false;   // a kept sign-in was found but could not be reopened (and was deleted)
-  const realSession = createAuthKitSession({
+  const session = createAuthKitSession({
     verifyRoot: async (input) => {
       if (pending) pending.dispose();
       pending = await rootHandle(input);
@@ -569,160 +499,23 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
        releaseSecretKeyForKit has exactly the session's shape. It asks the file's own (birth) committee; the Emergency
        Kit's Secret Key still opens the file when the gate cannot answer. */
     releaseSecretKey: (input) => releaseSecretKeyForKit(input),
-  });
-
-  /* The panel reads its screen from the session. A kept sign-in reopens with no file loaded, so the
-     panel is handed this session: it reports the kept identity as open until sign-out, and is the
-     real session in every other state. The panel then shows its usual signed-in screen and its own
-     Sign out. */
-  let keptState = null;
-  const keptListeners = new Set();
-  const session = {
-    ...realSession,
-    getState: () => keptState || realSession.getState(),
-    subscribe(listener) {
-      keptListeners.add(listener);
-      const stop = realSession.subscribe(listener);
-      return () => { keptListeners.delete(listener); stop(); };
+    /* "Keep me signed in" is the session's own (ark-ui, 2026-10-29). The scope is the one this site wrote records
+       under before the block moved, so a sign-in kept last week still opens. */
+    keep: {
+      scope: 'fxn-id-web-sign-in/' + product,
+      /* The session record is signed by a Public ID: the Master ID signs nothing for a page (owner, 2026-10-25). The
+         current Public ID signs; on a restore `want` names the key the record carries, and the file must still hold
+         it, or the kept copy is refused. */
+      signer: async (opened, want) => {
+        const ids = await openPublicIds(opened.vault, opened.secret?.mnemonic);
+        const key = want.publicKeyHex || active?.current || null;
+        const id = key ? ids.find((i) => i.key === key) : ids[0];
+        if (!id) return null;
+        const s = seedSigner(id);
+        return { keyName: 'Your Public ID', publicKeyHex: s.pubHex, sign: (bytes) => s.signBytes(bytes) };
+      },
     },
-    clear() { keptState = null; realSession.clear(); },
-  };
-
-  /* ---- Keep me signed in ---- */
-  const kept = createPersistedSecretVault({ scope: 'fxn-id-web-sign-in/' + product });
-  let keeping = Promise.resolve(); // saves and clears run one at a time, in the order chosen
-  let picker = null;
-  installKeepStyles();
-  const keepBox = document.createElement('div');
-  keepBox.className = 'ark-session-keep';
-  keepBox.setAttribute('data-ark-session', 'keep');
-  const pickerSlot = document.createElement('div');
-  const keepStatus = document.createElement('p');
-  keepStatus.className = 'ark-session-remember-note';
-  keepStatus.setAttribute('data-ark-session', 'keep-status');
-  keepStatus.setAttribute('role', 'status');
-  const keepActions = document.createElement('div');
-  keepActions.className = 'ark-auth-actions';
-  keepActions.setAttribute('data-ark-auth', 'actions');
-  const forgetButton = document.createElement('button');
-  forgetButton.type = 'button';
-  forgetButton.textContent = KEEP_WORDS.forget;
-  forgetButton.setAttribute('data-kind', 'quiet');
-  forgetButton.setAttribute('data-action', 'forget');
-  keepActions.appendChild(forgetButton);
-  keepBox.append(pickerSlot, keepStatus, keepActions);
-
-  // `hidden` alone can lose to a site's own display rule for buttons, so the inline style says it too.
-  function shown(node, yes) {
-    node.hidden = !yes;
-    node.style.display = yes ? '' : 'none';
-  }
-
-  function showKeep({ status = '', canForget = false } = {}) {
-    shown(keepBox, true);
-    keepStatus.textContent = status;
-    shown(keepStatus, Boolean(status));
-    shown(keepActions, canForget);
-  }
-
-  function hideKeep() {
-    if (picker) { picker.destroy(); picker = null; }
-    shown(keepBox, false);
-    keepStatus.textContent = '';
-    shown(keepActions, false);
-  }
-
-  function queue(work) {
-    keeping = keeping.then(work, work);
-    return keeping;
-  }
-
-  function keepFor(value) {
-    return queue(async () => {
-      const ms = rememberMeDurationMs(value);
-      if (!ms) {
-        try { await kept.clear(); } catch { /* no storage means nothing is kept */ }
-        if (active) showKeep();
-        return;
-      }
-      if (!active) return;
-      try {
-        await kept.save(encodeRemembered({
-          kitText: encodeAuthKitEnvelope(active.vault),
-          mnemonic: active.secret.mnemonic,
-          walletSecretKey: active.secret.walletSecretKey,
-          walletSecretKeys: active.secret.walletSecretKeys,
-        }), ms);
-        if (active) showKeep({ status: KEEP_WORDS.keptUntil(formatUntil(Date.now() + ms)), canForget: true });
-      } catch {
-        if (picker) picker.setValue('none');
-        if (active) showKeep({ status: KEEP_WORDS.saveRefused });
-      }
-    });
-  }
-
-  /* The file changed (a public id or wallet was added): a kept sign-in must hold the new file, or a reload loses it. */
-  function refreshKept() {
-    return queue(async () => {
-      if (!active) return;
-      let ms = 0;
-      try { ms = await kept.remainingMs(); } catch { return; }
-      if (!ms) return;
-      try {
-        await kept.save(encodeRemembered({ kitText: encodeAuthKitEnvelope(active.vault), mnemonic: active.secret.mnemonic, walletSecretKey: active.secret.walletSecretKey, walletSecretKeys: active.secret.walletSecretKeys }), ms);
-      } catch { /* the kept copy stays older; the saved file is what counts */ }
-    });
-  }
-
-  function forgetKept() {
-    return queue(async () => {
-      try { await kept.clear(); } catch { /* no storage means nothing is kept */ }
-    });
-  }
-
-  forgetButton.addEventListener('click', () => {
-    void forgetKept().then(() => {
-      if (picker) picker.setValue('none');
-      if (active) showKeep({ status: KEEP_WORDS.forgotten });
-    });
   });
-
-  /* After a fresh open: offer the windows, starting at "Only this tab". */
-  function offerKeep() {
-    if (picker) picker.destroy();
-    picker = createArkRememberMePicker({ container: pickerSlot, value: 'none', onChange: (value) => { void keepFor(value); } });
-    showKeep();
-  }
-
-  /* On load: reopen a kept identity without the file, or delete a record that cannot be used. */
-  async function reopenKept() {
-    let record = null;
-    try { record = await kept.load(); } catch { return; } // no storage here: nothing was kept
-    if (!record || active) return;
-    let handle = null;
-    try {
-      const material = decodeRemembered(record);
-      const vault = parseAuthKit(material.kitText);
-      const summary = describeAuthKit(vault);
-      handle = await rootHandle({ mnemonic: material.mnemonic, derivation: summary.rootDerivation, callsign: summary.callsign });
-      if (canonicalAuthKitRootKey(handle.publicKeyB64) !== canonicalAuthKitRootKey(vault.rootPublicKey)) throw new Error('The kept phrase does not make this FXN ID\'s Master ID.');
-      if (active) { handle.dispose(); return; } // someone opened a file while this was reading
-      const secret = { mnemonic: material.mnemonic };
-      if (material.walletSecretKey) secret.walletSecretKey = material.walletSecretKey;
-      if (Object.keys(material.walletSecretKeys).length) secret.walletSecretKeys = material.walletSecretKeys;
-      const opened = { vault, summary, secret, rootVerified: true };
-      await admit(opened, handle);
-      keptState = { status: 'open', summary, opened, error: null, unverified: false, gateClient: false };
-      for (const listener of keptListeners) listener(keptState);
-      const remaining = await kept.remainingMs();
-      if (active) showKeep({ status: remaining ? KEEP_WORDS.keptUntil(formatUntil(Date.now() + remaining)) : '', canForget: true });
-    } catch {
-      if (handle && !active) handle.dispose();
-      await forgetKept();
-      keptRefused = true;
-      showKeep({ status: KEEP_WORDS.restoreRefused });
-    }
-  }
 
   createArkAuthKitPanel({
     container, session, product,
@@ -738,27 +531,25 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
       const handle = pending;
       pending = null;
       await admit(opened, handle);
-      offerKeep();
     },
-    onSignOut: () => { if (pending) { pending.dispose(); pending = null; } hideKeep(); void forgetKept(); drop(); },
+    // The panel's own Sign out forgets a kept sign-in before this runs.
+    onSignOut: () => { if (pending) { pending.dispose(); pending = null; } drop(); },
   });
-  hideKeep();
-  container.appendChild(keepBox);
-  void reopenKept();
 
   return {
     current: () => (active ? active.identity : null),
     /* The last refusal, for a page that draws its own failure screen (defxn.com /auth): { code, message, detail } or
        null. code is AuthKitError's stable code (ark-ui flux-auth): switch on it, never on the words. keptRefused is
-       true once a kept sign-in was found on load but could not be reopened (this browser then deleted it). */
-    error: () => { const e = realSession.getState().error; return e ? { code: e.code, message: e.message, detail: e.detail || null } : null; },
-    keptRefused: () => keptRefused,
+       true once a kept sign-in was found on load but could not be reopened (this browser then deleted it); it is the
+       session's own keep.restoreRefused. */
+    error: () => { const e = session.getState().error; return e ? { code: e.code, message: e.message, detail: e.detail || null } : null; },
+    keptRefused: () => Boolean(session.getState().keep?.restoreRefused),
     /* What the loaded file is, for a page that draws its own checks: { version, needsSecretKey, hasGate } or null.
        No factor and no key: only what the file's public header says. */
-    fileInfo: () => { const m = realSession.getState().summary; return m ? { version: m.version, needsSecretKey: !!m.needsSecretKey, hasGate: !!m.hasGate } : null; },
+    fileInfo: () => { const m = session.getState().summary; return m ? { version: m.version, needsSecretKey: !!m.needsSecretKey, hasGate: !!m.hasGate } : null; },
     // Signing out also deletes a kept sign-in. Disposing does not: a page that is going away has not signed out.
-    signOut: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } hideKeep(); void forgetKept(); drop(); },
-    dispose: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } hideKeep(); drop(); },
+    signOut: () => { void session.forgetKept(); session.clear(); if (pending) { pending.dispose(); pending = null; } drop(); },
+    dispose: () => { session.clear(); if (pending) { pending.dispose(); pending = null; } drop(); },
   };
 }
 
