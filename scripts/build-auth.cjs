@@ -24,6 +24,7 @@ execFileSync(esbuild, [
   '--alias:fxn-auth/wallet-signing-handle=' + fluxRoot + '/fxn-auth/src/walletSigningHandle.mjs',
   '--alias:fxn-auth/wallet-lifecycle=' + fluxRoot + '/fxn-auth/src/walletLifecycle.mjs',
   '--alias:fxn-auth/public-ids=' + fluxRoot + '/fxn-auth/src/publicIds.mjs',
+  '--alias:fxn-auth/sealed-key=' + fluxRoot + '/fxn-auth/src/sealedKey.mjs',
   '--alias:fxn-auth/root-keys=' + fluxRoot + '/fxn-auth/src/rootKeys.mjs',
   '--alias:fxn-auth/wallet-delegation=' + fluxRoot + '/fxn-auth/src/walletDelegation.mjs',
   '--alias:fxn-auth/wallet-registry=' + fluxRoot + '/fxn-auth/src/walletRegistry.mjs',
