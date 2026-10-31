@@ -37,7 +37,12 @@
      ONE call, so it runs when the last Security screen is left, and the Recovery screen shows what it returned.
      Markup is rebuilt only when the screen changes (the screen enters with a slide); typing updates the DOM in
      place, so a keystroke never replays the entry motion. Secrets leave memory and the DOM when the file is saved.
-     The 3D FXN ID card is an empty frame for now (owner, 2026-10-30): same size and place, art later. ---- */
+     The FXN ID card's place is a frame on Welcome and on Complete. The panel draws no card itself: after every render, and
+     after every change the card can show, it calls opts.onCard(frame, info) with that screen's frame (or null) and
+     info = { screen, name, pinGrade, passwordGrade, icon, total, picked }: the grades this panel's own strength bars show, the
+     chosen icon's id and the recovery words' count and how many are confirmed. Never a PIN, a password, a key word or a
+     recovery word. FXN Browser plays the fxn-3d card through every step with it (2026-10-31). Without the option the frame
+     stays empty. ---- */
   var STAGES = ['Identity', 'Security', 'Recovery', 'Confirm', 'Complete'];
   var STAGE_OF = { name: 0, pin: 1, password: 1, word: 1, words: 2, confirm: 3, file: 4 };
   var STRENGTH_WORDS = ['', 'Weak', 'Fair', 'Good', 'Strong'];
@@ -72,12 +77,18 @@
     var quietClass = opts.quietClass != null ? opts.quietClass : 'fxn-btn fxn-btn-quiet';
     var resultClass = opts.resultClass != null ? opts.resultClass : 'fxn-create-note';
     var icons = window.ArkAdminAuth.FXN_ID_ICONS || [];
-    var screen, dir, error, making, values, made, show, written, words, shuffled, picked, fileSize, savedName, prevStage;
+    var screen, dir, error, making, values, made, show, written, words, shuffled, picked, fileSize, savedName, prevStage, grades;
     function reset() {
       screen = 'welcome'; dir = 'fwd'; error = ''; prevStage = null; making = false; made = null; words = null; shuffled = null; picked = [];
       written = false; show = { pin: false, password: false }; fileSize = ''; savedName = '';
       values = { displayName: '', pin: '', password: '', word: '', icon: '', wordCount: '24' };
+      grades = { pin: 0, password: 0 };   /* kept after the PIN and password leave memory, so the card keeps showing them */
     }
+    function cardInfo() {
+      return { screen: screen, name: values.displayName.trim(), pinGrade: grades.pin, passwordGrade: grades.password, icon: values.icon,
+        total: words ? words.length : Number(values.wordCount), picked: picked.length };
+    }
+    function emitCard() { if (opts.onCard) opts.onCard(container.querySelector('.fxn-card-frame'), cardInfo()); }
     function passwordNeeded() { return values.pin.length < 8; }
     function stepError(key) {
       if (key === 'name' && !values.displayName.trim()) return 'Type a name.';
@@ -197,6 +208,7 @@
     function render() {
       container.innerHTML = '<div class="fxn-screen" data-screen="' + screen + '" data-dir="' + dir + '">' + body() + '</div>';
       var input = container.querySelector('[autofocus]'); if (input) input.focus();
+      emitCard();
     }
 
     /* ---- in-place updates while typing (no re-render, so no replayed motion) ---- */
@@ -214,13 +226,14 @@
       if (input.name === 'displayName') { values.displayName = input.value; setCheck(Boolean(input.value.trim())); }
       else if (input.name === 'pin') {
         var digits = input.value.replace(/\D/g, '').slice(0, 12); if (digits !== input.value) input.value = digits;
-        values.pin = digits; var boxes = container.querySelector('[data-fxn-pin-boxes]'); if (boxes) boxes.innerHTML = pinBoxes();
+        values.pin = digits; grades.pin = pinStrength(digits); var boxes = container.querySelector('[data-fxn-pin-boxes]'); if (boxes) boxes.innerHTML = pinBoxes();
         setStrength(pinStrength(digits), pinWord(digits));
       } else if (input.name === 'password') {
-        values.password = input.value; setStrength(passwordStrength(input.value), STRENGTH_WORDS[passwordStrength(input.value)]);
+        values.password = input.value; grades.password = passwordStrength(input.value); setStrength(passwordStrength(input.value), STRENGTH_WORDS[passwordStrength(input.value)]);
         var row = container.querySelector('[data-fxn-checklist] li'); if (row) row.dataset.ok = String(passwordNeeded() ? Boolean(input.value) : true);
       } else if (input.name === 'word') { values.word = input.value; setCheck(Boolean(input.value)); }
       if (error) setError('');
+      emitCard();
     }
 
     /* ---- moving between screens ---- */
@@ -272,6 +285,7 @@
         picked.push(i); chip.dataset.state = 'picked';
         var counter = container.querySelector('[data-fxn-counter]'); if (counter) counter.textContent = picked.length + ' / ' + words.length + ' correct';
         setNextEnabled(picked.length === words.length);
+        emitCard();
       } else {
         /* A wrong word shakes and settles (animationend clears it), and nothing is counted. */
         chip.dataset.state = 'wrong';
@@ -304,10 +318,12 @@
       else if (t.dataset.iconId) {
         values.icon = t.dataset.iconId; setError('');
         Array.prototype.forEach.call(container.querySelectorAll('[data-icon-id]'), function (b) { b.setAttribute('aria-checked', String(b.dataset.iconId === values.icon)); });
+        emitCard();
       }
       else if (t.dataset.wordCount) {
         values.wordCount = t.dataset.wordCount;
         Array.prototype.forEach.call(container.querySelectorAll('[data-word-count]'), function (b) { b.setAttribute('aria-checked', String(b.dataset.wordCount === values.wordCount)); });
+        emitCard();
       }
       else if (t.dataset.chip) pick(t);
       else if (t.hasAttribute('data-fxn-restart')) { picked = []; go('confirm', true); }
