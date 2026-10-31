@@ -2,7 +2,7 @@
    verified archive. Used by app.js. The lookup and CSS functions are pure and tested in Node
    (tests/gateway-folder-site.test.mjs); buildPageHtml takes a parsed Document, so it runs in the browser.
 
-   How a page is shown (the threat model is in docs/DEVNET-TOOLS-LOG-2026-10-23.md, "Folder sites"):
+   How a page is shown (the threat model is in docs/archive/devnet/DEVNET-TOOLS-LOG-2026-10-23.md, "Folder sites"):
    the site's code is someone else's, so it never runs on the <label>.defxn.com origin. app.js puts each
    page in an <iframe sandbox="allow-scripts ..."> of site-frame.html, which gives it an opaque origin:
    no cookies, no storage, no access to the shell, and the identity broker ignores it. site-frame.html's

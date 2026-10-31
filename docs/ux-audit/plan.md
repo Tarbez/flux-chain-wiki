@@ -407,7 +407,7 @@ Pages still to finish by hand: /concept/depth, /learnings and its notes, /what-i
 The owner asked to merge the three stopped helper branches (site 7 commits, guides 3, CMS 1) into main, losing nothing.
 They are merged at aeaf0a7 with no conflicts; pages and glossary rebuilt; no test run (owner tests).
 The 2026-10-22 ~22:00 incident (a sub-agent rsynced flux/defxn-wt-node-clean, cut from an older main, over main;
-record: /Volumes/PortableSSD/docs/node-production-build-2026-10-21/out/INCIDENT-2026-10-22-main-trees-overwritten.md)
+record: /Volumes/PortableSSD/docs/archive/node/node-production-build-2026-10-21/out/INCIDENT-2026-10-22-main-trees-overwritten.md)
 left 254 changed paths in main. Before touching them, every tracked and untracked file was saved as the commit
 `refs/snapshots/main-tree-20261023` (1e8ca22). Each path was then sorted by content:
 - 222 files equal to a blob already on a branch (old copies) and 15 deleted files: reset to HEAD; nothing lost.

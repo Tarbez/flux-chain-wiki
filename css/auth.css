@@ -113,7 +113,7 @@
 .auth-panel-slot [data-ark-auth="actions"] button:disabled { opacity: .55; cursor: default; }
 .auth-panel-slot [data-ark-auth="notice"] { margin: 0; padding: 9px 12px; border-radius: 4px; font-size: var(--fs-tertiary); border: 1px solid hsl(var(--warning)); color: hsl(var(--text)); background: hsl(var(--canvas) / .7); }
 .auth-panel-slot [data-ark-auth="notice"][data-tone="error"] { border-color: hsl(var(--danger)); }
-.auth-panel-slot .ark-session-keep { display: none; }
+.auth-panel-slot [data-stage="ready"] [data-ark-auth="keep"] { display: none; }   /* before the file opens the picker shows; once signed in the /auth page says the session itself (bodySigned) */
 .auth-world .auth-kit-confirm { display: flex; align-items: center; gap: 10px; margin: 12px 0; font-size: var(--fs-tertiary); color: hsl(var(--text)); }
 .auth-world .auth-kit-confirm input { width: 18px; height: 18px; accent-color: hsl(var(--primary)); }
 

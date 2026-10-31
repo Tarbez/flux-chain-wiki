@@ -259,3 +259,29 @@ Still not built:
     that matches `^https://[a-z0-9-]+\.fxn$`, and send `Vary: Origin`.
 - Per-route titles for readers without scripts. The router sets each page's title at run time.
 - Tests. They follow the owner's confirmation.
+
+## Built 2026-10-29, later: /2 in every reader
+
+This section supersedes the "Still not built" list above for the items it names. Built, not deployed, no tests.
+
+- **The FXN Browser reads `/2`.** `ark-browser` `src/main/fxn-sites/fxn-site-host.js`, `readIndexSite` and
+  `_blockOf`. It reads the index with `readFolderSiteIndex` from bundle-deploy's `folder-site-core.js`, which the
+  build already ships.
+  - A file's blocks are fetched when the file is asked for. Each block is checked by its BLAKE3 and by its length.
+  - Blocks share the host's CID cache (128 MiB) with sites. A Range request fetches only the blocks it covers.
+  - The same file is copied into `ark-browser-wt-tester-build` for the next tester build.
+- **The boxed shell reads `/2`.** `gateway/index-site.js` fetches blocks through `content.js`
+  `fetchVerifiedContent`, the shell's one checked path, and keeps them by ID up to 96 MiB.
+  - `folder-site.js` `loadPageFiles` fetches only what one page names. That covers the page's attributes, its
+    `srcset`, its styles and the style sheets those import.
+  - A file over 32 MiB is left out of a page and its CSP blocks it.
+  - The deployed copy (`devnet-deploy-2026-10-23/site/defxn-gateway/`) has the same files and keeps its node pins.
+- **`prepare --store a,b`** sends every block and the index to each store (`createMirroredStoreClient`).
+- **Measured 2026-10-29** on an M-series Mac, Node 24, against a loopback stand-in store holding the stage.
+  - The stage held 1,439 files and 14,854,732 bytes. They packed as an index of 719,532 bytes and 1,324 blocks.
+  - The home page took 127 blocks. With pure-JS BLAKE3, the shell took 0.6 s to load them. The FXN Browser's
+    first answer took 0.46 s.
+- **Deploy files:** `devnet-deploy-2026-10-23/caddy/fxn-site.service` and `caddy/fxn-names.caddy.next`. The second
+  is `fxn-names.caddy` with its `*.fxn` block swapped for `fxn-sites.caddy`'s.
+
+Still not built: the FXN Browser's check of `fxn-site` on every `.fxn` page, live data on de.fxn, and tests.

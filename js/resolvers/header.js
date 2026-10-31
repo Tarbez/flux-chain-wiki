@@ -51,7 +51,7 @@ function lazyHeaderPopover(spec) {
    module, and a wallet module that fails to load (no module support, a
    file: URL) must not take the rest of the header down with it -- a
    mount that fails just hides its own control. */
-var HEADER_WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261025-price1';
+var HEADER_WALLET_MODULE = 'js/ark/dense-wire-wallet.mjs?v=20261029-decimals1';
 var headerWalletModulePromise = null;
 function loadHeaderWalletModule() {
   if (!headerWalletModulePromise) {

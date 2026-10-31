@@ -73,29 +73,31 @@ function boot({ worldTag = false, ringOwns = false } = {}) {
 const layers = (w) => [...w.document.querySelectorAll('#scene .card-world')];
 
 (async () => {
-  // 1. art(): the sheet, the mark, three.js and the recipe all come before art3d.js
+  /* Owner directive, 2026-10-30: "Port each remaining view's 3D into the grammar renderer. Port the NFT card and the skins.
+     Make the grammar world the default, ready to drop threejs entirely." The card therefore draws with the grammar renderer:
+     art3d.js loads js/nft/card-gl.mjs itself, and art() requests no Three.js script for a card, with or without a ring-world
+     tag on the page. These assertions state that contract; they replace the old order "three.js before art3d.js". */
+  // 1. art(): the sheet, the mark and the recipe come before art3d.js; no Three.js is requested
   {
     const { w, calls } = boot();
     await w.DefxnSkinSite.art();
     const at = (f) => calls.indexOf(f);
-    assert.ok(at('css/nft-card.css') >= 0 && at('js/ark/mark-data.js') >= 0 && at('js/vendor/three-r180-defxn.js') >= 0, 'art() links the card sheet and loads the mark and three.js');
-    assert.ok(at('js/nft/art3d.js') > at('js/vendor/three-r180-defxn.js'), 'three.js loads before art3d.js (it reads three as it loads)');
+    assert.ok(at('css/nft-card.css') >= 0 && at('js/ark/mark-data.js') >= 0, 'art() links the card sheet and loads the mark');
+    assert.ok(!calls.some((c) => /three/i.test(c)), 'no Three.js script is requested for a card (owner, 2026-10-30: drop threejs)');
     assert.ok(at('js/nft/art3d.js') > at('js/ark/mark-data.js') && at('js/nft/art3d.js') > at('css/nft-card.css'), 'the mark and the sheet come before art3d.js');
     assert.ok(at('js/nft/art3d.js') > at('js/nft/skin-recipe.js'), 'the recipe loads before art3d.js');
     assert.equal(calls.filter((c) => c === 'js/nft/art3d.js').length, 1, 'art3d.js loads once');
+    const art3d = fs.readFileSync(path.join(root, 'js/nft/art3d.js'), 'utf8');
+    assert.ok(/import\(new URL\('card-gl\.mjs'/.test(art3d), 'art3d.js loads the grammar renderer module js/nft/card-gl.mjs itself');
+    assert.ok(!/THREE\./.test(art3d), 'art3d.js no longer reads THREE');
   }
 
-  // 2. three.js already loading through the ring world's own tag: waited for, never loaded a second time
+  // 2. a ring-world Three.js tag on the page does not hold the card back, and the card never loads Three.js
   {
     const { w, calls } = boot({ worldTag: true });
-    const done = w.DefxnSkinSite.art();
-    await ticks();
-    assert.ok(!calls.includes('js/vendor/three-r180-defxn.js'), 'art() does not load a second three.js while the world is loading one');
-    assert.ok(!calls.includes('js/nft/art3d.js'), 'and art3d.js waits for it');
-    w.DEFXNDependencies = {}; w.__worldTag.dispatchEvent(new w.Event('load'));
-    await done;
-    assert.ok(calls.includes('js/nft/art3d.js'), 'once the world\'s three.js has loaded, art3d.js loads');
-    assert.ok(!calls.includes('js/vendor/three-r180-defxn.js'), 'and three.js was never loaded by art()');
+    await w.DefxnSkinSite.art();
+    assert.ok(calls.includes('js/nft/art3d.js'), 'art3d.js loads without waiting for the ring world\'s Three.js tag');
+    assert.ok(!calls.includes('js/vendor/three-r180-defxn.js'), 'and art() never loads Three.js');
   }
 
   // 3. the dress: place, no avatar, and shown only after the world has painted

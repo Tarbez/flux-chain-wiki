@@ -57,9 +57,10 @@ var DefxnSkinSite = (function () {
 
   /* ---------- the card's art: the NFT session's 3D engine (js/nft/art3d.js) ----------
      The profile card (js/ark/profile-card.js) and the scene below both draw with it. The load order is the NFT
-     session's: js/ark/mark-data.js and js/vendor/three-r180-defxn.js before art3d.js (it reads three as it loads), and
-     the recipe before it too. The ring world (js/world/world-host.js) loads three.js and the mark with its own tags,
-     guarded by these globals: a tag already loading is waited for, never loaded twice, so the page holds one THREE. */
+     session's: js/ark/mark-data.js and the recipe before art3d.js. art3d.js loads the grammar renderer's card module
+     (js/nft/card-gl.mjs) itself and draws in one shared card context; the page loads no Three.js for the card. Either
+     world host (js/world/world-host.js, or the grammar host under ?world=2) answers owns() and covered the same way, so
+     reading() and clip() below hold under both. A mark tag already loading is waited for, never loaded twice. */
   function shared(global, path) {
     if (window[global]) return Promise.resolve();
     var tag = document.querySelector('script[src*="' + path + '"]');
@@ -71,7 +72,7 @@ var DefxnSkinSite = (function () {
     });
   }
   function art() {
-    return Promise.all([ArkUI.loadSheet('css/nft-card.css'), shared('DEFXN_MARK', 'js/ark/mark-data.js'), shared('DEFXNDependencies', 'js/vendor/three-r180-defxn.js')])
+    return Promise.all([ArkUI.loadSheet('css/nft-card.css'), shared('DEFXN_MARK', 'js/ark/mark-data.js')])
       .then(needs).then(function () { return load(NFT + 'art3d.js'); });
   }
 

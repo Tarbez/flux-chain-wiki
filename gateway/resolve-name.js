@@ -9,7 +9,7 @@
    the retired names/* registry (the Explorer `names` source this shell read until
    2026-10-23).
 
-   The network decides the ending (2026-10-29, docs/FXN-NAME-RENT-DESIGN.md): `.fxn` on
+   The network decides the ending (2026-10-29, docs/DEFXN-NAMES-ONE-SYSTEM.md): `.fxn` on
    fxn-mainnet, `.fxndev` on every test network, from the shared `nameEnding`. The network
    is name-config.js NETWORK when set, else the first node's BUILD_INFO. The verifier gets
    the network and the clock, so a name in its grace or lapsed is refused by name and its

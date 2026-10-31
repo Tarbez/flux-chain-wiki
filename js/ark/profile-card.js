@@ -16,9 +16,9 @@
      ready      a Promise of the card element; null if closed first; rejects naming what did not load.
      close()    removes the card (box is then exactly as it was) and frees its 3D renderer.
 
-   Loading is DefxnSkinSite's: DefxnSkinSite.art() links the card's sheet and loads the mark, three.js, the recipe and
-   js/nft/art3d.js in the NFT session's order (the ring world's own tags are waited for, three.js is never loaded
-   twice; tests/skin-site.cjs holds those cases). This file then asks DefxnSkinSite.sample(n) for the record and
+   Loading is DefxnSkinSite's: DefxnSkinSite.art() links the card's sheet and loads the mark, the recipe and
+   js/nft/art3d.js in the NFT session's order (art3d.js loads the grammar renderer's card module itself, so the
+   card needs the grammar renderer and no Three.js; tests/skin-site.cjs holds those cases). This file then asks DefxnSkinSite.sample(n) for the record and
    loads js/nft/card.js (ArkUI.loadScript). The sheet's path is written in DefxnSkinSite's call, so
    scripts/page-styles.mjs keeps it out of every route list.
    ===================================================================== */

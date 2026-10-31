@@ -17,7 +17,7 @@ flx-resolver-artifacts.mjs, flx-state-grammar.js. The drift test's FILES list na
 package.json holds only "type": "module", as dense-wire/web/package.json does, so the .js files here
 (flx-state-grammar.js) load as modules in Node the same way they do in a browser.
 
-Re-vendored 2026-10-29 for name rent and the .fxndev ending (docs/FXN-NAME-RENT-DESIGN.md) and amounts with
+Re-vendored 2026-10-29 for name rent and the .fxndev ending (docs/DEFXN-NAMES-ONE-SYSTEM.md) and amounts with
 decimals (docs/FXN-DECIMALS-DESIGN.md). Source: flux/defxn-defi-rs-wt-dao-reapply/dense-wire/web, branch
 fix/dao-reapply-after-blobs at e492b4c plus that worktree's uncommitted changes. flx-builders.mjs now imports
 flx-amount.mjs (rentDue), so the closure is 13 files; the drift test's FILES list still names 12 and gains

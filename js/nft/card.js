@@ -25,9 +25,9 @@
    double-click resets it. Nothing here runs an idle frame loop. With prefers-reduced-motion the art
    does not tilt on hover and does not coast.
 
-   Needs, in order: js/ark/mark-data.js, js/vendor/three-r180-defxn.js, a layer table (the full
+   Needs, in order: js/ark/mark-data.js, a layer table (the full
    docs/home-redesign/nft/layers-bundle.js, or js/nft/skin-bundle.js on the site), js/nft/cards-data.js,
-   js/nft/traits.js, js/nft/art3d.js, js/nft/card-chrome.js. Styles: css/nft-card.css. */
+   js/nft/traits.js, js/nft/art3d.js (it loads the grammar renderer's js/nft/card-gl.mjs), js/nft/card-chrome.js. Styles: css/nft-card.css. */
 (function () {
   'use strict';
 

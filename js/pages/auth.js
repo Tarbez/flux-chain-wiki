@@ -89,7 +89,7 @@
   };
   var LEDES = {
     none: 'No FXN ID file is open on this device. Choose your FXN ID file to sign in to the DEFXN network.',
-    file: 'This device reads your FXN ID file. The file stays here and is never uploaded. Type the file’s PIN and password to open it.',
+    file: 'This device reads your FXN ID file. The file stays here and is never uploaded. Each step asks for one thing that opens it.',
     verify: 'This device checks your FXN ID file. Your identity shows when every check passes.',
     connected: 'Your FXN ID is open on this tab. You can now sign in to DEFXN sites and the network.',
     missing: 'This device saved your identity details, but no FXN ID file is open. Choose the file again to sign in.',
@@ -377,8 +377,7 @@
         var row = el('div', 'auth-file tp-panel'); row.appendChild(icon('file')); row.appendChild(el('b', 'auth-file-name', fileName || 'Your FXN ID file'));
         var st = el('span', 'auth-file-state' + (busy ? ' is-busy' : ''), busy ? 'Reading on this device…' : 'Read · locked'); if (busy) st.insertBefore(el('i', 'auth-spin'), st.firstChild); else st.insertBefore(icon('lock'), st.firstChild);
         row.appendChild(st); f.appendChild(row);
-        f.appendChild(note('lock', 'The file stays on this device. It is never uploaded.'));
-        if (!busy) f.appendChild(panelSlot);   /* the panel's PIN, password (and v10 factors) and its Open button */
+        if (!busy) f.appendChild(panelSlot);   /* the lede above already says the file stays here (law 1: said once) */   /* the panel's PIN, password (and v10 factors) and its Open button */
         f.appendChild(grid(['another', 'what'], 'is-two'));
         f.appendChild(explain());
         return f;

@@ -4,7 +4,7 @@
    A name's record points at a site with a blake3_cid target: the BLAKE3 hash of the site archive, which is
    the ID the byte store (flxd-blockstore, `fxn --roles store`) files it under. The node's web server answers
    GET /fxn-store/v1/<cid> from the store's own get (the Caddy block is in
-   docs/DEVNET-FLEET-RUNBOOK-2026-10-23.md); the store itself stays on loopback. The answer is the store's
+   docs/archive/devnet/DEVNET-FLEET-RUNBOOK-2026-10-23.md); the store itself stays on loopback. The answer is the store's
    wire body, {"ok": true, "data_base64": ...}.
 
    The node is not trusted: the bytes must hash to the ID the verified record names, or the page refuses to
