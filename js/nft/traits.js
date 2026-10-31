@@ -171,10 +171,56 @@
     throw new Error('Genesis number ' + n + ' has no mix left: all ' + CAP.toLocaleString('en-US') +
       ' mixes are used. Add an element file to any folder in docs/home-redesign/nft/layers/ and run make-layers.mjs.');
   }
-  // a real card's mix, drawn from its chain object id: the same id draws the same mix on every page. It is kept off
-  // the sample mixes and the review's held elements and clashes. Two real cards may draw one mix: no page holds every
-  // real card, so that check needs a registry and is not made here.
-  function dnaOfObject(id) {
+  /* A real card's mix is fixed when its PVA is activated (owner, 2026-10-29). The activation carries it as C[2], 32
+     bytes the chain does not read, packed in this grammar:
+       DFXNMIX1   df5d + <2 hex: the number of layers L> + <3 hex per layer: the element's place in it> + zeros to 64
+     The places are layers/order.flx's, which only grow, so a mix names the same elements on every later table. The
+     chain refuses a second PVA with the same 32 bytes (MixTaken), and the page then draws the key's next mix.
+     mix.fromPointer refuses anything mix.toPointer could not have written. */
+  var MIX_MAGIC = 'df5d';
+  var mix = {
+    toPointer: function (dna) {
+      var idx = String(dna).split('-').map(Number);
+      if (idx.length !== LAYERS.length || LAYERS.length > 19) throw new Error('A mix names one element per layer, and this one names ' + idx.length + ' for ' + LAYERS.length + ' layers.');
+      var body = MIX_MAGIC + ('0' + LAYERS.length.toString(16)).slice(-2) + idx.map(function (i, j) {
+        if (!(i >= 0 && i < LAYERS[j].elements.length && i < 4096)) throw new Error('The mix names element ' + i + ' of ' + LAYERS[j].key + ', which has ' + LAYERS[j].elements.length + '.');
+        return ('00' + i.toString(16)).slice(-3);
+      }).join('');
+      return body + '0'.repeat(64 - body.length);
+    },
+    fromPointer: function (pointer) {
+      var m = /^df5d([0-9a-f]{2})([0-9a-f]{58})$/.exec(String(pointer));
+      if (!m) throw new Error('This card\'s mix does not start with df5d, so the DEFXN site did not pack it.');
+      var n = parseInt(m[1], 16);
+      if (n !== LAYERS.length) throw new Error('This card\'s mix names ' + n + ' layers, and this page\'s table has ' + LAYERS.length + '. Load the layer table it was drawn from.');
+      var idx = [];
+      for (var j = 0; j < n; j++) {
+        var i = parseInt(m[2].substr(j * 3, 3), 16);
+        if (i >= LAYERS[j].elements.length) throw new Error('This card\'s mix names element ' + i + ' of ' + LAYERS[j].key + ', and this page\'s table has ' + LAYERS[j].elements.length + '. Load a newer layer table.');
+        idx.push(i);
+      }
+      var dna = dnaOf(idx);
+      if (mix.toPointer(dna) !== pointer) throw new Error('This card\'s mix reads, but does not write back the same. The DEFXN site did not pack it.');
+      return dna;
+    }
+  };
+  // the mix a key's activation carries on try n: the n-th mix drawn from (key, n) that is off the sample mixes and
+  // the review's held elements and clashes. The same key and n draw the same mix on every page.
+  function mixDraw(key, n) {
+    var seen = {}, found = -1;
+    for (var t = 0; t < 64 * (n + 1); t++) {
+      var rnd = prng(keyOfString('pva|' + key + '|' + t), 0x0d7a);
+      var d = dnaOf(LAYERS.map(function (l) { return weighted(l, rnd); }));
+      if (seen[d] || d in reservedSet || !problems(elementsOf(d)).ok) continue;
+      seen[d] = true;
+      if (++found === n) return d;
+    }
+    throw new Error('Key ' + String(key).slice(0, 8) + ' found no free mix on try ' + n + ' in ' + 64 * (n + 1) + ' draws. Review the held list in layers/review.flx.');
+  }
+  // a real card's mix: the one its activation carries (mixPointer, from the chain read), or for a PVA activated before
+  // mixes, the one drawn from its object id. That older draw uses this page's table, so a new element file can change it.
+  function dnaOfObject(id, mixPointer) {
+    if (mixPointer) return mix.fromPointer(mixPointer);
     for (var t = 0; t < 64; t++) {
       var rnd = prng(keyOfString('object|' + id + '|' + t), 0x0d7a);
       var d = dnaOf(LAYERS.map(function (l) { return weighted(l, rnd); }));
@@ -266,11 +312,12 @@
        'pinned'  the record pins it (unique when its number is reserved)
        'preview' a full pin on a record with no number: a look at one mix, not a card
        'key'     the genesis ID is not a number, so the DNA is drawn from the key and is NOT checked
-       'object'  a real card: the DNA is drawn from its chain object id (record.objectId) */
+       'object'  a real card: the DNA its activation carries (record.objectMix), or for an older PVA the one drawn from
+                 its chain object id (record.objectId) */
   function pick(record) {
     var object = /^[0-9a-f]{64}$/.test(record.objectId || '') ? record.objectId : null;
     var n = object ? null : numberOf(record.genesisId), pinned = byName(record.traits), dna, how;
-    if (object && !pinned) { dna = dnaOfObject(object); how = 'object'; }
+    if (object && !pinned) { dna = dnaOfObject(object, record.objectMix); how = 'object'; }
     else if (pinned) { dna = pinned; how = n && reserved[n] === pinned ? 'pinned' : 'preview'; }
     else if (n) { dna = dnaAt(n); how = 'number'; }
     else {
@@ -334,7 +381,7 @@
   function objectRecord(pva, network) {
     var d = new Date((pva.mintedAt || 0) * 1000), short = function (h) { return h.slice(0, 6) + '…' + h.slice(-4); };
     return {
-      objectId: pva.id, genesisId: short(pva.id), identity: '0x' + String(pva.owner).toUpperCase(), name: pva.name || short(pva.owner),
+      objectId: pva.id, objectMix: pva.mix || null, genesisId: short(pva.id), identity: '0x' + String(pva.owner).toUpperCase(), name: pva.name || short(pva.owner),
       status: 'Active', role: 'Member', network: network || 'DEFXN',
       joined: (d.getUTCDate() < 10 ? '0' : '') + d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(),
       serial: pva.id.slice(0, 4), tagline: ((window.DEFXN_CARDS || [])[0] || {}).tagline || []
@@ -412,7 +459,7 @@
     UI_NAMES: UI_NAMES, uiName: uiName, layerKeyOf: layerKeyOf,
     need: need, needAll: needAll, ready: ready, load: load,
     LAYERS: LAYERS, WORN: WORN, CATEGORIES: CATEGORIES, wornOf: wornOf, CAP: CAP, pick: pick, dnaAt: dnaAt, elementsOf: elementsOf, numberOf: numberOf,
-    takeNumber: takeNumber, newRecord: newRecord, sampleRecord: sampleRecord, objectRecord: objectRecord, dnaOfObject: dnaOfObject, ROLES: ROLES, words: words,
+    takeNumber: takeNumber, newRecord: newRecord, sampleRecord: sampleRecord, objectRecord: objectRecord, dnaOfObject: dnaOfObject, mixDraw: mixDraw, mix: mix, ROLES: ROLES, words: words,
     TIERS: TIERS, score: score, problems: problems, REVIEW: REVIEW,
     skinOf: skinOf, skinText: skinText, wear: wear, bornWith: bornWith, price: price, skinCost: skinCost, SKIN_BASE_FXN: SKIN_BASE_FXN, keyOf: keyOf, keyHex: keyHex, keyOfString: keyOfString, prng: prng
   };

@@ -14,7 +14,7 @@
 //   - every record is a LEDGERENTRY of its kind's labels only (each once, C aside), its H is the hex of its own G, it
 //     carries exactly one S block and that block is LAST, and its S verifies under its own G over the bytes before it;
 //   - the first record is a KASSET1 on `pva` or `skin` whose CID is the asked id: the owner is its signer, the pointer
-//     its C[1];
+//     its C[1]; a PVA may carry its card's mix as C[2] (`mix`, fixed at activation), a skin never carries a C[2];
 //   - a PVA has nothing after its mint: any move of a PVA is refused PvaIsBound, as every node refuses it;
 //   - each KEDGE1 follows the current head (C[1]) under the pointer relation, and the KSUPER1 after it is signed by
 //     the current owner, from the current head (C[1]) to that edge (C[2]): the edge's signer becomes the owner and its
@@ -25,7 +25,8 @@
 // What it cannot check, and says so in `notChecked` (never reported as checked):
 //   - freshness: a node can withhold a newer move; the proof shows the records are genuine and chained, not latest;
 //   - the earn: a PVA's C[1] is an FXN payment the node found on its ledger; confirm it with NATIVE_HISTORY;
-//   - one PVA per identity: the node reads the key's earliest earned PVA; another node may hold one this one does not.
+//   - one PVA per identity: the node reads the key's earliest earned PVA; another node may hold one this one does not;
+//   - one mix per chain: the node lets a mix count for its earliest PVA; another node may hold an earlier one.
 
 import { sha256Hex, verifyHex } from "./flx-crypto.mjs";
 import { keyName, isKeyNameLabel } from "./flx-object-builders.mjs";
@@ -36,7 +37,7 @@ export const POINTER_RELATION = "references";
 const HEX64 = /^[0-9a-f]{64}$/;
 const BURN = "0".repeat(64);
 const KINDS = {
-  KASSET1: { labels: "GYVMHNKJCS", refs: 2 },
+  KASSET1: { labels: "GYVMHNKJCS", refs: 2, maxRefs: 3 },
   KEDGE1: { labels: "GYVMHNKRQJCS", refs: 3 },
   KSUPER1: { labels: "GYVMHNKOJCS", refs: 3 },
 };
@@ -108,7 +109,11 @@ async function readRecord(text, i) {
   if (get("Y")[0] !== "LEDGERENTRY" || get("V")[0] !== "1") return bad("Grammar", "is not a LEDGERENTRY of version 1", "Y = LEDGERENTRY, V = 1");
   if (!/^(0|[1-9][0-9]*)$/.test(get("M")[0] ?? "") || !/^(0|[1-9][0-9]*)$/.test(get("J")[0] ?? "")) return bad("Grammar", "has an M or J that is not plain digits", "M and J as digits");
   const refs = get("C");
-  if (refs.length !== shape.refs || refs.some((c) => !HEX64.test(c))) return bad("Grammar", `carries ${refs.length} C refs, ${kind} carries ${shape.refs} of 64 hex`, `${shape.refs} content addresses`);
+  const maxRefs = shape.maxRefs ?? shape.refs;
+  if (refs.length < shape.refs || refs.length > maxRefs || refs.some((c) => !HEX64.test(c))) {
+    const count = maxRefs === shape.refs ? `${shape.refs}` : `${shape.refs} or ${maxRefs}`;
+    return bad("Grammar", `carries ${refs.length} C refs, ${kind} carries ${count} of 64 hex`, `${count} content addresses`);
+  }
   const last = blocks.at(-1);
   if (last[0] !== "S" || get("S").length !== 1 || !/^[0-9a-f]{128}$/.test(last.slice(1))) {
     return bad("SignatureNotFinal", "does not end in its one S block", "exactly one S block, as the record's final block");
@@ -123,7 +128,8 @@ async function readRecord(text, i) {
  *  Input: `{ id, entries, pva }` as `parseObjectProofReply` returns them.
  *
  *  Resolves to (never throws):
- *    { kind: "verified", id, chain, owner, pointer, minter, mintedAt, head, moves, pva: id | null, notChecked }
+ *    { kind: "verified", id, chain, owner, pointer, minter, mintedAt, head, moves, pva: id | null, mix, notChecked }
+ *    (`mix`: a PVA's C[2], the card's mix fixed at activation; null for a PVA activated before mixes, and for a skin)
  *    { kind: "burned", id, chain, burnedAt, burnedBy, notChecked }
  *    { kind: "refused", code, failure, missing, remedy, at? }   // `at` = record index */
 export async function verifyObjectProof({ id, entries, pva = null } = {}) {
@@ -145,6 +151,9 @@ export async function verifyObjectProof({ id, entries, pva = null } = {}) {
   }
   if (mint.cid !== id) return refuse("WrongId", `the mint's CID is ${mint.cid}, not the asked ${id}`, "the mint whose CID is the id", "ask another node for the proof", 0);
   const chain = mint.chain;
+  if (chain === SKIN_CHAIN && mint.refs.length > 2) {
+    return refuse("Grammar", "the skin's mint carries a C[2]; only a PVA carries a mix", "a skin mint of 2 C refs", "ask another node for the proof", 0);
+  }
   const notChecked = ["freshness: a node can withhold a newer move; this proves the records are genuine and chained, not that they are the latest"];
   if (chain === PVA_CHAIN) {
     if (read.length > 1) {
@@ -152,7 +161,9 @@ export async function verifyObjectProof({ id, entries, pva = null } = {}) {
     }
     notChecked.push(`earn: the PVA cites ${mint.refs[1]}, an FXN payment the node found on its ledger; confirm it with NATIVE_HISTORY defxn ${mint.signer}`);
     notChecked.push("one PVA per identity: the node reads the key's earliest earned PVA; another node may hold one this node does not");
-    return { kind: "verified", id, chain, owner: mint.signer, pointer: mint.refs[1], minter: mint.signer, mintedAt: mint.at, head: id, moves: 0, pva: id, notChecked };
+    const mix = mint.refs[2] ?? null;
+    if (mix) notChecked.push(`one mix per chain: the node found no earlier PVA with the mix ${mix}; another node may hold one this node does not`);
+    return { kind: "verified", id, chain, owner: mint.signer, pointer: mint.refs[1], minter: mint.signer, mintedAt: mint.at, head: id, moves: 0, pva: id, mix, notChecked };
   }
 
   if (pva === null) {

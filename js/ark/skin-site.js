@@ -373,13 +373,19 @@ var DefxnSkinSite = (function () {
      listed yet. It needs the layer table, which a kept card has not loaded: the menu asks only when its list opens.
      Resolves to [{ layer, name, href }]. */
   var SHOP = 'docs/home-redesign/nft/shop.html';
+  /* a real card's own mix, from its card record (written from the chain read: the mix its activation carries); a record
+     that does not read falls back to the older draw from the object id */
+  function ownMix(object, record) {
+    try { var r = DefxnCardRecord.decode(record); if (r.object === object) return r.genesis; } catch (e) { /* fall back */ }
+    return DEFXN_TRAITS.dnaOfObject(object);
+  }
   function menuPieces() {
     var c = window.DefxnWear && DefxnWear.current, card = on && on.card;
     if (!c || !card || !card.dna) return Promise.resolve([]);
     return needs().then(function () {
       var T = DEFXN_TRAITS, table = window.DEFXN_LAYERS_TABLE;
       if (card.table && table && card.table !== table) throw new Error('this card was dressed from layer table ' + card.table + ', and this page has table ' + table + '. Reload the page, then open the list again');
-      var worn = T.elementsOf(card.dna), born = c.number ? T.elementsOf(T.dnaAt(Number(c.number))) : c.object ? T.elementsOf(T.dnaOfObject(c.object)) : worn, skin = {};
+      var worn = T.elementsOf(card.dna), born = c.number ? T.elementsOf(T.dnaAt(Number(c.number))) : c.object ? T.elementsOf(ownMix(c.object, card.record)) : worn, skin = {};
       worn.forEach(function (e, i) { if (e && born[i] !== e) skin[e.layer] = e.name; });
       var base = new URLSearchParams();
       if (c.number) base.set('genesisId', c.number);
@@ -503,7 +509,8 @@ var DefxnSkinSite = (function () {
   function endSale(who, edge) { return tradeStep('endSale', { who: who, edge: edge }); }
   /* publish(walletKey) -> Promise of true when that private wallet's link is now on the chain (the page's own
      Publish link step, with its warning) */
-  function activatePva(who, publish) { return tradeStep('activatePva', { who: who, publish: publish || null }); }
+  /* the card's mix is drawn on this page (DEFXN_TRAITS.mixDraw), so the table loads first */
+  function activatePva(who, publish) { return needs().then(function () { return tradeStep('activatePva', { who: who, publish: publish || null }); }); }
   function giveSkin(who, id, edge) { return tradeStep('giveSkin', { who: who, id: id, edge: edge }); }
   function needsSync() {
     if (!window.DefxnCardRecord || !DefxnCardRecord.skin) throw new Error('A skin needs ' + NFT + 'card-record.js, and it is not loaded. Load the recipe first.');

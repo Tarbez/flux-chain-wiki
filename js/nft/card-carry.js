@@ -16,7 +16,8 @@
        read   readChainCards({ key })'s result
        lib    { record: DefxnCardRecord, traits: DEFXN_TRAITS } (default: the page's globals)
    It checks, in this order: the PVA the chain holds for the key is this object; the record names this object and
-   this key; the record's own mix is the one the object id draws (DEFXN_TRAITS.dnaOfObject); and the mix worn is
+   this key; the record's own mix is the PVA's (the mix its activation carries, or for an older PVA the one its
+   object id draws: DEFXN_TRAITS.dnaOfObject); and the mix worn is
    the card's own or one skin this key owns on the chain now. Works in the browser (window.DefxnCardCarry) and in
    Node (lib passed in). Exports only; no top-level work. */
 (function (root) {
@@ -42,7 +43,9 @@
     try { rec = R.decode(card.record); } catch (e) { return refused('The card record does not read: ' + e.message, 'a DFXNCARD1 line this grammar wrote', 'wear your card again on defxn.com'); }
     if (rec.object !== card.object) return refused('The card record names another object.', 'a record for PVA ' + short(card.object), 'wear your card again on defxn.com');
     if (String(rec.identity || '').replace(/^0x/i, '').toLowerCase() !== key) return refused('The card record names another key.', 'a record for ' + short(key), 'share the public id the card belongs to');
-    if (rec.genesis !== T.dnaOfObject(card.object)) return refused('The card record\'s own mix is not the one its object id draws.', 'the mix DEFXN_TRAITS.dnaOfObject draws for this PVA', 'wear your card again on defxn.com');
+    var own;
+    try { own = T.dnaOfObject(card.object, read.pva.mix); } catch (e) { return refused('The PVA\'s own mix does not read here: ' + e.message, 'the layer table the mix was drawn from', 'reload the page, then check the card again'); }
+    if (rec.genesis !== own) return refused('The card record\'s own mix is not the PVA\'s.', 'the mix the PVA\'s activation carries', 'wear your card again on defxn.com');
     var skin = null;
     if (rec.worn !== rec.genesis) {
       (read.skins || []).some(function (s) {

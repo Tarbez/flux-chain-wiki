@@ -33,16 +33,21 @@
      and private ones (who.publicId.wallets, links only in the FXN ID file). The chain counts only a payment it can
      tie to the public id, so when the first payment is in a private wallet, `publish(walletKey)` sends that one
      link first (owner, 2026-10-25: activation publishes it, after a warning) and must resolve true. One per identity; the chain refuses a
-     second (PvaTaken) and a payment that is not the signer's (NotEarned).
+     second (PvaTaken) and a payment that is not the signer's (NotEarned). The activation carries the card's mix, fixed
+     now (owner, 2026-10-29): try n signs DEFXN_TRAITS.mixDraw(key, n). The chain refuses a mix another PVA holds
+     (MixTaken); the page then draws try n + 1 and asks for a new signature.
 
    A real card has no number (owner, 2026-10-25): its card record carries the PVA's object id in the O box, and its
-   mix is drawn from that id (DEFXN_TRAITS.objectRecord, js/nft/card-record.js). Exports only; no top-level work. */
+   mix is the one its activation carries (pva.mix; a PVA activated before 2026-10-29 has none, and its mix is drawn from
+   its id: DEFXN_TRAITS.objectRecord, js/nft/card-record.js). Exports only; no top-level work. */
 import { WireClient } from "../dense-wire/flx-wire.mjs";
 import { readObjectsOf, parseObjectProofReply, verifyObjectProof, verifyWalletsOf } from "../dense-wire/flx-object-proof.mjs";
 import { base64ToHex } from "../dense-wire/flx-identity-bridge.mjs";
 import { keyName, buildPvaActivationWithSigner, PVA_CHAIN, buildSkinMintWithSigner, buildSkinHeadEdgeWithSigner, buildSkinMoveWithSigner, buildSkinSaleWithSigner, buildSkinSaleEndWithSigner, parseSaleOfReply, SKIN_CHAIN, OBJECT_POINTER_RELATION } from "../dense-wire/flx-object-builders.mjs";
 import { sha256Hex, verifyHex } from "../dense-wire/flx-crypto.mjs";
 import { reviewAndSign, signerFor } from "./dense-wire-wallet.mjs";
+// Amounts on the wire are base units; fxnText prints them at the node's declared decimals (docs/FXN-DECIMALS-DESIGN.md).
+import { readDecimals, fxnText } from "./fxn-holdings.mjs";
 
 /** The identity's Ed25519 key as hex: publicKeyB64 is base64 of the 32 raw bytes (flx-identity-bridge.mjs). */
 export function identityKeyHex(identity) {
@@ -141,10 +146,11 @@ async function sent(wire, text, what) {
 /** Step 1 of a trade, on the next owner's device: consent to take the skin, and for a priced sale pay into it. */
 export async function acceptSkin({ who, wire, id, price = null, days = 3 }) {
   const units = price === null || price === undefined || price === "" ? null : BigInt(price);
-  if (units !== null && units <= 0n) return refused("The sale price is not above zero.", "a price of 1 FXN or more", "ask the owner for a new sale link");
+  if (units !== null && units <= 0n) return refused("The sale price is not above zero.", "a price above zero", "ask the owner for a new sale link");
   if (units !== null && !(Number.isInteger(+days) && +days >= 1 && +days <= 30)) return refused("The sale's days are not 1 to 30.", "how many days your FXN waits for the owner", "ask the owner for a new sale link");
   const got = await verifiedSkin(wire, id);
   if (got.kind === "refused") return got;
+  if (units !== null) await readDecimals(wire);
   const { verdict } = got;
   const signer = signerFor(who);
   if (verdict.owner === signer.pubHex) return refused("You already own this skin.", "a skin someone else owns", "send the link to the person who should take it");
@@ -172,15 +178,15 @@ export async function acceptSkin({ who, wire, id, price = null, days = 3 }) {
   const saleRun = (s) => buildSkinSaleWithSigner({ signer: s, pos: pos + 1, prevCid: edgeCid, edge: edgeCid, skin: id, amount: units, deadline, nowSec: at });
   const sale = await reviewAndSign({
     who, signer, wireUrl: wire.url, run: saleRun,
-    title: `Pay ${units} FXN for this skin`,
-    description: `${units} FXN leave your wallet now and wait for the owner. They go to the owner only when the skin moves to you. If it has not moved in ${days} days, you take them back.`,
+    title: `Pay ${fxnText(units)} for this skin`,
+    description: `${fxnText(units)} leave your wallet now and wait for the owner. They go to the owner only when the skin moves to you. If it has not moved in ${days} days, you take them back.`,
     action: "object.sale", scope: "skin.sale",
     authority: "(none: your FXN, held by the chain's sale rule for this one consent)",
     configuration: "dense-wire object grammar · KSALE1 on " + SKIN_CHAIN,
     denies: "scope does not authorize any other amount, any other skin, or a move of your own PVA or skins",
-    claims: ["evidence skin " + id, "evidence consent " + edgeCid, "evidence amount " + units + "FXN", "evidence deadline " + deadline],
-    manifest: { schema: "dense-wire.skin-sale/1", buyer: signer.pubHex, chain: SKIN_CHAIN, skin: id, consent: edgeCid, amount: units.toString() + "FXN", deadline, at },
-    facts: [{ label: "Price", value: `${units} FXN` }, { label: "Skin", value: id }, { label: "Waits until", value: new Date(deadline * 1000).toISOString() }],
+    claims: ["evidence skin " + id, "evidence consent " + edgeCid, "evidence amount " + units + " base units", "evidence deadline " + deadline],
+    manifest: { schema: "dense-wire.skin-sale/1", buyer: signer.pubHex, chain: SKIN_CHAIN, skin: id, consent: edgeCid, amount: units.toString(), deadline, at },
+    facts: [{ label: "Price", value: fxnText(units) }, { label: "Skin", value: id }, { label: "Waits until", value: new Date(deadline * 1000).toISOString() }],
   });
   const unpaid = await sent(wire, sale, "sale");
   if (unpaid) return { ...unpaid, failure: unpaid.failure + " Your consent is on the chain, and moves nothing without a sale." };
@@ -197,20 +203,21 @@ export async function endSale({ who, wire, edge }) {
   if (held.state !== "funded") return refused(`The sale is ${held.state}. Nothing waits to come back.`, "a funded sale", "nothing to do");
   const at = Math.floor(Date.now() / 1000);
   if (at <= held.deadline) return refused(`The sale runs until ${new Date(held.deadline * 1000).toISOString()}.`, "the deadline to pass", "come back after the deadline");
+  await readDecimals(wire);
   const signer = signerFor(who);
   const { pos, prevCid } = headOf(signer, await wire.chainHead(signer.pubHex));
   const text = await reviewAndSign({
     who, signer, wireUrl: wire.url,
     run: (s) => buildSkinSaleEndWithSigner({ signer: s, pos, prevCid, sale: held.sale, nowSec: at }),
-    title: `Take ${held.amount} FXN back`,
+    title: `Take ${fxnText(held.amount)} back`,
     description: "The owner did not move the skin in time. This returns your held FXN to your wallet.",
     action: "object.sale.end", scope: "skin.sale",
     authority: "(none: the buyer's return of its own held FXN after the deadline)",
     configuration: "dense-wire object grammar · KSALEEND1 on " + SKIN_CHAIN,
     denies: "scope does not authorize any other amount, sale or move",
-    claims: ["evidence sale " + held.sale, "evidence amount " + held.amount + "FXN"],
+    claims: ["evidence sale " + held.sale, "evidence amount " + held.amount + " base units"],
     manifest: { schema: "dense-wire.skin-sale-end/1", buyer: signer.pubHex, chain: SKIN_CHAIN, sale: held.sale, at },
-    facts: [{ label: "Amount", value: `${held.amount} FXN` }],
+    facts: [{ label: "Amount", value: fxnText(held.amount) }],
   });
   const no = await sent(wire, text, "return");
   if (no) return no;
@@ -248,20 +255,21 @@ export async function giveSkin({ who, wire, id, edge }) {
   if (sale.kind === "sale" && sale.state !== "funded") return refused(`The taker's sale is ${sale.state}, so moving would not pay you.`, "a funded sale", "ask the taker to accept again with FXN in their wallet");
   if (sale.kind === "sale" && Math.floor(Date.now() / 1000) >= sale.deadline) return refused("The taker's sale has ended.", "a sale still running", "ask the taker for a new sale");
   const price = sale.kind === "sale" ? sale.amount : null;
+  if (price !== null) await readDecimals(wire);
   const { pos, prevCid } = headOf(signer, await wire.chainHead(signer.pubHex));
   const nowSec = Math.floor(Date.now() / 1000);
   const run = (s) => buildSkinMoveWithSigner({ signer: s, pos, prevCid, head: verdict.head, newHead: edge, nowSec });
   const move = await reviewAndSign({
     who, signer, wireUrl: wire.url, run,
-    title: price === null ? "Give this skin" : `Sell this skin for ${price} FXN`,
+    title: price === null ? "Give this skin" : `Sell this skin for ${fxnText(price)}`,
     description: price === null
       ? `This moves skin ${shortKey(id)} from you to ${shortKey(consent.taker)}. They signed for it. You cannot take it back.`
-      : `This moves skin ${shortKey(id)} to ${shortKey(consent.taker)}, and the ${price} FXN they hold for it come to you in the same step.`,
+      : `This moves skin ${shortKey(id)} to ${shortKey(consent.taker)}, and the ${fxnText(price)} they hold for it come to you in the same step.`,
     action: "object.move", scope: "skin.move",
     authority: "(none: the owner's move of one skin to the taker who consented)",
     configuration: "dense-wire object grammar · KSUPER1 on " + SKIN_CHAIN,
     denies: "scope does not authorize a move of your PVA, of any other skin, or any FXN",
-    claims: ["evidence skin " + id, "evidence to " + consent.taker, "evidence consent " + edge].concat(price === null ? [] : ["evidence price " + price + "FXN", "evidence sale " + sale.sale]),
+    claims: ["evidence skin " + id, "evidence to " + consent.taker, "evidence consent " + edge].concat(price === null ? [] : ["evidence price " + price + " base units", "evidence sale " + sale.sale]),
     manifest: { schema: "dense-wire.object-move/1", owner: signer.pubHex, chain: SKIN_CHAIN, skin: id, head: verdict.head, to: consent.taker, consent: edge, at: nowSec },
     facts: [{ label: "Skin", value: id }, { label: "To", value: consent.taker }],
   });
@@ -303,22 +311,32 @@ export async function activatePva({ who, wire, publish = null }) {
     if (!(await publish(earnKey))) return refused("The wallet's link was not published, so the chain cannot count its FXN.", "that wallet's link on the chain", "publish it, or receive FXN on a published wallet, then activate");
     published = earnKey;
   }
-  const { pos, prevCid } = headOf(signer, await wire.chainHead(signer.pubHex));
-  const nowSec = Math.floor(Date.now() / 1000);
-  const text = await reviewAndSign({
-    who, signer, wireUrl: wire.url,
-    run: (s) => buildPvaActivationWithSigner({ signer: s, pos, prevCid, earnRef: earn.reference, nowSec }),
-    title: "Activate your PVA",
-    description: `This makes your identity card. It cites the ${earn.amount} FXN you received from ${shortKey(earn.counterparty)}. The card stays bound to your key: nobody can move or sell it.`,
-    action: "object.activate", scope: "pva.activate",
-    authority: "(none: your own card, earned by a payment your wallet received)",
-    configuration: "dense-wire object grammar · KASSET1 on " + PVA_CHAIN,
-    denies: "scope does not authorize any move of FXN, of a skin, or of the card itself",
-    claims: ["evidence earn " + earn.reference, "evidence chain " + PVA_CHAIN],
-    manifest: { schema: "dense-wire.pva-activate/1", identity: signer.pubHex, chain: PVA_CHAIN, earn: earn.reference, at: nowSec },
-    facts: [{ label: "Earned by", value: `${earn.amount} FXN from ${earn.counterparty}` }],
-  });
-  const no = await sent(wire, text, "activation");
-  if (no) return no;
-  return { kind: "activated", id: await sha256Hex(text), published };
+  await readDecimals(wire);
+  const T = globalThis.DEFXN_TRAITS;
+  if (!T || typeof T.mixDraw !== "function") return refused("This page cannot draw your card's look.", "js/nft/traits.js and its layer table", "reload the page, then activate again");
+  for (let n = 0; n < MIX_TRIES; n++) {
+    const dna = T.mixDraw(signer.pubHex, n), mix = T.mix.toPointer(dna);
+    const look = T.elementsOf(dna).map((e) => e.name).join(", ");
+    const { pos, prevCid } = headOf(signer, await wire.chainHead(signer.pubHex));
+    const nowSec = Math.floor(Date.now() / 1000);
+    const text = await reviewAndSign({
+      who, signer, wireUrl: wire.url,
+      run: (s) => buildPvaActivationWithSigner({ signer: s, pos, prevCid, earnRef: earn.reference, mix, nowSec }),
+      title: n ? "Sign your card again with a new look" : "Activate your PVA",
+      description: (n ? "Another card already has the look drawn before. This is the next look for your key. " : "") +
+        `This makes your identity card. It cites the ${fxnText(earn.amount)} you received from ${shortKey(earn.counterparty)}. The card's look is fixed now. The card stays bound to your key: nobody can move or sell it.`,
+      action: "object.activate", scope: "pva.activate",
+      authority: "(none: your own card, earned by a payment your wallet received)",
+      configuration: "dense-wire object grammar · KASSET1 on " + PVA_CHAIN,
+      denies: "scope does not authorize any move of FXN, of a skin, or of the card itself",
+      claims: ["evidence earn " + earn.reference, "evidence chain " + PVA_CHAIN, "evidence mix " + mix],
+      manifest: { schema: "dense-wire.pva-activate/1", identity: signer.pubHex, chain: PVA_CHAIN, earn: earn.reference, mix, at: nowSec },
+      facts: [{ label: "Earned by", value: `${fxnText(earn.amount)} from ${earn.counterparty}` }, { label: "Card look", value: look }],
+    });
+    const no = await sent(wire, text, "activation");
+    if (!no) return { kind: "activated", id: await sha256Hex(text), published, mix };
+    if (!no.failure.includes("MixTaken")) return no;
+  }
+  return refused(`The first ${MIX_TRIES} looks drawn for your key belong to other cards.`, "a card look no other PVA holds", "activate again later, or ask the DEFXN team to check the layer table");
 }
+const MIX_TRIES = 8;

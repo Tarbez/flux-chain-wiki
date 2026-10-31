@@ -13,7 +13,9 @@
      I<hex>           the identity, when it is hex (the 0x is dropped)
      IT<hex>          the identity as text, when it is not hex (hex of its UTF-8)
      T<8 hex>         the layer table version (either bundle): the DNA indexes this table
-     D<base 36>       the genesis DNA, packed: one mixed-radix number over the layers' element counts
+     D<base 36>       the genesis DNA, packed: one mixed-radix number over the layers' element counts. For a real card
+                      it is the mix its PVA's activation carries (DFXNMIX1, js/nft/traits.js), or for a PVA activated
+                      before 2026-10-29 the mix drawn from its object id
      W<base 36>       the DNA worn now, when a skin changes it (absent when it does not)
 
    Example: DFXNCARD1-N263-Id984cd0f1e...-T3fa9c01b-D2k9x7q1mzp-W2k9x7q1mzq
