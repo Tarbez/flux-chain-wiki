@@ -114,6 +114,7 @@
   var kindOf = new Array(N), refOf = new Int16Array(N), delay = arr(), col = new THREE.Color();
 
   /* ---------- what the page chose ---------- */
+  var beads = [];   /* the latest interactions the page handed over: [{ ms, ok }], empty until the live feed answers */
   var sub = 'now', chosen = '', live = 0, setAt = 0, t0 = 0, DUR = 1150, form = null, ready = false;
   var pick = follower(GROUPS.length, 140);
   function state() { return sub === 'capabilities' || sub === 'ceiling' ? sub : 'now'; }
@@ -152,7 +153,13 @@
       line(LA.set(x - h, y, z - h), LB.set(x + h, y, z - h), 5, a, .022); line(LA.set(x + h, y, z - h), LB.set(x + h, y, z + h), 5, a, .022);
       line(LA.set(x + h, y, z + h), LB.set(x - h, y, z + h), 5, a, .022); line(LA.set(x - h, y, z + h), LB.set(x - h, y, z - h), 5, a, .022);
     });
-    if (st === 'now' && F.marks.live) line(LA.set(O.x + F.marks.live.x0, y, O.z + F.marks.live.z), LB.set(O.x + F.marks.live.x1, y, O.z + F.marks.live.z), 28, a, .026);   /* dotted until something streams */
+    if (st === 'now' && F.marks.live) {
+      var lv = F.marks.live, n = beads.length;
+      if (!n) line(LA.set(O.x + lv.x0, y, O.z + lv.z), LB.set(O.x + lv.x1, y, O.z + lv.z), 28, a, .026);   /* dotted until something streams */
+      /* one bead for each of the latest interactions (GET /api/fleet-interactions), oldest on the left; a failed one is smaller. Placed by order, not
+         scaled by latency: the card states the latency. */
+      else for (var i = 0; i < n; i++) { var bx = O.x + lv.x0 + (lv.x1 - lv.x0) * (n === 1 ? .5 : i / (n - 1)); line(LA.set(bx, y, O.z + lv.z), LA, 1, a, beads[i].ok === false ? .03 : .05); }
+    }
   }
 
   /* ---------- the labels the page writes, placed here on their points ---------- */
@@ -186,6 +193,7 @@
       var next = typeof st.s === 'string' && st.s ? st.s : 'now', changed = next !== sub;
       if (changed) { sub = next; setAt = performance.now(); }
       chosen = typeof st.c === 'string' ? st.c : '';
+      beads = Array.isArray(st.interactions) ? st.interactions.slice(-100) : [];
       padTop = +st.pt || 0; padBottom = +st.pb || 0;
       if (w < .05) setAt = performance.now();
       if (changed || !ready) target(formOf(state()), w < .05 || !ready || k.reduced);

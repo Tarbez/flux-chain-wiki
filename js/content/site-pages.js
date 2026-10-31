@@ -110,10 +110,17 @@ var ArkSitePages = (function () {
     var year = new Date(thursday).getUTCFullYear(), jan1 = Date.UTC(year, 0, 1);
     return { year: year, number: Math.floor((thursday - jan1) / 864e5 / 7) + 1, from: isoDate(monday), to: isoDate(monday + 6 * 864e5) };
   }
-  /* the weeks that hold a run, oldest first: [{ number, year, key, path, from, to, runs: [{ record, date }] }] */
-  function statsWeeks() {
+  /* the weeks that hold a run, oldest first: [{ number, year, key, path, from, to, runs: [{ record, date }] }]. `live` (optional) is the runs list
+     of GET /api/fleet-runs: each run joins the week of its started_at_ms (UTC); STATS_RUNS stays the offline copy, and a record in both counts once. */
+  function statsRunsWith(live) {
+    var all = STATS_RUNS.slice(), seen = {};
+    all.forEach(function (r) { seen[r.record] = true; });
+    (live || []).forEach(function (r) { if (r && r.id && !seen[r.id] && r.started_at_ms >= 0) { seen[r.id] = true; all.push({ record: r.id, date: isoDate(r.started_at_ms) }); } });
+    return all;
+  }
+  function statsWeeks(live) {
     var byNumber = {};
-    STATS_RUNS.forEach(function (run) {
+    statsRunsWith(live).forEach(function (run) {
       var w = isoWeek(run.date), id = w.year + '-' + w.number;
       (byNumber[id] = byNumber[id] || { number: w.number, year: w.year, from: w.from, to: w.to, runs: [] }).runs.push({ record: run.record, date: run.date });
     });
@@ -123,8 +130,8 @@ var ArkSitePages = (function () {
   }
   /* The time axis of the stats stage and its tabs: every week from the first run's to the week of `today` (an ISO date), oldest first, at most
      `max` of them (the newest). A week with no run has key null: it has no page, and it is drawn empty. */
-  function statsTimeline(today, max) {
-    var weeks = statsWeeks(), now = isoWeek(today), out = [];
+  function statsTimeline(today, max, live) {
+    var weeks = statsWeeks(live), now = isoWeek(today), out = [];
     if (!weeks.length) return out;
     var first = utcDay(weeks[0].from), last = Math.max(utcDay(now.from), utcDay(weeks[weeks.length - 1].from));
     for (var t = first; t <= last; t += 7 * 864e5) {
@@ -156,7 +163,7 @@ var ArkSitePages = (function () {
     families: function () { return copy(FAMILIES); },
     row: function (key) { var r = row(key); return r ? copy(r) : null; },
     statsRuns: function () { return copy(STATS_RUNS); },
-    statsWeeks: function () { return copy(statsWeeks()); },
+    statsWeeks: function (live) { return copy(statsWeeks(live)); },
     statsTimeline: statsTimeline,
     isoWeek: isoWeek,
     journeyOf: journeyOf

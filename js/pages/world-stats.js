@@ -16,6 +16,12 @@
    one line), a few facts, the run it comes from and its date, and one action: the next step. The legend under the stage says what one cube stands for.
    Words: the worldstats manifest (WORLDSTATS.*). Numbers: the data files, never typed here. A reading that does not exist says "No reading" and why.
 
+   LIVE (2026-10-28, docs/stats/LIVE-DATA-CONTRACT.md): every step also reads the node's live feeds through ArkPulse (interactions, capabilities,
+   resolvers, runs). Now adds the live request rate, the beads of the latest interactions and the latest benchmark run (with its ISO week, derived
+   from started_at_ms); Operations adds each capability's live rate, p95 and headroom; One node adds resolver load and the newest ceiling run. The
+   dated records stay the answer and the offline copy. A feed that fails, or is older than 2 x interval_ms, says "No reading" and why, per fact;
+   nothing becomes 0.
+
    REDUCTION TEST (docs/PRODUCT-DESIGN-LAWS.md), kept with the work: on every step 1 its question; 2 the next question; 3 one answer and what it measures;
    4 the facts behind it; 5 nothing; 6 conditions are one line, the device a fact; 7 nothing more; 8-9 the address; 10 what is not measured says so. */
 (function () {
@@ -24,6 +30,7 @@
   var T = function (key, vars) { return W.text('WORLDSTATS.' + key, vars); };
   function H() { return window.ArkStatsHighlights || {}; }
   function caps() { return (window.DEFXN_CAPABILITIES || {}).capabilities || []; }
+  function resolverIds() { return ((window.DEFXN_RESOLVERS || {}).resolvers || []).map(function (r) { return r.id; }); }
   function title(id) { return id.charAt(0).toUpperCase() + id.slice(1); }
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
   var DATE = typeof Intl !== 'undefined' ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : null;
@@ -37,8 +44,21 @@
     return T('AGO.DAY', { n: Math.floor(min / 1440) });
   }
 
-  /* ---------- the one live reading: the fleet pulse, shared by every mount ---------- */
-  var pulse = { status: 'wait', data: null, why: '', at: 0 }, listeners = [], timer = 0, inflight = false;
+  /* ---------- the live readings, shared by every mount ----------
+     The fleet pulse (hourly self-bench) and the four live stats feeds of docs/stats/LIVE-DATA-CONTRACT.md, each read through the ONE client
+     (js/ark/pulse-client.js). A feed is { status: wait | ok | stale | fail, data, why, at }. A live feed is asked again after its own interval_ms
+     (2 s at the least, 60 s at the most); a feed that failed is asked again after 30 s. A reading older than 2 x interval_ms is stale: its data is
+     kept only to say how old it is. */
+  var FEEDS = {
+    pulse: { client: 'get', every: 60000 },
+    interactions: { client: 'interactions', live: true },
+    capabilities: { client: 'capabilities', live: true },
+    resolvers: { client: 'resolvers', live: true },
+    runs: { client: 'runs', every: 60000 }
+  };
+  var feeds = {}, listeners = [], timers = {}, inflight = {};
+  Object.keys(FEEDS).forEach(function (name) { feeds[name] = { status: 'wait', data: null, why: '', at: 0 }; });
+  var pulse = feeds.pulse;
   function why(error) {
     var e = error || {}, m = String(e.message || '');
     if (e.name === 'AbortError') return T('PULSE.TIMEOUT');
@@ -46,21 +66,76 @@
     if (/^Malformed/.test(m)) return T('PULSE.SHAPE');
     return T('PULSE.OFFLINE');
   }
-  function poll() {
-    if (inflight || !window.ArkPulse) { if (!window.ArkPulse && pulse.status === 'wait') { pulse = { status: 'fail', data: null, why: T('PULSE.OFFLINE'), at: Date.now() }; tell(); } return; }
-    inflight = true;
-    ArkPulse.get().then(function (r) { pulse = { status: 'ok', data: r.data, why: '', at: Date.now() }; },
-      function (e) { pulse = { status: 'fail', data: null, why: why(e), at: Date.now() }; })
-      .then(function () { inflight = false; tell(); });
+  /* why a live stats feed has no reading, from the error the client threw (it keeps the host's refusal code) */
+  function liveWhy(error) {
+    var e = error || {}, m = String(e.message || '');
+    if (e.code === 'FLEET_STATS_NOT_CONFIGURED') return T('LIVE.NOTCONFIGURED');
+    if (e.code === 'FLEET_STATS_NOT_SERVED') return T('WHY.INTERACTIONS');
+    if (e.status === 404) return T('LIVE.NOTSERVED');
+    if (e.name === 'AbortError' || e.code === 'FLEET_STATS_TIMEOUT') return T('LIVE.TIMEOUT');
+    if (/^Malformed/.test(m) || e.code === 'FLEET_STATS_MALFORMED') return T('LIVE.SHAPE');
+    return T('LIVE.OFFLINE');
+  }
+  function settle(name, rec) {
+    if (rec.status === 'ok' && FEEDS[name].live && ArkPulse.stale(rec.data)) rec = { status: 'stale', data: rec.data, why: T('LIVE.STALE', { age: liveAgo(rec.data) }), at: rec.at };
+    feeds[name] = rec; if (name === 'pulse') pulse = rec;
+  }
+  function delayOf(name) {
+    var F = FEEDS[name], rec = feeds[name], iv = rec.data && rec.data.interval_ms;
+    if (rec.status === 'fail') return 30000;
+    if (F.every) return F.every;
+    return Math.max(2000, Math.min(60000, iv > 0 ? iv : 10000));
+  }
+  function poll(name) {
+    var F = FEEDS[name];
+    if (inflight[name]) return;
+    if (!window.ArkPulse || typeof ArkPulse[F.client] !== 'function') {
+      settle(name, { status: 'fail', data: null, why: name === 'pulse' ? T('PULSE.OFFLINE') : T('LIVE.NOCLIENT'), at: Date.now() }); tell(); return;
+    }
+    inflight[name] = true;
+    ArkPulse[F.client]().then(function (r) { settle(name, { status: 'ok', data: r.data, why: '', at: Date.now() }); },
+      function (e) { settle(name, { status: 'fail', data: null, why: name === 'pulse' ? why(e) : liveWhy(e), at: Date.now() }); })
+      .then(function () { inflight[name] = false; tell(); schedule(name); });
+  }
+  function schedule(name) {
+    clearTimeout(timers[name]);
+    if (!listeners.length) return;
+    timers[name] = setTimeout(function () { if (document.hidden) schedule(name); else poll(name); }, delayOf(name));
   }
   function tell() { listeners.slice().forEach(function (fn) { fn(pulse); }); }
   function watch(fn) {
     listeners.push(fn);
-    if (!timer) { poll(); timer = setInterval(function () { if (!document.hidden) poll(); }, 60000); }
+    if (listeners.length === 1) Object.keys(FEEDS).forEach(poll);
     return function () {
       var i = listeners.indexOf(fn); if (i >= 0) listeners.splice(i, 1);
-      if (!listeners.length && timer) { clearInterval(timer); timer = 0; }
+      if (!listeners.length) Object.keys(timers).forEach(function (name) { clearTimeout(timers[name]); delete timers[name]; });
     };
+  }
+  /* how old a live reading is, by the host's age_ms (ArkPulse.age), so a visitor's clock does not have to agree with the node's */
+  function liveAgo(data) { return ago(Date.now() - ArkPulse.age(data)); }
+  /* a fact with no reading: the feed's reason, or the wait line */
+  function noReading(label, rec, extra) { return Object.assign({ label: label, none: rec.status === 'wait' ? T('LIVE.WAIT') : rec.why }, extra || {}); }
+  function fmt2(n) { return Number(n).toLocaleString('en-US', { maximumFractionDigits: n < 10 ? 2 : n < 100 ? 1 : 0 }); }
+  function day(ms) { return date(new Date(ms).toISOString().slice(0, 10)); }
+  /* the ISO week a run belongs to, derived from started_at_ms (the same rule as ArkSitePages.statsWeeks) */
+  function weekOf(ms) { return window.ArkSitePages && ArkSitePages.isoWeek ? ArkSitePages.isoWeek(new Date(ms).toISOString().slice(0, 10)).number : '?'; }
+  function newestRun(filter) {
+    var runs = feeds.runs.status === 'ok' ? feeds.runs.data.runs.filter(filter || function () { return true; }) : [];
+    return runs.reduce(function (a, b) { return !a || b.started_at_ms > a.started_at_ms ? b : a; }, null);
+  }
+  /* each capability (the 18 ids of DEFXN_CAPABILITIES): requests/s now, p95 and headroom from the live feed, null kept null, and why a cell has
+     no reading: the node's own notBuilt reason when a run could not drive it */
+  function liveCaps() {
+    var rec = feeds.capabilities;
+    if (rec.status !== 'ok') return null;
+    var d = rec.data, nb = d.not_built || {};
+    return caps().map(function (c) {
+      var x = d.capabilities[c.id] || null, gone = nb[c.id] ? nb[c.id].reason : null, missing = gone || T('CAP.UNLISTED');
+      return { id: c.id, row: x, why: {
+        rate: x ? null : missing,
+        p95: !x ? missing : x.p95_ms == null ? T('CAP.FEW') : null,
+        room: !x ? missing : x.headroom_pct == null ? gone || (d.runs_error ? T('CAP.NORUNS') : T('CAP.NOCEILING')) : null } };
+    });
   }
   function nodesOf(p) { return p.status === 'ok' ? p.data.nodes.map(function (n) { return { name: n.name, qps: n.qps, error: n.error || null }; }) : []; }
 
@@ -109,11 +184,11 @@
   function ops() { return window.ArkStatsScale && ArkStatsScale.operations && H().operations ? ArkStatsScale.operations(H().operations.rows) : []; }
   function cubeRate() { return (window.ArkStatsScale && ArkStatsScale.CUBE_RATE) || 1000; }
 
-  /* the latest 100 interactions, as a stream the page can hand the world: the pulse client does not return them yet (docs/stats/LIVE-DATA-CONTRACT.md),
-     so this is empty until it does, and the live line says No reading */
-  function interactionsOf(p) {
-    var list = p.status === 'ok' && Array.isArray(p.data.interactions) ? p.data.interactions : [];
-    return list.filter(function (x) { return x && typeof x.latency_ms === 'number'; }).slice(-100).map(function (x) { return { ms: x.latency_ms }; });
+  /* the latest 100 interactions (GET /api/fleet-interactions), as a stream the page hands the world: one bead for each; a row with no latency_ms
+     is not drawn (contract section 1). Empty while the feed has no fresh reading, and the live line stays dotted. */
+  function interactionsOf() {
+    var rec = feeds.interactions, list = rec.status === 'ok' ? rec.data.interactions : [];
+    return list.filter(function (x) { return x && typeof x.latency_ms === 'number'; }).slice(-100).map(function (x) { return { ms: x.latency_ms, ok: x.ok }; });
   }
 
   /* ---------- THREE STEPS, one illustration (js/world/stats-stage.js changes shape for each) ---------- */
@@ -166,41 +241,59 @@
       parse: function () { return {}; }, query: function () { return ''; },
       world: function (st) { return W.state('stats', { s: kind, c: st && st.c || '', pt: pad.pt, pb: pad.pb }); },
       picks: { stagePick: function (a, b) { var p = W.picked(a, b); if (p.kind === 'station' && p.id) W.go(p.id); } },
-      build: function (ctx) { Object.assign(ui, card(ctx, kind)); track(ctx, d); if (d.more) d.more(ctx); }
+      build: function (ctx) {
+        Object.assign(ui, card(ctx, kind)); track(ctx, d); if (d.more) d.more(ctx);
+        /* every step redraws its card when a live feed answers (the Now step also hands the world the beads) */
+        var off = watch(function () { if (ctx.redraw) ctx.redraw(); if (d.live) d.live(); });
+        var was = ctx.dispose; ctx.dispose = function () { off(); if (was) was(); };
+      }
     };
     return d;
   }
 
   /* ================================================================ 1 /stats/now: the network */
   function nowDef(key) {
-    var d = stepDef('now', key), ui = d.ui, off = null, more = d.build, OPm = H().operations || {}, F = OPm.fleet;
-    d.world = function () { return Object.assign(W.state('stats', { s: 'now', pt: pad.pt, pb: pad.pb }), { nodes: nodesOf(pulse), interactions: interactionsOf(pulse) }); };
-    d.build = function (ctx) {
-      more(ctx);
-      off = watch(function () { ctx.redraw(); var h = W.host(); if (h && h.select) h.select(d.world()); });
-      var was = ctx.dispose; ctx.dispose = function () { if (off) off(); if (was) was(); };
-    };
+    var d = stepDef('now', key), ui = d.ui, OPm = H().operations || {}, F = OPm.fleet;
+    d.world = function () { return Object.assign(W.state('stats', { s: 'now', pt: pad.pt, pb: pad.pb }), { nodes: nodesOf(pulse), interactions: interactionsOf() }); };
+    d.live = function () { var h = W.host(); if (h && h.select) h.select(d.world()); };
     d.render = function (st, ctx) {
       ctx.redraw = function () { d.render(st, ctx); };
       if (!F) return;
       W.title(ui.title, T('STORY.NOW.Q'));
       setAnswer(ui, fmt(F.parallelSwapsPerSecond), T('UNIT.SWAPS.S'), T('STORY.NOW.MEANS', { nodes: F.nodes, cores: F.cores }));
-      /* what streams now: the fleet's self-check if the pulse answered; else one line that says why there is no reading */
-      var live = pulse.status === 'ok'
+      /* the fleet's self-check if the pulse answered; else why there is no reading */
+      var self = pulse.status === 'ok'
         ? { label: T('NOW.ROW.PULSE'), value: fmt(pulse.data.aggregate_qps), unit: T('UNIT.OPS.S'), sub: T('KPI.PULSE.SUB', { ok: pulse.data.nodes.filter(function (n) { return !n.error; }).length, total: pulse.data.nodes.length, age: ago(pulse.data.measured_at_ms) }) }
-        : { label: T('STORY.LIVE.TAG'), none: pulse.status === 'wait' ? T('PULSE.WAIT') : T('WHY.INTERACTIONS') };
+        : { label: T('NOW.ROW.PULSE'), none: pulse.status === 'wait' ? T('PULSE.WAIT') : pulse.why };
+      /* live traffic: requests a second over every capability the node lists, in its window (GET /api/fleet-capabilities) */
+      var cr = feeds.capabilities, live;
+      if (cr.status === 'ok') {
+        /* only the capabilities this site lists (the node may count others) */
+        var rows = caps().map(function (c) { return cr.data.capabilities[c.id]; }).filter(Boolean);
+        var rates = rows.filter(function (c) { return c.per_second != null; });
+        live = rates.length
+          ? { label: T('STORY.LIVE.TAG'), value: fmt2(rates.reduce(function (a, c) { return a + c.per_second; }, 0)), unit: T('UNIT.REQ.S'),
+              sub: T('NOW.LIVE.SUB', { errors: fmt(rows.reduce(function (a, c) { return a + c.errors; }, 0)), s: fmt(Math.round(cr.data.window_ms / 1000)), node: cr.data.node || '', age: liveAgo(cr.data) }) }
+          : { label: T('STORY.LIVE.TAG'), none: T('LIVE.NOCAPS') };
+      } else live = noReading(T('STORY.LIVE.TAG'), cr);
+      /* the newest benchmark run the node filed (GET /api/fleet-runs), with the ISO week it belongs to */
+      var run = newestRun(), rr = feeds.runs, last;
+      if (run) last = { label: T('NOW.RUN'), value: run.id, sub: T('NOW.RUN.SUB', { kind: run.kind, week: weekOf(run.started_at_ms), date: day(run.started_at_ms), device: run.device }), wide: true };
+      else if (rr.status === 'ok') last = { label: T('NOW.RUN'), none: rr.data.next_run_at_ms ? T('RUN.NEXT', { date: day(rr.data.next_run_at_ms) }) : T('RUN.NONE'), wide: true };
+      else last = noReading(T('NOW.RUN'), rr, { wide: true });
       facts(ui, [
         { label: T('STORY.NOW.NODES'), value: String(F.nodes), unit: T(F.nodes === 1 ? 'STORY.NODE.ONE' : 'STORY.NODE.MANY'), sub: T('STORY.CORE.MANY', { n: F.cores }) },
         { label: T('STORY.NOW.TRANSFERS'), value: fmt(F.transfersPerSecond), unit: T('STORY.UNIT.TRANSFERS') },
         { label: T('STORY.NOW.STORES'), value: fmt(F.storesPerSecond), unit: T('STORY.UNIT.RECORDS') },
-        live
+        self, live, last
       ]);
       ui.source.textContent = T('STORY.SOURCE', { record: OPm.record, date: date(OPm.date) });
-      unitKey(ctx.f, [['cube', T('STORY.KEY.CUBE.SWAPS', { n: fmt(cubeRate()) })], ['none', T('STORY.KEY.LIVE')]]);
+      var beads = interactionsOf();
+      unitKey(ctx.f, [['cube', T('STORY.KEY.CUBE.SWAPS', { n: fmt(cubeRate()) })], beads.length ? ['dot', T('STORY.KEY.BEADS', { n: fmt(beads.length) })] : ['none', T('STORY.KEY.LIVE')]]);
       /* the totals only: no node is named or drawn on its own (the fleet grows) */
       var tags = [tick('v-total-swaps', fmt(F.parallelSwapsPerSecond), 'above', 'hot'), tick('n-total-swaps', T('STORY.NOW.SWAPS'), 'below', 'grp hot', T('UNIT.SWAPS.S')),
         tick('v-total-transfers', fmt(F.transfersPerSecond), 'above'), tick('n-total-transfers', T('STORY.NOW.TRANSFERS'), 'below', 'grp', T('STORY.UNIT.TRANSFERS')),
-        { id: 'live', name: T('STORY.LIVE.TAG'), sub: T('NONE'), cls: 'small', at: 'left' }];
+        { id: 'live', name: T('STORY.LIVE.TAG'), sub: beads.length ? T('STORY.LIVE.BEADS', { n: fmt(beads.length) }) : T('NONE'), cls: 'small', at: 'left' }];
       W.tags(ctx.f.tags, tags);
     };
     return d;
@@ -220,8 +313,38 @@
       ui.pick = node('div', 'chips ws-ops rise'); ui.pick.setAttribute('role', 'group'); ui.pick.setAttribute('aria-label', T('STORY.CAPABILITIES.PICK'));
       ui.answer.parentNode.insertBefore(ui.pick, ui.answer);
       ui.pick.addEventListener('click', function (e) { var b = e.target.closest('[data-c]'); if (b) ctx.set({ c: b.dataset.c }); });
+      /* each capability, live: folded under the card (depth, not length) */
+      ui.live = node('details', 'ws-live rise'); ui.body.parentNode.insertBefore(ui.live, ui.body.nextSibling);
     };
+    /* the live table: one row for each capability id, and in each cell the reading or "No reading" with its reason */
+    function liveTable() {
+      var rec = feeds.capabilities, rows = liveCaps(), open = ui.live.open;
+      ui.live.textContent = '';
+      var sum = node('summary'); sum.appendChild(node('span', null, T('CAP.LIVE.TITLE')));
+      sum.appendChild(node('small', 'mono', rec.status === 'ok' ? T('CAP.LIVE.META', { s: fmt(Math.round(rec.data.window_ms / 1000)), node: rec.data.node || '', age: liveAgo(rec.data) }) : T('NONE')));
+      ui.live.appendChild(sum); ui.live.open = open;
+      if (!rows) { var p = node('p', 'none'); p.appendChild(node('b', null, T('NONE'))); p.appendChild(node('small', null, rec.status === 'wait' ? T('LIVE.WAIT') : rec.why)); ui.live.appendChild(p); return; }
+      var table = node('table'), head = node('tr');
+      [T('CAP.COL.NAME'), T('UNIT.REQ.S'), T('CAP.COL.P95'), T('CAP.COL.ROOM')].forEach(function (h) { head.appendChild(node('th', null, h)); });
+      var thead = node('thead'); thead.appendChild(head); table.appendChild(thead);
+      var body = node('tbody');
+      function cell(tr, value, reason) {
+        var td = node('td');
+        if (reason) { td.className = 'none'; td.appendChild(node('b', null, T('NONE'))); td.appendChild(node('small', null, reason)); } else td.appendChild(node('b', null, value));
+        tr.appendChild(td);
+      }
+      rows.forEach(function (r) {
+        var tr = node('tr'), x = r.row; tr.appendChild(node('th', null, title(r.id)));
+        cell(tr, x && x.per_second != null ? fmt2(x.per_second) : '', r.why.rate);
+        cell(tr, x && x.p95_ms != null ? fmt2(x.p95_ms) + ' ' + T('UNIT.MS') : '', r.why.p95);
+        cell(tr, x && x.headroom_pct != null ? fmt2(x.headroom_pct) + '%' : '', r.why.room);
+        body.appendChild(tr);
+      });
+      table.appendChild(body); ui.live.appendChild(table);
+    }
     d.render = function (st, ctx) {
+      ctx.redraw = function () { d.render(st, ctx); };
+      liveTable();
       var g = W.pick(list, st.c); if (!g) return;
       var best = g.rows.slice().sort(function (a, b) { return b.rate - a.rate; })[0];
       W.title(ui.title, T('STORY.CAPABILITIES.Q'));
@@ -249,6 +372,7 @@
   function ceilingDef(key) {
     var d = stepDef('ceiling', key), ui = d.ui, cp = H().clientPath, D = H().defiShard;
     d.render = function (st, ctx) {
+      ctx.redraw = function () { d.render(st, ctx); };
       if (!cp) return;
       var top = cp.byConnections[cp.byConnections.length - 1], one = cp.byConnections[0];
       W.title(ui.title, T('STORY.CEILING.Q'));
@@ -256,6 +380,25 @@
       var rows = [{ label: T('FIG.ONE'), value: fmt(one.swapsPerSecond), unit: T('UNIT.SWAPS.S') }, { label: T('CEILING.STRIP.CORES'), value: T('CEILING.CORES', { used: cp.serverCoresAtCeiling, all: cp.cores }) }];
       /* what limits it: the batch's one telling fact (BENCH-012), the send to the replicas against the time to resolve */
       if (D) rows.push({ label: T('STORY.CEILING.LIMIT'), value: fmt(Math.round(D.broadcastLatencyMs)), unit: T('UNIT.MS'), sub: T('STORY.CEILING.LIMIT.SUB', { peers: D.peersReached, resolve: D.batchLatencyMs.toFixed(1), times: (D.broadcastLatencyMs / D.batchLatencyMs).toFixed(1), record: D.record }), wide: true });
+      /* resolver load now (GET /api/fleet-resolvers): swaps a second over every resolver, and the batch and send times of the busiest one */
+      var rr = feeds.resolvers;
+      if (rr.status === 'ok') {
+        /* only the resolvers this site lists (the node also counts its own, e.g. perf) */
+        var known = resolverIds(), ids = Object.keys(rr.data.resolvers).filter(function (id) { return known.indexOf(id) >= 0; }), secs = rr.data.window_ms / 1000;
+        if (!ids.length || !(secs > 0)) rows.push({ label: T('CEIL.RES'), none: T('LIVE.NORES') });
+        else {
+          var busy = ids.reduce(function (a, id) { return !a || rr.data.resolvers[id].swaps > rr.data.resolvers[a].swaps ? id : a; }, null), b = rr.data.resolvers[busy];
+          rows.push({ label: T('CEIL.RES'), value: fmt2(ids.reduce(function (a, id) { return a + rr.data.resolvers[id].swaps; }, 0) / secs), unit: T('UNIT.SWAPS.S'),
+            sub: T('CEIL.RES.SUB', { resolver: title(busy), batch: b.batch_ms_mean == null ? T('NONE') : fmt2(b.batch_ms_mean) + ' ' + T('UNIT.MS'), send: b.send_ms_mean == null ? T('NONE') : fmt2(b.send_ms_mean) + ' ' + T('UNIT.MS'), node: rr.data.node || '', age: liveAgo(rr.data) }), wide: true });
+        }
+      } else rows.push(noReading(T('CEIL.RES'), rr, { wide: true }));
+      /* the newest stress or ceiling run (contract section 5): its highest rate and at how many connections */
+      var stress = newestRun(function (r) { return (r.kind === 'stress' || r.kind === 'ceiling') && r.ceiling.length; });
+      if (stress) {
+        var top2 = stress.ceiling.reduce(function (a, c) { return !a || c.per_second > a.per_second ? c : a; }, null);
+        rows.push({ label: T('CEIL.RUN'), value: fmt2(top2.per_second), unit: T('UNIT.REQ.S'), sub: T('CEIL.RUN.SUB', { run: stress.id, n: fmt(top2.connections), date: day(stress.started_at_ms), device: stress.device }), wide: true });
+      } else if (feeds.runs.status === 'ok') rows.push({ label: T('CEIL.RUN'), none: T('RUN.NOSTRESS'), wide: true });
+      else rows.push(noReading(T('CEIL.RUN'), feeds.runs, { wide: true }));
       facts(ui, rows);
       ui.source.textContent = T('STORY.SOURCE', { record: cp.record, date: date(cp.date) });
       unitKey(ctx.f, [['cube', T('STORY.KEY.CUBE.SWAPS', { n: fmt(cubeRate()) })], ['top', T('STORY.KEY.HIGHEST')]]);

@@ -347,6 +347,198 @@ ArkManifest.define({
       "kind": "line",
       "section": "Dashboard",
       "value": "Chosen"
+    },
+    "LIVE.WAIT": {
+      "label": "Live: waiting",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "Asking the stats node."
+    },
+    "LIVE.NOCLIENT": {
+      "label": "Live: the page did not load its client",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "This page did not load the stats client."
+    },
+    "LIVE.NOTCONFIGURED": {
+      "label": "Live: the host has no stats node",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "This host is not connected to a stats node yet."
+    },
+    "LIVE.NOTSERVED": {
+      "label": "Live: the host does not serve the feed",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "This host does not serve live stats."
+    },
+    "LIVE.TIMEOUT": {
+      "label": "Live: no answer in time",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "The stats node did not answer in time."
+    },
+    "LIVE.SHAPE": {
+      "label": "Live: answer in a shape the page does not read",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "The stats node answered in a shape this page does not read."
+    },
+    "LIVE.OFFLINE": {
+      "label": "Live: not reachable",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "The stats node could not be reached."
+    },
+    "LIVE.STALE": {
+      "label": "Live: the last reading is too old",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "Stale. The last reading is from {age}."
+    },
+    "LIVE.NOCAPS": {
+      "label": "Live: no capability has a rate",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "The node lists no capability rate yet."
+    },
+    "LIVE.NORES": {
+      "label": "Live: no resolver load",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "No node reports resolver load yet."
+    },
+    "RUN.NONE": {
+      "label": "Runs: none filed, none scheduled",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "No benchmark run is scheduled yet."
+    },
+    "RUN.NEXT": {
+      "label": "Runs: none filed, the next one is scheduled",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "No run is filed yet. The next one starts on {date}."
+    },
+    "RUN.NOSTRESS": {
+      "label": "Runs: no stress or ceiling run",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "No stress run has been filed yet."
+    },
+    "CAP.UNLISTED": {
+      "label": "Live table: the node does not list the capability",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "The node does not list it."
+    },
+    "CAP.FEW": {
+      "label": "Live table: too few requests for a p95",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "Under 20 requests in the window."
+    },
+    "CAP.NOCEILING": {
+      "label": "Live table: no ceiling run for the capability",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "No ceiling run has driven it yet."
+    },
+    "CAP.NORUNS": {
+      "label": "Live table: the runs list could not be read",
+      "kind": "line",
+      "section": "Why there is no reading",
+      "value": "The benchmark runs could not be read."
+    },
+    "UNIT.REQ.S": {
+      "label": "Unit: requests a second",
+      "kind": "line",
+      "section": "Live",
+      "value": "requests/s"
+    },
+    "NOW.LIVE.SUB": {
+      "label": "Now: under the live rate",
+      "kind": "line",
+      "section": "Live",
+      "value": "{errors} errors in the last {s} s, node {node}, {age}"
+    },
+    "NOW.RUN": {
+      "label": "Now: the latest benchmark run",
+      "kind": "line",
+      "section": "Live",
+      "value": "Latest benchmark run"
+    },
+    "NOW.RUN.SUB": {
+      "label": "Now: under the latest run",
+      "kind": "line",
+      "section": "Live",
+      "value": "{kind} run, week {week}, {date}. {device}"
+    },
+    "STORY.KEY.BEADS": {
+      "label": "Legend: one bead for each interaction",
+      "kind": "line",
+      "section": "Live",
+      "value": "One bead = one interaction, the latest {n}"
+    },
+    "STORY.LIVE.BEADS": {
+      "label": "Label under the live line, with beads",
+      "kind": "line",
+      "section": "Live",
+      "value": "latest {n}"
+    },
+    "CAP.LIVE.TITLE": {
+      "label": "Operations: the live table",
+      "kind": "line",
+      "section": "Live",
+      "value": "Each capability, live"
+    },
+    "CAP.LIVE.META": {
+      "label": "Operations: the live table window",
+      "kind": "line",
+      "section": "Live",
+      "value": "last {s} s, node {node}, {age}"
+    },
+    "CAP.COL.NAME": {
+      "label": "Operations: live table column",
+      "kind": "line",
+      "section": "Live",
+      "value": "Capability"
+    },
+    "CAP.COL.P95": {
+      "label": "Operations: live table column",
+      "kind": "line",
+      "section": "Live",
+      "value": "p95"
+    },
+    "CAP.COL.ROOM": {
+      "label": "Operations: live table column",
+      "kind": "line",
+      "section": "Live",
+      "value": "Headroom"
+    },
+    "CEIL.RES": {
+      "label": "One node: resolver load now",
+      "kind": "line",
+      "section": "Live",
+      "value": "Resolvers now"
+    },
+    "CEIL.RES.SUB": {
+      "label": "One node: under resolver load",
+      "kind": "line",
+      "section": "Live",
+      "value": "Busiest: {resolver}. Batch {batch}, send {send}. Node {node}, {age}"
+    },
+    "CEIL.RUN": {
+      "label": "One node: the newest ceiling run",
+      "kind": "line",
+      "section": "Live",
+      "value": "Newest ceiling run"
+    },
+    "CEIL.RUN.SUB": {
+      "label": "One node: under the newest ceiling run",
+      "kind": "line",
+      "section": "Live",
+      "value": "{run} at {n} connections, {date}. {device}"
     }
   }
 });

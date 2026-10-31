@@ -17,6 +17,7 @@ import { brotliCompress, gzip, constants as zc } from 'node:zlib';
 import { promisify } from 'node:util';
 import { proxyFleetPulse } from './lib/fleet-pulse-proxy.mjs';
 import { engineDir, engineBrowserFiles } from './lib/fxn-3d-closure.mjs';
+import { FLEET_STATS_ROUTES, proxyFleetStats } from './lib/fleet-stats.mjs';
 
 const ROOT = resolve(fileURLToPath(new URL('..', import.meta.url)));
 /* The 3D engine's browser modules live in the sibling repo flux/fxn-3d; the world host imports them as /fxn-3d/<path>.
@@ -135,6 +136,10 @@ createServer(async (req, res) => {
       const { appendFile } = await import('node:fs/promises');
       await appendFile(DIAG_LOG, raw.split('\n').map(l => new Date().toISOString() + ' ' + l).join('\n') + '\n');
       res.writeHead(204).end(); return;
+    }
+    if (FLEET_STATS_ROUTES[pathname]) {
+      if (req.method !== 'GET') { res.writeHead(405).end('Method not allowed'); return; }
+      await proxyFleetStats(res, FLEET_STATS_ROUTES[pathname], url.searchParams); return;
     }
     if (PRIVATE.test(pathname)) { res.writeHead(404).end('Not found'); return; }
     let file = pathname === '/' ? join(ROOT, 'index.html') : await fileFor(pathname);

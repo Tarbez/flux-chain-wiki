@@ -1,7 +1,50 @@
 # Stats live data contract
 
 Written for: the engineer on the devnet fleet who adds the streams and the scheduled runs.
-Status: 2026-10-24. The pages read this contract today and show "No reading" for every field marked absent.
+Status: 2026-10-28. Sections 1 to 5 are served by this repo's two hosts, from one node. A host with no node set answers each route with an error, and the pages show "No reading" and the reason.
+
+## How the four routes are served (2026-10-28)
+
+`scripts/serve-site.mjs` (local) and `scripts/publish-host.mjs` (defxn.com, behind Caddy's `/api/*` route) answer `GET /api/fleet-interactions`, `/api/fleet-capabilities`, `/api/fleet-resolvers` and `/api/fleet-runs`. Both call one module, `scripts/lib/fleet-stats.mjs`. It asks one chain-server two wire commands over its WebSocket line protocol, with the site's copy of the wire client (`js/dense-wire/flx-wire.mjs`):
+
+- `STATS_LIVE` feeds sections 1, 2 and 3. The node counts the interactions it resolves, in memory, over a rolling window.
+- `PERF_RUNS` feeds sections 2 (the tested ceiling), 4 and 5. The node reads the runs the scheduled benchmark filed as signed records on chain `perf`.
+
+The line format of both replies is fixed in the stats brief and restated at the top of `scripts/lib/fleet-stats.mjs`. A line tag the module does not know is skipped.
+
+| Setting | Default | Meaning |
+| --- | --- | --- |
+| `DEFXN_STATS_NODE` | none | The node's WebSocket URL, for example `ws://127.0.0.1:19501/ws` or `wss://nodes.defxn.com/ws` |
+| `DEFXN_STATS_CACHE_MS` | 3000 | How long one reply serves every visitor, a failure included |
+| `DEFXN_STATS_TIMEOUT_MS` | 5000 | How long the host waits for the node |
+
+Run it locally against a node:
+
+```bash
+DEFXN_STATS_NODE=ws://127.0.0.1:19501/ws node scripts/serve-site.mjs
+curl -s http://127.0.0.1:3438/api/fleet-capabilities
+```
+
+When a route cannot answer, it replies with a 5xx code and `{ "ok": false, "error": <code>, "detail": <text> }`:
+
+| `error` | HTTP | When |
+| --- | --- | --- |
+| `FLEET_STATS_NOT_CONFIGURED` | 503 | `DEFXN_STATS_NODE` is not set on this host |
+| `FLEET_STATS_UNREACHABLE` | 502 | The node did not accept the connection |
+| `FLEET_STATS_TIMEOUT` | 504 | The node did not answer in time |
+| `FLEET_STATS_NOT_SERVED` | 502 | The node refused the command (a node without `STATS_LIVE` or `PERF_RUNS`) |
+| `FLEET_STATS_MALFORMED` | 502 | The reply broke the line format. The whole answer fails |
+
+What the routes add to the tables below:
+
+- Every live answer carries `node` (the node's name), `interval_ms` and `age_ms`. `interval_ms` is the node's bucket, 1000 ms by default, and `window_ms` is 60000 ms by default. `age_ms` is how old the reading is by the host's clock when it answers. The page adds the time since the answer arrived and calls the reading stale past `2 x interval_ms`, so the visitor's clock never has to agree with the node's. The host keeps a live reply for at most half of `interval_ms`.
+- `interactions[].resolver` is `null` when no resolver grammar claims the record: a swap, a native transfer or a base-chain record. The row is kept.
+- `capabilities` and `resolvers` may hold ids the site does not list. The node counts its own `perf` resolver, for example. The pages show only the ids in `DEFXN_CAPABILITIES` and `DEFXN_RESOLVERS`.
+- `/api/fleet-capabilities` carries `tested_ceiling_run`, the run that reached the ceiling. It also carries `runs_error`, which says why every ceiling is null when `PERF_RUNS` could not be read.
+- `/api/fleet-capabilities` and `/api/fleet-resolvers` carry `not_built`, as `{ id: { reason, run } }`. It names each target the newest run could not drive, with the node's reason. A later run that measured the target clears it.
+- `runs[].figures[]` and `runs[].ceiling[]` carry `target` (`cap`, `res` or `fleet`) and `target_id`. `runs[].absent[]` lists `{ target, id, reason }` for each target a run could not drive. `runs[].record_cid` is the signed record's CID. `runs[].id` is `PERF-<yyyymmdd>-<n>` for a run the schedule made.
+
+The client is `ArkPulse` in `js/ark/pulse-client.js`: `interactions()`, `capabilities()`, `resolvers()` and `runs()`, each with its own `validate`, plus `stale(data)`.
 
 ## What the pages need
 
@@ -37,9 +80,9 @@ A field the fleet does not send is absent. Absent is not 0.
 
 The pulse is an hourly self-bench of synthetic entries. It is not live traffic. The Now page says "Fleet self-check" and shows its age.
 
-## What is missing
+## What the four live routes answer
 
-Everything below is absent today. The page for each says why.
+Sections 1 to 5 were missing until 2026-10-28. Each is now served, and each page still says "No reading" and why when its route cannot answer. The reasons in quotes below are what a page showed before the route existed.
 
 ### 1. Latest interactions stream
 
@@ -53,7 +96,7 @@ Page: Now (the line in front of the canyon). Reason shown today: "The fleet does
 | `interval_ms` | ms | How often the fleet refreshes the list |
 | `interactions[].at_ms` | ms since epoch | When the interaction finished |
 | `interactions[].capability` | capability id | One of `DEFXN_CAPABILITIES.capabilities[].id`, or `null` when the interaction used none |
-| `interactions[].resolver` | resolver id | One of `DEFXN_RESOLVERS.resolvers[].id` |
+| `interactions[].resolver` | resolver id | One of `DEFXN_RESOLVERS.resolvers[].id`, or `null` when no resolver grammar claims the record |
 | `interactions[].latency_ms` | ms | Client send to signed result received, measured at the node that resolved it. Not network time to the visitor |
 | `interactions[].node` | text | `nodes[].name` |
 | `interactions[].ok` | boolean | The result was signed and stored |
@@ -117,6 +160,15 @@ A week page exists for each ISO week that holds a run. Today the weeks come from
 ### 5. Latest stress test
 
 Page: Ceiling. It is the newest run with `kind` `stress` or `ceiling`. Reason shown today: it shows BENCH-015 (2026-10-15) as the latest run that pushed connections. No stress test is scheduled.
+
+### Where the pages show it (2026-10-28)
+
+The stats section has three steps since 2026-10-25. `/stats/resolver` opens One node, and each `/stats/week-<n>` opens Now.
+
+- Now (`/stats/now`) shows the live request rate over every capability, one bead for each of the latest interactions, and the newest run with its ISO week.
+- Operations (`/stats/capabilities`) shows a folded table with each capability's rate, p95 and headroom. A cell with no reading gives its reason, and the node's notBuilt reason when a run could not drive the capability.
+- One node (`/stats/ceiling`) shows resolver load now and the newest stress or ceiling run.
+- The dated records (`js/content/stats-highlights.js`) stay the answer of each step and the offline copy. `STATS_RUNS` stays the offline list of runs. `ArkSitePages.statsWeeks(runs)` adds the live runs by `started_at_ms`.
 
 ## How a page decides what to show
 
