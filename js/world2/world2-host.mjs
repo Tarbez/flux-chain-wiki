@@ -25,7 +25,8 @@
    as chains-scene.js fitShadow does (40 round the network, 14 on the calm pose). The card (/auth, MESH.md): a
    view that has a camera record but no frame of its own may carry a mesh; on the first flight to one the host
    imports world2-mesh.mjs, fetches world/card.flx once, mounts the mesh and hands it to the renderer; leaving the
-   view takes it off (the mount stays for the next visit).
+   view takes it off (the mount stays for the next visit). Since 2026-10-31 /auth draws none (NO_MESH_CARD below): the
+   fxn-3d FXN ID card replaced it.
    ===================================================================== */
 import { fetchWorld, fetchBlob, fetchNames, fetchGroup, fetchLines, firstInstance, worldPath, PICTURE } from './world2-decode.mjs';
 import { createRenderer, FOV, afterRestore } from './world2-gl.mjs';
@@ -34,6 +35,8 @@ import { createSites } from './world2-sites.mjs';
 import { createHelix } from './world2-helix.mjs';
 import { mountHubMark } from './world2-hubmark.mjs';
 import { createTags } from './world2-tags.mjs';
+import { mountDrums } from './world2-drums.mjs';   /* the rings as solid drums in the card's metal (2026-10-31) */
+import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './world2-cardlook.mjs';   /* the FXN ID card's surface on the network's parts, and the light along the links (docs/design/auth/FXN-ID-CARD.md) */
 
 (function () {
   'use strict';
@@ -381,12 +384,42 @@ import { createTags } from './world2-tags.mjs';
     if (sitesMoving) moving = true;
     if (helixMoving || haloMoving) moving = true;
     if (kit) { kitMoving = kit.step(now); if (kitMoving) moving = true; }
+    if (flowStep(now)) moving = true;
     afterDraw();
     if (moving) raf = requestAnimationFrame(tick);
   }
   /* forceShadow: the measurement's redraw draws the shadow map again so one frame carries the whole cost */
+  /* the card's surface (world2-cardlook.mjs FRAME) on every part the lit program draws by a name it lists: the frame's tiles, links and cubes, and
+     the parts the groups add to the list later (a view's lines). Once per part; a part that already names its own material keeps it. */
+  var surfaced = new WeakSet(), frameParts = null;
+  function surface() {
+    if (!drawParts) return;
+    for (var i = 0; i < drawParts.length; i++) {
+      var p = drawParts[i]; if (surfaced.has(p)) continue; surfaced.add(p);
+      /* the frame's own parts only (the network's tiles, links, cubes, dots): a group's parts (a stats slab drawn as a tile, a line of beads) keep their own look */
+      if (!frameParts || !frameParts.has(p)) continue;
+      var m = FRAME[p.like || p.part]; if (m && !p.mat) p.mat = m;
+    }
+  }
+  /* the light along the links (world-shaders.mjs uFlow): it runs from a view's arrival for FLOW_MS, eased in and out, on its own clock, so the motes
+     that share the clock drift only while it runs and stand still after; none with reduced motion */
+  var flowAt = -1e9, flowClock = 0, flowLast = 0, flowOn = false;
+  function flowStart() { if (reduced()) return; flowAt = performance.now(); wake(); }
+  function flowStep(now) {
+    var base = world && world.knobs && world.knobs.look && world.knobs.look.flow || 0, t = now - flowAt;
+    var k = reduced() || !base || t < 0 || t > FLOW_MS ? 0 : Math.min(1, t / FLOW_IN) * Math.min(1, (FLOW_MS - t) / FLOW_OUT);
+    if (!k && !flowOn) { flowLast = 0; return false; }
+    flowClock += flowLast ? Math.min(.05, (now - flowLast) / 1000) : 0; flowLast = now;
+    R.setTime(flowClock); R.setLook({ flow: base * k * k * (3 - 2 * k) });
+    flowOn = k > 0;
+    if (!flowOn) flowLast = 0;
+    return flowOn;
+  }
+  var drums = null;
   function draw(forceShadow) {
     if (!cam || !R) return;
+    if (drums) drums.hide();   /* the old tiles stay out of the picture whatever the stage writes */
+    surface();
     var c = drawn();
     drawnYaw = c.yaw;
     stage.place(c, slabRect);   /* the page slab follows the camera as it is drawn, the lean included */
@@ -532,7 +565,7 @@ import { createTags } from './world2-tags.mjs';
     fetchWorld().then(function (w) {
       world = w;
       if (w.views.calm) { CALM.n = w.views.calm.back; CALM.elev = w.views.calm.elev; CALM.dist = w.views.calm.dist; CALM.tilt = w.views.calm.tilt; }
-      R.setLook(w.knobs.look);
+      R.setLook(w.knobs.look); R.setLook({ flow: 0 });   /* the light along the links runs only from an arrival (flowStep) */
       /* one blob serves every view in slice 1; a view with its own blob would be fetched here on its first flight */
       var first = w.frames.intro || w.frames[Object.keys(w.frames)[0]];
       if (!first) throw new Error('no frame record');
@@ -545,6 +578,9 @@ import { createTags } from './world2-tags.mjs';
     drawParts = parts;
     parts.forEach(function (p) { if (p.part === 'pearl') { p.like = 'solid'; p.shape = 'sphere'; p.noShadow = true; } if (p.part === 'glyph') { p.like = 'solid'; p.shape = 'cube'; p.noShadow = true; } });   /* the glyph bars engraved on the network's tiles: solid boxes in the frame's own buffer */
     R.setFrameBlob(cid, buffer, parts);
+    var groundPart = parts.filter(function (p) { return p.part === 'ground'; })[0];
+    frameParts = new Set(parts);
+    drums = mountDrums(R, world, parts, buffer, groundPart ? firstInstance(buffer, groundPart) : null);   /* before the stage: it takes the drums' parts as the frame's own */
     /* the stage gives the parts their state and morph streams (the renderer's per-part buffers) and owns every channel */
     stage = createStage({ world: world, R: R, parts: parts, blob: buffer, names: words, fov: FOV, reduced: reduced, wake: wake, palette: function () { return paletteNow || (paletteNow = readPalette()); } });
     tags = createTags({ layerOf: function (v) { return host.tags(v); }, here: function () { return cur ? viewFor(cur.key) : null; }, scale: pageScale,
@@ -576,7 +612,8 @@ import { createTags } from './world2-tags.mjs';
     new MutationObserver(repaint).observe(root, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', repaint);
     new ResizeObserver(resize).observe(layer);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
+    /* the words the world paints on canvases (status panels, record plates) are set in the site's font slots (world2-cardlook.mjs fontOf): painted again once the faces have landed */
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { resize(); repaint(); });
     ArkWorld.onChange(applyWorld);
     if (!reduced() && peekBuild()) stage.unbuilt();   /* the first visit's network starts unbuilt: no flash of the finished world before the build begins */
     resize();
@@ -610,7 +647,7 @@ import { createTags } from './world2-tags.mjs';
     setRiseVariables(w.motion);
     if (!host.ready) return;
     var look = {}; Object.keys(w.look || {}).forEach(function (k) { if (typeof w.look[k] === 'number') look[k.toLowerCase()] = w.look[k]; });
-    R.setLook(look);
+    R.setLook(look); R.setLook({ flow: 0 }); flowStart();
     if (cur) flyTo(target(viewFor(cur.key)), 500, null);
   }
 
@@ -697,6 +734,9 @@ import { createTags } from './world2-tags.mjs';
   /* a view the camera arrives at: its touchable parts, its state; a view it leaves rests (auth's beam is on again for the network) */
   function enterView(v, was, flight) {
     var base = baseView(v), now = performance.now();
+    var lk = world && world.knobs && world.knobs.look || {}, eg = lk.edgegain, hs = lk.hubstack || 0;
+    R.setLook({ edgegain: (eg == null ? 1 : eg) * (EDGE_OF_VIEW[base] == null ? 1 : EDGE_OF_VIEW[base]), hubstack: hs * (HUB_OF_VIEW[base] == null ? 1 : HUB_OF_VIEW[base]) });
+    flowStart();
     atHome = base === 'home';
     if (sites) sites.view(atHome, now);
     if (kit) kit.view(!!cur && viewFor(cur.key) === 'kit', now, flight.dur);   /* the Kit's objects grow in as the camera comes and sink as it leaves (chains-scene.js morph) */
@@ -999,10 +1039,16 @@ import { createTags } from './world2-tags.mjs';
     out[12] = m[12]; out[13] = m[13] + (lift - tip * .5) * RH * .3; out[14] = m[14]; out[15] = 1;
     return out;
   }
+  /* VIEWS THAT DRAW NO MESH CARD, though card.flx has one for them. /auth's mesh card was replaced on 2026-10-31 by the fxn-3d FXN ID
+     card (js/ark/fxn-id-card/, the card FXN Browser shows), which the page draws in its own stage. Named here, the view never fetches
+     its mesh: no card.flx, no blob, no textures. With no card there is no card frame (cardFrame() answers null), so the parts written
+     in the card's own units (the rig's glow and the loose bits off its corner, world2-rig.mjs attach) are not drawn either; the rings,
+     cubes and glass status panels of the stage stay. Take a view out of this table to draw its mesh card again. */
+  var NO_MESH_CARD = { auth: true };
   function showCard(view) {
     var base = baseView(view);
     /* a view with a frame of its own is the network; one with a camera but no frame may carry a mesh (auth) */
-    if (!world.views[base] || world.frames[base] || stage.FAMILY.has(base) || /^ring\d+$/.test(base)) { cardOn = null; R.setCard(null); return; }
+    if (!world.views[base] || world.frames[base] || stage.FAMILY.has(base) || /^ring\d+$/.test(base) || NO_MESH_CARD[base]) { cardOn = null; R.setCard(null); return; }
     cardOn = base;
     if (!(base in cards)) {
       cards[base] = (meshMod ? Promise.resolve(meshMod) : import('/fxn-3d/js/render/world2-mesh.mjs').then(function (m) { meshMod = m; return m; }))

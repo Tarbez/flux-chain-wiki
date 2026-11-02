@@ -1,0 +1,665 @@
+/* The FXN ID card and the FXN ID view on defxn.com (js/ark/fxn-id-card/). The site's one copy of FXN Browser's sheet
+   (ark-browser src/renderer/fxn-id-card/fxn-id-card.css), kept in the same order and the same selectors so the two can become one
+   shared sheet. What differs is named once, in the HOST block below: the browser's tokens are whole colours (var(--accent)), the
+   site's are HSL triplets (hsl(var(--primary))), and the site's type scale is its own --fs-* set. Every rule after the host block
+   reads only the --fxn-* names it sets. Design note: docs/design/auth/FXN-ID-CARD.md.
+
+   The card is dark metal in every theme, so the prints on it are light ink whichever theme the page wears; their accent is the
+   theme's. The view (dialog, guide, detail, Public ID layers, wallet coins) is the theme's own surfaces and text, light or dark.
+   Type from the scale: 11 for labels and notes, 18 for names, 29 for the view's title. */
+
+/* ---- HOST: the site's tokens (docs/PRODUCT-DESIGN-LAWS.md 71-83). --primary is the base hue every DEFXN theme builds on, so it
+   is the card's accent (the browser's --accent plays that part there). --secondary, the complement, is spent once: the view's one
+   dominant action. */
+.fxn-idc,
+.fxn-idv {
+  --fxn-idc-accent: hsl(var(--primary));
+  --fxn-ink-accent-text: hsl(var(--primary));
+  --fxn-ink-raised: hsl(var(--raised));
+  --fxn-ink-nested: hsl(var(--nested));
+  --fxn-ink-glass: hsl(var(--surface) / 0.92);
+  --fxn-ink-border: hsl(var(--border-default));
+  --fxn-ink-strong: hsl(var(--text-strong));
+  --fxn-ink-text: hsl(var(--text));
+  --fxn-ink-muted: hsl(var(--text-muted));
+  --fxn-ink-shadow: hsl(var(--theme-shadow-color, 0 0% 0%));
+  --fxn-ink-radius: 8px;
+  --fxn-fs-label: var(--fs-tertiary, 11px);
+  --fxn-fs-name: var(--fs-secondary, 18px);
+  --fxn-fs-title: var(--fs-primary, 29px);
+  --fxn-fs-body: var(--fs-tertiary, 11px);
+}
+
+.fxn-idc {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fxn-idc-canvas,
+.fxn-idc-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* the accent turned to the theme's (set by fxn-id-card.js), and a contact shadow in the theme's own shadow ink */
+  filter: var(--fxn-idc-tint, none) drop-shadow(0 10px 14px color-mix(in srgb, var(--fxn-ink-shadow) 40%, transparent));
+}
+
+.fxn-idc-still {
+  object-fit: contain;
+}
+
+.fxn-idc-canvas[hidden],
+.fxn-idc-still[hidden] {
+  display: none;
+}
+
+.fxn-idc .fxn-idc-print[hidden] {
+  display: none;
+}
+
+.fxn-idc-print {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.fxn-idc-label {
+  min-height: 1.4em;
+  font: 600 var(--fxn-fs-label)/1.4 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--fxn-idc-accent) 82%, #fff);
+}
+
+.fxn-idc-rule {
+  display: block;
+  width: 28px;
+  height: 2px;
+  background: var(--fxn-idc-accent);
+  transform-origin: 0 50%;
+}
+
+.fxn-idc-name {
+  max-width: 100%;
+  font: 700 var(--fxn-fs-name)/1.15 var(--font-display);
+  color: #eef2f0;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.fxn-idc-name.is-placeholder {
+  color: #a9b0ad;
+}
+
+.fxn-idc-word {
+  white-space: nowrap;
+}
+
+.fxn-idc-word > span {
+  display: inline-block;
+}
+
+/* the security plate: the PIN's four cells, then the password's (the seal), lit up to the grade the panel reports */
+.fxn-idc-print.fxn-idc-print-lock {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 7px;
+  padding: 10px 9px;   /* px, not %: a percentage pads by the stage's width, not the print's */
+}
+
+.fxn-idc-bars {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 7px;
+  height: 100%;
+  min-width: 4px;
+  transform-origin: 50% 100%;
+}
+
+.fxn-idc-bar {
+  flex: 1;
+  border-radius: 1px;
+  background: color-mix(in srgb, #eef2f0 12%, transparent);
+  transition: background-color 180ms ease-out, box-shadow 180ms ease-out;
+}
+
+.fxn-idc-bars[data-grade="1"] .fxn-idc-bar:nth-child(-n + 1),
+.fxn-idc-bars[data-grade="2"] .fxn-idc-bar:nth-child(-n + 2),
+.fxn-idc-bars[data-grade="3"] .fxn-idc-bar:nth-child(-n + 3),
+.fxn-idc-bars[data-grade="4"] .fxn-idc-bar {
+  background: var(--fxn-idc-accent);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--fxn-idc-accent) 60%, transparent);
+}
+
+/* the stamp: the chosen icon struck into the plate */
+.fxn-idc-print-stamp {
+  align-items: center;
+  padding: 5px;
+}
+
+.fxn-idc-print-stamp svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: color-mix(in oklab, var(--fxn-idc-accent) 82%, #fff);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--fxn-idc-accent) 55%, transparent));
+}
+
+/* the vault on the back: one cell per recovery word */
+.fxn-idc-print-vault {
+  justify-content: flex-start;
+  padding: 8px;
+}
+
+.fxn-idc-print-vault .fxn-idc-label {
+  white-space: nowrap;
+}
+
+.fxn-idc-cells {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  width: 100%;
+  flex: 1;
+}
+
+.fxn-idc-cell {
+  border: 1px solid color-mix(in srgb, #eef2f0 22%, transparent);
+  border-radius: 2px;
+  transition: background-color 160ms ease-out, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.fxn-idc-cell[data-on="true"] {
+  background: var(--fxn-idc-accent);
+  border-color: var(--fxn-idc-accent);
+  transform: scale(1.08);
+}
+
+.fxn-idc-probe {
+  display: none;
+}
+
+/* ---- The FXN ID view (fxn-id-view.js): the signed-in FXN ID, inside the card. A full-window view (it fits 1280x720 with no page
+   scroll): the head, the stage (the card, the 3D layers, the guide, the detail), the foot (add a Public ID, save the file).
+   Type from the scale: 11 for labels, 18 for names, 29 for the view's title. --accent marks the Public ID sites see and the
+   published wallets; everything else is the theme's text and surfaces. The selectors carry dialog.ark-dialog to outrank the
+   browser's own dialog rule (styles.css dialog.ark-dialog), which sizes a dialog to fit its content. */
+dialog.ark-dialog.fxn-idv {
+  width: min(1180px, calc(100vw - 48px));
+  height: min(680px, calc(100vh - 48px));
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--fxn-ink-border);
+  border-radius: var(--fxn-ink-radius);
+  background: var(--fxn-ink-raised);
+  color: var(--fxn-ink-text);
+  overflow: hidden;
+}
+
+dialog.ark-dialog.fxn-idv[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.fxn-idv-head {
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px 0;
+}
+
+.fxn-idv-titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.fxn-idv-kicker {
+  margin: 0;
+  font: 600 var(--fxn-fs-label)/1.4 var(--font-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fxn-ink-muted);
+}
+
+.fxn-idv-title {
+  margin: 0;
+  font: 700 var(--fxn-fs-title)/1.15 var(--font-display);
+  color: var(--fxn-ink-strong);
+}
+
+.fxn-idv-stage {
+  grid-row: 2;
+  grid-column: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.fxn-idv-world-wrap {
+  position: absolute;
+  inset: 0;
+  perspective-origin: 50% 50%;
+  pointer-events: none;
+}
+
+.fxn-idv-world {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+/* a Public ID: a glass layer standing in the open card; the chosen one in front holds its wallets */
+.fxn-idv-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 420px;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--fxn-idc-accent) 35%, transparent);
+  border-radius: 10px;
+  background: var(--fxn-ink-glass);
+  color: var(--fxn-ink-strong);
+  transform-origin: 0 0;
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 260ms ease-out var(--fxn-idv-delay, 0ms), border-color 200ms ease-out;
+  backface-visibility: hidden;
+}
+
+.fxn-idv-layer[data-shown="true"] {
+  opacity: 0.6;
+}
+
+.fxn-idv-layer[data-shown="true"][data-front="true"] {
+  opacity: 1;
+}
+
+.fxn-idv-layer[data-focus="true"] {
+  border-color: var(--fxn-idc-accent);
+  box-shadow: 0 0 0 1px var(--fxn-idc-accent), 0 0 24px color-mix(in srgb, var(--fxn-idc-accent) 30%, transparent);
+}
+
+.fxn-idv-layer-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.fxn-idv-layer-head b {
+  font: 700 var(--fxn-fs-name)/1.2 var(--font-display);
+}
+
+.fxn-idv-layer-head small {
+  font: 500 var(--fxn-fs-label)/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--fxn-ink-muted);
+}
+
+.fxn-idv-badge,
+.fxn-idv-mark {
+  font: 600 var(--fxn-fs-label)/1.4 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fxn-ink-accent-text);
+}
+
+.fxn-idv-layer[data-front="false"] .fxn-idv-coins {
+  display: none;
+}
+
+.fxn-idv-coins {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* a wallet: a coin that rises in when its Public ID is chosen, and lifts when it is chosen */
+.fxn-idv-coin {
+  display: grid;
+  gap: 2px;
+  justify-items: center;
+  padding: 10px 4px 8px;
+  border: 1px solid var(--fxn-ink-border);
+  border-radius: 999px / 40%;
+  background: var(--fxn-ink-nested);
+  color: var(--fxn-ink-strong);
+  font: inherit;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(14px) scale(0.8);
+  transition: opacity 220ms ease-out var(--fxn-idv-delay, 0ms), transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--fxn-idv-delay, 0ms), border-color 160ms ease-out;
+}
+
+.fxn-idv-coin[data-shown="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+.fxn-idv-coin[data-shown="true"][data-focus="true"] {
+  border-color: var(--fxn-idc-accent);
+  transform: translateY(-8px) scale(1.12);
+  transition-delay: 0ms;
+}
+
+.fxn-idv-coin[data-published="true"] {
+  border-color: color-mix(in srgb, var(--fxn-idc-accent) 60%, transparent);
+}
+
+.fxn-idv-coin b {
+  font: 600 var(--fxn-fs-label)/1.3 var(--font-display);
+}
+
+.fxn-idv-coin small {
+  font: 500 var(--fxn-fs-label)/1.3 var(--font-mono);
+  color: var(--fxn-ink-muted);
+}
+
+.fxn-idv-coin .fxn-idv-mark {
+  font-size: var(--fxn-fs-label);
+  letter-spacing: 0.04em;
+}
+
+/* the guide's beat and the chosen item's detail: 2D, over the stage */
+.fxn-idv-guide,
+.fxn-idv-detail {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: min(340px, 40%);
+  padding: 16px;
+  border: 1px solid var(--fxn-ink-border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--fxn-ink-raised) 88%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.fxn-idv-guide[hidden],
+.fxn-idv-detail[hidden] {
+  display: none;
+}
+
+.fxn-idv-guide h3,
+.fxn-idv-detail h3 {
+  margin: 4px 0 6px;
+  font: 700 var(--fxn-fs-name)/1.2 var(--font-display);
+}
+
+.fxn-idv-guide p,
+.fxn-idv-detail p {
+  margin: 0 0 10px;
+  font-size: var(--fxn-fs-body);
+  line-height: 1.45;
+  color: var(--fxn-ink-muted);
+}
+
+.fxn-idv-detail code {
+  display: block;
+  margin: 0 0 10px;
+  font: 500 var(--fxn-fs-label)/1.4 var(--font-mono);
+  word-break: break-all;
+  color: var(--fxn-ink-text);
+}
+
+.fxn-idv-guide-nav,
+.fxn-idv-detail-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.fxn-idv-muted {
+  font-size: var(--fxn-fs-label);
+}
+
+.fxn-idv-foot {
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--fxn-ink-border);
+}
+
+.fxn-idv-add {
+  display: flex;
+  gap: 8px;
+}
+
+.fxn-idv-add input {
+  width: 220px;
+  padding: 6px 10px;
+  border: 1px solid var(--fxn-ink-border);
+  border-radius: 8px;
+  background: var(--fxn-ink-nested);
+  color: var(--fxn-ink-text);
+  font: inherit;
+}
+
+.fxn-idv-note {
+  flex: 1;
+  margin: 0;
+  font-size: var(--fxn-fs-body);
+  color: var(--fxn-ink-muted);
+}
+
+/* the tree: for screen readers always; drawn as the view itself without motion or WebGL2 */
+.fxn-idv-tree {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  margin: 0;
+  padding: 0;
+}
+
+.fxn-idv[data-flat="true"] .fxn-idv-stage > :not(.fxn-idv-guide):not(.fxn-idv-detail) {
+  display: none;
+}
+
+.fxn-idv[data-flat="true"] .fxn-idv-tree {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  overflow: auto;
+  grid-row: 2;
+  grid-column: 1;
+  align-self: start;
+  z-index: 1;
+  max-height: 100%;
+  box-sizing: border-box;
+  margin: 12px 18px;
+  padding: 0;
+  list-style: none;
+  max-width: calc(100% - 420px);
+}
+
+.fxn-idv[data-flat="true"] .fxn-idv-tree li {
+  list-style: none;
+}
+
+.fxn-idv[data-flat="true"] .fxn-idv-tree > li {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--fxn-ink-border);
+  border-radius: 8px;
+  background: var(--fxn-ink-nested);
+}
+
+.fxn-idv[data-flat="true"] .fxn-idv-tree > li[aria-selected="true"],
+.fxn-idv[data-flat="true"] .fxn-idv-tree li li[aria-selected="true"] {
+  border-color: var(--fxn-idc-accent);
+  outline: 1px solid var(--fxn-idc-accent);
+}
+
+.fxn-idv[data-flat="true"] .fxn-idv-tree-label {
+  font-weight: 600;
+}
+
+.fxn-idv[data-flat="true"] .fxn-idv-tree ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.fxn-idv[data-flat="true"] .fxn-idv-tree ul li {
+  padding: 4px 8px;
+  border: 1px solid var(--fxn-ink-border);
+  border-radius: 999px;
+  font: 500 var(--fxn-fs-label)/1.4 var(--font-mono);
+}
+
+.fxn-idv-tree:focus-visible {
+  outline: none;
+}
+
+/* ---- HOST: the site's buttons inside the view (the browser's .fxn-btn rules live in its own styles.css). A quiet button is an
+   outline in the theme's text; the primary one is the view's one dominant action, in the complement. "Save the file" takes the
+   complement only while there is a change to save (fxn-id-view.js sets data-dirty), so the guide's Next stays the one filled
+   button while it shows. */
+.fxn-idv .fxn-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 16px;
+  border: 1px solid var(--fxn-ink-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--fxn-ink-strong);
+  font: 600 var(--fxn-fs-label)/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 160ms ease-out, background-color 160ms ease-out;
+}
+
+.fxn-idv .fxn-btn-small {
+  min-height: 30px;
+  padding: 0 12px;
+}
+
+.fxn-idv .fxn-btn-quiet:hover {
+  border-color: var(--fxn-idc-accent);
+}
+
+.fxn-idv .fxn-btn-primary {
+  border-color: transparent;
+  background: hsl(var(--secondary));
+  color: hsl(var(--text-inverse));
+}
+
+.fxn-idv .fxn-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.fxn-idv .fxn-idv-foot .fxn-btn-primary:not([data-dirty="true"]) {
+  border-color: var(--fxn-ink-border);
+  background: transparent;
+  color: var(--fxn-ink-strong);
+}
+
+.fxn-idv .fxn-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.fxn-idv .fxn-btn:focus-visible,
+.fxn-idv .fxn-close:focus-visible,
+.fxn-idv .fxn-idv-coin:focus-visible,
+.fxn-idv .fxn-idv-add input:focus-visible {
+  outline: 2px solid var(--fxn-idc-accent);
+  outline-offset: 2px;
+}
+
+.fxn-idv .fxn-close {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--fxn-ink-border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--fxn-ink-muted);
+  font: 600 var(--fxn-fs-label)/1 var(--font-mono);
+  cursor: pointer;
+}
+
+.fxn-idv .fxn-close:hover {
+  color: var(--fxn-ink-strong);
+  border-color: var(--fxn-idc-accent);
+}
+
+dialog.ark-dialog.fxn-idv {
+  margin: auto;
+  box-shadow: 0 30px 80px -30px var(--fxn-ink-shadow);
+  font-family: var(--font-sans);
+}
+
+dialog.ark-dialog.fxn-idv::backdrop {
+  background: hsl(var(--canvas) / 0.62);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* the view opens: the dialog rises a little and the ground fades in (none with reduced motion) */
+@media (prefers-reduced-motion: no-preference) {
+  dialog.ark-dialog.fxn-idv[open] {
+    animation: fxn-idv-in 420ms cubic-bezier(0.22, 0.7, 0.18, 1);
+  }
+
+  .fxn-idv-guide:not([hidden]),
+  .fxn-idv-detail:not([hidden]) {
+    animation: fxn-idv-panel 320ms cubic-bezier(0.22, 0.7, 0.18, 1);
+  }
+}
+
+@keyframes fxn-idv-in {
+  from { transform: translateY(16px) scale(0.985); }
+  to { transform: none; }
+}
+
+@keyframes fxn-idv-panel {
+  from { transform: translateY(10px); }
+  to { transform: none; }
+}
+
+.fxn-idv-guide p.fxn-idv-kicker,
+.fxn-idv-detail p.fxn-idv-kicker {
+  margin: 0;
+  font-size: var(--fxn-fs-label);
+  color: var(--fxn-idc-accent);
+}
+
+.fxn-idv-guide p,
+.fxn-idv-detail p {
+  line-height: 1.6;
+}

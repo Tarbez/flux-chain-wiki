@@ -11,12 +11,14 @@
 import { easeOf } from '/fxn-3d/scripts/lib/anim-sample.mjs';
 import { uvSphere, torus, prism } from '/fxn-3d/js/render/world2-shapes.mjs';
 import { boxShape } from './world2-pieces.mjs';
+import { SATIN, SHELL, PANEL } from './world2-cardlook.mjs';
+import { drumsOfRows, createDrumParts } from './world2-drums.mjs';   /* a ring of blocks drawn as one solid drum (2026-10-31) */   /* the card's surfaces (docs/design/auth/FXN-ID-CARD.md) */
 import { paintIdPlate } from './world2-plates.mjs';
 import { loadPart, resolveRow, alongPts } from './world2-rows.mjs';
 
 const TAU = Math.PI * 2, clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 /* ring-kit.js blockSet's material: satin with a clear coat, as the record tiles */
-const BLOCK_MAT = { metal: .08, rough: .6, coat: .55, coatRough: .14, env: .75 };
+const BLOCK_MAT = SATIN;   /* the card's plates (world2-cardlook.mjs), not the flat matte they were */
 
 /* a hexagon ring (identity-stages.js rimGeo: ExtrudeGeometry(hexShape(r outer, r inner), { depth })): corners up, from z 0 to depth. It is drawn as light, so it needs no winding or normals */
 function hexRing(ro, ri, depth) {
@@ -98,14 +100,17 @@ export function createIdRig(o) {
     let cfg;
     switch (k.kind) {
       case 'block': {   /* a bevelled block at its true size, drawn by the mesh pass; the lit program keeps its shadow only when the stage casts one */
-        const box = [a[0], a[1], a[2], a[3]], shape = 'idbox:' + box.join(','), mat = a.length > 5 ? { metal: a[5], rough: a[6], coat: a[7], coatRough: a[8], env: a[9] } : BLOCK_MAT;   /* a stage that gave its set a material of its own */
+        const box = [a[0], a[1], a[2], a[3]], shape = 'idbox:' + box.join(','), mat = BLOCK_MAT;   /* 2026-10-31: every block is the card's satin plate (world2-cardlook.mjs SATIN); a set's own matte numbers (a[5..9]) drew the pink rings flat, so they are no longer read */   /* a stage that gave its set a material of its own */
         addShape(shape, () => boxShape(box[0], box[1], box[2], box[3]));
-        cfg = a[4] ? { like: 'solid', shape, piece: { box, mat } } : { like: 'cube', pass: 'blend', piece: { box, mat } };
+        /* a block at its true size takes the card's layered plate; a unit block sized by its rows (the stats floor and bars) keeps one box, as a row's own stretch would pull its plates apart */
+        const plated = !(box[0] === 1 && box[1] === 1 && box[2] === 1);
+        cfg = a[4] ? { like: 'solid', shape, piece: { box, mat, plated } } : { like: 'cube', pass: 'blend', piece: { box, mat, plated } };
+        cfg.ringBox = box;
         break;
       }
-      case 'glass': cfg = { like: 'cube', pass: 'blend', piece: { box: [a[0], a[1], a[2], a[3]], mat: { metal: 0, rough: .08, coat: 1, coatRough: .03, env: .35, opacity: .999 } } }; break;
+      case 'glass': cfg = { like: 'cube', pass: 'blend', piece: { box: [a[0], a[1], a[2], a[3]], mat: SHELL }, ringBox: [a[0], a[1], a[2]] }; break;
       case 'mesh': cfg = { like: null, piece: { mesh: p.part, mat: BLOCK_MAT } }; break;
-      case 'glassmesh': cfg = { like: null, piece: { mesh: p.part, mat: { metal: .15, rough: .25, coat: .8, coatRough: .15, env: 1, opacity: .999 } } }; break;   /* a plate of glass with holes (the download lens) */
+      case 'glassmesh': cfg = { like: null, piece: { mesh: p.part, mat: PANEL } }; break;   /* a plate of glass with holes (the download lens) */
       case 'text': cfg = { like: 'text' }; break;
       case 'glowcube': cfg = { like: 'glow', shape: 'cube', glow: [1, 0, 1], back: a[0] === 'back' }; break;   /* back: the shell of a glass block, its back faces only */
       case 'glowsphere': cfg = { like: 'glow', shape: 'idsphere', glow: [1, 0, 1] }; break;
@@ -311,8 +316,15 @@ export function createIdRig(o) {
       else if (!active[view] && at >= 0) list.splice(at, 1);
     }
   }
+  const drumParts = createDrumParts(R, list, 24, 'id');
+  let drumLists = [[], [], [], []], drumRings = {};
+  /* a row inside one of the view's drums (the words and marks that stood on the ring's blocks) */
+  const insideDrum = (view, out, i) => (drumRings[view] || []).some((r) => Math.hypot(out[i * 16 + 9] - r.x, out[i * 16 + 11] - r.z) < r.R * 1.15 && out[i * 16 + 10] > r.y0 - .05 && out[i * 16 + 10] < r.y1 + .05);
   function flush() {
     sync();
+    drumLists = [[], [], [], []]; drumRings = {};
+    /* blocks first, so a ring's drum is known before the words that stood on its blocks are laid (they leave with the blocks) */
+    for (const view in byView) byView[view].sort((x, y) => (y.cfg && y.cfg.ringBox ? 1 : 0) - (x.cfg && x.cfg.ringBox ? 1 : 0));
     for (const view in byView) {
       const used = {};
       for (const e of byView[view]) {
@@ -333,12 +345,19 @@ export function createIdRig(o) {
         continue;
       }
       if (on) e.out.set(e.local);
+      /* a ring of blocks (or of glass) is one solid drum: its blocks leave the picture and the drum stands in their place */
+      if (on && e.cfg && e.cfg.ringBox) {
+        const d = drumsOfRows(e.out, e.per, e.cfg.ringBox);
+        if (d.used.size) { d.used.forEach((j) => { e.out[j * 16 + 15] = 0; }); for (let k = 0; k < 4; k++) drumLists[k].push(...d.lists[k]); drumRings[view] = (drumRings[view] || []).concat(d.rings); }
+      }
+      if (on && e.cfg && !e.cfg.ringBox && drumRings[view]) for (let i = 0; i < e.per; i++) if (insideDrum(view, e.out, i)) e.out[i * 16 + 15] = 0;
       let any = false;
       if (on) for (let i = 0; i < e.per; i++) if (e.out[i * 16 + 15] > 1e-4) { any = true; break; }
       if (e.part) { e.part.count = any ? e.per : 0; e.part.c = null; if (on) R.updateBuffer(e.buf, e.out, 0); }
       if (e.piece) pieces.write(e.piece, e.out, any ? e.per : 0);
       }
     }
+    drumParts.write(drumLists);
   }
   /* the point light a view casts (the trace's ember): { pos, color, intensity (share of the look's emberlight) } while the view is drawn and the light is on, else null */
   function light() {

@@ -9,20 +9,20 @@
    a frame per state; the words of the panels are painted from the state's own lines, once per state, and handed to the renderer by id. Nothing here schedules a frame. No JSON. */
 import { torus } from '/fxn-3d/js/render/world2-shapes.mjs';
 import { loadPart, resolveRow } from './world2-rows.mjs';
+import { CUBE, PANEL, fontOf, inkOf, paintLabel } from './world2-cardlook.mjs';   /* the card's surfaces and type (docs/design/auth/FXN-ID-CARD.md) */
 
 /* how each part is drawn. like: the renderer's kind; shape: its unit shape; attach: written in the card's units; piece: drawn through the mesh pass (world2-pieces.mjs) */
 const PART = {
   aglow: { like: 'glow', shape: 'cube', glow: [1, 0, 1], attach: true },
   aorbit0: { like: 'glow', shape: 'orbit0', glow: [1, 0, 1] }, aorbit1: { like: 'glow', shape: 'orbit1', glow: [1, 0, 1] },
-  acube: { like: 'cube', pass: 'blend', piece: { kind: 'cube', mat: { metal: .2, rough: .3, coat: .8, coatRough: .1, env: 1, opacity: .999 } } },
+  acube: { like: 'cube', pass: 'blend', piece: { kind: 'cube', mat: CUBE } },
   abits: { like: 'cube', attach: true },
-  apanel0: { like: null, piece: { mesh: 'apanel0', mat: { metal: .15, rough: .25, coat: .8, coatRough: .15, env: 1, opacity: .999 } } },
-  apanel1: { like: null, piece: { mesh: 'apanel1', mat: { metal: .15, rough: .25, coat: .8, coatRough: .15, env: 1, opacity: .999 } } },
+  apanel0: { like: null, piece: { mesh: 'apanel0', mat: PANEL } },
+  apanel1: { like: null, piece: { mesh: 'apanel1', mat: PANEL } },
   abead: { like: 'dot' }, atop: { like: 'glow', shape: 'cube', glow: [1, 0, 1] }, atext0: { like: 'text' }, atext1: { like: 'text' }
 };
 const CHANNELS = ['lift', 'tip', 'glow', 'orbit', 'gather', 'broken', 'loose', 'bad', 'cspin'];
 const TAU = Math.PI * 2;
-const MONO = '"JetBrains Mono", ui-monospace, monospace';
 
 export function createRig(o) {
   const { world, R, blob, lines, palette, wake, pieces, meshes } = o;
@@ -128,10 +128,17 @@ export function createRig(o) {
     ];
     sheets.forEach((sh, k) => {
       const e = P['atext' + k]; if (!e || !e.part) return;
-      const q = panel[k], cv = document.createElement('canvas'); cv.width = 512; cv.height = Math.round(512 * q.h / q.w);
-      const g = cv.getContext('2d'), u = cv.width / q.w;
-      g.font = '500 34px ' + MONO; if ('letterSpacing' in g) g.letterSpacing = '3px'; g.fillStyle = token('--primary', '#ff8e59'); g.textBaseline = 'middle'; g.fillText(sh.title.toUpperCase(), u * .2, u * .3);
-      sh.rows.forEach((r, i) => { g.font = '500 29px ' + MONO; g.fillStyle = r[1] === 'dim' ? 'rgba(220,214,210,.55)' : 'rgba(246,242,238,1)'; g.fillText(String(r[0]).toUpperCase(), u * .2, u * (.62 + i * .34)); });
+      /* the card's type (world2-cardlook.mjs): the title is the card's label (mono, tracked, the accent, a short rule under it), the rows
+         the theme's strong ink, a dim row in its muted ink. Painted at 1024 across, twice the old 512, so the words stay crisp at the panel's size on
+         a 2x screen. */
+      const q = panel[k], cv = document.createElement('canvas'); cv.width = 1024; cv.height = Math.round(1024 * q.h / q.w);
+      const g = cv.getContext('2d'), u = cv.width / q.w, s = cv.width / 512;
+      paintLabel(g, sh.title, u * .2, u * .28, 30 * s, token('--primary', '#ff8e59'));
+      sh.rows.forEach((r, i) => {
+        g.font = '500 ' + (27 * s) + 'px ' + fontOf('mono'); if ('letterSpacing' in g) g.letterSpacing = (27 * s * .06).toFixed(1) + 'px';
+        g.fillStyle = r[1] === 'dim' ? inkOf('--text-muted', .75, 'rgba(238,242,240,.5)') : inkOf('--text-strong', 1, '#eef2f0');   /* the theme's ink: the panel's glass is light in a light theme */
+        g.fillText(String(r[0]).toUpperCase(), u * .2, u * (.64 + i * .34));
+      });
       if (e.part.tex) R.dropTexture(e.part.tex);
       e.part.tex = 'rig' + k + ':' + id; R.setTexture(e.part.tex, cv);
     });

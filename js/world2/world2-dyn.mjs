@@ -22,6 +22,8 @@ import { eyeOf, view as viewMatrix } from '/fxn-3d/js/render/world2-math.mjs';
 import { easeOf } from '/fxn-3d/scripts/lib/anim-sample.mjs';
 import { paintPlate } from './world2-plates.mjs';
 import { loadPart, resolveRow } from './world2-rows.mjs';
+import { SATIN, RAIL, STAMP, GLASS, SHELL, SLAB, SLAB_RIM } from './world2-cardlook.mjs';
+import { drumsOfRows, createDrumParts } from './world2-drums.mjs';   /* your ring's records stand on a solid drum (2026-10-31) */   /* the card's surfaces (docs/design/auth/FXN-ID-CARD.md) */
 
 const TAU = Math.PI * 2, LIFT = .16, HALF_D = .15;
 const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
@@ -35,19 +37,20 @@ const yawOf = (r) => Math.atan2(-r[2], r[0]);
    places (the slab) */
 /* piece: the part is drawn through the mesh pass (world2-pieces.mjs) with ring-kit.js's material for that part: tiles satin with a clear coat (tileMaterial), links
    MeshStandard, the page dark matte glass (kind page), the earlier versions' panes clear glass (blockSet, opacity .34 in the row), the record's shell black glass */
-const TILE_MAT = { metal: .08, rough: .6, coat: .55, coatRough: .14, env: .75 };
+/* 2026-10-31: the surfaces are the FXN ID card's (world2-cardlook.mjs): satin metal under a clear coat, not the flat matte they were */
+const TILE_MAT = SATIN;
 /* the open card (record-glass.js cardMat: near-black glass) as the mesh pass draws it: no clear coat, almost no room, so the chosen tile is black while it becomes the card and not the tile's colour lit by the room */
 const CARD_MAT = { metal: 0, rough: .5, coat: 0, coatRough: .5, env: .08 };
 const PART = {
-  ytile: { like: 'tile', mode: 'pose', shadow: true, piece: { kind: 'tile', mat: TILE_MAT } }, ylink: { like: 'link', mode: 'pose', shadow: true, piece: { kind: 'link', mat: { metal: .2, rough: .55, env: 1 } } },
-  clink: { like: 'link', mode: 'link', shadow: true, piece: { kind: 'link', mat: { metal: .2, rough: .55, env: 1 } } },
+  ytile: { like: 'tile', mode: 'pose', shadow: true, piece: { kind: 'tile', mat: TILE_MAT } }, ylink: { like: 'link', mode: 'pose', shadow: true, piece: { kind: 'link', mat: RAIL } },
+  clink: { like: 'link', mode: 'link', shadow: true, piece: { kind: 'link', mat: RAIL } },
   kring: { like: 'dot', mode: 'lin' }, runbead: { like: 'dot', mode: 'lin' },
-  pane: { like: 'cube', mode: 'pose', pass: 'blend', piece: { kind: 'pane', mat: { metal: .08, rough: .18, coat: .55, coatRough: .14, env: .75, opacity: .999 } } },
-  shell: { like: 'cube', mode: 'pose', pass: 'blend', piece: { kind: 'shell', mat: { metal: 0, rough: .08, coat: 1, coatRough: .03, env: .35, opacity: .999 } } },
+  pane: { like: 'cube', mode: 'pose', pass: 'blend', piece: { kind: 'pane', mat: GLASS } },
+  shell: { like: 'cube', mode: 'pose', pass: 'blend', piece: { kind: 'shell', mat: SHELL } },
   edge: { like: 'glow', shape: 'cube', glow: [1, 0, 1], mode: 'pose' }, bead: { like: 'dot', mode: 'lin' }, proof: { like: 'line', mode: 'lin' },
-  key: { like: 'solid', shape: 'hexprism', mode: 'lin', shadow: true, piece: { kind: 'hex', mat: { metal: .35, rough: .45, coat: .4, coatRough: .25, env: 1 } } }, keyrim: { like: 'glow', shape: 'thintorus', glow: [1, 0, 1], mode: 'lin' },
-  pool: { like: 'pool', mode: 'pose' }, slab: { like: 'tile', mode: 'pose', hold: true, piece: { kind: 'tile', mat: { metal: .08, rough: .78, coat: .1, coatRough: .5, env: .35 } } },
-  slabrim: { like: 'tile', mode: 'pose', hold: true, piece: { kind: 'tile', mat: { metal: .08, rough: .4, env: .75 } } },
+  key: { like: 'solid', shape: 'hexprism', mode: 'lin', shadow: true, piece: { kind: 'hex', mat: STAMP } }, keyrim: { like: 'glow', shape: 'thintorus', glow: [1, 0, 1], mode: 'lin' },
+  pool: { like: 'pool', mode: 'pose' }, slab: { like: 'tile', mode: 'pose', hold: true, piece: { kind: 'tile', mat: SLAB, plated: false } },
+  slabrim: { like: 'tile', mode: 'pose', hold: true, piece: { kind: 'tile', mat: SLAB_RIM, plated: false } },
   rel: { like: 'tile', mode: 'pose', shadow: true, piece: { kind: 'tile', mat: TILE_MAT } }, spot: { like: null, mode: 'lin' }
 };
 for (let i = 0; i < 9; i++) PART['plate' + i] = { like: 'text', mode: 'pose' };
@@ -110,6 +113,7 @@ export function createDyn(o) {
     P[p.part] = e; order.push(e);
   }
   const drawn = order.filter((e) => e.part).map((e) => e.part);
+  const drumParts = createDrumParts(R, drawn, 4, 'y');
   const pickParts = drawn.filter((q) => q.pick);
 
   /* ---------- the items and the words ---------- */
@@ -382,7 +386,7 @@ export function createDyn(o) {
   let dimMine = 0;
   function setDim(d) { if (Math.abs(d - dimMine) > 1e-4) { dimMine = d; return true; } return false; }
   function flush(off) {
-    if (off) { if (cardPiece) pieces.write(cardPiece, cardRow, 0); for (const e of order) if (e.part) { e.part.count = 0; if (e.piece) pieces.write(e.piece, e.out, 0); } return; }
+    if (off) { drumParts.write(null); if (cardPiece) pieces.write(cardPiece, cardRow, 0); for (const e of order) if (e.part) { e.part.count = 0; if (e.piece) pieces.write(e.piece, e.out, 0); } return; }
     for (const e of order) if (!e.cfg.hold) e.out.set(e.cur);
     /* your ring, where the network steps back: on a view that is not the chain's own (the identity and how-it-works views, any page over the network) its tiles are the network's, whose colour is
        darkened by the step back (chains-scene.js netSet.tint: multiplyScalar(1 - dims)); the chain's own views keep them lit. The step back fades out as the ring becomes the chain (m). */
@@ -416,6 +420,8 @@ export function createDyn(o) {
       if (q != null && out[q * 16 + 15] > 1e-4) { for (let k = 0; k < 16; k++) cardRow[k] = out[q * 16 + k]; out[q * 16 + 15] = 0; swapped = 1; }
     }
     if (cardPiece) pieces.write(cardPiece, cardRow, swapped);
+    /* your ring of records keeps its records (they carry the words) and stands on one solid drum that closes it, in the card's metal */
+    drumParts.write(drumsOfRows(P.ytile.out, P.ytile.per, [1, 1, .28], { pedestal: true }).lists);
     for (const e of order) {
       if (e.cfg.hold) continue;
       let any = false;

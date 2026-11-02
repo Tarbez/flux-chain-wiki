@@ -50,7 +50,26 @@ var ArkWorld = (function () {
       emberLight: [0, 60, 26, 0.5, 'Record light (trace page)'],
       emberReach: [2, 40, 12, 0.5, 'Record light reach'],
       beam: [0, 1, 1, 0.05, 'Beam'],
-      dust: [0, 400, 150, 10, 'Dust specks']
+      dust: [0, 400, 150, 10, 'Dust specks'],
+      /* the surface knobs (2026-10-31, the FXN ID card's look on the world; fxn-3d engine/render/world-shaders.mjs WORLD.knobs). Their defaults
+         draw what the world drew before them; js/content/world-data.js carries the values the site uses. */
+      floorFine: [0, 1, 0, 0.01, 'Floor fine lines'],
+      floorSheen: [0, 0.3, 0, 0.005, 'Floor sheen'],
+      shadowStrength: [0, 1, 1, 0.01, 'Ground shadow strength'],
+      shadowSoft: [0, 3, 0, 0.05, 'Ground shadow softness'],
+      shadowLight: [0, 1, 1, 0.01, 'Ground shadow in a light theme (times the strength)'],
+      flow: [0, 2, 0, 0.05, 'Light along the links'],
+      flowSpeed: [0, 2, 0.35, 0.01, 'Light along the links, speed (lengths per second)'],
+      slotLight: [0, 1, 1, 0.01, 'Ring slots in a light theme'],
+      mirror: [0, 1, 0, 0.01, 'Floor reflection'],
+      mirrorFade: [0.2, 10, 2.5, 0.1, 'Floor reflection depth (world units)'],
+      seam: [0, 1, 0, 0.05, 'Plate seams on tiles and cubes'],
+      edgeGain: [0, 2, 1, 0.05, 'Edge light'],
+      orbitAccent: [0, 1, 0, 0.05, 'Orbit circles in the accent'],
+      orbitEngrave: [0, 1, 0, 0.05, 'Orbit circles engraved (second line)'],
+      hubStack: [0, 1, 0, 0.05, 'Kernel built as stacked plates'],
+      contact: [0, 1, 0, 0.05, 'Contact shadow'],
+      ringPlate: [0, 1, 0, 0.05, 'Rings stand on lit plates']
     },
     motion: {
       flight: [400, 4000, 1750, 50, 'Camera flight (ms)'],

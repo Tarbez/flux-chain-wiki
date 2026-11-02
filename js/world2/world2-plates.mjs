@@ -5,7 +5,10 @@
    version's revision; the person of your key. This file only draws them, in the sizes and fonts of scripts/lib/stage-src/chains-scene.js drawRecord
    and its pane plates, with the live theme's colours, so one repaint (a theme change, a font landing) draws them again. The canvases are
    handed to the renderer by id (R.setTexture), one upload each. */
-const MONO = '"JetBrains Mono", ui-monospace, monospace', SANS = '"Inter Tight", Inter, system-ui, sans-serif';
+import { fontOf } from './world2-cardlook.mjs';
+/* the faces are the site's own font slots, read when a plate is painted (2026-10-31: the FXN ID card's type, docs/design/auth/FXN-ID-CARD.md):
+   "JetBrains Mono" and "Inter Tight" were named here, and the site loads neither, so every plate fell back to the system's faces */
+const face = { get mono() { return fontOf('mono'); }, get sans() { return fontOf('sans'); } };
 
 /* a theme colour as the world reads it: HSL channels on body ("210 18% 72%") become a CSS colour */
 function token(name, fallback) {
@@ -27,21 +30,21 @@ export function paintPlate(spec) {
   const kind = spec[0], ink = token('--text-strong', '#f3f8f4'), mute = token('--text-muted', '#9aa3a8'), sig = token('--signal', '#3fd1a8');
   if (kind === 'record') {
     const [, rev, title, date, signed] = spec, w = 512, h = 512, pad = 40, cv = canvas(w, h), g = cv.getContext('2d');
-    g.fillStyle = mute; g.font = '500 30px ' + MONO; if ('letterSpacing' in g) g.letterSpacing = '5px';
+    g.fillStyle = mute; g.font = '500 30px ' + face.mono; if ('letterSpacing' in g) g.letterSpacing = '5px';
     g.fillText(rev, pad, pad + 26);
     g.globalAlpha = .5; g.fillRect(pad, pad + 48, w - pad * 2, 2); g.globalAlpha = 1;
     if ('letterSpacing' in g) g.letterSpacing = '-1px';
-    g.fillStyle = ink; g.font = '700 66px ' + SANS;
+    g.fillStyle = ink; g.font = '700 66px ' + face.sans;
     wrapWords(g, title, w - pad * 2, 3).forEach((l, i) => g.fillText(l, pad, pad + 140 + i * 74));
     if ('letterSpacing' in g) g.letterSpacing = '3px';
-    g.fillStyle = mute; g.font = '500 28px ' + MONO; g.fillText(date, pad, h - pad);
+    g.fillStyle = mute; g.font = '500 28px ' + face.mono; g.fillText(date, pad, h - pad);
     if (signed) { g.fillStyle = sig; g.fillText(signed, w - pad - g.measureText(signed).width, h - pad); }
     return cv;
   }
   if (kind === 'rev') {
     const w = 512, h = Math.round(512 * .22 / .84), cv = canvas(w, h), g = cv.getContext('2d');
     if (!spec[1]) return cv;
-    g.fillStyle = ink; g.font = '600 64px ' + MONO; if ('letterSpacing' in g) g.letterSpacing = '8px';
+    g.fillStyle = ink; g.font = '600 64px ' + face.mono; if ('letterSpacing' in g) g.letterSpacing = '8px';
     g.fillText(spec[1], 24, h * .7);
     return cv;
   }
@@ -55,8 +58,8 @@ export function paintPlate(spec) {
 
 /* ---------- the identity steps' plates (scripts/lib/stage-src/identity-stages.js textPlate): the key file's name, the app's lines, the signing request, the vault's three icons,
    the person mark, the name, a device's screen. spec: [kind, w, h, ...words]; w and h are the plate's size in the world, its canvas is 512 wide ---------- */
-function mono(g, px, sp, wt) { g.font = (wt || 500) + ' ' + px + 'px "JetBrains Mono", ui-monospace, monospace'; if ('letterSpacing' in g) g.letterSpacing = (sp == null ? 3 : sp) + 'px'; }
-function sans(g, px, wt) { g.font = (wt || 700) + ' ' + px + 'px "Inter Tight", Inter, system-ui, sans-serif'; if ('letterSpacing' in g) g.letterSpacing = '-1px'; }
+function mono(g, px, sp, wt) { g.font = (wt || 500) + ' ' + px + 'px ' + face.mono; if ('letterSpacing' in g) g.letterSpacing = (sp == null ? 3 : sp) + 'px'; }
+function sans(g, px, wt) { g.font = (wt || 700) + ' ' + px + 'px ' + face.sans; if ('letterSpacing' in g) g.letterSpacing = '-1px'; }
 export function paintIdPlate(spec) {
   const kind = spec[0], pw = Number(spec[1]), ph = Number(spec[2]), words = spec.slice(3), cv = canvas(512, Math.round(512 * ph / pw)), g = cv.getContext('2d'), w = cv.width, h = cv.height;
   const strong = token('--text-strong', '#f3f8f4'), muted = token('--text-muted', '#9aa3a8'), signal = token('--signal', '#3fd1a8'), honey = token('--state-partial', '#e8b55a');

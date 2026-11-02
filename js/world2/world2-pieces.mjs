@@ -29,28 +29,55 @@ export function boxShape(w, h, d, r, seg = 4) {
   return { pos, nrm: g.nrm, uv: g.uv, idx: g.idx };
 }
 
+/* The FXN ID card's layered plate (2026-10-31, docs/design/auth/FXN-ID-CARD.md): a block is a body with a plate a step proud of it on each of its
+   broad faces, so a record, an identity block or a cube reads as stacked plates with a gap between them, as the card's plates do. The body is the
+   box made thinner across its broad faces; each plate is 80% of the face, as deep as the box was, with a tighter corner. The box's outer size is
+   unchanged, so every place and every instance matrix stays as it was. A face narrower than a fifth of the box takes no plate. */
+function merge(parts) {
+  const pos = [], nrm = [], uv = [], idx = [];
+  for (const g of parts) { const base = pos.length / 3; pos.push(...g.pos); nrm.push(...g.nrm); uv.push(...g.uv); for (const i of g.idx) idx.push(base + i); }
+  return { pos, nrm, uv, idx };
+}
+export function platedShape(w, h, d, r) {
+  const dim = [w, h, d], big = Math.max(w, h, d), parts = [], axes = [0, 1, 2].filter((k) => dim.filter((_, j) => j !== k).every((x) => x > big * .2));
+  /* the body: thinner along each plated axis by a step either side */
+  const body = dim.map((x, k) => (axes.includes(k) ? x - Math.min(x * .18, big * .09) : x));
+  parts.push(boxShape(body[0], body[1], body[2], Math.min(r, Math.min(...body) / 2.2)));
+  for (const k of axes) {
+    const pl = dim.map((x, j) => (j === k ? x : x * .8));
+    parts.push(boxShape(pl[0], pl[1], pl[2], Math.min(r * .6, Math.min(...pl) / 2.2)));
+  }
+  return merge(parts);
+}
+
 /* mesh: the module world2-mesh.mjs (the host imports it once, when the first piece is needed); env: its baked room or null */
 export function createPieces(R, mesh, env) {
   const gl = R.gl, prog = mesh.createCardProgram(gl), ups = new Map(), list = [], room = env ? mesh.uploadEnvironment(gl, env) : null;
   /* the shapes a part may name: size (w, h, d) and corner radius, from ring-kit.js and chains-scene.js */
   const SHAPES = { tile: [1, 1, .28, .028], link: [1, .24, .12, .012], pane: [1, 1, .03, .003], shell: [1.03, 1.03, .31, .031], sheet: [1, 1, .1, .01], cube: [1, 1, 1, .12] };
   /* a box of its own size (w, h, d, corner radius), as ring-kit.js k.bevel builds a block: the identity views' forms */
-  function boxUp(b) {
-    const key = 'box:' + b.join(',');
+  function boxUp(b, plated) {
+    const key = (plated ? 'plated:' : 'box:') + b.join(',');
     if (ups.has(key)) return ups.get(key);
-    const g = boxShape(b[0], b[1], b[2], b[3]), parsed = mesh.quantizedShape(g.pos, g.nrm, g.idx, [255, 255, 255, 255], Math.max(b[0], b[1], b[2]) / 2 + 1e-3), up = mesh.uploadMesh(gl, parsed);
+    const g = plated ? platedShape(b[0], b[1], b[2], b[3]) : boxShape(b[0], b[1], b[2], b[3]), parsed = mesh.quantizedShape(g.pos, g.nrm, g.idx, [255, 255, 255, 255], Math.max(b[0], b[1], b[2]) / 2 + 1e-3), up = mesh.uploadMesh(gl, parsed);
     ups.set(key, up); return up;
   }
-  function upOf(kind) {
-    if (ups.has(kind)) return ups.get(kind);
+  /* the opaque blocks take the card's layered plate; glass, rails and the thin sheets keep one box */
+  const PLATED = new Set(['tile', 'cube']);
+  function upOf(kind, plated) {
+    const key = (plated ? 'plated:' : '') + kind;
+    if (ups.has(key)) return ups.get(key);
     const s = SHAPES[kind]; if (!s && kind !== 'hex') throw new Error('pieces: no shape named ' + kind + ' (world2-pieces.mjs SHAPES), so the part cannot be drawn through the mesh pass');
-    const g = kind === 'hex' ? prism(HEX) : boxShape(s[0], s[1], s[2], s[3]), half = kind === 'hex' ? 1 : Math.max(s[0], s[1], s[2]) / 2 + 1e-3;
+    const g = kind === 'hex' ? prism(HEX) : plated ? platedShape(s[0], s[1], s[2], s[3]) : boxShape(s[0], s[1], s[2], s[3]), half = kind === 'hex' ? 1 : Math.max(s[0], s[1], s[2]) / 2 + 1e-3;
     const parsed = mesh.quantizedShape(g.pos, g.nrm, g.idx, [255, 255, 255, 255], half), up = mesh.uploadMesh(gl, parsed);
-    ups.set(kind, up); return up;
+    ups.set(key, up); return up;
   }
   /* a piece: one part of the stage drawn as one instanced mesh. spec: { kind, mat: { metal, rough, coat, coatRough, env, opacity, emission }, glass } */
   function add(name, spec, rows) {
-    const up = spec.box ? boxUp(spec.box) : upOf(spec.kind), data = new Float32Array(rows), glass = (spec.mat.opacity == null ? 1 : spec.mat.opacity) < 1;
+    /* a broad flat slab (a floor, a page) keeps one box: its plate would read as a second slab beside it */
+    const flat = spec.box && Math.max(spec.box[0], spec.box[1], spec.box[2]) > 8 * Math.min(spec.box[0], spec.box[1], spec.box[2]);
+    const glass = (spec.mat.opacity == null ? 1 : spec.mat.opacity) < 1, plated = !glass && !flat && spec.plated !== false;
+    const up = spec.box ? boxUp(spec.box, plated) : upOf(spec.kind, plated && PLATED.has(spec.kind)), data = new Float32Array(rows);
     const inst = mesh.uploadInstances(gl, up, data, glass);
     const p = { name, up, inst, data, count: 0, o: { mode: 0, post: 0, inst, mat: Object.assign({ rgb: [1, 1, 1] }, spec.mat), faces: spec.faces } };
     list.push(p); return p;
