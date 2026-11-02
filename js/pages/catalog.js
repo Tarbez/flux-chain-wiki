@@ -168,8 +168,10 @@ var arkPageModules = {
   account: { module: 'account', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/account-session.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/ark/profile-card.js', 'js/pages/account.js']) },
   /* /auth: signing in with your FXN ID file, split out of /account (owner, 2026-10-25). It stands on the 3D world
      (js/world/auth-stage.js) and uses /account's one sign-in session (js/ark/account-session.js), with the same
-     scripts that session needs: the panel and signer, the mesh directory publish and its signing review. */
-  auth: { module: 'auth', scripts: ['js/ark/ml-dsa.js', 'js/admin/auth.js', 'js/ark/account-session.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/profile-card.js', 'js/pages/auth.js'] },
+     scripts that session needs: the panel and signer, the mesh directory publish and its signing review. The create panel
+     is here for its grades only (ArkAuthKitCreatePanel.grades): the wizard tells the FXN ID card the PIN and password
+     grades by the panel's one rule (js/ark/fxn-id-card/fxn-id-card-stage.js). */
+  auth: { module: 'auth', scripts: ['js/ark/ml-dsa.js', 'js/admin/auth.js', 'js/ark/auth-kit-create-panel.js', 'js/ark/account-session.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/profile-card.js', 'js/pages/auth.js'] },
   'account/domains': { module: 'accountDomains', scripts: ['js/ark/local-domains.js'].concat(ArkUI.blockScripts, ['js/ark/vendor/ark-kit-forms.js', 'js/pages/account-domains.js']) },
   treasury: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/economy-preview.js']) },
   deposits: { module: 'economyPreview', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/pages/economy-preview.js']) },

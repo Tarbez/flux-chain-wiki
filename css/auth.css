@@ -17,6 +17,13 @@
 .auth-world::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 52%; pointer-events: none;
   background: linear-gradient(90deg, hsl(var(--canvas) / .9) 0, hsl(var(--canvas) / .78) 55%, transparent 100%); }
 .auth-stage { position: absolute; top: 0; bottom: 58px; left: 38%; right: var(--aw-rail); pointer-events: none; }
+/* the FXN ID card (js/ark/fxn-id-card/, the fxn-3d card FXN Browser shows; js/pages/auth.js emitCard). It replaced the world's own
+   card (js/world2/world2-host.mjs NO_MESH_CARD) and stands where that card stood, on the world's ground, with no plate of its own:
+   blank until you start making an FXN ID, then built step by step. Its box sits at the stage's right, so the close steps frame
+   their plates beside the words, not under them. 16:9, near FXN Browser's stage. The card's glow takes the theme's --primary
+   (js/ark/fxn-id-card/fxn-id-card.css, HOST). */
+.auth-idcard { position: absolute; right: 0; top: 50%; width: min(100%, 700px); aspect-ratio: 16 / 9; transform: translateY(-50%); }
+.auth-idcard[hidden] { display: none; }
 
 /* ---- the words ---- */
 .auth-words { position: absolute; left: var(--aw-pad); top: max(18px, 3.4vh); bottom: 64px; width: min(660px, 45vw); display: flex; flex-direction: column; min-height: 0; }
@@ -313,6 +320,7 @@
   .auth-world { display: block; padding: 0 16px 96px; pointer-events: auto; overflow-y: auto; overscroll-behavior: contain; }
   .auth-world::before { display: none; }
   .auth-stage { position: relative; left: auto; right: auto; top: auto; bottom: auto; height: min(78vw, 340px); margin: 0 -16px; }
+  .auth-idcard { right: 16px; width: calc(100% - 32px); max-height: calc(100% - 16px); }
   .auth-words { position: relative; left: auto; top: auto; bottom: auto; width: auto; }
   .auth-world h1 { font-size: var(--fs-hero); }
   .auth-lede { font-size: var(--fs-secondary); }

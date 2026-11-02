@@ -412,6 +412,9 @@
     return { reset: function () { stage = 'form'; kit = null; render(); } };
   }
 
-  window.ArkUI.authKitCreatePanel = { mount: mount };
-  window.ArkAuthKitCreatePanel = { mount: mount };
+  /* The grades the v10 strength bars show, for a create flow that is not this panel but tells the same FXN ID card
+     (js/pages/auth.js's wizard, through js/ark/fxn-id-card/fxn-id-card-stage.js): one rule for a grade, here. */
+  var grades = { pin: pinStrength, password: passwordStrength };
+  window.ArkUI.authKitCreatePanel = { mount: mount, grades: grades };
+  window.ArkAuthKitCreatePanel = { mount: mount, grades: grades };
 })();

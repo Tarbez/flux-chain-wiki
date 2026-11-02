@@ -31,6 +31,10 @@
    7 Removable: the rail on a phone. 8 Leaving keeps state: the session outlives the page. 9 Returning: the state is
    read again on mount. 10 If WebGL is missing: the words, the card's facts and the rail still say everything.
 
+   The card in the stage is the FXN ID card (fxn-3d, js/ark/fxn-id-card/, the card FXN Browser shows; it replaced the world's
+   own card). It is blank until you press "Create a new identity", then it builds and does each step's part:
+   docs/design/auth/FXN-ID-CARD.md.
+
    Layout: css/auth.css. */
 (function () {
   'use strict';
@@ -144,6 +148,11 @@
          first in the page, because the sign-in panel's own root also carries a data-stage attribute. */
       var stage = el('div', 'auth-stage'); stage.setAttribute('data-stage', ''); stage.setAttribute('aria-hidden', 'true');
       page.appendChild(stage);
+      /* the FXN ID card (owner, 2026-10-31: the card FXN Browser shows, js/ark/fxn-id-card/, drawn by fxn-3d). It replaced the
+         world's own card (js/world2/world2-host.mjs NO_MESH_CARD) and stands where that card stood: blank until you press "Create a
+         new identity", then it builds and does each step's part (see emitCard below) */
+      var idStage = el('div', 'auth-idcard'); idStage.hidden = true;
+      stage.appendChild(idStage);
       /* the DEFXN mark for the identity's avatar (js/ark/mark-data.js, which the world loads) */
       function markVar() { if (window.DEFXN_MARK) page.style.setProperty('--auth-mark', 'url("' + window.DEFXN_MARK + '")'); }
       markVar(); if (!window.DEFXN_MARK && window.ArkWorldHost && window.ArkWorldHost.whenReady) window.ArkWorldHost.whenReady(markVar);
@@ -185,7 +194,7 @@
          makes the file, adds the first Public ID, and gives each gate node its piece of the Master ID Secret Key. Then
          the page shows the Emergency Kit once (the Master ID recovery phrase and the Master ID Secret Key) and saves the
          file. The icon list is ark-ui's FXN_ID_ICONS, never a copy. The PIN rule said here is the writer's own rule,
-         told a step earlier; the writer still checks it. Each step builds the 3D card further (auth-stage.js 'create'). */
+         told a step earlier; the writer still checks it. Each step builds the FXN ID card further (emitCard); the world's stage still hears the step for its panels. */
       var ICONS = (window.ArkAdminAuth && ArkAdminAuth.FXN_ID_ICONS) || [];
       /* the gate committee a new FXN ID is enrolled with: the devnet committee (2 of 3 at gate.defxn.com), a byte copy of
          flux/devnet-deploy-2026-10-23/gate/gate.committee in fxn-auth's own grammar. In assets/, so every host serves it. */
@@ -198,8 +207,8 @@
         { key: 'icon', title: ['Pick your', 'icon.'], lede: 'Pick one of nine icons. You pick it again each time you sign in, so remember it.', label: 'Icon' },
         { key: 'words', title: ['Choose your', 'recovery words.'], lede: 'Your Master ID recovery phrase brings your identity back if you lose the file. More words are harder to guess.', label: 'Recovery words' }
       ];
-      var creating = false, cphase = 'ask', made = null, cstep = 0, cdir = 1, cerr = '', cvals = null;
-      function resetCreate() { cphase = 'ask'; made = null; cstep = 0; cdir = 1; cerr = ''; cvals = { displayName: '', pin: '', password: '', word: '', icon: '', wordCount: '24' }; }
+      var creating = false, cphase = 'ask', made = null, cstep = 0, cdir = 1, cerr = '', cvals = null, kitConfirmed = false;
+      function resetCreate() { cphase = 'ask'; made = null; cstep = 0; cdir = 1; cerr = ''; kitConfirmed = false; cvals = { displayName: '', pin: '', password: '', word: '', icon: '', wordCount: '24' }; }
       resetCreate();
       function sendCreate3d() { var h = window.ArkWorldHost; if (h && h.ready && h.select) h.select({ s: 'create', b: cstep, ic: cvals.icon }); }
       function startCreate() {
@@ -241,6 +250,37 @@
       /* the 3D's build step: each answered question, then making */
       function cresult() { return cphase === 'making' ? { error: false, text: 'making' } : null; }
       function createStage() { return cphase === 'kit' ? 'words' : cphase === 'saved' ? 'saved' : 'create'; }
+      /* ---- THE FXN ID CARD beside the wizard. The wizard tells it what the create panel tells it (js/ark/auth-kit-create-panel.js,
+         opts.onCard): { screen, name, pinGrade, passwordGrade, icon, total, picked }, through the same onCard
+         (js/ark/fxn-id-card/fxn-id-card-stage.js). Grades and counts only: the PIN, password, key word and recovery words never
+         reach it. The grades are the panel's own rule (ArkAuthKitCreatePanel.grades), kept after the PIN and password leave
+         memory. Each step does its part on the card: the name types onto it, the PIN seats the security plate, the password
+         seals it, the key word and icon strike the stamp, the word count turns it over to its recovery vault, the Emergency Kit
+         lights the vault's cells once you confirm you wrote the words down, and the saved file turns it back finished. */
+      var WIZARD_SCREEN = ['name', 'pin', 'password', 'word', 'word', 'words'];
+      var cgrades = { pin: 0, password: 0 }, cardStage = null, cardLoading = null;
+      function cardInfo() {
+        var g = window.ArkAuthKitCreatePanel && ArkAuthKitCreatePanel.grades;
+        if (g && cphase === 'ask') cgrades = { pin: g.pin(cvals.pin), password: g.password(cvals.password) };
+        var total = Number(cvals.wordCount) === 12 ? 12 : 24;
+        var screen = cphase === 'saved' ? 'done' : cphase === 'kit' ? (kitConfirmed ? 'confirm' : 'words') : cphase === 'making' ? 'words' : WIZARD_SCREEN[cstep];
+        return { screen: screen, name: cvals.displayName.trim(), pinGrade: cgrades.pin, passwordGrade: cgrades.password, icon: cvals.icon, total: total, picked: kitConfirmed ? total : 0 };
+      }
+      /* Outside the wizard the card is blank (owner, 2026-10-31: blank until you start, then it builds piece by piece), except
+         with an FXN ID open on this tab, where it stands finished at its welcome pose with your name. */
+      function emitCard() {
+        idStage.hidden = false;
+        if (cardStage) {
+          if (creating && (state === 'create' || state === 'words' || state === 'saved')) cardStage.onCard(null, cardInfo());
+          else if (state === 'connected' || state === 'offline') { var who = ArkUI.localIdentity.current() || {}; cardStage.show('welcome', { name: who.displayName || '', pinGrade: 4, passwordGrade: 4 }); }
+          else cardStage.show('blank');
+          return;
+        }
+        if (!cardLoading) cardLoading = import('/js/ark/fxn-id-card/fxn-id-card-stage.js').then(function (m) { cardStage = m.createCardStage(idStage); return cardStage; }, function (error) {
+          console.info('[auth] The FXN ID card did not load (' + error.message + '). The steps work without it.'); return null;
+        });
+        cardLoading.then(function (loaded) { if (loaded && page.isConnected) emitCard(); });
+      }
       function choose() { creating = false; happened = ''; if (state === 'restore') keptSeen = true; var p = panel(); if (p && p.getAttribute('data-stage') === 'unlock') act('clear'); act('import'); }
 
       /* the network this browser is set to (js/ark/dense-wire-wallet.mjs, the header's control) */
@@ -496,7 +536,7 @@
           var lab = el('label', 'auth-wfield'); lab.appendChild(el('span', null, st.label + (st.optional ? ' (optional)' : '')));
           var inp = el('input'); inp.type = st.input.type; inp.name = st.input.name; inp.value = cvals[st.input.name]; inp.autocomplete = st.input.auto || 'off'; inp.spellcheck = false;
           if (st.input.max) inp.maxLength = st.input.max; if (st.input.mode) inp.inputMode = st.input.mode; if (st.input.hint) inp.placeholder = st.input.hint;
-          inp.addEventListener('input', function () { cvals[st.input.name] = inp.value; });
+          inp.addEventListener('input', function () { cvals[st.input.name] = inp.value; emitCard(); });
           lab.appendChild(inp); pane.appendChild(lab);
         } else {
           var opts = st.key === 'icon' ? ICONS.map(function (c) { return [c.id, c.path, c.label]; }) : [['24', '24 words', 'The stronger choice'], ['12', '12 words', 'Quicker to write down']];
@@ -508,7 +548,8 @@
             else { b.appendChild(el('b', null, o[1])); b.appendChild(el('small', null, o[2])); }
             b.addEventListener('click', function () {
               cvals[field] = o[0]; pick.querySelectorAll('.auth-wopt').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });
-              if (field === 'icon') sendCreate3d();   /* the 3D card shows the icon you pick */
+              if (field === 'icon') sendCreate3d();   /* the world's stage hears the icon you pick */
+              emitCard();   /* the FXN ID card stamps the icon, or counts the recovery cells */
             });
             pick.appendChild(b);
           });
@@ -550,8 +591,8 @@
         box.appendChild(gl);
         f.appendChild(box);
         var ok = el('label', 'auth-kit-confirm'); var cb = el('input'); cb.type = 'checkbox'; ok.appendChild(cb); ok.appendChild(el('span', null, 'I wrote down the phrase and the Secret Key, on paper'));
-        var acts = el('div', 'auth-actions auth-kit-acts'); var save = main('Save FXN ID file', saveFile); save.disabled = true; acts.appendChild(ok); acts.appendChild(save); f.appendChild(acts);
-        cb.addEventListener('change', function () { save.disabled = !cb.checked; });
+        var acts = el('div', 'auth-actions auth-kit-acts'); var save = main('Save FXN ID file', saveFile); cb.checked = kitConfirmed; save.disabled = !kitConfirmed; acts.appendChild(ok); acts.appendChild(save); f.appendChild(acts);
+        cb.addEventListener('change', function () { save.disabled = !cb.checked; kitConfirmed = cb.checked; emitCard(); });
         f.appendChild(note('lock', 'Anyone with these can open your Master ID. This page shows them once. Never photograph or paste them.'));
         return f;
       }
@@ -651,6 +692,7 @@
         var s3 = s === 'fail' ? 'fail' : s === 'restore' || s === 'cleared' || s === 'ended' ? 'ended' : s;
         var sel = { s: s3, net: network.label, b: s === 'create' ? (cres && !cres.error ? CSTEPS.length : cstep) : 0, ic: creating ? cvals.icon : '' };
         if (host2 && host2.select) { if (host2.ready) host2.select(sel); else host2.state(sel); }
+        emitCard();
         if (changed) {
           if (false && body.animate && !(ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion())) body.animate([{ transform: 'translateY(12px)' }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.22,.7,.18,1)' });   /* motion only: a body that has not started moving is still readable */
         }
@@ -663,7 +705,7 @@
       function onNet() { paint(false); }
       window.addEventListener('online', onNet); window.addEventListener('offline', onNet);
       paint(true);
-      page.arkDispose = function () { window.removeEventListener('online', onNet); window.removeEventListener('offline', onNet); var h = window.ArkWorldHost; if (h && h.scene && h.scene.authFace) h.scene.authFace(null); watch.disconnect(); if (typeof stopId === 'function') stopId(); clearTimeout(holdTimer); session.container.removeEventListener('change', onPick, true); };
+      page.arkDispose = function () { if (cardStage) cardStage.release(); window.removeEventListener('online', onNet); window.removeEventListener('offline', onNet); var h = window.ArkWorldHost; if (h && h.scene && h.scene.authFace) h.scene.authFace(null); watch.disconnect(); if (typeof stopId === 'function') stopId(); clearTimeout(holdTimer); session.container.removeEventListener('change', onPick, true); };
 
       /* the CMS's insertion point for reusable blocks (js/content/components.js): empty, and out of the layout */
       var anchor = el('div', 'world-insert'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);

@@ -235,6 +235,7 @@
       var refs = {};                       // rendered block roots, by name
       var views = {};                      // the persistent view nodes, moved into whichever tabs exist
       var cardHost = null, tabsEl = null, tabsValues = [], railEl = null, identityWrap = null, mapWrap = null, offstage = null;
+      var fxnIdWrap = null, fxnIdStage = null;   // your FXN ID: the card, and the way into the FXN ID view (see "your FXN ID" below)
       var nftSample = null, profileCard = null, cardSeal = null, realCard = null, mintAsk = null, tradeAsk = null, tradeNote = null, salePrice = null, activateNote = null;   // the NFT card (js/ark/profile-card.js): a review sample named in the address
       var lastProps = Object.create(null); // props each live block was last painted with
       var wallet = { symbol: 'FXN', logo: null, balance: null, display: '—', message: 'Sign in to check', key: '' };
@@ -980,6 +981,14 @@
           identityWrap.appendChild(refs.fold); identityWrap.appendChild(refs.dev);
           identityWrap.hidden = !identity;
           left.appendChild(identityWrap);
+          /* your FXN ID (owner, 2026-10-31): the fxn-3d card FXN Browser shows, at its Master ID pose, and the way into the FXN ID
+             view (js/ark/fxn-id-card/). Shown once the file is open, because the view reads the open file's Public IDs. */
+          fxnIdWrap = el('div', 'account-fxnid'); fxnIdWrap.hidden = true;
+          fxnIdStage = el('div', 'account-fxnid-stage'); fxnIdStage.setAttribute('aria-hidden', 'true');
+          fxnIdWrap.appendChild(fxnIdStage);
+          refs.fxnId = make({ block: 'actions', id: 'account-fxnid-open', props: fxnIdProps() }); remember('fxnId', fxnIdProps());
+          fxnIdWrap.appendChild(refs.fxnId);
+          left.appendChild(fxnIdWrap);
           /* the frame the 3D world is fitted to (js/world/world-host.js frame()): your identity over the network, below the words */
           var worldStage = el('div', 'account-stage'); worldStage.setAttribute('data-stage', ''); worldStage.setAttribute('aria-hidden', 'true');
           left.appendChild(worldStage);
@@ -1022,6 +1031,7 @@
           'spend-submit': function () { spendSubmit(); },
           'spend-reset': function () { if (spend) openSpend({ label: spend.label }); },
           'mesh-verify': function () { checkMesh(); },
+          'fxnid-open': function () { openFxnIdView(); },
           'rail-defi': function () { openTab('defi'); },
           'rail-contacts': function () { openTab('contacts'); },
           'rail-mesh': function () { openTab('mesh'); },
@@ -2030,6 +2040,70 @@
         } else if (createPanelHandle) { createPanelHandle.reset(); }
       }
 
+      /* ---- your FXN ID: the card and the FXN ID view ----------------------------------------------------------------
+         The card (js/ark/fxn-id-card/fxn-id-card.js, fxn-3d's player) stands at its Master ID pose under your identity details and
+         leans toward the pointer. "Open your FXN ID" opens the FXN ID view (fxn-id-view.js): the card opens, your Public IDs stand
+         in it as layers, each holding its wallets. The view explains itself in four beats the first time; this device remembers
+         that it has (localStorage, one '1', a per-viewer convenience), and "How it works" replays it. The first time an open file
+         is seen here, the view opens by itself, as FXN Browser's does after a sign-in. One WebGL card at a time: the small card
+         stops while the view is open. The modules load on first use, never with the page. */
+      var FXN_ID_EXPLAINED = 'defxn-fxn-id-view-explained';
+      var fxnIdPreview = null, fxnIdView = null, fxnIdLoading = null, fxnIdAutoOpened = false, fxnIdTilt = null;
+      function fxnIdProps() { return { label: 'Your FXN ID', items: [{ label: 'Open your FXN ID', action: 'fxnid-open', tone: 'primary' }] }; }
+      function fxnIdExplained() { try { return localStorage.getItem(FXN_ID_EXPLAINED) === '1'; } catch (e) { return false; } }
+      function loadFxnId() {
+        if (!fxnIdLoading) fxnIdLoading = Promise.all([import('/js/ark/fxn-id-card/fxn-id-card.js'), import('/js/ark/fxn-id-card/fxn-id-view.js')])
+          .then(function (m) { return { card: m[0], view: m[1] }; });
+        return fxnIdLoading;
+      }
+      function fxnIdWho() { var who = session.isUnlocked() ? session.current() : null; return who && who.publicIds ? who : null; }
+      function syncFxnId() {
+        if (!fxnIdWrap) return;
+        var who = fxnIdWho();
+        fxnIdWrap.hidden = !who;
+        if (!who) { if (fxnIdPreview) fxnIdPreview.release(); if (fxnIdView) fxnIdView.close(); return; }
+        loadFxnId().then(function (m) {
+          if (!page || !page.isConnected || fxnIdWrap.hidden || (fxnIdView && fxnIdView.dialog.isConnected)) return;
+          if (!fxnIdPreview) fxnIdPreview = m.card.createFxnIdCard();
+          fxnIdPreview.update({ name: who.fileDisplayName || '', pinGrade: 4, passwordGrade: 4 });
+          if (!fxnIdPreview.el.isConnected) void fxnIdPreview.attach(fxnIdStage, { play: false, state: 'master', name: who.fileDisplayName || '' });
+          if (!fxnIdAutoOpened && !fxnIdExplained()) { fxnIdAutoOpened = true; openFxnIdView(); }
+        }, function (error) {
+          fxnIdWrap.hidden = true;
+          console.info('[account] The FXN ID card did not load (' + error.message + '). Your Public IDs and wallets are under Signing keys and Wallet.');
+        });
+      }
+      /* the small card leans toward the pointer (the player's orbit on top of its keyed camera) and settles back when it leaves */
+      function fxnIdLean(event) {
+        if (!fxnIdPreview || !fxnIdPreview.ready || (ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion())) return;
+        var r = fxnIdStage.getBoundingClientRect(), goal = event ? { yaw: ((event.clientX - r.left) / r.width - 0.5) * 24, pitch: ((event.clientY - r.top) / r.height - 0.5) * -12 } : { yaw: 0, pitch: 0 };
+        if (!fxnIdTilt) fxnIdTilt = { yaw: 0, pitch: 0, goal: goal, raf: 0 };
+        fxnIdTilt.goal = goal;
+        if (fxnIdTilt.raf) return;
+        var step = function () {
+          var t = fxnIdTilt; t.raf = 0;
+          if (!fxnIdPreview || !fxnIdPreview.ready) return;
+          t.yaw += (t.goal.yaw - t.yaw) * 0.14; t.pitch += (t.goal.pitch - t.pitch) * 0.14;
+          fxnIdPreview.orbit(t.yaw, t.pitch);
+          if (Math.abs(t.goal.yaw - t.yaw) > 0.05 || Math.abs(t.goal.pitch - t.pitch) > 0.05) t.raf = requestAnimationFrame(step);
+        };
+        fxnIdTilt.raf = requestAnimationFrame(step);
+      }
+      function openFxnIdView() {
+        var who = fxnIdWho();
+        if (!who || (fxnIdView && fxnIdView.dialog.isConnected)) return;
+        loadFxnId().then(function (m) {
+          if (!page || !page.isConnected || (fxnIdView && fxnIdView.dialog.isConnected)) return;
+          if (fxnIdPreview) fxnIdPreview.release();
+          if (fxnIdTilt) { cancelAnimationFrame(fxnIdTilt.raf); fxnIdTilt = null; }
+          fxnIdView = m.view.openFxnIdView({ identity: who, explained: fxnIdExplained(),
+            onExplained: function () { try { localStorage.setItem(FXN_ID_EXPLAINED, '1'); } catch (e) { /* a private window keeps no mark: the guide shows again next time */ } },
+            onFile: function () { openTab('session'); } });
+          /* closed: what the view changed (a Public ID or wallet added, the Public ID sites see) shows in Signing keys, and the small card comes back */
+          fxnIdView.dialog.addEventListener('close', function () { fxnIdView = null; if (page.isConnected) { renderKeys(); syncFxnId(); } });
+        }, function (error) { console.info('[account] The FXN ID view did not load (' + error.message + '). Your Public IDs and wallets are under Signing keys and Wallet.'); });
+      }
+
       var chooseKitWords = /^(Choose Auth Kit|Unlock Auth Kit|Select Auth Kit|Sign in with your Auth Kit|Select your Auth Kit|Choose FXN ID file)$/;
       function renderIdentity(next) {
         identity = next;
@@ -2051,6 +2125,7 @@
         if (unlocked) loadWallet();
         else resetWallet(identity ? 'Choose your FXN ID file to read your FXN balance.' : undefined);
         renderKeys();
+        syncFxnId();
         paint('hero', heroProps(identity));
         paint('identity', identityProps(identity));
         paint('devFacts', developerProps(identity));
@@ -2092,7 +2167,8 @@
         if (unlock && unlock.click) unlock.click();
         else if (unlock && unlock.focus) unlock.focus();
       }
-      page.arkDispose = function () { generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); window.clearTimeout(copyTimer); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); if (profileCard) profileCard.close(); if (cardSeal) cardSeal.remove(); };
+      if (fxnIdWrap) { fxnIdWrap.addEventListener('pointermove', fxnIdLean); fxnIdWrap.addEventListener('pointerleave', function () { fxnIdLean(null); }); }
+      page.arkDispose = function () { if (fxnIdPreview) fxnIdPreview.release(); if (fxnIdView) fxnIdView.close(); if (fxnIdTilt) cancelAnimationFrame(fxnIdTilt.raf); generation += 1; contactsGeneration += 1; walletGeneration += 1; stopContactsPolling(); window.clearTimeout(copyTimer); if (controller) controller.abort(); if (wire) { wire.close(); wire = null; } unsubscribe(); unsubscribeDomains(); session.container.remove(); if (profileCard) profileCard.close(); if (cardSeal) cardSeal.remove(); };
       return page;
     }
   };
