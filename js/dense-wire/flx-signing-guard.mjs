@@ -19,8 +19,26 @@
 //                    the wallet's review asks it too, before the holder approves). Round 10: `network` is required;
 //                    NOT_NETWORK_BOUND says a record is bound to none, and a missing one is refused (NETWORK_UNNAMED).
 //   sendGuarded      a record signed elsewhere (a prepared batch) sent through the same network check (round 10).
+//   admittedCid      round 12 (flooder ZD3-1): the CID a page chains on is sha256(signed text), computed here. A node's
+//                    answered CID that differs is refused by name (CID_MISMATCH) and nothing further is signed.
+//                    Before this, three doors set prev = reply.cid: a lying node (a DNS hijack, a ?ws= link, one bad
+//                    fleet node) answered a fake CID, the page signed the next position citing it, and the node kept
+//                    that signed record to publish after the honest one landed. Two signed records at one position
+//                    is equivocation, and the key froze for good.
+//   holdSigned       round 12 (ZD3-1, second half): bytes that left this page for (network, key, chain, position) are
+//                    held, and only those exact bytes are ever sent again at that position. A different record there,
+//                    or a record below the held position, is refused (HELD_OTHER_RECORD, HEAD_BEHIND_SIGNED). Until
+//                    round 12 only a timeout resent identical bytes; any "refused" reply let the page sign the same
+//                    position with a new M, and a node that withheld the first could freeze the key with it.
+//   releaseHeld      drops a hold only when a SECOND node's HEAD shows the held position filled.
+// Callers that chain on a reply (round 12 list): submitAtPosition here (every door that uses it: genesis
+// genesis-distribute.js, genesis-dao.js, genesis-release.js, genesis-network.js, genesis-dao-records.js, genesis-app.js
+// mint; defxn-dao fxn-dao-app.mjs; deploy post-launch-flow.mjs; defxn fxn-holdings.mjs), genesis-authorization.js's
+// treasury batch and genesis-app.js's single transfer (sendGuarded with a hold, then admittedCid), and
+// flx-resolver-record-client.mjs nextWrite. test/signing-guard-cid.test.mjs finds any other `prev = reply.cid` in web/.
 // Pure and browser-first (Node-compatible): no node: imports.
 import { GENESIS_PREV, NOT_NETWORK_BOUND, networkRoot, signingNetworkRefusal } from "./flx-builders.mjs";
+import { sha256Hex } from "./flx-crypto.mjs";
 export { NOT_NETWORK_BOUND };
 
 export class SigningGuardRefusal extends Error {
@@ -130,6 +148,7 @@ export async function submitAtPosition(wire, { pubHex, at, kind, text, chain, ne
       "review and sign again. Nothing was sent, so the key is safe.",
     );
   }
+  holdSigned({ network, pubHex, chain, pos: at.pos, text });
   let reply;
   try {
     reply = await withTimeout(wire.submit(kind, text), timeoutMs);
@@ -147,6 +166,7 @@ export async function submitAtPosition(wire, { pubHex, at, kind, text, chain, ne
       "stop signing with this key. Read the node's answer above; the chain keeps the evidence.",
     );
   }
+  if (reply?.kind === "ok") return { ...reply, cid: await admittedCid(reply, text) };
   return reply;
 }
 
@@ -154,7 +174,136 @@ export async function submitAtPosition(wire, { pubHex, at, kind, text, chain, ne
  *  record it did not sign here (a prepared batch: the genesis treasury lines). Asks the node its network just before
  *  sending, and refuses another network, none, or a missing `network` by name with nothing sent. `send(line)` is the
  *  page's raw sender. */
-export async function sendGuarded(wire, network, line, send = (l) => wire.send(l)) {
+export async function sendGuarded(wire, network, line, send = (l) => wire.send(l), held = null) {
   await refuseOtherNetwork(wire, network);
+  // Round 12 (ZD3-1): a caller that knows the record's place passes `held` ({ pubHex, chain, pos, text }), and the
+  // bytes are held before they leave the page, as submitAtPosition does.
+  if (held) holdSigned({ network, ...held });
   return send(line);
+}
+
+/** Round 12 (flooder ZD3-1): the CID to chain on after an ok reply: sha256 of the signed text, computed here, the CID
+ *  the chain itself gives the record (`incoming_cid = sha256_hex(text)`). A node that answers another CID is lying or
+ *  broken, and the next record must not cite its answer: refused by name, and the caller signs nothing further. */
+export async function admittedCid(reply, text) {
+  const mine = await sha256Hex(text);
+  if (reply?.cid !== mine) {
+    throw new SigningGuardRefusal(
+      "CID_MISMATCH",
+      `The node answered CID ${String(reply?.cid ?? "(none)").slice(0, 16)}… for a record whose bytes hash to ${mine.slice(0, 16)}….`,
+      "a node that answers the CID of the record it was sent.",
+      "stop and ask another node for this key's HEAD before signing again. Nothing further was signed; the node may be lying, so do not use it.",
+    );
+  }
+  return mine;
+}
+
+// The signed-bytes hold (round 12, ZD3-1). One entry per (network, key, chain): the highest position this page sent
+// bytes for, and those bytes. Kept in the origin's localStorage as plain text ("<pos>\n<text>"; a signed record is one
+// line), or in memory where there is none (Node). The bytes are public once sent, so holding them reveals nothing.
+const memoryHolds = new Map();
+let holdStore = null;
+function defaultHoldStore() {
+  const ls = globalThis.localStorage;
+  if (ls && typeof ls.getItem === "function") return { get: (k) => ls.getItem(k), set: (k, v) => ls.setItem(k, v), delete: (k) => ls.removeItem(k) };
+  return { get: (k) => memoryHolds.get(k) ?? null, set: (k, v) => { memoryHolds.set(k, v); }, delete: (k) => { memoryHolds.delete(k); } };
+}
+/** Replaces where holds are kept (a test passes a fresh Map-backed store). Returns the previous store. */
+export function useHoldStore(store) {
+  const before = holdStore;
+  holdStore = store;
+  return before;
+}
+function holds() { return holdStore ?? (holdStore = defaultHoldStore()); }
+function holdKey({ network, pubHex, chain }) {
+  const net = typeof network === "string" ? network : "unbound";
+  return `flx-held:${net}:${pubHex}:${chain || "base"}`;
+}
+
+/** The bytes this page holds for the key's chain: `{ pos, text }`, or null. */
+export function heldAt({ network, pubHex, chain }) {
+  const raw = holds().get(holdKey({ network, pubHex, chain }));
+  if (typeof raw !== "string") return null;
+  const cut = raw.indexOf("\n");
+  const pos = Number(raw.slice(0, cut));
+  return cut > 0 && Number.isSafeInteger(pos) ? { pos, text: raw.slice(cut + 1) } : null;
+}
+
+/** Holds `text` as the bytes sent at `pos`, or refuses before anything is sent: a different record at a held position
+ *  (HELD_OTHER_RECORD), or any record below it (HEAD_BEHIND_SIGNED: a node whose HEAD is behind what this key already
+ *  signed is lagging or lying, and a record there would be the second one). The same bytes again are always allowed. */
+export function holdSigned({ network, pubHex, chain, pos, text }) {
+  const held = heldAt({ network, pubHex, chain });
+  if (held && pos < held.pos) {
+    throw new SigningGuardRefusal(
+      "HEAD_BEHIND_SIGNED",
+      `The node says this key's next position is ${pos}, and this page already sent a signed record at position ${held.pos}.`,
+      `a node whose HEAD shows position ${held.pos} filled.`,
+      "ask another node for this key's HEAD. Nothing was sent. If this network was started again from genesis, clear this site's stored data first.",
+    );
+  }
+  if (held && pos === held.pos && text !== held.text) {
+    throw new SigningGuardRefusal(
+      "HELD_OTHER_RECORD",
+      `This page already sent a different signed record at position ${pos} for this key, and no second node shows it filled.`,
+      `the record sent before (resend it with the same bytes), or a second node's HEAD past position ${pos}.`,
+      "resend the held record, or run releaseHeld against another node once it shows the position filled. Nothing was sent: a second record at one position would freeze the key.",
+    );
+  }
+  holds().set(holdKey({ network, pubHex, chain }), `${pos}\n${text}`);
+}
+
+/** Drops the hold once a SECOND node (`witness`, not the node that took the bytes) shows the held position filled.
+ *  Refuses by name otherwise, and the hold stays. Returns true when dropped, false when nothing was held. */
+export async function releaseHeld(witness, { network, pubHex, chain }) {
+  const held = heldAt({ network, pubHex, chain });
+  if (!held) return false;
+  const now = await chainPosition(witness, pubHex, chain);
+  if (now.pos <= held.pos) {
+    throw new SigningGuardRefusal(
+      "HELD_NOT_FILLED",
+      `The second node says this key's next position is ${now.pos}; the held record is at ${held.pos}.`,
+      `a second node whose HEAD is past position ${held.pos}.`,
+      "resend the held record, or ask another node. The hold stays, so no second record is signed there.",
+    );
+  }
+  holds().delete(holdKey({ network, pubHex, chain }));
+  return true;
+}
+
+// Round 12 (flooder ZD3-3, the Bybit and Ledger lesson: what the signer sees must be what is signed). A review that
+// renders its own copy of the record ("a second builder") can drift from the bytes the real builder signs, and nothing
+// compared them. These two are the one rule: the review shows the text the REAL builder asks to sign (reviewedBody runs
+// it with a recording signer that signs nothing), and the record the real signer produces is refused unless it is
+// exactly that text plus its signature (signedAsReviewed). Callers: genesis-authorization.js (mint, transfer, network
+// setting, release, DAO founding) and defxn-dao chain-dao-authorization.js.
+
+/** The exact text `build(signer)` asks its signer to sign, from a recording signer that returns no signature. */
+export async function reviewedBody(pubHex, build) {
+  let asked = null;
+  const recorder = {
+    pubHex,
+    signText: async (text) => { if (asked === null) asked = text; return ""; },
+    signBytes: async () => { throw new SigningGuardRefusal("REVIEW_UNREADABLE", "The builder signs raw bytes, so its text cannot be shown for review.", "a builder that signs text.", "review the bytes with the vote review instead. Nothing was signed."); },
+  };
+  await build(recorder);
+  if (asked === null) {
+    throw new SigningGuardRefusal("REVIEW_UNREADABLE", "The builder asked for no signature, so there is nothing to review.", "the text the builder signs.", "report this builder. Nothing was signed.");
+  }
+  return asked;
+}
+
+/** Refuses a signed record that is not exactly `reviewed` followed by `-S<signature>` (one box, no further dash). */
+export function signedAsReviewed(reviewed, signedText) {
+  const text = String(signedText ?? "");
+  const tail = text.startsWith(reviewed + "-S") ? text.slice(reviewed.length + 2) : null;
+  if (tail === null || tail.length === 0 || tail.includes("-")) {
+    throw new SigningGuardRefusal(
+      "REVIEW_MISMATCH",
+      "The signed record differs from the one shown for review.",
+      "a signed record whose body is the reviewed text, byte for byte.",
+      "do not send it: review and sign again. Nothing was sent.",
+    );
+  }
+  return text;
 }

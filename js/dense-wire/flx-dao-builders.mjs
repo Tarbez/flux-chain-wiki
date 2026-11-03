@@ -24,6 +24,7 @@ import { hexOfUtf8 } from "./flx-dumb-parser.mjs";
 import { DOCS } from "./flx-transfer-builders.mjs";
 import { hexOfUtf8C } from "./flx-native-transfer.mjs";
 import { renderBaseChainMintParams as renderMintParams } from "./flx-launch-blobs.mjs";
+import { networkCovered } from "./flx-builders.mjs";
 
 /** `chain.rs` ~3381-3394. */
 export const DAO_KIND_FOUND = "KDAO1";
@@ -191,6 +192,21 @@ export function daoTreasuryInitVoteCoveredBytes(daoId, treasuryPubkey, boundAt) 
  *  `manifestText` directly, as fetched. */
 export function treasurySpendVoteCoveredBytes(daoId, inputCid, manifestText) {
   return coveredBytes("FLX-TREASURY-SPEND-VOTE-V1\0", [daoId, inputCid, manifestText]);
+}
+
+/** Round 12 (flooder ZD3-8): the bytes a council member SIGNS for a vote are the covered bytes bound to the network
+ *  the node names (`chain::network_covered`, which dao.rs and treasury.rs verify), never the bare covered bytes. The
+ *  Chain DAO tab and the genesis founding vote signed the bare (devnet) bytes on every network: on mainnet each vote
+ *  failed with no reason given to the signer, and a vote meant for mainnet was a valid devnet vote. `network` is
+ *  required; a missing one is refused by name (networkCovered). Every page that signs a vote calls one of these. */
+export function daoFoundVoteSigningBytes(network, daoId, quorumThreshold, registeredAt, signersBlobText) {
+  return networkCovered(network, daoFoundVoteCoveredBytes(daoId, quorumThreshold, registeredAt, signersBlobText));
+}
+export function daoTreasuryInitVoteSigningBytes(network, daoId, treasuryPubkey, boundAt) {
+  return networkCovered(network, daoTreasuryInitVoteCoveredBytes(daoId, treasuryPubkey, boundAt));
+}
+export function treasurySpendVoteSigningBytes(network, daoId, inputCid, manifestText) {
+  return networkCovered(network, treasurySpendVoteCoveredBytes(daoId, inputCid, manifestText));
 }
 
 /** `render_dao_signer_blob`, src/dao.rs ~112-120: `["<signer hex>", ...]`
