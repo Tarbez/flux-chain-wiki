@@ -22,7 +22,16 @@
 //   - any other file (node_modules, an ignored dist folder) must match its sha256 in scripts/auth-inputs.lock
 //     (`<sha256>\t<repo>/<path>`).
 // The inputs are found from esbuild's own metafile, never from a list written here, so a new dependency fails the
-// build by name until it is pinned. `node scripts/build-auth.cjs --print-pins` prints both tables for the current
+// build by name until it is pinned.
+//
+// Round 13 (round-12 verifier, ZD3-6): the tracked-file check asked `git status --porcelain`, and the git() helper read
+// any git error as clean. `git update-index --skip-worktree` hid an edited file from status, so a postinstall script
+// or a local edit could change fxn-auth/src and still pass. Now each tracked file's BYTES are compared with the pinned
+// commit's blob: `git hash-object <file>` must equal `git rev-parse <pin>:<path>`, and a git command that fails is a
+// refusal, never a pass. The repo's HEAD no longer matters: what is checked is the bytes esbuild read against the
+// pinned commit. The probe build and the real build were two esbuild runs, so a file could change between the check
+// and the build: now the inputs are checked again after the real build, the real bundle (less its banner line) must
+// equal the probe's bytes, and on any difference the written bundle is removed and the build refuses. `node scripts/build-auth.cjs --print-pins` prints both tables for the current
 // inputs (stdout only) for review. The bundle's first line names the pin digest, so a served copy says what it was
 // built from.
 const { execFileSync } = require('node:child_process');
@@ -69,12 +78,15 @@ function checkPins(inputs) {
     if (i.top === own) continue;
     const tracked = i.top && git(i.top, ['ls-files', '--error-unmatch', '--', i.rel]) !== null;
     if (tracked) {
-      const head = git(i.top, ['rev-parse', 'HEAD']);
-      repos.set(i.repo, head);
-      if (printPins) continue;
+      if (printPins) { repos.set(i.repo, git(i.top, ['rev-parse', 'HEAD'])); continue; }
       if (!pinnedRepos.has(i.repo)) refuse(`The bundle reads ${i.repo}/${i.rel}, and scripts/auth-inputs.tsv pins no commit for ${i.repo}.`, `a "${i.repo}<TAB><commit>" row.`, 'review that repo at the commit it is on and add the row.');
-      if (head !== pinnedRepos.get(i.repo)) refuse(`${i.repo} is at ${head}, and the bundle is pinned to ${pinnedRepos.get(i.repo)}.`, `${i.repo} checked out at the pinned commit (ARK_FLUX_ROOT may point at a worktree of it).`, 'check out the pinned commit, or review the new one and update scripts/auth-inputs.tsv.');
-      if (git(i.top, ['status', '--porcelain', '--', i.rel])) refuse(`${i.repo}/${i.rel} differs from its commit ${head}.`, 'the committed file.', 'commit or restore it.');
+      const pin = pinnedRepos.get(i.repo);
+      repos.set(i.repo, pin);
+      const want = git(i.top, ['rev-parse', '--verify', '--quiet', `${pin}:${i.rel}`]);
+      if (!want) refuse(`The pinned commit ${pin} of ${i.repo} holds no ${i.rel}, or git could not read it.`, `${i.rel} at ${i.repo} ${pin}.`, 'review the file at a commit that holds it and update scripts/auth-inputs.tsv.');
+      const have = git(i.top, ['hash-object', '--', i.rel]);
+      if (!have) refuse(`git could not hash ${i.repo}/${i.rel}, so its bytes are unchecked.`, 'a readable file in a working git checkout.', 'check the checkout, then build again.');
+      if (have !== want) refuse(`${i.repo}/${i.rel} on disk (blob ${have}) is not the file at the pinned commit ${pin} (blob ${want}).`, 'the pinned bytes.', 'restore the file to the pinned commit (git checkout <pin> -- <file>; mind skip-worktree), or review the new bytes and update scripts/auth-inputs.tsv.');
     } else {
       const key = `${i.repo}/${i.rel}`, h = sha256(i.real);
       lock.push(`${h}\t${key}`);
@@ -105,21 +117,39 @@ const ALIASES = [
   '--alias:fxn-auth-client/wallet-mesh=' + fluxRoot + '/fxn-auth-client/src/wallet-mesh.mjs',
   '--alias:deadark-identity-core/root-signing-handle=' + fluxRoot + '/deadark-identity-core/dist/identity/root-signing-handle.js',
 ];
+const OUTFILE_ARG = '--outfile=js/admin/auth.js';
 const BASE = ['scripts/auth-entry.js', '--bundle', '--format=iife', '--global-name=ArkAdminAuth', '--minify', '--legal-comments=none', ...ALIASES];
 // Pass 1 reads the inputs (into a temp folder); the pins are checked; only then is the bundle written.
 const probe = fs.mkdtempSync(path.join(os.tmpdir(), 'build-auth-'));
 execFileSync(esbuild, [...BASE, '--metafile=' + path.join(probe, 'meta.json'), '--outfile=' + path.join(probe, 'probe.js'), '--log-level=error'], { stdio: 'inherit' });
 const pins = checkPins(inputsOf(path.join(probe, 'meta.json')));
-fs.rmSync(probe, { recursive: true, force: true });
+/** The bundle's output path: the one --outfile the real build names (tests/auth-bundle.cjs redirects that string). */
+function BASE_OUT() { return OUTFILE_ARG.slice('--outfile='.length); }
 if (printPins) {
+  fs.rmSync(probe, { recursive: true, force: true });
   console.log('# scripts/auth-inputs.tsv\n' + pins.tsv.join('\n') + '\n# scripts/auth-inputs.lock\n' + pins.lock.join('\n'));
   process.exit(0);
 }
+const probeBytes = fs.readFileSync(path.join(probe, 'probe.js'));
 execFileSync(esbuild, [
   ...BASE,
   '--banner:js=/* FXN sign-in bundle, built from pinned inputs: scripts/auth-inputs.tsv and .lock, digest ' + pins.digest + ' */',
-  '--outfile=js/admin/auth.js',
+  '--metafile=' + path.join(probe, 'meta2.json'),
+  OUTFILE_ARG,
 ], { stdio: 'inherit' });
+{
+  // Round 13 (ZD3-6): the bundle written must be built from the bytes that were checked. The inputs are checked again,
+  // and the bundle less its banner line must be the probe's bytes; otherwise it is removed and the build refuses.
+  const outfile = BASE_OUT();
+  const written = fs.readFileSync(outfile);
+  const cut = written.indexOf(0x0a);
+  const again = (() => { try { return checkPins(inputsOf(path.join(probe, 'meta2.json'))); } catch (error) { fs.rmSync(outfile, { force: true }); throw error; } })();
+  fs.rmSync(probe, { recursive: true, force: true });
+  if (again.digest !== pins.digest || cut < 0 || Buffer.compare(written.subarray(cut + 1), probeBytes) !== 0) {
+    fs.rmSync(outfile, { force: true });
+    refuse('An input of the sign-in bundle changed between the check and the build.', 'inputs that hold still while the bundle is built.', 'stop whatever is writing the sibling checkouts or node_modules, then build again.');
+  }
+}
 // Other sites that carry this Auth Kit bundle are LISTED when their copy differs, never written.
 // Until 2026-10-23 this step wrote the fresh bundle into every sibling site under flux/. Run from
 // a worktree, flux/ is the parent, so it wrote into other repos' MAIN folders, where other sessions

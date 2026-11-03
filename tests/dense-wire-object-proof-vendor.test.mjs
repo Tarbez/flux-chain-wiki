@@ -11,6 +11,16 @@ import { fileURLToPath } from 'node:url';
 import { identityKeyHex, readChainCards } from '../js/ark/chain-cards.mjs';
 import { sourceName, sourceOf } from './lib/dense-wire-source.mjs';
 
+// Round 13 (frontend lane): the skin doors place and send every record through flx-signing-guard.mjs, which asks the
+// node its network (BUILD_INFO), reads the key's head from the node AND a witness, and checks an OK reply's CID against
+// sha256(record). A fake that stands for one honest devnet answers BUILD_INFO and has a witness showing the same head.
+function honestNetwork(node) {
+  const inner = node.sendLine;
+  node.sendLine = async (line) => (line.startsWith('BUILD_INFO') ? 'BUILD_INFO\tv\tclean\tnow\tfxn-devnet' : inner(line));
+  node.witnesses = [{ url: 'wss://witness.test/ws', chainHead: (...a) => node.chainHead(...a), sendLine: node.sendLine }];
+  return node;
+}
+
 // Round 11 (council lane): the byte check of flx-object-proof.mjs, flx-object-builders.mjs and flx-crypto.mjs moved to
 // the one drift check, tests/vendored-dense-wire.test.mjs (every file in js/dense-wire, its source read from a commit by
 // tests/lib/dense-wire-source.mjs). The vectors below come from the same source.
@@ -54,7 +64,8 @@ test('mintSkin shows the full signing review, signs only the bytes approved, and
   const who = { publicKeyB64: raw.toString('base64'), sign: async (text) => sign(null, Buffer.from(text), privateKey).toString('base64'), signBytes: async () => '' };
   const pointer = 'df51' + 'e196847c' + '0'.repeat(51) + '1';
   const sent = [];
-  const wire = { url: 'ws://test', chainHead: async () => ({ kind: 'none' }), sendLine: async (line) => { sent.push(line); return `OK\t${'0'.repeat(64)}`; } };
+  const { createHash } = await import('node:crypto');
+  const wire = honestNetwork({ url: 'ws://test', chainHead: async () => ({ kind: 'none' }), sendLine: async (line) => { sent.push(line); return `OK\t${createHash('sha256').update(line.slice(line.indexOf('\t') + 1)).digest('hex')}`; } });
 
   // no review loaded: nothing is signed
   globalThis.window = {};
@@ -99,7 +110,7 @@ test('a skin trade: the taker accepts, the owner gives, and each wrong step is r
   const id = sha(skin);
   // a small node: it keeps the records, answers the four reads the trade uses, and admits what it is sent
   const held = new Map([[sha(pva), pva], [id, skin]]), chain = [skin], heads = new Map();
-  const node = { url: 'ws://test', chainHead: async (k) => heads.has(k) ? { kind: 'head', length: heads.get(k)[0], headCid: heads.get(k)[1] } : { kind: 'none' },
+  const node = honestNetwork({ url: 'ws://test', chainHead: async (k) => heads.has(k) ? { kind: 'head', length: heads.get(k)[0], headCid: heads.get(k)[1] } : { kind: 'none' },
     sendLine: async (line) => {
       const [head, arg] = line.split('\t');
       if (head === 'OBJ_PROOF') return chain.map((t) => `OBJ_PROOF_LINE\t${t}\n`).join('') + `OBJ_PROOF_PVA\t${pva}\nOBJ_PROOF_END\t${id}\t${chain.length}\n`;
@@ -112,7 +123,7 @@ test('a skin trade: the taker accepts, the owner gives, and each wrong step is r
         return `OK\t${sha(arg)}`;
       }
       return 'ERR\tunknown';
-    } };
+    } });
   globalThis.window = { ArkUI: { authorizationDialog: { confirm: async () => true } }, ArkAuthorizationView: { scopedAuthorizationView: (v) => v } };
 
   assert.match((await acceptSkin({ who: a.who, wire: node, id })).failure, /already own/, 'the owner cannot accept its own skin');
@@ -144,7 +155,7 @@ test('a priced skin sale: the taker pays into the sale, the owner is paid with t
   const id = sha(skin);
   // a small node with the sale rule's states: a sale is funded when taken, paid when the move adopts its consent
   const held = new Map([[sha(pva), pva], [id, skin]]), chain = [skin], heads = new Map(), sales = new Map();
-  const node = { url: 'ws://test', chainHead: async (k) => heads.has(k) ? { kind: 'head', length: heads.get(k)[0], headCid: heads.get(k)[1] } : { kind: 'none' },
+  const node = honestNetwork({ url: 'ws://test', chainHead: async (k) => heads.has(k) ? { kind: 'head', length: heads.get(k)[0], headCid: heads.get(k)[1] } : { kind: 'none' },
     sendLine: async (line) => {
       const [head, arg] = line.split('\t');
       if (head === 'OBJ_PROOF') return chain.map((t) => `OBJ_PROOF_LINE\t${t}\n`).join('') + `OBJ_PROOF_PVA\t${pva}\nOBJ_PROOF_END\t${id}\t${chain.length}\n`;
@@ -159,7 +170,7 @@ test('a priced skin sale: the taker pays into the sale, the owner is paid with t
         return `OK\t${sha(arg)}`;
       }
       return 'ERR\tunknown';
-    } };
+    } });
   const shown = [];
   globalThis.window = { ArkUI: { authorizationDialog: { confirm: async (v) => { shown.push(v); return true; } } }, ArkAuthorizationView: { scopedAuthorizationView: (v) => v } };
 

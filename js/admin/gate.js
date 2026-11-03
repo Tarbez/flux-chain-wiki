@@ -455,7 +455,8 @@
   /* The identity picker is always mounted (reauthenticate needs it live even after the editor has opened),
      but a reload no longer forces a fresh sign-in: if the host's own session cookie is still valid, the
      editor opens immediately and the recovery file is only asked for again when Publish actually needs it. */
-  auth = ArkAdminAuth.create({ container: kitContainer, product: 'DEFXN CMS', onChange: function (who) {
+  // Round 13 (ZD3-3): the CMS gate signs the editor's login; it keeps no sign-in (the bundle's default since round 13).
+  auth = ArkAdminAuth.create({ keepSignedIn: false, container: kitContainer, product: 'DEFXN CMS', onChange: function (who) {
     if (who && account) account.set(who);
     if (!who && !suppressForget && (identity || pendingWho)) {
       if (account) account.clear();

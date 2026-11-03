@@ -14,7 +14,12 @@ ArkUI.openAccountSession = function () {
   if (ArkUI.accountSession) return ArkUI.accountSession;
   var container = document.createElement('div');
   var preservingIdentity = false;
-  var auth = ArkAdminAuth.create({ container: container, product: 'DEFXN', onChange: function (next) {
+  /* Round 13 (round-12 verifier, ZD3-3): this session signs FXN sends, skin trades and council acts, and under one FXN
+     ID its file also derives the genesis signer. No sign-in is kept in the browser's persisted-secret vault, and one
+     kept on this origin before round 13 is deleted, not restored: any script the origin serves could ask a kept
+     record to sign. Reloading signs out. */
+  try { if (window.indexedDB) window.indexedDB.deleteDatabase('ark-persisted-secret'); } catch (e) { /* no storage: nothing kept */ }
+  var auth = ArkAdminAuth.create({ keepSignedIn: false, container: container, product: 'DEFXN', onChange: function (next) {
     if (!preservingIdentity) {
       if (next) {
         ArkUI.localIdentity.set(next);

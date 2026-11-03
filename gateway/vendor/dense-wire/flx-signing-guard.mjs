@@ -8,7 +8,8 @@
 //       signed the same position meanwhile (nothing serialised signing under one key);
 //   (c) a HEAD that could not be read was taken as position 0, which the genesis key already holds.
 // This module is the one fix for all of them:
-//   chainPosition    HEAD as { pos, prevCid }, or a refusal: an unreadable head is never position 0.
+//   chainPosition    HEAD as { pos, prevCid }, or a refusal: an unreadable head is never position 0. Round 13: a second
+//                    (witness) node must show the same head, or nothing is signed (WITNESS_MISSING, HEAD_DISAGREES).
 //   withKeyLock      one signer per key at a time across tabs (Web Locks), within a page otherwise.
 //   submitAtPosition re-reads HEAD just before sending and refuses if the position moved (nothing is sent),
 //                    resends the SAME signed bytes once on a timeout (a node admits an identical resend), and
@@ -36,6 +37,9 @@
 // mint; defxn-dao fxn-dao-app.mjs; deploy post-launch-flow.mjs; defxn fxn-holdings.mjs), genesis-authorization.js's
 // treasury batch and genesis-app.js's single transfer (sendGuarded with a hold, then admittedCid), and
 // flx-resolver-record-client.mjs nextWrite. test/signing-guard-cid.test.mjs finds any other `prev = reply.cid` in web/.
+// Round 13: the record client (nextWrite and the deployer's submitRecord) and the launch panel's four records go through
+// submitAtPosition too, and flx-signing-doors.mjs is the one scan every page repo runs for a door outside this guard.
+// `agreedRead` is the read side: a value a page shows or acts on comes from the node and every witness, or not at all.
 // Pure and browser-first (Node-compatible): no node: imports.
 import { GENESIS_PREV, NOT_NETWORK_BOUND, networkRoot, signingNetworkRefusal } from "./flx-builders.mjs";
 import { sha256Hex } from "./flx-crypto.mjs";
@@ -49,10 +53,53 @@ export class SigningGuardRefusal extends Error {
   }
 }
 
-/** The key's next position and previous record, read from the node. Throws when the node does not say. `chain`: a
- *  launched chain the record will name (growth loop build 4: a key keeps one list per launched chain); omit it for
- *  the key's base list. */
+/** The key's next position and previous record, read from the node AND from every witness node, which must all say the
+ *  same. Throws when a node does not say, or when two nodes disagree. `chain`: a launched chain the record will name
+ *  (growth loop build 4: a key keeps one list per launched chain); omit it for the key's base list.
+ *
+ *  Round 13 (frontend lane, ZD3-1 residual): until round 13 this read ONE node's HEAD. A node that withheld the key's
+ *  record 5 answered "next position 5", the page signed a second record at 5, and the node kept both: equivocation, and
+ *  the key froze for good. The hold (holdSigned) only knows what THIS origin sent, and one FXN ID signs on genesis, dao,
+ *  deploy and defxn.com, so a record sent from another origin was invisible to it. Now a second node must show the same
+ *  head (`witnessesOf`), and a disagreement, an unreadable witness or no witness at all is refused by name before
+ *  anything is signed. A witness that lags by one record makes the page refuse and ask again; it never signs. */
 export async function chainPosition(wire, pubHex, chain) {
+  const mine = await readHead(wire, pubHex, chain);
+  const witnesses = await witnessesOf(wire);
+  if (witnesses.length === 0) {
+    throw new SigningGuardRefusal(
+      "WITNESS_MISSING",
+      "No second node was named to confirm where this key's chain ends, so one node's word would decide the position.",
+      "a witness node: the page's wire.witnesses, or the network's list in WITNESS_NODES (flx-signing-guard.mjs, an owner value).",
+      "name a second node of this network and try again. Nothing was signed.",
+    );
+  }
+  for (const witness of witnesses) {
+    let seen;
+    try {
+      seen = await readHead(witness, pubHex, chain);
+    } catch (error) {
+      throw new SigningGuardRefusal(
+        "WITNESS_UNREADABLE",
+        `The witness node ${witness.url ?? "(unnamed)"} did not say where this key's chain ends (${error?.failure ?? error?.message ?? "no answer"}).`,
+        "a HEAD or HEAD_NONE answer from every witness node.",
+        "try again in a moment, or name another witness. Nothing was signed.",
+      );
+    }
+    if (seen.pos !== mine.pos || seen.prevCid !== mine.prevCid) {
+      throw new SigningGuardRefusal(
+        "HEAD_DISAGREES",
+        `Two nodes disagree on where this key's chain ends: ${wire.url ?? "the node"} says position ${mine.pos}, the witness ${witness.url ?? "(unnamed)"} says ${seen.pos}.`,
+        "two nodes that show the same head for this key.",
+        "wait a moment and try again; if they still disagree, one node is behind or lying, so use another. Nothing was signed.",
+      );
+    }
+  }
+  return mine;
+}
+
+/** One node's answer for the key's head: `{ pos, prevCid }`, or POSITION_UNREADABLE. */
+async function readHead(wire, pubHex, chain) {
   const head = await wire.chainHead(pubHex, chain);
   if (head?.kind === "head" && Number.isSafeInteger(head.length) && /^[0-9a-f]{64}$/.test(head.headCid || "")) {
     return { pos: head.length, prevCid: head.headCid };
@@ -64,6 +111,97 @@ export async function chainPosition(wire, pubHex, chain) {
     "a HEAD or HEAD_NONE answer for the signing key.",
     "try again, or ask another node. Nothing was signed: a position that cannot be read is never taken as 0.",
   );
+}
+
+/** Round 13: the second nodes a position is checked against, by network (BUILD_INFO's fifth field). OWNER VALUE, listed in
+ *  docs: safest default is none, so every signing page refuses (WITNESS_MISSING) until the owner names, for each network,
+ *  at least one node that is not the page's own node. Each entry is a WebSocket URL; the signing sites' CSP must admit it. */
+export const WITNESS_NODES = Object.freeze({});
+
+const witnessClients = new Map();
+let makeWitnessClient = null;
+/** Replaces how a witness URL becomes a client (a test passes a fake; pages leave the default WireClient). */
+export function useWitnessClient(make) {
+  const before = makeWitnessClient;
+  makeWitnessClient = make;
+  witnessClients.clear();
+  return before;
+}
+
+/** The witness nodes for `wire`: its own `witnesses` when the page names them, else WITNESS_NODES for the network the
+ *  node names. A witness that IS the node (same object or same URL) does not count. */
+export async function witnessesOf(wire) {
+  let list = Array.isArray(wire?.witnesses) ? wire.witnesses : null;
+  if (list === null) {
+    const network = await nodeNetwork(wire).catch(() => null);
+    const urls = (network && WITNESS_NODES[network]) || [];
+    list = [];
+    for (const url of urls) {
+      if (!witnessClients.has(url)) {
+        const make = makeWitnessClient ?? (async (u) => new (await import("./flx-wire.mjs")).WireClient(u));
+        witnessClients.set(url, await make(url));
+      }
+      list.push(witnessClients.get(url));
+    }
+  }
+  return list.filter((w) => w && w !== wire && !(w.url && wire?.url && w.url === wire.url));
+}
+
+/** Round 13 (frontend lane; repo map 2026-11-03: "reads of HEAD, treasury, votes and segments are checked for shape
+ *  only"): a read a page shows or acts on, asked of the node AND every witness, and returned only when all of them
+ *  give the same answer. `read(client)` is run once per node; `key(value)` is what is compared (default: the value's
+ *  text with sorted keys, BigInt kept as digits). No witness, an unanswered read or two answers is refused by name:
+ *  the page shows the refusal, never one node's answer as the network's. */
+export async function agreedRead(wire, read, { key = stableText, what = "this read" } = {}) {
+  const witnesses = await witnessesOf(wire);
+  if (witnesses.length === 0) {
+    throw new SigningGuardRefusal(
+      "WITNESS_MISSING",
+      `No second node was named to confirm ${what}, so one node's answer would be shown as the network's.`,
+      "a witness node: the page's wire.witnesses, or the network's list in WITNESS_NODES (flx-signing-guard.mjs, an owner value).",
+      "name a second node of this network and reload.",
+    );
+  }
+  const answers = [];
+  for (const node of [wire, ...witnesses]) {
+    try {
+      answers.push({ url: node.url ?? "(unnamed)", value: await read(node) });
+    } catch (error) {
+      throw new SigningGuardRefusal(
+        "READ_UNCONFIRMED",
+        `${node.url ?? "A node"} did not answer ${what} (${error?.failure ?? error?.message ?? "no answer"}).`,
+        "the same answer from the node and every witness.",
+        "reload in a moment, or name another witness.",
+      );
+    }
+  }
+  const first = key(answers[0].value);
+  const off = answers.find((a) => key(a.value) !== first);
+  if (off) {
+    throw new SigningGuardRefusal(
+      "READ_DISAGREES",
+      `Two nodes give different answers for ${what}: ${answers[0].url} and ${off.url}.`,
+      "two nodes that give the same answer.",
+      "reload in a moment; if they still differ, one node is behind or lying, so use another.",
+    );
+  }
+  return answers[0].value;
+}
+
+/** A value's text with object keys sorted and BigInt written as digits, so two equal answers compare equal. */
+export function stableText(value) {
+  if (typeof value === "bigint") return `${value}n`;
+  if (Array.isArray(value)) return `[${value.map(stableText).join(",")}]`;
+  if (value instanceof Map) return stableText(Object.fromEntries(value));
+  if (value instanceof Set) return stableText([...value]);
+  if (value && typeof value === "object") return `{${Object.keys(value).sort().map((k) => `${JSON.stringify(k)}:${stableText(value[k])}`).join(",")}}`;
+  return JSON.stringify(value ?? null);
+}
+
+/** A page's wire with the witness nodes it names (`urls`, each turned into a client by `make`), for `chainPosition`. */
+export function withWitnesses(wire, urls, make) {
+  wire.witnesses = (urls || []).filter((u) => u && u !== wire.url).map((u) => make(u));
+  return wire;
 }
 
 /** What a key's first record cites in C[0] (owner, 2026-10-25, `chain::network_root`): the root of the network the
@@ -137,7 +275,7 @@ function withTimeout(promise, ms) {
  * was built for; the node is asked its network again just before sending, and another network, or none, is refused
  * by name with nothing sent (a wallet's network switch between review and send).
  */
-export async function submitAtPosition(wire, { pubHex, at, kind, text, chain, network, timeoutMs = 15000 }) {
+export async function submitAtPosition(wire, { pubHex, at, kind, text, chain, network, parse, timeoutMs = 15000 }) {
   await refuseOtherNetwork(wire, network);
   const now = await chainPosition(wire, pubHex, chain);
   if (now.pos !== at.pos || now.prevCid !== at.prevCid) {
@@ -149,15 +287,16 @@ export async function submitAtPosition(wire, { pubHex, at, kind, text, chain, ne
     );
   }
   holdSigned({ network, pubHex, chain, pos: at.pos, text });
+  const send = sender(wire, parse);
   let reply;
   try {
-    reply = await withTimeout(wire.submit(kind, text), timeoutMs);
+    reply = await withTimeout(send(kind, text), timeoutMs);
   } catch (error) {
     if (!error?.timeout) throw error;
     // The same signed bytes, never a new record: an identical resend is admitted idempotently.
-    reply = await withTimeout(wire.submit(kind, text), timeoutMs);
+    reply = await withTimeout(send(kind, text), timeoutMs);
   }
-  const words = `${reply?.code ?? ""} ${reply?.reason ?? reply?.raw ?? ""}`;
+  const words = `${reply?.code ?? reply?.failure ?? ""} ${reply?.reason ?? reply?.missing ?? reply?.raw ?? ""}`;
   if (reply?.kind !== "ok" && /equivocat|chain[- ]break|frozen/i.test(words)) {
     throw new SigningGuardRefusal(
       "KEY_FROZEN",
@@ -168,6 +307,26 @@ export async function submitAtPosition(wire, { pubHex, at, kind, text, chain, ne
   }
   if (reply?.kind === "ok") return { ...reply, cid: await admittedCid(reply, text) };
   return reply;
+}
+
+/** How a record goes out (round 13). A wire with `submit` and no `parse` takes `(kind, text)` and answers parsed
+ *  (`OK <cid>` as `{ kind: "ok", cid }`). With `parse`, or on a wire that only has `send`/`sendLine` (a WalletWire, a
+ *  launch panel's wire), the line `<kind>\t<text>` is sent and its reply read by `parse` (default: `OK`/`ERR`). Every
+ *  door uses this one path, so a command whose reply is not `OK <cid>` (NATIVE_SEND_OK) still gets the position
+ *  re-check, the network check, the hold and the CID check. */
+function sender(wire, parse) {
+  if (!parse && typeof wire.submit === "function") return (kind, text) => wire.submit(kind, text);
+  const line = typeof wire.send === "function" ? (l) => wire.send(l) : (l) => wire.sendLine(l);
+  const read = parse ?? okOrErr;
+  return async (kind, text) => read(String(await line(`${kind}\t${text}`)));
+}
+
+/** `OK<TAB><cid>` -> `{ kind: "ok", cid }`; `ERR<TAB><code><TAB><reason>` -> `{ kind: "err", code, reason }`. */
+export function okOrErr(reply) {
+  const parts = String(reply).trim().split("\t");
+  if (parts[0] === "OK" && parts[1]) return { kind: "ok", cid: parts[1].trim() };
+  if (parts[0] === "ERR") return { kind: "err", code: parts[1], reason: parts.slice(2).join("\t") };
+  return { kind: "error", raw: String(reply).trim() };
 }
 
 /** Round 10 (fresh audit CNN-5): sends one already-signed line through the network check, for a page that sends a
@@ -258,7 +417,7 @@ export function holdSigned({ network, pubHex, chain, pos, text }) {
 export async function releaseHeld(witness, { network, pubHex, chain }) {
   const held = heldAt({ network, pubHex, chain });
   if (!held) return false;
-  const now = await chainPosition(witness, pubHex, chain);
+  const now = await readHead(witness, pubHex, chain);
   if (now.pos <= held.pos) {
     throw new SigningGuardRefusal(
       "HELD_NOT_FILLED",
