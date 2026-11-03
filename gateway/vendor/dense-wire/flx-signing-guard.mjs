@@ -270,3 +270,40 @@ export async function releaseHeld(witness, { network, pubHex, chain }) {
   holds().delete(holdKey({ network, pubHex, chain }));
   return true;
 }
+
+// Round 12 (flooder ZD3-3, the Bybit and Ledger lesson: what the signer sees must be what is signed). A review that
+// renders its own copy of the record ("a second builder") can drift from the bytes the real builder signs, and nothing
+// compared them. These two are the one rule: the review shows the text the REAL builder asks to sign (reviewedBody runs
+// it with a recording signer that signs nothing), and the record the real signer produces is refused unless it is
+// exactly that text plus its signature (signedAsReviewed). Callers: genesis-authorization.js (mint, transfer, network
+// setting, release, DAO founding) and defxn-dao chain-dao-authorization.js.
+
+/** The exact text `build(signer)` asks its signer to sign, from a recording signer that returns no signature. */
+export async function reviewedBody(pubHex, build) {
+  let asked = null;
+  const recorder = {
+    pubHex,
+    signText: async (text) => { if (asked === null) asked = text; return ""; },
+    signBytes: async () => { throw new SigningGuardRefusal("REVIEW_UNREADABLE", "The builder signs raw bytes, so its text cannot be shown for review.", "a builder that signs text.", "review the bytes with the vote review instead. Nothing was signed."); },
+  };
+  await build(recorder);
+  if (asked === null) {
+    throw new SigningGuardRefusal("REVIEW_UNREADABLE", "The builder asked for no signature, so there is nothing to review.", "the text the builder signs.", "report this builder. Nothing was signed.");
+  }
+  return asked;
+}
+
+/** Refuses a signed record that is not exactly `reviewed` followed by `-S<signature>` (one box, no further dash). */
+export function signedAsReviewed(reviewed, signedText) {
+  const text = String(signedText ?? "");
+  const tail = text.startsWith(reviewed + "-S") ? text.slice(reviewed.length + 2) : null;
+  if (tail === null || tail.length === 0 || tail.includes("-")) {
+    throw new SigningGuardRefusal(
+      "REVIEW_MISMATCH",
+      "The signed record differs from the one shown for review.",
+      "a signed record whose body is the reviewed text, byte for byte.",
+      "do not send it: review and sign again. Nothing was sent.",
+    );
+  }
+  return text;
+}
