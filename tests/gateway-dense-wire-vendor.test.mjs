@@ -10,22 +10,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const VENDOR = path.join(ROOT, 'gateway', 'vendor', 'dense-wire');
-// The import closure of the three entry files (verifier, wire client, record reader for app release
-// downloads, gateway/release.js). package.json beside them holds only "type": "module" and is not a copy.
-const FILES = ['flx-domain-proof.mjs', 'flx-dumb-parser.mjs', 'flx-builders.mjs', 'flx-object-builders.mjs', 'flx-crypto.mjs', 'flx-wire.mjs',
-  'flx-resolver-record-client.mjs', 'flx-identity-bridge.mjs', 'flx-launch-blobs.mjs', 'flx-record-grammar.mjs', 'flx-resolver-artifacts.mjs', 'flx-state-grammar.js'];
-
-function sourceDir() {
-  return [process.env.DENSE_WIRE_WEB, path.resolve(ROOT, '..', 'defxn-defi-rs', 'dense-wire', 'web'), path.resolve(ROOT, '..', 'defxn-defi-rs-wt-names', 'dense-wire', 'web')]
-    .filter(Boolean).find((dir) => fs.existsSync(path.join(dir, 'flx-domain-proof.mjs'))) || null;
-}
-
-test('the vendored dense-wire files are byte-identical to their source', () => {
-  const source = sourceDir();
-  assert.ok(source, 'no dense-wire/web with flx-domain-proof.mjs was found. Missing: flux/defxn-defi-rs (branch fix/one-name-system) beside this repo, or DENSE_WIRE_WEB. To fix: check it out, or set DENSE_WIRE_WEB.');
-  for (const file of FILES) {
-    assert.ok(fs.readFileSync(path.join(VENDOR, file)).equals(fs.readFileSync(path.join(source, file))), `${file} has drifted from ${path.join(source, file)}. To fix: copy the source file over the vendored one (never edit the copy).`);
+// Round 11 (council lane): the byte check of every file in gateway/vendor/dense-wire moved to the one drift check,
+// tests/vendored-dense-wire.test.mjs, which finds the files in the folder and reads the source from a commit
+// (tests/lib/dense-wire-source.mjs). This test read a hand-written list against the sibling checkout's working tree.
+test('the gateway entry files are vendored', () => {
+  for (const file of ['flx-domain-proof.mjs', 'flx-wire.mjs', 'flx-resolver-record-client.mjs']) {
+    assert.ok(fs.existsSync(path.join(ROOT, 'gateway', 'vendor', 'dense-wire', file)), `gateway/vendor/dense-wire/${file} is missing. To fix: copy it from dense-wire/web with git show`);
   }
 });
 

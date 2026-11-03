@@ -256,3 +256,37 @@ export function parseBaseChainMintParams(text) {
   }
   return doc;
 }
+
+// Owner-confirmed safety follow-up 2026-10-31: a backed launch's default outflow guards, DERIVED from its own economy
+// and the sizes of its two shared accounts. The JS twin of `launch_economy::launch_account_sizes` and
+// `launch_economy::default_outflow`, pinned to the same rows by `test/fixtures/launch-outflow-defaults.tsv`. A launch
+// page proposes these numbers; the creator may send lower ones (in force at once) or higher ones (in force 7 days after
+// the launch) as `ADMIN_LAUNCH_TOKEN` field 12. An empty field 12 is the default.
+
+/** The node's default curve split, in basis points (`chain_server` `curve_seed_params_from_env`). */
+export const DEFAULT_CURVE_SPLIT = Object.freeze({ creatorAllocBps: 200, curveBps: 7931, reserveBps: 1869 });
+
+/** `{ creatorAllocation, poolInventory }` (bigint) of a launch of `supply` base units on curve split `split`. */
+export function launchAccountSizes(supply, split = DEFAULT_CURVE_SPLIT) {
+  const s = BigInt(supply);
+  const share = (bps) => (s * BigInt(bps)) / 10000n;
+  return { creatorAllocation: share(split.creatorAllocBps), poolInventory: share(split.curveBps) + share(split.reserveBps) };
+}
+
+/**
+ * The default guards `{ treasury, pool }`, each a bigint limit for every window (minute, hour, day):
+ * the treasury's largest vesting tranche, `ceil(creatorAllocation / tranches)`, and the insurance share of the pool,
+ * `poolInventory * insuranceBps / 10000`. Each is at least 1.
+ */
+export function launchOutflowDefaults({ creatorAllocation, poolInventory, tranches, insuranceBps }) {
+  const t = BigInt(Math.max(1, tranches));
+  const alloc = BigInt(creatorAllocation);
+  const atLeastOne = (v) => (v < 1n ? 1n : v);
+  return { treasury: atLeastOne((alloc + t - 1n) / t), pool: atLeastOne((BigInt(poolInventory) * BigInt(insuranceBps)) / 10000n) };
+}
+
+/** `ADMIN_LAUNCH_TOKEN` field 12 for guards `{ treasury, pool }` that hold in every window: `<m>,<h>,<d>;<m>,<h>,<d>`. */
+export function renderOutflowField({ treasury, pool }) {
+  const three = (v) => [v, v, v].map(String).join(",");
+  return `${three(treasury)};${three(pool)}`;
+}

@@ -488,9 +488,12 @@ export function createResolverRecordClient({
   async function prepareRecord(value, { nowSec = Math.floor(Date.now() / 1000) } = {}) {
     const who = requireSigner("prepare a record");
     const target = await targetGrammar();
-    const headReply = await wire.head(who.pubHex);
+    // The record rides the signer's list on its own chain (`N` = resolverChainId), not the base list: read HEAD for
+    // that chain, or the J and prev C would be the base list's (owner-approved fix, 2026-10-29). No record of this
+    // key on that chain yet (HEAD_NONE) means position 0 citing GENESIS_PREV.
+    const headReply = await wire.head(who.pubHex, resolverChainId);
     if (headReply.kind !== "none" && headReply.kind !== "head") {
-      throw refusal("RRC_READ_FAILED", `the node did not answer HEAD for ${who.pubHex}`, "the signer's own chain head (its next position)", "check the node is reachable");
+      throw refusal("RRC_READ_FAILED", `the node did not answer HEAD for ${who.pubHex} on chain ${resolverChainId}`, "the signer's own head on the record's chain (its next position)", "check the node is reachable");
     }
     const at = headReply.kind === "head" ? { pos: headReply.length, prevCid: headReply.cid } : { pos: 0, prevCid: GENESIS_PREV };
     const payloadText = encodeRecordPayload(value);

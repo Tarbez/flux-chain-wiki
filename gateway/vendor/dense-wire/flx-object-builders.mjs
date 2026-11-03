@@ -5,8 +5,9 @@
 // `RESOLVER_RECORD<TAB><text>`. Signer shape: `{ pubHex, signText(asciiText) -> Promise of hex signature }`.
 //
 //   PVA      KASSET1 on `pva`, signed by the identity, C[1] = the reference of an FXN payment it received
-//            (NATIVE_HISTORY's `received` row). One per identity. It never moves: a node refuses any KEDGE1 or KSUPER1
-//            on `pva` as PvaIsBound.
+//            (NATIVE_HISTORY's `received` row), C[2] = the card's mix (optional: 32 bytes the chain does not read,
+//            fixed at activation; one mix per chain, a second is refused MixTaken). One per identity. It never moves:
+//            a node refuses any KEDGE1 or KSUPER1 on `pva` as PvaIsBound.
 //   skin     KASSET1 on `skin`, signed by a key that holds a PVA. C[1] is the skin's pointer: 32 bytes the chain does
 //            not read. The defxn site packs the skin's own record into it (js/nft/card-record.js, DFXNSKIN1).
 //   trade    the next owner signs a KEDGE1 for the skin's current head (send it first), then the owner signs a
@@ -42,18 +43,23 @@ function requirePosition(pos, prevCid) {
   requireCid(prevCid, "previous record CID", "read it with HEAD <your key>; a key's first record uses 64 zeros.");
 }
 
-/** A `KASSET1` mint on `chain` (`pva` or `skin`) pointing at `pointer`. Its object id is the CID of the text. */
-export async function buildObjectMintWithSigner({ signer, chain, pos, prevCid, pointer, nowSec }) {
+/** A `KASSET1` mint on `chain` (`pva` or `skin`) pointing at `pointer`, with `detail` as C[2] on `pva` only (the
+ *  card's mix). Its object id is the CID of the text. */
+export async function buildObjectMintWithSigner({ signer, chain, pos, prevCid, pointer, detail = null, nowSec }) {
   if (chain !== PVA_CHAIN && chain !== SKIN_CHAIN) throw new Error(`That chain ${JSON.stringify(chain)} carries no objects. Missing: "${PVA_CHAIN}" or "${SKIN_CHAIN}". To fix: use buildPvaActivationWithSigner or buildSkinMintWithSigner.`);
   requirePosition(pos, prevCid);
   requireCid(pointer, "pointer", "give 64 lowercase hex: the earn reference for a PVA, the packed skin record for a skin.");
-  const body = `${objectHead(signer.pubHex, chain, nowSec)}-K${OBJECT_KIND_ASSET}-J${pos}-C${prevCid}-C${pointer}`;
+  if (detail !== null && chain !== PVA_CHAIN) throw new Error(`A ${chain} mint carries no C[2]. Missing: nothing; only a PVA carries a mix. To fix: leave detail out.`);
+  if (detail !== null) requireCid(detail, "card mix", "give 64 lowercase hex: the mix the site packed for this card.");
+  const body = `${objectHead(signer.pubHex, chain, nowSec)}-K${OBJECT_KIND_ASSET}-J${pos}-C${prevCid}-C${pointer}${detail === null ? "" : `-C${detail}`}`;
   return `${body}-S${await signer.signText(body)}`;
 }
 
-/** Activate the identity's PVA: a `KASSET1` on `pva` citing `earnRef`, the reference of an FXN payment it received. */
-export async function buildPvaActivationWithSigner({ signer, pos, prevCid, earnRef, nowSec }) {
-  return buildObjectMintWithSigner({ signer, chain: PVA_CHAIN, pos, prevCid, pointer: earnRef, nowSec });
+/** Activate the identity's PVA: a `KASSET1` on `pva` citing `earnRef`, the reference of an FXN payment it received,
+ *  and carrying `mix` (64 hex, optional) as C[2]: the card's look, fixed now. A node refuses a mix another PVA holds
+ *  (MixTaken). */
+export async function buildPvaActivationWithSigner({ signer, pos, prevCid, earnRef, mix = null, nowSec }) {
+  return buildObjectMintWithSigner({ signer, chain: PVA_CHAIN, pos, prevCid, pointer: earnRef, detail: mix, nowSec });
 }
 
 /** Mint a skin: a `KASSET1` on `skin` whose pointer is the skin (32 bytes, the site's packed DFXNSKIN1). The minter must hold a PVA. */

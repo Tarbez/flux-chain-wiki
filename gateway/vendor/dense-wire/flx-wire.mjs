@@ -623,9 +623,88 @@ export class WireClient {
         previousRoot: parts[3],
         linesCount: Number(parts[4]),
         votes: parseFraction(parts[5]),
+        // The time rule (owner 2026-11-01): the segment's signed time and the previous segment's time, `-` when
+        // absent. The time is part of the bytes a vote signs (`segmentCoveredBytes`).
+        time: parts[6] && parts[6] !== "-" ? Number(parts[6]) : null,
+        previousTime: parts[7] && parts[7] !== "-" ? Number(parts[7]) : null,
+        // The fork fix: the segment's chain (`-` = the base chain). Round 4 (ruling V): the round's proposer and its
+        // PROPOSAL signature (`-` until signed), the round, and the POL round (`-` = a new segment).
+        chainId: parts[8] && parts[8] !== "-" ? parts[8] : null,
+        proposer: parts[9] && parts[9] !== "-" ? parts[9] : null,
+        proposalSignature: parts[10] && parts[10] !== "-" ? parts[10] : null,
+        round: parts[11] && parts[11] !== "-" ? Number(parts[11]) : 0,
+        polRound: parts[12] && parts[12] !== "-" ? Number(parts[12]) : null,
       }, reply);
     }
     return { kind: "error", raw: reply };
+  }
+
+  /** SEG_TURN <chain|-> <seq> <time> <round> → the proposer of that round, the chain's applied head, the previous
+   *  segment's time, K and the committee's keys (round 4). Asked of the browser's own node only. */
+  async segTurn(chainId, sequence, time, round = 0) {
+    const reply = await this._send(`SEG_TURN\t${chainId ?? "-"}\t${sequence}\t${time}\t${round}`);
+    const parts = reply.split("\t");
+    if (parts[0] !== "SEG_TURN" || !parts[1] || parts[1] === "-") return { kind: "error", reason: reply };
+    const headSeq = parts[2] && parts[2] !== "-" ? Number(parts[2]) : null;
+    return {
+      kind: "turn",
+      turn: parts[1],
+      head: headSeq !== null && parts[3] && parts[3] !== "-" ? { sequence: headSeq, root: parts[3] } : null,
+      previousTime: parts[4] && parts[4] !== "-" ? Number(parts[4]) : null,
+      required: parts[5] && /^\d+$/.test(parts[5]) ? Number(parts[5]) : 0,
+      committee: parts[6] && parts[6] !== "-" ? parts[6].split(",").filter(Boolean) : [],
+    };
+  }
+
+  /** SEG_VOTES <root> → the messages the node holds for that proposal (round 4): its round's prevotes for it, and its
+   *  POL round's prevotes for it (`{ prevotes, polPrevotes }`, each `{ signer, signature }`), and the steps of `me`'s own
+   *  messages it holds in `round` (`mine`; a message it does not hold is sent again). */
+  async segVotes(root, round, polRound, me = null) {
+    const reply = await this._send(`SEG_VOTES\t${root}`);
+    const lines = reply.split("\n").filter(Boolean);
+    if (!lines.some((l) => l.startsWith("SEG_VOTES_END"))) return { kind: "error", reason: reply };
+    const prevotes = [];
+    const polPrevotes = [];
+    const mine = [];
+    const stepOf = { proposal: 0, prevote: 1, precommit: 2 };
+    for (const f of lines.filter((l) => l.startsWith("SEG_VOTE_LINE\t")).map((l) => l.split("\t"))) {
+      if (me && f[4] === me && Number(f[2]) === round && f[1] in stepOf) mine.push(stepOf[f[1]]);
+      if (f[1] !== "prevote" || f[3] !== root) continue;
+      const vote = { signer: f[4], signature: f[5] };
+      if (Number(f[2]) === round) prevotes.push(vote);
+      else if (polRound !== null && polRound !== undefined && Number(f[2]) === polRound) polPrevotes.push(vote);
+    }
+    return { kind: "votes", prevotes, polPrevotes, mine };
+  }
+
+  /** SEG_VOTE <proposal|prevote|precommit> <chain|-> <seq> <round> <root|-> <signer> <signature> → the node's answer to
+   *  one signed message (round 4): `accepted` with `have/need`, `finalized` at K precommits, or `rejected`. */
+  async segVote(step, chainId, sequence, round, root, signerHex, signatureHex, header = null) {
+    // Round 6: four optional fields, the header the vote covers (previous root, line count, time, POL round), so a
+    // node that does not serve `root` still checks and books the message as evidence before it refuses the vote.
+    const tail = header ? `\t${header.previousRoot}\t${header.lineCount}\t${header.time ?? "-"}\t${header.polRound ?? "-"}` : "";
+    const reply = await this._send(`SEG_VOTE\t${step}\t${chainId ?? "-"}\t${sequence}\t${round}\t${root ?? "-"}\t${signerHex}\t${signatureHex}${tail}`);
+    const parts = reply.split("\t");
+    if (parts[0] === "SEG_VOTE_OK") return { kind: "accepted", finalized: false, step: parts[1], votes: parseFraction(parts[2]) };
+    if (parts[0] === "SEG_ACC_FIN") return { kind: "accepted", finalized: true, root: parts[1], applied: Number(parts[2]), votes: parseFraction(parts[3]) };
+    return { kind: "rejected", reason: parts.slice(1).join(" ") || reply };
+  }
+
+  /** SEG_ORDER <chain|-> <key,key,...> → the chain's applied head at the browser's node and, of `keys`, each signer's
+   *  newest certified record there (`{ at, lane, millis }` by key; round 3, money-sale-1). Asked of the browser's own
+   *  node only. */
+  async segOrder(chainId, keys) {
+    const reply = await this._send(`SEG_ORDER\t${chainId ?? "-"}\t${keys.join(",")}`);
+    const parts = reply.split("\t");
+    if (parts[0] !== "SEG_ORDER") return { kind: "error", reason: reply };
+    const headSeq = parts[1] && parts[1] !== "-" ? Number(parts[1]) : null;
+    const places = new Map();
+    for (const entry of (parts[3] ?? "").split(",").filter(Boolean)) {
+      const [key, at, lane, precision] = entry.split("/");
+      if (!key || !/^\d+$/.test(at ?? "") || !lane) return { kind: "error", reason: `SEG_ORDER entry outside its grammar: ${entry}` };
+      places.set(key, { at: Number(at), lane, millis: precision === "m" });
+    }
+    return { kind: "order", head: headSeq !== null && parts[2] && parts[2] !== "-" ? { sequence: headSeq, root: parts[2] } : null, places };
   }
 
   /** SEG_PULL_LINES <root> → the raw lines of that segment.
@@ -658,26 +737,39 @@ export class WireClient {
     return { kind: "lines", root: head[1], lines };
   }
 
-  /** SEG_SIG <root>\t<signer>\t<sig> → ACC/ACC_FIN/REJ. */
-  async segSig(root, signerHex, signatureHex) {
-    const reply = await this._send(`SEG_SIG\t${root}\t${signerHex}\t${signatureHex}`);
-    const parts = reply.split("\t");
-    if (parts[0] === "SEG_ACC") {
-      return voted({ kind: "accepted", votes: parseFraction(parts[1]), finalized: false }, reply);
+  /** SEG_SIG is retired (round 5): a precommit with no prevote and no lock rule, which the node refuses by name.
+   *  Nothing is sent; the refusal names what replaces it (`segVote`, judged by `flx-segment-judge.mjs`). */
+  async segSig(root) {
+    return { kind: "rejected", reason: `retired: SEG_SIG for ${root} is a precommit with no prevote and no lock rule. Missing: the round-4 messages (SEG_VOTE proposal, prevote, precommit) judged by flx-segment-judge.mjs. To fix: sign through browserSignStep` };
+  }
+
+  /** SEG_MINE <signer> → the highest message by `signer` this node holds, per chain (round 5, `SignedHeads.reconcile`):
+   *  `{ chain, sequence, round, step, value: { root, time, previousRoot, lineCount } | null, polRound, signature }`,
+   *  and (round 7) `epoch`: the vote book the answer comes from (`SEG_MINE_END`'s third field; null from an older
+   *  node, which the judge then counts as unanswered). */
+  async segMine(signerHex) {
+    const reply = await this._send(`SEG_MINE\t${signerHex}`);
+    const lines = reply.split("\n").filter(Boolean);
+    const end = lines.find((l) => l.startsWith("SEG_MINE_END"));
+    if (!end) return { kind: "error", reason: reply };
+    const epochText = end.split("\t")[2];
+    const epoch = epochText !== undefined && /^\d+$/.test(epochText) ? Number(epochText) : null;
+    const stepOf = { proposal: 0, prevote: 1, precommit: 2 };
+    const votes = [];
+    for (const f of lines.filter((l) => l.startsWith("SEG_MINE_LINE\t")).map((l) => l.split("\t"))) {
+      if (f.length !== 11 || !(f[4] in stepOf)) continue;
+      const opt = (v) => (v === "-" ? null : v);
+      votes.push({
+        chain: opt(f[1]),
+        sequence: Number(f[2]),
+        round: Number(f[3]),
+        step: stepOf[f[4]],
+        value: opt(f[5]) ? { root: f[5], time: opt(f[6]) === null ? null : Number(f[6]), previousRoot: f[7], lineCount: Number(f[8]) } : null,
+        polRound: opt(f[9]) === null ? null : Number(f[9]),
+        signature: f[10],
+      });
     }
-    if (parts[0] === "SEG_ACC_FIN") {
-      return voted({
-        kind: "accepted",
-        finalized: true,
-        root: parts[1],
-        applied: Number(parts[2]),
-        votes: parseFraction(parts[3]),
-      }, reply);
-    }
-    if (parts[0] === "SEG_REJ") {
-      return { kind: "rejected", reason: parts[1] ?? "unknown" };
-    }
-    return { kind: "error", raw: reply };
+    return { kind: "mine", votes, epoch };
   }
 
   // --------------------------------------------------------------------
@@ -732,14 +824,22 @@ export class WireClient {
    *  waits until the chain's lead nodes confirm a payment). Asked for the exact record (its sha256), so a key that
    *  signed two records at one position never sees both read as final. A wallet shows a payment as waiting until
    *  this says `confirmed`, and as never final on `conflict`.
-   *    -> CONFIRMED<TAB><holder><TAB><chain><TAB><position><TAB><segment sequence>
+   *    -> CONFIRMED<TAB><holder><TAB><chain><TAB><position><TAB><segment sequence><TAB><K><TAB><signers><TAB><final|not-final>
+   *       (K and signers since 2026-10-31; `k` and `signers` are null from an older node, so a wallet never guesses a count;
+   *       the final word since 2026-11-01, null from an older node)
    *    -> CONFLICT<TAB><holder><TAB><chain><TAB><position><TAB><the cid certified there instead>
    *    -> WAITING<TAB><holder><TAB><chain><TAB><position><TAB><K><TAB><signers>
    *    -> CONFIRMED_ERR<TAB><code><TAB><reason> */
   async confirmed(holderHex, chain, position, cid) {
     const reply = await this._send(`CONFIRMED\t${holderHex}\t${chain || "-"}\t${position}\t${cid}`);
     const parts = reply.split("\t");
-    if (parts[0] === "CONFIRMED") return { kind: "confirmed", chain: parts[2], position: Number(parts[3]), sequence: Number(parts[4]) };
+    if (parts[0] === "CONFIRMED") {
+      const count = (n) => (parts[n] === undefined || parts[n].trim() === "" ? null : Number(parts[n]));
+      // consensus-names-9 (2026-11-01): field 7 is the node's own word, `final` or `not-final`; null from an older node.
+      const word = (parts[7] || "").trim();
+      const final = word === "final" ? true : word === "not-final" ? false : null;
+      return { kind: "confirmed", chain: parts[2], position: Number(parts[3]), sequence: Number(parts[4]), k: count(5), signers: count(6), final };
+    }
     if (parts[0] === "CONFLICT") return { kind: "conflict", chain: parts[2], position: Number(parts[3]), certified: parts[4] };
     if (parts[0] === "WAITING") return { kind: "waiting", chain: parts[2], position: Number(parts[3]), k: Number(parts[4]), signers: Number(parts[5]) };
     return { kind: "error", raw: reply };
@@ -1440,14 +1540,18 @@ export class WireClient {
   }
 
   /** `DOM_RENT_QUOTE<TAB><years>` — what `years` (1 to 10) of a name cost now, and who is paid.
-   *    -> DOM_RENT_QUOTE<TAB><years><TAB><fxn><TAB><currency><TAB><minor>/<fxn><TAB><pool|lastpool:<at>|sale><TAB><ops safe><TAB><ending>
+   *    -> DOM_RENT_QUOTE<TAB><years><TAB><fxn><TAB><currency><TAB><minor>/<fxn><TAB><pool|lastpool:<at>|sale><TAB><ops safe><TAB><ending><TAB><decimals>
+   *       `<fxn>` and the price's `<fxn>` are FXN base units, returned as BigInt; `<decimals>` (FXN's, 9) is returned
+   *       as `decimals` so a page prints `formatAmount(quote.fxn, quote.decimals)`.
    *    -> DOM_RENT_NONE<TAB><failure><TAB><missing><TAB><remedy>   (a test network, or no ops safe yet) */
   async domRentQuote(years) {
     const reply = (await this._send(`DOM_RENT_QUOTE\t${years}`)).replace(/\n$/, "");
     const p = reply.split("\t");
     if (p[0] === "DOM_RENT_QUOTE") {
-      const [minor, fxn] = p[4].split("/").map(Number);
-      return { kind: "quote", years: Number(p[1]), fxn: Number(p[2]), currency: p[3], price: { minor, fxn }, source: p[5], payee: p[6], ending: p[7] };
+      // 2026-10-29: amounts are FXN base units (BigInt: past 2^53 a Number is not exact), and the ninth column is the
+      // decimals to print them with (`formatAmount` in flx-amount.mjs). A reply without it (an older node) reads as 0.
+      const [minor, fxn] = p[4].split("/").map((t) => BigInt(t));
+      return { kind: "quote", years: Number(p[1]), fxn: BigInt(p[2]), currency: p[3], price: { minor, fxn }, source: p[5], payee: p[6], ending: p[7], decimals: p[8] === undefined ? 0 : Number(p[8]) };
     }
     if (p[0] === "DOM_RENT_NONE") return { kind: "none", failure: p[1], missing: p[2], remedy: p[3] };
     return { kind: "error", raw: reply };

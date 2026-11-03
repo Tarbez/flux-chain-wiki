@@ -130,6 +130,20 @@ export async function clearKey() {
   });
 }
 
+/** The signer's signed-heads record (`flx-segment-judge.mjs`, FLX text), kept per key beside the key itself. */
+const signedHeadsId = (pubHex) => `signed-heads:${pubHex}`;
+
+export async function loadSignedHeadsText(pubHex) {
+  const db = await openDb();
+  const record = await getRecord(db, signedHeadsId(pubHex));
+  return typeof record?.flx === "string" ? record.flx : "";
+}
+
+export async function saveSignedHeadsText(pubHex, flx) {
+  const db = await openDb();
+  await putRecord(db, { id: signedHeadsId(pubHex), flx });
+}
+
 function openDb() {
   return new Promise((res, rej) => {
     const req = indexedDB.open(DB_NAME, 1);

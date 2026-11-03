@@ -9,28 +9,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { identityKeyHex, readChainCards } from '../js/ark/chain-cards.mjs';
+import { sourceName, sourceOf } from './lib/dense-wire-source.mjs';
 
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const VENDOR = path.join(ROOT, 'js', 'dense-wire');
-
-// The source until branch pva-chain merges: DENSE_WIRE_WEB, then the main checkout, then the pva-chain worktree.
-function sourceDir() {
-  return [process.env.DENSE_WIRE_WEB, path.resolve(ROOT, '..', 'defxn-defi-rs', 'dense-wire', 'web'), path.resolve(ROOT, '..', 'defxn-defi-rs-wt-pva', 'dense-wire', 'web')]
-    .filter(Boolean).find((dir) => fs.existsSync(path.join(dir, 'flx-object-proof.mjs'))) || null;
-}
-
-test('js/dense-wire/flx-object-proof.mjs, flx-object-builders.mjs and flx-crypto.mjs are byte-identical to their source', () => {
-  const source = sourceDir();
-  assert.ok(source, 'no dense-wire/web with flx-object-proof.mjs was found. Missing: flux/defxn-defi-rs (branch pva-chain) beside this repo, or DENSE_WIRE_WEB. To fix: check it out, or set DENSE_WIRE_WEB.');
-  for (const file of ['flx-object-proof.mjs', 'flx-object-builders.mjs', 'flx-crypto.mjs']) {
-    assert.ok(fs.readFileSync(path.join(VENDOR, file)).equals(fs.readFileSync(path.join(source, file))), `${file} has drifted from ${path.join(source, file)}. To fix: copy the source file over the vendored one (never edit the copy).`);
-  }
-});
-
+// Round 11 (council lane): the byte check of flx-object-proof.mjs, flx-object-builders.mjs and flx-crypto.mjs moved to
+// the one drift check, tests/vendored-dense-wire.test.mjs (every file in js/dense-wire, its source read from a commit by
+// tests/lib/dense-wire-source.mjs). The vectors below come from the same source.
 test('readChainCards shows each key its own verified objects and refuses a listing that lies', async () => {
-  const source = sourceDir();
-  assert.ok(source, 'no dense-wire/web source; see the test above');
-  const rows = fs.readFileSync(path.join(source, 'test', 'fixtures', 'object-vectors.tsv'), 'utf8').trim().split('\n').map((l) => l.split('\t'));
+  const vectors = sourceOf('test/fixtures/object-vectors.tsv');
+  assert.ok(vectors, `the object vectors are not on this machine. Missing: ${sourceName('test/fixtures/object-vectors.tsv')}. To fix: fetch that branch into the sibling defxn-defi-rs, or set DENSE_WIRE_WEB`);
+  const rows = vectors.toString('utf8').trim().split('\n').map((l) => l.split('\t'));
   const text = (hex) => Buffer.from(hex, 'hex').toString('utf8');
   const proofs = new Map(rows.filter((r) => r[0] === 'proof' && ['pva', 'skin_traded'].includes(r[1])).map((r) => [r[2], text(r[3])]));
   const lists = new Map(rows.filter((r) => r[0] === 'objs').map(([, key, hex]) => [key, text(hex)]));

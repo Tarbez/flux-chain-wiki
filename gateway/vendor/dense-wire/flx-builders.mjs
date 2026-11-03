@@ -1308,13 +1308,18 @@ export const NETWORK_MAIN = "fxn-mainnet";
 /** The devnet's id, the same literal as `netparams::NETWORK_DEVNET`. A node with no network set runs as it. */
 export const NETWORK_DEVNET = "fxn-devnet";
 
+/** `netparams::is_network_id`: `fxn-` then one or more lowercase letters, digits and `-`, at most 32 long. */
+export function isNetworkId(value) {
+  return typeof value === "string" && /^fxn-[a-z0-9-]{1,28}$/.test(value);
+}
+
 /** What a key's first record cites in `C[0]` on `network` (owner, 2026-10-25), mirroring `chain::network_root`.
  *  A key has one record chain, and every later record links back to its first one, so the first record's root binds
  *  the whole chain to one network: a record signed on one network is never admitted on another. The devnet keeps the
  *  64-zero sentinel, so the running devnet's history still replays. Every other network's root is the SHA-256 of
  *  `fxn-network-root-` and its id. A node names its root in `HEAD_NONE`; prefer that answer to computing it. */
 export async function networkRoot(network) {
-  if (typeof network !== "string" || !/^fxn-[a-z0-9-]{1,28}$/.test(network)) {
+  if (!isNetworkId(network)) {
     throw new Error(
       `The network ${JSON.stringify(network)} is not a network id, so the builder cannot name its root. ` +
         `Missing: a network id, fxn- then lowercase letters, digits and -, such as ${NETWORK_DEVNET} or ${NETWORK_MAIN}. ` +
@@ -1332,8 +1337,18 @@ export const NETWORK_COVERED_TAG = "FXNNET1";
  *  record's root cannot bind it. The devnet's bytes are unchanged. On every other network they are `FXNNET1`, NUL,
  *  the network id, NUL, then the bytes, so a vote signed on one network never verifies on another. */
 export function networkCovered(network, bytes) {
-  if (network === undefined || network === NETWORK_DEVNET) return bytes;
-  if (typeof network !== "string" || !/^fxn-[a-z0-9-]{1,28}$/.test(network)) {
+  // Round 10 (fresh audit CNN-6): a missing network refuses by name. Until round 10 `undefined` returned the devnet's
+  // bytes, so a page on a mainnet node whose BUILD_INFO did not read signed a consent valid on the devnet. A caller that
+  // means the devnet passes NETWORK_DEVNET.
+  if (network === undefined || network === null) {
+    throw new Error(
+      "The network this signature is for was not read, so the bytes cannot be bound to it. " +
+        `Missing: the network the page is connected to (BUILD_INFO's fifth field), such as ${NETWORK_DEVNET} or ${NETWORK_MAIN}. ` +
+        "To fix: read the node's network first and pass it; nothing was signed.",
+    );
+  }
+  if (network === NETWORK_DEVNET) return bytes;
+  if (!isNetworkId(network)) {
     throw new Error(
       `The network ${JSON.stringify(network)} is not a network id, so the vote cannot be bound to it. ` +
         `Missing: a network id, fxn- then lowercase letters, digits and -, such as ${NETWORK_DEVNET} or ${NETWORK_MAIN}. ` +
@@ -1355,6 +1370,68 @@ export const LAUNCHED_CHAIN_WORDS = Object.freeze(["mainnet", "devnet"]);
  *  network. Mirrors `netparams::network_word`. */
 export function networkWord(network) {
   return network === NETWORK_MAIN ? "mainnet" : "devnet";
+}
+
+/** What a signing screen says beside a network id: `MAINNET` for fxn-mainnet, `a test network` for every other id,
+ *  and `no network named` when the node is older than the network id (`fxn node check` says the same). */
+export function networkKind(network) {
+  if (network === NETWORK_MAIN) return "MAINNET";
+  return isNetworkId(network) ? "a test network" : "no network named";
+}
+
+/** The line a signing review shows for the network a signature is for (round 7, nodeuse; owner 2026-11-03: one FXN
+ *  ID key and one wallet work on every network, and the only difference is in sign and approve). `network` is the
+ *  network the record was built for; `null` when the node names none. */
+export function signingNetworkFact(network) {
+  const value = network ? `${network} (${networkKind(network)}). This signature is for ${network} and verifies nowhere else.` : "The node names no network (a chain built before the network id). This signature's bytes are the devnet's.";
+  return { label: "Network", value };
+}
+
+/** Round 10 (fresh audit CNN-5): what a caller passes as `network` for a record that is truly not bound to one, so a
+ *  forgotten network (`undefined`) is never read as "nothing to check". */
+export const NOT_NETWORK_BOUND = Symbol.for("fxn.not-network-bound");
+
+/** Round 7, nodeuse (owner 2026-11-03): why a record built for `recordNetwork` must not be signed or sent to a node
+ *  that names `nodeNetwork` (BUILD_INFO's fifth field), as `{ failure, missing, remedy }`, or `null` when they are the
+ *  same network. The ONE function for this rule; callers: `flx-signing-guard.mjs` (`submitAtPosition`, before any
+ *  record goes to a node) and every signing screen's review (the wallet's `reviewThen` on defxn.com/account), so a
+ *  wallet pointed at one network never signs a record built for another. A node that names no network cannot be
+ *  matched and is refused: a signature bound to a network must reach a node that says which network it runs.
+ *  `recordNetwork` undefined means the page built nothing network-bound; `null` from a node means it names none. */
+export function signingNetworkRefusal(recordNetwork, nodeNetwork) {
+  // Round 10 (fresh audit CNN-5): a record that is not bound to a network says so with NOT_NETWORK_BOUND; `undefined`
+  // is a caller that forgot, and is refused by name (it was "nothing to check" until round 10).
+  if (recordNetwork === NOT_NETWORK_BOUND) return null;
+  if (recordNetwork === undefined) {
+    return {
+      failure: "The page did not say which network this record is for, so the wallet cannot check the node runs it.",
+      missing: "the network the record was built for (the node's BUILD_INFO fifth field when it was built).",
+      remedy: "read the node's network before building the record and pass it with the record. Nothing was signed or sent.",
+    };
+  }
+  // Round 8: the node first. A page that read no network from the node passes null as the record's network, and the
+  // failure is the node's (it names none), not the record's.
+  if (!isNetworkId(nodeNetwork)) {
+    const wanted = isNetworkId(recordNetwork) ? recordNetwork : null;
+    return {
+      failure: wanted ? `This record is for ${wanted} (${networkKind(wanted)}), and the node this wallet talks to names no network.` : "The node this wallet talks to names no network, so no record can be bound to one.",
+      missing: wanted ? `a node that answers BUILD_INFO with its network, so the wallet can check it is ${wanted}.` : "a node that answers BUILD_INFO with its network (its fifth field).",
+      remedy: wanted ? "connect the wallet to a node built after 2026-10-23, or to a node that runs " + wanted + ". Nothing was signed." : "connect the wallet to a node built after 2026-10-23. Nothing was signed.",
+    };
+  }
+  if (!isNetworkId(recordNetwork)) {
+    return {
+      failure: `The record names ${JSON.stringify(recordNetwork)} as its network, which is not a network id.`,
+      missing: `a network id, fxn- then lowercase letters, digits and -, such as ${NETWORK_DEVNET} or ${NETWORK_MAIN}.`,
+      remedy: "build the record for the network the wallet is connected to (BUILD_INFO's fifth field). Nothing was signed.",
+    };
+  }
+  if (recordNetwork === nodeNetwork) return null;
+  return {
+    failure: `This record is for ${recordNetwork} (${networkKind(recordNetwork)}), and the node this wallet talks to runs ${nodeNetwork} (${networkKind(nodeNetwork)}).`,
+    missing: `a node on ${recordNetwork}, or a record built for ${nodeNetwork}.`,
+    remedy: `pick the ${recordNetwork} network in the wallet and sign again, or build the record for ${nodeNetwork}. Nothing was signed or sent; the key is the same on every network, only the signature is bound to one.`,
+  };
 }
 
 /** The end word of a launched chain id (`arkdevnet` -> `devnet`), or null when it has no label before a word.
@@ -1444,7 +1521,34 @@ export async function segmentRootFromLines({ sequence, previousRoot, lines }) {
     .join("");
 }
 
-export function segmentCoveredBytes({ sequence, previousRoot, root, linesCount, chainId }) {
+/** The time rule (owner 2026-11-01): a timed segment's covered bytes open with this domain and the time as 8 bytes
+ *  big-endian, then the untimed bytes (`chain_segment::SEGMENT_DOMAIN_TIME`). */
+const DOMAIN_TIME = new TextEncoder().encode("FLX-LEDGER-SEGMENT-TIME-V1\0");
+/** The compiled skew of the time rule in seconds (`chain_segment::SEGMENT_TIME_SKEW_SECS`). */
+export const SEGMENT_TIME_SKEW_SECS = 120;
+
+/** Why a signer whose clock reads `now` refuses to sign a segment of time `time`, or null (`segment_time_refusal`). */
+export function segmentTimeRefusal(time, previousTime, now) {
+  if (previousTime !== null && previousTime !== undefined && time < previousTime) {
+    return `the segment is signed at ${time}, before the segment before it (${previousTime})`;
+  }
+  if (Math.abs(time - now) > SEGMENT_TIME_SKEW_SECS) {
+    return `the segment is signed at ${time}, ${Math.abs(time - now)} s from this signer's clock ${now}`;
+  }
+  return null;
+}
+
+export function segmentCoveredBytes({ sequence, previousRoot, root, linesCount, chainId, time }) {
+  const untimed = segmentCoveredBytesUntimed({ sequence, previousRoot, root, linesCount, chainId });
+  if (time === undefined || time === null) return untimed;
+  const buf = new Uint8Array(DOMAIN_TIME.length + 8 + untimed.length);
+  buf.set(DOMAIN_TIME, 0);
+  writeBE64(buf, DOMAIN_TIME.length, BigInt.asUintN(64, BigInt(time)));
+  buf.set(untimed, DOMAIN_TIME.length + 8);
+  return buf;
+}
+
+function segmentCoveredBytesUntimed({ sequence, previousRoot, root, linesCount, chainId }) {
   const enc = new TextEncoder();
   const prev = enc.encode(previousRoot);
   const rootB = enc.encode(root);
@@ -1491,6 +1595,13 @@ function writeBE64(buf, offset, value) {
 // --- PVA and skins: the builders live in flx-object-builders.mjs (one file a site can vendor alone) ---
 export * from "./flx-object-builders.mjs";
 import { isKeyNameLabel } from "./flx-object-builders.mjs";
+
+// --- Site reports: the report, retraction and roster builders live in flx-attest-builders.mjs (vendored with
+// flx-attest-proof.mjs) ---
+export * from "./flx-attest-builders.mjs";
+// --- Node releases: the KNODEREL1 body and record readers live in flx-release-builders.mjs (vendored by the genesis
+// page), mirroring the flx-release crate against its own vectors ---
+export * from "./flx-release-builders.mjs";
 
 /** Convenience: compute CID of a built manifest. */
 export async function cidOf(text) {

@@ -66,13 +66,17 @@ export async function nativeBalance(wire, chainId, holderHex) {
   return parts[0] === "BALANCE" ? BigInt(parts[3]) : null;
 }
 
-/** `NATIVE_HISTORY` -> `[{at, kind, counterparty, amount, reference}]` oldest first, or `null` when unknown. */
+/** `NATIVE_HISTORY` -> `[{at, kind, counterparty, amount, reference, payer, position, record}]` oldest first, or `null`
+ *  when unknown. `payer` and `position` name a transfer record (its signer's key and its `J`) so a wallet can ask
+ *  `CONFIRMED` about a payment it received (2026-10-31). A credit row names its operator's `NativeCredit` too, and its
+ *  CID rides as `record` (owner answer 2026-10-31); every other row's record is its `reference`. Null where unknown. */
 export async function nativeHistory(wire, chainId, holderHex, limit = 50) {
   const lines = String(await wire.send(`NATIVE_HISTORY\t${chainId}\t${holderHex}\t${limit}`)).trim().split("\n");
   if (!lines[0].startsWith("NATIVE_HISTORY\t")) return null;
   return lines.filter((l) => l.startsWith("ROW\t")).map((l) => {
-    const [, at, kind, counterparty, amount, reference] = l.split("\t");
-    return { at: Number(at), kind, counterparty, amount: BigInt(amount), reference };
+    const [, at, kind, counterparty, amount, reference, payer, position, record] = l.split("\t");
+    const placed = /^[0-9a-f]{64}$/.test(payer || "") && /^\d+$/.test(position || "");
+    return { at: Number(at), kind, counterparty, amount: BigInt(amount), reference, payer: placed ? payer : null, position: placed ? Number(position) : null, record: placed ? (/^[0-9a-f]{64}$/.test(record || "") ? record : reference) : null };
   });
 }
 

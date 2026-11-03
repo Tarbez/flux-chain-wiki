@@ -27,3 +27,16 @@ flx-amount.mjs once the owner confirms this build. Copied files, sha256:
   flx-domain-proof.mjs  8662c73b2416b5faa85f080b67d0e80d3d1ff3f4767cba1e7d2b1e1e379d6950
   flx-launch-blobs.mjs  45c2291bc68b7fa5817a3ec58adc30ec6a11abe4069d5486534f133feeb12c13
   flx-wire.mjs          5b0aaee5c245e6d2e4e3735adc7990d3b4ba9a1560e46f0b6aab4f04e59fe8fc
+
+Re-vendored 2026-11-03 (audit round 11, council lane). The source is the commit 23dc083, read with git show.
+Six copies were behind it:
+  - flx-builders.mjs.
+  - flx-crypto.mjs.
+  - flx-launch-blobs.mjs.
+  - flx-object-builders.mjs.
+  - flx-resolver-record-client.mjs.
+  - flx-wire.mjs.
+Two copies are new, because the builders file now imports them:
+  - flx-attest-builders.mjs.
+  - flx-release-builders.mjs.
+The drift check is tests/vendored-dense-wire.test.mjs. It reads every file in this folder, so no list here needs an update.
