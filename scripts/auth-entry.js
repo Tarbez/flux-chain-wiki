@@ -97,7 +97,7 @@
 import { createAuthKitSession, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit, encodeAuthKitEnvelope } from '@deadark/ark-ui/flux-auth';
 import { createArkAuthKitPanel } from '@deadark/ark-ui/flux-auth-ui';
 import { createFluxRootHandle, fluxRootFromMnemonic, FLUX_ROOT_DERIVATION } from 'fxn-auth/root-from-mnemonic';
-import { createRootIdentitySigningHandle } from 'deadark-identity-core/root-signing-handle';
+import { createRootIdentitySigningHandleNative } from 'deadark-identity-core/root-signing-handle';
 import { createWalletSigningHandle } from 'fxn-auth/wallet-signing-handle';
 import { createWalletRotation, createWalletRevocation, walletLinkRecordCid } from 'fxn-auth/wallet-lifecycle';
 import { createWalletDelegation, signWalletDelegation } from 'fxn-auth/wallet-delegation';
@@ -170,7 +170,9 @@ async function rootHandle({ mnemonic, derivation, callsign }) {
   if (derivation === FLUX_ROOT_DERIVATION) return createFluxRootHandle(mnemonic);
   if (derivation === 'deadark-profile-v1') {
     if (!callsign) throw new Error('This FXN ID names a DeArk profile Master ID but records no callsign, so its key cannot be rebuilt.');
-    return createRootIdentitySigningHandle({ phrase: mnemonic, callsign });
+    // Native WebCrypto derivation (law 2026-10-15; pre-genesis audit memory-laws-7): the sync handle derived the
+    // key with tweetnacl on every sign-in. Same key and signatures; tweetnacl only on a runtime with no Ed25519.
+    return createRootIdentitySigningHandleNative({ phrase: mnemonic, callsign });
   }
   throw new Error('This FXN ID uses a Master ID derivation this page does not know: ' + derivation + '.');
 }
