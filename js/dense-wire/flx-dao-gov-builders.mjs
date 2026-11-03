@@ -16,6 +16,7 @@
 import { hexOfUtf8, utf8OfHex, admit, signaturePrefix } from "./flx-dumb-parser.mjs";
 import { networkCovered } from "./flx-builders.mjs";
 import { FXN_DECIMALS, MAX_DECIMALS } from "./flx-amount.mjs";
+import { quorumFor } from "./flx-quorum.mjs";
 
 export const DAO_GOV_CHAIN = "daogov";
 export const KIND_TREASURY_ADD = "KDAOTREASX1";
@@ -271,8 +272,10 @@ export function checkSafeConfig(c) {
   need(c.signers.length >= SAFE_FLOOR_SIGNERS, `A safe needs at least ${SAFE_FLOOR_SIGNERS} different signers. To fix: add a signer.`);
   need(c.signers.length <= MAX_SAFE_SIGNERS, `A safe has at most ${MAX_SAFE_SIGNERS} signers.`);
   need(c.delegates.length <= MAX_SAFE_DELEGATES, `A safe has at most ${MAX_SAFE_DELEGATES} delegates.`);
-  need(Number.isInteger(c.threshold) && c.threshold >= SAFE_FLOOR_QUORUM && c.threshold <= c.signers.length,
-    `The threshold must be a whole number from ${SAFE_FLOOR_QUORUM} to the number of signers (${c.signers.length}).`);
+  // Round 12 (breaker H2-6): `dao_treasury::safe_shape`, a safe's K obeys the one quorum rule (K > 2N/3).
+  const leastK = Math.max(SAFE_FLOOR_QUORUM, quorumFor(c.signers.length));
+  need(Number.isInteger(c.threshold) && c.threshold >= leastK && c.threshold <= c.signers.length,
+    `The threshold must be a whole number from ${leastK} to the number of signers (${c.signers.length}), above two thirds of them.`);
   need(!c.delegates.some((k) => c.signers.includes(k)), "A key cannot be both a signer and a delegate. To fix: remove it from one list.");
 }
 
@@ -771,21 +774,42 @@ export function genesisOperatorsRefusal(mint) {
       "render the params with GenesisMint::with_ledger_operators (web: buildGenesisMint with operators and ledgerRequired), publish them with BLOB_PUT, and sign the mint over the new CID",
     ];
   }
-  // Owner ruling 2026-11-01 (DEVNET K >= 2): no single key pays out, on any network.
+  // Owner ruling 2026-11-01 (DEVNET K >= 2): no single key pays out, on any network. Round 12 (flooder ZD3-2): and K
+  // obeys the one quorum rule (`operator_quorum::required_for`).
   const floor = MIN_LEDGER_REQUIRED;
-  if (k < floor || k > n) {
+  if (n < floor) {
+    return [`the mint params name ${n} ledger operator`, `at least ${floor} operators named, on every network, devnet included`, `name at least ${floor} operators, publish the params again, and sign the mint over the new CID`];
+  }
+  const needK = Math.max(floor, quorumFor(n));
+  if (k < needK || k > n) {
     return [
-      `the mint params ask ${k} of ${n} ledger operators`,
-      `ledgerrequired from ${floor} to the operator count, on every network, devnet included, with at least ${floor} operators named`,
-      `name at least ${floor} operators, set ledgerrequired to how many must sign each payout (at least ${floor}, at most the operators named), publish the params again, and sign the mint over the new CID`,
+      `the mint params: ${k} of ${n} ledger operators must sign each payout`,
+      `K from ${needK} to ${n}: above 2N/3 of the operators named (the one quorum rule) and at least ${floor}, on every network`,
+      `set ledgerrequired to at least ${needK} in the params, publish them again, and sign the mint over the new CID`,
     ];
   }
   return null;
 }
 
+/** `chain_segment::quorum_for`: the one quorum rule, K > 2N/3 (0 seats need 0). One copy, in flx-quorum.mjs (round 12
+ *  merge); re-exported here for this module's callers. */
+export { quorumFor };
+
 /** `operator_quorum::MIN_LEDGER_REQUIRED` (owner ruling 2026-11-01): the fewest ledger operators that authorize one
  *  payout, on every network, devnet included. It supersedes round 1's mainnet-only `MAINNET_MIN_LEDGER_REQUIRED`. */
 export const MIN_LEDGER_REQUIRED = 2;
+
+/** `GenesisMint::concentration_refusal` (round 12, breaker H2-7): `null` unless one key is both a council seat and a
+ *  ledger operator. It counts keys, not people: person-level concentration is not built (the person gate). */
+export function genesisConcentrationRefusal(mint) {
+  const both = (mint.operators ?? []).filter((k) => (mint.council ?? []).includes(k));
+  if (both.length === 0) return null;
+  return [
+    `${both.length} key${both.length === 1 ? " is" : "s are"} both a council seat and a ledger operator (first ${both[0].slice(0, 16)})`,
+    "council seats and ledger operators held by different keys, so no one key is in both K-of-N sets",
+    "make a separate key for each ledger operator, name those keys as the operators, publish the params again, and sign the mint over the new CID",
+  ];
+}
 
 /** `GenesisMint::decimals_refusal`: `null` when the params declare FXN's decimals, else `[failure, missing, remedy]`. */
 export function genesisDecimalsRefusal(mint) {
@@ -814,8 +838,10 @@ export function genesisCouncilRefusal(mint) {
   if (independent < MIN_INDEPENDENT_SIGNERS) {
     return [`the council has ${independent} signers who are not founders`, `at least ${MIN_INDEPENDENT_SIGNERS} independent signers`, "add independent signers to the council"];
   }
-  if (t < MIN_COUNCIL_THRESHOLD || t > n) {
-    return [`the council's threshold is ${t} of ${n}`, `a threshold from ${MIN_COUNCIL_THRESHOLD} to ${n}`, "set the threshold to 3 or more, at most the signer count"];
+  // Round 12 (breaker H2-6): the one quorum rule (K > 2N/3), as `GenesisMint::council_refusal`.
+  const needK = Math.max(MIN_COUNCIL_THRESHOLD, quorumFor(n));
+  if (t < needK || t > n) {
+    return [`the council's threshold is ${t} of ${n}`, `a threshold from ${needK} to ${n} (above two thirds of the council, the one quorum rule)`, `set the threshold to ${needK} or more, at most the signer count`];
   }
   if (t <= mint.founders.length) {
     return [
@@ -845,7 +871,7 @@ export function checkGenesisMintParams(blob) {
   if (!parsed.ok) {
     return { ok: false, refusal: [`the genesis mint params do not read: ${parsed.why}`, `an ${GENESIS_MINT_HEADER} blob`, "render it with genesis_mint::GenesisMint::render"] };
   }
-  const refusal = genesisCouncilRefusal(parsed.mint) ?? genesisOperatorsRefusal(parsed.mint) ?? genesisDecimalsRefusal(parsed.mint);
+  const refusal = genesisCouncilRefusal(parsed.mint) ?? genesisOperatorsRefusal(parsed.mint) ?? genesisConcentrationRefusal(parsed.mint) ?? genesisDecimalsRefusal(parsed.mint);
   return refusal ? { ok: false, refusal } : { ok: true, mint: parsed.mint };
 }
 
@@ -1278,8 +1304,9 @@ export function councilProposalPayload({ daoId, seats, threshold, deadline, body
   need(keys.every(isHex64), "A seat is not a key. Missing: 64 lowercase hex characters per seat.");
   // A7 (2026-10-29): at least 5 seats and a majority threshold.
   need(keys.length >= MIN_COUNCIL_SEATS && keys.length <= MAX_COUNCIL_SEATS, `The council has ${keys.length} distinct seats. Missing: ${MIN_COUNCIL_SEATS} to ${MAX_COUNCIL_SEATS}. To fix: name more seats.`);
-  const least = Math.max(SAFE_FLOOR_QUORUM, Math.floor(keys.length / 2) + 1);
-  need(Number(threshold) >= least && Number(threshold) <= keys.length, `Threshold ${threshold} with ${keys.length} seats. Missing: a threshold from ${least} to the seat count, more than half. To fix: raise the threshold.`);
+  // Round 12 (breaker H2-6): the one quorum rule (K > 2N/3), as the chain's council proposal check.
+  const least = Math.max(SAFE_FLOOR_QUORUM, quorumFor(keys.length));
+  need(Number(threshold) >= least && Number(threshold) <= keys.length, `Threshold ${threshold} with ${keys.length} seats. Missing: a threshold from ${least} to the seat count, more than two thirds. To fix: raise the threshold.`);
   return renderGov(KIND_COUNCIL_PROPOSAL, [daoId, sizeText(threshold, "threshold"), timeText(deadline, "deadline")], { seat: keys.map((k) => [k]), ...bodyGroup(body) });
 }
 

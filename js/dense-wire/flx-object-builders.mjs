@@ -43,14 +43,13 @@ function requirePosition(pos, prevCid) {
   requireCid(prevCid, "previous record CID", "read it with HEAD <your key>; a key's first record uses 64 zeros.");
 }
 
-/** A `KASSET1` mint on `chain` (`pva` or `skin`) pointing at `pointer`, with `detail` as C[2] on `pva` only (the
- *  card's mix). Its object id is the CID of the text. */
+/** A `KASSET1` mint on `chain` (`pva` or `skin`) pointing at `pointer`, with `detail` as C[2]: on `pva` the card's
+ *  mix, on `skin` the CID of its terms record (round 12, `asset_terms.rs`). Its object id is the CID of the text. */
 export async function buildObjectMintWithSigner({ signer, chain, pos, prevCid, pointer, detail = null, nowSec }) {
   if (chain !== PVA_CHAIN && chain !== SKIN_CHAIN) throw new Error(`That chain ${JSON.stringify(chain)} carries no objects. Missing: "${PVA_CHAIN}" or "${SKIN_CHAIN}". To fix: use buildPvaActivationWithSigner or buildSkinMintWithSigner.`);
   requirePosition(pos, prevCid);
   requireCid(pointer, "pointer", "give 64 lowercase hex: the earn reference for a PVA, the packed skin record for a skin.");
-  if (detail !== null && chain !== PVA_CHAIN) throw new Error(`A ${chain} mint carries no C[2]. Missing: nothing; only a PVA carries a mix. To fix: leave detail out.`);
-  if (detail !== null) requireCid(detail, "card mix", "give 64 lowercase hex: the mix the site packed for this card.");
+  if (detail !== null) requireCid(detail, chain === PVA_CHAIN ? "card mix" : "terms", chain === PVA_CHAIN ? "give 64 lowercase hex: the mix the site packed for this card." : "give the CID of the creator's KTERMS1 (buildSkinTermsWithSigner), sent first.");
   const body = `${objectHead(signer.pubHex, chain, nowSec)}-K${OBJECT_KIND_ASSET}-J${pos}-C${prevCid}-C${pointer}${detail === null ? "" : `-C${detail}`}`;
   return `${body}-S${await signer.signText(body)}`;
 }
@@ -62,9 +61,35 @@ export async function buildPvaActivationWithSigner({ signer, pos, prevCid, earnR
   return buildObjectMintWithSigner({ signer, chain: PVA_CHAIN, pos, prevCid, pointer: earnRef, detail: mix, nowSec });
 }
 
-/** Mint a skin: a `KASSET1` on `skin` whose pointer is the skin (32 bytes, the site's packed DFXNSKIN1). The minter must hold a PVA. */
-export async function buildSkinMintWithSigner({ signer, pos, prevCid, skinPointer, nowSec }) {
-  return buildObjectMintWithSigner({ signer, chain: SKIN_CHAIN, pos, prevCid, pointer: skinPointer, nowSec });
+/** Mint a skin: a `KASSET1` on `skin` whose pointer is the skin (32 bytes, the site's packed DFXNSKIN1). The minter must hold a PVA.
+ *  `terms` (optional) is the CID of the minter's own KTERMS1: the skin's royalty and licence, fixed at this mint. */
+export async function buildSkinMintWithSigner({ signer, pos, prevCid, skinPointer, terms = null, nowSec }) {
+  return buildObjectMintWithSigner({ signer, chain: SKIN_CHAIN, pos, prevCid, pointer: skinPointer, detail: terms, nowSec });
+}
+
+// --- a skin's royalty and licence (asset_terms.rs, round 12) ---
+
+export const TERMS_KIND = "KTERMS1";
+/** The highest royalty, in basis points: 10% (an owner value, on its safest default). */
+export const MAX_ROYALTY_BPS = 1000;
+/** The uses a licence may forbid: one at most. */
+export const LICENCE_USES = ["give", "sell", "move"];
+
+/** The creator's terms: `royaltyBps` of every priced sale goes to the signer, and `forbids` (null, "give", "sell" or
+ *  "move") is the one use the licence refuses. `licenceText` is the sha256 of the licence's full text, kept off chain.
+ *  Send it first, then mint the skin naming its CID as `terms`. */
+export async function buildSkinTermsWithSigner({ signer, pos, prevCid, royaltyBps = 0, forbids = null, licenceText = "0".repeat(64), nowSec }) {
+  requirePosition(pos, prevCid);
+  requireCid(licenceText, "licence text", "give the sha256 of the licence's full text, or leave it out for none.");
+  if (!Number.isInteger(royaltyBps) || royaltyBps < 0 || royaltyBps > MAX_ROYALTY_BPS) {
+    throw new Error(`That royalty is not 0 to ${MAX_ROYALTY_BPS} basis points. Missing: a whole number of basis points (250 is 2.5%). To fix: set royaltyBps within the rule.`);
+  }
+  if (forbids !== null && !LICENCE_USES.includes(forbids)) {
+    throw new Error(`That licence word ${JSON.stringify(forbids)} is not a use. Missing: one of ${LICENCE_USES.join(", ")}, or null to allow every use. To fix: pick one.`);
+  }
+  const licence = forbids === null ? "" : `-P0${hexOfUtf8(forbids)}`;
+  const body = `${objectHead(signer.pubHex, SKIN_CHAIN, nowSec)}-K${TERMS_KIND}-T${royaltyBps}BPS${licence}-J${pos}-C${prevCid}-C${licenceText}`;
+  return `${body}-S${await signer.signText(body)}`;
 }
 
 /** The next owner's consent: a `KEDGE1` on `skin` from the skin's current head to its pointer. Send it before the move. */

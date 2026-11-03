@@ -14,7 +14,8 @@
 //   - every record is a LEDGERENTRY of its kind's labels only (each once, C aside), its H is the hex of its own G, it
 //     carries exactly one S block and that block is LAST, and its S verifies under its own G over the bytes before it;
 //   - the first record is a KASSET1 on `pva` or `skin` whose CID is the asked id: the owner is its signer, the pointer
-//     its C[1]; a PVA may carry its card's mix as C[2] (`mix`, fixed at activation), a skin never carries a C[2];
+//     its C[1]; a PVA may carry its card's mix as C[2] (`mix`, fixed at activation), a skin its terms record's CID
+//     (`terms`: its royalty and licence, fixed at the mint; round 12);
 //   - a PVA has nothing after its mint: any move of a PVA is refused PvaIsBound, as every node refuses it;
 //   - each KEDGE1 follows the current head (C[1]) under the pointer relation, and the KSUPER1 after it is signed by
 //     the current owner, from the current head (C[1]) to that edge (C[2]): the edge's signer becomes the owner and its
@@ -151,9 +152,6 @@ export async function verifyObjectProof({ id, entries, pva = null } = {}) {
   }
   if (mint.cid !== id) return refuse("WrongId", `the mint's CID is ${mint.cid}, not the asked ${id}`, "the mint whose CID is the id", "ask another node for the proof", 0);
   const chain = mint.chain;
-  if (chain === SKIN_CHAIN && mint.refs.length > 2) {
-    return refuse("Grammar", "the skin's mint carries a C[2]; only a PVA carries a mix", "a skin mint of 2 C refs", "ask another node for the proof", 0);
-  }
   const notChecked = ["freshness: a node can withhold a newer move; this proves the records are genuine and chained, not that they are the latest"];
   if (chain === PVA_CHAIN) {
     if (read.length > 1) {
@@ -175,6 +173,9 @@ export async function verifyObjectProof({ id, entries, pva = null } = {}) {
     return refuse("NoPva", "the proof's PVA is not a PVA its minter held when it minted the skin", `a KASSET1 on ${PVA_CHAIN} signed by ${mint.signer}, stamped at or before ${mint.at}`, "ask another node for the proof", 0);
   }
   notChecked.push(`earn: the minter's PVA ${p.cid} cites an FXN payment the node found on its ledger; confirm it with NATIVE_HISTORY`);
+  // Round 12 (ranked risk 10): a skin's C[2] names its terms record (royalty and licence), fixed at the mint.
+  const terms = mint.refs[2] ?? null;
+  if (terms) notChecked.push(`terms: the skin's mint names the terms record ${terms}; read it by its CID and check it is signed by ${mint.signer}`);
 
   let owner = mint.signer;
   let pointer = mint.refs[1];
@@ -208,7 +209,7 @@ export async function verifyObjectProof({ id, entries, pva = null } = {}) {
     moves += 1;
     i += 1;
   }
-  return { kind: "verified", id, chain, owner, pointer, minter: mint.signer, mintedAt: mint.at, head, moves, pva: p.cid, notChecked };
+  return { kind: "verified", id, chain, owner, pointer, minter: mint.signer, mintedAt: mint.at, head, moves, pva: p.cid, terms, notChecked };
 }
 
 /** Ask one node what `key` owns, and verify every object here. `wire` is anything with `send(line) -> Promise of the

@@ -2,7 +2,7 @@
 // three wire commands around it. A NEW file on purpose: the other web builders are edited by other work.
 //
 //   NATIVE_BALANCE<TAB>chain<TAB>holder          -> BALANCE<TAB>chain<TAB>holder<TAB>amount | BALANCE_UNKNOWN<TAB>chain<TAB>holder
-//   NATIVE_SEND<TAB><signed KNXFER1 record>      -> NATIVE_SEND_OK<TAB>cid<TAB>senderBalance
+//   NATIVE_SEND<TAB><signed KNXFER1 record>      -> NATIVE_SEND_OK<TAB>cid<TAB>senderBalance<TAB>accepted-not-final
 //                                                 | NATIVE_SEND_ERR<TAB>failure<TAB>missing<TAB>remedy
 //   NATIVE_HISTORY<TAB>chain<TAB>holder<TAB>n    -> NATIVE_HISTORY<TAB>chain<TAB>holder<TAB>rows, then ROW lines, then NATIVE_HISTORY_END
 //
@@ -52,10 +52,15 @@ export async function buildNativeTransfer(signer, { pos, prev, toKeyHex, chainId
   return { text: `${body}-S${sig}`, line: `NATIVE_SEND\t${body}-S${sig}` };
 }
 
-/** Parses a `NATIVE_SEND` reply into `{kind:'ok', cid, senderBalance}` or `{kind:'refused', failure, missing, remedy}`. */
+/** Parses a `NATIVE_SEND` reply into `{kind:'ok', cid, senderBalance, final}` or `{kind:'refused', failure, missing, remedy}`.
+ *  Round 12 (ranked risk 7): `final` is always `false` here. One node accepted the spend and no certified segment covers it
+ *  yet, so a screen shows it as waiting until `CONFIRMED` answers `final`. A node from before round 12 sends no fourth
+ *  field, and its answer is read as not final too. */
 export function parseNativeSendReply(reply) {
   const parts = String(reply).trim().split("\t");
-  if (parts[0] === "NATIVE_SEND_OK" && parts.length === 3) return { kind: "ok", cid: parts[1], senderBalance: BigInt(parts[2]) };
+  if (parts[0] === "NATIVE_SEND_OK" && (parts.length === 3 || (parts.length === 4 && parts[3] === "accepted-not-final"))) {
+    return { kind: "ok", cid: parts[1], senderBalance: BigInt(parts[2]), final: false };
+  }
   if (parts[0] === "NATIVE_SEND_ERR" && parts.length === 4) return { kind: "refused", failure: parts[1], missing: parts[2], remedy: parts[3] };
   return { kind: "error", raw: String(reply).trim() };
 }
