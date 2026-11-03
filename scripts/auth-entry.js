@@ -180,7 +180,12 @@ async function rootHandle({ mnemonic, derivation, callsign }) {
 /* container: where the sign-in panel is drawn.
    onChange(identity | null): called on sign-in and sign-out.
    identity: { publicKeyB64, displayName, sign(text) -> Promise<signatureB64> } */
-export function create({ container, onChange = () => {}, product = 'Flux Protocol' }) {
+/* keepSignedIn (round 12, flooder ZD3-3): false on a page that signs genesis, council or treasury acts. The panel then
+   offers no "keep me signed in", nothing is written to the persisted-secret vault, and a record kept earlier under this
+   product's scope is not restored. A kept record is locked under a key this browser cannot copy out, yet any script
+   served from the origin could still ask it to sign: a page whose served files are changed would sign with it on the
+   next visit. Default true, as before, for every other page. */
+export function create({ container, onChange = () => {}, product = 'Flux Protocol', keepSignedIn = true }) {
   // No default stylesheet: the panel's own `data-ark-auth` hooks are styled entirely by css/admin.css,
   // so its look is one thing with the rest of the gate, not two stylesheets negotiating a cascade.
   let active = null;   // { handle, walletHandle, identity, vault, secret }
@@ -503,7 +508,7 @@ export function create({ container, onChange = () => {}, product = 'Flux Protoco
     releaseSecretKey: (input) => releaseSecretKeyForKit(input),
     /* "Keep me signed in" is the session's own (ark-ui, 2026-10-29). The scope is the one this site wrote records
        under before the block moved, so a sign-in kept last week still opens. */
-    keep: {
+    keep: keepSignedIn === false ? false : {
       scope: 'fxn-id-web-sign-in/' + product,
       /* The session record is signed by a Public ID: the Master ID signs nothing for a page (owner, 2026-10-25). The
          current Public ID signs; on a restore `want` names the key the record carries, and the file must still hold

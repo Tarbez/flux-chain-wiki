@@ -70,6 +70,7 @@ import { WireClient } from "./flx-wire.mjs";
 import { buildGenesis, buildResolverLaunch, buildResolverRecordWithSigner, resolverRecordBody, isChainIdShape, GENESIS_PREV } from "./flx-builders.mjs";
 import { cryptoKeySigner } from "./flx-identity-bridge.mjs";
 import { sha256Hex } from "./flx-crypto.mjs";
+import { admittedCid, holdSigned } from "./flx-signing-guard.mjs";
 import { hexOfUtf8, utf8OfHex } from "./flx-dumb-parser.mjs";
 import { renderProviderSet, renderSpeedParams } from "./flx-launch-blobs.mjs";
 import { compileGrammar, checkRecord, formatRefusal, grammarSummary } from "./flx-record-grammar.mjs";
@@ -300,6 +301,8 @@ export function createResolverRecordClient({
 
   async function nextWrite(buildText) {
     const text = await buildText(pos, prevCid);
+    // Round 12 (ZD3-1): these bytes are the only record ever sent at this position by this process (flx-signing-guard).
+    holdSigned({ network: undefined, pubHex: signerPubHex, pos, text });
     const reply = await wire.submit(tagFor(text, kindMarker), text);
     if (reply.kind !== "ok") {
       throw new ResolverRecordClientError(
@@ -307,9 +310,13 @@ export function createResolverRecordClient({
         `dense-wire refused the write: ${reply.code ?? ""} ${reply.reason ?? JSON.stringify(reply)}`.trim(),
       );
     }
+    // Round 12 (flooder ZD3-1): the next record cites sha256(text), computed here, never the node's answered CID. A node
+    // that answers another CID is refused (CID_MISMATCH) and nothing further is signed: citing a lying node's CID
+    // signed a second record at the next position for it to publish, and the key froze.
+    const cid = await admittedCid(reply, text);
     pos += 1;
-    prevCid = reply.cid;
-    return reply;
+    prevCid = cid;
+    return { ...reply, cid };
   }
 
   /** Ensure this identity has a genesis entry and its own resolver
