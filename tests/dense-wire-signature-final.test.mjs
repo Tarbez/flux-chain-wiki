@@ -7,22 +7,18 @@
 import assert from 'node:assert/strict';
 import { generateKeyPairSync, sign, verify } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
 import { signaturePrefix } from '../js/dense-wire/flx-dumb-parser.mjs';
+import { sourceOf, sourceName } from './lib/dense-wire-source.mjs';
 
-const HERE = path.dirname(fileURLToPath(import.meta.url));
-// DENSE_WIRE_WEB points at a dense-wire/web checkout carrying the strict rule (until fix/one-name-system merges with the patch).
-const WEB = process.env.DENSE_WIRE_WEB || path.resolve(HERE, '..', '..', 'defxn-defi-rs', 'dense-wire', 'web');
-
-test('js/dense-wire/flx-dumb-parser.mjs is byte-identical to the shared parser', () => {
-  const canonical = path.join(WEB, 'flx-dumb-parser.mjs');
-  let source = null;
-  try { source = readFileSync(canonical); } catch {}
-  assert.ok(source, `${canonical} is missing. Missing: dense-wire's web parser. To fix: check out defxn-defi-rs beside this repo, or set DENSE_WIRE_WEB.`);
+// Round 11 merge: the shared parser is read from a commit through the one source helper (tests/lib/dense-wire-source.mjs,
+// DENSE_WIRE_REV), as every other drift check here is. Before, this file read the sibling checkout's working tree,
+// which another session keeps on its own branch, so it failed when the copy was re-vendored from the pinned merge.
+test('js/dense-wire/flx-dumb-parser.mjs is byte-identical to the shared parser', (t) => {
+  const source = sourceOf('flx-dumb-parser.mjs');
+  if (!source) { t.skip(`${sourceName('flx-dumb-parser.mjs')} is not on this machine (set DENSE_WIRE_REPO or DENSE_WIRE_WEB)`); return; }
   assert.ok(readFileSync(new URL('../js/dense-wire/flx-dumb-parser.mjs', import.meta.url)).equals(source),
-    `js/dense-wire/flx-dumb-parser.mjs differs from ${canonical}. Missing: the strict single-signature rule in the shared parser (out/daemons-dense-wire-js-signature-final.patch, applied on fix/one-name-system and merged). To fix: land that patch, then set DENSE_WIRE_WEB to that checkout or copy the canonical file over this one (never edit the copy).`);
+    `js/dense-wire/flx-dumb-parser.mjs differs from ${sourceName('flx-dumb-parser.mjs')}. Missing: the strict single-signature rule in the shared parser. To fix: copy the canonical file over this one with git show (never edit the copy).`);
 });
 
 test('a_block_after_the_signature_never_verifies', () => {

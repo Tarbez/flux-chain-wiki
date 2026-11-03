@@ -9,7 +9,11 @@
    ships. DENSE_WIRE_WEB (a dense-wire/web folder) still overrides, and its files are then read as they are on disk.
 
    2026-11-03 (audit round 11, council lane): the default rev is audit-fix-all-r10 (23dc083), the branch that merges
-   the round-10 fixes. Set it to main once that branch is merged. */
+   the round-10 fixes. Set it to main once that branch is merged.
+
+   2026-11-03 (audit round 11 merge): the default rev is audit-fix-all-r11. flx-dumb-parser.mjs (both folders) and
+   js/dense-wire/flx-transfer-builders.mjs were re-copied from it with git show; every other copy was already
+   byte-identical. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -18,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const OVERRIDE = process.env.DENSE_WIRE_WEB || null;
 export const REPO = process.env.DENSE_WIRE_REPO || path.resolve(ROOT, '..', 'defxn-defi-rs');
-export const REV = process.env.DENSE_WIRE_REV || 'audit-fix-all-r10';
+export const REV = process.env.DENSE_WIRE_REV || 'audit-fix-all-r11';
 
 /** Where `name` (a path under dense-wire/web) is read from, for messages. */
 export function sourceName(name) {

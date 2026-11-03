@@ -1,23 +1,21 @@
-// FLX Dumb Parser — JavaScript port of dense-wire's `admit()` path.
+// FLX Dumb Parser — JavaScript port of dense-wire's kernel door, `src/lib.rs::admit_named`.
 //
-// This module parses a dense FLX manifest string (ASCII alphanumeric + `-`
-// delimiter) into its blocks, enforces the grammar invariants, and runs a
-// shape-level check on each block. Semantics (what a CID points to, what a
-// signature covers) are the Smart Resolver's job on the server; this is the
-// Dumb Parser and nothing more.
+// This module parses a dense FLX record (ASCII alphanumeric + `-` delimiter) into its boxes, enforces the door's
+// grammar invariants, and runs each box's payload rule. Semantics (what a CID points to, what a signature covers) are
+// the node's; this is the Dumb Parser and nothing more.
 //
 // LAW: no WASM, no VM, no bytecode. This is plain ES2022.
 //
-// Mirrors the Rust implementation in `src/lib.rs::admit` and the subset of
-// `flux-core` role resolvers we need (G, Y, V, M, H, J, C, S, K, W, D, N),
-// plus (added for the transfer-lifecycle and DAO/treasury kinds) I, R, T.
+// Round 11 (2026-11-03, docs/fxn-vs-osf-2026-10-31/19-grammar-atlas-resolvers.md): this door used to read every box
+// by its first letter, knew 12 letters, counted a `CHAIN` box as a `C` reference, and still admitted the five retired
+// lifecycle kinds (INTENT, OFFER, AGREEMENT, FULFILLMENT, VALUEOBJECT) the node refuses. It now reads the node's way:
+// the labels `KIND`, `KK` and `CHAIN` first (longest label, flux-spec 0.4.3 rule 2), then the first letter; every
+// letter flux-core's `resolve_dense_block` resolves, with that resolver's payload rule; and the one kind the node
+// admits, `LEDGERENTRY`. The parity vectors in `tests/vectors/box-reading-parity.tsv` (derived from the kernel) pin
+// it: `web/test/box-reading-parity.test.mjs`.
 //
-// Kind::code()/Kind::from_code() (src/lib.rs ~61-99) and Kind::required()/
-// Kind::min_c() (~180-205) are ported below for the five lifecycle kinds
-// (Intent, Offer, Agreement, Fulfillment, ValueObject) alongside the
-// pre-existing LedgerEntry kind. The I/R/T shape checks are ported from
-// `flx/flux-core/src/roles.rs`'s `primary`/`referential`/
-// `target` resolvers.
+// `native/android/defxn-node/src/dumb-parser.js` is a byte-identical copy, so the Android package installs alone.
+// Edit this file, copy it there; the parity test fails while the two differ.
 
 const MAX_MANIFEST_LEN = 65_536;
 const ALLOWED = /^[A-Za-z0-9-]+$/;
@@ -27,187 +25,144 @@ export const ErrGrammar = 1;
 export const ErrType = 2;
 export const ErrSig = 3;
 
-/** Known Y kinds and their constraints. */
+/** The one kind the node admits (`Kind::from_code`: the registered code `1A` or the long form on the wire). */
 const KIND_LEDGERENTRY = "LEDGERENTRY";
-const KIND_LEDGERENTRY_SHORT = "1A";
-export const KIND_INTENT = "INTENT";
-export const KIND_OFFER = "OFFER";
-export const KIND_AGREEMENT = "AGREEMENT";
-export const KIND_FULFILLMENT = "FULFILLMENT";
-export const KIND_VALUEOBJECT = "VALUEOBJECT";
+const CODE_TO_KIND = { "1A": KIND_LEDGERENTRY, [KIND_LEDGERENTRY]: KIND_LEDGERENTRY };
 
-/** Y-block payload -> kind name. Mirrors `Kind::from_code` (src/lib.rs
- *  ~61-74): LedgerEntry alone accepts two spellings (the registered short
- *  code `1A` and the long form `LEDGERENTRY` actually emitted on the wire
- *  today); every other kind has exactly one code, always the short form. */
-const CODE_TO_KIND = {
-  "0G": KIND_INTENT,
-  "0H": KIND_OFFER,
-  "0I": KIND_AGREEMENT,
-  "0J": KIND_FULFILLMENT,
-  "0L": KIND_VALUEOBJECT,
-  [KIND_LEDGERENTRY_SHORT]: KIND_LEDGERENTRY,
-  [KIND_LEDGERENTRY]: KIND_LEDGERENTRY,
-};
+/** `Kind::required()` and `Kind::min_c()` for `LEDGERENTRY`. */
+const REQUIRED_ROLES = ["G", "Y", "V", "M", "H", "J", "C", "S"];
+const MIN_C = 2;
 
-/** `Kind::required()`, src/lib.rs ~180-187. */
-const REQUIRED_ROLES = {
-  [KIND_LEDGERENTRY]: ["G", "Y", "V", "M", "H", "J", "C", "S"],
-  [KIND_INTENT]: ["G", "Y", "V", "C", "M", "D", "S"],
-  [KIND_OFFER]: ["G", "Y", "V", "C", "M", "D", "S"],
-  [KIND_AGREEMENT]: ["G", "Y", "V", "C", "M", "S"],
-  [KIND_FULFILLMENT]: ["G", "Y", "V", "C", "M", "S"],
-  [KIND_VALUEOBJECT]: ["G", "Y", "V", "I", "R", "H", "T", "C", "M", "S"],
-};
+/** `lib.rs::LEDGER_MULTI_LETTER_LABELS`: the labels read by more than their first letter. */
+export const LEDGER_MULTI_LETTER_LABELS = ["KIND", "CHAIN", "KK"];
 
-/** `Kind::min_c(issuance)`, src/lib.rs ~188-205. ValueObject's minimum
- *  depends on whether it's an issuance (its `I` payload is literally "0"),
- *  so this is a function, not a flat table. */
-function minC(kind, isIssuance) {
-  switch (kind) {
-    case KIND_INTENT: return 1;
-    case KIND_OFFER: return 2;
-    case KIND_AGREEMENT: return 5;
-    case KIND_FULFILLMENT: return 3;
-    case KIND_VALUEOBJECT: return isIssuance ? 2 : 4;
-    case KIND_LEDGERENTRY: return 2;
-    default: return 0;
+/** `lib.rs::ledger_box_label`: a multi-letter label when the box starts with one, else its first character. */
+export function ledgerBoxLabel(block) {
+  for (const token of LEDGER_MULTI_LETTER_LABELS) {
+    if (block.startsWith(token)) return token;
   }
+  return block.length ? block[0] : "";
 }
 
-/** Mirrors flux-core's `generated.rs::GLOBALLY_REPEATABLE_ROLES` (every
- *  manifest type, not just these five) and `REPEATABLE_ROLES_BY_TYPE`'s
- *  entries for INTENT/OFFER/AGREEMENT/FULFILLMENT/VALUEOBJECT. LedgerEntry
- *  predates that pinned table and is special-cased separately (its own
- *  `C`/`S` rule, as before this change) — see `src/lib.rs::admit`'s own
- *  LedgerEntry branch. */
-const GLOBALLY_REPEATABLE_ROLES = new Set(["S", "P", "O", "L", "E"]);
-const REPEATABLE_ROLES_BY_TYPE = {
-  [KIND_INTENT]: new Set(["C", "H", "S"]),
-  [KIND_OFFER]: new Set(["C", "S"]),
-  [KIND_AGREEMENT]: new Set(["C", "S"]),
-  [KIND_FULFILLMENT]: new Set(["C", "S"]),
-  [KIND_VALUEOBJECT]: new Set(["C", "P", "S"]),
+/** `chain::is_chain_id_shape`: 3-32 lowercase letters and digits. */
+const isChainIdShape = (v) => /^[a-z0-9]{3,32}$/.test(v);
+
+// ---- flux-core `roles.rs` payload rules (pinned rev e22d0a1), one per letter `resolve_dense_block` dispatches ----
+
+const I64_MAX = 9223372036854775807n;
+const U64_MAX = 18446744073709551615n;
+const fitsI64 = (digits) => BigInt(digits) <= I64_MAX;
+const isLowerHex = (s) => /^[0-9a-f]+$/.test(s);
+const isAlnum = (s) => /^[A-Za-z0-9]+$/.test(s);
+/** `generated.rs::PAYLOAD_FLOORS`. */
+const FLOORS = { G: 32, S: 64, C: 16 };
+const STATUS_VALUES = ["PENDING", "APPROVED", "EXECUTED", "REJECTED"];
+const ACTION_VERBS = ["LIQUIDITYREMOVE", "LIQUIDITYADD", "COLLABORATE", "DELEGATE", "REGISTER", "ENDORSE", "SUPPORT", "DELETE", "FOLLOW", "NOTIFY", "SETTLE", "UPDATE", "QUERY", "CITE", "MINT", "SELL", "SEND", "BUY"];
+const ACTION_FLAGS = ["X"];
+const LATTICE_SCALE_CODES = ["0", "2", "4", "6"];
+const MANIFEST_TYPE_CODES = new Set(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "0A", "0B", "0C", "0D", "0E", "0F", "0G", "0H", "0I", "0J", "0K", "0L", "0M", "0N", "0O", "0P", "0Q", "0R", "0S", "0T", "0U", "0V", "0W", "0X", "0Y", "0Z", "10", "11", "12", "13"]);
+
+/** `unpack_coded_fields`: a leading digit run that fits an i64, then `<UPPERCASE><digits?>` groups that fit too. */
+function codedFields(p) {
+  const lead = /^\d+/.exec(p);
+  if (!lead || !fitsI64(lead[0])) return false;
+  let rest = p.slice(lead[0].length);
+  while (rest.length) {
+    const m = /^([A-Z])(\d*)/.exec(rest);
+    if (!m) return false;
+    if (m[2] && !fitsI64(m[2])) return false;
+    rest = rest.slice(m[0].length);
+  }
+  return true;
+}
+const numeric = (p) => /^\d+$/.test(p) && fitsI64(p);
+const opaque = (letter) => (p) => p.length > 0 && isAlnum(p) && p.length >= (FLOORS[letter] ?? 0);
+const hexPayload = (decode) => (p) => {
+  if (!p.length || !isLowerHex(p) || p.length % 2 !== 0) return false;
+  if (!decode) return true;
+  try { utf8OfHex(p); return true; } catch { return false; }
 };
-function isRepeatableRole(kind, role) {
-  if (kind === KIND_LEDGERENTRY) return role === "C" || role === "S";
-  if (GLOBALLY_REPEATABLE_ROLES.has(role)) return true;
-  return REPEATABLE_ROLES_BY_TYPE[kind]?.has(role) ?? false;
-}
 
-/** Shape rules. Each returns true if the block's packed value is valid.
- *  The packed value is `block.slice(1)` (everything after the role letter). */
-const SHAPE = {
-  // G: 64-char lowercase hex (ed25519 pubkey hex).
-  G: (p) => p.length === 64 && isLowerHex(p),
-  // Y: alphanumeric word.
-  Y: (p) => /^[A-Z0-9]+$/.test(p),
-  // V: digits.
-  V: (p) => /^\d+$/.test(p),
-  // M: digits (unix seconds).
-  M: (p) => /^\d+$/.test(p),
-  // H: hex (hex-of-UTF-8 of a key). Even length, lowercase hex.
-  H: (p) => p.length > 0 && p.length % 2 === 0 && isLowerHex(p),
-  // J: digits (position).
-  J: (p) => /^\d+$/.test(p),
-  // C: content box. flux-core's own `content()` resolver (roles.rs) is
-  // `opaque`: a dash-free alphanumeric payload of at least 16 characters
-  // (`PAYLOAD_FLOORS` C=16). USUALLY a 64-char sha256 CID, but not always:
-  // a padded price field, and a `KDOMREC2` target box (an uppercase type
-  // code, then lowercase hex), are real C payloads the node admits. This
-  // used to require even-length lowercase hex, which refused the record
-  // target boxes the node admits; it now mirrors the Rust rule exactly.
-  C: (p) => p.length >= 16 && /^[A-Za-z0-9]+$/.test(p),
-  // S: 128-char lowercase hex (ed25519 sig hex).
-  S: (p) => p.length === 128 && isLowerHex(p),
-  // K: alphanumeric kind marker (KRSTR1, KEARN1S, ...).
-  K: (p) => p.length > 0 && /^[A-Za-z0-9]+$/.test(p),
-  // W: hex-of-utf8 (matches flux-core's Wrapped resolver). The dense
-  // charset forbids dots, so dotted addresses are hex-encoded by the
-  // builders; signer-pubkey W blocks (used by EarnSigner) are already
-  // lowercase hex. Even-length lowercase hex, non-empty.
-  W: (p) => p.length > 0 && p.length % 2 === 0 && isLowerHex(p),
-  // D: digits (deadline, unix seconds).
-  D: (p) => /^\d+$/.test(p),
-  // N: chain-id scope (Phase B.1). Mirrors `chain::is_chain_id_shape`:
-  // 3-32 lowercase alphanumeric. Not in the original table because no
-  // pre-existing builder emitted an N block; the new DAO/treasury builders
-  // (Y=LEDGERENTRY, K=KDAO1/KDAOTREAS1/KTSPEND1) always do.
-  N: (p) => /^[a-z0-9]{3,32}$/.test(p),
-  // I: role `primary`, ported from flux-core's `unpack_coded_fields`
-  // (roles.rs ~130-192): a mandatory leading digit run (the sequence
-  // number), then zero or more `<UPPERCASE letter><optional digits>`
-  // groups. Dense-wire's own ValueObject sequence is always plain digits
-  // ("0" for an issuance, "1", "2", ... for each successor) with no
-  // trailing groups, but this stays a true port rather than narrowing to
-  // just `^\d+$`.
-  I: (p) => /^\d+([A-Z]\d*)*$/.test(p),
-  // R: role `referential` (roles.rs ~298-301) — the grammar gives this
-  // role no internal structure at all. The top-level charset/block-split
-  // already rules out a dash, so this is just "non-empty".
-  R: (p) => p.length > 0,
-  // T: role `target`, ported from flux-core's `target`/`numeric_unit_shape`
-  // (roles.rs ~222-296): either `<digit-run><UPPERCASE unit>` (rejected
-  // outright, not falling back to opaque, if the digit run is over 19
-  // chars — mirrors the Rust `numeric_unit_shape` returning `Some(Err)`
-  // rather than `None` in that case) or a non-empty dash-free alphanumeric
-  // opaque string.
+/** Each letter's rule over the payload (the box after its letter). `true` when the box meets it. */
+const RULE = {
+  I: codedFields,
+  B: codedFields,
+  A: (p) => ACTION_VERBS.some((verb) => p.startsWith(verb) && [...p.slice(verb.length)].every((c) => ACTION_FLAGS.includes(c))),
   T: (p) => {
-    let i = 0;
-    while (i < p.length && p.charCodeAt(i) >= 48 && p.charCodeAt(i) <= 57) i++;
-    if (i > 0) {
-      const unit = p.slice(i);
-      if (unit.length > 0 && /^[A-Z]+$/.test(unit)) {
-        return p.slice(0, i).length <= 19;
-      }
-    }
-    return p.length > 0 && /^[A-Za-z0-9]+$/.test(p);
+    const m = /^(\d+)([A-Z]+)$/.exec(p);
+    if (m) return m[1].length <= 19 && fitsI64(m[1]);
+    return p.length > 0 && isAlnum(p);
   },
+  R: () => true,
+  G: opaque("G"),
+  Y: (p) => MANIFEST_TYPE_CODES.has(p) || /^[A-Z][A-Z0-9]*$/.test(p),
+  S: opaque("S"),
+  C: opaque("C"),
+  M: numeric,
+  V: numeric,
+  H: hexPayload(false),
+  P: (p) => (p[0] === "1" || p[0] === "0") && hexPayload(true)(p.slice(1)),
+  D: numeric,
+  Q: hexPayload(true),
+  O: hexPayload(true),
+  L: (p) => /^\d+$/.test(p) && LATTICE_SCALE_CODES.includes(p[0]) && p.length > 1 && BigInt(p.slice(1)) <= U64_MAX,
+  W: hexPayload(false),
+  U: (p) => STATUS_VALUES.includes(p),
+  E: hexPayload(true),
 };
 
-/** Parse-and-validate a manifest. Returns a `Raw` object or throws. */
+/** Parse-and-validate a record exactly as the node's door does. Returns a `Raw` or throws a `ParseError`. */
 export function admit(text) {
-  if (!text || text.length > MAX_MANIFEST_LEN) throw new ParseError(ErrGrammar, "size");
-  if (!ALLOWED.test(text)) throw new ParseError(ErrGrammar, "charset");
+  if (!text) throw new ParseError(ErrGrammar, "the record is empty");
+  if (text.length > MAX_MANIFEST_LEN) throw new ParseError(ErrGrammar, `the record is over the ${MAX_MANIFEST_LEN}-byte limit`);
+  if (!ALLOWED.test(text)) throw new ParseError(ErrGrammar, "charset: only ASCII letters, digits and '-'");
   const blocks = text.split("-");
   const yBlock = blocks.find((b) => b.startsWith("Y"));
-  if (!yBlock) throw new ParseError(ErrGrammar, "no Y");
-  const yCode = yBlock.slice(1);
-  const kind = CODE_TO_KIND[yCode] ?? null;
-  if (!kind) throw new ParseError(ErrType, `unknown Y=${yCode}`);
+  if (!yBlock) throw new ParseError(ErrGrammar, "no Y box");
+  const kind = CODE_TO_KIND[yBlock.slice(1)] ?? null;
+  if (!kind) throw new ParseError(ErrType, `unknown Y=${yBlock.slice(1)}: the node admits only YLEDGERENTRY`);
 
   const seen = new Set();
-  for (const block of blocks) {
-    if (!block) throw new ParseError(ErrGrammar, "empty block");
-    const role = block[0];
-    const packed = block.slice(1);
-    if (!isRepeatableRole(kind, role)) {
-      if (seen.has(role)) throw new ParseError(ErrGrammar, `duplicate role ${role}`);
-      seen.add(role);
+  let seenKindMarker = false;
+  let seenChainScope = false;
+  blocks.forEach((block, index) => {
+    if (!block) throw new ParseError(ErrGrammar, `box ${index} is empty`);
+    const label = ledgerBoxLabel(block);
+    if (label === "KIND" || label === "KK") {
+      if (seenKindMarker) throw new ParseError(ErrGrammar, `box ${index}: a second kind marker (KIND or KK)`);
+      seenKindMarker = true;
+      if (!/^[A-Za-z0-9]+$/.test(block.slice(label.length))) throw new ParseError(ErrGrammar, `label ${label}, box ${index}: its marker is empty or not alphanumeric`);
+      return;
     }
-    const check = SHAPE[role];
-    if (!check) throw new ParseError(ErrGrammar, `unknown role ${role}`);
-    if (!check(packed)) throw new ParseError(ErrGrammar, `bad ${role} shape`);
-  }
+    if (label === "CHAIN" || label === "N") {
+      if (seenChainScope) throw new ParseError(ErrGrammar, `box ${index}: a second chain scope (CHAIN or N)`);
+      seenChainScope = true;
+      if (!isChainIdShape(block.slice(label.length))) throw new ParseError(ErrGrammar, `label ${label}, box ${index}: the chain id has the wrong shape`);
+      return;
+    }
+    const repeatable = label === "C" || label === "S";
+    if (!repeatable) {
+      if (seen.has(label)) throw new ParseError(ErrGrammar, `label ${label}, box ${index}: a second box with a label that may appear once`);
+      seen.add(label);
+    }
+    if (label === "J") {
+      if (!/^\d+$/.test(block.slice(1))) throw new ParseError(ErrGrammar, `label J, box ${index}: the position is not decimal digits`);
+      return;
+    }
+    const rule = RULE[label];
+    if (!rule) throw new ParseError(ErrGrammar, `box ${index}: no resolver for label ${label}`);
+    if (!rule(block.slice(1))) throw new ParseError(ErrGrammar, `label ${label}, box ${index}: failed its payload rule`);
+  });
 
-  for (const r of REQUIRED_ROLES[kind]) {
-    if (!blocks.some((b) => b.startsWith(r))) {
-      throw new ParseError(ErrGrammar, `missing required role ${r}`);
-    }
+  const raw = new Raw(text, kind, blocks);
+  for (const r of REQUIRED_ROLES) {
+    if (raw.payload(r) === null) throw new ParseError(ErrGrammar, `missing required role ${r}`);
   }
-  // `Kind::is_issuance` (src/lib.rs ~236-238): a ValueObject whose `I`
-  // payload is literally "0". Computed directly from the blocks (not via
-  // `Raw`, which doesn't exist yet) the same way `Kind::min_c` needs it
-  // before `Raw` can be constructed on the Rust side too.
-  const iBlock = blocks.find((b) => b.startsWith("I"));
-  const isIssuance = kind === KIND_VALUEOBJECT && iBlock?.slice(1) === "0";
-  const cCount = blocks.filter((b) => b.startsWith("C")).length;
-  if (cCount < minC(kind, isIssuance)) {
-    throw new ParseError(ErrGrammar, "too few C refs");
-  }
-  return new Raw(text, kind, blocks);
+  if (raw.cCount() < MIN_C) throw new ParseError(ErrGrammar, "too few C refs");
+  return raw;
 }
 
+/** The kernel slicer, `lib.rs::Raw`: by first letter, except that a `CHAIN` box is never a `C` reference. */
 export class Raw {
   constructor(text, kind, blocks) {
     this.text = text;
@@ -215,20 +170,34 @@ export class Raw {
     this.blocks = blocks;
   }
   payload(role) {
-    const b = this.blocks.find((b) => b.startsWith(role));
+    const b = this.blocks.find((b) => b.startsWith(role) && !(role === "C" && b.startsWith("CHAIN")));
     return b ? b.slice(1) : null;
   }
+  #cs() {
+    return this.blocks.filter((b) => b.startsWith("C") && !b.startsWith("CHAIN"));
+  }
   c(n) {
-    const cs = this.blocks.filter((b) => b.startsWith("C"));
+    const cs = this.#cs();
     return cs[n] ? cs[n].slice(1) : null;
   }
-  /** `Raw::c_count` (src/lib.rs ~230-232). */
   cCount() {
-    return this.blocks.filter((b) => b.startsWith("C")).length;
+    return this.#cs().length;
   }
-  /** `Raw::is_issuance` (src/lib.rs ~236-238). */
+  /** `Raw::chain_scope`: the `N` box, else the `CHAIN` box. */
+  chainScope() {
+    const chain = this.blocks.find((b) => b.startsWith("CHAIN"));
+    return this.payload("N") ?? (chain ? chain.slice(5) : null);
+  }
+  /** `Raw::boxes`: every box as `[label, payload]`, labelled by `ledgerBoxLabel`. */
+  boxes() {
+    return this.blocks.map((b) => {
+      const label = ledgerBoxLabel(b);
+      return [label, b.slice(label.length)];
+    });
+  }
+  /** Always false: the only kind with an issuance (`VALUEOBJECT`) is retired (`Raw::is_issuance`). */
   isIssuance() {
-    return this.kind === KIND_VALUEOBJECT && this.payload("I") === "0";
+    return false;
   }
   g() {
     return this.payload("G") ?? "";
@@ -260,10 +229,6 @@ export class ParseError extends Error {
     this.code = code;
     this.reason = reason;
   }
-}
-
-function isLowerHex(s) {
-  return /^[0-9a-f]+$/.test(s);
 }
 
 /** Hex-of-UTF-8 helper for building H blocks client-side. */

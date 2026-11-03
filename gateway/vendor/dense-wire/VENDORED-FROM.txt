@@ -40,3 +40,6 @@ Two copies are new, because the builders file now imports them:
   - flx-attest-builders.mjs.
   - flx-release-builders.mjs.
 The drift check is tests/vendored-dense-wire.test.mjs. It reads every file in this folder, so no list here needs an update.
+
+Re-vendored 2026-11-03 (audit round 11 merge). The source is audit-fix-all-r11 (6494d65), read with git show.
+One copy was behind it: flx-dumb-parser.mjs. The parity lane moved every box read into that one parser.
