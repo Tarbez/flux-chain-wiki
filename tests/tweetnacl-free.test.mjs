@@ -7,7 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -62,4 +62,41 @@ test('build-auth refuses a bundle that carries tweetnacl and removes it', { skip
   } catch (error) { why = String(error.stderr || error.message); }
   assert.match(why, /The sign-in bundle carries tweetnacl code \(found: .*\)\. Missing: .*To fix: .*Nothing was written\./s);
   assert.equal(existsSync(out), false, 'the refused bundle was removed');
+});
+
+// 5. Round 14 follow-up: every file a signing page serves, not only the sign-in bundle. js/admin/vendor/auth-kit-create.js
+//    (no pipeline; it signed with tweetnacl on every runtime) was served beside the bundle on /account; it is gone, and the
+//    create panel uses the bundle's createFxnId. The signing pages are FOUND: every catalog route whose scripts include
+//    js/admin/auth.js, and every HTML file that loads it. Each one's scripts (the route's scripts, the shell's when a route
+//    signs, and their built copies under js/min/) must carry no tweetnacl code. Fails on 493aee1: /account served
+//    js/admin/vendor/auth-kit-create.js. admin-app.html keeps js/admin/vendor/tweetnacl.js (nacl.box content encryption;
+//    no native XSalsa20) and loads no sign-in, so it is no signing page; the case requires that it stays so.
+const require_ = createRequire(import.meta.url);
+const { loadCatalog, servedPath, keyOf } = require_('../scripts/lib/page-scripts.cjs');
+const scriptTags = (html) => [...html.matchAll(/<script[^>]*\ssrc="([^"?#]+)/g)].map((m) => m[1].replace(/^\.?\//, ''));
+test('no file a signing page serves carries tweetnacl code', () => {
+  const served = new Set();
+  const catalog = loadCatalog(site);
+  const signingRoutes = Object.entries(catalog).filter(([, entry]) => entry.scripts.includes('js/admin/auth.js'));
+  assert.ok(signingRoutes.length > 0, 'a catalog route signs');
+  for (const [, entry] of signingRoutes) for (const s of entry.scripts) { served.add(s); served.add(servedPath(s)); }
+  const htmls = readdirSync(site).filter((f) => f.endsWith('.html'));
+  const signingHtml = htmls.filter((f) => scriptTags(readFileSync(join(site, f), 'utf8')).includes('js/admin/auth.js'));
+  for (const f of [...signingHtml, 'index.html']) for (const s of scriptTags(readFileSync(join(site, f), 'utf8'))) served.add(s);
+  const files = [...served].filter((f) => existsSync(join(site, f))).sort();
+  assert.ok(files.includes('js/admin/auth.js') && files.includes('js/ark/auth-kit-create-panel.js'));
+  assert.equal(files.includes('js/admin/vendor/auth-kit-create.js'), false, 'js/admin/vendor/auth-kit-create.js is served again');
+  assert.equal(files.includes('js/admin/vendor/tweetnacl.js'), false, 'a signing page loads js/admin/vendor/tweetnacl.js');
+  const carrying = files.map((f) => [f, tweetnaclMarks(readFileSync(join(site, f)))]).filter(([, m]) => m.length).map(([f, m]) => `${f} (${m.join(', ')})`);
+  assert.deepEqual(carrying, [], 'these files a signing page serves carry tweetnacl code');
+  assert.equal(scriptTags(readFileSync(join(site, 'admin-app.html'), 'utf8')).includes('js/admin/auth.js'), false, 'admin-app.html (which loads tweetnacl.js for nacl.box) loads no sign-in');
+  assert.equal(keyOf('js/ark/auth-kit-create-panel.js'), 'ark/auth-kit-create-panel');
+});
+
+// 6. The create panel makes every FXN ID through the bundle's createFxnId and names no other writer.
+test('the create panel has one writer: ArkAdminAuth.createFxnId', () => {
+  const panel = readFileSync(join(site, 'js', 'ark', 'auth-kit-create-panel.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(panel, /window\.ArkAdminAuth\.createFxnId\(/);
+  assert.doesNotMatch(panel, /ArkAuthKitCreate\.create|auth-kit-create\.js/);
+  assert.equal(existsSync(join(site, 'js', 'admin', 'vendor', 'auth-kit-create.js')), false);
 });

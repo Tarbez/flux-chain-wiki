@@ -165,7 +165,7 @@ var arkPageModules = {
   /* The Wallet tab's dense-wire modules (js/ark/dense-wire-wallet.mjs over
      js/dense-wire/*.mjs) are ES modules, which page-loader.js does not load:
      js/pages/account.js import()s them on first use instead. */
-  account: { module: 'account', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/admin/vendor/auth-kit-create.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/account-session.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/ark/profile-card.js', 'js/pages/account.js']) },
+  account: { module: 'account', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/account-session.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/ark/profile-card.js', 'js/pages/account.js']) },
   /* /auth: signing in with your FXN ID file, split out of /account (owner, 2026-10-25). It stands on the 3D world
      (js/world/auth-stage.js) and uses /account's one sign-in session (js/ark/account-session.js), with the same
      scripts that session needs: the panel and signer, the mesh directory publish and its signing review. The create panel

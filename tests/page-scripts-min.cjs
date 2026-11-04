@@ -54,7 +54,7 @@ const builtKeys = Object.keys(plan.hashes);
   // Named cases: why each exemption exists, and that the files the budget needs are built.
   const why = (script) => exempt.get(script) || '';
   for (const script of scripts.filter((s) => s.startsWith('js/content/articles/'))) assert(/another pipeline/.test(why(script)), script + ': a CMS-written article body is never built (a built copy would go stale on publish)');
-  for (const script of ['js/ark/vendor/ark-kit-public.js', 'js/ark/vendor/ark-kit-forms.js', 'js/admin/auth.js', 'js/admin/vendor/auth-kit-create.js']) assert(/another pipeline/.test(why(script)), script + ' is built by its own pipeline already');
+  for (const script of ['js/ark/vendor/ark-kit-public.js', 'js/ark/vendor/ark-kit-forms.js', 'js/admin/auth.js']) assert(/another pipeline/.test(why(script)), script + ' is built by its own pipeline already');
   /* Derived, not listed (2026-10-20): a hand list named js/content/reference-text.js after W5-REF deleted it and
      js/content/glossary.js after W5-GLOSS gave each route its own file, and failed on both. Every catalog script
      whose first lines say it is generated is exempt as generated; the adapter bundle is always one of them. */
