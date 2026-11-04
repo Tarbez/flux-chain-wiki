@@ -13,11 +13,12 @@
                    name ending this shell opens (.fxn on fxn-mainnet, .fxndev on every test network,
                    dense-wire's nameEnding) and is passed to the verifier. Empty means the first
                    node's BUILD_INFO decides; a pin is safer, because a node is not trusted.
-   Set them at deploy time; this file is the one place they live. */
-/* Devnet, as deployed 2026-10-28 (flux/devnet-deploy-2026-10-23/DEPLOY.md, "Fresh devnet on the owner's genesis
-   key"): CHAIN_SERVER_GENESIS_KEY in node.env on bk2 and mk2, derived from the owner's FXN ID (fxn-id genesis-key).
-   nodes.defxn.com runs the old chain-server with no genesis key, so names verify only on devnet until mainnet
-   is founded. Public key only. */
-export const NAME_NODES = ["wss://devnet.defxn.com/ws"];
-export const GENESIS_PUB_HEX = "242a1c15d39cbc0b1cea654b069f06f641be7c87761d895845e0013921ce84a8";
-export const NETWORK = "fxn-devnet";
+   All three are derived from fxn-network.mjs, the one list of FXN networks every app reads, so this file holds no value
+   of its own. To move the gateway to another network, or to file the genesis key after the genesis run, edit
+   fxn-network.mjs (PAGE_NETWORK, NETWORKS). Until the key is filed, GENESIS_PUB_HEX is empty and the shell says so. */
+import { networkConfig, PAGE_NETWORK } from "./fxn-network.mjs";
+
+const NET = networkConfig(PAGE_NETWORK);
+export const NAME_NODES = NET.pageNodes.slice();
+export const GENESIS_PUB_HEX = NET.genesisPubHex;
+export const NETWORK = NET.network;
