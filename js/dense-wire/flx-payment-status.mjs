@@ -93,6 +93,15 @@ export function paymentTone(status) {
   return status?.kind === "conflict" || status?.kind === "error" ? "danger" : "drift";
 }
 
+/** A short label for a list row (a history badge), read from the node's answer alone: "Final" only when the node said
+ *  final. `null` (a row the node gave no place for, so nothing was asked) reads "Not checked". */
+export function paymentLabel(status) {
+  if (isFinal(status)) return "Final";
+  if (status?.kind === "confirmed" || status?.kind === "waiting" || status?.kind === "accepted") return "Not final";
+  if (status?.kind === "conflict") return "Never final";
+  return "Not checked";
+}
+
 /** The words a wallet shows for a status, read from the node's answer alone. The count is shown whenever the node
  *  sent one. `accepted` is a taken reply before any `CONFIRMED` answer; `waiting` is `CONFIRMED` answering `WAITING`. */
 export function describePaymentStatus(status) {
