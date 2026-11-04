@@ -188,7 +188,7 @@ test('a priced skin sale: the taker pays into the sale, the owner is paid with t
   const given = await giveSkin({ who: a.who, wire: node, id, edge: accepted.edge });
   assert.deepEqual([given.kind, given.to, String(given.paid)], ['given', b.pubHex, String(HUNDRED)]);
   assert.match(shown.at(-1).title, /Sell this skin for 100 FXN/, "the owner's review names the price in FXN");
-  assert.ok(shown.at(-1).claims.some((c) => c === `evidence price ${HUNDRED} base units`), "the exact signed claims keep the raw value");
+  assert.match(shown.at(-1).claimStack, new RegExp(`evidence price ${HUNDRED} base units`), "the exact signed claims keep the raw value");
   assert.match((await endSale({ who: b.who, wire: node, edge: accepted.edge })).failure, /is paid/, 'a paid sale cannot be taken back');
 
   // an ended, unpaid sale: the owner's move is refused, and the taker takes the FXN back
