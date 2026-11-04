@@ -5,14 +5,14 @@
    sign-in modal, defxn.com's /account page, and any future one) instead
    of each page hand-rolling its own copy of this form -- the exact
    "do it once, reuse it" the 2026-10-06 identity-creation gap review
-   asked for. Built on js/admin/vendor/auth-kit-create.js's
-   window.ArkAuthKitCreate.create(...) (the REAL, tested
-   ark-dao/createRecoveryIdentity, bundled for the browser -- see that
-   file's own header for why this reuses existing crypto rather than
-   reimplementing it).
+   asked for. Built on the sign-in bundle's window.ArkAdminAuth.createFxnId
+   (js/admin/auth.js, scripts/auth-entry.js over fxn-auth's createAuthKitV10,
+   the one writer). Until round 14 it was built on
+   js/admin/vendor/auth-kit-create.js, which signed with tweetnacl and is no
+   longer served.
 
    window.ArkAuthKitCreatePanel.mount(container, opts) renders the
-   two-stage wizard (form -> recovery phrase + download) into `container`
+   wizard (identity, security, recovery words, file) into `container`
    and returns { reset() }. `opts.onDownloaded(filename)` fires once the
    real .auth.fxn file has been saved, so the caller can return to its own
    import/unlock view -- this module never signs anyone in itself; the
@@ -27,7 +27,7 @@
   window.ArkUI = window.ArkUI || {};
 
   /* ---- v10 (2026-10-30): the screen-by-screen FXN ID wizard, for a surface with no /auth page (FXN Browser's own FXN ID
-     box). On only when the caller names a gate committee (opts.committeeUrl) and the sign-in bundle carries
+     box), and since round 14 for every surface (see mount below). It runs over the sign-in bundle's
      createFxnId (js/admin/auth.js, scripts/auth-entry.js over fxn-auth's createAuthKitV10, the one writer). The screens
      follow the owner's design board of 2026-10-30 (Welcome, Identity, Security x3, Recovery, Confirm, File, Success,
      Complete) with a five-stage stepper. Every hint on a screen is a rule the writer enforces
@@ -339,77 +339,22 @@
     return { reset: function () { reset(); render(); } };
   }
 
+  /* Round 14 (owner ruling 2026-11-04, "signpins": no tweetnacl on a signing page). Every surface takes the v10 wizard
+     over the sign-in bundle's createFxnId (WebCrypto Ed25519, refusing a runtime without it). Until round 14 a caller
+     that named no gate committee got a two-stage form over js/admin/vendor/auth-kit-create.js, a stale bundle that
+     signed with tweetnacl on every runtime; that file is no longer served. A caller with no committeeUrl uses the
+     site's /gate.committee (createFxnId's default), and a site with none gets createFxnId's own refusal, by name, on
+     the screen. A page that loaded the panel without js/admin/auth.js is refused by name, never served a fallback.
+     `onDownloaded(filename)` (the old form's callback) is the v10 `onSaved`. */
   function mount(container, opts) {
-    opts = opts || {};
-    if (opts.committeeUrl && window.ArkAdminAuth && window.ArkAdminAuth.createFxnId) return mountV10(container, opts);
-    var actionClass = opts.actionClass != null ? opts.actionClass : 'action';
-    var formClass = opts.formClass != null ? opts.formClass : 'founding-form';
-    var resultClass = opts.resultClass != null ? opts.resultClass : 'result-banner';
-    var stage = 'form';
-    var kit = null;
-
-    function render() {
-      if (stage === 'form') {
-        container.innerHTML =
-          '<form class="' + formClass + '" data-auth-kit-create-form>' +
-            '<label>Your name<input type="text" name="displayName" maxlength="80" required autofocus></label>' +
-            '<label>Recovery words' +
-              '<select name="wordCount"><option value="24" selected>24 words</option><option value="12">12 words</option></select>' +
-            '</label>' +
-            '<label>PIN<input type="password" name="pin" inputmode="numeric" placeholder="8–12 digits" autocomplete="new-password" required></label>' +
-            '<label>Password (optional)<input type="password" name="password" autocomplete="new-password"></label>' +
-            '<p class="account-hint">Use 8–12 PIN digits, or 6–12 digits with a password. You type them each time you open the file.</p>' +
-            '<button class="' + actionClass + '" type="submit">Create my FXN ID</button>' +
-          '</form><div class="' + resultClass + '" data-auth-kit-create-result hidden></div>';
-        var form = container.querySelector('[data-auth-kit-create-form]');
-        var result = container.querySelector('[data-auth-kit-create-result]');
-        form.addEventListener('submit', function (event) {
-          event.preventDefault();
-          var data = new FormData(form);
-          var pin = String(data.get('pin') || '');
-          var password = String(data.get('password') || '');
-          var displayName = String(data.get('displayName') || '').trim();
-          if (!/^\d{6,12}$/.test(pin) || (pin.length < 8 && !password)) {
-            result.hidden = false; result.className = resultClass + ' error'; result.textContent = 'Use 8–12 PIN digits alone, or 6–12 digits with a password.'; return;
-          }
-          if (!displayName) return;
-          result.hidden = false; result.className = resultClass; result.textContent = 'Making your FXN ID…';
-          (window.ArkAuthKitCreate ? window.ArkAuthKitCreate.create({
-            displayName: displayName, wordCount: Number(data.get('wordCount')) === 12 ? 12 : 24, pin: pin, password: password,
-          }) : Promise.reject(new Error('js/admin/vendor/auth-kit-create.js did not load.'))).then(function (created) {
-            kit = created; stage = 'recovery'; render();
-          }).catch(function (error) {
-            result.className = resultClass + ' error'; result.textContent = error.message;
-          });
-        });
-      } else if (stage === 'recovery') {
-        var words = kit.mnemonic.split(' ');
-        container.innerHTML =
-          '<p class="lead">Write these ' + words.length + ' words on paper, in order. They bring your identity back if you lose the file. Anyone who has them can open it, so never photograph or paste them.</p>' +
-          '<ol class="auth-word-grid">' + words.map(function (w, i) { return '<li><small>' + (i + 1) + '</small><strong></strong></li>'; }).join('') + '</ol>' +
-          '<label class="auth-word-confirm"><input type="checkbox" data-auth-kit-create-written> I wrote the words down</label>' +
-          '<button class="' + actionClass + '" type="button" data-auth-kit-create-download disabled>Save FXN ID file</button>' +
-          '<div class="' + resultClass + '" data-auth-kit-create-download-result hidden></div>';
-        var items = container.querySelectorAll('.auth-word-grid li strong');
-        words.forEach(function (w, i) { items[i].textContent = w; });
-        var written = container.querySelector('[data-auth-kit-create-written]'), saveButton = container.querySelector('[data-auth-kit-create-download]');
-        written.addEventListener('change', function () { saveButton.disabled = !written.checked; });
-        saveButton.addEventListener('click', function () {
-          var filename = (kit.displayName.trim().toLowerCase().replace(/[^a-z0-9._]+/g, '-').replace(/^-+|-+$/g, '') || 'fxn-id') + '.auth.fxn';
-          var blob = new Blob([kit.authKit], { type: 'application/vnd.flux.auth-kit' });
-          var url = URL.createObjectURL(blob);
-          var anchor = document.createElement('a'); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
-          var result = container.querySelector('[data-auth-kit-create-download-result]');
-          result.hidden = false; result.className = resultClass + ' ok';
-          result.textContent = 'FXN ID file saved as ' + filename + '. Keep it, and keep the words apart from it. Next, choose the file under Sign in.';
-          stage = 'done'; kit = null;
-          if (opts.onDownloaded) setTimeout(function () { opts.onDownloaded(filename); }, 6000);
-        });
-      }
+    opts = Object.assign({}, opts || {});
+    if (!opts.onSaved && opts.onDownloaded) opts.onSaved = opts.onDownloaded;
+    if (!(window.ArkAdminAuth && window.ArkAdminAuth.createFxnId)) {
+      container.innerHTML = '<div class="' + esc(opts.resultClass != null ? opts.resultClass : 'fxn-create-note') + ' error" role="alert">' +
+        'This page cannot make an FXN ID: the sign-in (js/admin/auth.js) did not load. Reload the page; if it stays, the site is missing js/admin/auth.js.</div>';
+      return { reset: function () {} };
     }
-
-    render();
-    return { reset: function () { stage = 'form'; kit = null; render(); } };
+    return mountV10(container, opts);
   }
 
   /* The grades the v10 strength bars show, for a create flow that is not this panel but tells the same FXN ID card

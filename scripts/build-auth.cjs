@@ -31,9 +31,14 @@
 // refusal, never a pass. The repo's HEAD no longer matters: what is checked is the bytes esbuild read against the
 // pinned commit. The probe build and the real build were two esbuild runs, so a file could change between the check
 // and the build: now the inputs are checked again after the real build, the real bundle (less its banner line) must
-// equal the probe's bytes, and on any difference the written bundle is removed and the build refuses. `node scripts/build-auth.cjs --print-pins` prints both tables for the current
-// inputs (stdout only) for review. The bundle's first line names the pin digest, so a served copy says what it was
-// built from.
+// equal the probe's bytes, and on any difference the written bundle is removed and the build refuses.
+// `node scripts/build-auth.cjs --print-pins` prints both tables for the current inputs (stdout only) for review. The
+// bundle's first line names the pin digest, so a served copy says what it was built from.
+//
+// Round 14 (owner ruling 2026-11-04, "signpins"): the bundle carries no tweetnacl. flux-claims' ed25519 and
+// deadark-identity-core's root-signing-handle are WebCrypto only and refuse a runtime with no built-in Ed25519
+// ("This browser cannot sign safely: it has no built-in Ed25519. Please update it."). The written bundle is grepped
+// by scripts/tweetnacl-free.cjs and removed, with a refusal, if any tweetnacl code is in it.
 const { execFileSync } = require('node:child_process');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
@@ -148,6 +153,13 @@ execFileSync(esbuild, [
   if (again.digest !== pins.digest || cut < 0 || Buffer.compare(written.subarray(cut + 1), probeBytes) !== 0) {
     fs.rmSync(outfile, { force: true });
     refuse('An input of the sign-in bundle changed between the check and the build.', 'inputs that hold still while the bundle is built.', 'stop whatever is writing the sibling checkouts or node_modules, then build again.');
+  }
+  // Round 14 (owner ruling 2026-11-04): no tweetnacl in a signing page. The built bytes are grepped (scripts/
+  // tweetnacl-free.cjs), so a dependency that brings tweetnacl back fails the build by name, and nothing is left behind.
+  const marks = require(path.join(site, 'scripts', 'tweetnacl-free.cjs')).tweetnaclMarks(written);
+  if (marks.length) {
+    fs.rmSync(outfile, { force: true });
+    refuse(`The sign-in bundle carries tweetnacl code (found: ${marks.join(', ')}).`, 'a bundle whose every Ed25519 path is WebCrypto, refusing a runtime without it.', 'find the input that imports tweetnacl (node scripts/build-auth.cjs --print-pins lists them) and move it to the native-only helper.');
   }
 }
 // Other sites that carry this Auth Kit bundle are LISTED when their copy differs, never written.
