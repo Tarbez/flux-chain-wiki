@@ -7,32 +7,32 @@
 // bodies exactly, against the real, already-built modules on disk -- same
 // discipline tests/wallet-add.mjs/wallet-delegate.mjs already established.
 import assert from 'node:assert/strict';
-import nacl from '/Volumes/PortableSSD/flux/fxn-auth/node_modules/tweetnacl/nacl-fast.js';
+import { keyPair, keyPairFromSecretKey, signDetached, verifyDetached, randomBytes } from './lib/native-ed25519.mjs';
 
 globalThis.btoa = (s) => Buffer.from(s, 'binary').toString('base64');
 globalThis.atob = (s) => Buffer.from(s, 'base64').toString('binary');
 
-const { createWalletForIdentity, createWalletRotation, createWalletRevocation, walletLinkRecordCid } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletLifecycle.mjs');
-const { addWalletToAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, sealAuthKitEnvelope, openAuthKitEnvelope } = await import('/Volumes/PortableSSD/design/ark-ui/dist/ark-ui.flux-auth.js');
-const { verifyIdentityWalletLink } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/identityWallet.mjs');
+const { createWalletForIdentity, createWalletRotation, createWalletRevocation, walletLinkRecordCid } = await import(new URL('../../fxn-auth/src/walletLifecycle.mjs', import.meta.url).href);
+const { addWalletToAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, sealAuthKitEnvelope, openAuthKitEnvelope } = await import(new URL('../../../design/ark-ui/dist/ark-ui.flux-auth.js', import.meta.url).href);
+const { verifyIdentityWalletLink } = await import(new URL('../../fxn-auth/src/identityWallet.mjs', import.meta.url).href);
 
 const toBase64 = (bytes) => Buffer.from(bytes).toString('base64');
 const toHex = (base64Value) => Buffer.from(base64Value, 'base64').toString('hex');
 
-const root = nacl.sign.keyPair();
+const root = keyPair();
 const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 const PIN = '12345678';
 const identityId = toHex(toBase64(root.publicKey));
 const identityPublicKey = identityId;
-function rawSign(message) { return nacl.sign.detached(message, root.secretKey); }
+function rawSign(message) { return signDetached(message, root.secretKey); }
 
 async function buildVaultWithNoWallet() {
   const baseVault = {
     schema: 'flux-auth-kit/v9', version: 9,
     identityId, rootPublicKey: toBase64(root.publicKey),
     displayName: 'Test Identity', wordCount: 12, recoveryConfirmed: true,
-    kdf: { name: 'PBKDF2-SHA256', iterations: 600000, salt: toBase64(nacl.randomBytes(16)) },
-    cipher: { name: 'AES-256-GCM', iv: toBase64(nacl.randomBytes(12)), ciphertext: '' },
+    kdf: { name: 'PBKDF2-SHA256', iterations: 600000, salt: toBase64(randomBytes(16)) },
+    cipher: { name: 'AES-256-GCM', iv: toBase64(randomBytes(12)), ciphertext: '' },
   };
   return sealAuthKitEnvelope(baseVault, { mnemonic, identityId, rootPublicKey: baseVault.rootPublicKey }, { pin: PIN });
 }
@@ -89,7 +89,7 @@ const verified = await verifyIdentityWalletLink(newRecord, { expectedIdentityId:
 assert.deepEqual(verified, { valid: true }, 'the rotation record must be a real, independently-verifiable chained signature, not just a storage entry');
 
 const newSecretKeyB64 = (await openAuthKitEnvelope(vault, { pin: PIN })).walletSecretKey;
-const derivedPublicKeyB64 = Buffer.from(nacl.sign.keyPair.fromSecretKey(Buffer.from(newSecretKeyB64, 'base64')).publicKey).toString('base64');
+const derivedPublicKeyB64 = Buffer.from(keyPairFromSecretKey(Buffer.from(newSecretKeyB64, 'base64')).publicKey).toString('base64');
 assert.equal(derivedPublicKeyB64, newRecord.body.walletPublicKey, 'the new wallet\'s own secret key is real and independently recoverable');
 
 // Rotating the now-superseded original address again is refused by name.

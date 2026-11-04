@@ -10,35 +10,35 @@ import assert from 'node:assert/strict';
 import net from 'node:net';
 import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import nacl from '/Volumes/PortableSSD/flux/fxn-auth/node_modules/tweetnacl/nacl-fast.js';
+import { keyPair, keyPairFromSecretKey, signDetached, verifyDetached, randomBytes } from './lib/native-ed25519.mjs';
 
 globalThis.btoa = (s) => Buffer.from(s, 'binary').toString('base64');
 globalThis.atob = (s) => Buffer.from(s, 'base64').toString('binary');
 
-const { createWalletForIdentity } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletLifecycle.mjs');
-const { createWalletDelegation, signWalletDelegation } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletDelegation.mjs');
-const { reduceWalletRegistry } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletRegistry.mjs');
-const { resolveClaimScope, rightsDimension, delegationDimension } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/claimScopeResolver.mjs');
-const { rankDiscovery } = await import('/Volumes/PortableSSD/flux/fxn-auth-client/src/wallet-mesh.mjs');
-const { addWalletToAuthKit, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, sealAuthKitEnvelope } = await import('/Volumes/PortableSSD/design/ark-ui/dist/ark-ui.flux-auth.js');
+const { createWalletForIdentity } = await import(new URL('../../fxn-auth/src/walletLifecycle.mjs', import.meta.url).href);
+const { createWalletDelegation, signWalletDelegation } = await import(new URL('../../fxn-auth/src/walletDelegation.mjs', import.meta.url).href);
+const { reduceWalletRegistry } = await import(new URL('../../fxn-auth/src/walletRegistry.mjs', import.meta.url).href);
+const { resolveClaimScope, rightsDimension, delegationDimension } = await import(new URL('../../fxn-auth/src/claimScopeResolver.mjs', import.meta.url).href);
+const { rankDiscovery } = await import(new URL('../../fxn-auth-client/src/wallet-mesh.mjs', import.meta.url).href);
+const { addWalletToAuthKit, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, sealAuthKitEnvelope } = await import(new URL('../../../design/ark-ui/dist/ark-ui.flux-auth.js', import.meta.url).href);
 
 const toBase64 = (bytes) => Buffer.from(bytes).toString('base64');
 const toHex = (base64Value) => Buffer.from(base64Value, 'base64').toString('hex');
 
-const root = nacl.sign.keyPair();
+const root = keyPair();
 const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 const PIN = '12345678';
 const identityId = toHex(toBase64(root.publicKey));
 const identityPublicKey = identityId;
-function rawSign(message) { return nacl.sign.detached(message, root.secretKey); }
+function rawSign(message) { return signDetached(message, root.secretKey); }
 
 async function buildVaultWithNoWallet() {
   const baseVault = {
     schema: 'flux-auth-kit/v9', version: 9,
     identityId, rootPublicKey: toBase64(root.publicKey),
     displayName: 'Test Identity', wordCount: 12, recoveryConfirmed: true,
-    kdf: { name: 'PBKDF2-SHA256', iterations: 600000, salt: toBase64(nacl.randomBytes(16)) },
-    cipher: { name: 'AES-256-GCM', iv: toBase64(nacl.randomBytes(12)), ciphertext: '' },
+    kdf: { name: 'PBKDF2-SHA256', iterations: 600000, salt: toBase64(randomBytes(16)) },
+    cipher: { name: 'AES-256-GCM', iv: toBase64(randomBytes(12)), ciphertext: '' },
   };
   return sealAuthKitEnvelope(baseVault, { mnemonic, identityId, rootPublicKey: baseVault.rootPublicKey }, { pin: PIN });
 }
@@ -105,7 +105,7 @@ vault = afterDelegate;
 assert.deepEqual(grant.rights, ['receive', 'spend']);
 
 const signed = await signWithDelegatedRoot(vault, delegatedWallet.walletAddress, 'spend 10', 'spend', 10);
-assert.equal(nacl.sign.detached.verify(new TextEncoder().encode('spend 10'), signed, root.publicKey), true, 'the delegated signature must verify against the real root key');
+assert.equal(verifyDetached(new TextEncoder().encode('spend 10'), signed, root.publicKey), true, 'the delegated signature must verify against the real root key');
 
 await assert.rejects(signWithDelegatedRoot(vault, delegatedWallet.walletAddress, 'spend 999', 'spend', 999), /WALLET_DELEGATION_SPEND_EXCEEDS_CAP/);
 
@@ -125,7 +125,7 @@ await assert.rejects(signWithDelegatedRoot(vault, delegatedWallet.walletAddress,
 console.log('wallet-delegate ok: delegateWallet/revokeWalletDelegation/signWithDelegatedRoot compose rights+delegation correctly, over-cap/undelegated-right/revoked all refused by name');
 
 // Discovery Resolver: proven live against the real compiled flxd-discovery binary.
-const DISCOVERY_BINARY = '/Volumes/PortableSSD/flux/flxd-discovery/target/release/flxd-discovery';
+const DISCOVERY_BINARY = new URL('../../flxd-discovery/target/release/flxd-discovery', import.meta.url).href;
 if (existsSync(DISCOVERY_BINARY)) {
   function freePort() {
     return new Promise((resolve, reject) => {

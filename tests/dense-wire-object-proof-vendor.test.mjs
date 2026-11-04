@@ -16,7 +16,9 @@ import { sourceName, sourceOf } from './lib/dense-wire-source.mjs';
 // sha256(record). A fake that stands for one honest devnet answers BUILD_INFO and has a witness showing the same head.
 function honestNetwork(node) {
   const inner = node.sendLine;
-  node.sendLine = async (line) => (line.startsWith('BUILD_INFO') ? 'BUILD_INFO\tv\tclean\tnow\tfxn-devnet' : inner(line));
+  // A node of the devnet that answers FXN's decimals (9) as a real one does: a review names its amount in FXN.
+  node.sendLine = async (line) => (line.startsWith('BUILD_INFO') ? 'BUILD_INFO\tv\tclean\tnow\tfxn-devnet'
+    : line.startsWith('DECIMALS\t') ? 'DECIMALS\tdefxn\t9\tchain' : inner(line));
   node.witnesses = [{ url: 'wss://witness.test/ws', chainHead: (...a) => node.chainHead(...a), sendLine: node.sendLine }];
   return node;
 }
@@ -79,13 +81,16 @@ test('mintSkin shows the full signing review, signs only the bytes approved, and
   assert.equal(sent.length, 0);
   assert.equal(shown[0].action, 'object.mint');
   assert.match(shown[0].claimStack, /does not authorize a move of your PVA/);
-  assert.match(shown[0].authorizationBytes, new RegExp(`-Nskin-KKASSET1-J0-C${'0'.repeat(64)}-C${pointer}$`));
+  // Round 14: a key's first record cites its network's root, and the devnet's is its own (never the zero root).
+  const { networkRoot, NETWORK_DEVNET } = await import('../js/dense-wire/flx-builders.mjs');
+  const root = await networkRoot(NETWORK_DEVNET);
+  assert.match(shown[0].authorizationBytes, new RegExp(`-Nskin-KKASSET1-J0-C${root}-C${pointer}$`));
 
   // yes: the approved bytes are signed and sent, and the skin is read back
   window.ArkUI.authorizationDialog.confirm = async () => true;
   const res = await mintSkin({ who, wire, pointer, readBack: async () => ({ kind: 'objects', objects: [] }) });
   assert.equal(sent.length, 1);
-  assert.match(sent[0], new RegExp(`^RESOLVER_RECORD\\tG${raw.toString('hex')}-YLEDGERENTRY-V1-M\\d+-H[0-9a-f]+-Nskin-KKASSET1-J0-C0{64}-C${pointer}-S[0-9a-f]{128}$`));
+  assert.match(sent[0], new RegExp(`^RESOLVER_RECORD\\tG${raw.toString('hex')}-YLEDGERENTRY-V1-M\\d+-H[0-9a-f]+-Nskin-KKASSET1-J0-C${root}-C${pointer}-S[0-9a-f]{128}$`));
   assert.equal(res.kind, 'refused', 'a skin that does not verify yet is not reported as minted');
   assert.match(res.remedy, /reload/);
   assert.equal((await mintSkin({ who, wire, pointer: 'ab'.repeat(32) })).kind, 'refused', 'a hash is not a skin pointer');
@@ -175,13 +180,15 @@ test('a priced skin sale: the taker pays into the sale, the owner is paid with t
   globalThis.window = { ArkUI: { authorizationDialog: { confirm: async (v) => { shown.push(v); return true; } } }, ArkAuthorizationView: { scopedAuthorizationView: (v) => v } };
 
   assert.match((await acceptSkin({ who: b.who, wire: node, id, price: 0 })).failure, /not above zero/);
-  const accepted = await acceptSkin({ who: b.who, wire: node, id, price: 100, days: 3 });
-  assert.deepEqual([accepted.kind, String(accepted.price), shown.map((v) => v.action)], ['accepted', '100', ['object.accept', 'object.sale']], 'two reviews: the consent, then the payment');
-  assert.match(shown[1].authorizationBytes, /-KKSALE1-T100NATIVE-D\d+-J1-C/);
+  const HUNDRED = 100n * 10n ** 9n; // 100 FXN in base units, at the node's 9 decimals
+  const accepted = await acceptSkin({ who: b.who, wire: node, id, price: HUNDRED, days: 3 });
+  assert.deepEqual([accepted.kind, String(accepted.price), shown.map((v) => v.action)], ['accepted', String(HUNDRED), ['object.accept', 'object.sale']], 'two reviews: the consent, then the payment');
+  assert.match(shown[1].authorizationBytes, new RegExp(`-KKSALE1-T${HUNDRED}NATIVE-D\\d+-J1-C`));
   assert.match((await endSale({ who: b.who, wire: node, edge: accepted.edge })).failure, /runs until/, 'nothing comes back before the deadline');
   const given = await giveSkin({ who: a.who, wire: node, id, edge: accepted.edge });
-  assert.deepEqual([given.kind, given.to, String(given.paid)], ['given', b.pubHex, '100']);
-  assert.match(shown.at(-1).title, /Sell this skin for 100 FXN/, "the owner's review names the price");
+  assert.deepEqual([given.kind, given.to, String(given.paid)], ['given', b.pubHex, String(HUNDRED)]);
+  assert.match(shown.at(-1).title, /Sell this skin for 100 FXN/, "the owner's review names the price in FXN");
+  assert.ok(shown.at(-1).claims.some((c) => c === `evidence price ${HUNDRED} base units`), "the exact signed claims keep the raw value");
   assert.match((await endSale({ who: b.who, wire: node, edge: accepted.edge })).failure, /is paid/, 'a paid sale cannot be taken back');
 
   // an ended, unpaid sale: the owner's move is refused, and the taker takes the FXN back

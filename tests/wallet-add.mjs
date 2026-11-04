@@ -8,20 +8,20 @@
 // on a real vault -- against the real, already-built modules on disk, not
 // a reimplementation.
 import assert from 'node:assert/strict';
-import nacl from '/Volumes/PortableSSD/flux/fxn-auth/node_modules/tweetnacl/nacl-fast.js';
+import { keyPair, keyPairFromSecretKey, signDetached, verifyDetached, randomBytes } from './lib/native-ed25519.mjs';
 
 globalThis.btoa = (s) => Buffer.from(s, 'binary').toString('base64');
 globalThis.atob = (s) => Buffer.from(s, 'base64').toString('binary');
 
-const { createWalletForIdentity } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/walletLifecycle.mjs');
-const { addWalletToAuthKit, sealAuthKitEnvelope } = await import('/Volumes/PortableSSD/design/ark-ui/dist/ark-ui.flux-auth.js');
+const { createWalletForIdentity } = await import(new URL('../../fxn-auth/src/walletLifecycle.mjs', import.meta.url).href);
+const { addWalletToAuthKit, sealAuthKitEnvelope } = await import(new URL('../../../design/ark-ui/dist/ark-ui.flux-auth.js', import.meta.url).href);
 
 const toBase64 = (bytes) => Buffer.from(bytes).toString('base64');
 const toHex = (base64Value) => Buffer.from(base64Value, 'base64').toString('hex');
 
 // A minimal real v9 vault + secret, sealed the same way ark-ui's own fixtures build one,
 // with no wallet yet -- the harder case (addWallet's identityId/identityPublicKey fallback path).
-const root = nacl.sign.keyPair();
+const root = keyPair();
 const mnemonic = 'abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about';
 const PIN = '12345678';
 
@@ -31,8 +31,8 @@ async function buildVaultWithNoWallet() {
     identityId: toHex(toBase64(root.publicKey)),
     rootPublicKey: toBase64(root.publicKey),
     displayName: 'Test Identity', wordCount: 12, recoveryConfirmed: true,
-    kdf: { name: 'PBKDF2-SHA256', iterations: 600000, salt: toBase64(nacl.randomBytes(16)) },
-    cipher: { name: 'AES-256-GCM', iv: toBase64(nacl.randomBytes(12)), ciphertext: '' },
+    kdf: { name: 'PBKDF2-SHA256', iterations: 600000, salt: toBase64(randomBytes(16)) },
+    cipher: { name: 'AES-256-GCM', iv: toBase64(randomBytes(12)), ciphertext: '' },
   };
   return sealAuthKitEnvelope(baseVault, { mnemonic, identityId: baseVault.identityId, rootPublicKey: baseVault.rootPublicKey }, { pin: PIN });
 }
@@ -40,7 +40,7 @@ async function buildVaultWithNoWallet() {
 // Mirrors auth-entry.js's own `handle.sign` usage: raw Uint8Array(64), not base64 --
 // exactly createFluxRootHandle's real shape.
 function rawSign(message) {
-  return nacl.sign.detached(message, root.secretKey);
+  return signDetached(message, root.secretKey);
 }
 
 const vault = await buildVaultWithNoWallet();
@@ -63,7 +63,7 @@ assert.deepEqual(updatedVault.wallets.map((w) => w.body.walletAddress), [walletA
 
 // The identitySignature is real and verifies against the real root key used to sign it --
 // proves signIdentity's raw-bytes return value actually reached the record correctly.
-const { verifyIdentityWalletLink } = await import('/Volumes/PortableSSD/flux/fxn-auth/src/identityWallet.mjs');
+const { verifyIdentityWalletLink } = await import(new URL('../../fxn-auth/src/identityWallet.mjs', import.meta.url).href);
 const verified = await verifyIdentityWalletLink(record, { expectedIdentityId: identityId, prior: null });
 assert.deepEqual(verified, { valid: true });
 

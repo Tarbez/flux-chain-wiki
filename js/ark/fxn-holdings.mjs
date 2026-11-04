@@ -72,6 +72,16 @@ export async function readDecimals(wire) {
 const big = (n) => (n === null || n === undefined ? null : typeof n === "bigint" ? n : BigInt(n));
 /** Base units as text at the node's decimals ("1.5"), or the base-unit count while the decimals are not read. */
 const fxn = (n) => (current.decimals === null ? big(n).toString() : formatAmount(big(n), current.decimals));
+/** Why a review cannot name an FXN amount yet, as `{ failure, missing, remedy }`, or `null` once FXN's decimals are read.
+ *  The plain summary a person reads before signing always names its amount in FXN (owner ruling 2026-11-04, the safest
+ *  rule): a review never shows a raw base-unit count as its price, so with no decimals it is not shown at all. The exact
+ *  signed text under the summary still carries the raw value the signature covers. */
+export async function reviewAmountRefusal(wire) {
+  const read = await readDecimals(wire);
+  if (read.decimals !== null) return null;
+  return { failure: `The amount cannot be shown in FXN: ${read.why}.`, missing: "FXN's decimals from the node (DECIMALS defxn)", remedy: "press Refresh, or pick a node that answers DECIMALS" };
+}
+
 /** The unit `fxn` printed in: "FXN", or "base units" while the decimals are not read. */
 export const fxnUnit = () => (current.decimals === null ? "base units" : "FXN");
 /** An amount with its unit: "1.5 FXN". */

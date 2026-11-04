@@ -48,7 +48,7 @@ import { sha256Hex, verifyHex } from "../dense-wire/flx-crypto.mjs";
 import { reviewAndSign, signerFor } from "./dense-wire-wallet.mjs";
 import { chainPosition, submitAtPosition, okOrErr, nodeNetwork, withKeyLock, SigningGuardRefusal } from "../dense-wire/flx-signing-guard.mjs";
 // Amounts on the wire are base units; fxnText prints them at the node's declared decimals (docs/FXN-DECIMALS-DESIGN.md).
-import { readDecimals, fxnText } from "./fxn-holdings.mjs";
+import { readDecimals, fxnText, reviewAmountRefusal } from "./fxn-holdings.mjs";
 
 /** The identity's Ed25519 key as hex: publicKeyB64 is base64 of the 32 raw bytes (flx-identity-bridge.mjs). */
 export function identityKeyHex(identity) {
@@ -168,7 +168,10 @@ export async function acceptSkin({ who, wire, id, price = null, days = 3 }) {
   if (units !== null && !(Number.isInteger(+days) && +days >= 1 && +days <= 30)) return refused("The sale's days are not 1 to 30.", "how many days your FXN waits for the owner", "ask the owner for a new sale link");
   const got = await verifiedSkin(wire, id);
   if (got.kind === "refused") return got;
-  if (units !== null) await readDecimals(wire);
+  if (units !== null) {
+    const noFxn = await reviewAmountRefusal(wire);
+    if (noFxn) return refused(noFxn.failure, noFxn.missing, noFxn.remedy);
+  }
   const { verdict } = got;
   const signer = signerFor(who);
   if (verdict.owner === signer.pubHex) return refused("You already own this skin.", "a skin someone else owns", "send the link to the person who should take it");
@@ -224,7 +227,8 @@ export async function endSale({ who, wire, edge }) {
   if (held.state !== "funded") return refused(`The sale is ${held.state}. Nothing waits to come back.`, "a funded sale", "nothing to do");
   const at = Math.floor(Date.now() / 1000);
   if (at <= held.deadline) return refused(`The sale runs until ${new Date(held.deadline * 1000).toISOString()}.`, "the deadline to pass", "come back after the deadline");
-  await readDecimals(wire);
+  const noFxn = await reviewAmountRefusal(wire);
+  if (noFxn) return refused(noFxn.failure, noFxn.missing, noFxn.remedy);
   const signer = signerFor(who);
   const place = await placeOf(wire, signer);
   if (place.kind === "refused") return place;
@@ -279,7 +283,10 @@ export async function giveSkin({ who, wire, id, edge }) {
   if (sale.kind === "sale" && sale.state !== "funded") return refused(`The taker's sale is ${sale.state}, so moving would not pay you.`, "a funded sale", "ask the taker to accept again with FXN in their wallet");
   if (sale.kind === "sale" && Math.floor(Date.now() / 1000) >= sale.deadline) return refused("The taker's sale has ended.", "a sale still running", "ask the taker for a new sale");
   const price = sale.kind === "sale" ? sale.amount : null;
-  if (price !== null) await readDecimals(wire);
+  if (price !== null) {
+    const noFxn = await reviewAmountRefusal(wire);
+    if (noFxn) return refused(noFxn.failure, noFxn.missing, noFxn.remedy);
+  }
   const place = await placeOf(wire, signer);
   if (place.kind === "refused") return place;
   const { at: placeAt, network } = place;
@@ -338,7 +345,8 @@ export async function activatePva({ who, wire, publish = null }) {
     if (!(await publish(earnKey))) return refused("The wallet's link was not published, so the chain cannot count its FXN.", "that wallet's link on the chain", "publish it, or receive FXN on a published wallet, then activate");
     published = earnKey;
   }
-  await readDecimals(wire);
+  const noFxn = await reviewAmountRefusal(wire);
+  if (noFxn) return refused(noFxn.failure, noFxn.missing, noFxn.remedy);
   const T = globalThis.DEFXN_TRAITS;
   if (!T || typeof T.mixDraw !== "function") return refused("This page cannot draw your card's look.", "js/nft/traits.js and its layer table", "reload the page, then activate again");
   for (let n = 0; n < MIX_TRIES; n++) {
