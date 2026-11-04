@@ -8,6 +8,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { connectSourcesFor } from '../gateway/vendor/dense-wire/flx-network-witnesses.mjs';
+import { NETWORKS, PAGE_NETWORK } from '../gateway/vendor/dense-wire/fxn-network.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Round 11 (council lane): the byte check of every file in gateway/vendor/dense-wire moved to the one drift check,
@@ -35,5 +37,19 @@ test('the gateway shell and the CMS permission check read no retired name source
   }
   assert.deepEqual(offenders, []);
   assert.equal(fs.existsSync(path.join(ROOT, 'gateway', 'verify-name-record.js')), false, 'the retired verifier is back');
-  assert.match(fs.readFileSync(path.join(ROOT, 'gateway', 'index.html'), 'utf8'), /connect-src 'self' wss:\/\/nodes\.defxn\.com/, 'the CSP must let the shell reach the name node');
+});
+
+// Owner ruling 2026-11-05 (why this exists): round 14's witness change let these pages connect to wss://*.devnet.defxn.com
+// so they could reach each seat's witness name. A wildcard admits every label under the domain, a user-published gateway
+// site among them. Each page names the node host and each seat exactly, the list connectSourcesFor derives from the
+// one network file, so a seat added there fails this test until the pages name it.
+test('the shell and the site CSP name the network host and each witness seat exactly, with no wildcard', () => {
+  const { sources } = connectSourcesFor(NETWORKS[PAGE_NETWORK].host);
+  for (const file of [path.join('gateway', 'index.html'), 'index.html']) {
+    const connect = (fs.readFileSync(path.join(ROOT, file), 'utf8').match(/connect-src ([^;]+);/) || [])[1] || '';
+    assert.ok(!connect.includes('*'), `${file}: connect-src must never use a wildcard (${connect})`);
+    for (const source of sources) assert.ok(connect.split(/\s+/).includes(source), `${file}: connect-src must name ${source} (${connect})`);
+  }
+  const shell = fs.readFileSync(path.join(ROOT, 'gateway', 'index.html'), 'utf8');
+  assert.ok(shell.includes(`connect-src 'self' ${sources.join(' ')};`), 'the gateway shell connects to the node and its witnesses, and nothing else');
 });
