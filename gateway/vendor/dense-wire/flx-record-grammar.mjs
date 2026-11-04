@@ -37,12 +37,13 @@
 // `^[A-Z][A-Z0-9]*$`; `opaque-alphanumeric` is `[A-Za-z0-9]+` with a floor
 // of 1 (`minLength || 1`); `lowercase-hex` adds `evenLength`.
 //
-// Two honest non-enforcing states, as in Rust: a blob that is not (and
-// does not claim to be) an `flx-resolver-grammar/1` document compiles to
-// `{kind: "unspecified", reason}` -- every record passes, and every
-// surface says WHY nothing was checked; a blob that CLAIMS the schema and
-// cannot be read throws, because a resolver that says it has a grammar
-// and cannot be read would admit anything while looking verified.
+// No grammar admits everything (round 13, as in Rust): the legacy
+// `FLX-RESOLVER-GRAMMAR-V1` text compiles to `{kind: "no-records", reason}`,
+// which REFUSES every record by name (it declares commands, not label
+// rules). Every other body that is not a compiling `flx-resolver-grammar/1`
+// document throws a named refusal. Until round 13 those compiled to
+// "unspecified" and every record passed, so a launcher opted a chain out
+// of every check by publishing any non-grammar blob.
 //
 // No dependencies beyond the language. ES module; runs in a browser and
 // in Node unchanged.
@@ -216,11 +217,10 @@ const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v)
 
 /**
  * Compile a grammar manifest blob.
- *   - `{kind: "unspecified", reason}` for anything that is not (and does
- *     not claim to be) an `flx-resolver-grammar/1` JSON document;
+ *   - `{kind: "no-records", reason}` for the legacy FLX-RESOLVER-GRAMMAR-V1 text only (it admits no record);
  *   - `{kind: "compiled", labels, kinds, kindRules}` for one that reads;
- *   - throws `Error` for a document that claims the schema and cannot be
- *     read -- the node turns that into a launch/upgrade refusal.
+ *   - throws `Error`, named, for every other body: a JSON array or scalar, no or another `schema`, a document
+ *     that claims the schema and cannot be read -- the node turns that into a launch/upgrade refusal.
  * Mirrors `record_grammar::compile`.
  */
 const STATE_LABELS = new Set(["K", "I", "S", "N", "B", "Z", "O", "A"]);
@@ -241,11 +241,11 @@ function requireGrammarSchema(value) {
   throw new Error(`grammar manifest: the FLX state records carry schema ${schema === undefined ? "None" : `Some(${JSON.stringify(schema)})`}, not ${GRAMMAR_SCHEMA}. Missing: a \`schema\` field naming ${GRAMMAR_SCHEMA} (a grammar with no or another schema would launch enforcing nothing). To fix: publish the grammar in its own grammar (FLX-RESOLVER-GRAMMAR-V2, scripts/derive-resolver-grammar.mjs), then submit the record again`);
 }
 
-/** A grammar body that does not start with `{`: `{kind:"unspecified", reason}`, `{kind:"value", value}` for FLX state
+/** A grammar body that does not start with `{`: `{kind:"no-records", reason}` (legacy V1 text), `{kind:"value", value}` for FLX state
  * records (the value they decode to), or a thrown refusal naming the failure, the missing thing and the remedy. */
 function nonObjectGrammarBody(trimmed) {
   if (trimmed.startsWith("FLX-RESOLVER-GRAMMAR-V1")) {
-    return { kind: "unspecified", reason: "legacy FLX-RESOLVER-GRAMMAR-V1 text (declares commands, not label rules)" };
+    return { kind: "no-records", reason: "legacy FLX-RESOLVER-GRAMMAR-V1 text (declares commands, not label rules)" };
   }
   if (trimmed.startsWith("FLX-RESOLVER-OFFER-V1")) {
     throw new Error("grammar manifest: the body is a legacy FLX-RESOLVER-OFFER-V1 text, not a grammar. Missing: an flx-resolver-grammar/1 document (FLX-RESOLVER-GRAMMAR-V2 or FLX state records; JSON is read only for what is already on chain) or the legacy FLX-RESOLVER-GRAMMAR-V1 text. To fix: publish the resolver's grammar manifest, not its offer, in the grammar slot");
@@ -262,13 +262,22 @@ function nonObjectGrammarBody(trimmed) {
       throw new Error(`grammar manifest: the body ${excerpt(trimmed)} starts like FLX state records but is not readable as them (${e.message}). Missing: a well-formed document. To fix: publish the grammar in its own grammar (FLX-RESOLVER-GRAMMAR-V2), then submit the record again`);
     }
   }
-  if (trimmed.startsWith("[")) return { kind: "unspecified", reason: "grammar blob is not a JSON document" };
+  if (trimmed.startsWith("[")) throw new Error(notAGrammar("the grammar blob is not a JSON document"));
+  let scalar = false;
   try {
-    JSON.parse(trimmed); // a complete JSON scalar never claimed the schema
-    return { kind: "unspecified", reason: "grammar blob is not a JSON document" };
+    JSON.parse(trimmed);
+    scalar = true;
   } catch {
-    throw new Error(`grammar manifest: the blob body ${excerpt(trimmed)} has a header no reader here recognises. Missing: a grammar in its own grammar (FLX-RESOLVER-GRAMMAR-V2) or the legacy FLX-RESOLVER-GRAMMAR-V1 text. To fix: publish the resolver's grammar manifest (scripts/derive-resolver-grammar.mjs), then submit the record again`);
+    scalar = false;
   }
+  // Round 13: a JSON scalar is not a grammar; refused by name (it admitted every record as "unspecified").
+  if (scalar) throw new Error(notAGrammar("the grammar blob is not a JSON document"));
+  throw new Error(`grammar manifest: the blob body ${excerpt(trimmed)} has a header no reader here recognises. Missing: a grammar in its own grammar (FLX-RESOLVER-GRAMMAR-V2) or the legacy FLX-RESOLVER-GRAMMAR-V1 text. To fix: publish the resolver's grammar manifest (scripts/derive-resolver-grammar.mjs), then submit the record again`);
+}
+
+/** Round 13: the one refusal for a body that is not a grammar, word for word `record_grammar::not_a_grammar`. */
+function notAGrammar(failure) {
+  return `grammar manifest: ${failure}. Missing: an ${GRAMMAR_SCHEMA} document (FLX-RESOLVER-GRAMMAR-V2, or FLX state records or JSON with that schema) that declares the resolver's labels. To fix: derive the grammar (scripts/derive-resolver-grammar.mjs), publish it, and launch or upgrade again; a grammar that is not read is never held as one that admits everything`;
 }
 
 export function compileGrammar(manifest) {
@@ -290,10 +299,10 @@ export function compileGrammar(manifest) {
     }
   } else if (!trimmed.startsWith("{")) {
     // WARCH19 step 1, the JS half (mirrors `record_grammar::compile` over `blob_doc::json_text_of`): only the legacy
-    // V1 grammar text, and JSON that is not a `{` document, are unspecified; FLX state records compile as the JSON
+    // V1 grammar text is no-records (admits nothing); FLX state records compile as the JSON
     // they encode; every other body is refused by name, never read as "checks nothing".
     const doc = nonObjectGrammarBody(trimmed);
-    if (doc.kind === "unspecified") return doc;
+    if (doc.kind === "no-records") return doc;
     requireGrammarSchema(doc.value);
     return compileGrammar(JSON.stringify(doc.value));
   } else {
@@ -304,12 +313,10 @@ export function compileGrammar(manifest) {
     }
   }
   const schema = isObject(doc) ? doc.schema : undefined;
-  if (typeof schema !== "string") {
-    return { kind: "unspecified", reason: "grammar blob is JSON with no `schema` field" };
-  }
-  if (schema !== GRAMMAR_SCHEMA) {
-    return { kind: "unspecified", reason: `grammar blob has schema ${JSON.stringify(schema)}, not ${GRAMMAR_SCHEMA}` };
-  }
+  // Round 13: a JSON array, or a document with no or another schema, is refused by name (as `record_grammar::compile`).
+  if (!isObject(doc)) throw new Error(notAGrammar("the grammar blob is not a JSON document"));
+  if (typeof schema !== "string") throw new Error(notAGrammar("the grammar blob is JSON with no `schema` field"));
+  if (schema !== GRAMMAR_SCHEMA) throw new Error(notAGrammar(`the grammar blob has schema ${JSON.stringify(schema)}, not ${GRAMMAR_SCHEMA}`));
   const tokens = isObject(doc.grammar) && Array.isArray(doc.grammar.roleTokens) ? doc.grammar.roleTokens : null;
   if (!tokens) throw new Error(`${GRAMMAR_SCHEMA}: \`grammar.roleTokens\` must be an array`);
   if (tokens.length === 0) throw new Error(`${GRAMMAR_SCHEMA}: \`grammar.roleTokens\` is empty; a grammar with no labels admits nothing`);
@@ -385,9 +392,9 @@ export function compileGrammar(manifest) {
 }
 
 /** One line for list surfaces, as Rust's `RecordGrammar::summary`:
- *  `enforced:<n> labels,<k> kinds` or `unspecified:<reason>`. */
+ *  `enforced:<n> labels,<k> kinds` or `no-records:<reason>`. */
 export function grammarSummary(grammar) {
-  if (grammar.kind === "unspecified") return `unspecified:${grammar.reason}`;
+  if (grammar.kind === "no-records") return `no-records:${grammar.reason}`;
   return `enforced:${grammar.labels.length} labels,${grammar.kinds ? grammar.kinds.size : 0} kinds`;
 }
 
@@ -451,14 +458,20 @@ function checkPayload(rule, payload) {
 }
 
 /**
- * Check one record's text against a compiled (or unspecified) grammar.
+ * Check one record's text against a compiled (or no-records) grammar.
  * `{ok: true}` or `{ok: false, failure, missing, remedy}` -- every refusal
- * names the failure, what is missing, and the remedy. An `unspecified`
- * grammar passes everything (the legacy lane); the caller decides how to
- * report that. Mirrors `RecordGrammar::check` / `CompiledGrammar::check`.
+ * names the failure, what is missing, and the remedy. A `no-records`
+ * grammar refuses every record (round 13; it was "unspecified" and passed
+ * everything). Mirrors `RecordGrammar::check` / `CompiledGrammar::check`.
  */
 export function checkRecord(grammar, text) {
-  if (grammar.kind === "unspecified") return { ok: true };
+  if (grammar.kind === "no-records") {
+    return refuse(
+      `this resolver's grammar admits no record (${grammar.reason})`,
+      "an flx-resolver-grammar/1 manifest that declares this record's labels",
+      "the resolver's control authority upgrades it to a derived grammar (FLX-RESOLVER-GRAMMAR-V2, scripts/derive-resolver-grammar.mjs); until then its chain takes no record",
+    );
+  }
   const { labels, kinds, kindRules } = grammar;
   let kind = null;
   let cCount = 0;

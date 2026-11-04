@@ -467,8 +467,8 @@ export function createResolverRecordClient({
     } catch (e) {
       throw refusal("RRC_GRAMMAR_REFUSED", `chain ${resolverChainId}'s grammar manifest does not compile (${e.message})`, "a readable flx-resolver-grammar/1 manifest", "upgrade the resolver with a grammar derived by scripts/derive-resolver-grammar.mjs");
     }
-    if (grammar.kind === "unspecified") {
-      throw refusal("RRC_GRAMMAR_UNSPECIFIED", `chain ${resolverChainId}'s grammar is unspecified (${grammar.reason}): the node would admit any record unchecked, so nothing can be checked before signing`, `an flx-resolver-grammar/1 manifest declaring ${kindMarker}`, `upgrade ${resolverChainId} with a grammar that declares ${kindMarker}, or deploy to a chain launched with one`);
+    if (grammar.kind === "no-records") {
+      throw refusal("RRC_GRAMMAR_NO_RECORDS", `chain ${resolverChainId}'s grammar admits no record (${grammar.reason}): the node refuses every record on it`, `an flx-resolver-grammar/1 manifest declaring ${kindMarker}`, `upgrade ${resolverChainId} with a grammar that declares ${kindMarker}, or deploy to a chain launched with one`);
     }
     compiled = { cid: row.grammarManifestCid, grammar, summary: grammarSummary(grammar) };
     return compiled;

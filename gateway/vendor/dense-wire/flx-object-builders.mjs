@@ -129,10 +129,16 @@ export const SALE_END_KIND = "KSALEEND1";
 export const MAX_SALE_SECS = 30 * 86_400;
 
 /** The buyer's sale: pay `amount` FXN for `skin` through its consent `edge` (a KEDGE1 CID, sent first), until
- *  `deadline` (unix seconds, within 30 days). The node holds the FXN at once; the owner's move pays it out. */
+ *  `deadline` (unix seconds, within 30 days). The node holds the FXN at once; the owner's move pays it out.
+ *  Round 13: the sale is chained on its consent. Its previous record is the consent and `pos` is the consent's J + 1,
+ *  so a second sale for one consent is an equivocation. `prevCid` may be left out; if given, it must be `edge`. */
 export async function buildSkinSaleWithSigner({ signer, pos, prevCid, edge, skin, amount, deadline, nowSec }) {
-  requirePosition(pos, prevCid);
   requireCid(edge, "consent", "pass the CID of your KEDGE1 for the skin (sha256 of its text).");
+  if (prevCid !== undefined && prevCid !== edge) {
+    throw new Error("That sale is not chained on its consent. Missing: the consent as the sale's previous record. To fix: sign the sale as your next record after the consent, with prevCid set to the consent's CID.");
+  }
+  prevCid = edge;
+  requirePosition(pos, prevCid);
   requireCid(skin, "skin id", "pass the skin's id, from OBJS_OF or its link.");
   const units = BigInt(amount);
   if (units <= 0n) throw new Error("That price is not above zero. Missing: a whole number of FXN, 1 or more. To fix: set a price.");

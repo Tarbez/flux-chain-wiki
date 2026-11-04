@@ -186,7 +186,7 @@ export function readNativeLock(text) {
 export function parseRecordReply(reply) {
   const line = String(reply ?? "").trim().split("\n")[0];
   const f = line.split("\t");
-  if (f[0] === "OK" && KEY64.test(f[1] ?? "")) return { kind: "ok", cid: f[1] };
+  if (f[0] === "OK" && KEY64.test(f[1] ?? "")) return { kind: "ok", cid: f[1], final: false };
   if (f[0] === "ERR" && f.length >= 3) {
     const reason = f.slice(2).join("\t");
     const m = /^(.*?)\. Missing: (.*?)\. To fix: (.*)$/s.exec(reason);

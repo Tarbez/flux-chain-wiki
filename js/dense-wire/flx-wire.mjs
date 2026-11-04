@@ -796,7 +796,8 @@ export class WireClient {
   async manifestSubmit(text) {
     const reply = await this._send(`MANIFEST_SUBMIT\t${text}`);
     const parts = reply.split("\t");
-    if (parts[0] === "MANIFEST_OK") return { kind: "ok", cid: parts[1] };
+    // Round 13 (ranked risk 7): a taken reply is never final (`flx-reply-ok.mjs`); CONFIRMED says when it is.
+    if (parts[0] === "MANIFEST_OK") return { kind: "ok", cid: parts[1], final: false };
     if (parts[0] === "MANIFEST_ERR") return { kind: "error", reason: parts[1] };
     return { kind: "error", raw: reply };
   }
@@ -1656,7 +1657,7 @@ function voted(out, reply) {
 
 function parseReply(line) {
   const parts = line.split("\t");
-  if (parts[0] === "OK") return { kind: "ok", cid: parts[1] };
+  if (parts[0] === "OK") return { kind: "ok", cid: parts[1], final: false };
   if (parts[0] === "ERR") return { kind: "err", code: parts[1], reason: parts[2] };
   // `DomainPurchase`-only: admission succeeded (the record is on the
   // chain, see `chain_server.rs::flush_batch_into`'s own comment — this
