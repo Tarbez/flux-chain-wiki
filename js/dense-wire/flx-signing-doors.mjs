@@ -51,7 +51,8 @@ function literalCommand(arg) {
 }
 
 /**
- * The findings in one file: `[{ at: "<path>:<line>", why }]`. `path` is the repo-relative path the repo reports.
+ * The findings in one file: `[{ at: "<path>:<line>", line: "<path>: <the line's text>", why }]`. `path` is the
+ * repo-relative path the repo reports.
  * Files named flx-signing-guard.mjs are the guard itself and have none.
  */
 export function signingDoorFindings(path, text, { methods = [] } = {}) {
@@ -61,19 +62,20 @@ export function signingDoorFindings(path, text, { methods = [] } = {}) {
   String(text).split("\n").forEach((line, i) => {
     if (COMMENT.test(line)) return;
     const at = `${path}:${i + 1}`;
-    if (/\.submit\(/.test(line)) out.push({ at, why: "sends a record with .submit(: use submitAtPosition (flx-signing-guard.mjs)" });
+    const listedAs = `${path}: ${line.trim()}`;
+    if (/\.submit\(/.test(line)) out.push({ at, line: listedAs, why: "sends a record with .submit(: use submitAtPosition (flx-signing-guard.mjs)" });
     const w = wrapped && wrapped.exec(line);
-    if (w) out.push({ at, why: `sends a signed record with WireClient.${w[1]}, which calls submit with no guard: use submitAtPosition` });
+    if (w) out.push({ at, line: listedAs, why: `sends a signed record with WireClient.${w[1]}, which calls submit with no guard: use submitAtPosition` });
     for (const m of line.matchAll(/\.send(Line)?\(\s*([^\s)][^)]*)/g)) {
       const arg = m[2];
       if (/^["'`]/.test(arg)) {
         const command = literalCommand(arg);
-        if (command && TAGS.has(command)) out.push({ at, why: `sends a signed ${command} line outside the guard: use submitAtPosition, or sendGuarded for a line signed elsewhere` });
-        else if (command === null && /^`\$\{/.test(arg)) out.push({ at, why: "sends a line whose command is computed: use submitAtPosition, or list it as a read with why" });
+        if (command && TAGS.has(command)) out.push({ at, line: listedAs, why: `sends a signed ${command} line outside the guard: use submitAtPosition, or sendGuarded for a line signed elsewhere` });
+        else if (command === null && /^`\$\{/.test(arg)) out.push({ at, line: listedAs, why: "sends a line whose command is computed: use submitAtPosition, or list it as a read with why" });
         continue;
       }
       if (/sendGuarded\(/.test(line)) continue;
-      out.push({ at, why: "sends a line built elsewhere: use sendGuarded or submitAtPosition, or list it as a read with why" });
+      out.push({ at, line: listedAs, why: "sends a line built elsewhere: use sendGuarded or submitAtPosition, or list it as a read with why" });
     }
   });
   return out;
@@ -81,12 +83,23 @@ export function signingDoorFindings(path, text, { methods = [] } = {}) {
 
 /**
  * The repo's verdict over its files: findings not listed as reads, and listed reads that no longer send there (a stale
- * list hides the next door). `reads` maps "<path>:<line>" to why that line sends no signed record.
+ * list hides the next door). `reads` maps a line to why it sends no signed record. A key is "<path>: <the line's text>",
+ * so an edit above a listed line leaves the list right; the older "<path>:<line>" still reads. A text key covers one
+ * line: a second line with the same text is a new door, and it is reported.
  */
 export function signingDoorVerdict(files, reads = new Map(), options = {}) {
   const all = files.flatMap(({ path, text }) => signingDoorFindings(path, text, options));
-  const unguarded = all.filter((f) => !reads.has(f.at));
-  const stale = [...reads.keys()].filter((at) => !all.some((f) => f.at === at));
+  const covered = new Map();
+  const unguarded = all.filter((f) => {
+    if (reads.has(f.at)) {
+      covered.set(f.at, f.at);
+      return false;
+    }
+    if (!reads.has(f.line)) return true;
+    if (!covered.has(f.line)) covered.set(f.line, f.at);
+    return covered.get(f.line) !== f.at;
+  });
+  const stale = [...reads.keys()].filter((key) => !covered.has(key));
   return { unguarded, stale };
 }
 

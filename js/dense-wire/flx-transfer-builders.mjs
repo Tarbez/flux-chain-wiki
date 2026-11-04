@@ -34,10 +34,11 @@ export const DOCS = Object.freeze({
 });
 
 /** `issuer_evidence_cid_on` (flx-cap-custody): the issuer evidence a receipt cites in C[3] on `network` (owner,
- *  2026-10-25). The devnet keeps `issuer:<key>`; every other network hashes `issuer:<network>:<key>`, so a receipt
+ *  2026-10-25). A local test node keeps `issuer:<key>`; every other network hashes `issuer:<network>:<key>`, so a receipt
  *  signed for one network never mints on another. `network` defaults to the devnet. */
 export async function issuerEvidenceCid(issuerKeyHex, network = NETWORK_DEVNET) {
-  return sha256Hex(network === NETWORK_DEVNET ? `issuer:${issuerKeyHex}` : `issuer:${network}:${issuerKeyHex}`);
+  // Round 14 (owner list 2026-11-04): only a local test node keeps the unbound address (`flx_cap_custody::issuer_evidence_cid_on`).
+  return sha256Hex(network === "fxn-local" ? `issuer:${issuerKeyHex}` : `issuer:${network}:${issuerKeyHex}`);
 }
 
 /** `plan_cid`, src/lib.rs ~122. */

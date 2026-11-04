@@ -20,7 +20,7 @@
 // Readers read JSON (on chain forever, unchanged verdicts) AND the blob's own grammar, and refuse anything else by name:
 // the failure, the missing thing, the remedy. Writers write only the new form.
 
-import { MAX_AMOUNT, MAX_DECIMALS } from "./flx-amount.mjs";
+import { FXN_DECIMALS, MAX_AMOUNT, MAX_DECIMALS, formatAmount } from "./flx-amount.mjs";
 
 export const PROVIDER_SET_HEADER = "FLX-PROVIDER-SET-V1";
 export const STAKE_INPUTS_HEADER = "FLX-STAKE-INPUTS-V1";
@@ -50,7 +50,7 @@ const KINDS = {
     noun: "token spec",
     labels: [
       ["symbol", SYMBOL], ["totalSupply", AMOUNT], ["distributedSupply", AMOUNT], ["computeRewardResolverCid", HEX64],
-      ["economyCid", HEX64], ["fairLaunchSecs", COUNT], ["walletCapBps", COUNT], ["creatorBond", COUNT], ["feePips", COUNT], ["genesisCid", HEX64],
+      ["economyCid", HEX64], ["foundingCid", HEX64], ["fairLaunchSecs", COUNT], ["walletCapBps", COUNT], ["creatorBond", COUNT], ["feePips", COUNT], ["genesisCid", HEX64],
       ["decimals", DECIMALS],
     ],
   },
@@ -130,8 +130,8 @@ export const renderStakeInputs = (cids) => render("stakeInputs", cids);
 export const renderSpeedParams = ({ requiredK, segmentIntervalSecs, maxLinesPerSegment, minBondTermSecs }) =>
   render("speedParams", { requiredK, segmentIntervalSecs, maxLinesPerSegment, minBondTermSecs });
 /** The terms and `economyCid` are optional; absent ones are absent from the blob (so the same launch keeps one CID). */
-export const renderTokenSpec = ({ symbol, totalSupply = NATIVE_TOKEN_TOTAL_SUPPLY, distributedSupply, computeRewardResolverCid, economyCid, fairLaunchSecs, walletCapBps, creatorBond, feePips, genesisCid }) =>
-  render("tokenSpec", { symbol, totalSupply, distributedSupply, computeRewardResolverCid, economyCid, fairLaunchSecs, walletCapBps, creatorBond, feePips, genesisCid });
+export const renderTokenSpec = ({ symbol, totalSupply = NATIVE_TOKEN_TOTAL_SUPPLY, distributedSupply, computeRewardResolverCid, economyCid, foundingCid, fairLaunchSecs, walletCapBps, creatorBond, feePips, genesisCid }) =>
+  render("tokenSpec", { symbol, totalSupply, distributedSupply, computeRewardResolverCid, economyCid, foundingCid, fairLaunchSecs, walletCapBps, creatorBond, feePips, genesisCid });
 export const renderBaseChainMintParams = (treasuryKey, distributedSupply, computeReserveSupply) =>
   render("mintParams", { treasuryKey, distributedSupply, computeReserveSupply });
 
@@ -289,4 +289,41 @@ export function launchOutflowDefaults({ creatorAllocation, poolInventory, tranch
 export function renderOutflowField({ treasury, pool }) {
   const three = (v) => [v, v, v].map(String).join(",");
   return `${three(treasury)};${three(pool)}`;
+}
+
+/** Owner ruling 2026-11-04: the founding of a chain's DAO, `chain_dao::ChainFounding::render`. The council is sorted and listed once. */
+export function renderChainFounding({ chain, threshold, council, registered, votesCid, feeLock }) {
+  const seats = [...new Set(council)].sort();
+  return ["FLX-CHAIN-FOUNDING-V1", "chain", chain, "threshold", String(threshold), ...seats.flatMap((key) => ["council", key]), "registered", String(registered), "votes", votesCid, "fee", feeLock].join("\t");
+}
+
+/** The `LAUNCH_PRICE` reply as `{ at, fund, chain: { fee, stake, total }, resolver: { bond, total }, communityBps, timelockSecs }`, amounts as BigInt base units. Every cost, before anyone signs. Throws on a reply that does not read. */
+export function parseLaunchPrice(reply) {
+  const price = { chain: {}, resolver: {} };
+  for (const line of String(reply).split("\n")) {
+    const f = line.split("\t");
+    if (f[0] === "LAUNCH_PRICE") { price.at = Number(f[1]); price.fund = f[2] === "-" ? null : f[2]; }
+    else if (f[0] === "LAUNCH_PRICE_ROW" && f[1] === "chain") price.chain[f[2] === "resolver-id" ? "resolverId" : f[2] === "creator-bond" ? "creatorBond" : f[2]] = BigInt(f[3]);
+    else if (f[0] === "LAUNCH_PRICE_ROW" && f[2] === "registry-bond") price.resolver.bond = BigInt(f[3]);
+    else if (f[0] === "LAUNCH_PRICE_TOTAL") price[f[1]].total = BigInt(f[2]);
+    else if (f[0] === "LAUNCH_PRICE_TERMS") { price.communityBps = Number(f[1]); price.timelockSecs = Number(f[2]); }
+    else if (f[0] === "LAUNCH_PRICE_ERR") throw new Error(`${f[1]}. Missing: ${f[2]}. To fix: ${f[3]}`);
+  }
+  if (price.chain.total === undefined) throw new Error("The reply is not LAUNCH_PRICE. Missing: its rows. To fix: send LAUNCH_PRICE to a node of the network.");
+  return price;
+}
+
+/** One read of `LAUNCH_PRICE`, the read launch-chain makes, for a page that prices a launch. Throws by name on a node that cannot answer. */
+export async function readLaunchPrice(wire) {
+  return parseLaunchPrice(await wire.send("LAUNCH_PRICE\t"));
+}
+
+/** A parsed price as the sentences every launch surface shows, `{ chain, resolver }`. The amounts are the node's; none is written here. */
+export function launchPriceSentences(price) {
+  const fxn = (base) => `${formatAmount(base, FXN_DECIMALS)} FXN`;
+  const waits = price.fund === null ? " No network fund is filed, so a chain's launch waits until platformdao is filed." : "";
+  return {
+    chain: `A chain costs ${fxn(price.chain.total)}: a ${fxn(price.chain.fee)} fee to the network fund, never refunded, and a ${fxn(price.chain.stake)} stake, locked. Only a timelocked vote of the chain's DAO refunds the stake. Nothing else is charged.${waits}`,
+    resolver: `A resolver id with no chain locks ${fxn(price.resolver.bond)}. It comes back when the id is given up. A first-party id locks nothing.`,
+  };
 }

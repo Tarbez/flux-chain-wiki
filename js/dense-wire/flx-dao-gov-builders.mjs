@@ -524,8 +524,9 @@ export const executePayload = proposalRefPayload;
 export const KIND_NETPARAM_PROPOSAL = "KDAONETPROP1";
 /** `netparams::Param::ALL`, by name, in the Rust's order. */
 // money-sale-4 (2026-11-01): `ledgeroperators` and `ledgerrequired` added, so the DAO can change the set after the
-// handover; the base mint files their first values.
-export const NETPARAMS = ["stakefloor", "platformdao", "segmentsigners", "segmentrequired", "splitprograms", "issuers", "network", "devnetkeys", "gateoperators", "segmentheartbeat", "paramdao", "bootnodes", "ledgeroperators", "ledgerrequired"];
+// handover; the base mint files their first values. Round 14: the whole list, since the launch fee left the fee votes
+// and a page offered 14 of the node's 31 names. test/chain-founding.test.mjs holds this list to src/netparams.rs.
+export const NETPARAMS = ["stakefloor", "platformdao", "segmentsigners", "segmentrequired", "splitprograms", "issuers", "network", "devnetkeys", "gateoperators", "segmentheartbeat", "paramdao", "bootnodes", "apikeycut", "releasenotice", "releasenoticemoney", "releasenoticeemergency", "ledgeroperators", "ledgerrequired", "rebuildauditors", "genesiskeyend", "personattesters", "personrequired", "personvotecap", "registrybond", "registryexpiry", "unstakequiet", "resolverproviderfloor", "launchfee", "seatfloor", "communitysplit", "relayclass"];
 /** A vote on who signs segments, on which DAO holds the parameters, or on the entry nodes needs 10% turnout and a 7-day delay. */
 export const STRICT_TURNOUT_BPS = 1000;
 export const STRICT_DELAY_SECS = 7 * 24 * 3600;
@@ -648,7 +649,7 @@ export function parseApprovalLines(text) {
 
 // ---- the base chain's genesis mint params (`src/genesis_mint.rs`) ------------------------------------------------
 // The base chain mints only when its NativeMint cites an FLX-GENESIS-MINT-V1 blob: one line naming the network DAO
-// and the council that signs every safe the mint pays (owner decision 3, 2026-10-22: a 3-of-5 council of both
+// and the council that signs every safe the mint pays (owner decision 3, 2026-10-22: a council of both
 // founders and three independent signers).
 //   FLX-GENESIS-MINT-V1 TAB dao TAB <id> TAB threshold TAB <count> {TAB council TAB <hex64>} {TAB founder TAB <hex64>}
 //                       {TAB operator TAB <hex64>} [TAB ledgerrequired TAB <count>]   (2026-11-01, money-sale-4: the
@@ -914,12 +915,6 @@ export const WEEK_SECS = 7 * 86400;
 export const MAX_PERIOD_SECS = 366 * 86400;
 /** `dao_ops::CATEGORIES`, in the Rust's order. A budget naming anything else is refused by name. */
 export const BUDGET_CATEGORIES = ["servers", "maintainers", "salaries", "bonuses", "campaigns", "scaling", "hiring", "legal", "offices", "audits", "emergency"];
-/** `billing_fees::Fee::NETWORK`: the network's dues, voted by KDAOFEEPROP1 like the billing fees but kept out of `FEES`. */
-export const NETWORK_FEES = ["launchdues", "launchfee"];
-/** `billing_fees::MAX_LAUNCH_DUES_FXN` and `MAX_LAUNCH_FEE_FXN`. */
-/** FXN base units since 2026-10-29: 10,000,000 FXN at 9 decimals. */
-export const MAX_LAUNCH_DUES_FXN = 10000000n * 10n ** 9n;
-export const MAX_LAUNCH_FEE_FXN = 10000000n * 10n ** 9n;
 
 const OPS_SPEND_DOMAIN = "FLX-DAO-OPS-SPEND-V2\0";
 const OPS_STREAM_DOMAIN = "FLX-DAO-OPS-STREAM-V2\0";
@@ -1017,7 +1012,7 @@ function ruleHolds(rule, v) {
     case "Sig": return isSig(v);
     case "Count": return isCount(v);
     case "Choice": return CHOICES.includes(v);
-    case "FeeName": return FEES.includes(v) || NETWORK_FEES.includes(v);
+    case "FeeName": return FEES.includes(v);
     case "FeeValue": return isFeeValueShape(v);
     case "ParamName": return NETPARAMS.includes(v) || (typeof v === "string" && v.startsWith(LEAD_PARAM_PREFIX) && isId(v.slice(LEAD_PARAM_PREFIX.length)));
     case "ParamValue": return v === "-" || (typeof v === "string" && v.length <= 16384 && v.length % 2 === 0 && /^[0-9a-f]*$/.test(v));
@@ -1212,15 +1207,6 @@ export function opsStopPayload({ daoId, stream, at, approvals = [] }) {
   need(isId(daoId) && isHex64(stream), "The stop has a field outside its rule. Missing: a DAO id and the stream's 64-hex id.");
   checkApprovals(approvals);
   return renderGov(KIND_OPS_STOP, [daoId, stream, timeText(at, "at")], { approve: approvals });
-}
-
-/** KDAOFEEPROP1 for the network's dues (`launchdues`, `launchfee`): whole FXN from 1 to the bound in code. */
-export function networkFeeProposalPayload({ daoId, fee, value, deadline, body = null }) {
-  need(isId(daoId), "The DAO name is not a DAO name. Missing: 3 to 32 lowercase letters or digits.");
-  need(NETWORK_FEES.includes(fee), `"${fee}" is not a network dues value. Missing: ${NETWORK_FEES.join(" or ")}. To fix: pick one, or use feeProposalPayload for a billing fee.`);
-  const bound = fee === "launchdues" ? MAX_LAUNCH_DUES_FXN : MAX_LAUNCH_FEE_FXN;
-  need(isCount(String(value)) && BigInt(value) >= 1n && BigInt(value) <= bound, `${fee} is whole FXN from 1 to ${bound}, the bound in code. Missing: a value in that range. To fix: change the value.`);
-  return renderGov(KIND_FEE_PROPOSAL, [daoId, fee, String(value), timeText(deadline, "deadline")], bodyGroup(body));
 }
 
 /** Read any `daogov` record: `{ signer, m, kind, payload, fields, groups }`, or null when it does not read. */

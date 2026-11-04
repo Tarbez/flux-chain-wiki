@@ -50,8 +50,9 @@ export function isValidFqdn(name) {
 
 /** Build an unsigned genesis LEDGERENTRY and sign it with `privateKey`.
  *  Shape mirrors `chain::genesis_on` + `chain::entry`. `network` names the root the record cites
- *  (`networkRoot`); it defaults to the devnet, whose root is `GENESIS_PREV`. */
-export async function buildGenesis({ privateKey, pubHex, nowSec, network = NETWORK_DEVNET }) {
+ *  (`networkRoot`); it defaults to a local test node (round 14: what a node with no network set runs), whose root is
+ *  `GENESIS_PREV`. A page on the devnet or mainnet passes the network BUILD_INFO names. */
+export async function buildGenesis({ privateKey, pubHex, nowSec, network = NETWORK_LOCAL }) {
   const idRef = await sha256Hex(pubHex); // sha256 of the key's hex-utf8 bytes
   const h = hexOfUtf8(pubHex);
   const root = await networkRoot(network);
@@ -730,8 +731,16 @@ export function resolverLaunchBody({
   offerManifestCid,
   grammarManifestCid,
   controlKeyHex,
+  bondLockCid,
   nowSec,
 }) {
+  if (bondLockCid !== undefined && bondLockCid !== null && !/^[0-9a-f]{64}$/.test(bondLockCid)) {
+    throw new Error(
+      `That bond lock is not a CID. ` +
+        `Missing: the 64-hex CID of the native lock (KNLOCK1, purpose registry-bond) that bonds this id (got ${JSON.stringify(bondLockCid)}). ` +
+        `To fix: lock the bond first and pass the lock record's CID; a first-party id passes none.`,
+    );
+  }
   if (!isChainIdShape(carrierChainId)) {
     throw new Error(
       `That carrier chain-id is not addressable. ` +
@@ -758,7 +767,10 @@ export function resolverLaunchBody({
   return (
     `G${pubHex}-Y${Y_LEDGERENTRY}-V1-M${nowSec}-H${h}-N${carrierChainId}-K${RESOLVER_KIND_LAUNCH}` +
     `-W${w}-J${pos}-C${prevCid}-C${providerSetCid}-C${speedParamsCid}` +
-    `-C${offerManifestCid}-C${grammarManifestCid}-C${controlKeyHex}`
+    `-C${offerManifestCid}-C${grammarManifestCid}-C${controlKeyHex}` +
+    // Round 14 (owner ruling 2026-11-04): a third-party launch cites its bond lock as C[6]
+    // (`chain::resolver_launch_bonded`); a first-party launch carries none.
+    (bondLockCid ? `-C${bondLockCid}` : "")
   );
 }
 
@@ -1305,8 +1317,12 @@ export function isChainIdShape(value) {
 /** The mainnet's network id, the same literal as `netparams::NETWORK_MAIN`. Every other id is a test network. */
 export const NETWORK_MAIN = "fxn-mainnet";
 
-/** The devnet's id, the same literal as `netparams::NETWORK_DEVNET`. A node with no network set runs as it. */
+/** The devnet's id, the same literal as `netparams::NETWORK_DEVNET`. */
 export const NETWORK_DEVNET = "fxn-devnet";
+
+/** Round 14 (owner ruling 2026-11-04): a local test node's id, the same literal as `netparams::NETWORK_LOCAL`. A node
+ *  with no network set runs as it, and only its first records cite the 64-zero root. */
+export const NETWORK_LOCAL = "fxn-local";
 
 /** `netparams::is_network_id`: `fxn-` then one or more lowercase letters, digits and `-`, at most 32 long. */
 export function isNetworkId(value) {
@@ -1315,9 +1331,10 @@ export function isNetworkId(value) {
 
 /** What a key's first record cites in `C[0]` on `network` (owner, 2026-10-25), mirroring `chain::network_root`.
  *  A key has one record chain, and every later record links back to its first one, so the first record's root binds
- *  the whole chain to one network: a record signed on one network is never admitted on another. The devnet keeps the
- *  64-zero sentinel, so the running devnet's history still replays. Every other network's root is the SHA-256 of
- *  `fxn-network-root-` and its id. A node names its root in `HEAD_NONE`; prefer that answer to computing it. */
+ *  the whole chain to one network: a record signed on one network is never admitted on another. A local test node
+ *  keeps the 64-zero sentinel (round 14; the devnet kept it until then, and its stores are empty, so nothing replays).
+ *  Every other network's root, the devnet's included, is the SHA-256 of `fxn-network-root-` and its id. A node names
+ *  its root in `HEAD_NONE`; prefer that answer to computing it. */
 export async function networkRoot(network) {
   if (!isNetworkId(network)) {
     throw new Error(
@@ -1326,15 +1343,15 @@ export async function networkRoot(network) {
         `To fix: pass the network the page is connected to (BUILD_INFO's fifth field), or the root HEAD_NONE names.`,
     );
   }
-  return network === NETWORK_DEVNET ? GENESIS_PREV : sha256Hex(`fxn-network-root-${network}`);
+  return network === NETWORK_LOCAL ? GENESIS_PREV : sha256Hex(`fxn-network-root-${network}`);
 }
 
-/** The tag `networkCovered` puts first on a non-devnet network, the same bytes as `chain::NETWORK_COVERED_TAG`. */
+/** The tag `networkCovered` puts first on every network but a local test node, the same bytes as `chain::NETWORK_COVERED_TAG`. */
 export const NETWORK_COVERED_TAG = "FXNNET1";
 
 /** The bytes a signature outside a record chain covers on `network` (a DAO vote, a segment signature, a custody
  *  release vote), mirroring `chain::network_covered`. Such a signature names no chain position, so the first
- *  record's root cannot bind it. The devnet's bytes are unchanged. On every other network they are `FXNNET1`, NUL,
+ *  record's root cannot bind it. A local test node's bytes are unchanged. On every other network, the devnet included, they are `FXNNET1`, NUL,
  *  the network id, NUL, then the bytes, so a vote signed on one network never verifies on another. */
 export function networkCovered(network, bytes) {
   // Round 10 (fresh audit CNN-6): a missing network refuses by name. Until round 10 `undefined` returned the devnet's
@@ -1347,7 +1364,8 @@ export function networkCovered(network, bytes) {
         "To fix: read the node's network first and pass it; nothing was signed.",
     );
   }
-  if (network === NETWORK_DEVNET) return bytes;
+  // Round 14 (owner list 2026-11-04): only a local test node signs the bare bytes (`flx_release::network_covered`).
+  if (network === NETWORK_LOCAL) return bytes;
   if (!isNetworkId(network)) {
     throw new Error(
       `The network ${JSON.stringify(network)} is not a network id, so the vote cannot be bound to it. ` +
