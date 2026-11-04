@@ -1,6 +1,8 @@
 # The commit each git repo the FXN sign-in bundle reads from must be at (scripts/build-auth.cjs, round 12 ZD3-6).
-# Built 2026-11-03 with ARK_FLUX_ROOT naming fxn-auth-wt-audit-fix-auth, fxn-auth-client and deadark-identity-core-wt-audit-fix-auth;
-# flux-claims is reached through fxn-auth's node_modules link (flx/flux-claims-wt-audit-fix-auth).
-flux-claims	a541262cb660b77a508e0631a9f6b2e0b1bc9023
-fxn-auth	d38933f0526deeabc60fa8572606011ad673828d
+# Built 2026-11-04 (round 14 signpins) with ARK_FLUX_ROOT naming fxn-auth-wt-audit-fix-r14-signpins, fxn-auth-client and
+# deadark-identity-core-wt-audit-fix-r14-signpins; flux-claims is reached through fxn-auth's node_modules link
+# (flx/flux-claims-wt-audit-fix-r14-signpins). flux-claims d183a22 and deadark-identity-core fe5ddba are native-only:
+# the bundle reads no tweetnacl.
+flux-claims	d183a22d4fe207add910e4a17a8442ab4aa390d5
+fxn-auth	eebc2957809425c04c930f3d93994f20f4c7cacc
 fxn-auth-client	0b7bb8890e0224869f1579ee14bee878e97eaa4e
