@@ -46,7 +46,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const OVERRIDE = process.env.DENSE_WIRE_WEB || null;
 export const REPO = process.env.DENSE_WIRE_REPO || path.resolve(ROOT, '..', 'defxn-defi-rs');
-export const REV = process.env.DENSE_WIRE_REV || '73de3e9240f4dc25ec12a117a820c5d090e43a23';
+export const REV = process.env.DENSE_WIRE_REV || '9eb743f17384fa709b0e1704363b8ed1b20cea36';
 
 /** Where `name` (a path under dense-wire/web) is read from, for messages. */
 export function sourceName(name) {

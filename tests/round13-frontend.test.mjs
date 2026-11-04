@@ -48,6 +48,7 @@ test('round 13: after a refused send, a retry never signs a second record at the
 test('round 13: sendFxn checks the network and a second node before signing', async () => {
   const head = { kind: 'head', length: 5, headCid: 'e'.repeat(64) };
   const lone = node('wss://a/ws', head, () => '');
+  lone.witnesses = []; // round 14: fxn-devnet now has witnesses (its seats); this node's page names none
   await assert.rejects(sendFxn({ who: {}, wire: lone, amount: 5n, recipient: TO, signer }), (e) => e.code === 'WITNESS_MISSING');
   const liar = node('wss://a/ws', head, () => '');
   liar.witnesses = [node('wss://b/ws', { kind: 'head', length: 6, headCid: 'f'.repeat(64) }, () => '')];

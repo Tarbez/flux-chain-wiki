@@ -260,6 +260,9 @@ export function decodeRecordPayload(recordText) {
  * @param {string} [params.carrierChainId] - defaults to the base chain
  * @param {string} [params.network] - the network every record this client signs is built for (round 13): required to
  *   write, refused by name (NETWORK_UNNAMED) when left out, so a reader-only client needs none
+ * @param {string} [params.bondLockCid] - round 14: the CID of the launcher's native lock (KNLOCK1, purpose
+ *   registry-bond) that bonds a resolver id that is not first-party. The launch cites it as C[6]; a node refuses a
+ *   third-party launch without one (BondNotHeld). A first-party id passes none.
  */
 export function createResolverRecordClient({
   wsUrl,
@@ -271,6 +274,7 @@ export function createResolverRecordClient({
   kindMarker,
   carrierChainId = BASE_CHAIN_ID,
   network,
+  bondLockCid,
 }) {
   if (!isChainIdShape(resolverChainId)) {
     throw new ResolverRecordClientError(
@@ -326,9 +330,16 @@ export function createResolverRecordClient({
     if (!signingKey) {
       throw refusal("RRC_NO_SIGNER", "only the chain's operator launches it", "the operator's signingKey (a WebCrypto CryptoKey)", "launch the product chain from its own process; the deployer only writes to launched chains");
     }
-    const headReply = await wire.head(pubHex);
-    if (headReply.kind === "none") {
-      await nextWrite(() => buildGenesis({ privateKey: signingKey, pubHex, nowSec: nowSec() }));
+    // Round 14 (Data resolver prep): the first record cites the root of the network it is signed for. It was built
+    // with no network, so it cited the local root and a devnet node refused it (WrongNetwork). And whether the key has
+    // a first record is read from the node AND its witnesses (chainPosition), never one node's HEAD: a lagging node
+    // answering HEAD_NONE made the client sign a second record at position 0, which freezes the key.
+    const first = await chainPosition(wire, pubHex);
+    if (first.pos === 0) {
+      if (!network) {
+        throw refusal("RRC_NO_NETWORK", "the client cannot sign a first record without the network it is for", "the network id the node runs (BUILD_INFO's fifth field), such as fxn-devnet", "construct the client with `network`");
+      }
+      await nextWrite(() => buildGenesis({ privateKey: signingKey, pubHex, nowSec: nowSec(), network }));
     }
 
     // WARCH19 step 5: each launch blob is written in its own grammar (flx-launch-blobs.mjs), one line for BLOB_PUT.
@@ -356,6 +367,8 @@ export function createResolverRecordClient({
         offerManifestCid,
         grammarManifestCid,
         controlKeyHex: pubHex,
+        // Round 14: a third-party id's bond (C[6]); without it a node refuses the launch (BondNotHeld).
+        bondLockCid,
         nowSec: nowSec(),
       }),
     ).catch((err) => {

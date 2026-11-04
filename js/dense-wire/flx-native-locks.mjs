@@ -29,6 +29,7 @@ import { MAX_AMOUNT } from "./flx-amount.mjs";
 import { resolverRecordBody, isChainIdShape } from "./flx-builders.mjs";
 import { sha256Hex } from "./flx-crypto.mjs";
 import { utf8OfHex } from "./flx-dumb-parser.mjs";
+import { readLaunchPrice } from "./flx-launch-blobs.mjs";
 
 /** `chain::BASE_CHAIN_ID`: the chain whose native FXN the wallet shows (`NATIVE_BALANCE defxn <key>`). */
 export const BASE_CHAIN_ID = "defxn";
@@ -52,7 +53,14 @@ export const PURPOSE = Object.freeze({
   BOUNTY: "bounty",
   CREATOR_BOND: "creator-bond",
   RENT: "rent",
+  /** `native_locks::PURPOSE_REGISTRY_BOND` (round 14): the bond a third-party resolver id holds; its launch cites it as C[6]. */
+  REGISTRY_BOND: "registry-bond",
+  /** `native_locks::PURPOSE_LAUNCH_FEE` (round 14): a chain launch's fee, paid to the network fund by the launch. */
+  LAUNCH_FEE: "launch-fee",
 });
+/** How long a registry bond's lock runs before its locker may refund it: past the launch that cites it. While the id
+ *  lives its launch holds the lock, so no refund comes before the id expires, whatever the deadline. */
+export const REGISTRY_BOND_LOCK_SECS = 86_400;
 /** How long a buy's lock outlives its intent. The node needs the lock's deadline strictly after the intent's
  *  (`native_swap::CODE_LOCK_ENDS_TOO_SOON`); past that, a longer margin only delays the refund of a lock no fill spent. */
 export const BUY_LOCK_MARGIN_SECS = 60;
@@ -150,6 +158,31 @@ export function nameLockTerms({ sellerKey, price, deadline }) {
 export function rentLockTerms({ opsSafe, amount, deadline }) {
   if (!KEY64.test(String(opsSafe))) throw refuse("the ops safe is not an address", "the ops safe's 64-hex address (DOM_RENT_QUOTE)", "read it with DOM_RENT_QUOTE");
   return { chain: BASE_CHAIN_ID, amount: wholeAmount(amount, "the rent"), beneficiary: opsSafe, deadline, purpose: PURPOSE.RENT };
+}
+
+/** A registry bond's lock (`native_locks::PURPOSE_REGISTRY_BOND`): the launcher locks exactly `bond`, the amount the
+ *  node's LAUNCH_PRICE names, for itself, purpose `registry-bond`, until `nowSec + deadlineSecs`. */
+export function registryBondLockTerms({ launcher, bond, nowSec, deadlineSecs = REGISTRY_BOND_LOCK_SECS }) {
+  if (!KEY64.test(String(launcher))) throw refuse("the launcher is not a key", "the launcher's 64-hex key (the signer of the launch)", "lock with the key that signs the launch");
+  if (!Number.isSafeInteger(deadlineSecs) || deadlineSecs <= 0) throw refuse("the bond's lock has no time to run", "a deadline after the launch that cites it", "pass deadlineSecs above 0, or leave the default");
+  return { chain: BASE_CHAIN_ID, amount: wholeAmount(bond, "the bond"), beneficiary: launcher, deadline: nowSec + deadlineSecs, purpose: PURPOSE.REGISTRY_BOND };
+}
+
+/** Round 14 (the Repo/Remote-env prep): the one registry-bond lock builder every resolver product uses (Notify, Games
+ *  and Content each built their own with buildNativeLock). Reads the bond from the node (LAUNCH_PRICE's registry-bond
+ *  row) and signs the lock at `pos`/`prev`; the caller submits it through its signing guard. -> `{ text, cid, line,
+ *  amount }`, `cid` the C[6] its launch cites. Refused by name when the node prices no bond. */
+export async function buildRegistryBondLock(signer, wire, { pos, prev, nowSec, deadlineSecs = REGISTRY_BOND_LOCK_SECS }) {
+  let price;
+  try {
+    price = await readLaunchPrice(wire);
+  } catch (e) {
+    throw refuse(`the node did not price a resolver id (${e?.message ?? e})`, "a LAUNCH_PRICE answer with its registry-bond row", "ask a node of the network the chain launches on, of round 14 or later; nothing was signed");
+  }
+  const bond = price.resolver?.bond;
+  if (typeof bond !== "bigint" || bond <= 0n) throw refuse("the node's LAUNCH_PRICE names no registry bond", "a LAUNCH_PRICE_ROW resolver registry-bond line", "ask a node of round 14 or later; nothing was signed");
+  const terms = registryBondLockTerms({ launcher: signer.pubHex, bond, nowSec, deadlineSecs });
+  return { ...(await buildNativeLock(signer, { pos, prev, ...terms, nowSec })), amount: bond };
 }
 
 /** `native_locks::read` for a lock or a refund: what the signed text says, or null when it is not one. Checks no

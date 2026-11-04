@@ -43,7 +43,8 @@
 // Pure and browser-first (Node-compatible): no node: imports.
 import { GENESIS_PREV, NOT_NETWORK_BOUND, networkRoot, signingNetworkRefusal } from "./flx-builders.mjs";
 import { sha256Hex } from "./flx-crypto.mjs";
-export { NOT_NETWORK_BOUND };
+import { WITNESS_NODES } from "./flx-network-witnesses.mjs";
+export { NOT_NETWORK_BOUND, WITNESS_NODES };
 
 export class SigningGuardRefusal extends Error {
   constructor(code, failure, missing, remedy) {
@@ -70,7 +71,7 @@ export async function chainPosition(wire, pubHex, chain) {
     throw new SigningGuardRefusal(
       "WITNESS_MISSING",
       "No second node was named to confirm where this key's chain ends, so one node's word would decide the position.",
-      "a witness node: the page's wire.witnesses, or the network's list in WITNESS_NODES (flx-signing-guard.mjs, an owner value).",
+      "a witness node: the page's wire.witnesses, or the network's list in WITNESS_NODES (flx-network-witnesses.mjs, the network's seats).",
       "name a second node of this network and try again. Nothing was signed.",
     );
   }
@@ -113,10 +114,9 @@ async function readHead(wire, pubHex, chain) {
   );
 }
 
-/** Round 13: the second nodes a position is checked against, by network (BUILD_INFO's fifth field). OWNER VALUE, listed in
- *  docs: safest default is none, so every signing page refuses (WITNESS_MISSING) until the owner names, for each network,
- *  at least one node that is not the page's own node. Each entry is a WebSocket URL; the signing sites' CSP must admit it. */
-export const WITNESS_NODES = Object.freeze({});
+/* Round 13: the second nodes a position is checked against, by network (BUILD_INFO's fifth field). Round 14: the list is
+   the network's own, in flx-network-witnesses.mjs (the one list every signing page vendors with this guard). A network
+   with no entry there still signs nothing (WITNESS_MISSING). */
 
 const witnessClients = new Map();
 let makeWitnessClient = null;
@@ -158,7 +158,7 @@ export async function agreedRead(wire, read, { key = stableText, what = "this re
     throw new SigningGuardRefusal(
       "WITNESS_MISSING",
       `No second node was named to confirm ${what}, so one node's answer would be shown as the network's.`,
-      "a witness node: the page's wire.witnesses, or the network's list in WITNESS_NODES (flx-signing-guard.mjs, an owner value).",
+      "a witness node: the page's wire.witnesses, or the network's list in WITNESS_NODES (flx-network-witnesses.mjs, the network's seats).",
       "name a second node of this network and reload.",
     );
   }
