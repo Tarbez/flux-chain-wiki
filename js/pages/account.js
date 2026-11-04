@@ -500,7 +500,9 @@
         return { label: 'Transfers', empty: { reason: 'None of your keys has sent or received FXN on this network.', remedy: 'Share a key from Your keys to receive FXN.' },
           items: got.rows.slice(0, HISTORY_SHOWN).map(function (row, i) {
             var words = holdingsApi.describeTransfer(row, names);
-            return { id: 'h' + i, title: plainLine(words.title, 96), meta: plainLine(words.meta, 96), status: row.kind === 'sent' ? { label: 'Sent', tone: 'reference' } : { label: row.kind === 'received' ? 'Received' : plainLine(row.kind, 24), tone: 'trust' } };
+            /* Round 14 (wallet-final): a received row's badge is the node's final or not-final answer, never assumed */
+            var st = holdingsApi.transferStatus(row);
+            return { id: 'h' + i, title: plainLine(words.title, 96), meta: plainLine(words.meta, 96), status: { label: plainLine(st.label, 24), tone: st.tone } };
           }) };
       }
       function meshActionProps() {
@@ -1680,7 +1682,8 @@
           holdings.history = got;
           paint('history', historyProps());
           var shown = Math.min(got.rows.length, HISTORY_SHOWN);
-          say(got.rows.length > shown ? 'Showing the newest ' + shown + ' of ' + got.rows.length + ' transfers.' : (got.unread ? got.unread + ' of your keys were not read. Press History again to retry.' : ''), got.unread ? 'warning' : undefined);
+          var notFinal = fh.describeHistoryReceived(got);
+          say([got.rows.length > shown ? 'Showing the newest ' + shown + ' of ' + got.rows.length + ' transfers.' : (got.unread ? got.unread + ' of your keys were not read. Press History again to retry.' : ''), notFinal].filter(Boolean).join(' '), got.unread || notFinal ? 'warning' : undefined);
         } catch (error) {
           if (token !== historyGeneration || !page.isConnected) return;
           holdings.historyWhy = 'Your transfers were not read: ' + text(error && error.message, 'the node did not answer') + '. Press History again to retry.';

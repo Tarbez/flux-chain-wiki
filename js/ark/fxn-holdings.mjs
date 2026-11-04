@@ -33,6 +33,7 @@ import { chainPosition, withKeyLock, submitAtPosition, signedAsReviewed } from "
 import { BASE_CHAIN_ID } from "../dense-wire/flx-dao-builders.mjs";
 import { hexToBytes } from "../dense-wire/flx-crypto.mjs";
 import { formatAmount, parseAmount, parseDecimalsReply } from "../dense-wire/flx-amount.mjs";
+import { receivedStatus, describeReceived, paymentLabel, paymentTone } from "../dense-wire/flx-payment-status.mjs";
 
 /** The DAO the mint named on the FXN devnet. A node whose mint named another DAO says which in its refusal, and the
  *  read follows it once (`readSafes`), so this is a first guess, never a second copy of the chain's answer. */
@@ -215,7 +216,11 @@ export async function readSafes(wire, mine, nowSec = Math.floor(Date.now() / 100
 /* ---- history ---------------------------------------------------------------------------------------------------- */
 
 /** NATIVE_HISTORY for each key, merged newest first: `{ rows: [{ at, kind, counterparty, amount, reference, key,
- *  keyName }], unread }`. `at` is unix milliseconds. A key the node did not answer for is counted, not shown as empty. */
+ *  keyName, payment }], unread, received }`. `at` is unix milliseconds. A key the node did not answer for is counted,
+ *  not shown as empty. Round 14 (wallet-final): every received or credited row is asked about with CONFIRMED through
+ *  flx-payment-status.mjs `receivedStatus` (owner ruling 2026-10-31: money received shows final apart from not
+ *  final). `payment` is the node's answer for that row, null when the node named no place to ask about (or the row is
+ *  not money received); `received` is receivedStatus's sums. */
 export async function readHistory(wire, keys, limit = 50) {
   const rows = [];
   let unread = 0;
@@ -227,7 +232,24 @@ export async function readHistory(wire, keys, limit = 50) {
     } catch { unread += 1; }
   }
   rows.sort((a, b) => b.at - a.at);
-  return { rows, unread };
+  const received = await receivedStatus(wire, BASE_CHAIN_ID, rows);
+  const asked = new Map(received.rows.map((r) => [r.row, r.status]));
+  return { rows: rows.map((r) => ({ ...r, payment: asked.get(r) ?? null })), unread, received };
+}
+
+/** The badge of a history row: a sent row is "Sent"; a received or credited row carries the node's own final or
+ *  not-final answer (flx-payment-status.mjs `paymentLabel`, `paymentTone`), "Final" only when the node said final. */
+export function transferStatus(row) {
+  // A row nothing could be asked about reads "Not checked" in the waiting tone, not as a failure.
+  if (row.kind === "received" || row.kind === "credit") return { label: paymentLabel(row.payment), tone: row.payment ? paymentTone(row.payment) : "drift" };
+  if (row.kind === "sent") return { label: "Sent", tone: "reference" };
+  return { label: row.kind, tone: "trust" };
+}
+
+/** The line under the history for its received rows: what is not final yet, never final, or not checked (empty when
+ *  every received payment checked is final). */
+export function describeHistoryReceived(history) {
+  return history && history.received ? describeReceived(history.received, fxnText) : "";
 }
 
 /** One history row in words: what moved, to or from whom, on which of your keys. */

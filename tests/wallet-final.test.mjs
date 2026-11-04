@@ -94,3 +94,66 @@ test('the account page decides no payment words itself: send and safe spend show
   const holdings = fs.readFileSync(path.join(root, 'js/ark/fxn-holdings.mjs'), 'utf8');
   assert.match(holdings, /return \{ cid: reply\.cid, record: reply\.record \};/, 'submitSpend hands back the signed record to ask about');
 });
+
+/* Follow-up (2026-11-04): the History view read every received row as "Received" in the done colour. Each received or
+   credited row is now asked about with CONFIRMED (receivedStatus) and its badge is the node's own answer. */
+const fh = await import('../js/ark/fxn-holdings.mjs');
+const PAYER = 'd'.repeat(64), REC = 'f'.repeat(64);
+/** A WalletWire whose node holds one key's history: rows are [kind, position or null], each asked about with `answer`. */
+function historyNode(rows, answer) {
+  const wire = new dw.WalletWire('wss://node.test/ws');
+  const client = Object.create(WireClient.prototype);
+  client.asked = [];
+  client.close = () => {};
+  client._send = async (line) => {
+    if (line.startsWith('NATIVE_HISTORY\t')) {
+      const body = rows.map(([kind, pos], i) => `ROW\t${1000 + i}\t${kind}\t${PAYER}\t7\tref-${i}` + (pos === null ? '' : `\t${PAYER}\t${pos}\t${REC}`));
+      return ['NATIVE_HISTORY\tdefxn\tx\t' + rows.length].concat(body, ['NATIVE_HISTORY_END']).join('\n');
+    }
+    client.asked.push(line);
+    return answer(line);
+  };
+  wire.client = client;
+  return { wire, client };
+}
+const badges = async (rows, answer) => {
+  const node = historyNode(rows, answer);
+  const got = await fh.readHistory(node.wire, [{ key: HOLDER, name: 'Main' }], 50);
+  return { got, labels: got.rows.map((r) => [r.kind, fh.transferStatus(r).label, fh.transferStatus(r).tone]), asked: node.client.asked };
+};
+
+test('history: a received row the node calls final reads Final', async () => {
+  const { labels, asked } = await badges([['received', 4]], () => `CONFIRMED\t${PAYER}\tdefxn\t4\t9\t3\t4\tfinal\n`);
+  assert.deepEqual(labels, [['received', 'Final', 'trust']]);
+  assert.equal(asked.length, 1);
+  assert.match(asked[0], new RegExp(`^CONFIRMED\\t${PAYER}\\t[^\\t]+\\t4\\t${REC}$`), 'asked for the payer\'s record at its place');
+});
+
+test('history: not-final, no word, WAITING and CONFLICT never read Final, and the page says how much is not final', async () => {
+  for (const [line, label, tone] of [
+    [`CONFIRMED\t${PAYER}\tdefxn\t4\t9\t1\t1\tnot-final\n`, 'Not final', 'drift'],
+    [`CONFIRMED\t${PAYER}\tdefxn\t4\t9\t3\t4\n`, 'Not final', 'drift'],
+    [`WAITING\t${PAYER}\tdefxn\t4\t1\t1\n`, 'Not final', 'drift'],
+    [`CONFLICT\t${PAYER}\tdefxn\t4\t${OTHER}\n`, 'Never final', 'danger'],
+  ]) {
+    const { got, labels } = await badges([['received', 4]], () => line);
+    assert.deepEqual(labels, [['received', label, tone]], line);
+    assert.match(fh.describeHistoryReceived(got), /not final yet|never be final/, line);
+  }
+});
+
+test('history: a credit is asked about too, a row with no place is Not checked, and a sent row asks nothing', async () => {
+  const { got, labels, asked } = await badges([['credit', 2], ['received', null], ['sent', null]], () => `CONFIRMED\t${PAYER}\tdefxn\t2\t9\t1\t1\tnot-final\n`);
+  assert.deepEqual(labels, [['sent', 'Sent', 'reference'], ['received', 'Not checked', 'drift'], ['credit', 'Not final', 'drift']], 'newest first');
+  assert.equal(asked.length, 1, 'only the credit was asked about');
+  assert.match(fh.describeHistoryReceived(got), /could not be checked/);
+});
+
+test('the account page shows the history badge from transferStatus, not a fixed "Received"', () => {
+  for (const file of ['js/pages/account.js', 'js/min/pages/account.js']) {
+    const text = fs.readFileSync(path.join(root, file), 'utf8');
+    assert.match(text, /\.transferStatus\(/, file);
+    assert.match(text, /\.describeHistoryReceived\(/, file);
+    assert.doesNotMatch(text, /label: row\.kind === 'received' \? 'Received'/, file);
+  }
+});
