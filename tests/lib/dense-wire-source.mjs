@@ -23,7 +23,13 @@
    2026-11-03 (audit round 12 merge): the default rev is audit-fix-all-r12, the branch that merges the seven
    round-12 dense-wire lanes. flx-dao-gov-builders.mjs, flx-native-transfer.mjs, flx-object-builders.mjs (both folders) and
    flx-object-proof.mjs were re-copied from it with git show. flx-quorum.mjs is a new copy:
-   the one browser quorum rule, which flx-dao-gov-builders.mjs now imports. */
+   the one browser quorum rule, which flx-dao-gov-builders.mjs now imports.
+
+   2026-11-03 (audit round 13, frontend lane): the default rev is a COMMIT, 19c48d3 on audit-fix-r13-frontend, never a
+   branch name: a branch moves, so a pin that names one checks against whatever the branch holds that day (repo map
+   2026-11-03, "the pins name a branch, not a commit"). flx-signing-guard.mjs (both folders: HEAD checked against a
+   witness node, the line sender, agreedRead), flx-resolver-record-client.mjs (gateway: writes through the guard) and
+   the new flx-signing-doors.mjs (the one door scan) were re-copied from it with git show. */
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -32,7 +38,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const OVERRIDE = process.env.DENSE_WIRE_WEB || null;
 export const REPO = process.env.DENSE_WIRE_REPO || path.resolve(ROOT, '..', 'defxn-defi-rs');
-export const REV = process.env.DENSE_WIRE_REV || 'audit-fix-all-r12';
+export const REV = process.env.DENSE_WIRE_REV || '19c48d3565f2751ba962a748aeaeb80b8eb35acd';
 
 /** Where `name` (a path under dense-wire/web) is read from, for messages. */
 export function sourceName(name) {

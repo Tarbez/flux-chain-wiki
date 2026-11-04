@@ -41,6 +41,7 @@ import { BASE_CHAIN_ID } from "../dense-wire/flx-dao-builders.mjs";
 import { nativeBalance, nativeHistory, buildNativeTransfer, parseNativeSendReply } from "../dense-wire/flx-native-transfer.mjs";
 import { sha256Hex } from "../dense-wire/flx-crypto.mjs";
 import { parseDecimalsReply, pow10 } from "../dense-wire/flx-amount.mjs";
+import { chainPosition, submitAtPosition, nodeNetwork, withKeyLock } from "../dense-wire/flx-signing-guard.mjs";
 
 const WIRE_TIMEOUT_MS = 15000;
 
@@ -301,7 +302,7 @@ function approvedOnly(signer, approved) {
  *  `action`, `scope`, `authority`, `configuration` and `denies` name what this one signature authorizes. Refuses
  *  outright if that modal is not loaded: per the workspace law, every signing surface shows the full modal, so a
  *  missing modal means no signature, never a silent fallback. */
-export async function reviewThen({ who, pubHex, wireUrl, title, description, claims, manifest, facts, unsigned, run,
+export async function reviewThen({ who, pubHex, wireUrl, network, title, description, claims, manifest, facts, unsigned, run,
   action = "native.transfer", scope = "fxn.transfer", authority = "(none: a holder-signed FXN transfer, not a DAO action)",
   configuration = "dense-wire native-token grammar · KNXFER1", denies = "scope does not authorize any other amount, recipient or chain" }) {
   const dialog = window.ArkUI && window.ArkUI.authorizationDialog;
@@ -313,7 +314,8 @@ export async function reviewThen({ who, pubHex, wireUrl, title, description, cla
     title,
     description: description + " Review exactly what this signs before approving. Nothing is signed or sent until you approve.",
     requester: (who.displayName ? who.displayName + " · " : "") + pubHex,
-    network: "dense-wire · " + wireUrl,
+    // Round 13 (round-12 verifier, ZD3-8 residual): the review names the network the signature is for, not only a URL.
+    network: (network ? network : "network not named by the node") + " · " + wireUrl,
     authority,
     configuration,
     scope,
@@ -378,9 +380,13 @@ export async function sendFxn({ who, wire, amount, recipient, signer = signerFor
   // shows anyone that both are you. The review says so first. `linkRisk` reads the opened file only; it sends nothing.
   const risk = who.linkRisk ? await who.linkRisk(signer.pubHex, toKeyHex) : null;
   const warning = risk ? `This send links ${risk.from} and ${risk.to} in public. Anyone who reads the chain can tell both are you. It cannot be undone.` : "";
-  const head = await wire.chainHead(signer.pubHex);
-  const pos = head.kind === "head" ? head.length : 0;
-  const prev = head.kind === "head" ? head.headCid : "0".repeat(64);
+  // Round 13 (round-12 verifier, ZD3-1 at defxn.com/account): this read HEAD itself and took HEAD_ERR as position 0,
+  // which the key already holds, and sent with a raw sendLine: no network check, no hold, so a refused send let the
+  // holder sign a second record at the same position. The position now comes from the guard (the node and a witness
+  // agree, or nothing is signed), and the send goes through submitAtPosition.
+  const network = await nodeNetwork(wire);
+  const at = await chainPosition(wire, signer.pubHex);
+  const { pos, prevCid: prev } = at;
   // Captured ONCE, before `run` is built: `run` is called TWICE by
   // `reviewAndSign` (a probe pass to show the bytes, then the real
   // signing pass after approval) -- `Date.now()` inside the closure
@@ -390,7 +396,7 @@ export async function sendFxn({ who, wire, amount, recipient, signer = signerFor
   // Found before this ever shipped, not live.
   const now = Date.now();
   const signed = await reviewAndSign({
-    who, signer, wireUrl: wire.url,
+    who, signer, wireUrl: wire.url, network,
     title: risk ? `Warning: send ${show(units)} to your own ${risk.to}` : `Send ${show(units)} to ${short(toKeyHex)}`,
     description: (warning ? warning + " " : "") + "This is the whole action: your signature alone moves the value, the recipient does nothing.",
     claims: [`evidence recipient ${toKeyHex}`, `evidence amount ${units} base units`, `evidence chain ${BASE_CHAIN_ID}`],
@@ -398,7 +404,7 @@ export async function sendFxn({ who, wire, amount, recipient, signer = signerFor
     facts: (warning ? [{ label: "Links your ids", value: warning }] : []).concat([{ label: "Amount", value: `${show(units)} (${units} base units)` }, { label: "Recipient", value: toKeyHex }]),
     run: (s) => buildNativeTransfer(s, { pos, prev, toKeyHex, chainId: BASE_CHAIN_ID, amount: units, now }).then((r) => r.text),
   });
-  const reply = parseNativeSendReply(await wire.sendLine(`NATIVE_SEND\t${signed}`));
+  const reply = await withKeyLock(signer.pubHex, () => submitAtPosition(wire, { pubHex: signer.pubHex, at, kind: "NATIVE_SEND", text: signed, network, parse: parseNativeSendReply }));
   // The record's place on the sender's list, so the page can ask when the payment is final (`watchSendConfirmed`).
   return reply.kind === "ok" ? { ...reply, holder: signer.pubHex, position: pos } : reply;
 }

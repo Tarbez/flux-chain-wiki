@@ -37,6 +37,21 @@ defxn.com, www.defxn.com {
 	root * /srv/defxn-site
 	encode zstd gzip
 
+	# Round 13 (round-12 verifier, ZD3-5): defxn.com signs. /account sends FXN and trades skins, and broker.html signs
+	# for other sites, under the same FXN ID that derives the genesis signer. Until round 13 this site sent no HSTS, no
+	# CSP header and no frame-ancestors, and a <meta> CSP cannot set frame-ancestors, so the broker's Approve button
+	# could be framed. The CSP is the pages' own (index.html's <meta>, the widest of them) less `file:`, plus
+	# frame-src 'self' for the CMS pages and frame-ancestors 'none'. The broker opens as a popup, never in a frame.
+	# FXN_WITNESS_CONNECT (empty by default) names the witness nodes the signing guard reads HEAD from.
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; frame-src 'self'; connect-src 'self' https://gate.defxn.com http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com {$FXN_WITNESS_CONNECT:}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+	}
+
+
 	# These three live under js/admin/ (where the build scripts emit them) but
 	# are public, shared primitives, not CMS-editor code: the Auth Kit (used by
 	# the public /account page) and the <flux-authorization-dialog> bundle +

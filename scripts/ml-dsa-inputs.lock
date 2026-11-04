@@ -1,0 +1,10 @@
+# sha256 of every file the ML-DSA-87 bundle reads (scripts/build-ml-dsa.cjs, round 13). Paths are under the flux folder.
+21d1b7524d11682946b8a2347ff128fcad9e18c48b966c92a9900ccd40cad7ce	fxn-auth/node_modules/@noble/post-quantum/_crystals.js
+564fa89137d60d32067e4c400a0c2a8ca7d2b75a9f877345517f5cb67103bee1	fxn-auth/node_modules/@noble/post-quantum/utils.js
+6b4397dd40cef490bb70bf59784d2b053dc331755700ae30ff28d30ec5fccb6b	fxn-auth/node_modules/@noble/hashes/utils.js
+73e2264abb589f48da33d997aae9ec559863be01ac2eeb4ef9ef44fd2f372987	fxn-auth/node_modules/@noble/post-quantum/ml-dsa.js
+9a81e1edb24eae27b335533220167609cfb58008c5690e140ce478acdc669f32	fxn-auth/node_modules/@noble/hashes/sha3.js
+9ced3aa10598277a735e54f7b61d88e929d565da884ba5385f9006ebb3b6aab2	fxn-auth/node_modules/@noble/curves/abstract/modular.js
+a4b2ff7ca33f4acc85d61f0e83ec3303c3f6b38ecc19b20d0f6462d820e518cf	fxn-auth/node_modules/@noble/curves/abstract/fft.js
+b09da8c07fe8187c07649494cdb7cd0bcf13df90b506a9473d19e4d5f8c2e102	fxn-auth/node_modules/@noble/hashes/_u64.js
+be9ff86aef76419376e4d66cf01a134f3117f1f8dd62d81f1b79100145503367	fxn-auth/node_modules/@noble/curves/utils.js

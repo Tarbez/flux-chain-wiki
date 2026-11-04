@@ -29,7 +29,7 @@ import {
   isHex64, isSig, bytesHex, safeSendCovered, safeSendPayload, govRecordBody, signGovRecord, parseApprovalLines,
 } from "../dense-wire/flx-dao-gov-builders.mjs";
 import { networkCovered } from "../dense-wire/flx-builders.mjs";
-import { chainPosition, withKeyLock, submitAtPosition } from "../dense-wire/flx-signing-guard.mjs";
+import { chainPosition, withKeyLock, submitAtPosition, signedAsReviewed } from "../dense-wire/flx-signing-guard.mjs";
 import { BASE_CHAIN_ID } from "../dense-wire/flx-dao-builders.mjs";
 import { hexToBytes } from "../dense-wire/flx-crypto.mjs";
 import { formatAmount, parseAmount, parseDecimalsReply } from "../dense-wire/flx-amount.mjs";
@@ -341,7 +341,7 @@ export async function submitSpend(dw, { who, wire, safes, terms, approvals }) {
     const at = await chainPosition(wire, signer.pubHex);
     const body = govRecordBody({ pubHex: signer.pubHex, pos: at.pos, prevCid: at.prevCid, kind: KIND_SAFE_SEND, payload, nowSec: Math.floor(Date.now() / 1000) });
     const text = await dw.reviewThen({
-      who, pubHex: signer.pubHex, wireUrl: wire.url,
+      who, pubHex: signer.pubHex, wireUrl: wire.url, network: safes.network,
       title: `Send ${fxnText(terms.amount)} from the ${safe.label} safe`,
       description: `This sends the spend to the network with ${approvals.size} council approvals inline. The chain checks each approval and the unlocked amount.`,
       claims: [`evidence safe ${safe.address}`, `evidence recipient ${terms.to}`, `evidence amount ${terms.amount} base units`, `evidence approvals ${approvals.size}`],
@@ -351,7 +351,9 @@ export async function submitSpend(dw, { who, wire, safes, terms, approvals }) {
       configuration: "dense-wire daogov grammar · KDAOSAFESEND1", denies: "scope does not authorize any other safe, amount, recipient or record",
       run: () => signGovRecord(signer, body),
     });
-    return submitAtPosition(wire, { pubHex: signer.pubHex, at, kind: "RESOLVER_RECORD", text });
+    // Round 13: the record sent is the body reviewed plus its signature (signedAsReviewed), for the network the safes
+    // were read on. Until round 13 no network was passed, so the guard refused every spend as NETWORK_UNNAMED.
+    return submitAtPosition(wire, { pubHex: signer.pubHex, at, kind: "RESOLVER_RECORD", text: signedAsReviewed(body, text), network: safes.network ?? undefined });
   });
   if (!reply || reply.kind !== "ok") throw new Error(`The node refused the spend: ${(reply && (reply.reason || reply.code || reply.raw)) || "no reason given"}. Nothing moved.`);
   return { cid: reply.cid };

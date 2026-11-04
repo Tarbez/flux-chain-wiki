@@ -46,6 +46,7 @@ import { base64ToHex } from "../dense-wire/flx-identity-bridge.mjs";
 import { keyName, buildPvaActivationWithSigner, PVA_CHAIN, buildSkinMintWithSigner, buildSkinHeadEdgeWithSigner, buildSkinMoveWithSigner, buildSkinSaleWithSigner, buildSkinSaleEndWithSigner, parseSaleOfReply, SKIN_CHAIN, OBJECT_POINTER_RELATION } from "../dense-wire/flx-object-builders.mjs";
 import { sha256Hex, verifyHex } from "../dense-wire/flx-crypto.mjs";
 import { reviewAndSign, signerFor } from "./dense-wire-wallet.mjs";
+import { chainPosition, submitAtPosition, okOrErr, nodeNetwork, withKeyLock, SigningGuardRefusal } from "../dense-wire/flx-signing-guard.mjs";
 // Amounts on the wire are base units; fxnText prints them at the node's declared decimals (docs/FXN-DECIMALS-DESIGN.md).
 import { readDecimals, fxnText } from "./fxn-holdings.mjs";
 
@@ -86,14 +87,15 @@ export async function mintSkin({ who, wire, pointer, readBack = readObjectsOf })
   const refuse = (failure, missing, remedy) => ({ kind: "refused", failure, missing, remedy });
   if (!/^df51[0-9a-f]{60}$/.test(pointer || "")) return refuse("This is not a skin this shop packed.", "a pointer from DefxnCardRecord.skin.toPointer", "build the skin in the shop again");
   const signer = signerFor(who);
-  const head = await wire.chainHead(signer.pubHex);
-  const pos = head.kind === "head" ? head.length : 0;
-  const prevCid = head.kind === "head" ? head.headCid : "0".repeat(64);
+  const place = await placeOf(wire, signer);
+  if (place.kind === "refused") return place;
+  const { at, network } = place;
+  const { pos, prevCid } = at;
   // one clock for both passes: reviewAndSign builds the record twice (to show it, then to sign it)
   const nowSec = Math.floor(Date.now() / 1000);
   const run = (s) => buildSkinMintWithSigner({ signer: s, pos, prevCid, skinPointer: pointer, nowSec });
   const text = await reviewAndSign({
-    who, signer, wireUrl: wire.url, run,
+    who, signer, wireUrl: wire.url, network, run,
     title: "Mint this skin",
     description: "This signs one skin onto your key. Your PVA stays as it is. You can trade the skin later.",
     action: "object.mint", scope: "skin.mint",
@@ -104,11 +106,8 @@ export async function mintSkin({ who, wire, pointer, readBack = readObjectsOf })
     manifest: { schema: "dense-wire.object-mint/1", minter: signer.pubHex, chain: SKIN_CHAIN, pointer, at: nowSec },
     facts: [{ label: "Skin", value: pointer }, { label: "Owner", value: signer.pubHex }],
   });
-  const reply = String(await wire.sendLine(`RESOLVER_RECORD\t${text}`)).trim();
-  if (!reply.startsWith("OK\t")) {
-    const [, , reason] = reply.split("\t");
-    return refuse(`The node did not take the skin: ${reason || reply}`, "a skin mint the chain admits", "read the reason above; most often it is NoPva: earn FXN and activate your PVA first");
-  }
+  const no = await sent(wire, signer, at, network, text, "skin");
+  if (no) return no.code ? no : refuse(no.failure, "a skin mint the chain admits", "read the reason above; most often it is NoPva: earn FXN and activate your PVA first");
   const id = await sha256Hex(text);
   const read = await readBack({ wire: { send: (line) => wire.sendLine(line) }, key: signer.pubHex });
   const skin = read.kind === "objects" ? read.objects.find((o) => o.id === id) : null;
@@ -132,15 +131,34 @@ async function verifiedSkin(wire, id) {
   return { proof, verdict };
 }
 
-function headOf(signer, head) {
-  return { pos: head.kind === "head" ? head.length : 0, prevCid: head.kind === "head" ? head.headCid : "0".repeat(64) };
+// Round 13 (frontend lane, ZD3-1 class). Until round 13 every door here read HEAD itself (an unreadable HEAD was taken
+// as position 0, which the key already holds) and sent with a raw sendLine: no network check, no hold, no position
+// re-check. After a refused reply the activation signed a new record at the same position. Every door now places its
+// record with the guard (chainPosition: the node and a witness agree, or nothing is signed) and sends it with
+// submitAtPosition under the key's lock (network checked, position re-read, bytes held, answered CID checked).
+
+/** The key's next place and the network the node names, or a refusal from the guard. */
+async function placeOf(wire, signer) {
+  try {
+    const network = await nodeNetwork(wire);
+    return { kind: "place", at: await chainPosition(wire, signer.pubHex), network };
+  } catch (error) {
+    if (error instanceof SigningGuardRefusal) return { ...refused(error.failure, error.missing, error.remedy), code: error.code };
+    throw error;
+  }
 }
 
-async function sent(wire, text, what) {
-  const reply = String(await wire.sendLine(`RESOLVER_RECORD\t${text}`)).trim();
-  if (reply.startsWith("OK\t")) return null;
-  const [, , reason] = reply.split("\t");
-  return refused(`The node did not take the ${what}: ${reason || reply}`, `a ${what} the chain admits`, "read the reason above, then try again");
+/** Sends one signed record at `at` through the guard: null when the node took it, else a refusal. */
+async function sent(wire, signer, at, network, text, what) {
+  let reply;
+  try {
+    reply = await withKeyLock(signer.pubHex, () => submitAtPosition(wire, { pubHex: signer.pubHex, at, kind: "RESOLVER_RECORD", text, network, parse: okOrErr }));
+  } catch (error) {
+    if (error instanceof SigningGuardRefusal) return { ...refused(error.failure, error.missing, error.remedy), code: error.code };
+    throw error;
+  }
+  if (reply.kind === "ok") return null;
+  return refused(`The node did not take the ${what}: ${reply.reason || reply.raw}`, `a ${what} the chain admits`, "read the reason above, then try again");
 }
 
 /** Step 1 of a trade, on the next owner's device: consent to take the skin, and for a priced sale pay into it. */
@@ -154,11 +172,14 @@ export async function acceptSkin({ who, wire, id, price = null, days = 3 }) {
   const { verdict } = got;
   const signer = signerFor(who);
   if (verdict.owner === signer.pubHex) return refused("You already own this skin.", "a skin someone else owns", "send the link to the person who should take it");
-  const { pos, prevCid } = headOf(signer, await wire.chainHead(signer.pubHex));
+  const place = await placeOf(wire, signer);
+  if (place.kind === "refused") return place;
+  const { at: placeAt, network } = place;
+  const { pos, prevCid } = placeAt;
   const nowSec = Math.floor(Date.now() / 1000);
   const run = (s) => buildSkinHeadEdgeWithSigner({ signer: s, pos, prevCid, head: verdict.head, pointer: verdict.pointer, nowSec });
   const edge = await reviewAndSign({
-    who, signer, wireUrl: wire.url, run,
+    who, signer, wireUrl: wire.url, network, run,
     title: "Accept this skin",
     description: `This says you will take skin ${shortKey(id)} from ${shortKey(verdict.owner)}. It moves nothing: the owner moves it after this.`,
     action: "object.accept", scope: "skin.accept",
@@ -169,7 +190,7 @@ export async function acceptSkin({ who, wire, id, price = null, days = 3 }) {
     manifest: { schema: "dense-wire.object-accept/1", taker: signer.pubHex, chain: SKIN_CHAIN, skin: id, head: verdict.head, pointer: verdict.pointer, at: nowSec },
     facts: [{ label: "Skin", value: id }, { label: "From", value: verdict.owner }],
   });
-  const no = await sent(wire, edge, "consent");
+  const no = await sent(wire, signer, placeAt, network, edge, "consent");
   if (no) return no;
   const edgeCid = await sha256Hex(edge);
   if (units === null) return { kind: "accepted", id, edge: edgeCid, owner: verdict.owner, sale: null };
@@ -177,7 +198,7 @@ export async function acceptSkin({ who, wire, id, price = null, days = 3 }) {
   const at = Math.floor(Date.now() / 1000), deadline = at + Number(days) * 86_400;
   const saleRun = (s) => buildSkinSaleWithSigner({ signer: s, pos: pos + 1, prevCid: edgeCid, edge: edgeCid, skin: id, amount: units, deadline, nowSec: at });
   const sale = await reviewAndSign({
-    who, signer, wireUrl: wire.url, run: saleRun,
+    who, signer, wireUrl: wire.url, network, run: saleRun,
     title: `Pay ${fxnText(units)} for this skin`,
     description: `${fxnText(units)} leave your wallet now and wait for the owner. They go to the owner only when the skin moves to you. If it has not moved in ${days} days, you take them back.`,
     action: "object.sale", scope: "skin.sale",
@@ -188,7 +209,7 @@ export async function acceptSkin({ who, wire, id, price = null, days = 3 }) {
     manifest: { schema: "dense-wire.skin-sale/1", buyer: signer.pubHex, chain: SKIN_CHAIN, skin: id, consent: edgeCid, amount: units.toString(), deadline, at },
     facts: [{ label: "Price", value: fxnText(units) }, { label: "Skin", value: id }, { label: "Waits until", value: new Date(deadline * 1000).toISOString() }],
   });
-  const unpaid = await sent(wire, sale, "sale");
+  const unpaid = await sent(wire, signer, { pos: pos + 1, prevCid: edgeCid }, network, sale, "sale");
   if (unpaid) return { ...unpaid, failure: unpaid.failure + " Your consent is on the chain, and moves nothing without a sale." };
   const held = parseSaleOfReply(await wire.sendLine(`SALE_OF\t${edgeCid}`));
   if (held.kind !== "sale" || held.state !== "funded") return refused("The node took the sale, and does not show it funded.", "a funded sale", "check your FXN balance, then accept again");
@@ -205,9 +226,12 @@ export async function endSale({ who, wire, edge }) {
   if (at <= held.deadline) return refused(`The sale runs until ${new Date(held.deadline * 1000).toISOString()}.`, "the deadline to pass", "come back after the deadline");
   await readDecimals(wire);
   const signer = signerFor(who);
-  const { pos, prevCid } = headOf(signer, await wire.chainHead(signer.pubHex));
+  const place = await placeOf(wire, signer);
+  if (place.kind === "refused") return place;
+  const { at: placeAt, network } = place;
+  const { pos, prevCid } = placeAt;
   const text = await reviewAndSign({
-    who, signer, wireUrl: wire.url,
+    who, signer, wireUrl: wire.url, network,
     run: (s) => buildSkinSaleEndWithSigner({ signer: s, pos, prevCid, sale: held.sale, nowSec: at }),
     title: `Take ${fxnText(held.amount)} back`,
     description: "The owner did not move the skin in time. This returns your held FXN to your wallet.",
@@ -219,7 +243,7 @@ export async function endSale({ who, wire, edge }) {
     manifest: { schema: "dense-wire.skin-sale-end/1", buyer: signer.pubHex, chain: SKIN_CHAIN, sale: held.sale, at },
     facts: [{ label: "Amount", value: fxnText(held.amount) }],
   });
-  const no = await sent(wire, text, "return");
+  const no = await sent(wire, signer, placeAt, network, text, "return");
   if (no) return no;
   return { kind: "returned", amount: held.amount };
 }
@@ -256,11 +280,14 @@ export async function giveSkin({ who, wire, id, edge }) {
   if (sale.kind === "sale" && Math.floor(Date.now() / 1000) >= sale.deadline) return refused("The taker's sale has ended.", "a sale still running", "ask the taker for a new sale");
   const price = sale.kind === "sale" ? sale.amount : null;
   if (price !== null) await readDecimals(wire);
-  const { pos, prevCid } = headOf(signer, await wire.chainHead(signer.pubHex));
+  const place = await placeOf(wire, signer);
+  if (place.kind === "refused") return place;
+  const { at: placeAt, network } = place;
+  const { pos, prevCid } = placeAt;
   const nowSec = Math.floor(Date.now() / 1000);
   const run = (s) => buildSkinMoveWithSigner({ signer: s, pos, prevCid, head: verdict.head, newHead: edge, nowSec });
   const move = await reviewAndSign({
-    who, signer, wireUrl: wire.url, run,
+    who, signer, wireUrl: wire.url, network, run,
     title: price === null ? "Give this skin" : `Sell this skin for ${fxnText(price)}`,
     description: price === null
       ? `This moves skin ${shortKey(id)} from you to ${shortKey(consent.taker)}. They signed for it. You cannot take it back.`
@@ -276,7 +303,7 @@ export async function giveSkin({ who, wire, id, edge }) {
   // the one verifier judges the move before it leaves this device: the proof as it will read with the move
   const after = await verifyObjectProof({ id, entries: [...proof.entries, consent.text, move], pva: proof.pva });
   if (after.kind !== "verified" || after.owner !== consent.taker) return refused(`The move would not verify (${after.failure || after.kind}). Nothing was sent.`, "a move the verifier accepts", "reload and try again");
-  const no = await sent(wire, move, "move");
+  const no = await sent(wire, signer, placeAt, network, move, "move");
   if (no) return no;
   const now = await verifiedSkin(wire, id);
   if (now.kind === "refused" || now.verdict.owner !== consent.taker) return refused("The node took the move, and the skin does not read as theirs here yet.", "a proof that names the taker", "reload in a moment");
@@ -317,10 +344,13 @@ export async function activatePva({ who, wire, publish = null }) {
   for (let n = 0; n < MIX_TRIES; n++) {
     const dna = T.mixDraw(signer.pubHex, n), mix = T.mix.toPointer(dna);
     const look = T.elementsOf(dna).map((e) => e.name).join(", ");
-    const { pos, prevCid } = headOf(signer, await wire.chainHead(signer.pubHex));
+    const place = await placeOf(wire, signer);
+    if (place.kind === "refused") return place;
+    const { at: placeAt, network } = place;
+    const { pos, prevCid } = placeAt;
     const nowSec = Math.floor(Date.now() / 1000);
     const text = await reviewAndSign({
-      who, signer, wireUrl: wire.url,
+      who, signer, wireUrl: wire.url, network,
       run: (s) => buildPvaActivationWithSigner({ signer: s, pos, prevCid, earnRef: earn.reference, mix, nowSec }),
       title: n ? "Sign your card again with a new look" : "Activate your PVA",
       description: (n ? "Another card already has the look drawn before. This is the next look for your key. " : "") +
@@ -333,9 +363,11 @@ export async function activatePva({ who, wire, publish = null }) {
       manifest: { schema: "dense-wire.pva-activate/1", identity: signer.pubHex, chain: PVA_CHAIN, earn: earn.reference, mix, at: nowSec },
       facts: [{ label: "Earned by", value: `${fxnText(earn.amount)} from ${earn.counterparty}` }, { label: "Card look", value: look }],
     });
-    const no = await sent(wire, text, "activation");
+    const no = await sent(wire, signer, placeAt, network, text, "activation");
     if (!no) return { kind: "activated", id: await sha256Hex(text), published, mix };
-    if (!no.failure.includes("MixTaken")) return no;
+    // A refused activation's bytes stay held at its position (round 12 rule): the next look is signed only when the
+    // guard admits a record there, which it refuses by name (HELD_OTHER_RECORD) until a second node shows it filled.
+    if (no.code || !no.failure.includes("MixTaken")) return no;
   }
   return refused(`The first ${MIX_TRIES} looks drawn for your key belong to other cards.`, "a card look no other PVA holds", "activate again later, or ask the DEFXN team to check the layer table");
 }

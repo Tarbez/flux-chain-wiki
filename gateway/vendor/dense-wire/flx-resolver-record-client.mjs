@@ -67,10 +67,10 @@
 // workspace documents: no `npm install` runs across these sibling
 // repos.
 import { WireClient } from "./flx-wire.mjs";
-import { buildGenesis, buildResolverLaunch, buildResolverRecordWithSigner, resolverRecordBody, isChainIdShape, GENESIS_PREV } from "./flx-builders.mjs";
+import { buildGenesis, buildResolverLaunch, buildResolverRecordWithSigner, resolverRecordBody, isChainIdShape } from "./flx-builders.mjs";
 import { cryptoKeySigner } from "./flx-identity-bridge.mjs";
 import { sha256Hex } from "./flx-crypto.mjs";
-import { admittedCid, holdSigned } from "./flx-signing-guard.mjs";
+import { chainPosition, submitAtPosition, signedAsReviewed } from "./flx-signing-guard.mjs";
 import { hexOfUtf8, utf8OfHex } from "./flx-dumb-parser.mjs";
 import { renderProviderSet, renderSpeedParams } from "./flx-launch-blobs.mjs";
 import { compileGrammar, checkRecord, formatRefusal, grammarSummary } from "./flx-record-grammar.mjs";
@@ -258,6 +258,8 @@ export function decodeRecordPayload(recordText) {
  *   kind the chain's published grammar declares (see the header), so a
  *   node refuses any record on this chain carrying a different marker
  * @param {string} [params.carrierChainId] - defaults to the base chain
+ * @param {string} [params.network] - the network every record this client signs is built for (round 13): required to
+ *   write, refused by name (NETWORK_UNNAMED) when left out, so a reader-only client needs none
  */
 export function createResolverRecordClient({
   wsUrl,
@@ -268,6 +270,7 @@ export function createResolverRecordClient({
   resolverChainId,
   kindMarker,
   carrierChainId = BASE_CHAIN_ID,
+  network,
 }) {
   if (!isChainIdShape(resolverChainId)) {
     throw new ResolverRecordClientError(
@@ -291,32 +294,26 @@ export function createResolverRecordClient({
     return signer;
   }
 
-  // Single writer per identity -- pos/prevCid tracked in-process,
-  // seeded once from the live HEAD. Two processes sharing one identity
-  // would race this; explicitly out of scope for a first working
-  // version, same as every other client built on this program.
-  let pos = null;
-  let prevCid = null;
   let bootstrapped = false;
+  /** Bodies prepareRecord returned, with the signer and position each was prepared at (round 13). */
+  const prepared = new Map();
 
-  async function nextWrite(buildText) {
-    const text = await buildText(pos, prevCid);
-    // Round 12 (ZD3-1): these bytes are the only record ever sent at this position by this process (flx-signing-guard).
-    holdSigned({ network: undefined, pubHex: signerPubHex, pos, text });
-    const reply = await wire.submit(tagFor(text, kindMarker), text);
+  // Round 13 (frontend lane, ZD3-1 class): every write goes through the one guard. Until round 13 this client tracked the
+  // position in-process from one HEAD read and sent with wire.submit, and the deployer's submitRecord sent with no
+  // position re-check, no network check and no hold. Now each write reads the position from the node and its witness
+  // (chainPosition), and submitAtPosition re-reads it, checks the network (`network`, required to sign), holds the bytes
+  // and checks the answered CID against sha256(text). `chain`: the signer's list the record rides (none: the base list).
+  async function nextWrite(buildText, chain) {
+    const at = await chainPosition(wire, signerPubHex, chain);
+    const text = await buildText(at.pos, at.prevCid);
+    const reply = await submitAtPosition(wire, { pubHex: signerPubHex, at, kind: tagFor(text, kindMarker), text, chain, network });
     if (reply.kind !== "ok") {
       throw new ResolverRecordClientError(
         "RRC_WRITE_REFUSED",
         `dense-wire refused the write: ${reply.code ?? ""} ${reply.reason ?? JSON.stringify(reply)}`.trim(),
       );
     }
-    // Round 12 (flooder ZD3-1): the next record cites sha256(text), computed here, never the node's answered CID. A node
-    // that answers another CID is refused (CID_MISMATCH) and nothing further is signed: citing a lying node's CID
-    // signed a second record at the next position for it to publish, and the key froze.
-    const cid = await admittedCid(reply, text);
-    pos += 1;
-    prevCid = cid;
-    return { ...reply, cid };
+    return reply;
   }
 
   /** Ensure this identity has a genesis entry and its own resolver
@@ -331,12 +328,7 @@ export function createResolverRecordClient({
     }
     const headReply = await wire.head(pubHex);
     if (headReply.kind === "none") {
-      pos = 0;
-      prevCid = GENESIS_PREV;
       await nextWrite(() => buildGenesis({ privateKey: signingKey, pubHex, nowSec: nowSec() }));
-    } else {
-      pos = headReply.length;
-      prevCid = headReply.cid;
     }
 
     // WARCH19 step 5: each launch blob is written in its own grammar (flx-launch-blobs.mjs), one line for BLOB_PUT.
@@ -391,6 +383,7 @@ export function createResolverRecordClient({
         inlinePayload,
         nowSec: nowSec(),
       }),
+      resolverChainId,
     );
   }
 
@@ -497,12 +490,10 @@ export function createResolverRecordClient({
     const target = await targetGrammar();
     // The record rides the signer's list on its own chain (`N` = resolverChainId), not the base list: read HEAD for
     // that chain, or the J and prev C would be the base list's (owner-approved fix, 2026-10-29). No record of this
-    // key on that chain yet (HEAD_NONE) means position 0 citing GENESIS_PREV.
-    const headReply = await wire.head(who.pubHex, resolverChainId);
-    if (headReply.kind !== "none" && headReply.kind !== "head") {
-      throw refusal("RRC_READ_FAILED", `the node did not answer HEAD for ${who.pubHex} on chain ${resolverChainId}`, "the signer's own head on the record's chain (its next position)", "check the node is reachable");
-    }
-    const at = headReply.kind === "head" ? { pos: headReply.length, prevCid: headReply.cid } : { pos: 0, prevCid: GENESIS_PREV };
+    // key on that chain yet (HEAD_NONE) means position 0 citing the network's root (the guard's one rule).
+    // Round 13: the position comes from the guard, from the node AND a witness node (chainPosition); one node's HEAD
+    // alone let a node that withheld a record get a second one signed at its position.
+    const at = await chainPosition(wire, who.pubHex, resolverChainId);
     const payloadText = encodeRecordPayload(value);
     const args = { pos: at.pos, prevCid: at.prevCid, resolverChainId, kindMarker, inlinePayload: payloadText, nowSec };
     const unsignedBody = resolverRecordBody({ pubHex: who.pubHex, ...args });
@@ -510,6 +501,7 @@ export function createResolverRecordClient({
     // characters) is checked with a placeholder of a real signature's
     // length, every other block exactly as it will be signed.
     checkAgainst(target, `${unsignedBody}-S${"0".repeat(128)}`);
+    prepared.set(unsignedBody, { pubHex: who.pubHex, at });
     return {
       chainId: resolverChainId,
       kindMarker,
@@ -527,8 +519,20 @@ export function createResolverRecordClient({
    *  admitted back by cid and (with `expectValue`) refuse unless it decodes
    *  to exactly that value. Returns `readRecord`'s shape. */
   async function submitRecord(signedText, { expectValue } = {}) {
+    // Round 13 (ZD3-1, ZD3-3 class): only a record this client prepared is sent, it must be exactly the prepared body
+    // plus its signature (signedAsReviewed, the one review rule; the deployer had its own startsWith copy), and it goes
+    // through submitAtPosition at the prepared position (position re-read, network checked, bytes held, CID checked).
+    const text = String(signedText ?? "");
+    const cut = text.lastIndexOf("-S");
+    const body = cut > 0 ? text.slice(0, cut) : null;
+    const made = body === null ? undefined : prepared.get(body);
     checkAgainst(compiled ?? (await targetGrammar()), signedText);
-    const reply = await wire.submit("RESOLVER_RECORD", signedText);
+    if (!made) {
+      throw refusal("RRC_UNPREPARED", "this record was not prepared by this client, so nothing says it is the one reviewed", "a record from prepareRecord, signed by its sign()", "prepare the record again and sign what it returns. Nothing was sent.");
+    }
+    signedAsReviewed(body, text);
+    const reply = await submitAtPosition(wire, { pubHex: made.pubHex, at: made.at, kind: "RESOLVER_RECORD", text, chain: resolverChainId, network });
+    prepared.delete(body);
     if (reply.kind !== "ok") {
       throw refusal("RRC_WRITE_REFUSED", `the node refused the record: ${`${reply.code ?? ""} ${reply.reason ?? reply.raw ?? ""}`.trim()}`, "a record the node admits", "read the node's reason above; prepare again if your chain position moved");
     }

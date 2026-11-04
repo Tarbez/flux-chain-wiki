@@ -376,7 +376,11 @@
   });
 
   if (!window.ArkAdminAuth) { $('brokerStatus').textContent = 'The sign-in part of this page did not load. Reload the page.'; return; }
+  /* Round 13 (round-12 verifier, ZD3-3): the broker signs for other sites, so no sign-in is kept in the persisted-secret
+     vault, and one kept before round 13 is deleted. Reloading signs out. */
+  try { if (window.indexedDB) window.indexedDB.deleteDatabase('ark-persisted-secret'); } catch (e) { /* no storage: nothing kept */ }
   window.ArkAdminAuth.create({
+    keepSignedIn: false,
     container: $('brokerAuthContainer'),
     product: 'defxn',
     onChange: function (identity) {
