@@ -692,9 +692,11 @@ export class WireClient {
 
   /** SEG_ORDER <chain|-> <key,key,...> → the chain's applied head at the browser's node and, of `keys`, each signer's
    *  newest certified record there (`{ at, lane, millis }` by key; round 3, money-sale-1). Asked of the browser's own
-   *  node only. */
-  async segOrder(chainId, keys) {
-    const reply = await this._send(`SEG_ORDER\t${chainId ?? "-"}\t${keys.join(",")}`);
+   *  node only. Round 14: `proposalPlaces` (`linePlacesField`) is the proposal's places; the reply's fields 5 and 6 name one
+   *  already certified, repeated or out of its list's order (`repeated`), and the first one this node's lists cannot
+   *  append yet (`gap`). A reply without them is an older node's: nothing is known, and the signer waits. */
+  async segOrder(chainId, keys, proposalPlaces = "") {
+    const reply = await this._send(`SEG_ORDER\t${chainId ?? "-"}\t${keys.join(",")}\t${proposalPlaces}`);
     const parts = reply.split("\t");
     if (parts[0] !== "SEG_ORDER") return { kind: "error", reason: reply };
     const headSeq = parts[1] && parts[1] !== "-" ? Number(parts[1]) : null;
@@ -704,7 +706,9 @@ export class WireClient {
       if (!key || !/^\d+$/.test(at ?? "") || !lane) return { kind: "error", reason: `SEG_ORDER entry outside its grammar: ${entry}` };
       places.set(key, { at: Number(at), lane, millis: precision === "m" });
     }
-    return { kind: "order", head: headSeq !== null && parts[2] && parts[2] !== "-" ? { sequence: headSeq, root: parts[2] } : null, places };
+    if (parts.length < 6) return { kind: "error", reason: `SEG_ORDER did not say whether a line repeats or its lists hold the lines (fields 5 and 6). Missing: a node of this release. To fix: upgrade the home node: ${reply}` };
+    const named = (v) => (v && v !== "-" ? v : null);
+    return { kind: "order", head: headSeq !== null && parts[2] && parts[2] !== "-" ? { sequence: headSeq, root: parts[2] } : null, places, repeated: named(parts[4]), gap: named(parts[5]) };
   }
 
   /** SEG_PULL_LINES <root> → the raw lines of that segment.
