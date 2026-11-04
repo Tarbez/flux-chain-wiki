@@ -1788,7 +1788,12 @@
         try {
           var dw = await loadWalletModule(), fh = await loadHoldingsModule();
           var done = await fh.submitSpend(dw, { who: who, wire: walletWire(dw), safes: holdings.safes, terms: spend, approvals: spend.checked ? spend.checked.good : new Map() });
-          result('spendStatus', 'Sent. The chain moved ' + fh.fxnText(spend.amount) + ' from the ' + spend.label + ' safe. Record ' + done.cid.slice(0, 12) + '\u2026.', 'trust');
+          // Round 14 (wallet-final): the node took the spend; it is final only when the node's CONFIRMED says final.
+          var spent = 'The spend of ' + fh.fxnText(spend.amount) + ' from the ' + spend.label + ' safe, record ' + done.cid.slice(0, 12) + '\u2026: ';
+          result('spendStatus', spent + dw.describePaymentStatus(dw.acceptedStatus()), dw.paymentTone(dw.acceptedStatus()));
+          dw.watchSendConfirmed(walletWire(dw), done).then(function (status) {
+            result('spendStatus', spent + dw.describePaymentStatus(status), dw.paymentTone(status));
+          });
           loadWallet();
         } catch (error) {
           result('spendStatus', text(error && error.message, 'Not sent.'), /cancel/i.test(error && error.message || '') ? 'drift' : 'danger');
@@ -1816,11 +1821,10 @@
           var reply = await dw.sendFxn({ who: who, wire: walletWire(dw), amount: units, recipient: recipient, signer: from ? from.signer() : dw.signerFor(who), show: fh.fxnText });
           say(dw.describeSendReply(reply, fh.fxnText), reply.kind === 'ok' ? 'drift' : 'danger');
           if (reply.kind === 'ok') {
-            // Final only when the chain's lead nodes confirm it (owner rule 2026-10-27); waiting until then.
-            dw.watchSendConfirmed(walletWire(dw), reply).then(function (state) {
-              if (state === 'confirmed') say('Confirmed by the chain\'s lead nodes. The payment is final.', 'trust');
-              else if (state === 'conflict') say('This payment will never be final: a different record from your key was confirmed in its place.', 'danger');
-              else say('Still waiting for the chain\'s lead nodes to confirm this payment. Check again later.', 'drift');
+            // Round 14 (wallet-final): the words are the node's answer, read by flx-payment-status.mjs. "Final" only
+            // when the node's CONFIRMED says final; before, any CONFIRMED (one lead on the devnet) read as final.
+            dw.watchSendConfirmed(walletWire(dw), reply).then(function (status) {
+              say(dw.describePaymentStatus(status), dw.paymentTone(status));
             });
             Array.prototype.forEach.call(views.wallet.querySelectorAll('#account-send-form input'), function (input) { input.value = ''; });
             showWallet('home');

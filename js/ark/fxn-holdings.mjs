@@ -329,7 +329,7 @@ export async function approveSpend(dw, { who, wire, safes, terms }) {
 }
 
 /** Sends the KDAOSAFESEND1 record carrying the approvals, signed by your genesis key at its chain head, after the full
- *  review of the record. -> `{ cid }`; throws the node's refusal in its words, with nothing else sent. */
+ *  review of the record. -> `{ cid, record }` (`record` the signed text sent); throws the node's refusal in its words, with nothing else sent. */
 export async function submitSpend(dw, { who, wire, safes, terms, approvals }) {
   const why = spendRefusal(safes, terms);
   if (why) throw new Error(`${why.failure} Missing: ${why.missing}. To fix: ${why.remedy}.`);
@@ -353,10 +353,14 @@ export async function submitSpend(dw, { who, wire, safes, terms, approvals }) {
     });
     // Round 13: the record sent is the body reviewed plus its signature (signedAsReviewed), for the network the safes
     // were read on. Until round 13 no network was passed, so the guard refused every spend as NETWORK_UNNAMED.
-    return submitAtPosition(wire, { pubHex: signer.pubHex, at, kind: "RESOLVER_RECORD", text: signedAsReviewed(body, text), network: safes.network ?? undefined });
+    const record = signedAsReviewed(body, text);
+    const sent = await submitAtPosition(wire, { pubHex: signer.pubHex, at, kind: "RESOLVER_RECORD", text: record, network: safes.network ?? undefined });
+    return sent && sent.kind === "ok" ? { ...sent, record } : sent;
   });
   if (!reply || reply.kind !== "ok") throw new Error(`The node refused the spend: ${(reply && (reply.reason || reply.code || reply.raw)) || "no reason given"}. Nothing moved.`);
-  return { cid: reply.cid };
+  // Round 14 (wallet-final): the node took the spend, and it is not final until CONFIRMED says so. The signed record
+  // goes back so the page asks the node about this exact record (dense-wire-wallet.mjs `watchSendConfirmed`).
+  return { cid: reply.cid, record: reply.record };
 }
 
 export { isSig, fxn, short, dateOf };

@@ -72,8 +72,8 @@ test('round 13: a skin mint on HEAD_ERR is refused by the guard and sends nothin
 /** Lines that send outside the guard and carry no record signed here, each with why. */
 const READS = new Map([
   ['js/ark/chain-cards.mjs:112', 'read: readObjectsOf asks OBJS_OF and OBJ_PROOF through the wallet wire'],
-  ['js/ark/dense-wire-wallet.mjs:203', 'transport: WalletWire.sendLine, the line sender the guard itself uses'],
-  ['js/ark/dense-wire-wallet.mjs:206', 'transport: WalletWire.submit, what submitAtPosition calls'],
+  ['js/ark/dense-wire-wallet.mjs:208', 'transport: WalletWire.sendLine, the line sender the guard itself uses'],
+  ['js/ark/dense-wire-wallet.mjs:211', 'transport: WalletWire.submit, what submitAtPosition calls'],
   ['js/pages/account.js:1462', 'sends a KWALLET1 signed when the wallet was made, byte for byte: nothing is signed here, so no second record at its position comes from this door'],
   ['js/pages/account.js:1471', 'read: the publish step asks whether the chain already holds the link'],
 ]);

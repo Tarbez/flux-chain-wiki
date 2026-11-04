@@ -42,6 +42,10 @@ import { nativeBalance, nativeHistory, buildNativeTransfer, parseNativeSendReply
 import { sha256Hex } from "../dense-wire/flx-crypto.mjs";
 import { parseDecimalsReply, pow10 } from "../dense-wire/flx-amount.mjs";
 import { chainPosition, submitAtPosition, nodeNetwork, withKeyLock } from "../dense-wire/flx-signing-guard.mjs";
+// Round 14 (wallet-final): the one rule for what a payment's state is called. This page never decides "final" itself.
+import { acceptedStatus, describePaymentStatus, paymentTone, watchPayment } from "../dense-wire/flx-payment-status.mjs";
+
+export { acceptedStatus, describePaymentStatus, paymentTone };
 
 const WIRE_TIMEOUT_MS = 15000;
 
@@ -195,9 +199,10 @@ export class WalletWire {
   history(pubHex, limit) { return this._call((c) => nativeHistory(c, BASE_CHAIN_ID, pubHex, limit)); }
   /** -> `HEAD<TAB>...` parsed by WireClient.chainHead. */
   chainHead(pubHex) { return this._call((c) => c.chainHead(pubHex)); }
-  /** -> `{kind:'confirmed'|'waiting'|'error', ...}`: has K of the chain's lead nodes confirmed the record at
-   *  `position` of `pubHex`'s list (`CONFIRMED`)? A payment is final only then. */
-  confirmed(pubHex, position, cid) { return this._call((c) => c.confirmed(pubHex, null, position, cid)); }
+  /** -> `{kind:'confirmed'|'conflict'|'waiting'|'error', k, signers, final}`: what the node says about the record at
+   *  `position` of `pubHex`'s list on `chain` (null: the base list), read by WireClient.confirmed. The same shape as
+   *  WireClient's, so flx-payment-status.mjs takes a WalletWire. A payment is final only when `final` is true. */
+  confirmed(pubHex, chain, position, cid) { return this._call((c) => c.confirmed(pubHex, chain ?? null, position, cid)); }
   /** -> the raw `NATIVE_SEND_OK`/`NATIVE_SEND_ERR` reply line, parsed by
    *  the caller via `parseNativeSendReply`. */
   sendLine(line) { return this._call((c) => c.send(line)); }
@@ -357,7 +362,7 @@ const SEND_FAILURE_MEANING = {
 
 /** `show` prints base units with their unit (js/ark/fxn-holdings.mjs `fxnText`); without it, base units are named as such. */
 export function describeSendReply(reply, show = (n) => `${n} base units`) {
-  if (reply.kind === "ok") return `Sent. Waiting for the chain's lead nodes to confirm it. Your balance is now ${show(reply.senderBalance)}.`;
+  if (reply.kind === "ok") return `${describePaymentStatus(acceptedStatus())} Your balance is now ${show(reply.senderBalance)}.`;
   if (reply.kind === "refused") {
     return `${reply.failure}: ${SEND_FAILURE_MEANING[reply.failure] || "a reason this page does not recognise."} (${reply.remedy})`;
   }
@@ -409,16 +414,15 @@ export async function sendFxn({ who, wire, amount, recipient, signer = signerFor
   return reply.kind === "ok" ? { ...reply, holder: signer.pubHex, position: pos } : reply;
 }
 
-/** Ask every `everyMs` until the chain's lead nodes confirm a sent payment (dense-wire, owner rule 2026-10-27: a
- *  payment is final only when they confirm it). Asked for this exact record (`reply.cid`). Resolves "confirmed",
- *  "conflict" (they confirmed a different record in its place: it will never be final) or "waiting" when `timeoutMs`
- *  passes first (it may still confirm later). A failed ask is retried; it never throws. */
-export async function watchSendConfirmed(wire, reply, { everyMs = 3000, timeoutMs = 5 * 60 * 1000 } = {}) {
-  const until = Date.now() + timeoutMs;
-  while (Date.now() < until) {
-    const status = await wire.confirmed(reply.holder, reply.position, reply.cid).catch(() => null);
-    if (status && (status.kind === "confirmed" || status.kind === "conflict")) return status.kind;
-    await new Promise((resolve) => setTimeout(resolve, everyMs));
-  }
-  return "waiting";
+/** Ask every `everyMs` what the node says about a sent payment, through flx-payment-status.mjs `watchPayment`: asked
+ *  for this exact record: its text (`reply.record`), or its CID (`reply.cid`) at its place (`reply.holder`,
+ *  `reply.position`, `reply.chain` or the base list).
+ *  Resolves to the node's last answer: `CONFIRMED` (final only when the node says `final`), `CONFLICT` (it will never
+ *  be final), or the last `WAITING` or failed ask when `timeoutMs` passes (it may still confirm later). Show it with
+ *  `describePaymentStatus` and `paymentTone`. A failed ask is retried; it never throws. */
+export async function watchSendConfirmed(wire, reply, { everyMs = 3000, timeoutMs = 5 * 60 * 1000, onWaiting } = {}) {
+  // A reply that carries its signed record (`reply.record`) is asked about by that text, whose list flx-payment-status.mjs
+  // reads the way the node does (`listOfRecord`, the mirror of chain::lane_chain).
+  const place = typeof reply.record === "string" ? reply.record : { holder: reply.holder, chain: reply.chain ?? null, position: reply.position, cid: reply.cid };
+  return watchPayment(wire, place, { everyMs, timeoutMs, onWaiting });
 }

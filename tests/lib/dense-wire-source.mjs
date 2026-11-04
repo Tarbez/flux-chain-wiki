@@ -29,7 +29,12 @@
    branch name: a branch moves, so a pin that names one checks against whatever the branch holds that day (repo map
    2026-11-03, "the pins name a branch, not a commit"). flx-signing-guard.mjs (both folders: HEAD checked against a
    witness node, the line sender, agreedRead), flx-resolver-record-client.mjs (gateway: writes through the guard) and
-   the new flx-signing-doors.mjs (the one door scan) were re-copied from it with git show. */
+   the new flx-signing-doors.mjs (the one door scan) were re-copied from it with git show.
+
+   2026-11-04 (round 14, wallet-final lane): the default rev is eda25f1 on audit-fix-r14-wallet-final (audit-fix-all-r14
+   plus the payment words). js/dense-wire/flx-payment-status.mjs is a new copy: the one rule for what a payment is
+   called, final only when the node's CONFIRMED says final, which js/ark/dense-wire-wallet.mjs now imports.
+   js/dense-wire/flx-transfer-builders.mjs was re-copied (claimTreasuryLeg takes a network). */
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -38,7 +43,7 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const OVERRIDE = process.env.DENSE_WIRE_WEB || null;
 export const REPO = process.env.DENSE_WIRE_REPO || path.resolve(ROOT, '..', 'defxn-defi-rs');
-export const REV = process.env.DENSE_WIRE_REV || '24a675e93a0276556d3d347f278516b3db0ca9e4';
+export const REV = process.env.DENSE_WIRE_REV || 'eda25f16c3be1e3ce52de884ed22141144437ef6';
 
 /** Where `name` (a path under dense-wire/web) is read from, for messages. */
 export function sourceName(name) {

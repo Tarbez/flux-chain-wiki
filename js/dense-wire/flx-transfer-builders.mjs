@@ -89,9 +89,10 @@ async function build(parts, signers) {
  *  treasury-specific shape); pass it to `WireClient.treasuryClaim` as its
  *  own explicit argument instead, the same way `buildSlash`'s destination
  *  travels as `manifestSubmit`'s own `extra` argument rather than inside
- *  the manifest. */
-export async function claimTreasuryLeg(claimant, amount, now) {
-  return buildReceipt(claimant, 0, GENESIS_PREV, claimant.pubHex, amount, now);
+ *  the manifest. `network` names the network the receipt is for, as `buildReceipt`'s does (the Rust
+ *  `claim_treasury_leg` reads its process's network); it defaults to the devnet. */
+export async function claimTreasuryLeg(claimant, amount, now, network = NETWORK_DEVNET) {
+  return buildReceipt(claimant, 0, GENESIS_PREV, claimant.pubHex, amount, now, network);
 }
 
 // ----------------------------------------------------------------------------
