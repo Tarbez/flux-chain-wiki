@@ -3,7 +3,7 @@
    ---------------------------------------------------------------------
    Encrypt a piece of content once (AES-GCM, a random file key) and wrap
    that file key separately for each recipient's own X25519 keypair
-   (tweetnacl box, x25519-xsalsa20poly1305) -- the same two-layer scheme
+   (the NaCl box, x25519-xsalsa20poly1305) -- the same two-layer scheme
    ark-app uses for encrypted media (src/lib/media/crypto.ts,
    src/lib/content/encryptedContent.ts), ported to vanilla JS and
    extended to wrap for more than one recipient in the same envelope list.
@@ -13,7 +13,12 @@
    ever sends a secret key anywhere -- ArkSecret's ciphertext and the
    wrapped-key envelopes are exactly what ends up published, so the
    publish host and the mesh only ever see opaque bytes. Requires
-   js/admin/vendor/tweetnacl.js (global `nacl`) loaded first.
+   js/admin/fxn-box.js (global `FxnBox`) loaded first: X25519 is the
+   browser's own WebCrypto, and XSalsa20-Poly1305 is the one pure-JS part,
+   since WebCrypto has none (see that file). Round 14 (owner law
+   2026-10-15): tweetnacl.js is no longer loaded. Keys and envelopes are
+   byte for byte what tweetnacl made, so every key and envelope already
+   stored still opens (tests/fxn-box.test.mjs). Every key call is async.
    ===================================================================== */
 var ArkContentCrypto = (function () {
   'use strict';
@@ -43,12 +48,12 @@ var ArkContentCrypto = (function () {
 
   /* ---- key management: one X25519 keypair per local identity, kept only in this browser ---- */
 
-  function createKeyPair() {
-    var pair = nacl.box.keyPair();
+  async function createKeyPair() {
+    var pair = await FxnBox.keyPair();
     return { keyVersion: 1, publicKey: toBase64(pair.publicKey), secretKey: pair.secretKey };
   }
 
-  function createOrLoadKeyPair(ownerId) {
+  async function createOrLoadKeyPair(ownerId) {
     var storageKey = 'flux-admin-media-key:' + ownerId;
     var existing = window.localStorage.getItem(storageKey);
     if (existing) {
@@ -57,7 +62,7 @@ var ArkContentCrypto = (function () {
         if (parsed.publicKey && parsed.secretKey) return { keyVersion: parsed.keyVersion || 1, publicKey: parsed.publicKey, secretKey: fromBase64(parsed.secretKey) };
       } catch (e) { window.localStorage.removeItem(storageKey); }
     }
-    var next = createKeyPair();
+    var next = await createKeyPair();
     window.localStorage.setItem(storageKey, JSON.stringify({ keyVersion: next.keyVersion, publicKey: next.publicKey, secretKey: toBase64(next.secretKey) }));
     return next;
   }
@@ -80,17 +85,17 @@ var ArkContentCrypto = (function () {
     return JSON.parse(new TextDecoder().decode(plaintext));
   }
 
-  /* ---- file key, wrapped once per recipient with nacl box (x25519-xsalsa20poly1305) ---- */
+  /* ---- file key, wrapped once per recipient with the NaCl box (x25519-xsalsa20poly1305, js/admin/fxn-box.js) ---- */
 
-  function wrapKeyForRecipient(fileKey, recipientPublicKeyB64) {
-    var ephemeral = nacl.box.keyPair();
-    var nonce = nacl.randomBytes(nacl.box.nonceLength);
-    var ciphertext = nacl.box(fileKey, nonce, fromBase64(recipientPublicKeyB64), ephemeral.secretKey);
+  async function wrapKeyForRecipient(fileKey, recipientPublicKeyB64) {
+    var ephemeral = await FxnBox.keyPair();
+    var nonce = FxnBox.randomNonce();
+    var ciphertext = await FxnBox.box(fileKey, nonce, fromBase64(recipientPublicKeyB64), ephemeral.secretKey);
     return { recipientPublicKey: recipientPublicKeyB64, version: 1, algorithm: 'x25519-xsalsa20poly1305', nonce: toBase64(nonce), ephemeralPublicKey: toBase64(ephemeral.publicKey), ciphertext: toBase64(ciphertext) };
   }
 
-  function unwrapKeyFromEnvelope(envelope, secretKey) {
-    var opened = nacl.box.open(fromBase64(envelope.ciphertext), fromBase64(envelope.nonce), fromBase64(envelope.ephemeralPublicKey), secretKey);
+  async function unwrapKeyFromEnvelope(envelope, secretKey) {
+    var opened = await FxnBox.open(fromBase64(envelope.ciphertext), fromBase64(envelope.nonce), fromBase64(envelope.ephemeralPublicKey), secretKey);
     if (!opened) throw new Error('Failed to unwrap the file key: wrong secret key for this envelope');
     return opened;
   }
@@ -100,16 +105,16 @@ var ArkContentCrypto = (function () {
   async function encryptForRecipients(value, recipientPublicKeys) {
     if (!Array.isArray(recipientPublicKeys) || !recipientPublicKeys.length) throw new Error('At least one recipient public key is required');
     var body = await encryptJson(value);
-    var envelopes = recipientPublicKeys.map(function (pk) { return wrapKeyForRecipient(body.fileKey, pk); });
+    var envelopes = await Promise.all(recipientPublicKeys.map(function (pk) { return wrapKeyForRecipient(body.fileKey, pk); }));
     return { ciphertextBase64: toBase64(body.ciphertext), metadata: body.metadata, envelopes: envelopes };
   }
 
-  /* secret: {ciphertextBase64, metadata, recipients:[envelope,...]}. ownKeyPair: from createOrLoadKeyPair.
+  /* secret: {ciphertextBase64, metadata, recipients:[envelope,...]}. ownKeyPair: what createOrLoadKeyPair resolves to.
      Returns null (not a throw) when this identity is not one of the recipients: that is an ordinary outcome, not a failure. */
   async function decryptForSelf(secret, ownKeyPair) {
     var envelope = (secret.recipients || []).find(function (e) { return e.recipientPublicKey === ownKeyPair.publicKey; });
     if (!envelope) return null;
-    var fileKey = unwrapKeyFromEnvelope(envelope, ownKeyPair.secretKey);
+    var fileKey = await unwrapKeyFromEnvelope(envelope, ownKeyPair.secretKey);
     return decryptJson(fromBase64(secret.ciphertextBase64), fileKey, secret.metadata);
   }
 

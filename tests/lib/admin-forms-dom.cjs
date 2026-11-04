@@ -42,7 +42,7 @@ function bootForms() {
     'js/content/states.js', 'js/content/states-data.js', 'js/content/canvas-transitions.js', 'js/content/canvas-transitions-data.js',
     'js/content/element-motion.js', 'js/content/element-motion-data.js', 'js/content/world.js', 'js/content/world-data.js', 'js/content/skin-policy.js', 'js/content/skin-policy-data.js', 'js/content/mesh-settings.js', 'js/content/mesh-settings-data.js',
     'js/content/learnings.js', 'js/content/article-index.js', 'js/content/site-pages.js', 'js/content/seo.js', 'js/content/seo-data.js', 'js/pages/catalog.js',
-    'js/ark/reference-docs.js', 'js/admin/store.js', 'js/admin/vendor/tweetnacl.js', 'js/admin/crypto.js']) run(rel);
+    'js/ark/reference-docs.js', 'js/admin/store.js', 'js/admin/fxn-box.js', 'js/admin/crypto.js']) run(rel);
   /* every article body, as loadBodies() would fetch them */
   for (const a of window.LearningContent.articles) if (!a.sections) run('js/content/articles/' + a.slug + '.js');
 
