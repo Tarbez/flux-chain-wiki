@@ -53,7 +53,7 @@
 #scene .account-map-route-main { stroke:hsl(var(--primary-200)); }
 #scene .account-map-node { fill:hsl(var(--canvas)); stroke:hsl(var(--text-faint)); stroke-width:1; vector-effect:non-scaling-stroke; }
 #scene .account-map-origin { fill:hsl(var(--primary-100)); stroke:hsl(var(--primary)); stroke-width:1; vector-effect:non-scaling-stroke; }
-#scene .account-map text { fill:hsl(var(--text-faint)); font:500 12px/1 var(--font-mono,ui-monospace,monospace); letter-spacing:.08em; }
+#scene .account-map text { fill:hsl(var(--text-faint)); font:500 var(--fs-tertiary)/1 var(--font-mono,ui-monospace,monospace); letter-spacing:.08em; }
 #scene .account-map .account-map-you { fill:hsl(var(--text-strong)); }
 #scene .account-identity { display:grid; gap:10px; max-width:560px; margin-top:20px; }
 /* your FXN ID (js/pages/account.js "your FXN ID"; js/ark/fxn-id-card/): the fxn-3d card at its Master ID pose, leaning toward the
@@ -69,8 +69,8 @@
 #scene .account-nft { display:grid; grid-template-columns:minmax(0,min(360px,40vh,calc(100% - 210px))) minmax(190px,1fr); gap:20px; align-items:end; max-width:560px; margin:6px 0 0; }
 #scene .account-nft-art { min-width:0; }
 #scene .account-nft-side { display:grid; gap:10px; align-content:end; min-width:0; }
-#scene .account-nft-kicker { margin:0; color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.1em; text-transform:uppercase; }
-#scene .account-nft-note { margin:0; color:hsl(var(--text-muted)); font-size:13px; line-height:1.45; }
+#scene .account-nft-kicker { margin:0; color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1.4 var(--font-mono,monospace); letter-spacing:.1em; text-transform:uppercase; }
+#scene .account-nft-note { margin:0; color:hsl(var(--text-muted)); font-size:var(--fs-tertiary); line-height:1.45; }
 
 /* ---- the card (right) ----------------------------------------------------------------------- */
 #scene .account-session { display:grid; gap:16px; align-content:start; }
@@ -78,7 +78,7 @@
 #scene .account-session [data-account-notices] { display:grid; gap:10px; }
 #scene .account-session [data-account-notices]:empty { display:none; }
 #scene .account-cms { display:grid; gap:8px; padding-top:14px; border-top:1px solid var(--account-rule); }
-#scene .account-hint { margin:0; color:var(--account-muted); font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .account-hint { margin:0; color:var(--account-muted); font:400 var(--fs-tertiary)/1.5 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-wallet, #scene .account-keys, #scene .account-mesh, #scene .account-live, #scene .account-contacts [data-contacts-view="list"] { display:grid; gap:16px; align-content:start; }
 #scene .account-mesh-detail { padding-top:14px; border-top:1px solid var(--account-rule); }
 
@@ -86,7 +86,7 @@
 #scene .account-page :is([data-account-auth],.account-contacts-form) button {
   min-height:38px; padding:8px 14px; border:0; border-radius:8px;
   background:hsl(var(--reference-100)); color:hsl(var(--reference-700));
-  font:600 13px/1.2 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:0; text-transform:none; cursor:pointer;
+  font:600 var(--fs-tertiary)/1.2 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:0; text-transform:none; cursor:pointer;
 }
 #scene .account-page :is([data-account-auth],.account-contacts-form) button:hover { background:hsl(var(--reference-200)); }
 #scene .account-page :is(button,input,a,summary):focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
@@ -94,49 +94,49 @@
 #scene .account-page [data-ark-auth="panel"] { display:grid; gap:10px; }
 #scene .account-page [data-ark-auth="heading"] { display:none; }
 #scene .account-page [data-ark-auth="hint"],
-#scene .account-page [data-ark-auth="notice"] { margin:0; color:var(--account-muted); font:400 13px/1.5 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .account-page [data-ark-auth="notice"] { margin:0; color:var(--account-muted); font:400 var(--fs-tertiary)/1.5 var(--font-sans,"Albert Sans",sans-serif); }
 #scene [data-session="verified-local"] [data-ark-auth="body"]>:is(h2,p,dl) { display:none; }
 #scene .account-page [data-ark-auth="rows"] { display:grid; gap:8px; margin:8px 0; }
 #scene .account-page [data-ark-auth="rows"]>div { display:grid; gap:3px; }
-#scene .account-page [data-ark-auth="rows"] dt { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); }
-#scene .account-page [data-ark-auth="rows"] dd { margin:0; overflow-wrap:anywhere; font:400 12px/1.5 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .account-page [data-ark-auth="rows"] dt { color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1.4 var(--font-mono,monospace); }
+#scene .account-page [data-ark-auth="rows"] dd { margin:0; overflow-wrap:anywhere; font:400 var(--fs-tertiary)/1.5 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-page [data-ark-auth="form"] { display:grid; gap:10px; }
-#scene .account-page [data-ark-auth="form"] label { display:grid; gap:6px; color:hsl(var(--text-strong)); font:600 12px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .account-page [data-ark-auth="form"] label { display:grid; gap:6px; color:hsl(var(--text-strong)); font:600 var(--fs-tertiary)/1.4 var(--font-sans,"Albert Sans",sans-serif); }
 #scene .account-page [data-ark-auth="actions"] { display:flex; flex-wrap:wrap; gap:8px; }
 #scene .account-page [data-ark-auth="notice"][data-tone="error"] { color:hsl(var(--danger)); }
-#scene .account-page [data-account-auth] button[data-kind="primary"] { width:100%; min-height:52px; justify-content:center; padding:14px 22px; border-radius:4px; font-size:14px; }
+#scene .account-page [data-account-auth] button[data-kind="primary"] { width:100%; min-height:52px; justify-content:center; padding:14px 22px; border-radius:4px; font-size:var(--fs-tertiary); }
 #scene .account-page :is([data-ark-auth="form"] input,.account-contacts-form input,.account-secret input,[data-account-create] select) {
   width:100%; min-height:40px; box-sizing:border-box; padding:9px 12px;
   border:1px solid hsl(var(--border-default)); border-radius:2px;
-  background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); font:400 13px/1.4 var(--font-mono,ui-monospace,monospace);
+  background:hsl(var(--canvas) / .72); color:hsl(var(--text-strong)); font:400 var(--fs-tertiary)/1.4 var(--font-mono,ui-monospace,monospace);
 }
 #scene .account-page [data-session="remembered"] [data-ark-auth="rows"] { display:none; }
 
 /* wallet: the send form's wrapper and the network options (mounted by js/ark/dense-wire-wallet.mjs) */
 #scene .account-wallet-form { display:grid; gap:12px; }
 #scene .account-wallet-network { display:flex; align-items:flex-start; gap:10px; }
-#scene .account-wallet-network-label { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; padding-top:7px; }
+#scene .account-wallet-network-label { color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; padding-top:7px; }
 /* The option buttons themselves (.network-options/.network-option) are styled once, site-wide, in
    css/navigation.css -- shared with the site-nav chain popover's own mount of this same control. */
 #scene .account-wallet-network .network-options { min-width:160px; }
 
 /* contacts: the group headings (the lists are Ark's) */
 #scene .account-contacts-lists { display:grid; gap:16px; }
-#scene .account-contacts h3, #scene .account-keys h3 { margin:0 0 6px; color:hsl(var(--text-muted)); font:500 12px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .account-contacts h3, #scene .account-keys h3 { margin:0 0 6px; color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 #scene .account-contacts-lists h3 b { margin-left:4px; color:hsl(var(--text-strong)); font-weight:600; }
 /* the Auth Kit create wizard keeps this form class for its own layout */
 #scene .account-contacts-form { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; align-items:end; }
-#scene .account-contacts-form label { grid-column:1/-1; color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .account-contacts-form label { grid-column:1/-1; color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 #scene .account-contact-detail { display:grid; align-content:start; gap:14px; }
 #scene .account-contact-detail header { display:flex; align-items:center; gap:14px; }
-#scene .account-contact-avatar { display:grid; place-items:center; flex:0 0 48px; width:48px; height:48px; border:1px solid hsl(var(--border-strong)); border-radius:50%; background:hsl(var(--surface)); color:hsl(var(--text-strong)); font:500 14px/1 var(--font-mono,monospace); }
-#scene .account-contact-detail h2 { margin:0; color:hsl(var(--text-strong)); font:500 24px/1.15 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.03em; }
-#scene .account-contact-detail header span { color:hsl(var(--text-muted)); font:500 10px/1.4 var(--font-mono,monospace); text-transform:uppercase; }
-#scene .account-contact-detail>p { margin:0; color:var(--account-muted); font:400 13px/1.55 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .account-contact-avatar { display:grid; place-items:center; flex:0 0 48px; width:48px; height:48px; border:1px solid hsl(var(--border-strong)); border-radius:50%; background:hsl(var(--surface)); color:hsl(var(--text-strong)); font:500 var(--fs-tertiary)/1 var(--font-mono,monospace); }
+#scene .account-contact-detail h2 { margin:0; color:hsl(var(--text-strong)); font:500 var(--fs-primary)/1.15 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.03em; }
+#scene .account-contact-detail header span { color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1.4 var(--font-mono,monospace); text-transform:uppercase; }
+#scene .account-contact-detail>p { margin:0; color:var(--account-muted); font:400 var(--fs-tertiary)/1.55 var(--font-sans,"Albert Sans",sans-serif); }
 
 /* signing keys: the PIN and password pair (Ark's field has no password kind) */
 #scene .account-secret { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
-#scene .account-secret label { display:grid; gap:6px; color:hsl(var(--text-muted)); font:500 12px/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
+#scene .account-secret label { display:grid; gap:6px; color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1.4 var(--font-mono,monospace); letter-spacing:.06em; text-transform:uppercase; }
 
 /* ---- the glance rail (bottom): Ark's interactive stats, then the way to the explorer -------------- */
 #scene .account-rail { display:grid; gap:12px; padding-top:20px; border-top:1px solid var(--account-rule); }
@@ -148,7 +148,7 @@
   display:grid; grid-template-columns:repeat(3,1fr); gap:6px; list-style:none; margin:10px 0; padding:12px;
   border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .72);
 }
-#scene .auth-word-grid li { display:flex; align-items:baseline; gap:5px; font:400 12px/1.4 var(--font-mono,ui-monospace,monospace); }
+#scene .auth-word-grid li { display:flex; align-items:baseline; gap:5px; font:400 var(--fs-tertiary)/1.4 var(--font-mono,ui-monospace,monospace); }
 #scene .auth-word-grid li small { color:hsl(var(--text-muted)); min-width:1.4em; }
 #scene .auth-word-grid li strong { color:hsl(var(--text-strong)); }
 @media(max-width:620px) { #scene .auth-word-grid { grid-template-columns:repeat(2,1fr); } }

@@ -50,7 +50,7 @@
   max-width: 8em;
   margin: 0 0 12px;
   color: hsl(var(--text-strong));
-  font: 300 clamp(36px,4.2cqw,76px)/.91 var(--ark-font);
+  font: 300 var(--fs-hero)/.91 var(--ark-font);
   letter-spacing: -.055em;
   text-wrap: balance;
 }
@@ -58,7 +58,7 @@
   max-width: 41em;
   margin: 0;
   color: hsl(var(--text-muted));
-  font: 300 clamp(12px,1.02cqw,16px)/1.62 var(--ark-font);
+  font: 300 var(--fs-tertiary)/1.62 var(--ark-font);
   text-wrap: balance;
 }
 .ark-hero-eyebrow { color: var(--field-accent); }
@@ -73,13 +73,13 @@
   border: 0;
   background: transparent;
   color: hsl(var(--text-muted));
-  font: 500 9px var(--ark-font);
+  font: 500 var(--fs-tertiary) var(--ark-font);
   letter-spacing: .12em;
   text-transform: uppercase;
   cursor: pointer;
   transition: color 220ms ease, letter-spacing 420ms cubic-bezier(.2,.7,.2,1);
 }
-.hero-motion-toggle span { margin-right: 8px; color: hsl(var(--text-faint)); font-size: .78em; }
+.hero-motion-toggle span { margin-right: 8px; color: hsl(var(--text-faint)); font-size: var(--fs-tertiary); }
 .hero-motion-toggle:hover { color: var(--field-accent); letter-spacing: .16em; }
 .hero-motion-toggle[hidden] { display: none; }
 
@@ -93,14 +93,14 @@
 @media (max-width:760px) {
   .ark-field-pill::before,.ark-field-pill::after { width: 26px; margin: 0 10px; }
   .ark-hero-body { left: 20px; bottom: 66px; max-width: calc(100% - 40px); }
-  .ark-hero-title { font-size: clamp(34px,10cqw,54px); max-width: 7em; }
-  .ark-hero-copy { max-width: 31em; font-size: 12px; }
+  .ark-hero-title { font-size: var(--fs-hero); max-width: 7em; }
+  .ark-hero-copy { max-width: 31em; font-size: var(--fs-tertiary); }
   .hero-motion-toggle { bottom: 14px; }
 
 }
 @media (max-height:680px) and (min-width:761px) {
   .ark-hero-body { bottom: 24px; max-width: 38cqw; }
-  .ark-hero-title { font-size: 32px; margin-bottom: 7px; }
+  .ark-hero-title { font-size: var(--fs-primary); margin-bottom: 7px; }
   .ark-hero-eyebrow { margin-bottom: 7px; }
 }
 @media (prefers-reduced-motion:reduce) {

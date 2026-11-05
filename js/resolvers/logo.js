@@ -1,3 +1,4 @@
+/* type-scale: scaled art -- the poster is drawn in u units (js/tokens.js u()); its type scales with the poster, floored in px. */
 /* =====================================================================
    RESOLVER  RLOGO_V1  —  the logo
    ---------------------------------------------------------------------

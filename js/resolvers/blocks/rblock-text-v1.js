@@ -36,7 +36,7 @@ ArkUI.register('RBLOCK_TEXT_V1', {
       body.textContent = p.body;
       body.className = ArkUI.atomize({
         fontFamily: 'var(--font-sans)',
-        fontSize: 'var(--type-body)',
+        fontSize: 'var(--fs-secondary)',
         color: 'hsl(var(--text))',
         lineHeight: '1.6',
         margin: '0'

@@ -1,3 +1,4 @@
+/* type-scale: scaled art -- the poster is drawn in u units (js/tokens.js u()); its type scales with the poster, floored in px. */
 /* =====================================================================
    RESOLVER  RSTEP_V1  —  the step pill ("2. Make it Useful")
    ---------------------------------------------------------------------

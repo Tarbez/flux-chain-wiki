@@ -94,14 +94,14 @@
 .header-you-head .header-you-avatar { width:40px; height:40px; border-radius:8px; }
 .header-you-head .header-you-avatar svg, .header-you-head .header-you-avatar .native-icon { width:20px; height:20px; }
 .header-you-who { display:grid; gap:3px; min-width:0; }
-.header-you-who .header-account-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:600 15px/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-strong)); letter-spacing:-.01em; }
-.header-you-who .header-account-status { display:flex; align-items:center; gap:6px; font:500 10px/1.2 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.1em; text-transform:uppercase; color:hsl(var(--text-muted)); }
+.header-you-who .header-account-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:600 var(--fs-secondary)/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-strong)); letter-spacing:-.01em; }
+.header-you-who .header-account-status { display:flex; align-items:center; gap:6px; font:500 var(--fs-tertiary)/1.2 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.1em; text-transform:uppercase; color:hsl(var(--text-muted)); }
 .header-you-who .header-account-status::before { content:""; width:5px; height:5px; border-radius:50%; background:currentColor; }
 [data-you="in"] .header-account-status { color:hsl(var(--trust,var(--success))); }
-.header-you-line { grid-column:1 / -1; margin:0; font:400 12px/1.45 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-muted)); }
+.header-you-line { grid-column:1 / -1; margin:0; font:400 var(--fs-tertiary)/1.45 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-muted)); }
 #scene .ark-header .header-you-go {
  grid-column:1 / -1; display:flex; align-items:center; justify-content:center; height:36px; border-radius:8px;
- background:hsl(var(--primary)); color:hsl(var(--text-inverse)); font:600 13px/1 var(--dx-font-sans,var(--font-sans,sans-serif)); text-decoration:none;
+ background:hsl(var(--primary)); color:hsl(var(--text-inverse)); font:600 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif)); text-decoration:none;
 }
 #scene .ark-header .header-you-go:is(:hover,:focus-visible) { background:hsl(var(--primary-600,var(--primary))); color:hsl(var(--text-inverse)) !important; }
 #scene .ark-header .header-you-head[data-you="in"] .header-you-go { background:hsl(var(--text-strong) / .08); color:hsl(var(--text-strong)); }
@@ -110,15 +110,15 @@
 .header-you-netrow {
  display:flex; align-items:center; gap:10px; width:100%; height:40px; padding:0 12px; margin-top:2px;
  border:0; border-radius:8px; background:transparent; color:hsl(var(--text)); cursor:pointer; text-align:left;
- font:500 12px/1 var(--dx-font-sans,var(--font-sans,sans-serif)); transition:background-color .15s ease;
+ font:500 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif)); transition:background-color .15s ease;
 }
 .header-you-netrow:hover { background:hsl(var(--text-strong) / .06); }
-.header-you-netrow-label { font:600 9px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); }
-.header-you-netrow-value { display:flex; align-items:center; gap:6px; margin-left:auto; color:hsl(var(--text-strong)); font-family:var(--dx-font-mono,var(--font-mono,monospace)); font-size:11px; }
-.header-you-netrow-go { color:hsl(var(--text-muted)); font-size:16px; line-height:1; }
+.header-you-netrow-label { font:600 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); }
+.header-you-netrow-value { display:flex; align-items:center; gap:6px; margin-left:auto; color:hsl(var(--text-strong)); font-family:var(--dx-font-mono,var(--font-mono,monospace)); font-size:var(--fs-tertiary); }
+.header-you-netrow-go { color:hsl(var(--text-muted)); font-size:var(--fs-secondary); line-height:1; }
 
 /* layer 1, the pages: icon, name, the journey it starts */
-#primary-navigation .nav-layer-heading { margin:8px 12px 2px; font:600 9px/1.4 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); }
+#primary-navigation .nav-layer-heading { margin:8px 12px 2px; font:600 var(--fs-tertiary)/1.4 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); }
 .header-you-pages { display:grid; gap:1px; margin:0; padding:0; list-style:none; }
 #scene .ark-header .header-you-page {
  display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:10px; min-height:40px; padding:4px 12px 4px 6px;
@@ -128,21 +128,21 @@
 #scene .ark-header .header-you-page[aria-current="page"] { background:hsl(var(--text-strong) / .08); color:hsl(var(--text-strong)); box-shadow:inset 2px 0 0 hsl(var(--primary)); }
 .header-you-page-mark { display:inline-grid; place-items:center; width:28px; height:28px; border-radius:6px; background:hsl(var(--text-strong) / .05); color:hsl(var(--text-muted)); }
 .header-you-page-mark svg, .header-you-page-mark .native-icon { width:14px; height:14px; }
-.header-you-page-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:500 13px/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); }
-.header-you-page-meta { font:500 9px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.1em; text-transform:uppercase; color:hsl(var(--text-faint)); }
+.header-you-page-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:500 var(--fs-tertiary)/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); }
+.header-you-page-meta { font:500 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.1em; text-transform:uppercase; color:hsl(var(--text-faint)); }
 
 /* layer 2, the network */
 #primary-navigation .nav-layer-top { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 2px 4px; }
 #primary-navigation .nav-layer-back {
  height:32px; padding:0 10px; border:0; border-radius:6px; background:transparent; color:hsl(var(--text-muted)); cursor:pointer;
- font:600 12px/1 var(--dx-font-sans,var(--font-sans,sans-serif));
+ font:600 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif));
 }
 #primary-navigation .nav-layer-back:hover { background:hsl(var(--text-strong) / .06); color:hsl(var(--text-strong)); }
-#primary-navigation .nav-layer-depth { font:600 9px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-faint)); padding-right:8px; }
-#primary-navigation .nav-layer-title { margin:4px 10px 0; font:600 18px/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); letter-spacing:-.01em; color:hsl(var(--text-strong)); }
-#primary-navigation .nav-layer-note { margin:0 10px 8px; font:400 12px/1.45 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-muted)); }
+#primary-navigation .nav-layer-depth { font:600 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-faint)); padding-right:8px; }
+#primary-navigation .nav-layer-title { margin:4px 10px 0; font:600 var(--fs-secondary)/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); letter-spacing:-.01em; color:hsl(var(--text-strong)); }
+#primary-navigation .nav-layer-note { margin:0 10px 8px; font:400 var(--fs-tertiary)/1.45 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-muted)); }
 #primary-navigation .network-options { padding:0 2px 2px; }
-#primary-navigation .network-option { height:40px; padding:0 12px; border-radius:8px; font-size:13px; }
+#primary-navigation .network-option { height:40px; padding:0 12px; border-radius:8px; font-size:var(--fs-tertiary); }
 
 /* The real network listbox (js/ark/dense-wire-wallet.mjs::mountNetworkSelect) -- never a native
    <select>: its open state is unstyleable OS chrome. Shared by every mount of this control (the
@@ -151,7 +151,7 @@
 .network-option {
  display:flex; align-items:center; gap:8px; width:100%; height:36px; padding:0 10px;
  border:0; border-radius:6px; background:transparent; color:hsl(var(--text-muted));
- font:500 12px/1.2 var(--font-sans,"Albert Sans",sans-serif); text-align:left; cursor:pointer;
+ font:500 var(--fs-tertiary)/1.2 var(--font-sans,"Albert Sans",sans-serif); text-align:left; cursor:pointer;
  transition:background-color 150ms ease,color 150ms ease;
 }
 .network-option::before { content:""; width:6px; height:6px; border-radius:50%; background:transparent; flex:0 0 auto; border:1px solid hsl(var(--text-faint)); }
@@ -204,25 +204,25 @@
 #scene .site-footer-strip nav { gap:2px; }
 #scene .site-footer-strip nav a {
  position:relative; display:inline-flex; align-items:center; height:32px; min-height:32px; padding:0 10px; border-radius:8px;
- font:500 13px/1 var(--dx-font-sans,var(--font-sans,sans-serif)); letter-spacing:0; text-transform:none;
+ font:500 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif)); letter-spacing:0; text-transform:none;
  color:hsl(var(--text-muted)); background:none; text-decoration:none; transition:color .15s ease, background-color .15s ease;
 }
 #scene .site-footer-strip nav a:hover { color:hsl(var(--text-strong)); background:hsl(var(--text-strong) / .06); }
 #scene .site-footer-strip nav a[aria-current="page"] { color:hsl(var(--text-strong)); }
 #scene .site-footer-strip nav a[aria-current="page"]::after { content:""; position:absolute; left:10px; right:10px; bottom:3px; height:2px; border-radius:2px; background:hsl(var(--primary)); }
 /* the credit and rights line join the row (css/settings.css still places them on their own) */
-#scene .site-footer-strip :is(.site-credit,.site-copyright,.site-price) { position:static; font:500 11px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-faint)); }
+#scene .site-footer-strip :is(.site-credit,.site-copyright,.site-price) { position:static; font:500 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-faint)); }
 /* Back (js/hero-motion.js) closes the row: a small outlined control, the header's shape at its smaller size */
 #scene .site-footer-strip .hero-motion-toggle {
  position:static; display:inline-flex; align-items:center; height:30px; min-height:30px; padding:0 12px; border:1px solid hsl(var(--border-default)); border-radius:8px;
- background:hsl(var(--surface) / .6); color:hsl(var(--text)); font:600 10.5px/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.08em;
+ background:hsl(var(--surface) / .6); color:hsl(var(--text)); font:600 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.08em;
  text-transform:uppercase; white-space:nowrap; cursor:pointer; transition:color .15s ease, border-color .15s ease, background-color .15s ease;
 }
 #scene .site-footer-strip .hero-motion-toggle:hover { color:hsl(var(--text-strong)); border-color:hsl(var(--border-strong)); background:hsl(var(--raised)); letter-spacing:.08em; }
 /* the settings gear stands inside the bar's left end (css/settings.css owns the control; this only places and sizes it) */
 #scene .site-settings { left:calc(max(14px,env(safe-area-inset-left,0px)) + 6px); bottom:calc(max(12px,env(safe-area-inset-bottom,0px)) + 5px); }
 #scene .site-settings, #scene .site-settings .settings-root { width:34px; }
-#scene .site-settings .settings-trigger { width:34px; height:34px; border-radius:8px; font-size:16px; }
+#scene .site-settings .settings-trigger { width:34px; height:34px; border-radius:8px; font-size:var(--fs-secondary); }
 /* Narrower screens: the credit steps back, then the rights line, then the name; the section links and Back always stay
    (the links scroll sideways when they still do not fit). The credit shows from 1600px. */
 @media(max-width:1599.98px) { #scene .site-footer-strip .site-credit { display:none; } }
@@ -236,7 +236,7 @@
  #scene .site-footer-strip { left:8px; right:8px; bottom:8px; }
  #scene .site-settings { left:14px; bottom:13px; }
  #scene .site-footer-strip nav { overflow-x:auto; scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg, #000 85%, transparent); mask-image:linear-gradient(90deg, #000 85%, transparent); }
- #scene .site-footer-strip nav a { padding:0 8px; font-size:12px; }
+ #scene .site-footer-strip nav a { padding:0 8px; font-size:var(--fs-tertiary); }
  .hero-alive[data-page="zero"] .ark-hero-body { bottom:165px; }
 }
 @media(max-width:480px) { .ark-studio-label { max-width:85px; line-height:1.5; } }

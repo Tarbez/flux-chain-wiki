@@ -118,16 +118,16 @@ async function main() {
 :root{--canvas:#0d0f0e;--surface:#151817;--nested:#1b1f1d;--text:#e6e8e7;--muted:#8c9490;--line:#262b29;--accent:#5fd39a;--warn:#e2b450}
 @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--canvas:#f6f7f6;--surface:#fff;--nested:#f0f2f1;--text:#161a18;--muted:#5b625f;--line:#dde1df;--accent:#16794a;--warn:#8a6100}}
 :root[data-theme="dark"]{--canvas:#0d0f0e;--surface:#151817;--nested:#1b1f1d;--text:#e6e8e7;--muted:#8c9490;--line:#262b29;--accent:#5fd39a;--warn:#e2b450}
-*{box-sizing:border-box}body{background:var(--canvas);color:var(--text);font:14px/1.5 system-ui,sans-serif;margin:0;padding:24px 16px}
-main{max-width:1200px;margin:0 auto}h1{font-size:29px;margin:0 0 4px}p{color:var(--muted);margin:4px 0}
+*{box-sizing:border-box}body{background:var(--canvas);color:var(--text);font:var(--fs-tertiary, 11px)/1.5 system-ui,sans-serif;margin:0;padding:24px 16px}
+main{max-width:1200px;margin:0 auto}h1{font-size:var(--fs-primary, 29px);margin:0 0 4px}p{color:var(--muted);margin:4px 0}
 .bar{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.bar button{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:4px 10px;font:inherit;cursor:pointer}.bar button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.k{font:11px/1.4 ui-monospace,monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-.id{font:12px ui-monospace,monospace;word-break:break-all}.views b{color:var(--accent);font-weight:600}
-pre{background:var(--nested);border-radius:6px;padding:8px;margin:0;font:11px/1.45 ui-monospace,monospace;max-height:180px;overflow:auto;white-space:pre}
+.k{font:var(--fs-tertiary, 11px)/1.4 ui-monospace,monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.id{font:var(--fs-tertiary, 11px) ui-monospace,monospace;word-break:break-all}.views b{color:var(--accent);font-weight:600}
+pre{background:var(--nested);border-radius:6px;padding:8px;margin:0;font:var(--fs-tertiary, 11px)/1.45 ui-monospace,monospace;max-height:180px;overflow:auto;white-space:pre}
 canvas{width:100%;height:200px;background:var(--nested);border-radius:6px;display:block}
-.now{color:var(--warn)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}figure{margin:0}figure img{width:100%;border-radius:6px;display:block;border:1px solid var(--line);cursor:zoom-in}figcaption{font:11px ui-monospace,monospace;color:var(--muted);margin-top:2px}summary{cursor:pointer;color:var(--muted)}a{color:inherit}
+.now{color:var(--warn)}.pair{display:grid;grid-template-columns:1fr 1fr;gap:6px}figure{margin:0}figure img{width:100%;border-radius:6px;display:block;border:1px solid var(--line);cursor:zoom-in}figcaption{font:var(--fs-tertiary, 11px) ui-monospace,monospace;color:var(--muted);margin-top:2px}summary{cursor:pointer;color:var(--muted)}a{color:inherit}
 </style></head><body><main>
 <h1>Unused world files</h1>
 <p>${cards.length} files in <code>flux/defxn/world/</code>, ${(total / 1e6).toFixed(2)} MB. Nothing the site loads names them. They are older copies that an encoder run replaced. Each card shows the file, its view and the file that holds that view now.</p>

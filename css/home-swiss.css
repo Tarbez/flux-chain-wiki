@@ -13,7 +13,7 @@
 #scene .hl-world {display:block;width:100%;max-width:560px;height:auto;margin-inline:auto;overflow:visible;}
 .world-track {stroke:hsl(var(--text-faint));stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;transition:stroke 320ms,stroke-width 320ms;}
 .world-station {fill:hsl(var(--canvas));stroke:hsl(var(--text-faint));stroke-width:1.5;}
-.world-name {fill:hsl(var(--text-faint));font:500 12px var(--font-mono,monospace);letter-spacing:.04em;transition:fill 320ms;}
+.world-name {fill:hsl(var(--text-faint));font:500 var(--fs-tertiary) var(--font-mono,monospace);letter-spacing:.04em;transition:fill 320ms;}
 .world-line[data-selected="true"] .world-track {stroke:hsl(var(--text-strong));stroke-width:2;}
 .world-line[data-selected="true"] .world-station {stroke:hsl(var(--text-strong));}
 .world-line[data-selected="true"] .world-name {fill:hsl(var(--text-strong));font-weight:600;}
@@ -21,7 +21,7 @@
 .world-record {fill:hsl(var(--text-strong));}
 .world-interchange {fill:hsl(var(--canvas));stroke:hsl(var(--text-strong));stroke-width:2;}
 .world-you rect {fill:hsl(var(--text-strong));}
-.world-you-name {fill:hsl(var(--canvas));font:600 12px var(--font-mono,monospace);letter-spacing:.02em;}
+.world-you-name {fill:hsl(var(--canvas));font:600 var(--fs-tertiary) var(--font-mono,monospace);letter-spacing:.02em;}
 .world-icon path {fill:none;stroke:hsl(var(--canvas));stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 /* Draws in once, then holds still. With motion off the lines are simply there. */
 .world-track {animation:world-draw 1100ms cubic-bezier(.4,0,.2,1) backwards;animation-delay:calc(200ms + var(--i,0) * 120ms);}

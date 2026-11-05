@@ -5,8 +5,8 @@
    the card layer and its small site pane read them, so a sample skin dresses the pane through the same tokens.
    Nothing here runs a frame: the progress line is one CSS animation that pauses with the clock. */
 
-.wp-minute .wm-count { margin: 0 0 calc(8px * var(--g)); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-.wp-minute .wm-say { margin: 0; font: 600 clamp(22px, 2.5vw, 30px)/1.28 var(--font-display, var(--font-sans)); letter-spacing: -.01em; color: hsl(var(--text-strong)); min-height: 3.9em; }
+.wp-minute .wm-count { margin: 0 0 calc(8px * var(--g)); font-size: var(--fs-tertiary); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.wp-minute .wm-say { margin: 0; font: 600 var(--fs-primary)/1.28 var(--font-display, var(--font-sans)); letter-spacing: -.01em; color: hsl(var(--text-strong)); min-height: 3.9em; }
 .wp-minute .wm-say > span { display: block; }
 
 /* the nine ticks: a track each, the open one fills while the beat plays */
@@ -24,13 +24,13 @@
 
 /* the controls: quiet, so Next stays the one action */
 .wm-bar { display: flex; flex-wrap: wrap; gap: 8px 10px; margin-top: calc(8px * var(--g)); }
-.wm-btn { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 8px 3px 8px 3px; border: 1px solid hsl(var(--border-default)); background: none; color: hsl(var(--text-strong)); font: 500 13px/1 var(--font-sans); cursor: pointer; }
+.wm-btn { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border-radius: 8px 3px 8px 3px; border: 1px solid hsl(var(--border-default)); background: none; color: hsl(var(--text-strong)); font: 500 var(--fs-tertiary)/1 var(--font-sans); cursor: pointer; }
 .wm-btn svg { width: 12px; height: 12px; }
 .wm-btn:hover:not(:disabled) { border-color: hsl(var(--text-muted)); }
 .wm-btn:disabled { color: hsl(var(--text-faint)); cursor: default; }
 .wm-btn:focus-visible { outline: 2px solid hsl(var(--text-strong)); outline-offset: 2px; }
 .wm-btn[hidden] { display: none; }
-.wm-hint { margin: calc(10px * var(--g)) 0 0; font-size: 10.5px; letter-spacing: .12em; color: hsl(var(--text-faint)); }
+.wm-hint { margin: calc(10px * var(--g)) 0 0; font-size: var(--fs-tertiary); letter-spacing: .12em; color: hsl(var(--text-faint)); }
 
 /* ---------------------------------------------------------------- the card layer: the right of the stage, never over the grid */
 .wp-minute .wp-stage { overflow: visible; }
@@ -55,8 +55,8 @@
 .wm-p[data-piece="ornament"] { left: 5%; bottom: 14%; width: 38%; height: 8%; --dy: 70%; }
 .wm-p[data-piece="divider"] { left: 4%; right: 4%; top: 60%; height: 3%; --dx: 24%; }
 .wm-p[data-piece="emblem"] { right: 5%; bottom: 6%; width: 12%; aspect-ratio: 1; --dx: 40%; --dy: 40%; }
-.wm-cap { margin: 0; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-.wm-pieces { margin: 0; font-size: 12px; line-height: 1.45; color: hsl(var(--text-muted)); max-width: 40ch; }
+.wm-cap { margin: 0; font-size: var(--fs-tertiary); letter-spacing: .2em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.wm-pieces { margin: 0; font-size: var(--fs-tertiary); line-height: 1.45; color: hsl(var(--text-muted)); max-width: 40ch; }
 .wm-card[data-ready="true"] .wm-pieces { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }   /* read by a screen reader once the art stands */
 .wm-card[data-failed="true"] .wm-stack { display: none; }
 
@@ -64,13 +64,13 @@
 .wm-site { display: grid; gap: 6px; padding: 12px 14px; border-radius: 10px 3px 10px 3px; background: hsl(var(--surface)); color: hsl(var(--text)); box-shadow: inset 0 0 0 1px hsl(var(--border-default));
   clip-path: inset(0 0 100% 0); max-height: 0; padding-block: 0; overflow: hidden; transition: clip-path .8s var(--glide), max-height .8s var(--glide), padding .8s var(--glide); }
 .wm-card[data-site="true"] .wm-site { clip-path: inset(-20px); max-height: 160px; padding-block: 12px; }
-.wm-site h3 { margin: 0; font: 600 14px/1.2 var(--font-mono); color: hsl(var(--text-strong)); }
-.wm-site p { margin: 0; font-size: 13px; line-height: 1.4; color: hsl(var(--text)); }
-.wm-site button { justify-self: start; height: 30px; padding: 0 14px; border: 0; border-radius: 6px 2px 6px 2px; background: hsl(var(--primary)); color: hsl(var(--text-inverse)); font: 600 13px/1 var(--font-sans); }
+.wm-site h3 { margin: 0; font: 600 var(--fs-tertiary)/1.2 var(--font-mono); color: hsl(var(--text-strong)); }
+.wm-site p { margin: 0; font-size: var(--fs-tertiary); line-height: 1.4; color: hsl(var(--text)); }
+.wm-site button { justify-self: start; height: 30px; padding: 0 14px; border: 0; border-radius: 6px 2px 6px 2px; background: hsl(var(--primary)); color: hsl(var(--text-inverse)); font: 600 var(--fs-tertiary)/1 var(--font-sans); }
 
 /* a short screen: the sheet tightens */
 @container cb (max-height: 600px) {
-  .wp-minute .wm-say { min-height: 0; font-size: 22px; }
+  .wp-minute .wm-say { min-height: 0; font-size: var(--fs-secondary); }
   .wm-hint { display: none; }
 }
 @media (max-width: 900px) {

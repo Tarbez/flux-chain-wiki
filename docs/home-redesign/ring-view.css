@@ -9,14 +9,14 @@ body[data-view="ring"] .scrim .page{opacity:1}
 .ring-head .two{margin:0}
 .logo-slot{flex:none;width:calc(60px * var(--s, 1));height:calc(60px * var(--s, 1));border-radius:calc(14px * var(--s, 1));
   display:grid;place-items:center;border:1.5px dashed hsl(var(--text-faint));background:hsl(var(--canvas) / .35)}
-.logo-slot span{font:500 calc(9px * var(--s, 1))/1 var(--font-mono);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--text-faint))}
+.logo-slot span{font:500 calc(11px * var(--s, 1))/1 var(--font-mono);letter-spacing:.2em;text-transform:uppercase;color:hsl(var(--text-faint))}
 .logo-slot img{width:78%;height:78%;object-fit:contain}
 [data-view="ring"] .aside{margin-top:calc(14px * var(--s, 1))}
 [data-view="ring"] .chips{margin-top:calc(14px * var(--s, 1))}
 [data-view="ring"] .sheet-foot{margin-top:auto}
 
 /* home: a kind label can carry a second, quieter line (the named networks) */
-.callout span small{display:block;margin-top:2px;font-size:9px;letter-spacing:.16em;color:hsl(var(--text-muted))}
+.callout span small{display:block;margin-top:2px;font-size:var(--fs-tertiary, 11px);letter-spacing:.16em;color:hsl(var(--text-muted))}
 .callout[data-kind="resolver"] i{border-color:hsl(var(--chain-resolver))}
 .callout[data-kind="resolver"] i::after{background:hsl(var(--chain-resolver))}
 .callout[data-kind="pool"] i{border-color:hsl(var(--chain-pool))}
@@ -40,9 +40,9 @@ body[data-view="ring"] .scrim .page{opacity:1}
 .view[data-view="ring"] .peers{display:flex;align-items:center;gap:10px}
 .view[data-view="ring"] .peers a{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;box-shadow:inset 0 0 0 1px hsl(var(--border));color:hsl(var(--text-strong));padding:0}
 .view[data-view="ring"] .peers a:hover{box-shadow:inset 0 0 0 1px hsl(var(--reference));color:hsl(var(--reference))}
-.view[data-view="ring"] .peers .mono{font-size:10px;letter-spacing:.14em;color:hsl(var(--text-muted))}
+.view[data-view="ring"] .peers .mono{font-size:var(--fs-tertiary, 11px);letter-spacing:.14em;color:hsl(var(--text-muted))}
 .view[data-view="ring"] .grp{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.view[data-view="ring"] .grp b{width:76px;font-size:9.5px;font-weight:500;letter-spacing:.14em;color:hsl(var(--text-muted))}
+.view[data-view="ring"] .grp b{width:76px;font-size:var(--fs-tertiary, 11px);font-weight:500;letter-spacing:.14em;color:hsl(var(--text-muted))}
 /* the labels sit above the page layer so they can take the pointer; the layer itself lets it through */
 .callouts{z-index:2}
 

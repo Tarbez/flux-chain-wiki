@@ -95,7 +95,7 @@
   background: hsl(var(--canvas));
   color: hsl(var(--text));
   /* 16px/1.5 body (Power Design rule 4; 14px until 2026-10-20). */
-  font: 400 16px/1.5 var(--dx-font-sans);
+  font: 400 var(--fs-secondary)/1.5 var(--dx-font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -130,7 +130,7 @@
   width: auto; height: auto; margin: 0; clip: auto; overflow: visible;
   display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: var(--dx-radius);
   background: hsl(var(--surface)); border: 1px solid var(--dx-edge); color: hsl(var(--dx-link));
-  font: 600 16px/1.2 var(--dx-font-sans); text-decoration: none;
+  font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); text-decoration: none;
 }
 
 /* Shell bar --------------------------------------------------------------- */
@@ -159,7 +159,7 @@
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-width: 44px; min-height: 44px;
   color: hsl(var(--text-strong)); text-decoration: none;
-  font: 650 16px/1.2 var(--dx-font-sans); letter-spacing: -.01em;
+  font: 650 var(--fs-secondary)/1.2 var(--dx-font-sans); letter-spacing: -.01em;
   flex: 0 0 auto;
 }
 .dx-bar__brand:hover { color: hsl(var(--text-strong)); }
@@ -169,7 +169,7 @@
   background: hsl(var(--text-strong));
   -webkit-mask: var(--dx-mark) center/contain no-repeat; mask: var(--dx-mark) center/contain no-repeat;
 }
-.dx-bar__sep { display: none; color: hsl(var(--text-faint)); font: 400 20px/1.2 var(--dx-font-sans); flex: 0 0 auto; }
+.dx-bar__sep { display: none; color: hsl(var(--text-faint)); font: 400 var(--fs-secondary)/1.2 var(--dx-font-sans); flex: 0 0 auto; }
 /* One row on a 390px phone: brand mark, switcher, pill, toggle. Only the
    switcher NAME truncates: the pill and the toggle keep their boxes
    (flex: 0 0 auto; at 320px the pill was crushed to 9px). */
@@ -179,7 +179,7 @@
   height: var(--dx-strip-h); padding: 0 12px;
   background: hsl(var(--surface)); border: 1px solid var(--dx-edge); border-radius: var(--dx-radius);
   color: hsl(var(--text-strong)); cursor: pointer;
-  font: 600 16px/1.2 var(--dx-font-sans);
+  font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans);
   transition: background .15s var(--dx-ease), border-color .15s var(--dx-ease);
 }
 .dx-switch__trigger:hover { background: hsl(var(--raised)); }
@@ -187,7 +187,7 @@
 .dx-switch__trigger[aria-expanded="true"] { background: hsl(var(--raised)); border-color: hsl(var(--border-strong)); color: hsl(var(--text-strong)); }
 .dx-switch__lane {
   display: none;
-  font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase;
+  font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase;
   color: hsl(var(--text-muted)); padding: 4px 8px; border-right: 1px solid hsl(var(--border-default)); margin-right: 2px;
 }
 .dx-glyph { flex: 0 0 auto; display: inline-block; vertical-align: middle; }
@@ -316,7 +316,7 @@
      rules (defxn.com paints search fields black) must not reach this one. */
   flex: 1 1 auto; min-width: 0; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none;
   -webkit-appearance: none; appearance: none;
-  color: hsl(var(--text-strong)); font: 400 16px/1.2 var(--dx-font-sans);
+  color: hsl(var(--text-strong)); font: 400 var(--fs-secondary)/1.2 var(--dx-font-sans);
 }
 /* A host page's focus rule must not repaint the field. Named regression
    (2026-10-22): defxn.com's css/focus.css paints
@@ -348,7 +348,7 @@
 .dx-switch__tab {
   display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 4px 12px;
   background: none; border: 0; border-radius: 8px;
-  color: hsl(var(--text-muted)); font: 500 16px/1.2 var(--dx-font-sans); text-align: left; cursor: pointer;
+  color: hsl(var(--text-muted)); font: 500 var(--fs-secondary)/1.2 var(--dx-font-sans); text-align: left; cursor: pointer;
   transition: background var(--dx-t), color var(--dx-t);
 }
 .dx-switch__tab:hover { background: var(--dx-wash); color: hsl(var(--text-strong)); }
@@ -364,13 +364,13 @@
 /* List ------------------------------------------------------------------ */
 .dx-switch__back {
   justify-self: start; display: inline-flex; align-items: center; min-height: 44px; padding: 0 8px;
-  background: none; border: 0; border-radius: 8px; color: hsl(var(--text-strong)); font: 600 16px/1.2 var(--dx-font-sans); cursor: pointer;
+  background: none; border: 0; border-radius: 8px; color: hsl(var(--text-strong)); font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); cursor: pointer;
 }
 .dx-switch__panel[data-dx-depth="rail"] .dx-switch__back { display: none; }
 .dx-lane, .dx-resolvers, .dx-switch__results { display: grid; align-content: start; gap: 8px; min-width: 0; }
 .dx-lane:not([hidden]), .dx-resolvers:not([hidden]) { animation: dx-pane-in .18s var(--dx-ease); }
 .dx-lane__head { padding: 4px 8px 8px; }
-.dx-lane__name { font: 600 20px/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); }
+.dx-lane__name { font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); }
 .dx-lane__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 /* A row: the bare mark, the name and what it is, and a chevron. The row
    pointed at turns white (ink ground, ground-coloured words). */
@@ -389,7 +389,7 @@
 .dx-product-link[data-dx-previewed] .dx-row__mark { background: hsl(var(--secondary-ink) / .08); box-shadow: inset 0 0 0 1px hsl(var(--secondary-ink) / .12); }
 /* The facts line: where it lives, what flows through it, its status last. */
 /* One line: the address gives way (ellipsis) before the counts do. */
-.dx-row__facts { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; min-width: 0; margin-top: 4px; font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .02em; color: hsl(var(--text-faint)); }
+.dx-row__facts { display: flex; flex-wrap: nowrap; align-items: center; gap: 12px; min-width: 0; margin-top: 4px; font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .02em; color: hsl(var(--text-faint)); }
 .dx-row__facts > span { flex: 0 0 auto; white-space: nowrap; }
 .dx-row__facts > span:first-child { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .dx-product-link[data-dx-previewed] .dx-row__facts { color: hsl(var(--secondary-ink) / .66); }
@@ -399,15 +399,15 @@
 .dx-tag {
   display: inline-flex; align-items: center; gap: 8px; min-height: 24px; padding: 0 8px; border-radius: 999px;
   box-shadow: inset 0 0 0 1px hsl(var(--border-default));
-  font: 500 16px/1 var(--dx-font-sans); color: hsl(var(--text-muted)); white-space: nowrap;
+  font: 500 var(--fs-tertiary)/1 var(--dx-font-sans); color: hsl(var(--text-muted)); white-space: nowrap;
 }
 .dx-tag[data-tone="live"]::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: hsl(var(--success)); }
 .dx-tag[data-tone="public"]::before { content: ''; width: 6px; height: 6px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px currentColor; }
 .dx-product-link[data-dx-previewed] .dx-tag { color: hsl(var(--secondary-ink) / .74); box-shadow: inset 0 0 0 1px hsl(var(--secondary-ink) / .2); }
 /* The preview's facts: a two-column key and value list. */
 .dx-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; margin: 4px 0 0; padding: 12px 0; border-top: 1px solid hsl(var(--primary) / .18); border-bottom: 1px solid hsl(var(--primary) / .18); }
-.dx-facts dt { font: 500 16px/1.3 var(--dx-font-mono); letter-spacing: .04em; text-transform: uppercase; color: hsl(var(--text-faint)); }
-.dx-facts dd { margin: 0; display: flex; align-items: center; gap: 8px; min-width: 0; font: 500 16px/1.3 var(--dx-font-sans); color: hsl(var(--text-strong)); }
+.dx-facts dt { font: 500 var(--fs-tertiary)/1.3 var(--dx-font-mono); letter-spacing: .04em; text-transform: uppercase; color: hsl(var(--text-faint)); }
+.dx-facts dd { margin: 0; display: flex; align-items: center; gap: 8px; min-width: 0; font: 500 var(--fs-secondary)/1.3 var(--dx-font-sans); color: hsl(var(--text-strong)); }
 .dx-facts dd[data-tone="live"]::before { content: ''; flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; background: hsl(var(--success)); }
 .dx-product-link[data-dx-previewed] .dx-row__facts .dx-badge { color: hsl(var(--secondary-ink) / .66); }
 .dx-product-link[data-dx-previewed] .dx-row__facts .dx-badge::before { background: repeating-linear-gradient(-45deg, hsl(var(--secondary-ink) / .7) 0 1.5px, transparent 1.5px 4px); box-shadow: inset 0 0 0 1px hsl(var(--secondary-ink) / .7); }
@@ -415,25 +415,25 @@
 .dx-row__svg { color: hsl(var(--text-strong)); }
 .dx-product-link[data-dx-previewed] .dx-row__svg { color: hsl(var(--secondary-ink)); }
 .dx-row__text { display: grid; gap: 2px; min-width: 0; }
-.dx-product-link__name { font: 600 16px/1.3 var(--dx-font-sans); color: hsl(var(--text-strong)); }
-.dx-product-link__line { font-size: 16px; line-height: 1.35; color: hsl(var(--text-faint)); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.dx-product-link__name { font: 600 var(--fs-secondary)/1.3 var(--dx-font-sans); color: hsl(var(--text-strong)); }
+.dx-product-link__line { font-size: var(--fs-tertiary); line-height: 1.35; color: hsl(var(--text-faint)); display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
 .dx-product-link[data-dx-previewed] :is(.dx-product-link__name, .dx-row__go) { color: hsl(var(--secondary-ink)); }
 .dx-product-link[data-dx-previewed] .dx-product-link__line { color: hsl(var(--secondary-ink) / .72); }
 .dx-row__go { color: hsl(var(--text-muted)); transition: transform var(--dx-t); }
 .dx-product-link:hover .dx-row__go { transform: translateX(2px); }
-.dx-row__here { font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .04em; text-transform: uppercase; color: hsl(var(--text-faint)); white-space: nowrap; }
+.dx-row__here { font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .04em; text-transform: uppercase; color: hsl(var(--text-faint)); white-space: nowrap; }
 .dx-product-link[data-dx-previewed] .dx-row__here { color: hsl(var(--secondary-ink) / .66); }
 /* On a phone the row is too narrow for the words; the row itself is marked. */
 .dx-row__here { display: none; }
 /* The address lives in the preview's action; the row keeps it for retargetLinks. */
 .dx-product-link__where { display: none; }
-.dx-switch__none { padding: 8px; font-size: 16px; line-height: 1.5; color: hsl(var(--text-muted)); }
+.dx-switch__none { padding: 8px; font-size: var(--fs-secondary); line-height: 1.5; color: hsl(var(--text-muted)); }
 
 /* Status: a block and a word. Building is a hatched block: work under way.
    Planned is an empty outlined block: nothing built yet. */
 .dx-switch__panel .dx-badge {
   display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; border-radius: 0; background: none;
-  font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-faint));
+  font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-faint));
 }
 .dx-switch__panel .dx-badge::before {
   content: ''; flex: 0 0 auto; width: 16px; height: 8px;
@@ -456,22 +456,22 @@
   box-shadow: inset 0 1px 0 hsl(var(--primary) / .12);
 }
 .dx-switch__preview > * { animation: dx-preview-in .14s var(--dx-ease); }
-.dx-preview__eyebrow { font: 600 16px/1.2 var(--dx-font-sans); color: hsl(var(--primary)); }
+.dx-preview__eyebrow { font: 600 var(--fs-tertiary)/1.2 var(--dx-font-sans); color: hsl(var(--primary)); }
 .dx-preview__title { display: flex; align-items: center; gap: 16px; min-width: 0; margin: 4px 0; }
 .dx-preview__tile {
   display: inline-grid; place-items: center; flex: 0 0 auto; width: 64px; height: 64px;
   border: 1px solid hsl(var(--primary) / .28); border-radius: 10px; background: hsl(var(--primary) / .1); color: hsl(var(--text-strong));
 }
-.dx-preview__name { min-width: 0; font: 700 32px/1.05 var(--dx-font-sans); letter-spacing: -.03em; color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
-.dx-preview__what { margin: 0; font: 500 20px/1.35 var(--dx-font-sans); color: hsl(var(--text)); }
-.dx-preview__line { margin: 0; font-size: 16px; line-height: 1.5; color: hsl(var(--text-muted)); }
+.dx-preview__name { min-width: 0; font: 700 var(--fs-primary)/1.05 var(--dx-font-sans); letter-spacing: -.03em; color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
+.dx-preview__what { margin: 0; font: 500 var(--fs-secondary)/1.35 var(--dx-font-sans); color: hsl(var(--text)); }
+.dx-preview__line { margin: 0; font-size: var(--fs-tertiary); line-height: 1.5; color: hsl(var(--text-muted)); }
 /* The caveat, last: the status block and one plain sentence. */
-.dx-preview__caveat { display: flex; align-items: center; gap: 12px; margin: 0; font-size: 16px; line-height: 1.4; color: hsl(var(--text-muted)); }
+.dx-preview__caveat { display: flex; align-items: center; gap: 12px; margin: 0; font-size: var(--fs-tertiary); line-height: 1.4; color: hsl(var(--text-muted)); }
 .dx-preview__caveat .dx-badge { flex: 0 0 auto; }
 /* Related destinations: up to three, side by side, hairlines between. Each
    one moves the switcher to that product. */
 .dx-related { display: grid; gap: 8px; margin-top: 8px; }
-.dx-related__label { font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-faint)); }
+.dx-related__label { font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-faint)); }
 .dx-related__list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .dx-related__item {
   display: grid; align-content: start; gap: 8px; min-width: 0; min-height: 44px; padding: 4px 16px; margin: 0;
@@ -481,18 +481,18 @@
 .dx-related__item:first-child { padding-left: 0; border-left: 0; }
 .dx-related__top { display: flex; align-items: center; gap: 8px; min-width: 0; color: hsl(var(--text-strong)); }
 .dx-related__mark { flex: 0 0 auto; }
-.dx-related__name { font: 600 16px/1.2 var(--dx-font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dx-related__name { font: 600 var(--fs-tertiary)/1.2 var(--dx-font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dx-related__arrow { transition: transform var(--dx-t); }
 .dx-related__item:hover .dx-related__arrow { transform: translateX(3px); }
 .dx-related__item:hover .dx-related__name { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
-.dx-related__line { font-size: 16px; line-height: 1.4; color: hsl(var(--text-faint)); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.dx-related__line { font-size: var(--fs-tertiary); line-height: 1.4; color: hsl(var(--text-faint)); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 /* The one action: Open, the full width, white. It holds the preview's
    bottom edge, so a long preview scrolls under it and Open stays in view. */
 .dx-preview__foot { display: grid; margin-top: 8px; }
 .dx-switch__preview .dx-preview__foot { position: sticky; bottom: -24px; z-index: 1; margin: 8px -28px -24px; padding: 12px 28px 24px; background: var(--dx-card-bg); border-radius: 0 0 14px 14px; }
 .dx-cta {
   display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 16px; border-radius: 8px;
-  background: hsl(var(--secondary)); color: hsl(var(--secondary-ink)); font: 600 16px/1.2 var(--dx-font-sans); text-decoration: none;
+  background: hsl(var(--secondary)); color: hsl(var(--secondary-ink)); font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); text-decoration: none;
   transition: background var(--dx-t);
 }
 .dx-cta:hover { background: hsl(var(--secondary-600)); color: hsl(var(--secondary-ink)); }
@@ -501,7 +501,7 @@
 .dx-cta__go { transition: transform var(--dx-t); }
 .dx-cta:is(:hover, :focus-visible) .dx-cta__go { transform: translate(2px, -2px); }
 .dx-cta--here { background: var(--dx-wash-2); color: hsl(var(--text-muted)); }
-.dx-preview__here { font-size: 16px; line-height: 1.4; color: hsl(var(--text-muted)); }
+.dx-preview__here { font-size: var(--fs-tertiary); line-height: 1.4; color: hsl(var(--text-muted)); }
 /* Marks are drawn in solid ink and dimmed as one layer, never in a
    see-through ink: their pieces overlap, and a see-through ink doubles
    where they do. */
@@ -510,13 +510,13 @@
 /* Foot: the keys that drive it (from 981px), and the family home. */
 .dx-switch__foot { grid-area: foot; display: flex; align-items: center; justify-content: space-between; gap: 8px 24px; flex-wrap: wrap; padding: 4px 16px; border-top: 1px solid hsl(var(--border-subtle)); }
 .dx-switch__keys { display: none; align-items: center; gap: 20px; -webkit-user-select: none; user-select: none; }
-.dx-switch__key { display: inline-flex; align-items: center; gap: 4px; font-size: 16px; line-height: 1; color: hsl(var(--text-faint)); }
+.dx-switch__key { display: inline-flex; align-items: center; gap: 4px; font-size: var(--fs-tertiary); line-height: 1; color: hsl(var(--text-faint)); }
 .dx-switch__key > span { margin-left: 4px; }
 /* A key cap: one quiet square, the key drawn in it (Esc is the one word). */
 .dx-switch__cap {
   display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 4px;
   border: 1px solid hsl(var(--border-default)); border-radius: 6px; background: var(--dx-wash);
-  font: 500 16px/1 var(--dx-font-mono); color: hsl(var(--text-muted));
+  font: 500 var(--fs-tertiary)/1 var(--dx-font-mono); color: hsl(var(--text-muted));
 }
 .dx-switch__cap--word { padding: 0 8px; letter-spacing: 0; }
 .dx-switch__home {
@@ -526,7 +526,7 @@
 a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-strong)); }
 .dx-switch__home[aria-current="page"] { color: hsl(var(--text-strong)); }
 .dx-switch__home .dx-mark { width: 16px; height: 16px; }
-.dx-switch__home-name { font: 500 16px/1.2 var(--dx-font-sans); }
+.dx-switch__home-name { font: 500 var(--fs-tertiary)/1.2 var(--dx-font-sans); }
 .dx-switch__home .dx-product-link__where { display: none; }
 
 /* The switcher on a light page: near-black ink on white, the deeper orange
@@ -565,7 +565,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-bar__nav a, .dx-bar__nav button {
   position: relative; display: inline-flex; align-items: center; gap: 8px; height: 100%; padding: 0 12px;
   color: hsl(var(--text-muted)); text-decoration: none; white-space: nowrap;
-  font: 500 16px/1.2 var(--dx-font-sans); background: hsl(var(--surface)); border: 0; border-radius: 0; cursor: pointer;
+  font: 500 var(--fs-secondary)/1.2 var(--dx-font-sans); background: hsl(var(--surface)); border: 0; border-radius: 0; cursor: pointer;
   transition: color .15s var(--dx-ease), background-color .15s var(--dx-ease);
 }
 .dx-bar__nav > :first-child, .dx-bar__nav > :first-child :is(a, button) { border-radius: 7px 0 0 7px; }
@@ -585,7 +585,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-theme-toggle {
   width: var(--dx-strip-h); height: var(--dx-strip-h); flex: 0 0 auto; display: inline-grid; place-items: center;
   background: hsl(var(--surface)); border: 1px solid var(--dx-edge); border-radius: var(--dx-radius);
-  color: hsl(var(--text-muted)); cursor: pointer; font: 500 16px/1.2 var(--dx-font-sans);
+  color: hsl(var(--text-muted)); cursor: pointer; font: 500 var(--fs-secondary)/1.2 var(--dx-font-sans);
 }
 .dx-theme-toggle:hover { color: hsl(var(--text-strong)); background: hsl(var(--raised)); }
 .dx-theme-toggle svg { width: 16px; height: 16px; }
@@ -594,7 +594,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
    mono; a phone hides it. */
 .dx-bar__brand-sub {
   display: none;
-  font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase;
+  font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase;
   color: hsl(var(--text-muted)); padding-left: 8px; border-left: 1px solid hsl(var(--border-default));
 }
 /* Actions slot: account, sign in, the one solid header action, a network popover. */
@@ -609,7 +609,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-bar[data-dx-menu="folded"] .dx-bar__menu-toggle {
   display: inline-flex; align-items: center; height: var(--dx-strip-h); padding: 0 12px; cursor: pointer;
   background: hsl(var(--surface)); border: 1px solid var(--dx-edge); border-radius: var(--dx-radius);
-  color: hsl(var(--text-strong)); font: 600 16px/1.2 var(--dx-font-sans);
+  color: hsl(var(--text-strong)); font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans);
 }
 .dx-bar[data-dx-menu="folded"] .dx-bar__menu-toggle[aria-expanded="true"] { background: hsl(var(--reference-100)); border-color: hsl(var(--reference-300)); color: hsl(var(--reference-700)); }
 .dx-bar[data-dx-menu="folded"] .dx-bar__menu {
@@ -799,7 +799,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 /* the family name: the sans, muted, then a hairline before the links */
 .dx-foot[data-dx-mode="home"] .dx-foot__name {
   display: none; align-items: center; height: 24px; padding-right: 14px; margin-right: 6px; border-right: 1px solid hsl(var(--border-default));
-  font: 600 12px/1 var(--dx-font-sans, var(--font-sans, sans-serif)); letter-spacing: .01em; color: hsl(var(--text-muted)); white-space: nowrap;
+  font: 600 var(--fs-tertiary)/1 var(--dx-font-sans, var(--font-sans, sans-serif)); letter-spacing: .01em; color: hsl(var(--text-muted)); white-space: nowrap;
 }
 
 /* Onward: a page that explains something hands the reader to the product
@@ -814,11 +814,11 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
   border: 1px solid hsl(var(--border-default)); border-radius: var(--dx-radius); background: hsl(var(--surface));
 }
 .dx-onward__words { grid-row: auto; grid-column: 1 / -1; display: grid; gap: 8px; min-width: 0; }
-.dx-onward__lane { font: 600 16px/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-.dx-onward__text { display: block; max-width: 60ch; font: 400 16px/1.5 var(--dx-font-sans); color: hsl(var(--text)); }
+.dx-onward__lane { font: 600 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.dx-onward__text { display: block; max-width: 60ch; font: 400 var(--fs-secondary)/1.5 var(--dx-font-sans); color: hsl(var(--text)); }
 .dx-onward__link { grid-column: 1; justify-self: start; }
 .dx-onward__out { font-weight: 400; }
-.dx-onward__where { grid-column: 2; justify-self: start; align-self: center; font: 500 16px/1.2 var(--dx-font-mono); color: hsl(var(--text-faint)); }
+.dx-onward__where { grid-column: 2; justify-self: start; align-self: center; font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); color: hsl(var(--text-faint)); }
 .dx-onward--local .dx-onward__where { grid-row: auto; grid-column: 1 / -1; max-width: none; text-align: left; }
 
 /* Status pill: network / connection / identity state, state colors only.
@@ -828,7 +828,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
   display: inline-flex; align-items: center; gap: 8px; max-width: 132px; flex: 0 0 auto;
   height: var(--dx-strip-h); padding: 0 12px; border-radius: var(--dx-radius);
   border: 1px solid var(--dx-edge); background: hsl(var(--surface));
-  font: 500 16px/1.2 var(--dx-font-mono); color: hsl(var(--text-muted));
+  font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); color: hsl(var(--text-muted));
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .dx-pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: hsl(var(--text-faint)); flex: 0 0 auto; }
@@ -850,33 +850,34 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-hero--split { max-width: none; grid-template-columns: minmax(0, 1fr); gap: 32px; align-items: end; }
 .dx-eyebrow {
   display: inline-flex; align-items: center; gap: 8px;
-  font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase;
+  font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase;
   color: hsl(var(--text-muted));
 }
 .dx-eyebrow::before { content: ""; width: 7px; height: 7px; background: hsl(var(--primary)); border-radius: 50%; }
 .dx-eyebrow--plain::before { display: none; }
-/* Fluid display type (Power Design rule 3; stepped 32/40/56 at 768/1180 until
-   2026-10-20): the headline runs 32px at 360 to 48px at 1091, line-height
-   1.1; the small headline 24 to 32px. The px inside each clamp sit on the
-   scale (24/32/48) so the scale check reads them. */
+/* The one headline (laws 78-83, owner ruling 2026-11-05): primary (29px) on
+   a phone, hero (47px) from 640.02px; a smaller screen drops it one whole
+   step, never to a size between steps. Until 2026-11-05 it was a fluid
+   clamp(32px .. 48px); the small headline is primary at every width. */
 .dx-title {
-  font: 600 clamp(32px, 24px + 2.2vw, 48px)/1.1 var(--dx-font-display);
+  font: 600 var(--fs-primary)/1.1 var(--dx-font-display);
   letter-spacing: -.045em; color: hsl(var(--text-strong));
   text-wrap: balance; max-width: 16em;
 }
+@media (min-width: 640.02px) { .dx-title { font-size: var(--fs-hero); } }
 /* Two-tone headline (Flux Launch / defxn.com): the second sentence is muted. */
 .dx-title .dx-dim, .dx-title span.dx-dim { display: block; color: hsl(var(--text-faint)); }
 /* The one identity accent a headline may carry (DEFXN Ember: life, not ink). */
 .dx-title em { font-style: normal; color: hsl(var(--primary)); }
-.dx-title--sm { font-size: clamp(24px, 20px + 1vw, 32px); line-height: 1.1; letter-spacing: -.035em; }
-.dx-lede { font-size: clamp(16px, 16px + .5vw, 20px); line-height: 1.5; color: hsl(var(--text)); max-width: 62ch; text-wrap: pretty; }
-.dx-h2 { font: 600 clamp(20px, 16px + .5vw, 24px)/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); letter-spacing: -.02em; }
-.dx-h3 { font: 600 16px/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); }
+.dx-title--sm { font-size: var(--fs-primary); line-height: 1.1; letter-spacing: -.035em; }
+.dx-lede { font-size: var(--fs-secondary); line-height: 1.5; color: hsl(var(--text)); max-width: 62ch; text-wrap: pretty; }
+.dx-h2 { font: 600 var(--fs-primary)/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); letter-spacing: -.02em; }
+.dx-h3 { font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); }
 .dx-muted { color: hsl(var(--text-muted)); }
 .dx-faint { color: hsl(var(--text-faint)); }
 .dx-mono { font-family: var(--dx-font-mono); }
 /* "Small" is the floor: body size, quieter by colour where the page asks. */
-.dx-small { font-size: 16px; line-height: 1.5; }
+.dx-small { font-size: var(--fs-tertiary); line-height: 1.5; }
 /* Prose measure (Power Design rule 8): a block of help or small text stops at
    65ch; a span stays inline, so a note beside a value is untouched. */
 .dx-small:is(p, div), .dx-help:is(p, div) { display: block; max-width: 65ch; }
@@ -913,28 +914,28 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 /* Stat tiles. (Usable as <dl>/<div> pairs: list margins reset.) */
 .dx-stat :is(dt, dd) { margin: 0; }
 .dx-stat { display: grid; gap: 8px; padding: 16px; background: hsl(var(--surface)); border: 1px solid hsl(var(--border-subtle)); border-radius: var(--dx-radius); min-width: 0; }
-.dx-stat__label { font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-.dx-stat__value { font: 500 20px/1.15 var(--dx-font-sans); color: hsl(var(--text-strong)); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.dx-stat__value--mono { font: 500 16px/1.5 var(--dx-font-mono); }
-.dx-stat__note { font-size: 16px; color: hsl(var(--text-faint)); }
+.dx-stat__label { font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.dx-stat__value { font: 500 var(--fs-secondary)/1.15 var(--dx-font-sans); color: hsl(var(--text-strong)); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dx-stat__value--mono { font: 500 var(--fs-secondary)/1.5 var(--dx-font-mono); }
+.dx-stat__note { font-size: var(--fs-tertiary); color: hsl(var(--text-faint)); }
 
 /* Key/value rows, for exact records, keys and CIDs. Phone: one column, the
    value under its key; from 640.02px two columns. */
-.dx-kv { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 0; font-size: 16px; }
-.dx-kv dt { font: 500 16px/1.5 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.dx-kv { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin: 0; font-size: var(--fs-secondary); }
+.dx-kv dt { font: 500 var(--fs-tertiary)/1.5 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
 .dx-kv dd { margin: 0 0 8px; font-family: var(--dx-font-mono); color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
 /* A value this page does not know is a dash, never a 0 or a blank. */
 .dx-kv dd:empty::before, .dx-kv dd[data-unknown]::before { content: "—"; color: hsl(var(--text-faint)); }
 
 /* Tables. */
-.dx-table { width: 100%; border-collapse: collapse; font-size: 16px; }
+.dx-table { width: 100%; border-collapse: collapse; font-size: var(--fs-secondary); }
 .dx-table th {
   text-align: left; padding: 12px 16px; position: sticky; top: 0; background: hsl(var(--surface));
-  font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted));
+  font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted));
   border-bottom: 1px solid hsl(var(--border-default));
 }
 .dx-table td { padding: 12px 16px; border-bottom: 1px solid hsl(var(--border-subtle)); color: hsl(var(--text)); vertical-align: top; }
-.dx-table td.dx-mono, .dx-table td code { font-size: 16px; }
+.dx-table td.dx-mono, .dx-table td code { font-size: var(--fs-secondary); }
 .dx-table tbody tr:hover td { background: hsl(var(--raised)); }
 .dx-table tbody tr[aria-selected="true"] td { background: hsl(var(--reference-100)); }
 .dx-table-wrap { width: 100%; overflow-x: auto; }
@@ -942,7 +943,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 /* Badges: identity, role or state; never decoration. */
 .dx-badge {
   display: inline-flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 4px;
-  font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .04em;
+  font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .04em;
   background: hsl(var(--nested)); color: hsl(var(--text)); border: 1px solid hsl(var(--border-subtle));
 }
 .dx-badge[data-tone="live"] { background: hsl(var(--success-100)); color: hsl(var(--success-700)); border-color: hsl(var(--success-300)); }
@@ -956,7 +957,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   min-height: 44px; padding: 0 20px; border-radius: 999px;
-  font: 600 16px/1.2 var(--dx-font-sans); text-decoration: none; white-space: nowrap; cursor: pointer;
+  font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); text-decoration: none; white-space: nowrap; cursor: pointer;
   border: 1px solid var(--dx-edge); background: hsl(var(--reference-100)); color: hsl(var(--reference-700));
   transition: background .15s var(--dx-ease), border-color .15s var(--dx-ease), transform .15s var(--dx-ease);
 }
@@ -970,7 +971,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-btn--ghost:hover { background: hsl(var(--nested)); border-color: var(--dx-edge); color: hsl(var(--text-strong)); }
 .dx-btn--danger { background: hsl(var(--danger-100)); border-color: hsl(var(--danger-300)); color: hsl(var(--danger-700)); }
 .dx-btn--danger:hover { background: hsl(var(--danger-200)); border-color: hsl(var(--danger-400)); color: hsl(var(--danger-700)); }
-.dx-btn--sm { min-height: 44px; padding: 0 12px; font-size: 16px; }
+.dx-btn--sm { min-height: 44px; padding: 0 12px; font-size: var(--fs-secondary); }
 .dx-btn--block { width: 100%; }
 /* Disabled is a real style, not a fade (Power Design rule 13; opacity .45 left
    the label at 1.07:1 on the solid fill in light): --nested fill, --text-muted
@@ -993,7 +994,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-choice {
   display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px;
   background: transparent; border: 1px solid transparent; color: hsl(var(--text-muted));
-  font: 500 16px/1.2 var(--dx-font-sans); cursor: pointer; text-decoration: none;
+  font: 500 var(--fs-secondary)/1.2 var(--dx-font-sans); cursor: pointer; text-decoration: none;
 }
 .dx-choice:hover { color: hsl(var(--text-strong)); border-color: hsl(var(--reference-300)); }
 .dx-choice:is([aria-pressed="true"], [aria-selected="true"], [aria-current]:not([aria-current="false"])) {
@@ -1002,15 +1003,15 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 
 /* Fields ------------------------------------------------------------------- */
 .dx-field { display: grid; gap: 8px; }
-.dx-label { font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-.dx-help { font-size: 16px; line-height: 1.5; color: hsl(var(--text-faint)); }
+.dx-label { font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.dx-help { font-size: var(--fs-tertiary); line-height: 1.5; color: hsl(var(--text-faint)); }
 .dx-input, .dx-select, .dx-textarea {
   width: 100%; min-height: 44px; padding: 12px; border-radius: var(--dx-radius-sm);
   background: hsl(var(--depth)); border: 1px solid var(--dx-edge); color: hsl(var(--text-strong));
-  font: 400 16px/1.5 var(--dx-font-sans);
+  font: 400 var(--fs-secondary)/1.5 var(--dx-font-sans);
   transition: border-color .15s var(--dx-ease);
 }
-.dx-input--mono, .dx-textarea--mono { font-family: var(--dx-font-mono); font-size: 16px; }
+.dx-input--mono, .dx-textarea--mono { font-family: var(--dx-font-mono); font-size: var(--fs-secondary); }
 .dx-input::placeholder, .dx-textarea::placeholder { color: hsl(var(--text-faint)); }
 .dx-input:hover, .dx-select:hover, .dx-textarea:hover { border-color: hsl(var(--text-muted)); }
 /* Focus keeps the 2px reference ring (Power Design rule 13; the 1px border and
@@ -1020,13 +1021,13 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-textarea { min-height: 120px; resize: vertical; }
 .dx-file {
   display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: var(--dx-radius-sm);
-  background: hsl(var(--depth)); border: 1px dashed var(--dx-edge); color: hsl(var(--text-muted)); font-size: 16px;
+  background: hsl(var(--depth)); border: 1px dashed var(--dx-edge); color: hsl(var(--text-muted)); font-size: var(--fs-secondary);
 }
 .dx-file input[type="file"] { font: inherit; color: inherit; max-width: 100%; }
 .dx-file input[type="file"]::file-selector-button {
   margin-right: 12px; min-height: 44px; padding: 0 12px; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--dx-edge); background: hsl(var(--reference-100)); color: hsl(var(--reference-700));
-  font: 600 16px/1.2 var(--dx-font-sans);
+  font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans);
 }
 
 /* Steps: one active step at a time. */
@@ -1037,10 +1038,10 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 }
 .dx-step::before {
   content: counter(dx-step); grid-row: span 2; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
-  font: 600 16px/1.2 var(--dx-font-mono); border: 1px solid hsl(var(--border-default)); color: hsl(var(--text-muted)); background: hsl(var(--depth));
+  font: 600 var(--fs-tertiary)/1.2 var(--dx-font-mono); border: 1px solid hsl(var(--border-default)); color: hsl(var(--text-muted)); background: hsl(var(--depth));
 }
-.dx-step__title { font-weight: 600; font-size: 16px; color: inherit; }
-.dx-step__note { font-size: 16px; color: hsl(var(--text-faint)); }
+.dx-step__title { font-weight: 600; font-size: var(--fs-secondary); color: inherit; }
+.dx-step__note { font-size: var(--fs-tertiary); color: hsl(var(--text-faint)); }
 .dx-step[data-state="current"] { background: hsl(var(--reference-100)); color: hsl(var(--reference-700)); }
 .dx-step[data-state="current"]::before { border-color: hsl(var(--reference-400)); color: hsl(var(--reference-700)); background: hsl(var(--canvas)); }
 .dx-step[data-state="done"] { color: hsl(var(--text)); }
@@ -1051,7 +1052,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-note {
   display: grid; gap: 8px; padding: 12px 16px; border-radius: var(--dx-radius-sm);
   background: hsl(var(--raised)); border: 1px solid hsl(var(--border-subtle)); border-left: 3px solid hsl(var(--reference-400));
-  font-size: 16px; color: hsl(var(--text));
+  font-size: var(--fs-secondary); color: hsl(var(--text));
 }
 .dx-note[data-tone="warn"] { border-left-color: hsl(var(--warning)); }
 .dx-note[data-tone="live"] { border-left-color: hsl(var(--success)); }
@@ -1067,11 +1068,11 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-refusal[data-tone="warn"] .dx-refusal__code { color: hsl(var(--warning-700)); }
 /* calm, never shouting: the code is a sentence-case title, the labels are
    quiet sans at the 16px floor (Studio audit B19, 2026-10-21) */
-.dx-refusal__code { font: 600 16px/1.3 var(--dx-font-sans); color: hsl(var(--danger-700)); overflow-wrap: anywhere; }
+.dx-refusal__code { font: 600 var(--fs-secondary)/1.3 var(--dx-font-sans); color: hsl(var(--danger-700)); overflow-wrap: anywhere; }
 .dx-refusal__code::first-letter { text-transform: uppercase; }
-.dx-refusal__failure { color: hsl(var(--text-strong)); font-size: 16px; overflow-wrap: anywhere; }
-.dx-refusal dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 12px; margin: 0; font-size: 16px; }
-.dx-refusal dt { font: 500 16px/1.5 var(--dx-font-sans); color: hsl(var(--text-muted)); }
+.dx-refusal__failure { color: hsl(var(--text-strong)); font-size: var(--fs-secondary); overflow-wrap: anywhere; }
+.dx-refusal dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 12px; margin: 0; font-size: var(--fs-secondary); }
+.dx-refusal dt { font: 500 var(--fs-tertiary)/1.5 var(--dx-font-sans); color: hsl(var(--text-muted)); }
 .dx-refusal dd { margin: 0; color: hsl(var(--text)); overflow-wrap: anywhere; }
 
 /* Empty states say what is ready and the next step; they never look broken. */
@@ -1079,26 +1080,26 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
   display: grid; justify-items: start; gap: 8px; padding: 24px; border-radius: var(--dx-radius);
   border: 1px dashed hsl(var(--border-default)); background: hsl(var(--surface) / .5);
 }
-.dx-empty__title { font: 600 16px/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); }
-.dx-empty__body { font-size: 16px; color: hsl(var(--text-muted)); max-width: 52ch; }
+.dx-empty__title { font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); }
+.dx-empty__body { font-size: var(--fs-secondary); color: hsl(var(--text-muted)); max-width: 52ch; }
 
 /* Disclosure: reference copy lives behind a named summary. */
 .dx-disclosure { border: 1px solid hsl(var(--border-subtle)); border-radius: var(--dx-radius); background: hsl(var(--surface)); }
 .dx-disclosure > summary {
   list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  min-height: 44px; padding: 12px 16px; font: 600 16px/1.3 var(--dx-font-sans); color: hsl(var(--text-strong));
+  min-height: 44px; padding: 12px 16px; font: 600 var(--fs-secondary)/1.3 var(--dx-font-sans); color: hsl(var(--text-strong));
 }
 .dx-disclosure > summary::-webkit-details-marker { display: none; }
-.dx-disclosure > summary::after { content: "+"; font: 400 20px/1.2 var(--dx-font-mono); color: hsl(var(--text-muted)); }
+.dx-disclosure > summary::after { content: "+"; font: 400 var(--fs-secondary)/1.2 var(--dx-font-mono); color: hsl(var(--text-muted)); }
 .dx-disclosure[open] > summary::after { content: "−"; }
 .dx-disclosure > summary:hover { color: hsl(var(--reference-700)); }
-.dx-disclosure__body { padding: 0 16px 16px; display: grid; gap: 8px; font-size: 16px; color: hsl(var(--text)); }
+.dx-disclosure__body { padding: 0 16px 16px; display: grid; gap: 8px; font-size: var(--fs-secondary); color: hsl(var(--text)); }
 
 /* Log / console output. */
 .dx-log {
   margin: 0; padding: 12px 16px; border-radius: var(--dx-radius-sm);
   background: hsl(var(--depth)); border: 1px solid hsl(var(--border-subtle));
-  font: 400 16px/1.6 var(--dx-font-mono); color: hsl(var(--text)); white-space: pre-wrap; overflow-wrap: anywhere;
+  font: 400 var(--fs-secondary)/1.6 var(--dx-font-mono); color: hsl(var(--text)); white-space: pre-wrap; overflow-wrap: anywhere;
 }
 .dx-log [data-tone="danger"], .dx-log .err { color: hsl(var(--danger)); }
 .dx-log [data-tone="live"], .dx-log .ok { color: hsl(var(--success)); }
@@ -1115,12 +1116,12 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
   display: grid; place-items: center; gap: 8px; padding: 16px; text-align: center;
   background: hsl(var(--raised)); border: 0; border-top: 1px solid hsl(var(--border-subtle)); border-bottom: 1px solid hsl(var(--border-subtle));
 }
-.dx-handoff__self strong { font: 600 16px/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); }
+.dx-handoff__self strong { font: 600 var(--fs-secondary)/1.2 var(--dx-font-sans); color: hsl(var(--text-strong)); }
 .dx-handoff__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.dx-handoff__item { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 16px; color: hsl(var(--text)); }
+.dx-handoff__item { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: var(--fs-secondary); color: hsl(var(--text)); }
 /* The neighbour link is a target: a 44px line box, 8px from the next. */
-.dx-handoff__item a { display: inline-flex; align-items: center; min-height: 44px; font: 500 16px/1.2 var(--dx-font-mono); white-space: nowrap; }
-.dx-handoff__item .dx-faint { font: 500 16px/1.2 var(--dx-font-mono); }
+.dx-handoff__item a { display: inline-flex; align-items: center; min-height: 44px; font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); white-space: nowrap; }
+.dx-handoff__item .dx-faint { font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); }
 
 /* Schematic figures (Flux Launch grammar, Ember color) -------------------
    One grammar for every product's signature drawing. Strokes: 1.5 for the
@@ -1128,7 +1129,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
    the scaffolding, and the identity color marks exactly ONE thing per
    figure: what is live now (DEFXN.md: the identity color goes on the single
    record whose state the steps change, and its head marker). Flat fills, no
-   gradients, shadows or glow. SVG text sits on the type scale (16px floor:
+   gradients, shadows or glow. SVG text sits on the type scale (tertiary 11px
    a figure drawn for 12px labels re-spaces its layout, not its type). */
 .dx-frame {
   position: relative; padding: 16px; border-radius: var(--dx-radius);
@@ -1142,12 +1143,12 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 .dx-frame::before { top: 6px; left: 6px; border-width: 1px 0 0 1px; }
 .dx-frame::after { right: 6px; bottom: 6px; border-width: 0 1px 1px 0; }
 .dx-frame__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-.dx-frame__title { font: 500 16px/1.3 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-strong)); }
-.dx-frame__state { font: 500 16px/1.3 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-.dx-frame__note { margin-top: 8px; max-width: 65ch; font: 400 16px/1.5 var(--dx-font-mono); color: hsl(var(--text-muted)); }
+.dx-frame__title { font: 500 var(--fs-tertiary)/1.3 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-strong)); }
+.dx-frame__state { font: 500 var(--fs-tertiary)/1.3 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.dx-frame__note { margin-top: 8px; max-width: 65ch; font: 400 var(--fs-tertiary)/1.5 var(--dx-font-mono); color: hsl(var(--text-muted)); }
 .dx-sx { display: block; width: 100%; height: auto; overflow: visible; }
-.dx-sx text { font-family: var(--dx-font-sans); fill: hsl(var(--text)); font-size: 16px; }
-.dx-sx .sx-label { fill: hsl(var(--text-muted)); font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.dx-sx text { font-family: var(--dx-font-sans); fill: hsl(var(--text)); font-size: var(--fs-tertiary); }
+.dx-sx .sx-label { fill: hsl(var(--text-muted)); font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .06em; text-transform: uppercase; }
 .dx-sx .sx-strong { fill: hsl(var(--text-strong)); font-weight: 600; }
 .dx-sx .sx-frame { fill: hsl(var(--surface)); stroke: hsl(var(--border-subtle)); stroke-width: 1; }
 .dx-sx .sx-grid line, .dx-sx .sx-rule { stroke: hsl(var(--border-subtle)); stroke-width: 1; stroke-dasharray: 2 4; }
@@ -1184,15 +1185,15 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
 }
 .dx-strip__lead { grid-column: 1 / -1; display: grid; gap: 8px; }
 .dx-strip__item { display: grid; gap: 8px; min-width: 0; }
-.dx-strip__value { font: 600 20px/1.1 var(--dx-font-sans); letter-spacing: -.02em; color: hsl(var(--text-strong)); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dx-strip__value { font: 600 var(--fs-secondary)/1.1 var(--dx-font-sans); letter-spacing: -.02em; color: hsl(var(--text-strong)); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .dx-strip__value:empty::before, .dx-strip__value[data-unknown]::before { content: "—"; color: hsl(var(--text-faint)); }
-.dx-strip__label { font-size: 16px; color: hsl(var(--text-muted)); }
+.dx-strip__label { font-size: var(--fs-tertiary); color: hsl(var(--text-muted)); }
 
 /* Copy button for exact values: a button, so a 44px target (it was a 24px
    chip, the one open exception, until 2026-10-20). */
 .dx-copy {
   display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 0 8px; border-radius: 4px; cursor: pointer;
-  font: 500 16px/1.2 var(--dx-font-mono); letter-spacing: .04em;
+  font: 500 var(--fs-tertiary)/1.2 var(--dx-font-mono); letter-spacing: .04em;
   background: transparent; border: 1px solid var(--dx-edge); color: hsl(var(--text-muted));
 }
 .dx-copy:hover { color: hsl(var(--reference-700)); border-color: hsl(var(--reference-300)); background: hsl(var(--reference-100)); }
@@ -1205,7 +1206,7 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
   width: calc(100% - 2 * var(--dx-gutter)); max-width: calc(var(--dx-max) - 2 * var(--dx-gutter)); margin: 0 auto; padding: 20px 0 32px;
   display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
   border-top: 1px solid hsl(var(--border-subtle));
-  font: 500 16px/1.5 var(--dx-font-mono); letter-spacing: .06em; color: hsl(var(--text-faint));
+  font: 500 var(--fs-tertiary)/1.5 var(--dx-font-mono); letter-spacing: .06em; color: hsl(var(--text-faint));
 }
 /* Every footer link is a 44px target. */
 .dx-foot a { display: inline-flex; align-items: center; min-height: 44px; color: hsl(var(--text-muted)); text-decoration: none; }
@@ -1326,8 +1327,8 @@ a.dx-switch__home:hover { background: var(--dx-wash); color: hsl(var(--text-stro
   .dx-switch__preview .dx-preview__foot { bottom: -16px; margin: 4px -24px -16px; padding: 8px 24px 16px; }
   .dx-preview__tile { width: 56px; height: 56px; }
   .dx-preview__tile svg { width: 36px; height: 36px; }
-  .dx-preview__name { font-size: 24px; }
-  .dx-preview__what { font-size: 16px; }
+  .dx-preview__name { font-size: var(--fs-secondary); }
+  .dx-preview__what { font-size: var(--fs-secondary); }
   .dx-related__line { -webkit-line-clamp: 1; }
   .dx-product-link { min-height: 72px; padding: 8px 12px 8px 8px; }
   .dx-switch__preview { margin: 8px; }

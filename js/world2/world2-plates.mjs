@@ -30,21 +30,21 @@ export function paintPlate(spec) {
   const kind = spec[0], ink = token('--text-strong', '#f3f8f4'), mute = token('--text-muted', '#9aa3a8'), sig = token('--signal', '#3fd1a8');
   if (kind === 'record') {
     const [, rev, title, date, signed] = spec, w = 512, h = 512, pad = 40, cv = canvas(w, h), g = cv.getContext('2d');
-    g.fillStyle = mute; g.font = '500 30px ' + face.mono; if ('letterSpacing' in g) g.letterSpacing = '5px';
+    g.fillStyle = mute; g.font = '500 29px ' + face.mono; if ('letterSpacing' in g) g.letterSpacing = '5px';
     g.fillText(rev, pad, pad + 26);
     g.globalAlpha = .5; g.fillRect(pad, pad + 48, w - pad * 2, 2); g.globalAlpha = 1;
     if ('letterSpacing' in g) g.letterSpacing = '-1px';
-    g.fillStyle = ink; g.font = '700 66px ' + face.sans;
+    g.fillStyle = ink; g.font = '700 76px ' + face.sans;
     wrapWords(g, title, w - pad * 2, 3).forEach((l, i) => g.fillText(l, pad, pad + 140 + i * 74));
     if ('letterSpacing' in g) g.letterSpacing = '3px';
-    g.fillStyle = mute; g.font = '500 28px ' + face.mono; g.fillText(date, pad, h - pad);
+    g.fillStyle = mute; g.font = '500 29px ' + face.mono; g.fillText(date, pad, h - pad);
     if (signed) { g.fillStyle = sig; g.fillText(signed, w - pad - g.measureText(signed).width, h - pad); }
     return cv;
   }
   if (kind === 'rev') {
     const w = 512, h = Math.round(512 * .22 / .84), cv = canvas(w, h), g = cv.getContext('2d');
     if (!spec[1]) return cv;
-    g.fillStyle = ink; g.font = '600 64px ' + face.mono; if ('letterSpacing' in g) g.letterSpacing = '8px';
+    g.fillStyle = ink; g.font = '600 76px ' + face.mono; if ('letterSpacing' in g) g.letterSpacing = '8px';
     g.fillText(spec[1], 24, h * .7);
     return cv;
   }

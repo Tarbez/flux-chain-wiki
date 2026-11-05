@@ -139,7 +139,7 @@
       }
     }
 
-    ctx.font = '500 5px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.font = '500 7px ui-monospace, SFMono-Regular, Menlo, monospace';
     var index = 0;
     nodeRows = [];
     for (var row = 1; row < rows; row += 2) {
@@ -259,7 +259,7 @@
   function paintActivity() {
     var ctx = activity.getContext('2d');
     ctx.clearRect(0, 0, width, height);
-    ctx.font = '600 5px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.font = '600 7px ui-monospace, SFMono-Regular, Menlo, monospace';
     routes.forEach(function (route) {
       route.nodes.forEach(function (node, index) {
         var moment = route.age - index * 3.7;
@@ -458,7 +458,7 @@
     ctx.textBaseline = 'top';
     ctx.globalAlpha = visibility(0);
     ctx.fillStyle = colors.muted;
-    ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.font = '600 11px ui-monospace, SFMono-Regular, Menlo, monospace';
     ctx.fillText('FLUX PROTOCOL / HOME', margin, nav + 38);
     hit('home', margin, nav + 26, 190, 34);
     ctx.fillStyle = colors.accent;
@@ -481,10 +481,10 @@
       ctx.fillText(('0' + (node.index + 1)).slice(-2),rect.x + pad,rect.y + pad);
       if (mobile) {
         ctx.fillStyle = colors.accent;
-        ctx.font = '300 32px Albert Sans, sans-serif';
+        ctx.font = '300 29px Albert Sans, sans-serif';
         ctx.fillText(stageSymbols[node.index],rect.x + pad,rect.y + rect.height / 2 - 11);
         ctx.fillStyle = colors.strong;
-        ctx.font = '700 19px Albert Sans, sans-serif';
+        ctx.font = '700 18px Albert Sans, sans-serif';
         ctx.fillText(node.title.toUpperCase(),rect.x + pad + 54,rect.y + rect.height / 2 - 6,
           rect.width - pad * 2 - 54);
       } else {
@@ -509,7 +509,7 @@
     var offset = scrollY;
     ctx.textBaseline = 'top';
     ctx.globalAlpha = visibility(0);
-    ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.font = '600 11px ui-monospace, SFMono-Regular, Menlo, monospace';
     ctx.fillStyle = colors.muted;
     ctx.fillText('FLUX PROTOCOL / HOME',margin,nav + 36 - offset);
     hit('home',margin,nav + 25 - offset,190,32);
@@ -520,7 +520,7 @@
     ctx.fillText('AGREEMENT LIFECYCLE.',margin,nav + 116 - offset,width - margin * 2);
     var backX = width - margin - (mobile ? 96 : 116);
     ctx.fillStyle = colors.muted;
-    ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
+    ctx.font = '600 11px ui-monospace, SFMono-Regular, Menlo, monospace';
     ctx.fillText('← ALL STAGES',backX,nav + (mobile ? 36 : 43) - offset);
     hit('overview',backX - 8,nav + (mobile ? 24 : 31) - offset,130,36);
 
@@ -557,10 +557,10 @@
     labels.forEach(function (label,i) {
       var x = contentX + i * (buttonWidth + 8), by = factsY - offset;
       ctx.fillStyle = i === factIndex ? colors.accent : colors.muted;
-      ctx.font = '600 16px ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.font = '600 11px ui-monospace, SFMono-Regular, Menlo, monospace';
       ctx.fillText(factSymbols[i],x + 10,by + 11);
       ctx.fillStyle = i === factIndex ? colors.strong : colors.muted;
-      ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, monospace';
+      ctx.font = '600 11px ui-monospace, SFMono-Regular, Menlo, monospace';
       ctx.fillText(label.toUpperCase(),x + 31,by + 14,buttonWidth - 35);
       hit('fact',x,by,buttonWidth,42,i);
     });
