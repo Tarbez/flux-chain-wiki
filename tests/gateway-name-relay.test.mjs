@@ -19,7 +19,7 @@ import { resolveName, askGatewayProof } from '../gateway/resolve-name.js';
 import { relayWire } from '../gateway/chain-relay.js';
 import { readRelease, releaseRequestOf } from '../gateway/release.js';
 import { appReleaseSigningText, APP_RELEASE_SCHEMA, APP_BLOCK_BYTES } from '../gateway/vendor/bundle-deploy/app-release-core.js';
-import { buildResolverRecordWithSigner } from '../gateway/vendor/dense-wire/flx-builders.mjs';
+import { buildResolverRecordWithSigner, nameEnding } from '../gateway/vendor/dense-wire/flx-builders.mjs';
 import { encodeRecordPayload } from '../gateway/vendor/dense-wire/flx-resolver-record-client.mjs';
 import { sha256Hex } from '../gateway/vendor/dense-wire/flx-crypto.mjs';
 import { signer, buildProof, tamper } from './lib/dense-wire-proof.mjs';
@@ -92,7 +92,7 @@ test('the shell never opens the node: its CSP connects to its own origin only, a
 
 /* --- /_release/ through the relay ----------------------------------------------------------------------------- */
 
-const RELEASE_NAME = 'site.fxn'; // the vendored release rule (app-release-core.js NAME) takes .fxn and .ark only
+const RELEASE_NAME = FQDN; // site.fxndev: a release counts under the ending its network serves (fxn-devnet: .fxndev)
 const want = releaseRequestOf('/_release/ark-browser');
 const b64 = (hex) => Buffer.from(hex, 'hex').toString('base64');
 
@@ -112,7 +112,7 @@ const recordsReply = (rows) => `RESOLVER_RECORDS\tbundle\t${rows.length}\n` + ro
 test('a release resolves through the relay: the bundle chain is read by its one line and the owner-signed release counts', async () => {
   const owner = signer();
   const fake = relay(recordsReply([await releaseRow({ owner })]));
-  const read = await readRelease({ name: RELEASE_NAME, ownerHex: owner.pubHex, want, wire: fake.wire });
+  const read = await readRelease({ name: RELEASE_NAME, ownerHex: owner.pubHex, want, wire: fake.wire, ending: nameEnding(NETWORK) });
   assert.equal(read.ok, true, JSON.stringify(read));
   assert.equal(read.release.sha256, 'c'.repeat(64));
   assert.deepEqual(read.release.blocks, ['d'.repeat(64)]);
@@ -134,7 +134,17 @@ test('a tampered release record, or a release the owner did not sign, is refused
   const stranger = signer();
   const notOwner = await readRelease({ name: RELEASE_NAME, ownerHex: owner.pubHex, want, wire: relay(recordsReply([await releaseRow({ owner: stranger })])).wire });
   assert.equal(notOwner.reason, 'RELEASE_PROOF_INVALID');
-  assert.match(notOwner.detail, /does not own site\.fxn/);
+  assert.match(notOwner.detail, /does not own site\.fxndev/);
+});
+
+test('the gateway reads releases under its own network\'s ending: a .fxndev release does not count for a mainnet gateway', async () => {
+  const owner = signer();
+  const rows = recordsReply([await releaseRow({ owner })]);
+  const devnet = await readRelease({ name: RELEASE_NAME, ownerHex: owner.pubHex, want, wire: relay(rows).wire });
+  assert.equal(devnet.ok, true, `the default is name-config.js NETWORK (fxn-devnet): ${JSON.stringify(devnet)}`);
+  const mainnet = await readRelease({ name: RELEASE_NAME, ownerHex: owner.pubHex, want, wire: relay(rows).wire, ending: nameEnding('fxn-mainnet') });
+  assert.equal(mainnet.reason, 'RELEASE_PROOF_INVALID');
+  assert.match(mainnet.detail, /not under \.fxn, the one ending this network serves/);
 });
 
 test('a relay that refuses the release read is named, and an empty chain is "nothing published"', async () => {

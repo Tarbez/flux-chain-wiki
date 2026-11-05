@@ -578,7 +578,7 @@ async function main() {
   const wanted = releaseRequestOf(location.pathname, location.search);
   if (wanted?.invalid) return renderStatus("RELEASE_ADDRESS", "Use /_release/<product>, for example /_release/ark-browser.");
   if (wanted) {
-    const read = await readRelease({ name, ownerHex: resolved.owner, want: wanted });
+    const read = await readRelease({ name, ownerHex: resolved.owner, want: wanted, ending: served.ending });
     if (!read.ok) return renderStatus(read.reason, read.detail);
     return read.release.sealed ? renderTesterRelease(name, read.release) : renderRelease(name, read.release);
   }

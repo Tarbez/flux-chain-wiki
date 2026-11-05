@@ -55,7 +55,13 @@ export const SEALED_ALGORITHMS = Object.freeze([SEALED_ALGORITHM_XCHACHA, SEALED
 
 const CID = /^[0-9a-f]{64}$/;
 const SHA256 = /^[0-9a-f]{64}$/;
-const NAME = /^[a-z0-9][a-z0-9-]{0,62}\.(fxn|ark)$/;
+/* A name's form only: one label, then one ending. Which endings exist and which one this network serves is the
+   shared name rule's (dense-wire web/flx-builders.mjs isClaimableDomainName and nameEnding), checked where the
+   owner is proven (verifyDomainProof with the network pinned). This file keeps no list of endings, so a new ending
+   (.fxndev on the test networks, 2026-10-29) never needs a change here. A reader that knows its network passes that
+   network's one ending (`ending`, from the shared nameEnding(network)), and a release under any other ending is
+   refused by name: .fxndev counts on fxn-devnet and is refused on fxn-mainnet (2026-11-05). */
+const NAME = /^[a-z0-9][a-z0-9-]{0,62}\.[a-z]{2,63}$/;
 const WORD = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 const VERSION = /^\d+\.\d+\.\d+(-[0-9a-z.-]+)?$/i;
 const FILENAME = /^[A-Za-z0-9][A-Za-z0-9 ._+-]{0,199}$/;
@@ -86,12 +92,15 @@ export function appReleaseSigningText(value) {
 /**
  * Every problem with the fields, as sentences; an empty list means the shape is right.
  * It checks shape only. Signature and ownership are separate checks.
+ * `ending`, when given, is the one name ending the reader's network serves (dense-wire nameEnding(network), never a
+ * list kept here): a release named under another ending is a problem.
  */
-export function appReleaseProblems(value) {
+export function appReleaseProblems(value, { ending = null } = {}) {
   const f = value || {};
   const problems = [];
   if (f.schema !== APP_RELEASE_SCHEMA) problems.push(`schema is ${JSON.stringify(f.schema)}, not ${APP_RELEASE_SCHEMA}`);
-  if (!NAME.test(f.name || '')) problems.push('name is not one label plus .fxn or .ark');
+  if (!NAME.test(f.name || '')) problems.push('name is not one label plus one ending, such as browser.fxn');
+  else if (ending && !f.name.endsWith(`.${ending}`)) problems.push(`name ${f.name} is not under .${ending}, the one ending this network serves`);
   for (const key of ['product', 'channel', 'platform', 'arch']) if (!WORD.test(f[key] || '')) problems.push(`${key} is not a lowercase word`);
   if (!VERSION.test(f.version || '')) problems.push('version is not major.minor.patch');
   if (!Number.isSafeInteger(f.sequence) || f.sequence < 1) problems.push('sequence is not a whole number of 1 or more');
@@ -148,7 +157,9 @@ export function keyHexOfBase64(b64) {
 
 /**
  * Sorts every app release of `want` among decoded chain rows into counted and rejected.
- * `want` = { name, product, channel, platform, arch, sealed }; `ownerHex` is the name's owner key as
+ * `want` = { name, product, channel, platform, arch, sealed, ending }; `ending` (optional) is the one name ending the
+ * reader's network serves, from the shared nameEnding(network), and a release under another is rejected by name.
+ * `ownerHex` is the name's owner key as
  * 64 hex, from DOM_WHO (release-readers.mjs) or a verified DOM_PROOF (the gateway).
  * A row is { cid, signer (the record's G block), value, atSec, pos }. Returns { releases, rejected }.
  * A sealed release counts only for a reader that asks for sealed ones (`want.sealed`), and a public
@@ -164,7 +175,7 @@ export async function settleAppReleases(rows, want, ownerHex) {
     if (value.platform !== want.platform || value.arch !== want.arch) continue;
     if ((value.sealed !== undefined) !== Boolean(want.sealed)) continue;
     const reject = (why) => rejected.push({ recordCid: row.cid, version: value.version ?? null, sequence: value.sequence ?? null, why });
-    const problems = appReleaseProblems(value);
+    const problems = appReleaseProblems(value, { ending: want.ending ?? null });
     if (problems.length) { reject(`its fields are wrong: ${problems.join('; ')}`); continue; }
     if (!(await appReleaseSignatureVerifies(value))) { reject('its signature does not verify against its ownerPublicKey'); continue; }
     const keyHex = keyHexOfBase64(value.ownerPublicKey);

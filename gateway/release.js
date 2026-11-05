@@ -24,7 +24,8 @@ import { relayWire } from "./chain-relay.js";
 import { settleAppReleases, latestAppRelease } from "./vendor/bundle-deploy/app-release-core.js";
 import { blake3 } from "./vendor/flx-codec/blake3.js";
 import { CONTENT_ROUTE, hexOf } from "./content.js";
-import { CHAIN_READ_PATH } from "./name-config.js";
+import { CHAIN_READ_PATH, NETWORK } from "./name-config.js";
+import { nameEnding } from "./vendor/dense-wire/flx-builders.mjs";
 
 export const RELEASE_PATH = "/_release/";
 export const BUNDLE_CHAIN_ID = "bundle";
@@ -44,8 +45,10 @@ export function releaseRequestOf(pathname, search = "") {
 const RECORD_PROOF_CODES = new Set(["RRC_READBACK_MISMATCH", "RRC_FOREIGN_RECORD", "RRC_PAYLOAD_UNREADABLE"]);
 
 /** -> { ok: true, release, rejected } | { ok: false, reason, detail }. `wire` reads the bundle chain: the gateway's relay
- *  (chain-relay.js) unless a test passes its own. */
-export async function readRelease({ name, ownerHex, want, wire = relayWire({ path: CHAIN_READ_PATH }) }) {
+ *  (chain-relay.js) unless a test passes its own. `ending` is the one name ending this gateway's network serves (the
+ *  shared nameEnding(network)); a release under another ending does not count. */
+export async function readRelease({ name, ownerHex, want, wire = relayWire({ path: CHAIN_READ_PATH }), ending = NETWORK ? nameEnding(NETWORK) : null }) {
+  want = { ...want, ending };
   let rows;
   try {
     rows = await createResolverRecordClient({ wire, resolverChainId: BUNDLE_CHAIN_ID, kindMarker: KIND }).listRecords();
