@@ -43,3 +43,6 @@ The drift check is tests/vendored-dense-wire.test.mjs. It reads every file in th
 
 Re-vendored 2026-11-03 (audit round 11 merge). The source is audit-fix-all-r11 (6494d65), read with git show.
 One copy was behind it: flx-dumb-parser.mjs. The parity lane moved every box read into that one parser.
+
+Re-vendored 2026-11-05 (release-ready). The source is defxn-defi-rs release-ready (617d534), read with git show.
+One copy was behind it: flx-identity-bridge.mjs. Its comment named tweetnacl as the key source; the code is unchanged.
