@@ -51,14 +51,15 @@ async function signIn() {
   Object.defineProperty(input, 'files', { value: [new dom.window.File([KIT_TEXT], 'real.flx')], configurable: true });
   input.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
   await until(() => container.querySelector('[data-ark-auth="field-pin"]'), 'the unlock form');
-  const set = (name, value) => {
-    const field = container.querySelector(`[data-ark-auth="field-${name}"]`);
+  // Round 14: the panel asks one field per step (PIN, then password), with Next between them and Unlock on the last.
+  const step = async (name, value) => {
+    const field = await until(() => container.querySelector(`[data-ark-auth="field-${name}"]`), `the ${name} step`);
     Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(field, value);
     field.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    container.querySelector('[data-ark-auth="form"]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
   };
-  set('pin', KIT_PIN);
-  set('password', KIT_PASSWORD);
-  container.querySelector('[data-ark-auth="form"]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+  await step('pin', KIT_PIN);
+  await step('password', KIT_PASSWORD);
   return until(() => changes.find(Boolean), 'sign-in');
 }
 
