@@ -249,7 +249,16 @@ export function isClaimableDomainName(name) {
   const [label, tld] = parts;
   // a label of the key-name shape belongs to the key it is made from (keyName), never to a claim
   if (isKeyNameLabel(label)) return false;
+  // owner ruling 2026-11-05: no `xn--` label and no lookalike letters, decided by structure (isTaggedLabel)
+  if (isTaggedLabel(label)) return false;
   return NAME_ENDINGS.includes(tld);
+}
+
+/** Same rule as the Rust `chain::is_tagged_label`: hyphens in a label's third and fourth places (RFC 5891 section
+ *  4.2.3.1). `xn--` is punycode, which decodes to letters of another script; refused by position, so a tag invented
+ *  later is refused too. Without tags a label holds Latin small letters, digits and hyphens only: one script. */
+export function isTaggedLabel(label) {
+  return label.length >= 4 && label[2] === "-" && label[3] === "-";
 }
 
 // --- Name rent (owner rulings 2026-10-29; Rust `name_rent.rs`) ---------------
@@ -690,6 +699,39 @@ export async function buildDomainRentWithSigner({ signer, pos, prevCid, fqdn, he
     throw new Error(`A rent pays FXN in base units. Missing: an amount of 1 base unit or more (got ${JSON.stringify(String(amount))}). To fix: pay what DOM_RENT_QUOTE names.`);
   }
   const body = `${domainEntryHead(signer.pubHex, DOMAIN_KIND_RENT, fqdn, pos, prevCid, nowSec)}-C${headCid}-C${encodePriceField(String(years))}-C${encodePriceField(units.toString())}-C${lockCid}`;
+  return signDomainEntry(signer, body);
+}
+
+// --- A name a DAO safe holds (owner ruling 2026-11-05; Rust `name_safe.rs`) ----
+
+export const DOMAIN_KIND_SAFE = "KDOMSAFE1";
+export const SAFE_ACTIONS = Object.freeze(["take", "give", "point", "renew"]);
+
+/** The message every vote of a safe's decision signs (Rust `name_safe::covered`): the name, the ownership head, the
+ *  safe, the action and the action's own boxes, one per line. */
+export function domainSafeCovered({ fqdn, headCid, safe, action, boxes = [] }) {
+  return `FXN-DOMSAFE-V1\n${fqdn}\n${headCid}\n${safe}\n${action}\n${boxes.map((b) => `${b}\n`).join("")}`;
+}
+
+/** One safe signer's vote: `{ signer, signature }` over `domainSafeCovered(...)`. */
+export async function signSafeVoteWithSigner(signer, covered) {
+  return { signer: signer.pubHex, signature: await signer.signText(covered) };
+}
+
+/** Build and sign a KDOMSAFE1 (Rust `chain::domain_safe`). Any key files it; `votes` are K of the safe's signers over
+ *  `domainSafeCovered`. `boxes` are the action's own: none for take; [newOwnerPubHex, its dual-sig] for give; [prior
+ *  record CID, ...target boxes] for point; [years, FXN, lock CID] (price-field encoded) for renew. */
+export async function buildDomainSafeWithSigner({ signer, pos, prevCid, fqdn, headCid, safe, action, boxes = [], votes, nowSec }) {
+  if (!isClaimableDomainName(fqdn)) throw refuseName(fqdn, "carry a safe's decision for");
+  requireCid(headCid, "ownership head CID", `read the current head with DOM_WHO ${fqdn} and use its CID.`);
+  requireCid(safe, "safe address", "pass the safe's 64-hex address (the genesis plan's safe row).");
+  if (!SAFE_ACTIONS.includes(action)) {
+    throw new Error(`That safe action is not one this chain reads. Missing: one of ${SAFE_ACTIONS.join(", ")} (got ${JSON.stringify(action)}). To fix: pick one.`);
+  }
+  if (!Array.isArray(votes) || votes.length < 1 || votes.some((v) => !/^[0-9a-f]{64}$/.test(v.signer ?? "") || !/^[0-9a-f]{128}$/.test(v.signature ?? ""))) {
+    throw new Error("A safe's decision carries its signers' votes. Missing: at least one { signer: 64 hex, signature: 128 hex }. To fix: gather the votes with signSafeVoteWithSigner over domainSafeCovered.");
+  }
+  const body = `${domainEntryHead(signer.pubHex, DOMAIN_KIND_SAFE, fqdn, pos, prevCid, nowSec)}-C${headCid}-C${safe}-C${encodePriceField(action)}${boxes.map((b) => `-C${b}`).join("")}-C${votes.map((v) => v.signer + v.signature).join("")}`;
   return signDomainEntry(signer, body);
 }
 

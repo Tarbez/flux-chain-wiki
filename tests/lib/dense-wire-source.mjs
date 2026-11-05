@@ -46,7 +46,9 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const OVERRIDE = process.env.DENSE_WIRE_WEB || null;
 export const REPO = process.env.DENSE_WIRE_REPO || path.resolve(ROOT, '..', 'defxn-defi-rs');
-export const REV = process.env.DENSE_WIRE_REV || 'f41e5049af25fd1eafa2bb20ae6572dbc64e9cfd';
+// 2026-11-05 (names rulings N1 to N3): the default rev is 9612071 on names-rulings. flx-builders.mjs (isTaggedLabel:
+// no xn-- label; the KDOMSAFE1 builders) and flx-signing-doors.mjs (DOMAIN_SAFE) were re-copied from it with git show.
+export const REV = process.env.DENSE_WIRE_REV || '96120719df4371b1c8448e1244c955d8f4ec95b5';
 
 /** Where `name` (a path under dense-wire/web) is read from, for messages. */
 export function sourceName(name) {
