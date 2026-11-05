@@ -38,7 +38,10 @@
 //     signed by the holder then; every other action is by the safe holding the
 //     name. The safe's preimage hashes to its address, its K obeys the one
 //     quorum rule (K > 2N/3, flx-quorum.mjs), and K of its signers' votes
-//     verify over domainSafeCovered (Rust name_safe.rs, judge_safe_votes);
+//     verify over domainSafeCovered bound to the pinned network (Rust
+//     name_safe.rs, judge_safe_votes). A decision with no network pinned is
+//     refused. Post-quantum approvals, test keys and suspended seats are DAO
+//     state, named in notChecked;
 //   - with `network` pinned (owner rulings 2026-10-29): the name is under the
 //     one ending that network serves (.fxn on fxn-mainnet, .fxndev on every
 //     test network), and on the mainnet the term is recomputed from the
@@ -63,7 +66,7 @@
 //     `notChecked` says so. Pin it.
 
 import { admit, signaturePrefix, utf8OfHex, hexOfUtf8 } from "./flx-dumb-parser.mjs";
-import { sha256Hex, verifyHex } from "./flx-crypto.mjs";
+import { sha256Hex, verifyBytesHex, verifyHex } from "./flx-crypto.mjs";
 import { quorumFor } from "./flx-quorum.mjs";
 import {
   DOMAIN_KIND_BUY,
@@ -73,6 +76,7 @@ import {
   DOMAIN_KIND_SAFE,
   decodeTarget,
   domainSafeCovered,
+  domainSafeVoteBytes,
   readSafeDecision,
   safeAddressOf,
   DOMAIN_KIND_XFER,
@@ -210,7 +214,7 @@ export async function verifyDomainProof({ fqdn, entries, genesisPubHex, network,
   for (let i = 1; i < read.length; i++) {
     const e = read[i];
     if (e.kind === DOMAIN_KIND_SAFE) {
-      const judged = await judgeSafeDecision({ e, i, fqdn, owner, head, safes, last: i === read.length - 1, notChecked });
+      const judged = await judgeSafeDecision({ e, i, fqdn, owner, head, safes, network, last: i === read.length - 1, notChecked });
       if (judged.kind === "refused") return judged;
       if (judged.record) {
         record = judged.record;
@@ -327,7 +331,10 @@ export async function verifyDomainProof({ fqdn, entries, genesisPubHex, network,
 
 /** A DAO safe's decision in a proof (Rust `domain_claims::observe_safe_on` and `judge_safe_votes`). Returns
  *  `{ owner }` for a take or a give, `{ record }` for a final point, `{ rent }` for a renewal, or a refusal. */
-async function judgeSafeDecision({ e, i, fqdn, owner, head, safes, last, notChecked }) {
+async function judgeSafeDecision({ e, i, fqdn, owner, head, safes, network, last, notChecked }) {
+  if (network === undefined) {
+    return refuse("SafeNeedsNetwork", `entry ${i} is a safe's decision, and its votes are bound to a network nobody pinned`, "the network this reader trusts", "pass network to verifyDomainProof and verify again", i);
+  }
   let d;
   try {
     d = readSafeDecision(e.raw);
@@ -352,16 +359,17 @@ async function judgeSafeDecision({ e, i, fqdn, owner, head, safes, last, notChec
   if (!Number.isInteger(need) || signers.length === 0 || need > signers.length || need < quorumFor(signers.length)) {
     return refuse("SafeOutsideQuorum", `the safe asks ${pre.parts[3]} of ${signers.length} signers`, `K at least ${quorumFor(signers.length)} and at most ${signers.length} (K > 2N/3)`, "a node admits no such decision; ask another node", i);
   }
-  const covered = domainSafeCovered({ fqdn, headCid: d.head, safe: d.safe, action: d.action, boxes: d.boxes });
+  const bound = domainSafeVoteBytes(network, domainSafeCovered({ fqdn, headCid: d.head, safe: d.safe, action: d.action, boxes: d.boxes }));
   const counted = new Set();
   for (const v of d.votes) {
     if (!signers.includes(v.signer) || counted.has(v.signer)) continue;
-    if (await verifyHex(v.signer, covered, v.signature)) counted.add(v.signer);
+    if (await verifyBytesHex(v.signer, bound, v.signature)) counted.add(v.signer);
   }
   if (counted.size < need) {
     return refuse("SafeVotesShort", `${counted.size} of the safe's ${signers.length} signers voted for decision ${i}, and the safe needs ${need}`, `${need - counted.size} more vote(s) over the decision's covered message`, "the node admits no such decision; ask another node for the proof", i);
   }
   notChecked.push(`safe configuration: ${d.safe}'s signers are read from the preimage of its address as created; a later configuration the DAO filed is node state`);
+  notChecked.push(`council gate: post-quantum approvals, test keys and suspended seats for decision ${e.cid} are DAO state, not in the proof (the admitting node checked them)`);
   if (d.action === "take") return { owner: d.safe };
   if (d.action === "give") {
     const [to, sig] = d.boxes;

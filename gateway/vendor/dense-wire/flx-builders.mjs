@@ -713,9 +713,16 @@ export function domainSafeCovered({ fqdn, headCid, safe, action, boxes = [] }) {
   return `FXN-DOMSAFE-V1\n${fqdn}\n${headCid}\n${safe}\n${action}\n${boxes.map((b) => `${b}\n`).join("")}`;
 }
 
-/** One safe signer's vote: `{ signer, signature }` over `domainSafeCovered(...)`. */
-export async function signSafeVoteWithSigner(signer, covered) {
-  return { signer: signer.pubHex, signature: await signer.signText(covered) };
+/** The bytes a safe signer's vote signs: `domainSafeCovered(...)` bound to the network (Rust
+ *  `chain::network_covered`), so a vote given on one network counts on no other. */
+export function domainSafeVoteBytes(network, covered) {
+  return networkCovered(network, new TextEncoder().encode(covered));
+}
+
+/** One safe signer's vote: `{ signer, signature }` over `domainSafeVoteBytes(network, covered)`. Past A10 a council
+ *  seat also files its `KDAOPQAPPR1` over those bytes, or its vote does not count. */
+export async function signSafeVoteWithSigner(signer, covered, network) {
+  return { signer: signer.pubHex, signature: await signer.signBytes(domainSafeVoteBytes(network, covered)) };
 }
 
 /** Read a KDOMSAFE1 (Rust `name_safe::read_safe_decision`): `{ fqdn, head, safe, action, boxes, votes, m }`, or throws
