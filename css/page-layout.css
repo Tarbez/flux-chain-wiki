@@ -8,13 +8,12 @@
    specificity, so a component that sets its own font still wins. --font-sans is the brand slot
    (assets/kit/defxn-fonts.css). */
 /* The type scale (docs/PRODUCT-DESIGN-LAWS.md laws 78-83): base 11px, ratio 1.618, each step rounded
-   to whole px. Set once here; pages use these names and never write a raw px size. Roles: tertiary =
+   to whole px. Pages use these names and never write a raw px size. Roles: tertiary =
    captions, helper text, metadata, mono labels; secondary = body, lede, subheads, card titles; primary =
    section and panel headings; hero = a page hero; display = the one display headline of a page. micro is
    a last resort (law 81). A size between steps is a defect (law 82). */
-:root {
-  --fs-micro:7px; --fs-tertiary:11px; --fs-secondary:18px; --fs-primary:29px; --fs-hero:47px; --fs-display:76px;
-}
+/* The steps themselves are defined once, by the DEFXN product kit (assets/kit/defxn-fonts.css, synced from
+   flux/defxn-product-kit; owner ruling 2026-11-05: one definition). Every page loads that sheet. */
 :where(body) { font-family:var(--font-sans, system-ui, sans-serif); }
 :where(button, input, select, textarea) { font:inherit; }
 .hero-alive { --page-width:1080px; --page-gutter:clamp(20px,4cqw,56px); --page-top:clamp(32px,6cqh,64px); }
