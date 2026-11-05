@@ -747,13 +747,75 @@ export function readSafeDecision(raw) {
   for (let i = 0; i < votesBox.length; i += 192) votes.push({ signer: votesBox.slice(i, i + 64), signature: votesBox.slice(i + 64, i + 192) });
   const boxes = [];
   for (let i = 4; i < n - 1; i++) boxes.push(raw.c(i));
+  let batch = null;
+  if (boxes.length > 0 && boxes.at(-1).startsWith("Z")) batch = readSafeBatchPath(boxes.pop());
   const ok =
     (action === "take" && boxes.length === 0) ||
     (action === "give" && boxes.length === 2 && /^[0-9a-f]{64}$/.test(boxes[0]) && /^[0-9a-f]{128}$/.test(boxes[1])) ||
     (action === "point" && boxes.length >= 2 && /^[0-9a-f]{64}$/.test(boxes[0])) ||
     (action === "renew" && boxes.length === 3 && /^[0-9a-f]{64}$/.test(boxes[2]));
   if (!ok) throw new Error(`the ${action} decision's boxes do not read (name_safe.rs names each action's boxes)`);
-  return { fqdn, head, safe, action, boxes, votes, m: Number(raw.payload("M")) };
+  return { fqdn, head, safe, action, boxes, votes, batch, m: Number(raw.payload("M")) };
+}
+
+function readSafeBatchPath(path) {
+  const body = path.slice(1);
+  const why = "the batch box must be Z<8 hex row index><64 hex sibling>..., at most 16 siblings, the index inside them";
+  if (body.length < 8 || (body.length - 8) % 64 !== 0 || !/^[0-9a-f]+$/.test(body)) throw new Error(why);
+  const index = parseInt(body.slice(0, 8), 16);
+  const siblings = body.slice(8).match(/.{64}/g) ?? [];
+  if (siblings.length > 16 || index >= 2 ** siblings.length) throw new Error(why);
+  return { index, siblings };
+}
+
+const safeHex = (bytes) => [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+const safeUnhex = (hex) => new Uint8Array((hex.match(/../g) ?? []).map((h) => parseInt(h, 16)));
+async function safeSha(...parts) {
+  const all = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const p of parts) {
+    all.set(p, at);
+    at += p.length;
+  }
+  return safeHex(new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", all)));
+}
+const safeLeaf = (covered) => safeSha(new TextEncoder().encode("FXN-DOMSAFE-LEAF-V1\0"), new TextEncoder().encode(covered));
+const safeNode = (left, right) => safeSha(new TextEncoder().encode("FXN-DOMSAFE-NODE-V1\0"), safeUnhex(left), safeUnhex(right));
+
+/** The root a batch row and its path compute (Rust `name_safe::batch_root_of`). */
+export async function safeBatchRootOf(covered, index, siblings) {
+  let at = await safeLeaf(covered);
+  let i = index;
+  for (const sibling of siblings) {
+    at = i % 2 === 1 ? await safeNode(sibling, at) : await safeNode(at, sibling);
+    i = Math.floor(i / 2);
+  }
+  return at;
+}
+
+/** What a voter signs for a batch, before the network binding (Rust `name_safe::batch_covered`). */
+export function domainSafeBatchCovered(root) {
+  return `FXN-DOMSAFE-BATCH-V1\n${root}\n`;
+}
+
+/** A batch's root and each row's path box, in row order (Rust `name_safe::batch_tree`). `rows` are `domainSafeCovered`
+ *  results. A seat signs `domainSafeBatchCovered(root)` once; each record carries its row's path as its last box. */
+export async function domainSafeBatch(rows) {
+  let size = 1;
+  while (size < rows.length) size *= 2;
+  let level = await Promise.all(rows.map((r) => safeLeaf(r)));
+  const empty = await safeSha(new TextEncoder().encode("FXN-DOMSAFE-EMPTY-V1\0"));
+  while (level.length < size) level.push(empty);
+  const paths = rows.map(() => []);
+  let width = 1;
+  while (level.length > 1) {
+    paths.forEach((path, row) => path.push(level[Math.floor(row / width) ^ 1]));
+    const next = [];
+    for (let i = 0; i < level.length; i += 2) next.push(await safeNode(level[i], level[i + 1]));
+    level = next;
+    width *= 2;
+  }
+  return { root: level[0], paths: paths.map((path, row) => `Z${row.toString(16).padStart(8, "0")}${path.join("")}`) };
 }
 
 /** The domains a safe's address is hashed under (Rust `dao_treasury`: plain, vested, ruled safes). */
@@ -785,7 +847,8 @@ export async function safeAddressOf(domainHex, parts) {
 
 /** Build and sign a KDOMSAFE1 (Rust `chain::domain_safe`). Any key files it; `votes` are K of the safe's signers over
  *  `domainSafeCovered`. `boxes` are the action's own: none for take; [newOwnerPubHex, its dual-sig] for give; [prior
- *  record CID, ...target boxes] for point; [years, FXN, lock CID] (price-field encoded) for renew. */
+ *  record CID, ...target boxes] for point; [years, FXN, lock CID] (price-field encoded) for renew; then the row's batch
+ *  path box (`domainSafeBatch`) when the votes are over a batch root. */
 export async function buildDomainSafeWithSigner({ signer, pos, prevCid, fqdn, headCid, safe, action, boxes = [], votes, nowSec }) {
   if (!isClaimableDomainName(fqdn)) throw refuseName(fqdn, "carry a safe's decision for");
   requireCid(headCid, "ownership head CID", `read the current head with DOM_WHO ${fqdn} and use its CID.`);

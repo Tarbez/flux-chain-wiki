@@ -11,7 +11,7 @@ import {signer, handleSigner, buildProof, answers, tamper, dense} from './lib/de
 const owner=await createFluxRootHandle('abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about');
 const other=await createFluxRootHandle('legal winner thank year wave sausage worth useful legal winner thank yellow');
 const sign=async (handle,text)=>Buffer.from(await handle.sign(new TextEncoder().encode(text))).toString('base64');
-const NAME='flux-chain.ark';
+const NAME='flux-chain.fxndev';
 const ownerSigner=handleSigner(owner), otherSigner=handleSigner(other);
 const ownedByOwner=await buildProof({fqdn:NAME,genesis:ownerSigner,targets:[{type:'ipfs_cid',value:'bafy-test-site'}]});
 let served=answers.proof(ownedByOwner);
@@ -20,6 +20,9 @@ assert.deepEqual(nameNodesFromEnv({DEFXN_NAME_NODES:'ws://a:1/native, ws://b:1/n
 const provider=createCmsPermissions({name:NAME,genesisPubHex:ownerSigner.pubHex,dense,askProof:(fqdn)=>served(fqdn)});
 assert.equal((await provider(owner.publicKeyB64)).authorized,true);
 assert.equal((await provider(owner.publicKeyB64)).source,'dense-wire-domain-proof');
+// A name a DAO safe holds has votes bound to a network, so the permission check pins one: the pin reaches the verifier.
+const pinned=createCmsPermissions({name:NAME,network:NAME.endsWith('.fxn')?'fxn-devnet':'fxn-mainnet',genesisPubHex:ownerSigner.pubHex,dense,askProof:(fqdn)=>served(fqdn)});
+await assert.rejects(()=>pinned(owner.publicKeyB64),/WrongEnding/,'a name under another network\'s ending authorizes nobody');
 await assert.rejects(()=>provider(other.publicKeyB64),/does not verify this identity as the site owner/);
 served=answers.proof([tamper(ownedByOwner[0]),ownedByOwner[1]]);
 await assert.rejects(()=>provider(owner.publicKeyB64),/does not verify \(BadSignature\)/,'a proof that does not verify authorizes nobody, not even the owner');

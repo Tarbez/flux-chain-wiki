@@ -43,7 +43,7 @@ export function keyHexOf(publicKeyB64) {
   }
 }
 
-export function createCmsPermissions({ name, firstOwnerPublicKeyB64 = null, nameNodes = nameNodesFromEnv(), genesisPubHex = process.env.CHAIN_SERVER_GENESIS_KEY || '', dense = null, askProof = null, publicBase = undefined } = {}) {
+export function createCmsPermissions({ name, network = null, firstOwnerPublicKeyB64 = null, nameNodes = nameNodesFromEnv(), genesisPubHex = process.env.CHAIN_SERVER_GENESIS_KEY || '', dense = null, askProof = null, publicBase = undefined } = {}) {
   void publicBase;
   /* The name RULE is the chain's own (isClaimableDomainName), applied once the modules load. */
   const normalized = String(name || '').trim().toLowerCase();
@@ -78,11 +78,15 @@ export function createCmsPermissions({ name, firstOwnerPublicKeyB64 = null, name
     if (reply.kind !== 'proof') {
       throw new SessionRefusal(`Signed in, but ${node} answered DOM_PROOF ${normalized} with something that is not a proof (${reply.reason || reply.kind}).`, 'a DOM_PROOF reply.', 'ask another node (DEFXN_NAME_NODES).', 503);
     }
-    const verified = await modules.verifyDomainProof({ fqdn: normalized, entries: reply.entries, safes: reply.safes, genesisPubHex: genesis });
+    // The network is pinned from the one network list: a name a DAO safe holds is refused without it, since its votes
+    // are bound to a network, and a name under another network's ending never authorizes here.
+    const verified = await modules.verifyDomainProof({ fqdn: normalized, entries: reply.entries, safes: reply.safes, genesisPubHex: genesis, network: network ?? modules.PAGE_NETWORK });
     if (verified.kind !== 'verified') {
       /* Refused by name: a proof that does not verify authorizes nobody. */
       throw new SessionRefusal(`Signed in, but the ownership proof for ${normalized} does not verify (${verified.code}): ${verified.failure}`, verified.missing, verified.remedy, 403);
     }
+    // A site whose name a DAO safe holds has no one owner to sign in: one seat acting alone is not K of N, and a safe's
+    // change to its site is a KDOMSAFE1 by K of its signers. Not built: a key a safe's decision names to edit its site.
     if (verified.owner !== keyHex) {
       throw new SessionRefusal(`Signed in, but the chain does not verify this identity as the site owner: ${normalized} is owned by ${verified.owner}.`, "the owner's own key, or a transfer of the name to this key.", `sign in as the verified owner, or transfer ${normalized} at ${NAME_AUTHORITY_URL}; do not use cached identity details as permission.`, 403);
     }

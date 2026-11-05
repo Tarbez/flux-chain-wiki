@@ -75,10 +75,12 @@ import {
   DOMAIN_KIND_RENT,
   DOMAIN_KIND_SAFE,
   decodeTarget,
+  domainSafeBatchCovered,
   domainSafeCovered,
   domainSafeVoteBytes,
   readSafeDecision,
   safeAddressOf,
+  safeBatchRootOf,
   DOMAIN_KIND_XFER,
   DOMAIN_KIND_XFER2,
   GRACE_SECS,
@@ -359,7 +361,9 @@ async function judgeSafeDecision({ e, i, fqdn, owner, head, safes, network, last
   if (!Number.isInteger(need) || signers.length === 0 || need > signers.length || need < quorumFor(signers.length)) {
     return refuse("SafeOutsideQuorum", `the safe asks ${pre.parts[3]} of ${signers.length} signers`, `K at least ${quorumFor(signers.length)} and at most ${signers.length} (K > 2N/3)`, "a node admits no such decision; ask another node", i);
   }
-  const bound = domainSafeVoteBytes(network, domainSafeCovered({ fqdn, headCid: d.head, safe: d.safe, action: d.action, boxes: d.boxes }));
+  // A row alone, or the batch root its row and path compute: a vote over a root covers exactly the rows under it.
+  const row = domainSafeCovered({ fqdn, headCid: d.head, safe: d.safe, action: d.action, boxes: d.boxes });
+  const bound = domainSafeVoteBytes(network, d.batch ? domainSafeBatchCovered(await safeBatchRootOf(row, d.batch.index, d.batch.siblings)) : row);
   const counted = new Set();
   for (const v of d.votes) {
     if (!signers.includes(v.signer) || counted.has(v.signer)) continue;
