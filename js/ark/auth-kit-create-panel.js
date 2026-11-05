@@ -53,10 +53,10 @@
   var ICON_LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="1.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>';
   var ICON_COPY = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="1.5"/><path d="M15.5 8.5v-3A1.5 1.5 0 0 0 14 4H5.5A1.5 1.5 0 0 0 4 5.5V14a1.5 1.5 0 0 0 1.5 1.5h3"/></svg>';
   var DONE_LIST = [
-    ['Connect to apps', 'Sign in to any DEFXN app with the file and its PIN.', '<path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5ZM4 10h16"/>'],
-    ['Join the network', 'Your Public ID is how the network knows you.', '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/>'],
-    ['Keep control of your identity', 'The file and its keys stay on this device.', '<path d="M12 3.5 5 6.5v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9v-5Z"/>'],
-    ['Explore what’s possible', 'Names, wallets and apps are built on this ID.', '<circle cx="12" cy="12" r="8.5"/><path d="m15 9-2 6-4 2 2-6Z"/>']
+    ['Sign in to apps', 'Open any DEFXN app with the file and its PIN.', '<path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5ZM4 10h16"/>'],
+    ['Your Public ID', 'Other people and the network see your Public ID. They never see the file or its keys.', '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c3 3 3 14 0 17M12 3.5c-3 3-3 14 0 17"/>'],
+    ['Your keys', 'The file and its keys stay on this device.', '<path d="M12 3.5 5 6.5v5c0 4.5 3 7.5 7 9 4-1.5 7-4.5 7-9v-5Z"/>'],
+    ['Names and wallets', 'Names you claim and wallets you add belong to this ID.', '<circle cx="12" cy="12" r="8.5"/><path d="m15 9-2 6-4 2 2-6Z"/>']
   ];
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return '&#' + c.charCodeAt(0) + ';'; }); }
   /* A grade for the bar's length and word, never a rule: four length steps plus the character classes used. */
@@ -145,9 +145,9 @@
     /* ---- screens ---- */
     function body() {
       var st = STAGE_OF[screen], needed, n;
-      if (screen === 'welcome') return '<div class="fxn-welcome"><h3>Enter the Open Network</h3><p class="fxn-create-lede">Create your FXN ID to connect, build and explore across the DEFXN network.</p>' + card() +
+      if (screen === 'welcome') return '<div class="fxn-welcome"><h3>Create your FXN ID</h3><p class="fxn-create-lede">You make one file and a PIN on this device. The file signs you in to every DEFXN app, and it stays on this device.</p>' + card() +
         '<div class="fxn-create-actions fxn-create-actions-stack">' + btn(actionClass, 'type="button" data-fxn-go="name"', arrow('Create a new FXN ID')) + btn(quietClass, 'type="button" data-fxn-have', arrow('I have an FXN ID')) + '</div>' +
-        '<p class="fxn-welcome-foot">Identity <i>•</i> Security <i>•</i> Your Data <i>•</i> Always Yours</p></div>';
+        '<p class="fxn-welcome-foot">Five steps. The recovery words are shown once, so have paper ready.</p></div>';
       if (screen === 'name') return '<form class="fxn-create" data-fxn-create>' + stepper(st) + head(st, 'Name your identity', 'This name is for you. Sites see your Public ID, which this file makes next.') +
         checkField('displayName', 'text', 'maxlength="80" autocomplete="nickname" aria-label="Name" autofocus', Boolean(values.displayName.trim())) +
         '<p class="fxn-hint">Up to 80 characters. The file is named from its letters, numbers, dots and underscores.</p>' + notice() +
@@ -198,8 +198,8 @@
       if (screen === 'success') return '<div class="fxn-create fxn-success"><div class="fxn-success-tile" aria-hidden="true">' + ICON_CHECK + '</div><h3>Your FXN ID is ready</h3>' +
         '<p class="fxn-create-lede">' + esc(savedName) + ' is in your Downloads folder. Keep the file, and keep the words apart from it.</p>' + fileRow() +
         '<div class="fxn-create-actions fxn-create-actions-stack">' + (opts.onOpenDownloads ? btn(actionClass, 'type="button" data-fxn-open-downloads', arrow('Open Downloads')) : '') + btn(opts.onOpenDownloads ? quietClass : actionClass, 'type="button" data-fxn-open-kit', arrow('View my FXN ID')) + '</div>' +
-        '<p class="fxn-links"><button type="button" class="fxn-link" data-fxn-go="done">What’s next?</button>' + (opts.onLearnMore ? '<button type="button" class="fxn-link" data-fxn-learn>Learn more</button>' : '') + '</p></div>';
-      if (screen === 'done') return '<div class="fxn-create fxn-done"><h3>You’re all set</h3><p class="fxn-create-lede">Your FXN ID opens every DEFXN app. Here is what it does.</p>' + card() +
+        '<p class="fxn-links"><button type="button" class="fxn-link" data-fxn-go="done">What it does</button>' + (opts.onLearnMore ? '<button type="button" class="fxn-link" data-fxn-learn>Learn more</button>' : '') + '</p></div>';
+      if (screen === 'done') return '<div class="fxn-create fxn-done"><h3>What your FXN ID does</h3>' + card() +
         '<ul class="fxn-done-list">' + DONE_LIST.map(function (it, i) { return '<li style="--fxn-i:' + i + '"><span class="fxn-done-icon"><svg viewBox="0 0 24 24" aria-hidden="true">' + it[2] + '</svg></span><span><b>' + it[0] + '</b><small>' + it[1] + '</small></span></li>'; }).join('') + '</ul>' +
         '<div class="fxn-create-actions fxn-create-actions-stack">' + btn(actionClass, 'type="button" data-fxn-open-kit', arrow('Go to my FXN ID')) + '</div>' +
         '<p class="fxn-links"><button type="button" class="fxn-link" data-fxn-home>Back to home</button></p></div>';
@@ -351,7 +351,7 @@
     if (!opts.onSaved && opts.onDownloaded) opts.onSaved = opts.onDownloaded;
     if (!(window.ArkAdminAuth && window.ArkAdminAuth.createFxnId)) {
       container.innerHTML = '<div class="' + esc(opts.resultClass != null ? opts.resultClass : 'fxn-create-note') + ' error" role="alert">' +
-        'This page cannot make an FXN ID: the sign-in (js/admin/auth.js) did not load. Reload the page; if it stays, the site is missing js/admin/auth.js.</div>';
+        'This page cannot make an FXN ID: the sign-in (js/admin/auth.js) did not load. Reload the page. If it stays, the site is missing js/admin/auth.js.</div>';
       return { reset: function () {} };
     }
     return mountV10(container, opts);
