@@ -8,7 +8,7 @@ const resolutions = fs.readFileSync('css/resolutions.css', 'utf8');
    css/world-pages.css. Before, it was a page of Ark blocks in the block-page panel; before that, a hand-built
    hero in css/home-drafting.css. The same promises, measured on the world home:
    - the page stands below the header: on a desktop it is placed 64px down (the bar's height), and on a
-     tablet or phone it is a document with 72px of room above its first word;
+     tablet or phone it is a document with 76px (--sp-8) of room above its first word;
    - a phone scrolls it: one column, overflow auto, and it takes pointer events (on a desktop the page lets
      the 3D behind it take them), so a short screen never cuts the rail off;
    - the heading wraps on a phone (the desktop keeps each row on one line) and drops to the hero size. */
@@ -21,8 +21,10 @@ assert(phone, 'the world home has a tablet and phone layout (max-width: 900px)')
 const phoneHome = (/\.home-world \{([^}]*)\}/.exec(phone) || [])[1] || '';
 for (const [rule, why] of [['position: relative', 'a document, not a layer over the world'], ['grid-template-columns: minmax(0, 1fr)', 'one column'], ['overflow: auto', 'it scrolls on short screens'], ['pointer-events: auto', 'it takes the touch that scrolls it']])
   assert(phoneHome.includes(rule), 'phone home: ' + why + ' (' + rule + ')');
-const top = /padding-top: (\d+)px/.exec(phoneHome);
-assert(top && +top[1] >= 64, 'phone home: its first word sits below the 64px header');
+// The room above the first word is a spacing step (owner ruling 2026-11-05): 72px became --sp-8, 76px.
+const SP = { 7: 47, 8: 76, 9: 123 };
+const top = /padding-top: var\(--sp-(\d+)(?:, *\d+px)?\)/.exec(phoneHome);
+assert(top && SP[top[1]] >= 64, 'phone home: its first word sits below the 64px header');
 assert(/\.home-world h1 b, \.home-world h1 span \{ white-space: normal; \}/.test(phone), 'phone home: the heading wraps');
 assert(/\.home-world h1 \{ font-size: var\(--fs-hero\); \}/.test(phone), 'phone home: the heading drops to the hero size');
 assert(navigation.includes('env(safe-area-inset-top,0px)'), 'mobile chrome reserves the device safe area');
