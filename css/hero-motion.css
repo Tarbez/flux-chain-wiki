@@ -28,7 +28,7 @@
   content: "";
   width: clamp(24px, 3.6cqw, 58px);
   height: 1px;
-  margin: 0 14px;
+  margin: 0 var(--sp-4);
   background: hsl(var(--border-default));
 }
 .ark-field-pill::after { transform: rotate(180deg); }
@@ -48,7 +48,7 @@
 .ark-hero-title,.ark-hero-copy,.ark-hero-eyebrow { pointer-events: auto; user-select: text; }
 .ark-hero-title {
   max-width: 8em;
-  margin: 0 0 12px;
+  margin: 0 0 var(--sp-4);
   color: hsl(var(--text-strong));
   font: 300 var(--fs-hero)/.91 var(--ark-font);
   letter-spacing: -.055em;
@@ -69,7 +69,7 @@
   bottom: max(14px,2cqmin);
   z-index: 5;
   min-height: 44px;
-  padding: 10px 4px;
+  padding: var(--sp-4) var(--sp-2);
   border: 0;
   background: transparent;
   color: hsl(var(--text-muted));
@@ -79,7 +79,7 @@
   cursor: pointer;
   transition: color 220ms ease, letter-spacing 420ms cubic-bezier(.2,.7,.2,1);
 }
-.hero-motion-toggle span { margin-right: 8px; color: hsl(var(--text-faint)); font-size: var(--fs-tertiary); }
+.hero-motion-toggle span { margin-right: var(--sp-3); color: hsl(var(--text-faint)); font-size: var(--fs-tertiary); }
 .hero-motion-toggle:hover { color: var(--field-accent); letter-spacing: .16em; }
 .hero-motion-toggle[hidden] { display: none; }
 
@@ -91,7 +91,7 @@
 .hero-alive.hero-still .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { translate: 0 0; }
 
 @media (max-width:760px) {
-  .ark-field-pill::before,.ark-field-pill::after { width: 26px; margin: 0 10px; }
+  .ark-field-pill::before,.ark-field-pill::after { width: 26px; margin: 0 var(--sp-4); }
   .ark-hero-body { left: 20px; bottom: 66px; max-width: calc(100% - 40px); }
   .ark-hero-title { font-size: var(--fs-hero); max-width: 7em; }
   .ark-hero-copy { max-width: 31em; font-size: var(--fs-tertiary); }
@@ -100,8 +100,8 @@
 }
 @media (max-height:680px) and (min-width:761px) {
   .ark-hero-body { bottom: 24px; max-width: 38cqw; }
-  .ark-hero-title { font-size: var(--fs-primary); margin-bottom: 7px; }
-  .ark-hero-eyebrow { margin-bottom: 7px; }
+  .ark-hero-title { font-size: var(--fs-primary); margin-bottom: var(--sp-3); }
+  .ark-hero-eyebrow { margin-bottom: var(--sp-3); }
 }
 @media (prefers-reduced-motion:reduce) {
   .hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) { animation: none; transition: none; translate: 0 0; opacity: .12; }

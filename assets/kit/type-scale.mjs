@@ -282,7 +282,7 @@ export const isGenerated = (text) => /do not edit/i.test(text.slice(0, 600));
    var(--fs-*) with no definition loaded renders every such size as the
    inherited one, and a `font:` shorthand holding it is dropped whole. */
 const DEFINES = /--fs-tertiary\s*:/;
-function linkedSheets(file, text) {
+export function linkedSheets(file, text) {
   const out = [];
   const add = (from, href) => {
     if (/^(https?:)?\/\//.test(href) || href.startsWith('data:')) return;
@@ -294,7 +294,7 @@ function linkedSheets(file, text) {
   return out;
 }
 /* the repo root, for a root-relative href: the nearest directory up with a package.json or .git */
-function findRoot(file) {
+export function findRoot(file) {
   for (let d = path.dirname(file); ; d = path.dirname(d)) {
     let names = [];
     try { names = readdirSync(d); } catch { /* unreadable: keep climbing */ }

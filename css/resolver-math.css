@@ -17,23 +17,23 @@
    carries no card of its own. On a wide screen the field it buys, the two terms nobody added and
    the punch line stand to the right of the sum (display:contents lifts the sum and the field into
    this grid, so the markup -- and every saved layout key in it -- stays as it was). */
-.rm-equation {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:0 24px;align-items:start;}
+.rm-equation {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:0 var(--sp-6);align-items:start;}
 .rm-eq-kicker {
   grid-column:1 / -1;
-  margin:0 0 12px;
+  margin:0 0 var(--sp-4);
   font:600 var(--fs-tertiary)/1.5 var(--font-mono, ui-monospace, monospace);
   letter-spacing:.12em;
   text-transform:uppercase;
   color:hsl(var(--text-faint));
 }
 .rm-eq-body {display:contents;}
-.rm-eq-sum {grid-column:1;grid-row:2 / span 3;display:grid;gap:2px;}
-.rm-field {grid-column:2;grid-row:2;display:grid;gap:8px;align-content:start;padding-top:2px;}
-.rm-eq-zero {grid-column:2;grid-row:3;display:grid;gap:2px;margin:14px 0 0;}
+.rm-eq-sum {grid-column:1;grid-row:2 / span 3;display:grid;gap:var(--sp-1);}
+.rm-field {grid-column:2;grid-row:2;display:grid;gap:var(--sp-3);align-content:start;padding-top:var(--sp-1);}
+.rm-eq-zero {grid-column:2;grid-row:3;display:grid;gap:var(--sp-1);margin:var(--sp-4) 0 0;}
 .rm-eq-punch {
   grid-column:2;grid-row:4;
-  margin:14px 0 0;
-  padding-top:12px;
+  margin:var(--sp-4) 0 0;
+  padding-top:var(--sp-4);
   border-top:1px solid hsl(var(--reference-300));
   font-size:var(--fs-secondary);
   font-weight:600;
@@ -45,8 +45,8 @@
   display:grid;
   grid-template-columns:16px 48px minmax(0,1fr);
   align-items:baseline;
-  gap:0 10px;
-  padding:3px 0;
+  gap:0 var(--sp-4);
+  padding:var(--sp-2) 0;
   border-radius:6px;
 }
 .rm-eq-gloss {grid-column:3;font-size:var(--fs-tertiary);line-height:1.35;color:hsl(var(--text-muted));}
@@ -55,7 +55,7 @@
 .rm-eq-sum .rm-eq-row[data-in] {opacity:1;transform:none;}
 .rm-equation[data-played] .rm-eq-sum .rm-eq-row {opacity:1;transform:none;}
 .rm-eq-sum .rm-eq-row[data-term]:hover {background:hsl(var(--text-strong) / .05);}
-.rm-eq-rule {grid-column:1 / -1;height:1px;background:hsl(var(--reference-400));margin:8px 0;}
+.rm-eq-rule {grid-column:1 / -1;height:1px;background:hsl(var(--reference-400));margin:var(--sp-3) 0;}
 /* The total has no figure of its own -- it IS the figures above it -- so its label takes the
    number column rather than leaving a hole. */
 .rm-eq-total .rm-eq-n {display:none;}
@@ -65,11 +65,11 @@
 /* The terms nobody ever added. Same shape, so the absence lines up with the presence. */
 .rm-eq-zero .rm-eq-n {color:hsl(var(--danger));}
 .rm-eq-zero .rm-eq-gloss {color:hsl(var(--danger-700));}
-.rm-eq-note {grid-column:1 / -1;margin:8px 0 0;font-size:var(--fs-tertiary);color:hsl(var(--text-muted));max-width:72ch;}
+.rm-eq-note {grid-column:1 / -1;margin:var(--sp-3) 0 0;font-size:var(--fs-tertiary);color:hsl(var(--text-muted));max-width:72ch;}
 
 /* The swatch ties a line of the sum to its block of cells, so "93 record types" and the blue block
    are visibly one claim rather than two. */
-.rm-eq-swatch {display:inline-block;width:7px;height:7px;margin-left:7px;border-radius:2px;vertical-align:baseline;}
+.rm-eq-swatch {display:inline-block;width:7px;height:7px;margin-left:var(--sp-3);border-radius:2px;vertical-align:baseline;}
 .rm-eq-swatch[data-term="0"] {background:hsl(var(--primary-400));}
 .rm-eq-swatch[data-term="1"] {background:hsl(var(--role));}
 .rm-eq-swatch[data-term="2"] {background:hsl(var(--success));}
@@ -82,7 +82,7 @@
 /* The sum says "93 record types"; the field shows ninety-three things. Nothing here is sampled or
    rounded -- the cells are counted out of the generated census, which is why the count under the
    title can be read as a fact rather than a flourish. */
-.rm-field-head {margin:0;display:flex;align-items:baseline;gap:7px;}
+.rm-field-head {margin:0;display:flex;align-items:baseline;gap:var(--sp-3);}
 .rm-field-count {font:600 var(--fs-primary)/1 var(--font-mono,ui-monospace,monospace);color:hsl(var(--text-strong));font-variant-numeric:tabular-nums;}
 .rm-field-of {font-size:var(--fs-tertiary);color:hsl(var(--text-faint));}
 .rm-field-svg {display:block;width:100%;height:auto;overflow:visible;}
@@ -117,26 +117,26 @@
 
 /* ---- the builder: take a term out ----------------------------------- */
 
-.rm-build {display:grid;grid-template-columns:minmax(10.5rem,.7fr) minmax(0,2fr);gap:12px 24px;align-items:start;}
+.rm-build {display:grid;grid-template-columns:minmax(10.5rem,.7fr) minmax(0,2fr);gap:var(--sp-4) var(--sp-6);align-items:start;}
 .rm-builder, .rm-says {display:grid;align-content:start;}
 .rm-build-head {
-  margin:0 0 6px;
+  margin:0 0 var(--sp-3);
   font:600 var(--fs-tertiary)/1.5 var(--font-mono, ui-monospace, monospace);
   letter-spacing:.12em;
   text-transform:uppercase;
   color:hsl(var(--text-muted));
 }
-.rm-build-foot {margin:8px 0 0;font-size:var(--fs-tertiary);line-height:1.5;color:hsl(var(--text-faint));}
+.rm-build-foot {margin:var(--sp-3) 0 0;font-size:var(--fs-tertiary);line-height:1.5;color:hsl(var(--text-faint));}
 /* The row is the touch target (a <label>), so the checkbox keeps its natural size. */
-.rm-term {display:flex;align-items:center;gap:9px;margin:0;min-height:34px;padding:0;line-height:1.3;cursor:pointer;border-bottom:1px solid hsl(var(--reference-200));}
+.rm-term {display:flex;align-items:center;gap:var(--sp-4);margin:0;min-height:34px;padding:0;line-height:1.3;cursor:pointer;border-bottom:1px solid hsl(var(--reference-200));}
 .rm-term:last-of-type {border-bottom:0;}
 .rm-term input {min-height:0;accent-color:hsl(var(--reference-600));width:15px;height:15px;}
 .rm-term-label {font-size:var(--fs-secondary);color:hsl(var(--text));}
-.rm-tally {margin:0 0 10px;font-size:var(--fs-secondary);font-weight:600;color:hsl(var(--text-strong));}
+.rm-tally {margin:0 0 var(--sp-4);font-size:var(--fs-secondary);font-weight:600;color:hsl(var(--text-strong));}
 .rm-tally[data-state="reduced"] {color:hsl(var(--danger-700));}
 .rm-say-list {list-style:none;margin:0;padding:0;display:grid;gap:1px;}
 /* One line per thing that can be said: mark, words, the block, and what it needs. */
-.rm-say {display:grid;grid-template-columns:16px minmax(0,1fr) auto minmax(0,9rem);gap:2px 10px;align-items:baseline;padding:3px 0;border-bottom:1px solid hsl(var(--reference-200));}
+.rm-say {display:grid;grid-template-columns:16px minmax(0,1fr) auto minmax(0,9rem);gap:var(--sp-1) var(--sp-4);align-items:baseline;padding:var(--sp-2) 0;border-bottom:1px solid hsl(var(--reference-200));}
 .rm-say:last-child {border-bottom:0;}
 .rm-say-mark {font:600 var(--fs-tertiary)/1.4 var(--font-mono, ui-monospace, monospace);}
 .rm-say[data-state="yes"] .rm-say-mark {color:hsl(var(--success));}
@@ -149,11 +149,11 @@
 
 /* ---- the block explorer -------------------------------------------- */
 
-.rm-explorer-label {display:block;font-size:var(--fs-tertiary);color:hsl(var(--text-muted));margin:0 0 8px;}
+.rm-explorer-label {display:block;font-size:var(--fs-tertiary);color:hsl(var(--text-muted));margin:0 0 var(--sp-3);}
 .rm-input {
   width:100%;
   box-sizing:border-box;
-  padding:11px 13px;
+  padding:var(--sp-4) var(--sp-4);
   border-radius:8px;
   font:500 var(--fs-tertiary)/1.3 var(--font-mono, ui-monospace, monospace);
   background:hsl(var(--canvas));
@@ -163,10 +163,10 @@
 /* Interaction state uses the reference ladder: the identity colour is the component layer's to
    spend, never a page's. */
 .rm-input:focus-visible {outline:2px solid hsl(var(--reference-600));outline-offset:1px;}
-.rm-chips {display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;}
+.rm-chips {display:flex;flex-wrap:wrap;gap:var(--sp-3);margin:var(--sp-4) 0 0;}
 .rm-chip {
   font:500 var(--fs-tertiary)/1.3 var(--font-mono, ui-monospace, monospace);
-  padding:5px 9px;
+  padding:var(--sp-2) var(--sp-4);
   border-radius:6px;
   cursor:pointer;
   background:hsl(var(--nested));
@@ -175,7 +175,7 @@
   transition:color 140ms ease, border-color 140ms ease, background-color 140ms ease;
 }
 .rm-chip:is(:hover, :focus-visible) {color:hsl(var(--text-strong));border-color:hsl(var(--reference-400));background:hsl(var(--reference-200));}
-.rm-verdict {margin:16px 0 0;padding:14px 16px;border-radius:8px;border:1px solid hsl(var(--reference-300));background:hsl(var(--nested));}
+.rm-verdict {margin:var(--sp-5) 0 0;padding:var(--sp-4) var(--sp-5);border-radius:8px;border:1px solid hsl(var(--reference-300));background:hsl(var(--nested));}
 /* Resolves. */
 .rm-verdict[data-state="real"] {border-color:hsl(var(--success-400));background:hsl(var(--success-100));}
 /* Depends on the observer -- pick a type and it resolves one way. */
@@ -184,9 +184,9 @@
 .rm-verdict[data-state="unreal"] {border-color:hsl(var(--reference-400));background:hsl(var(--reference-100));}
 /* Resolved AND wrong -- the silent collision. The only alarm on the page. */
 .rm-verdict[data-state="hazard"] {border-color:hsl(var(--danger-400));background:hsl(var(--danger-100));}
-.rm-verdict-head {margin:0 0 10px;font-weight:600;color:hsl(var(--text-strong));}
+.rm-verdict-head {margin:0 0 var(--sp-4);font-weight:600;color:hsl(var(--text-strong));}
 /* Each line of the verdict as a label beside its value, so a long verdict stays short. */
-.rm-verdict-lines {margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:4px 14px;align-items:baseline;}
+.rm-verdict-lines {margin:0;display:grid;grid-template-columns:max-content minmax(0,1fr);gap:var(--sp-2) var(--sp-4);align-items:baseline;}
 .rm-verdict-lines dt {font:600 var(--fs-tertiary)/1.5 var(--font-mono, ui-monospace, monospace);letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--text-faint));}
 .rm-verdict-lines dd {margin:0;font-size:var(--fs-tertiary);color:hsl(var(--text));max-width:78ch;}
 

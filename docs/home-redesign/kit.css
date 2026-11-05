@@ -67,28 +67,28 @@ svg{display:block}
 :focus-visible{outline:2px solid hsl(var(--reference));outline-offset:3px}
 
 /* Header */
-.top{position:relative;z-index:2;height:60px;flex:none;display:flex;align-items:center;gap:28px;padding:0 48px;border-bottom:1px solid hsl(var(--border) / .8);
+.top{position:relative;z-index:2;height:60px;flex:none;display:flex;align-items:center;gap:var(--sp-6, 29px);padding:0 var(--sp-7, 47px);border-bottom:1px solid hsl(var(--border) / .8);
   background:hsl(var(--canvas) / .5);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1)}
-.brand{display:grid;gap:2px;margin-right:auto}
+.brand{display:grid;gap:var(--sp-1, 2px);margin-right:auto}
 .brand b{font:800 var(--fs-secondary, 18px)/1 var(--font-display);letter-spacing:.2em;color:hsl(var(--text-strong))}
 .brand small{font:500 var(--fs-tertiary, 11px)/1 var(--font-mono);letter-spacing:.32em;color:hsl(var(--text-muted))}
-.nav{display:flex;align-items:center;gap:34px;font:500 var(--fs-tertiary, 11px)/1 var(--font-sans);color:hsl(var(--text-strong))}
-.nav a{display:flex;align-items:center;gap:8px}
+.nav{display:flex;align-items:center;gap:var(--sp-6, 29px);font:500 var(--fs-tertiary, 11px)/1 var(--font-sans);color:hsl(var(--text-strong))}
+.nav a{display:flex;align-items:center;gap:var(--sp-3, 7px)}
 .nav a:hover{color:hsl(var(--reference))}
 /* the page you are on: a short teal rule under its name (orientation, law 49) */
 .nav a{position:relative}
 .nav a::after{content:'';position:absolute;left:0;right:0;bottom:-10px;height:2px;background:hsl(var(--signal));transform:scaleX(0);transform-origin:left;transition:transform .6s cubic-bezier(.22,.7,.18,1)}
 .nav a[aria-current="page"]::after{transform:none}
 .rule-v{width:1px;height:34px;background:hsl(var(--border))}
-.account{display:flex;align-items:center;gap:12px;color:hsl(var(--text-strong));font:500 var(--fs-tertiary, 11px)/1.2 var(--font-sans)}
+.account{display:flex;align-items:center;gap:var(--sp-4, 11px);color:hsl(var(--text-strong));font:500 var(--fs-tertiary, 11px)/1.2 var(--font-sans)}
 .account svg{width:26px;height:26px}
 .account small{display:block;font:400 var(--fs-tertiary, 11px)/1.3 var(--font-mono);color:hsl(var(--text-muted))}
-.earn{display:flex;align-items:center;gap:10px;height:36px;padding:0 16px 0 18px;border:1.5px solid hsl(var(--text-faint));
+.earn{display:flex;align-items:center;gap:var(--sp-4, 11px);height:36px;padding:0 var(--sp-5, 18px) 0 var(--sp-5, 18px);border:1.5px solid hsl(var(--text-faint));
   color:hsl(var(--text-strong));font:500 var(--fs-tertiary, 11px)/1 var(--font-sans);
   clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,0 100%)}
 .earn:hover{border-color:hsl(var(--reference));color:hsl(var(--reference))}
 .menu{display:none;margin-left:auto;background:none;border:1px solid hsl(var(--border));color:hsl(var(--text-strong));
-  height:38px;padding:0 14px;font:500 var(--fs-tertiary, 11px)/1 var(--font-mono);letter-spacing:.2em}
+  height:38px;padding:0 var(--sp-4, 11px);font:500 var(--fs-tertiary, 11px)/1 var(--font-mono);letter-spacing:.2em}
 
 /* The 3D layer: the whole screen, behind the page. */
 .scene{position:fixed;inset:0;z-index:0;pointer-events:none}
@@ -104,12 +104,12 @@ body.picking{cursor:pointer}
   clip-path:polygon(0 0,calc(100% - 15px) 0,100% 15px,100% 100%,0 100%)}
 .cta .who{width:66px;display:grid;place-items:center;border-right:1.5px solid hsl(var(--secondary-ink) / .35);height:30px}
 .cta .who svg{width:28px;height:28px}
-.cta .say{padding:0 24px 0 22px;display:flex;align-items:center;gap:44px;white-space:nowrap}
+.cta .say{padding:0 var(--sp-6, 29px) 0 var(--sp-5, 18px);display:flex;align-items:center;gap:var(--sp-7, 47px);white-space:nowrap}
 .cta .say svg{width:22px;height:17px}
 .cta:hover{filter:brightness(1.08)}
 /* A smaller form of the same action, for pages whose action is not the identity */
 .cta.small{height:44px;font-size:var(--fs-secondary, 18px);clip-path:polygon(0 0,calc(100% - 11px) 0,100% 11px,100% 100%,0 100%)}
-.cta.small .say{gap:18px;padding:0 20px}
+.cta.small .say{gap:var(--sp-5, 18px);padding:0 var(--sp-5, 18px)}
 .cta.small .say svg{width:18px;height:14px}
 /* The same action shape as a second choice: outline, no fill, so the page keeps one filled action */
 .cta.quiet{background:transparent;color:hsl(var(--secondary));box-shadow:inset 0 0 0 1.5px hsl(var(--secondary) / .7)}
@@ -117,15 +117,15 @@ body.picking{cursor:pointer}
 .cta.quiet:hover{filter:none;background:hsl(var(--secondary) / .08)}
 
 /* Quiet links: light text on a faint rule, lime on hover (rule R03) */
-.more{align-self:flex-start;display:flex;align-items:center;gap:12px;color:hsl(var(--text-strong));
-  font-size:var(--fs-tertiary, 11px);padding-bottom:7px;border-bottom:1px solid hsl(var(--text-faint))}
+.more{align-self:flex-start;display:flex;align-items:center;gap:var(--sp-4, 11px);color:hsl(var(--text-strong));
+  font-size:var(--fs-tertiary, 11px);padding-bottom:var(--sp-3, 7px);border-bottom:1px solid hsl(var(--text-faint))}
 .more:hover{color:hsl(var(--reference));border-color:hsl(var(--reference))}
 
 /* Where am I: brand / chain, and the way back */
-.crumbs{display:grid;gap:10px;font-size:var(--fs-tertiary, 11px)}
+.crumbs{display:grid;gap:var(--sp-4, 11px);font-size:var(--fs-tertiary, 11px)}
 .crumbs .path{color:hsl(var(--text-muted))}
 .crumbs .path b{color:hsl(var(--text-strong));font-weight:600;letter-spacing:.04em}
-.crumbs .back{display:flex;align-items:center;gap:8px;color:hsl(var(--text-strong))}
+.crumbs .back{display:flex;align-items:center;gap:var(--sp-3, 7px);color:hsl(var(--text-strong))}
 .crumbs .back:hover{color:hsl(var(--reference))}
 .crumbs svg{width:14px;height:12px}
 
@@ -135,16 +135,16 @@ body.picking{cursor:pointer}
 .minimap .yours{color:hsl(var(--signal))}
 
 /* Footer bar */
-.foot{position:relative;z-index:1;flex:none;height:52px;display:flex;align-items:center;gap:20px;padding:0 48px 0 36px;border-top:1px solid hsl(var(--border) / .8);
+.foot{position:relative;z-index:1;flex:none;height:52px;display:flex;align-items:center;gap:var(--sp-5, 18px);padding:0 var(--sp-7, 47px) 0 var(--sp-6, 29px);border-top:1px solid hsl(var(--border) / .8);
   background:hsl(var(--canvas) / .6);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1)}
-.foot a{display:flex;align-items:center;gap:12px;color:hsl(var(--text-strong));font-size:var(--fs-tertiary, 11px);padding-bottom:4px;border-bottom:1px solid hsl(var(--text-muted))}
+.foot a{display:flex;align-items:center;gap:var(--sp-4, 11px);color:hsl(var(--text-strong));font-size:var(--fs-tertiary, 11px);padding-bottom:var(--sp-2, 4px);border-bottom:1px solid hsl(var(--text-muted))}
 .foot .mark{color:hsl(var(--signal))}
 .foot small{margin-left:auto;font:400 var(--fs-tertiary, 11px)/1 var(--font-mono);color:hsl(var(--text))}
 
 /* Mockup-only control: not part of the design. */
-.mock{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:20;display:flex;gap:8px;align-items:center;padding:6px 8px 6px 12px;
+.mock{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:20;display:flex;gap:var(--sp-3, 7px);align-items:center;padding:var(--sp-3, 7px) var(--sp-3, 7px) var(--sp-3, 7px) var(--sp-4, 11px);
   background:hsl(var(--raised) / .92);border:1px dashed hsl(var(--text-faint));font:400 var(--fs-tertiary, 11px)/1 var(--font-mono);color:hsl(var(--text-muted))}
-.mock button{font:inherit;color:hsl(var(--text-strong));background:none;border:1px solid hsl(var(--border));padding:5px 8px;cursor:pointer}
+.mock button{font:inherit;color:hsl(var(--text-strong));background:none;border:1px solid hsl(var(--border));padding:var(--sp-2, 4px) var(--sp-3, 7px);cursor:pointer}
 .mock a{color:hsl(var(--text-strong));border-bottom:1px solid hsl(var(--text-faint))}
 
 /* Arrival: once, then still. */
@@ -152,17 +152,17 @@ body.picking{cursor:pointer}
 @keyframes fade{from{opacity:0}to{opacity:1}}
 
 @media (max-width:1240px){
-  .nav{gap:22px;font-size:var(--fs-tertiary, 11px)}.top{padding:0 28px;gap:20px}
-  .cta{font-size:var(--fs-secondary, 18px);height:50px}.cta .say{gap:32px}
+  .nav{gap:var(--sp-5, 18px);font-size:var(--fs-tertiary, 11px)}.top{padding:0 var(--sp-6, 29px);gap:var(--sp-5, 18px)}
+  .cta{font-size:var(--fs-secondary, 18px);height:50px}.cta .say{gap:var(--sp-6, 29px)}
 }
 @media (max-height:760px) and (min-width:901px){
   .cta{height:48px;font-size:var(--fs-secondary, 18px)}.cta .who{height:26px}
 }
 @media (max-width:900px){
   .nav,.top .rule-v,.account{display:none}
-  .menu{display:block}.brand{margin-right:0}.top{padding:0 18px;height:56px}
-  .earn{height:34px;font-size:var(--fs-tertiary, 11px);padding:0 14px 0 16px}
-  .foot{padding:0 18px;font-size:var(--fs-tertiary, 11px)}.foot small{font-size:var(--fs-tertiary, 11px)}
+  .menu{display:block}.brand{margin-right:0}.top{padding:0 var(--sp-5, 18px);height:56px}
+  .earn{height:34px;font-size:var(--fs-tertiary, 11px);padding:0 var(--sp-4, 11px) 0 var(--sp-5, 18px)}
+  .foot{padding:0 var(--sp-5, 18px);font-size:var(--fs-tertiary, 11px)}.foot small{font-size:var(--fs-tertiary, 11px)}
   .mock{bottom:12px}
 }
 .minimap svg{width:100%;height:100%;overflow:visible}
@@ -170,7 +170,7 @@ body.picking{cursor:pointer}
 /* The menu sheet: tablet and phone only; it slides down from the header (audit 3, fix 10) */
 .menu-sheet{display:none}
 @media (max-width:900px){
-  .menu-sheet{display:grid;position:absolute;left:0;right:0;top:100%;padding:6px 18px 18px;background:hsl(var(--canvas) / .97);
+  .menu-sheet{display:grid;position:absolute;left:0;right:0;top:100%;padding:var(--sp-3, 7px) var(--sp-5, 18px) var(--sp-5, 18px);background:hsl(var(--canvas) / .97);
     border-bottom:1px solid hsl(var(--border));clip-path:inset(0 0 100% 0);transform:translateY(-10px);pointer-events:none;
     transition:clip-path .45s cubic-bezier(.22,.7,.18,1),transform .45s cubic-bezier(.22,.7,.18,1)}
   .menu-sheet a{display:flex;align-items:center;justify-content:space-between;min-height:48px;border-top:1px solid hsl(var(--border));
@@ -184,10 +184,10 @@ body.picking{cursor:pointer}
 @media (prefers-reduced-motion:reduce){.menu-sheet{transition:none}}
 
 /* The mockup pill: bottom right, beside the footer's own words; folded below 1100px (fix 12) */
-.mock{left:auto;right:150px;bottom:10px;transform:none;padding:4px 6px 4px 4px;border-radius:999px;max-width:calc(100vw / var(--s) - 140px);flex-wrap:wrap;justify-content:flex-end}
+.mock{left:auto;right:150px;bottom:10px;transform:none;padding:var(--sp-2, 4px) var(--sp-3, 7px) var(--sp-2, 4px) var(--sp-2, 4px);border-radius:999px;max-width:calc(100vw / var(--s) - 140px);flex-wrap:wrap;justify-content:flex-end}
 .mock-toggle{height:26px;border-radius:999px}
-.mock-body{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.mock.folded{padding:4px}
+.mock-body{display:flex;flex-wrap:wrap;gap:var(--sp-3, 7px);align-items:center}
+.mock.folded{padding:var(--sp-2, 4px)}
 .mock.folded .mock-body{display:none}
 @media (max-width:900px){.mock{right:12px;bottom:12px}}
 

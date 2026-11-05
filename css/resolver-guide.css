@@ -3,13 +3,13 @@
   box-sizing:border-box;
   width:min(100%,880px);
   margin-inline:auto;
-  padding:clamp(48px,9cqh,104px) var(--page-gutter) 64px;
+  padding:clamp(var(--sp-7),9cqh,var(--sp-9)) var(--page-gutter) var(--sp-8);
 }
 .resolver-guide-content .learning-eyebrow {
   display:flex;
   align-items:center;
-  gap:12px;
-  margin:0 0 22px;
+  gap:var(--sp-4);
+  margin:0 0 var(--sp-5);
   font:600 var(--fs-tertiary)/1.4 var(--font-mono,ui-monospace,monospace);
   letter-spacing:.13em;
   text-transform:uppercase;
@@ -32,10 +32,10 @@
 }
 .resolver-guide-copy {
   display:grid;
-  gap:22px;
+  gap:var(--sp-5);
   max-width:680px;
-  margin-top:clamp(38px,7cqh,72px);
-  padding-top:28px;
+  margin-top:clamp(var(--sp-7),7cqh,var(--sp-8));
+  padding-top:var(--sp-6);
   border-top:1px solid hsl(var(--border-subtle));
 }
 .resolver-guide-copy p {
@@ -51,8 +51,8 @@
   display:flex;
   flex-wrap:wrap;
   align-items:center;
-  gap:14px 30px;
-  margin-top:42px;
+  gap:var(--sp-4) var(--sp-6);
+  margin-top:var(--sp-7);
 }
 .resolver-next-link,.resolver-back-link,.resolver-primary-cta {
   display:inline-flex;
@@ -66,7 +66,7 @@
 .resolver-next-link { color:hsl(var(--text-strong)); border-bottom:1px solid hsl(var(--reference)); }
 .resolver-back-link { color:hsl(var(--text-muted)); }
 .resolver-primary-cta {
-  padding:0 20px;
+  padding:0 var(--sp-5);
 }
 .resolver-guide-links a:hover { color:hsl(var(--reference)); }
 .resolver-primary-cta:hover { }
@@ -79,9 +79,9 @@
 .resolver-guide-page .resolver-guide-copy { animation-delay:150ms; }
 .resolver-guide-page .resolver-guide-links { animation-delay:230ms; }
 @media(max-width:760px) {
-  .resolver-guide-content { padding-top:48px; }
+  .resolver-guide-content { padding-top:var(--sp-7); }
   .resolver-guide-content .learning-heading { font-size:var(--fs-hero); }
-  .resolver-guide-copy { margin-top:36px; }
+  .resolver-guide-copy { margin-top:var(--sp-6); }
 }
 @media(prefers-reduced-motion:reduce) {
   .resolver-guide-page :is(.learning-eyebrow,.learning-heading,.resolver-guide-copy,.resolver-guide-links) { animation:none; }
@@ -96,10 +96,10 @@
    Nothing moves. Colour is the SDK's semantic tokens; shape (dashed lane, a provider dot) and
    the words carry every state, never colour alone.
    ===================================================================== */
-.mfig { display:grid; gap:14px; }
+.mfig { display:grid; gap:var(--sp-4); }
 .mfig-layers { gap:0; }
 .mfig-rule, .mfig-source { margin:0; color:hsl(var(--text-muted)); }
-.mfig-source { margin-top:12px; }
+.mfig-source { margin-top:var(--sp-4); }
 .mfig-states { grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); }
-.mfig-state { display:grid; align-content:start; gap:8px; }
-.mfig-variant { display:grid; gap:8px; padding:10px 12px; border:1px solid hsl(var(--border-default)); border-radius:8px; }
+.mfig-state { display:grid; align-content:start; gap:var(--sp-3); }
+.mfig-variant { display:grid; gap:var(--sp-3); padding:var(--sp-4) var(--sp-4); border:1px solid hsl(var(--border-default)); border-radius:8px; }

@@ -136,7 +136,7 @@
   /* At 12px on screen a name is about a quarter of the drawing's width: the other chains' names would sit on each other.
      Yours and the example's counterparty stay; the other four are named on the map under "How it fits together". */
   #scene .flow-landscape .land-party:not(.land-party-mine,.land-party-counterpart) {display:none;}
-  #scene .flow-rich .flow-now {padding-bottom:50px;}  /* the play button sits under the drawing, not over a name */
+  #scene .flow-rich .flow-now {padding-bottom:var(--sp-7);}  /* the play button sits under the drawing, not over a name */
   /* The legend band is empty here, so pull the drawing up into it. */
   #scene .flow-rich .flow-landscape {margin:-14% auto -5%;}
 }

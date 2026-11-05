@@ -1,9 +1,9 @@
 /* Batch 4: a quiet instrument field and deliberate, interactive reading depths. */
-.source-step-picker { display:flex; flex-wrap:wrap; gap:8px; margin:32px 0 12px; }
-.source-step-picker button,.source-step-controls button { min-height:44px; padding:10px 14px; border:1px solid hsl(var(--border-default)); background:transparent; color:hsl(var(--text-strong)); font:500 var(--fs-tertiary)/1.4 "Albert Sans",sans-serif; cursor:pointer; }
+.source-step-picker { display:flex; flex-wrap:wrap; gap:var(--sp-3); margin:var(--sp-6) 0 var(--sp-4); }
+.source-step-picker button,.source-step-controls button { min-height:44px; padding:var(--sp-4) var(--sp-4); border:1px solid hsl(var(--border-default)); background:transparent; color:hsl(var(--text-strong)); font:500 var(--fs-tertiary)/1.4 "Albert Sans",sans-serif; cursor:pointer; }
 .source-step-picker button[aria-pressed="true"] { border-color:hsl(var(--reference)); background:hsl(var(--reference-100)); }
 .source-step-progress { font:400 var(--fs-tertiary)/1.5 "Albert Sans",sans-serif; color:hsl(var(--text-muted)); }
-.source-step-controls { display:flex; flex-wrap:wrap; gap:9px; margin:0 0 30px; }
+.source-step-controls { display:flex; flex-wrap:wrap; gap:var(--sp-4); margin:0 0 var(--sp-6); }
 .source-step-controls .mechanism-next { background:hsl(var(--text-strong)); color:hsl(var(--foreground-inverse)); }
 .source-step-picker button:focus-visible,.source-step-controls button:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
 #scene .hero-alive .ark-layer-persistent::before,
@@ -24,14 +24,14 @@
 #scene .hero-alive[data-transition="running"] .ark-layer-persistent::after { transform:rotate(90deg) scale(.85); opacity:1; }
 #scene .hero-alive .lattice-field { mask-image:linear-gradient(90deg,rgba(0,0,0,.24),rgba(0,0,0,.45) 52%,#000); }
 
-.mechanism-next { min-height:44px; padding:10px 18px; border:1px solid hsl(var(--border-default)); border-radius:2px; background:hsl(var(--text-strong)); color:hsl(var(--canvas)); font:500 var(--fs-tertiary)/1.3 "Albert Sans",sans-serif; cursor:pointer; }
+.mechanism-next { min-height:44px; padding:var(--sp-4) var(--sp-5); border:1px solid hsl(var(--border-default)); border-radius:2px; background:hsl(var(--text-strong)); color:hsl(var(--canvas)); font:500 var(--fs-tertiary)/1.3 "Albert Sans",sans-serif; cursor:pointer; }
 
-#scene .hero-alive[data-page="zero"] .ark-layer-zero { height:auto; min-height:100dvh; display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,340px); grid-template-rows:minmax(0,1fr) auto; gap:24px clamp(28px,4vw,64px); padding:clamp(120px,15vh,190px) 6% 22px; align-content:stretch; }
+#scene .hero-alive[data-page="zero"] .ark-layer-zero { height:auto; min-height:100dvh; display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,340px); grid-template-rows:minmax(0,1fr) auto; gap:var(--sp-6) clamp(var(--sp-6),4vw,var(--sp-8)); padding:clamp(var(--sp-9),15vh,var(--sp-9)) 6% var(--sp-5); align-content:stretch; }
 #scene .hero-alive[data-page="zero"] .ark-hero-body { position:relative; inset:auto; grid-column:1; grid-row:1; width:auto; max-width:730px; min-height:0; align-self:start; }
 #scene .hero-alive[data-page="zero"] .ark-hero-title { max-width:15ch; font-size:var(--fs-display); font-weight:550; line-height:1.04; letter-spacing:-.055em; }
 #scene .hero-alive[data-page="zero"] .ark-hero-eyebrow { font-size:var(--fs-tertiary); line-height:1.5; letter-spacing:.08em; }
 #scene .hero-alive[data-page="zero"] .ark-hero-copy { font:400 var(--fs-secondary)/1.65 "Albert Sans",sans-serif; max-width:53ch; }
-#scene .home-lifecycle { position:relative; inset:auto; grid-column:2; grid-row:1; width:100%; margin:0; align-self:start; border:1px solid hsl(var(--text-strong) / .16); border-radius:3px; padding:24px; box-shadow:none; background:linear-gradient(150deg,hsl(var(--text-strong) / .07),hsl(var(--canvas) / .5)); }
+#scene .home-lifecycle { position:relative; inset:auto; grid-column:2; grid-row:1; width:100%; margin:0; align-self:start; border:1px solid hsl(var(--text-strong) / .16); border-radius:3px; padding:var(--sp-6); box-shadow:none; background:linear-gradient(150deg,hsl(var(--text-strong) / .07),hsl(var(--canvas) / .5)); }
 #scene .home-lifecycle::before { content:"+"; position:absolute; top:-9px; left:-6px; color:hsl(var(--text-strong)); font:300 var(--fs-tertiary)/1 monospace; }
 
 #scene .hero-alive[data-page="zero"] .ark-hero-copy { color:hsl(var(--text-strong) / .78); }
@@ -39,14 +39,14 @@
 #scene .hero-alive:has(.mechanism-explorer[data-reading-layer="reference"]) .ark-layer-persistent::before { transform:translateY(6%) rotate(-35deg) scale(1.12); }
 
 @media(max-width:900px) {
- #scene .hero-alive[data-page="zero"] .ark-layer-zero { display:flex; flex-direction:column; gap:34px; padding:112px 24px 60px; }
+ #scene .hero-alive[data-page="zero"] .ark-layer-zero { display:flex; flex-direction:column; gap:var(--sp-6); padding:var(--sp-9) var(--sp-6) var(--sp-8); }
  #scene .hero-alive[data-page="zero"] .ark-hero-body { min-height:calc(100dvh - 112px); }
 
- #scene .home-lifecycle { order:3; max-width:none; margin:10px 0 0; }
+ #scene .home-lifecycle { order:3; max-width:none; margin:var(--sp-4) 0 0; }
 }
 @media(max-width:760px) {
  .source-step-picker { flex-wrap:nowrap; }
- .source-step-picker button { flex:1; min-width:0; padding:10px 4px; text-align:center; font-size:0; }
+ .source-step-picker button { flex:1; min-width:0; padding:var(--sp-4) var(--sp-2); text-align:center; font-size:0; }
  .source-step-picker button::before { content:attr(data-step-number); font:600 var(--fs-tertiary)/1.4 ui-monospace,monospace; }
 
  #scene .hero-alive[data-page="zero"] .ark-hero-title { font-size:var(--fs-display); }

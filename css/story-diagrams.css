@@ -15,19 +15,19 @@
 /* The theory sheets' drawing and its numbered legend, inside Ark's figure frame (js/pages/sheet.js):
    choosing a legend entry opens that point. Every label is 12px or more: the drawing keeps its full
    width (no max-height, which letterboxed it and shrank its labels below the frame's 12px floor). */
-.story-plate {display:grid;gap:10px;}
-.story-legend {display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:2px 14px;}
-.story-legend .story-record {display:flex;align-items:center;gap:9px;min-height:44px;padding:5px 0;border:0;background:none;color:hsl(var(--text-muted));font:500 var(--fs-tertiary)/1.35 var(--font-sans,sans-serif);text-align:left;cursor:pointer;}
+.story-plate {display:grid;gap:var(--sp-4);}
+.story-legend {display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-1) var(--sp-4);}
+.story-legend .story-record {display:flex;align-items:center;gap:var(--sp-4);min-height:44px;padding:var(--sp-2) 0;border:0;background:none;color:hsl(var(--text-muted));font:500 var(--fs-tertiary)/1.35 var(--font-sans,sans-serif);text-align:left;cursor:pointer;}
 .story-legend .story-record::before {content:attr(data-diagram-number);color:hsl(var(--text-muted));font:500 var(--fs-tertiary)/1.6 var(--font-mono,monospace);}
 .story-legend .story-record:hover {color:hsl(var(--text-strong));}
 .story-legend .story-record[aria-pressed="true"],.story-legend .story-record[aria-pressed="true"]::before {color:hsl(var(--reference));}
 @media(min-width:901px){
 
- #scene .guided-page .lifecycle-boundary {padding:10px 14px;}
+ #scene .guided-page .lifecycle-boundary {padding:var(--sp-4) var(--sp-4);}
 
 }
 
 @media(min-width:901px) and (max-height:780px){
- #scene .guided-page {padding:26px;gap:10px;}
+ #scene .guided-page {padding:var(--sp-6);gap:var(--sp-4);}
 
 }

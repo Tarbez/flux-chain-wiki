@@ -16,10 +16,10 @@
 
 /* ---- the frame -------------------------------------------------------------------------------------------- */
 #scene .ark-page.ark-block-page.download-page {
-  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
-  background:none; padding:var(--s6) var(--s1) var(--s7); column-gap:clamp(40px,4.5vw,72px); row-gap:0; align-items:start;
+  --s1:var(--sp-2); --s2:var(--sp-3); --s3:var(--sp-4); --s4:var(--sp-5); --s5:var(--sp-6); --s6:var(--sp-6); --s7:var(--sp-7);
+  background:none; padding:var(--s6) var(--s1) var(--s7); column-gap:clamp(var(--sp-7),4.5vw,var(--sp-8)); row-gap:0; align-items:start;
 }
-#scene .ark-page.ark-block-page.download-page:not(.continuity-host > *) { width:calc(100% - 48px); max-width:1400px; height:calc(100dvh - 136px); margin:76px auto 60px; border-radius:0; }
+#scene .ark-page.ark-block-page.download-page:not(.continuity-host > *) { width:calc(100% - 48px); max-width:1400px; height:calc(100dvh - 136px); margin:var(--sp-8) auto var(--sp-8); border-radius:0; }
 #scene .ark-page.ark-block-page.download-page > * { max-width:none; margin-inline:0; }
 /* the panel it arrives in (js/ark/panel-continuity.js) has no box, as /account's: the scene shows, dimmed behind the
    words with home's dot grid, and clearer low down where the picture's window stands */
@@ -48,9 +48,9 @@
 #scene .download-title-name { color:hsl(var(--primary)); }
 #scene .download-page .ark-hero__lede, #scene .download-page .ark-hero > p { max-width:30em; font-size:var(--fs-secondary); line-height:1.55; color:hsl(var(--text)); }
 #scene .download-page .ark-hero .ark-actions { gap:var(--s3); margin-top:var(--s2); }
-#scene .download-page .ark-hero .ark-btn { min-height:48px; padding:0 var(--s5) 0 20px; border-radius:8px; font-weight:600; gap:10px; }
+#scene .download-page .ark-hero .ark-btn { min-height:48px; padding:0 var(--s5) 0 var(--sp-5); border-radius:8px; font-weight:600; gap:var(--sp-4); }
 #scene .download-page .ark-hero .ark-btn--secondary { background:hsl(var(--surface) / .7); border:1px solid hsl(var(--border-strong)); color:hsl(var(--text-strong)); }
-#scene .download-page .ark-hero .ark-btn--primary { background:hsl(var(--primary)); color:hsl(var(--text-inverse)); border:0; border-radius:0; padding-right:28px;
+#scene .download-page .ark-hero .ark-btn--primary { background:hsl(var(--primary)); color:hsl(var(--text-inverse)); border:0; border-radius:0; padding-right:var(--sp-6);
   clip-path:polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%); }
 #scene .download-page .ark-hero .ark-btn--primary:hover { filter:brightness(1.08); }
 
@@ -71,9 +71,9 @@
   background:radial-gradient(ellipse 70% 60% at 50% 55%, transparent 0, hsl(var(--canvas) / .25) 100%);
   transform:rotateY(14deg) rotateX(4deg); transform-origin:60% 60%;
   box-shadow:0 34px 60px -18px hsl(0 0% 0% / .8), 0 0 0 1px hsl(var(--primary) / .12), inset 0 1px 0 hsl(var(--text-strong) / .08); }
-#scene .dl-win-bar { display:flex; align-items:center; gap:6px; height:32px; padding:0 var(--s3); border-bottom:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .9); }
+#scene .dl-win-bar { display:flex; align-items:center; gap:var(--sp-3); height:32px; padding:0 var(--s3); border-bottom:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .9); }
 #scene .dl-dot { width:9px; height:9px; border-radius:50%; } #scene .dl-r { background:#ff5f57; } #scene .dl-y { background:#febc2e; } #scene .dl-g { background:#28c840; }
-#scene .dl-url { margin-left:var(--s2); flex:1; height:18px; padding:0 10px; border-radius:9px; border:1px solid hsl(var(--border-default)); background:hsl(var(--surface)); font:500 var(--fs-tertiary)/1.6 var(--font-mono,monospace); color:hsl(var(--text-muted)); }
+#scene .dl-url { margin-left:var(--s2); flex:1; height:18px; padding:0 var(--sp-4); border-radius:9px; border:1px solid hsl(var(--border-default)); background:hsl(var(--surface)); font:500 var(--fs-tertiary)/1.6 var(--font-mono,monospace); color:hsl(var(--text-muted)); }
 #scene .dl-win-view { position:absolute; left:0; right:0; top:32px; bottom:0; -webkit-backdrop-filter:brightness(1.9) contrast(1.08) saturate(1.25); backdrop-filter:brightness(1.9) contrast(1.08) saturate(1.25); }
 #scene .dl-win-word { position:absolute; left:0; right:0; bottom:var(--s3); display:grid; justify-items:center; gap:1px; pointer-events:none; text-shadow:0 0 12px hsl(var(--canvas)); }
 #scene .dl-win-word b { font:800 var(--fs-tertiary)/1 var(--font-display,var(--font-sans)); letter-spacing:.2em; color:hsl(var(--text-strong)); }
@@ -99,13 +99,13 @@
 #scene .download-page .story-main :is([data-ark-block="section-header"], .download-apps-note) { text-shadow:0 0 14px hsl(var(--canvas)), 0 0 3px hsl(var(--canvas)); }
 #scene .download-page .story-main > #download-apps-fold { margin-top:var(--s4); }
 #scene .download-page #download-apps { gap:var(--s3); grid-template-columns:repeat(4,minmax(0,1fr)); }
-#scene .ark-page.ark-block-page.download-page #download-apps [data-ark-part="card"] { position:relative; display:grid; grid-template-columns:22px minmax(0,1fr); grid-template-areas:"icon title" "icon desc" "icon chips"; align-items:start; align-content:start; gap:2px 10px; padding:var(--s3) var(--s3) var(--s3) 14px; border-radius:10px; min-height:0; height:auto; }
+#scene .ark-page.ark-block-page.download-page #download-apps [data-ark-part="card"] { position:relative; display:grid; grid-template-columns:22px minmax(0,1fr); grid-template-areas:"icon title" "icon desc" "icon chips"; align-items:start; align-content:start; gap:var(--sp-1) var(--sp-4); padding:var(--s3) var(--s3) var(--s3) var(--sp-4); border-radius:10px; min-height:0; height:auto; }
 #scene .download-page #download-apps [data-ark-part="card"] > * { margin:0; min-width:0; }
-#scene .download-page #download-apps [data-ark-part="card"]::before { content:""; grid-area:icon; width:18px; height:18px; margin-top:2px; background:hsl(var(--text-strong)); -webkit-mask:var(--dl-icon) center/contain no-repeat; mask:var(--dl-icon) center/contain no-repeat; }
+#scene .download-page #download-apps [data-ark-part="card"]::before { content:""; grid-area:icon; width:18px; height:18px; margin-top:var(--sp-1); background:hsl(var(--text-strong)); -webkit-mask:var(--dl-icon) center/contain no-repeat; mask:var(--dl-icon) center/contain no-repeat; }
 #scene .download-page #download-apps [data-ark-part="card-header"] { grid-area:chips; margin-top:var(--s2); }
 #scene .download-page #download-apps [data-ark-part="card-title"] { grid-area:title; font:600 var(--fs-tertiary)/1.25 var(--font-sans,sans-serif); }
 #scene .download-page #download-apps [data-ark-part="card-description"], #scene .download-page #download-apps [data-ark-part="card-description"] p { grid-area:desc; margin:0; font-size:var(--fs-tertiary); line-height:1.35; color:hsl(var(--text-muted)); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-#scene .download-page #download-apps [data-ark-part="status"] { display:inline-flex; align-items:center; min-height:0; padding:2px var(--s2); border-radius:6px; font:500 var(--fs-tertiary)/1.4 var(--font-sans,sans-serif); letter-spacing:0; text-transform:none; color:hsl(var(--text-muted)); background:hsl(var(--text-strong) / .06); border:1px solid hsl(var(--border-default)); }
+#scene .download-page #download-apps [data-ark-part="status"] { display:inline-flex; align-items:center; min-height:0; padding:var(--sp-1) var(--s2); border-radius:6px; font:500 var(--fs-tertiary)/1.4 var(--font-sans,sans-serif); letter-spacing:0; text-transform:none; color:hsl(var(--text-muted)); background:hsl(var(--text-strong) / .06); border:1px solid hsl(var(--border-default)); }
 #scene .download-page #download-apps [data-ark-part="status"]::before { display:none; }
 #scene .download-page #download-apps > *:nth-child(1) [data-ark-part="card"], #scene .download-page #download-apps [data-ark-part="card"]:nth-child(1) { --dl-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.1 2.5-1.8 3.1-.5 7.6 1.3 10.1.8 1.2 1.8 2.6 3.1 2.5 1.3 0 1.7-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.2-1.2 3-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4ZM13.9 5.2c.7-.8 1.2-2 1-3.2-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3.1 1.1.1 2.2-.6 2.9-1.4Z'/%3E%3C/svg%3E"); }
 #scene .download-page #download-apps > *:nth-child(2) [data-ark-part="card"], #scene .download-page #download-apps [data-ark-part="card"]:nth-child(2) { --dl-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Crect x='6' y='2' width='12' height='20' rx='2.5'/%3E%3Cpath d='M11 18h2'/%3E%3C/svg%3E"); }
@@ -118,25 +118,25 @@
 #scene .download-page [data-ark-block="figure"] { margin:0; }
 #scene .download-page [data-ark-part="figure-kind"], #scene .download-page [data-ark-part="figure-caption"] { display:none; }
 #scene .download-page .ark-figure__slot { padding:0; }
-#scene .download-page [data-ark-part="figure-frame"] { padding:var(--s5) var(--s5) 20px; border-radius:14px; border:1px solid hsl(var(--border-default));
+#scene .download-page [data-ark-part="figure-frame"] { padding:var(--s5) var(--s5) var(--sp-5); border-radius:14px; border:1px solid hsl(var(--border-default));
   background:linear-gradient(160deg,hsl(var(--text-strong) / .045),transparent 55%),hsl(var(--canvas) / .84); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); box-shadow:0 24px 50px -24px hsl(0 0% 0% / .7); }
 .download-terminal { display:grid; gap:var(--s3); min-width:0; }
 .download-terminal-top { display:flex; align-items:center; justify-content:space-between; gap:var(--s3); min-height:34px; }
-#scene .download-page .download-terminal-top [data-ark-block="eyebrow"] { display:flex; align-items:center; gap:10px; }
+#scene .download-page .download-terminal-top [data-ark-block="eyebrow"] { display:flex; align-items:center; gap:var(--sp-4); }
 #scene .download-page .download-terminal-top [data-ark-block="eyebrow"]::before { content:""; width:6px; height:6px; border-radius:50%; background:hsl(var(--primary)); box-shadow:0 0 8px hsl(var(--primary)); }
 #scene .download-page .download-terminal-top .copy-command [data-ark-part="button"], #scene .download-page .download-terminal-top .copy-command button { min-height:34px; height:34px; padding:0 var(--s3); border:1px solid hsl(var(--border-default)); border-radius:8px; background:hsl(var(--surface) / .6); color:hsl(var(--text)); font-size:var(--fs-tertiary); }
-#scene .download-page .download-terminal-top .copy-command [data-ark-part="button"]::before, #scene .download-page .download-terminal-top .copy-command button::before { content:""; display:inline-block; width:14px; height:14px; margin-right:7px; vertical-align:-2px; background:currentColor;
+#scene .download-page .download-terminal-top .copy-command [data-ark-part="button"]::before, #scene .download-page .download-terminal-top .copy-command button::before { content:""; display:inline-block; width:14px; height:14px; margin-right:var(--sp-3); vertical-align:-2px; background:currentColor;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Crect x='9' y='9' width='12' height='12' rx='2'/%3E%3Cpath d='M5 15V5a2 2 0 0 1 2-2h10'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Crect x='9' y='9' width='12' height='12' rx='2'/%3E%3Cpath d='M5 15V5a2 2 0 0 1 2-2h10'/%3E%3C/svg%3E") center/contain no-repeat; }
 #scene .download-terminal-title { margin:var(--s2) 0 0; font:700 var(--fs-primary)/1.2 var(--font-sans,sans-serif); letter-spacing:-.02em; color:hsl(var(--text-strong)); }
 #scene .download-terminal-desc { margin:0 0 var(--s1); font:400 var(--fs-tertiary)/1.5 var(--font-sans,sans-serif); color:hsl(var(--text-muted)); }
-#scene .download-code { display:flex; flex-direction:column; gap:var(--s2); margin:0; padding:var(--s4) 20px; border-radius:10px; border:1px solid hsl(var(--border-default)); background:hsl(0 0% 0% / .35); white-space:pre-wrap; overflow-wrap:anywhere; }
-#scene .download-code code { display:flex; gap:22px; font:500 var(--fs-tertiary)/1.45 var(--font-mono,monospace); color:hsl(var(--primary)); }
+#scene .download-code { display:flex; flex-direction:column; gap:var(--s2); margin:0; padding:var(--s4) var(--sp-5); border-radius:10px; border:1px solid hsl(var(--border-default)); background:hsl(0 0% 0% / .35); white-space:pre-wrap; overflow-wrap:anywhere; }
+#scene .download-code code { display:flex; gap:var(--sp-5); font:500 var(--fs-tertiary)/1.45 var(--font-mono,monospace); color:hsl(var(--primary)); }
 #scene .download-ln { min-width:1ch; color:hsl(var(--text-faint)); user-select:none; }
 #scene .download-expect { margin:0; font:400 var(--fs-tertiary)/1.45 var(--font-sans,sans-serif); color:hsl(var(--text-muted)); }
 #scene .download-expect[hidden] { display:none; }
-.download-proves { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:18px; }
-#scene .download-proves ul { margin:var(--s2) 0 0; padding:0; list-style:none; display:grid; gap:6px; }
+.download-proves { display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:var(--sp-5); }
+#scene .download-proves ul { margin:var(--s2) 0 0; padding:0; list-style:none; display:grid; gap:var(--sp-3); }
 #scene .download-proves li { font:400 var(--fs-secondary)/1.35 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
 #scene .download-proves-no li { color:hsl(var(--text-muted)); }
 #scene .download-proves-yes li::before { content:"✓  "; color:hsl(var(--primary)); }
@@ -144,25 +144,25 @@
 /* the way through: where you are, the dots and the player, then Previous / Next (or the hand-off on the last step) */
 #scene .download-way { display:flex; flex-wrap:wrap; align-items:flex-end; gap:var(--s3) var(--s4); margin-top:var(--s2); padding-top:var(--s4); border-top:1px solid hsl(var(--border-subtle)); }
 #scene .download-way > .ark-actions { margin:0 0 0 auto; }
-#scene .download-where { display:grid; gap:10px; }
+#scene .download-where { display:grid; gap:var(--sp-4); }
 #scene .download-progress { font:500 var(--fs-tertiary) var(--font-sans,sans-serif); color:hsl(var(--text-muted)); }
 #scene .download-dots-row { display:flex; align-items:center; gap:var(--s4); }
 #scene .download-dots { display:flex; gap:var(--s3); }
 #scene .download-dot { width:10px; height:10px; padding:0; border-radius:50%; border:1.5px solid hsl(var(--text-faint)); background:none; cursor:pointer; transition:background-color .3s ease, border-color .3s ease, box-shadow .3s ease; }
 #scene .download-dot[aria-current="step"] { border-color:hsl(var(--primary)); background:hsl(var(--primary)); box-shadow:0 0 8px hsl(var(--primary) / .8); }
 #scene .download-dot:focus-visible, #scene .download-play:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
-#scene .download-play { display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 10px 0 8px; border:1px solid hsl(var(--border-default)); border-radius:13px; background:none; color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1 var(--font-sans,sans-serif); cursor:pointer; }
+#scene .download-play { display:inline-flex; align-items:center; gap:var(--sp-3); height:26px; padding:0 var(--sp-4) 0 var(--sp-3); border:1px solid hsl(var(--border-default)); border-radius:13px; background:none; color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1 var(--font-sans,sans-serif); cursor:pointer; }
 #scene .download-play::before { content:""; width:0; height:0; border-left:7px solid currentColor; border-top:4.5px solid transparent; border-bottom:4.5px solid transparent; }
 #scene .download-play[aria-pressed="true"] { color:hsl(var(--primary)); border-color:hsl(var(--primary) / .6); }
 #scene .download-play[aria-pressed="true"]::before { width:8px; height:8px; border:0; border-radius:1px; background:currentColor; }
 #scene .download-play:hover { color:hsl(var(--text-strong)); border-color:hsl(var(--border-strong)); }
-#scene .download-page .download-way [data-action="download-next"], #scene .download-page .download-way .ark-actions > a { background:hsl(var(--primary)); color:hsl(var(--text-inverse)); border:0; border-radius:0; padding-right:26px;
+#scene .download-page .download-way [data-action="download-next"], #scene .download-page .download-way .ark-actions > a { background:hsl(var(--primary)); color:hsl(var(--text-inverse)); border:0; border-radius:0; padding-right:var(--sp-6);
   clip-path:polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 0 100%); }
-#scene .download-page .download-way [data-action="download-next"]::after, #scene .download-page .download-way .ark-actions > a::after { content:"→"; margin-left:10px; font-weight:600; }
+#scene .download-page .download-way [data-action="download-next"]::after, #scene .download-page .download-way .ark-actions > a::after { content:"→"; margin-left:var(--sp-4); font-weight:600; }
 #scene .download-page .download-way .ark-actions > a .ark-btn__arrow { display:none; }
 
 /* ---- right column: what success proves --------------------------------------------------------------------- */
-#scene .download-page .story-side [data-ark-block="callout"] { padding:var(--s4) 20px; border-radius:12px; border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .8); }
+#scene .download-page .story-side [data-ark-block="callout"] { padding:var(--s4) var(--sp-5); border-radius:12px; border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .8); }
 #scene .download-page .story-side [data-ark-part="alert-icon"] { font-size:0; width:22px; height:22px; border-radius:50%; border:1.5px solid hsl(var(--primary)); position:relative; }
 #scene .download-page .story-side [data-ark-part="alert-icon"]::after { content:"i"; position:absolute; inset:0; display:grid; place-items:center; font:700 var(--fs-tertiary)/1 var(--font-sans,sans-serif); color:hsl(var(--primary)); }
 #scene .download-page .story-side [data-ark-part="alert-title"] { font:600 var(--fs-secondary)/1.3 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
@@ -172,7 +172,7 @@
 #scene .download-page .ark-pager { display:grid; gap:var(--s4); padding:0; border:0; }
 #scene .download-page .ark-pager__spacer { display:none; }
 #scene .download-page .ark-pager__links { display:block; }
-#scene .download-page [data-ark-part="pager-next"] { position:relative; display:grid; grid-template-columns:40px minmax(0,1fr) auto; grid-template-areas:"icon title arrow" "icon line arrow"; align-items:center; gap:2px var(--s4); padding:var(--s4) 20px; border-radius:12px; border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .8); text-decoration:none; text-align:left; }
+#scene .download-page [data-ark-part="pager-next"] { position:relative; display:grid; grid-template-columns:40px minmax(0,1fr) auto; grid-template-areas:"icon title arrow" "icon line arrow"; align-items:center; gap:var(--sp-1) var(--s4); padding:var(--s4) var(--sp-5); border-radius:12px; border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .8); text-decoration:none; text-align:left; }
 #scene .download-page [data-ark-part="pager-next"] > span { text-align:left; justify-self:start; }
 #scene .download-page [data-ark-part="pager-next"]::before { content:""; grid-area:icon; width:34px; height:34px; background:hsl(var(--text-strong)); -webkit-mask:var(--dl-next) center/contain no-repeat; mask:var(--dl-next) center/contain no-repeat;
   --dl-next:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.5'%3E%3Ccircle cx='12' cy='5' r='2'/%3E%3Ccircle cx='5' cy='18' r='2'/%3E%3Ccircle cx='19' cy='18' r='2'/%3E%3Cpath d='m11 7-5 9m7-9 5 9M7 18h10'/%3E%3C/svg%3E"); }
@@ -184,7 +184,7 @@
 #scene .download-page .ark-pager__related { display:grid; gap:var(--s3); padding:0; border:0; }
 #scene .download-page .ark-pager__related-label { margin-top:var(--s2); font:600 var(--fs-tertiary)/1.4 var(--font-mono,monospace); letter-spacing:.14em; text-transform:uppercase; color:hsl(var(--text-muted)); }
 #scene .download-page .ark-pager__related-list { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:var(--s3); margin:0; padding:0; list-style:none; }
-#scene .download-page .ark-pager__related-list a { position:relative; display:grid; grid-template-columns:34px minmax(0,1fr) auto; grid-template-rows:auto auto; column-gap:var(--s3); row-gap:2px; align-items:center; height:100%; padding:var(--s3) 14px var(--s3) var(--s3); border-radius:12px; border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .8); color:hsl(var(--text-strong)); font:600 var(--fs-tertiary)/1.3 var(--font-sans,sans-serif); text-decoration:none; }
+#scene .download-page .ark-pager__related-list a { position:relative; display:grid; grid-template-columns:34px minmax(0,1fr) auto; grid-template-rows:auto auto; column-gap:var(--s3); row-gap:var(--sp-1); align-items:center; height:100%; padding:var(--s3) var(--sp-4) var(--s3) var(--s3); border-radius:12px; border:1px solid hsl(var(--border-default)); background:hsl(var(--canvas) / .8); color:hsl(var(--text-strong)); font:600 var(--fs-tertiary)/1.3 var(--font-sans,sans-serif); text-decoration:none; }
 #scene .download-page .ark-pager__related-list a > span:first-of-type:not(.download-related-line) { grid-column:3; grid-row:1 / span 2; }
 #scene .download-page .ark-pager__related-list a::before { content:""; grid-column:1; grid-row:1 / span 2; width:34px; height:34px; border-radius:8px; background:hsl(var(--text-strong) / .06) var(--dl-icon) center/18px no-repeat; box-shadow:inset 0 0 0 1px hsl(var(--border-default)); }
 #scene .download-page .ark-pager__related-list li:nth-child(1) a { --dl-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.6'%3E%3Cpath d='m12 2.8 8.5 4.6v9.2L12 21.2l-8.5-4.6V7.4Z'/%3E%3Cpath d='m3.5 7.4 8.5 4.6 8.5-4.6M12 12v9.2'/%3E%3C/svg%3E"); }
@@ -201,7 +201,7 @@
   #scene .ark-page.ark-block-page.download-page .story-side { margin-top:var(--s6); }
   #scene .download-page .ark-pager__related-list { grid-template-columns:minmax(0,1fr); }
 }
-@media(max-width:700px){ #scene .download-page #download-apps { grid-template-columns:repeat(2,minmax(0,1fr)); } .download-proves { grid-template-columns:1fr; gap:10px; } #scene .download-code code { font-size:var(--fs-tertiary); } }
+@media(max-width:700px){ #scene .download-page #download-apps { grid-template-columns:repeat(2,minmax(0,1fr)); } .download-proves { grid-template-columns:1fr; gap:var(--sp-4); } #scene .download-code code { font-size:var(--fs-tertiary); } }
 @media(max-width:560px){
   #scene .dl-win { position:relative; left:auto; width:100%; transform:none; }
   #scene .dl-id { position:relative; left:auto; top:auto; width:auto; margin-top:var(--s3); transform:none; }
@@ -232,13 +232,13 @@
 #scene .ark-page.ark-block-page.download-page .download-apps-note { display:none; }
 #scene .download-page .story-main > #download-apps-fold { margin-top:var(--s3); }
 #scene .download-page #download-apps { grid-template-columns:repeat(2,minmax(0,1fr)); max-width:560px; }
-#scene .ark-page.ark-block-page.download-page #download-apps [data-ark-part="card"] { grid-template-areas:"icon title chips" "icon desc chips"; grid-template-columns:22px minmax(0,1fr) auto; align-items:center; padding:10px var(--s3); }
+#scene .ark-page.ark-block-page.download-page #download-apps [data-ark-part="card"] { grid-template-areas:"icon title chips" "icon desc chips"; grid-template-columns:22px minmax(0,1fr) auto; align-items:center; padding:var(--sp-4) var(--s3); }
 #scene .download-page #download-apps [data-ark-part="card-header"] { margin-top:0; }
 #scene .download-page #download-apps [data-ark-part="card-description"] :is(p, *) { margin:0; padding:0; }
 /* right column */
 #scene .ark-page.ark-block-page.download-page .story-side { gap:var(--s3); }
-#scene .download-page [data-ark-part="figure-frame"] { padding:20px var(--s5) var(--s4); }
-#scene .download-terminal { gap:10px; }
+#scene .download-page [data-ark-part="figure-frame"] { padding:var(--sp-5) var(--s5) var(--s4); }
+#scene .download-terminal { gap:var(--sp-4); }
 #scene .download-terminal-title { margin-top:var(--s1); font-size:var(--fs-secondary); }
 #scene .download-code { padding:var(--s3) var(--s4); }
 #scene .download-way { margin-top:var(--s1); padding-top:var(--s3); }
@@ -253,8 +253,8 @@
   #scene .ark-page.ark-block-page.download-page .story-main > [data-ark-block="section-header"], #scene .download-footnote { display:none; }
   #scene .download-page .ark-hero__title { font-size:var(--fs-hero); }
   #scene .download-page .story-main > [data-story-depth] { margin-top:var(--s4); }
-  #scene .download-art { height:178px; } #scene .dl-win { width:330px; height:172px; } #scene .dl-id { left:304px; top:14px; padding:10px var(--s3); }
-  #scene .dl-id-key { margin-bottom:var(--s2); } #scene .dl-id-rows { gap:6px; }
+  #scene .download-art { height:178px; } #scene .dl-win { width:330px; height:172px; } #scene .dl-id { left:304px; top:14px; padding:var(--sp-4) var(--s3); }
+  #scene .dl-id-key { margin-bottom:var(--s2); } #scene .dl-id-rows { gap:var(--sp-3); }
   #scene .download-page .story-main > #download-apps-fold { margin-top:var(--s4); }
 }
 @media(max-width:560px){ #scene .dl-win { width:100%; height:220px; transform:none; } #scene .dl-id { left:auto; } }
@@ -267,11 +267,11 @@
 #scene .download-art { height:232px; } #scene .dl-win { height:224px; width:400px; } #scene .dl-id { left:372px; top:40px; }
 #scene .download-page .story-main > [data-story-depth] { margin-top:var(--s4); }
 #scene .ark-page.ark-block-page.download-page .story-main > [data-ark-block="section-header"] { margin-top:var(--s4); }
-#scene .download-code { gap:6px; } #scene .download-code code { font-size:var(--fs-tertiary); }
+#scene .download-code { gap:var(--sp-3); } #scene .download-code code { font-size:var(--fs-tertiary); }
 #scene .download-terminal-desc { font-size:var(--fs-tertiary); }
 #scene .download-page .story-side [data-ark-part="alert-description"], #scene .download-page .story-side [data-ark-part="alert-description"] p { font-size:var(--fs-tertiary); line-height:1.5; }
 #scene .download-page .ark-pager__related-label { display:none; }
-#scene .download-page .ark-pager__related-list a { padding:10px var(--s3) 10px 10px; }
+#scene .download-page .ark-pager__related-list a { padding:var(--sp-4) var(--s3) var(--sp-4) var(--sp-4); }
 /* compact, round 3: Previous step steps back (the dots go back to any step), the hero a little smaller, the window
    shorter; then the short-screen rules restated LAST so nothing above overrides them */
 #scene .download-page .download-way [data-action="download-previous"] { display:none !important; }
@@ -283,10 +283,10 @@
   #scene .download-page .ark-hero__lede, #scene .download-page .ark-hero > p, #scene .download-page .ark-pager__related, #scene .download-terminal-desc,
   #scene .ark-page.ark-block-page.download-page .story-main > [data-ark-block="section-header"], #scene .download-footnote { display:none; }
   #scene .download-page .ark-hero__title { font-size:var(--fs-hero); }
-  #scene .download-art { height:168px; } #scene .dl-win { width:310px; height:162px; } #scene .dl-id { left:288px; top:8px; padding:10px var(--s3); }
-  #scene .dl-id-key { margin-bottom:var(--s2); } #scene .dl-id-rows { gap:5px; }
+  #scene .download-art { height:168px; } #scene .dl-win { width:310px; height:162px; } #scene .dl-id { left:288px; top:8px; padding:var(--sp-4) var(--s3); }
+  #scene .dl-id-key { margin-bottom:var(--s2); } #scene .dl-id-rows { gap:var(--sp-2); }
   #scene .download-page .story-main > #download-apps-fold { margin-top:var(--s3); }
-  #scene .download-page [data-ark-part="figure-frame"] { padding:var(--s4) 20px var(--s3); }
+  #scene .download-page [data-ark-part="figure-frame"] { padding:var(--s4) var(--sp-5) var(--s3); }
 }
 #scene .ark-page.ark-block-page.download-page { padding-bottom:var(--s2); }
 @media(min-width:1001px) and (max-height:760px){
@@ -355,7 +355,7 @@
   background:hsl(var(--primary-300, var(--primary)) / .55); color:hsl(var(--primary-700, var(--text-strong))); box-shadow:inset 0 0 0 1px hsl(var(--primary-400, var(--primary)) / .6); }
 #scene .download-page .download-way [data-action="download-next"]:hover, #scene .download-page .download-way .ark-actions > a:hover { background:hsl(var(--primary-300, var(--primary)) / .8); }
 #scene .download-page #download-apps [data-ark-part="card-description"] { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100%; } #scene .download-page #download-apps [data-ark-part="card-description"] p { display:inline; }
-@media(min-width:1001px) and (max-height:760px){ #scene .download-code { padding:10px var(--s4); } }
+@media(min-width:1001px) and (max-height:760px){ #scene .download-code { padding:var(--sp-4) var(--s4); } }
 
 /* the FXN ID card: the shared glass (css/cutouts.css .tp-panel), lighter than before, so the window shows through the
    overlap (overlapping transparency, isolated so it never blends into the page) */
@@ -372,4 +372,4 @@
 #scene .dl-id { transform:rotateY(-14deg) rotateX(5deg); transform-origin:100% 50%; }
 @media(max-width:560px){ #scene .dl-win, #scene .dl-id { transform:none; } #scene .download-art::before { display:none; } }
 #scene .download-art::before { bottom:0; height:36%; }   /* inside the box: a glow below it added 4px of scroll at 1280x720 */
-@media(min-width:1001px) and (max-height:760px){ #scene .download-terminal-title { margin-top:0; font-size:var(--fs-secondary); } #scene .download-page .story-side [data-ark-block="callout"] { padding:10px var(--s4); } }
+@media(min-width:1001px) and (max-height:760px){ #scene .download-terminal-title { margin-top:0; font-size:var(--fs-secondary); } #scene .download-page .story-side [data-ark-block="callout"] { padding:var(--sp-4) var(--s4); } }

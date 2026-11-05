@@ -192,7 +192,7 @@
     '.th-corner{position:absolute;width:42%;height:auto;aspect-ratio:1}',
     '.th-corner.tl{left:6%;top:8%}.th-corner.tr{right:6%;top:8%;transform:scaleX(-1)}',
     '.th-corner.bl{left:6%;bottom:8%;transform:scaleY(-1)}.th-corner.br{right:6%;bottom:8%;transform:scale(-1,-1)}',
-    '.th-swatches{position:absolute;left:8px;bottom:8px;display:flex;gap:4px}',
+    '.th-swatches{position:absolute;left:8px;bottom:8px;display:flex;gap:var(--sp-2, 4px)}',
     '.th-swatches i{width:10px;height:10px;border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.5)}',
     '.th-stage{position:relative;overflow:hidden;background:#050606;border-radius:8px;touch-action:none}',
     '.th-stage.th-3d,.th-stage.th-palette{cursor:grab}',

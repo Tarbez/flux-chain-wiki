@@ -1,7 +1,7 @@
 .native-icon { display:inline-block; width:18px; height:18px; flex:0 0 18px; vertical-align:-3px; pointer-events:none; }
-.has-native-icon { display:inline-flex; align-items:center; gap:8px; }
+.has-native-icon { display:inline-flex; align-items:center; gap:var(--sp-3); }
 .has-native-icon > :is(.native-icon-arrow-right,.native-icon-open) { order:2; }
-#scene .story-depth button.has-native-icon { display:inline-flex; align-items:center; gap:8px; }
+#scene .story-depth button.has-native-icon { display:inline-flex; align-items:center; gap:var(--sp-3); }
 #scene .nav-route-link > .native-icon { position:absolute; top:16px; right:16px; color:hsl(var(--primary)); }
 #scene .nav-route-link::after { content:none; }
 

@@ -19,20 +19,20 @@
 <style>
   html, body { height: 100%; }
   body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font-family: var(--font-sans, system-ui, sans-serif); overflow: hidden; }
-  .st-tool { display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 20px; box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); font: 500 var(--fs-tertiary)/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+  .st-tool { display: flex; align-items: center; gap: var(--sp-4); height: 48px; padding: 0 var(--sp-5); box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); font: 500 var(--fs-tertiary)/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
   .st-tool b { color: hsl(var(--text-strong)); font-weight: 600; }
-  .st-pick { display: flex; gap: 4px; }
-  .st-pick button { font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 7px 10px; border-radius: 6px; border: 1px solid hsl(var(--border-default)); background: transparent; color: hsl(var(--text)); cursor: pointer; }
+  .st-pick { display: flex; gap: var(--sp-2); }
+  .st-pick button { font: inherit; letter-spacing: inherit; text-transform: inherit; padding: var(--sp-3) var(--sp-4); border-radius: 6px; border: 1px solid hsl(var(--border-default)); background: transparent; color: hsl(var(--text)); cursor: pointer; }
   .st-pick button[aria-pressed="true"] { background: hsl(var(--text-strong)); color: hsl(var(--canvas)); border-color: transparent; }
   .st-state { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-family: var(--font-sans, system-ui, sans-serif); font-size: var(--fs-tertiary); }
   .st-note { color: hsl(var(--text-faint)); }
   .st-main { height: calc(100% - 48px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
-  .st-edit { min-height: 0; overflow: auto; padding: 18px 20px; border-right: 1px solid hsl(var(--border-subtle)); }
-  .st-edit > h2, .st-stage > h2, .st-slot > h2 { margin: 0 0 10px; font: 600 var(--fs-tertiary)/1.2 var(--font-mono, monospace); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--text-muted)); }
-  .st-stage { min-height: 0; overflow: hidden; padding: 18px 22px; display: grid; grid-template-rows: auto auto auto 1fr; gap: 16px; align-content: start; }
-  .st-row { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .st-slot pre { margin: 0; max-height: 5.5rem; overflow: auto; padding: 8px; border-radius: 6px; background: hsl(var(--surface)); font: var(--fs-tertiary)/1.4 var(--font-mono, monospace); white-space: pre-wrap; overflow-wrap: anywhere; color: hsl(var(--text-muted)); }
-  .st-slot select { margin-left: 8px; }
+  .st-edit { min-height: 0; overflow: auto; padding: var(--sp-5) var(--sp-5); border-right: 1px solid hsl(var(--border-subtle)); }
+  .st-edit > h2, .st-stage > h2, .st-slot > h2 { margin: 0 0 var(--sp-4); font: 600 var(--fs-tertiary)/1.2 var(--font-mono, monospace); letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+  .st-stage { min-height: 0; overflow: hidden; padding: var(--sp-5) var(--sp-5); display: grid; grid-template-rows: auto auto auto 1fr; gap: var(--sp-5); align-content: start; }
+  .st-row { display: flex; align-items: center; gap: var(--sp-5); flex-wrap: wrap; }
+  .st-slot pre { margin: 0; max-height: 5.5rem; overflow: auto; padding: var(--sp-3); border-radius: 6px; background: hsl(var(--surface)); font: var(--fs-tertiary)/1.4 var(--font-mono, monospace); white-space: pre-wrap; overflow-wrap: anywhere; color: hsl(var(--text-muted)); }
+  .st-slot select { margin-left: var(--sp-3); }
 </style>
 </head>
 <body>

@@ -21,19 +21,19 @@
 <style>
   html, body { height: 100%; }
   body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font-family: var(--font-sans, system-ui, sans-serif); overflow: hidden; }
-  .wr-tool { display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 20px; box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); font: 500 var(--fs-tertiary)/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+  .wr-tool { display: flex; align-items: center; gap: var(--sp-4); height: 48px; padding: 0 var(--sp-5); box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); font: 500 var(--fs-tertiary)/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
   .wr-tool b { color: hsl(var(--text-strong)); font-weight: 600; }
   .wr-state { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-family: var(--font-sans, system-ui, sans-serif); font-size: var(--fs-tertiary); }
   .wr-note { color: hsl(var(--text-faint)); }
   #site { height: calc(100% - 48px); display: flex; flex-direction: column; background: hsl(var(--canvas)); color: hsl(var(--text)); }
-  .wr-head { display: flex; align-items: center; gap: 22px; padding: 10px 24px; border-bottom: 1px solid hsl(var(--border-default)); }
+  .wr-head { display: flex; align-items: center; gap: var(--sp-5); padding: var(--sp-4) var(--sp-6); border-bottom: 1px solid hsl(var(--border-default)); }
   .wr-word { font: 600 var(--fs-tertiary)/1 var(--font-mono, monospace); letter-spacing: .3em; color: hsl(var(--text-strong)); }
-  .wr-head nav { display: flex; gap: 18px; font-size: var(--fs-tertiary); }
+  .wr-head nav { display: flex; gap: var(--sp-5); font-size: var(--fs-tertiary); }
   .wr-head nav a { color: hsl(var(--text)); text-decoration: none; }
   .wr-grow { flex: 1; }
   .wr-account { color: hsl(var(--text)); font-size: var(--fs-tertiary); text-decoration: none; }
-  .wr-main { --type-h1: clamp(2rem, 3.2vw, 3.25rem); flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; padding: 22px 24px; overflow: hidden; }
-  .wr-col { display: grid; gap: 16px; align-content: start; min-height: 0; }
+  .wr-main { --type-h1: clamp(2rem, 3.2vw, 3.25rem); flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: var(--sp-5); padding: var(--sp-5) var(--sp-6); overflow: hidden; }
+  .wr-col { display: grid; gap: var(--sp-5); align-content: start; min-height: 0; }
 </style>
 </head>
 <body>
