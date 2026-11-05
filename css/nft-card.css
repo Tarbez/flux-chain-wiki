@@ -1,4 +1,5 @@
-/* DEFXN identity card (js/nft/card.js). One card, drawn at any width: every size below is in card units, where
+/* type-scale: scaled art -- the card is drawn in card units (0.1cqw), so its type scales with the card, not the page.
+   DEFXN identity card (js/nft/card.js). One card, drawn at any width: every size below is in card units, where
    the card is 1000 units wide and 700 tall (the reference is 343 x 240 px, 1.43 : 1). A unit is
    0.1cqw, so the card keeps every proportion at any size its box gives it.
    The palette is HSL channels, as in kit.css, so it can be re-tuned here in one place. */

@@ -19,25 +19,25 @@
     background: #000;
     color: #8a8a94;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    font-size: 15px;
+    font-size: var(--fs-secondary, 18px);
     line-height: 1.7;
-    padding: 72px 24px 110px;
+    padding: var(--sp-8, 76px) var(--sp-6, 29px) var(--sp-9, 123px);
     border-top: 1px solid rgba(255,255,255,0.06);
     -webkit-font-smoothing: antialiased;
   }
   #fallback .wrap { max-width: 640px; margin: 0 auto; }
   #fallback .eyebrow {
-    margin: 0 0 28px; font-size: 11px; letter-spacing: .24em;
+    margin: 0 0 var(--sp-6, 29px); font-size: var(--fs-tertiary, 11px); letter-spacing: .24em;
     text-transform: uppercase; color: #4a4a56;
   }
-  #fallback h1 { margin: 0 0 14px; font-size: 24px; line-height: 1.3; font-weight: 700; color: #fff; }
-  #fallback .lede { margin: 0 0 28px; font-size: 20px; font-weight: 300; color: #c8c8c8; }
-  #fallback p { margin: 0 0 22px; }
+  #fallback h1 { margin: 0 0 var(--sp-4, 11px); font-size: var(--fs-primary, 29px); line-height: 1.3; font-weight: 700; color: #fff; }
+  #fallback .lede { margin: 0 0 var(--sp-6, 29px); font-size: var(--fs-secondary, 18px); font-weight: 300; color: #c8c8c8; }
+  #fallback p { margin: 0 0 var(--sp-5, 18px); }
   #fallback a { color: #c8c8c8; text-decoration: underline; text-underline-offset: 3px; }
   #fallback a:hover { color: #fff; }
-  #fallback .row { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; justify-content: space-between; }
+  #fallback .row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-5, 18px); justify-content: space-between; }
   #fallback .cta {
-    display: inline-block; padding: 10px 20px; border-radius: 999px;
+    display: inline-block; padding: var(--sp-4, 11px) var(--sp-5, 18px); border-radius: 999px;
     border: 1px solid rgba(255,255,255,0.18); text-decoration: none; color: #fff;
     background: rgba(255,255,255,0.03);
   }
@@ -504,7 +504,7 @@ var AVATAR_DATA_URI = 'data:image/svg+xml,' + encodeURIComponent(
   '<rect width="48" height="48" rx="24" fill="url(#g)"/>' +
   '<circle cx="24" cy="24" r="23" fill="none" stroke="rgba(255,255,255,0.14)"/>' +
   '<text x="24" y="31" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif" ' +
-  'font-size="19" font-weight="700" fill="#e8e8ee" text-anchor="middle">H</text>' +
+  'font-size="18" font-weight="700" fill="#e8e8ee" text-anchor="middle">H</text>' +
   '</svg>'
 );
 
@@ -602,7 +602,7 @@ ArkUI.register('RSTEP_V1', {
     border: '1px solid rgba(255,255,255,0.30)',
     background: 'rgba(9,9,12,0.62)',
     color: '#ffffff',
-    fontSize: '18px',
+    fontSize: 'var(--fs-secondary, 18px)',
     fontWeight: '700',
     letterSpacing: '0.005em',
     whiteSpace: 'nowrap',
@@ -639,7 +639,7 @@ ArkUI.register('RSUB_V1', {
     transform: 'translateX(-50%)',
     margin: '0',
     textAlign: 'center',
-    fontSize: '24px',
+    fontSize: 'var(--fs-primary, 29px)',
     fontWeight: '300',
     lineHeight: '1.4',
     letterSpacing: '-0.005em',
@@ -667,7 +667,7 @@ ArkUI.register('RBODY_V1', {
     bottom: '110px',
     margin: '0',
     textAlign: 'left',
-    fontSize: '15px',
+    fontSize: 'var(--fs-secondary, 18px)',
     lineHeight: '1.7',
     color: '#8a8a94',
     zIndex: '2'
@@ -708,7 +708,7 @@ ArkUI.register('RTEXT_V1', {
   schema: { T: 'text', S: 'size', C: 'color', W: 'width' },
   base: {
     display: 'inline-block',
-    fontSize: '15px',
+    fontSize: 'var(--fs-secondary, 18px)',
     lineHeight: '1.5',
     color: '#8a8a94'
   },
@@ -806,7 +806,7 @@ ArkUI.register('RAVATAR_V1', {
     name.textContent = String(p.name || '').toUpperCase();
     name.className = ArkUI.atomize({
       display: 'block',
-      fontSize: '10px',
+      fontSize: 'var(--fs-tertiary, 11px)',
       fontWeight: '700',
       letterSpacing: '0.12em',
       color: '#e6e6ec'
@@ -817,7 +817,7 @@ ArkUI.register('RAVATAR_V1', {
     url.className = ArkUI.atomize({
       display: 'block',
       marginTop: '3px',
-      fontSize: '10px',
+      fontSize: 'var(--fs-tertiary, 11px)',
       letterSpacing: '0.04em',
       color: '#6e6e7a'
     });
@@ -888,7 +888,7 @@ ArkUI.register('RPILL_DOT_V1', {
     arrow.textContent = (String(p.arrow || 'right') === 'left') ? '\u2190' : '\u2192';
     arrow.className = ArkUI.atomize({
       display: 'block',
-      fontSize: '15px',
+      fontSize: 'var(--fs-secondary, 18px)',
       lineHeight: '1',
       color: '#ffffff'
     });

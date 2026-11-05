@@ -705,7 +705,7 @@ body.no-scene .tags,body.no-webgl .tags,body.no-scene .stage-note,body.no-webgl 
 /* the card, redesigned (2026-10-23, owner: "huge and half empty, cheap"): dark glass like the page,
    angular, sized to its content, with structure: a header band, a band for the tabs and the action,
    the content, and a facts rail on the right edged in teal. Light ink on the dark card. */
-.card{--ink:var(--text-strong);--cx:clamp(26px,calc(3.4vw / var(--s)),48px);padding-left:var(--cx);padding-right:var(--cx);height:auto}
+.card{--ink:var(--text-strong);--cx:clamp(var(--sp-6, 29px),calc(3.4vw / var(--s)),var(--sp-7, 47px));padding-left:var(--cx);padding-right:var(--cx);height:auto}
 .card-slot{height:auto;max-height:calc(80vh / var(--s));display:flex;align-items:stretch}
 .card .card-bar{margin:clamp(12px,calc(2vh / var(--s)),18px) calc(-1 * var(--cx)) 0;padding:10px var(--cx);
   border-top:1px solid hsl(var(--text-strong) / .08);border-bottom:1px solid hsl(var(--text-strong) / .08);background:hsl(var(--text-strong) / .025)}

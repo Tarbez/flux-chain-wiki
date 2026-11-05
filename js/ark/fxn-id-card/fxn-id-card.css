@@ -24,10 +24,6 @@
   --fxn-ink-muted: hsl(var(--text-muted));
   --fxn-ink-shadow: hsl(var(--theme-shadow-color, 0 0% 0%));
   --fxn-ink-radius: 8px;
-  --fxn-fs-label: var(--fs-tertiary, 11px);
-  --fxn-fs-name: var(--fs-secondary, 18px);
-  --fxn-fs-title: var(--fs-primary, 29px);
-  --fxn-fs-body: var(--fs-tertiary, 11px);
 }
 
 .fxn-idc {
@@ -69,15 +65,15 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 6px;
-  padding: 0 4px;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-2);
   box-sizing: border-box;
   text-align: left;
 }
 
 .fxn-idc-label {
   min-height: 1.4em;
-  font: 600 var(--fxn-fs-label)/1.4 var(--font-mono);
+  font: 600 var(--fs-tertiary, 11px)/1.4 var(--font-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: color-mix(in oklab, var(--fxn-idc-accent) 82%, #fff);
@@ -93,7 +89,7 @@
 
 .fxn-idc-name {
   max-width: 100%;
-  font: 700 var(--fxn-fs-name)/1.15 var(--font-display);
+  font: 700 var(--fs-secondary, 18px)/1.15 var(--font-display);
   color: #eef2f0;
   overflow-wrap: anywhere;
   display: -webkit-box;
@@ -119,14 +115,14 @@
 .fxn-idc-print.fxn-idc-print-lock {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  column-gap: 7px;
-  padding: 10px 9px;   /* px, not %: a percentage pads by the stage's width, not the print's */
+  column-gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-4);   /* px, not %: a percentage pads by the stage's width, not the print's */
 }
 
 .fxn-idc-bars {
   display: flex;
   flex-direction: column-reverse;
-  gap: 7px;
+  gap: var(--sp-3);
   height: 100%;
   min-width: 4px;
   transform-origin: 50% 100%;
@@ -150,7 +146,7 @@
 /* the stamp: the chosen icon struck into the plate */
 .fxn-idc-print-stamp {
   align-items: center;
-  padding: 5px;
+  padding: var(--sp-2);
 }
 
 .fxn-idc-print-stamp svg {
@@ -167,7 +163,7 @@
 /* the vault on the back: one cell per recovery word */
 .fxn-idc-print-vault {
   justify-content: flex-start;
-  padding: 8px;
+  padding: var(--sp-3);
 }
 
 .fxn-idc-print-vault .fxn-idc-label {
@@ -177,7 +173,7 @@
 .fxn-idc-cells {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  gap: var(--sp-3);
   width: 100%;
   flex: 1;
 }
@@ -225,8 +221,8 @@ dialog.ark-dialog.fxn-idv[open] {
   grid-row: 1;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 18px 0;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5) 0;
 }
 
 .fxn-idv-titles {
@@ -236,7 +232,7 @@ dialog.ark-dialog.fxn-idv[open] {
 
 .fxn-idv-kicker {
   margin: 0;
-  font: 600 var(--fxn-fs-label)/1.4 var(--font-mono);
+  font: 600 var(--fs-tertiary, 11px)/1.4 var(--font-mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--fxn-ink-muted);
@@ -244,7 +240,7 @@ dialog.ark-dialog.fxn-idv[open] {
 
 .fxn-idv-title {
   margin: 0;
-  font: 700 var(--fxn-fs-title)/1.15 var(--font-display);
+  font: 700 var(--fs-primary, 29px)/1.15 var(--font-display);
   color: var(--fxn-ink-strong);
 }
 
@@ -277,7 +273,7 @@ dialog.ark-dialog.fxn-idv[open] {
   left: 0;
   top: 0;
   width: 420px;
-  padding: 14px 16px;
+  padding: var(--sp-4) var(--sp-5);
   box-sizing: border-box;
   border: 1px solid color-mix(in srgb, var(--fxn-idc-accent) 35%, transparent);
   border-radius: 10px;
@@ -308,22 +304,22 @@ dialog.ark-dialog.fxn-idv[open] {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 4px 10px;
+  gap: var(--sp-2) var(--sp-4);
 }
 
 .fxn-idv-layer-head b {
-  font: 700 var(--fxn-fs-name)/1.2 var(--font-display);
+  font: 700 var(--fs-secondary, 18px)/1.2 var(--font-display);
 }
 
 .fxn-idv-layer-head small {
-  font: 500 var(--fxn-fs-label)/1.4 var(--font-mono);
+  font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono);
   letter-spacing: 0.06em;
   color: var(--fxn-ink-muted);
 }
 
 .fxn-idv-badge,
 .fxn-idv-mark {
-  font: 600 var(--fxn-fs-label)/1.4 var(--font-mono);
+  font: 600 var(--fs-tertiary, 11px)/1.4 var(--font-mono);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--fxn-ink-accent-text);
@@ -336,16 +332,16 @@ dialog.ark-dialog.fxn-idv[open] {
 .fxn-idv-coins {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-  gap: 8px;
-  margin-top: 12px;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
 }
 
 /* a wallet: a coin that rises in when its Public ID is chosen, and lifts when it is chosen */
 .fxn-idv-coin {
   display: grid;
-  gap: 2px;
+  gap: var(--sp-1);
   justify-items: center;
-  padding: 10px 4px 8px;
+  padding: var(--sp-4) var(--sp-2) var(--sp-3);
   border: 1px solid var(--fxn-ink-border);
   border-radius: 999px / 40%;
   background: var(--fxn-ink-nested);
@@ -373,16 +369,16 @@ dialog.ark-dialog.fxn-idv[open] {
 }
 
 .fxn-idv-coin b {
-  font: 600 var(--fxn-fs-label)/1.3 var(--font-display);
+  font: 600 var(--fs-tertiary, 11px)/1.3 var(--font-display);
 }
 
 .fxn-idv-coin small {
-  font: 500 var(--fxn-fs-label)/1.3 var(--font-mono);
+  font: 500 var(--fs-tertiary, 11px)/1.3 var(--font-mono);
   color: var(--fxn-ink-muted);
 }
 
 .fxn-idv-coin .fxn-idv-mark {
-  font-size: var(--fxn-fs-label);
+  font-size: var(--fs-tertiary, 11px);
   letter-spacing: 0.04em;
 }
 
@@ -393,7 +389,7 @@ dialog.ark-dialog.fxn-idv[open] {
   right: 18px;
   bottom: 18px;
   width: min(340px, 40%);
-  padding: 16px;
+  padding: var(--sp-5);
   border: 1px solid var(--fxn-ink-border);
   border-radius: 10px;
   background: color-mix(in srgb, var(--fxn-ink-raised) 88%, transparent);
@@ -407,22 +403,22 @@ dialog.ark-dialog.fxn-idv[open] {
 
 .fxn-idv-guide h3,
 .fxn-idv-detail h3 {
-  margin: 4px 0 6px;
-  font: 700 var(--fxn-fs-name)/1.2 var(--font-display);
+  margin: var(--sp-2) 0 var(--sp-3);
+  font: 700 var(--fs-secondary, 18px)/1.2 var(--font-display);
 }
 
 .fxn-idv-guide p,
 .fxn-idv-detail p {
-  margin: 0 0 10px;
-  font-size: var(--fxn-fs-body);
+  margin: 0 0 var(--sp-4);
+  font-size: var(--fs-tertiary, 11px);
   line-height: 1.45;
   color: var(--fxn-ink-muted);
 }
 
 .fxn-idv-detail code {
   display: block;
-  margin: 0 0 10px;
-  font: 500 var(--fxn-fs-label)/1.4 var(--font-mono);
+  margin: 0 0 var(--sp-4);
+  font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono);
   word-break: break-all;
   color: var(--fxn-ink-text);
 }
@@ -430,31 +426,31 @@ dialog.ark-dialog.fxn-idv[open] {
 .fxn-idv-guide-nav,
 .fxn-idv-detail-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--sp-3);
   justify-content: flex-end;
 }
 
 .fxn-idv-muted {
-  font-size: var(--fxn-fs-label);
+  font-size: var(--fs-tertiary, 11px);
 }
 
 .fxn-idv-foot {
   grid-row: 3;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 18px 16px;
+  gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5) var(--sp-5);
   border-top: 1px solid var(--fxn-ink-border);
 }
 
 .fxn-idv-add {
   display: flex;
-  gap: 8px;
+  gap: var(--sp-3);
 }
 
 .fxn-idv-add input {
   width: 220px;
-  padding: 6px 10px;
+  padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--fxn-ink-border);
   border-radius: 8px;
   background: var(--fxn-ink-nested);
@@ -465,7 +461,7 @@ dialog.ark-dialog.fxn-idv[open] {
 .fxn-idv-note {
   flex: 1;
   margin: 0;
-  font-size: var(--fxn-fs-body);
+  font-size: var(--fs-tertiary, 11px);
   color: var(--fxn-ink-muted);
 }
 
@@ -496,7 +492,7 @@ dialog.ark-dialog.fxn-idv[open] {
   z-index: 1;
   max-height: 100%;
   box-sizing: border-box;
-  margin: 12px 18px;
+  margin: var(--sp-4) var(--sp-5);
   padding: 0;
   list-style: none;
   max-width: calc(100% - 420px);
@@ -507,8 +503,8 @@ dialog.ark-dialog.fxn-idv[open] {
 }
 
 .fxn-idv[data-flat="true"] .fxn-idv-tree > li {
-  margin-bottom: 10px;
-  padding: 10px 12px;
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-4) var(--sp-4);
   border: 1px solid var(--fxn-ink-border);
   border-radius: 8px;
   background: var(--fxn-ink-nested);
@@ -527,16 +523,16 @@ dialog.ark-dialog.fxn-idv[open] {
 .fxn-idv[data-flat="true"] .fxn-idv-tree ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 8px 0 0;
+  gap: var(--sp-3);
+  margin: var(--sp-3) 0 0;
   padding: 0;
 }
 
 .fxn-idv[data-flat="true"] .fxn-idv-tree ul li {
-  padding: 4px 8px;
+  padding: var(--sp-2) var(--sp-3);
   border: 1px solid var(--fxn-ink-border);
   border-radius: 999px;
-  font: 500 var(--fxn-fs-label)/1.4 var(--font-mono);
+  font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono);
 }
 
 .fxn-idv-tree:focus-visible {
@@ -552,12 +548,12 @@ dialog.ark-dialog.fxn-idv[open] {
   align-items: center;
   justify-content: center;
   min-height: 34px;
-  padding: 0 16px;
+  padding: 0 var(--sp-5);
   border: 1px solid var(--fxn-ink-border);
   border-radius: 4px;
   background: transparent;
   color: var(--fxn-ink-strong);
-  font: 600 var(--fxn-fs-label)/1 var(--font-mono);
+  font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
@@ -566,7 +562,7 @@ dialog.ark-dialog.fxn-idv[open] {
 
 .fxn-idv .fxn-btn-small {
   min-height: 30px;
-  padding: 0 12px;
+  padding: 0 var(--sp-4);
 }
 
 .fxn-idv .fxn-btn-quiet:hover {
@@ -609,7 +605,7 @@ dialog.ark-dialog.fxn-idv[open] {
   border-radius: 4px;
   background: transparent;
   color: var(--fxn-ink-muted);
-  font: 600 var(--fxn-fs-label)/1 var(--font-mono);
+  font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono);
   cursor: pointer;
 }
 
@@ -655,7 +651,7 @@ dialog.ark-dialog.fxn-idv::backdrop {
 .fxn-idv-guide p.fxn-idv-kicker,
 .fxn-idv-detail p.fxn-idv-kicker {
   margin: 0;
-  font-size: var(--fxn-fs-label);
+  font-size: var(--fs-tertiary, 11px);
   color: var(--fxn-idc-accent);
 }
 

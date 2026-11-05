@@ -21,7 +21,7 @@ ArkUI.register('RBLOCK_QUOTE_V1', {
       quote.textContent = p.quote;
       quote.className = ArkUI.atomize({
         fontFamily: 'var(--font-display)',
-        fontSize: 'var(--type-h3)',
+        fontSize: 'var(--fs-primary)',
         fontStyle: 'italic',
         color: 'hsl(var(--text-strong))',
         margin: '0 0 8px',
@@ -34,7 +34,7 @@ ArkUI.register('RBLOCK_QUOTE_V1', {
       cite.textContent = p.attribution;
       cite.className = ArkUI.atomize({
         fontFamily: 'var(--font-sans)',
-        fontSize: 'var(--type-metadata)',
+        fontSize: 'var(--fs-tertiary)',
         color: 'hsl(var(--text-muted))',
         fontStyle: 'normal'
       });

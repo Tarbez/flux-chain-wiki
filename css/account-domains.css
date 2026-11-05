@@ -1,8 +1,8 @@
 /* Your domains (js/pages/account-domains.js): a page of Ark blocks since 2026-10-19 (W3-GUIDE), in
    the shared block-page frame (css/block-page.css). The form and the list are Ark's (since 2026-10-21); this file
    styles only the page's own status line and the hand-off around them. */
-#scene .account-domains-track { display:grid; gap:10px; }
-#scene [data-domains-add-status] { margin:0; color:var(--signal-trust,hsl(var(--trust))); font:400 13px/1.4 var(--font-sans,"Albert Sans",sans-serif); }
+#scene .account-domains-track { display:grid; gap:var(--sp-4); }
+#scene [data-domains-add-status] { margin:0; color:var(--signal-trust,hsl(var(--trust))); font:400 var(--fs-tertiary)/1.4 var(--font-sans,"Albert Sans",sans-serif); }
 /* a refused name is said in the danger colour, not the success one */
 #scene [data-domains-add-status][data-tone="error"] { color:hsl(var(--danger)); }
 #scene [data-domains-add-status]:empty { display:none; }

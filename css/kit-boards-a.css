@@ -1,4 +1,5 @@
-/* KIT BOARDS 01-02 (js/kit/board-01.js, js/kit/board-02.js): the elements of Actions & Inputs and Panels & Data.
+/* type-scale: scaled art -- a board drawn at zoom var(--kit-z); its sizes are the --fs-* steps divided by that zoom.
+   KIT BOARDS 01-02 (js/kit/board-01.js, js/kit/board-02.js): the elements of Actions & Inputs and Panels & Data.
    Every rule is scoped under .kit-el, the box the Kit page (js/pages/kit.js) gives each element. Ark's own parts
    (blocks, .ark-btn, .ark-badge, .ark-status) keep Ark's sheet (css/ark-blocks.css); this sheet draws only the
    markup the boards build around Ark's primitives, in Ark's shapes, so a skin reaches it by its part names.

@@ -46,7 +46,7 @@
 /* A label is the FXN ID card's print (js/ark/fxn-id-card/fxn-id-card.css, docs/design/auth/FXN-ID-CARD.md "The card's visual rules"): the
    title in mono, upper case, tracked .14em, in the theme's base hue; the line under it in the page's muted ink; both on the type scale's
    11 (laws 78-83; they were 12, 10 and 9). A thin edge, a 4px corner, and a glass ground clear enough to read over the world. */
-.world-tags .tag { position: absolute; left: 0; top: 0; display: grid; gap: 3px; max-width: 13em; padding: 6px 10px 7px; border-radius: 4px;
+.world-tags .tag { position: absolute; left: 0; top: 0; display: grid; gap: var(--sp-2); max-width: 13em; padding: var(--sp-3) var(--sp-4) var(--sp-3); border-radius: 4px;
   font: 400 var(--fs-tertiary, 11px)/1.4 var(--font-sans); color: hsl(var(--text-muted)); text-shadow: 0 0 10px hsl(var(--canvas)), 0 0 3px hsl(var(--canvas));
   background: hsl(var(--canvas) / .86); box-shadow: inset 0 0 0 1px hsl(var(--border-default)), 0 8px 18px -10px hsl(var(--theme-shadow-color, 0 0% 0%) / .8);
   -webkit-backdrop-filter: blur(8px) saturate(1.1); backdrop-filter: blur(8px) saturate(1.1);

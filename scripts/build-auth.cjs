@@ -161,6 +161,11 @@ execFileSync(esbuild, [
     fs.rmSync(outfile, { force: true });
     refuse(`The sign-in bundle carries tweetnacl code (found: ${marks.join(', ')}).`, 'a bundle whose every Ed25519 path is WebCrypto, refusing a runtime without it.', 'find the input that imports tweetnacl (node scripts/build-auth.cjs --print-pins lists them) and move it to the native-only helper.');
   }
+  // 2026-11-05 (owner ruling: one type scale, one spacing scale): the Auth Kit panel's sizes and spacing keep
+  // Ark's Dead Ark values; on FXN screens every one is a step. The kit's fixers (assets/kit, synced from
+  // flux/defxn-product-kit) move them, after the checks above have proved the bytes esbuild wrote.
+  const { scaleBundle } = require(path.join(site, 'assets', 'kit', 'space-scale.mjs'));
+  fs.writeFileSync(outfile, scaleBundle(written.toString('utf8'), outfile));
 }
 // Other sites that carry this Auth Kit bundle are LISTED when their copy differs, never written.
 // Until 2026-10-23 this step wrote the fresh bundle into every sibling site under flux/. Run from

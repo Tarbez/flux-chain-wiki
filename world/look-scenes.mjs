@@ -92,7 +92,7 @@ export function install(stat, size) {
   /* VIEWS 1: canvas text on faces, with a polygon offset on a plate lying on a face */
   worldScene('text', R => {
     const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256; const g = cv.getContext('2d');
-    g.fillStyle = 'rgba(20,30,40,.85)'; g.fillRect(0, 0, 512, 256); g.fillStyle = '#ffd28a'; g.font = 'bold 72px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('FXN ID', 256, 100); g.font = '36px sans-serif'; g.fillStyle = '#9fe'; g.fillText('your key, your name', 256, 186);
+    g.fillStyle = 'rgba(20,30,40,.85)'; g.fillRect(0, 0, 512, 256); g.fillStyle = '#ffd28a'; g.font = 'bold 76px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('FXN ID', 256, 100); g.font = '29px sans-serif'; g.fillStyle = '#9fe'; g.fillText('your key, your name', 256, 186);
     R.setTexture('look-text-1', cv);
     const plate = (x, y, z, w, h) => (a, i) => { a.set([w, 0, 0, 0, 0, 1, 0, -h, 0, x, y, z, 1, 1, 1, 1], i * 16); };
     return { parts: [{ part: 'cube', direct: true, data: list(1, (a, i) => inst(a, i, [-4, 3, 0], [6, 6, 6], null, [.45, .45, .5, 1])) },

@@ -31,7 +31,7 @@ ArkUI.register('RBLOCK_IMAGE_V1', {
       caption.textContent = p.caption;
       caption.className = ArkUI.atomize({
         fontFamily: 'var(--font-sans)',
-        fontSize: 'var(--type-metadata)',
+        fontSize: 'var(--fs-tertiary)',
         color: 'hsl(var(--text-muted))',
         marginTop: '8px'
       });

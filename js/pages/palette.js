@@ -175,13 +175,14 @@
       meta.textContent = '--font-' + slot + (family ? ' · ' + family : '');
     });
   }
-  /* The scale: one row per SDK step, the sample set in the step's own size (never below the site's 12px floor, which the
-     row says when it applies) and the declared value with what it comes to on this screen. */
+  /* The scale: one row per SDK step, the sample set in the step's own size and the declared value with what it comes
+     to on this screen. Each SDK step is an FXN scale step (--type-* alias --fs-*, owner ruling 2026-11-05), so the
+     12px floor this sample once held is retired. */
   function scaleFigure() {
     var list = el('ol', 'palette-scale');
     TOKENS.scale.forEach(function (step) {
       var row = el('li', 'palette-step');
-      var sample = el('span', 'palette-step-sample', SAMPLE); sample.style.fontSize = 'max(var(--type-' + step + '), 12px)';
+      var sample = el('span', 'palette-step-sample', SAMPLE); sample.style.fontSize = 'var(--type-' + step + ')';
       var probe = el('span', 'palette-step-probe', ''); probe.setAttribute('aria-hidden', 'true'); probe.style.fontSize = 'var(--type-' + step + ')'; probe.setAttribute('data-palette-probe', step);
       var meta = el('small', 'palette-step-meta', ''); meta.setAttribute('data-palette-step', step);
       row.appendChild(el('code', '', '--type-' + step)); row.appendChild(sample); row.appendChild(meta); row.appendChild(probe);
@@ -195,7 +196,7 @@
       var step = meta.getAttribute('data-palette-step'), probe = meta.parentNode.querySelector('[data-palette-probe]');
       var px = probe ? parseFloat(window.getComputedStyle(probe).fontSize) : NaN;
       var declared = resolve('type-' + step, 0);
-      meta.textContent = [declared, isNaN(px) ? '' : (Math.round(px * 10) / 10) + 'px here' + (px < 12 ? ', shown at 12px: the floor' : '')].filter(Boolean).join(' · ');
+      meta.textContent = [declared, isNaN(px) ? '' : (Math.round(px * 10) / 10) + 'px here'].filter(Boolean).join(' · ');
     });
   }
 

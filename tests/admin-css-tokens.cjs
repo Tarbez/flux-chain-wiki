@@ -97,7 +97,8 @@ for (const [file, css] of [['css/admin.css', adminRules], ['css/studio-embed.css
 }
 
 // 5. every token read is defined somewhere
-const sdk = new Set([...defined(fs.readFileSync('css/themes.css', 'utf8')), ...defined(fs.readFileSync('css/flux-themes.css', 'utf8'))]);
+// the type scale's --fs-* steps come from the kit's font sheet, which every editor page links (owner ruling 2026-11-05)
+const sdk = new Set([...defined(fs.readFileSync('css/themes.css', 'utf8')), ...defined(fs.readFileSync('css/flux-themes.css', 'utf8')), ...defined(fs.readFileSync('assets/kit/defxn-fonts.css', 'utf8'))]);
 const own = defined(`.x{${alias}}`);
 for (const [file, css] of [['css/admin.css', admin], ['css/studio-embed.css', studio]]) {
   const missing = [...new Set(reads(css).filter((r) => !r.fallback && !sdk.has(r.name) && !own.has(r.name) && !SCRIPT_SET.includes(r.name.slice(2))).map((r) => r.name))];

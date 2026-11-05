@@ -31,57 +31,57 @@
 <style>
   html, body { height: 100%; }
   body { margin: 0; background: hsl(var(--canvas)); color: hsl(var(--text)); font-family: var(--font-sans, system-ui, sans-serif); overflow: hidden; }
-  .pg-tool { display: flex; align-items: center; gap: 14px; height: 48px; padding: 0 20px; box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas)); font: 500 12px/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); position: relative; z-index: 3; }
+  .pg-tool { display: flex; align-items: center; gap: var(--sp-4); height: 48px; padding: 0 var(--sp-5); box-sizing: border-box; border-bottom: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas)); font: 500 var(--fs-tertiary)/1 var(--font-mono, ui-monospace, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); position: relative; z-index: 3; }
   .pg-tool b { color: hsl(var(--text-strong)); font-weight: 600; }
-  .pg-visit { display: flex; gap: 4px; }
-  .pg-visit button { font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 7px 10px; border-radius: 6px; border: 1px solid hsl(var(--border-default)); background: transparent; color: hsl(var(--text)); cursor: pointer; }
+  .pg-visit { display: flex; gap: var(--sp-2); }
+  .pg-visit button { font: inherit; letter-spacing: inherit; text-transform: inherit; padding: var(--sp-3) var(--sp-4); border-radius: 6px; border: 1px solid hsl(var(--border-default)); background: transparent; color: hsl(var(--text)); cursor: pointer; }
   .pg-visit button[aria-pressed="true"] { background: hsl(var(--text-strong)); color: hsl(var(--canvas)); border-color: transparent; }
-  .pg-state { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-family: var(--font-sans, system-ui, sans-serif); font-size: 13px; }
+  .pg-state { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-family: var(--font-sans, system-ui, sans-serif); font-size: var(--fs-tertiary); }
   .pg-note { color: hsl(var(--text-faint)); }
 
   #scene { position: relative; height: calc(100% - 48px); isolation: isolate; display: flex; flex-direction: column; }
   #scene > header, #scene > main { position: relative; z-index: 1; }
-  .pg-head { display: flex; align-items: center; gap: 22px; padding: 12px 24px; border-bottom: 1px solid hsl(var(--border-default)); background: hsl(var(--canvas) / .72); backdrop-filter: blur(8px); }
-  .pg-word { font: 600 14px/1 var(--font-mono, monospace); letter-spacing: .3em; color: hsl(var(--text-strong)); }
-  .pg-head nav { display: flex; gap: 18px; font-size: 14px; }
-  .pg-head nav a, .pg-head .header-account-link { color: hsl(var(--text)); text-decoration: none; font-size: 14px; }
-  .pg-head .ark-cta { padding: 8px 14px; border-radius: 8px; font: 500 14px/1 var(--font-sans, system-ui); }
+  .pg-head { display: flex; align-items: center; gap: var(--sp-5); padding: var(--sp-4) var(--sp-6); border-bottom: 1px solid hsl(var(--border-default)); background: hsl(var(--canvas) / .72); backdrop-filter: blur(8px); }
+  .pg-word { font: 600 var(--fs-tertiary)/1 var(--font-mono, monospace); letter-spacing: .3em; color: hsl(var(--text-strong)); }
+  .pg-head nav { display: flex; gap: var(--sp-5); font-size: var(--fs-tertiary); }
+  .pg-head nav a, .pg-head .header-account-link { color: hsl(var(--text)); text-decoration: none; font-size: var(--fs-tertiary); }
+  .pg-head .ark-cta { padding: var(--sp-3) var(--sp-4); border-radius: 8px; font: 500 var(--fs-tertiary)/1 var(--font-sans, system-ui); }
   .pg-grow { flex: 1; }
-  .pg-head .header-account-link { display: inline-flex; align-items: center; gap: 8px; }
+  .pg-head .header-account-link { display: inline-flex; align-items: center; gap: var(--sp-3); }
   .pg-head .native-icon { width: 18px; height: 18px; }
 
   .pg-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 196px 1fr; }
-  .pg-cats { display: flex; flex-direction: column; gap: 2px; padding: 18px 12px; border-right: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas) / .72); }
-  .pg-cats button { display: flex; justify-content: space-between; gap: 8px; padding: 9px 10px; border: 0; border-radius: 6px; background: transparent; color: hsl(var(--text)); font: 500 14px/1.2 var(--font-sans, system-ui); text-align: left; cursor: pointer; }
-  .pg-cats button span { color: hsl(var(--text-muted)); font-family: var(--font-mono, monospace); font-size: 12px; }
+  .pg-cats { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-5) var(--sp-4); border-right: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas) / .72); }
+  .pg-cats button { display: flex; justify-content: space-between; gap: var(--sp-3); padding: var(--sp-4) var(--sp-4); border: 0; border-radius: 6px; background: transparent; color: hsl(var(--text)); font: 500 var(--fs-tertiary)/1.2 var(--font-sans, system-ui); text-align: left; cursor: pointer; }
+  .pg-cats button span { color: hsl(var(--text-muted)); font-family: var(--font-mono, monospace); font-size: var(--fs-tertiary); }
   .pg-cats button[aria-pressed="true"] { background: hsl(var(--surface)); color: hsl(var(--text-strong)); box-shadow: inset 2px 0 0 hsl(var(--primary)); }
   /* the scroll pane holds a flow of columns: the flow's own height is free, so its columns balance */
-  .pg-grid { min-height: 0; overflow: auto; padding: 18px 22px 40px; }
-  .pg-flow { columns: 3 300px; column-gap: 16px; }
-  .pg-tile { break-inside: avoid; margin: 0 0 16px; min-width: 0; padding: 14px 16px 12px; border-radius: 10px; border: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas) / .86); backdrop-filter: blur(6px); }
-  .pg-tile-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 0 0 12px; font-size: 13px; color: hsl(var(--text-muted)); }
+  .pg-grid { min-height: 0; overflow: auto; padding: var(--sp-5) var(--sp-5) var(--sp-7); }
+  .pg-flow { columns: 3 300px; column-gap: var(--sp-5); }
+  .pg-tile { break-inside: avoid; margin: 0 0 var(--sp-5); min-width: 0; padding: var(--sp-4) var(--sp-5) var(--sp-4); border-radius: 10px; border: 1px solid hsl(var(--border-subtle)); background: hsl(var(--canvas) / .86); backdrop-filter: blur(6px); }
+  .pg-tile-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-4); margin: 0 0 var(--sp-4); font-size: var(--fs-tertiary); color: hsl(var(--text-muted)); }
   .pg-tile-head b { color: hsl(var(--text-strong)); font-weight: 600; }
-  .pg-tile-head code { font: 12px var(--font-mono, monospace); color: hsl(var(--text-faint)); }
+  .pg-tile-head code { font: var(--fs-tertiary) var(--font-mono, monospace); color: hsl(var(--text-faint)); }
   /* every part at two thirds of its size, so a whole group fits in view; zoom keeps the layout real */
   .pg-tile-body { zoom: .68; }
-  .pg-tile-rules { margin: 12px 0 0; font: 12px/1.4 var(--font-mono, monospace); color: hsl(var(--text-muted)); }
+  .pg-tile-rules { margin: var(--sp-4) 0 0; font: var(--fs-tertiary)/1.4 var(--font-mono, monospace); color: hsl(var(--text-muted)); }
   .pg-tile-rules:empty { display: none; }
-  .pg-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 8px; border: 1px solid hsl(var(--border-default)); }
-  .pg-seg button { padding: 7px 12px; border: 0; border-radius: 6px; background: transparent; color: hsl(var(--text)); font: 500 14px var(--font-sans, system-ui); }
+  .pg-seg { display: inline-flex; gap: var(--sp-1); padding: var(--sp-2); border-radius: 8px; border: 1px solid hsl(var(--border-default)); }
+  .pg-seg button { padding: var(--sp-3) var(--sp-4); border: 0; border-radius: 6px; background: transparent; color: hsl(var(--text)); font: 500 var(--fs-tertiary) var(--font-sans, system-ui); }
   .pg-seg button[aria-pressed="true"] { background: hsl(var(--surface)); color: hsl(var(--text-strong)); }
   @media (max-width: 720px) {
     body { overflow-x: hidden; overflow-y: auto; }
-    .pg-tool { flex-wrap: wrap; height: auto; padding: 10px 16px; gap: 8px 12px; }
+    .pg-tool { flex-wrap: wrap; height: auto; padding: var(--sp-4) var(--sp-5); gap: var(--sp-3) var(--sp-4); }
     .pg-visit { flex-wrap: wrap; }
     .pg-visit button, .pg-cats button { white-space: nowrap; }
     .pg-state { order: 3; flex-basis: 100%; }
-    .pg-head { flex-wrap: wrap; gap: 10px 16px; padding: 10px 16px; }
+    .pg-head { flex-wrap: wrap; gap: var(--sp-4) var(--sp-5); padding: var(--sp-4) var(--sp-5); }
     .pg-head nav { order: 3; flex-basis: 100%; }
     #scene { height: auto; }
     .pg-main { grid-template-columns: minmax(0, 1fr); }
     .pg-tile-body { overflow-x: auto; }
     .pg-cats { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid hsl(var(--border-subtle)); }
-    .pg-grid { padding: 16px; overflow: visible; }
+    .pg-grid { padding: var(--sp-5); overflow: visible; }
     .pg-flow { columns: 1; }
     .pg-tile-body { zoom: .85; }
   }

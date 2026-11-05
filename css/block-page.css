@@ -6,12 +6,12 @@
    and task frames fold into this one as their pages convert. */
 #scene .ark-block-page {
   position:relative; box-sizing:border-box; pointer-events:auto; overflow:auto;
-  display:grid; align-content:start; gap:clamp(20px,3vw,32px);
-  padding:clamp(20px,4vw,44px) clamp(16px,4vw,48px) 48px;
+  display:grid; align-content:start; gap:clamp(var(--sp-5),3vw,var(--sp-6));
+  padding:clamp(var(--sp-5),4vw,var(--sp-7)) clamp(var(--sp-5),4vw,var(--sp-7)) var(--sp-7);
   color:hsl(var(--text)); font-family:var(--font-sans,sans-serif);
 }
 #scene .ark-block-page:not(.continuity-host > *) {
-  width:calc(100% - 32px); max-width:1080px; height:calc(100dvh - 148px); margin:84px auto 64px;
+  width:calc(100% - 32px); max-width:1080px; height:calc(100dvh - 148px); margin:var(--sp-8) auto var(--sp-8);
   border-radius:14px; background:hsl(var(--canvas) / .97);
 }
 /* Inside the panel-continuity host (js/ark/panel-continuity.js: the story pages, /dao, /concept/*
@@ -29,8 +29,8 @@
    page's figure and record beside them wider than 900px -- where Ark's disclosure stops folding
    the figure (foldBelow 'tablet') -- one column narrower. Shared by every story page; a story
    page adds no layout CSS of its own. */
-#scene .ark-block-page .story-body {display:grid; gap:clamp(20px,3vw,32px); align-items:start;}
-#scene .ark-block-page :is(.story-main,.story-side) {display:grid; gap:clamp(16px,2.2vw,22px); align-content:start; min-width:0;}
+#scene .ark-block-page .story-body {display:grid; gap:clamp(var(--sp-5),3vw,var(--sp-6)); align-items:start;}
+#scene .ark-block-page :is(.story-main,.story-side) {display:grid; gap:clamp(var(--sp-5),2.2vw,var(--sp-5)); align-content:start; min-width:0;}
 @media(min-width:901px){
  #scene .ark-block-page .story-body[data-split] {grid-template-columns:minmax(0,1.15fr) minmax(300px,1fr);}
 }

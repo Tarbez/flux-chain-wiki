@@ -204,17 +204,17 @@
     --fs-secondary: 18px;
     --fs-primary: 29px;
     max-width: 520px;
-    padding: 72px 24px;
+    padding: var(--sp-8, 76px) var(--sp-6, 29px);
     text-align: left;
   }
-  .status-page.tester h1 { font-size: var(--fs-primary); line-height: 1.2; margin-bottom: 18px; overflow-wrap: anywhere; }
-  .status-page.tester p { margin: 0 0 11px; font-size: var(--fs-secondary); line-height: 1.45; }
+  .status-page.tester h1 { font-size: var(--fs-primary); line-height: 1.2; margin-bottom: var(--sp-5, 18px); overflow-wrap: anywhere; }
+  .status-page.tester p { margin: 0 0 var(--sp-4, 11px); font-size: var(--fs-secondary); line-height: 1.45; }
   .status-page.tester .tester-meta { font-family: var(--font-mono); font-size: var(--fs-tertiary); color: var(--text-faint); overflow-wrap: anywhere; }
-  .status-page.tester .release-button { display: block; width: 100%; margin-top: 18px; font-size: var(--fs-secondary); }
+  .status-page.tester .release-button { display: block; width: 100%; margin-top: var(--sp-5, 18px); font-size: var(--fs-secondary); }
   .text-button {
     display: block;
-    margin: 11px auto 0;
-    padding: 6px 11px;
+    margin: var(--sp-4, 11px) auto 0;
+    padding: var(--sp-3, 7px) var(--sp-4, 11px);
     font: inherit;
     font-size: var(--fs-tertiary);
     color: var(--text-muted);
@@ -225,11 +225,11 @@
     text-underline-offset: 3px;
   }
   .text-button:hover { color: var(--text); }
-  .tester-field { display: block; margin-top: 18px; }
-  .tester-label { display: block; margin-bottom: 6px; font-size: var(--fs-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-faint); }
+  .tester-field { display: block; margin-top: var(--sp-5, 18px); }
+  .tester-label { display: block; margin-bottom: var(--sp-3, 7px); font-size: var(--fs-tertiary); font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-faint); }
   .tester-field input[type="text"] {
     width: 100%;
-    padding: 11px;
+    padding: var(--sp-4, 11px);
     font: inherit;
     font-size: var(--fs-secondary);
     color: var(--text);
@@ -239,8 +239,8 @@
   }
   .tester-field input[type="file"] { width: 100%; font: inherit; font-size: var(--fs-tertiary); color: var(--text-muted); }
   .tester-line {
-    margin: 18px 0 0;
-    padding: 11px;
+    margin: var(--sp-5, 18px) 0 0;
+    padding: var(--sp-4, 11px);
     font-family: var(--font-mono);
     font-size: var(--fs-tertiary);
     white-space: pre-wrap;
@@ -250,10 +250,10 @@
     border-radius: var(--radius);
     user-select: all;
   }
-  .refusal:not(:empty) { margin-top: 18px; padding: 11px; border: 1px solid var(--danger); border-radius: var(--radius); }
-  .refusal p { font-size: var(--fs-tertiary) !important; margin: 0 0 6px !important; }
+  .refusal:not(:empty) { margin-top: var(--sp-5, 18px); padding: var(--sp-4, 11px); border: 1px solid var(--danger); border-radius: var(--radius); }
+  .refusal p { font-size: var(--fs-tertiary) !important; margin: 0 0 var(--sp-3, 7px) !important; }
   .refusal .refusal-failure { color: var(--danger); font-weight: 600; font-size: var(--fs-secondary) !important; }
-  .refusal .status-code { margin-top: 6px; }
+  .refusal .status-code { margin-top: var(--sp-3, 7px); }
 
   /* A folder site's page fills the window: the site owns everything inside it (app.js renderFolderSite). */
   iframe.folder-site {
@@ -267,21 +267,21 @@
 
   footer {
     text-align: center;
-    padding: 20px 24px 32px;
-    font-size: 0.74rem;
+    padding: var(--sp-5, 18px) var(--sp-6, 29px) var(--sp-6, 29px);
+    font-size: var(--fs-tertiary);
     color: var(--text-faint);
   }
   footer .verified {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: var(--sp-2, 4px);
   }
   footer .verified::before { content: "✓"; color: #2ea043; font-weight: 700; }
 
   @media (max-width: 520px) {
-    header { padding: 12px 16px; }
+    header { padding: var(--sp-4, 11px) var(--sp-5, 18px); }
     nav#site-nav { margin-left: 0; width: 100%; }
-    main { padding: 32px 16px 72px; }
+    main { padding: var(--sp-6, 29px) var(--sp-5, 18px) var(--sp-8, 76px); }
   }
 </style>
 </head>

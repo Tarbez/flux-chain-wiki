@@ -6,10 +6,10 @@
    record uses success. Nothing here renders below 12px (the plain scene was SVG text at about 6px
    on a phone: docs/ux-audit/pages-ux-a.md /chain). */
 
-.flow {--flow-step:3.2s;position:relative;display:grid;gap:14px;align-content:start;min-width:0;}
+.flow {--flow-step:3.2s;position:relative;display:grid;gap:var(--sp-4);align-content:start;min-width:0;}
 
 /* Now: the illustrated step, then its quote ------------------------------ */
-.flow-now {position:relative;display:grid;gap:10px;align-content:start;min-width:0;padding:14px 18px 18px;border-radius:12px;
+.flow-now {position:relative;display:grid;gap:var(--sp-4);align-content:start;min-width:0;padding:var(--sp-4) var(--sp-5) var(--sp-5);border-radius:12px;
  background:radial-gradient(120% 90% at 0% 0%,hsl(var(--primary-100)),transparent 55%),hsl(var(--text-strong) / .04);}
 .flow-scene {display:block;width:100%;height:auto;overflow:visible;}
 
@@ -20,48 +20,48 @@
    Staggering uses --i, set per element in js/pages/home-flow.js.
    --------------------------------------------------------------------- */
 .flow-plain {display:grid;min-width:0;}
-.flow-plain > .flow-panel {grid-area:1/1;display:grid;align-content:center;justify-items:center;gap:14px;min-width:0;padding:clamp(10px,2.4vw,26px) 0;}
+.flow-plain > .flow-panel {grid-area:1/1;display:grid;align-content:center;justify-items:center;gap:var(--sp-4);min-width:0;padding:clamp(var(--sp-4),2.4vw,var(--sp-6)) 0;}
 .flow-panel {opacity:0;pointer-events:none;transition:opacity 320ms ease;}
 .flow-panel-active {opacity:1;pointer-events:auto;}  /* the panels share one cell: only the shown one may take the pointer, or a later panel sits over the record's boxes and their tooltips never open */
 
 /* SIGN -- the record, field by field: the real wire grammar, dash-separated as on the wire, each
    field's plain name underneath. The signature is drawn differently: it covers everything before it. */
-.flow-record-format {display:flex;flex-wrap:wrap;justify-content:center;gap:12px 0;margin:0;padding:0;list-style:none;}
-.flow-record-format .flow-block {display:grid;grid-template-columns:auto auto;justify-items:center;column-gap:6px;row-gap:6px;}
-.flow-record-format .flow-block:not(:last-child)::after {content:"–";grid-column:2;grid-row:1;align-self:center;padding-right:6px;font:400 14px var(--font-mono,ui-monospace,monospace);color:hsl(var(--text-faint));}
-.flow-block-text {grid-column:1;display:block;min-width:2.4em;padding:9px 11px;border:1px solid hsl(var(--border-default));border-radius:6px;background:hsl(var(--surface));
- font:600 clamp(13px,1.5vw,17px)/1.15 var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;text-align:center;color:hsl(var(--text-strong));}
-.flow-block-under {grid-column:1;font:400 12px/1.3 var(--font-mono,ui-monospace,monospace);letter-spacing:.05em;color:hsl(var(--text-muted));}
+.flow-record-format {display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sp-4) 0;margin:0;padding:0;list-style:none;}
+.flow-record-format .flow-block {display:grid;grid-template-columns:auto auto;justify-items:center;column-gap:var(--sp-3);row-gap:var(--sp-3);}
+.flow-record-format .flow-block:not(:last-child)::after {content:"–";grid-column:2;grid-row:1;align-self:center;padding-right:var(--sp-3);font:400 var(--fs-tertiary) var(--font-mono,ui-monospace,monospace);color:hsl(var(--text-faint));}
+.flow-block-text {grid-column:1;display:block;min-width:2.4em;padding:var(--sp-4) var(--sp-4);border:1px solid hsl(var(--border-default));border-radius:6px;background:hsl(var(--surface));
+ font:600 var(--fs-secondary)/1.15 var(--font-mono,ui-monospace,monospace);letter-spacing:.02em;text-align:center;color:hsl(var(--text-strong));}
+.flow-block-under {grid-column:1;font:400 var(--fs-tertiary)/1.3 var(--font-mono,ui-monospace,monospace);letter-spacing:.05em;color:hsl(var(--text-muted));}
 .flow-block[data-i="6"] .flow-block-text {border-color:hsl(var(--primary-400));background:hsl(var(--primary-100));color:hsl(var(--primary));}
 
 /* CHECK -- four lamps, lit together: grammar, signature, head, peers. Meaning is never one of them. */
-.flow-lamps {display:flex;flex-wrap:wrap;justify-content:center;gap:12px clamp(16px,4vw,40px);}
-.flow-lamp {display:grid;justify-items:center;gap:7px;}
+.flow-lamps {display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sp-4) clamp(var(--sp-5),4vw,var(--sp-7));}
+.flow-lamp {display:grid;justify-items:center;gap:var(--sp-3);}
 .flow-lamp-mark {display:grid;place-items:center;width:44px;height:44px;border:1px solid hsl(var(--border-default));border-radius:50%;background:hsl(var(--surface));
- font:600 15px var(--font-mono,ui-monospace,monospace);color:hsl(var(--text-muted));}
+ font:600 var(--fs-tertiary) var(--font-mono,ui-monospace,monospace);color:hsl(var(--text-muted));}
 .flow-lamp[data-on="true"] .flow-lamp-mark {border-color:hsl(var(--primary));background:hsl(var(--primary));color:hsl(var(--text-inverse));}
-.flow-lamp-name {font:500 12px var(--font-mono,ui-monospace,monospace);letter-spacing:.04em;color:hsl(var(--text-muted));}
+.flow-lamp-name {font:500 var(--fs-tertiary) var(--font-mono,ui-monospace,monospace);letter-spacing:.04em;color:hsl(var(--text-muted));}
 
 /* EXTEND -- the holder's own chain, which this record joins. The new position arrives; the ones
    behind it were always there. */
-.flow-chain {display:flex;flex-wrap:wrap;align-items:center;justify-content:center;row-gap:10px;}
+.flow-chain {display:flex;flex-wrap:wrap;align-items:center;justify-content:center;row-gap:var(--sp-4);}
 .flow-link {width:clamp(10px,3vw,30px);height:2px;background:hsl(var(--text-strong) / .22);}
-.flow-node-text {display:block;padding:9px 12px;border:1px solid hsl(var(--border-subtle));border-radius:8px;background:hsl(var(--raised));
- font:600 13px var(--font-mono,ui-monospace,monospace);letter-spacing:.06em;color:hsl(var(--text-muted));}
+.flow-node-text {display:block;padding:var(--sp-4) var(--sp-4);border:1px solid hsl(var(--border-subtle));border-radius:8px;background:hsl(var(--raised));
+ font:600 var(--fs-tertiary) var(--font-mono,ui-monospace,monospace);letter-spacing:.06em;color:hsl(var(--text-muted));}
 .flow-node[data-on="false"],.flow-link[data-on="false"] {visibility:hidden;}
 .flow-node[data-new="true"] .flow-node-text {border-color:hsl(var(--primary));background:hsl(var(--primary-100));color:hsl(var(--text-strong));}  /* the accent is the border; the words take the strong ink (primary-700 on primary-100 is 3.75:1 on marine) */
 
 /* REPLICATE -- peers. Each one that holds it fills; the rest stay outlines, so a partial quorum
    reads as partial rather than full. */
-.flow-peers {display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:24rem;}
+.flow-peers {display:flex;flex-wrap:wrap;justify-content:center;gap:var(--sp-4);max-width:24rem;}
 .flow-peer {width:18px;height:18px;box-sizing:border-box;border:1.5px solid hsl(var(--text-strong) / .2);border-radius:50%;}
 .flow-peer[data-on="true"] {border-color:hsl(var(--success));background:hsl(var(--success));}
 
 /* RESOLVE -- the meaning, which only a resolver decides. */
-.flow-meaning-box {display:grid;justify-items:center;gap:6px;max-width:100%;padding:14px 22px;border:1px solid hsl(var(--success));border-radius:12px;background:hsl(var(--success-100));}
-.flow-meaning-text {font:600 clamp(15px,1.8vw,20px)/1.25 var(--font-mono,ui-monospace,monospace);letter-spacing:.01em;text-align:center;color:hsl(var(--success-700));}
-.flow-meaning-who {font:500 12px var(--font-mono,ui-monospace,monospace);letter-spacing:.1em;text-transform:uppercase;color:hsl(var(--success-700));}
-.flow-band-sub {margin:0;font:400 12px/1.4 var(--font-mono,ui-monospace,monospace);letter-spacing:.03em;text-align:center;color:hsl(var(--text-muted));}
+.flow-meaning-box {display:grid;justify-items:center;gap:var(--sp-3);max-width:100%;padding:var(--sp-4) var(--sp-5);border:1px solid hsl(var(--success));border-radius:12px;background:hsl(var(--success-100));}
+.flow-meaning-text {font:600 var(--fs-secondary)/1.25 var(--font-mono,ui-monospace,monospace);letter-spacing:.01em;text-align:center;color:hsl(var(--success-700));}
+.flow-meaning-who {font:500 var(--fs-tertiary) var(--font-mono,ui-monospace,monospace);letter-spacing:.1em;text-transform:uppercase;color:hsl(var(--success-700));}
+.flow-band-sub {margin:0;font:400 var(--fs-tertiary)/1.4 var(--font-mono,ui-monospace,monospace);letter-spacing:.03em;text-align:center;color:hsl(var(--text-muted));}
 
 /* The entrance of each panel: finite, restarted by toggling .flow-run (never a frame loop). */
 .flow.flow-run .flow-panel-active :is(.flow-block,.flow-node[data-new="true"],.flow-meaning-box) {animation:flow-in 460ms cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i, 0) * 60ms);}
@@ -87,5 +87,5 @@
 #scene .flow-toggle:focus-visible {outline:2px solid hsl(var(--reference));outline-offset:2px;}
 
 @media(max-width:480px){
- .flow-now {padding:10px 12px 14px;}
+ .flow-now {padding:var(--sp-4) var(--sp-4) var(--sp-4);}
 }

@@ -4,21 +4,21 @@
 <style>
 :root{--bg:#0d0f0e;--panel:#151816;--line:#2a2f2c;--text:#e8ebe9;--muted:#a3aaa6;--faint:#7c837f;--accent:#ff8e59}
 @media (prefers-color-scheme:light){:root{--bg:#f6f6f4;--panel:#fff;--line:#dcdcd6;--text:#1a1c1b;--muted:#4f5552;--faint:#6b706d;--accent:#b84a12}}
-body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,sans-serif}
-main{max-width:1180px;margin:0 auto;padding:32px 16px 64px}
-h1{font-size:28px;margin:0 0 8px;letter-spacing:-.02em}
-.lead{color:var(--muted);max-width:72ch;margin:0 0 20px}
-.stats{display:flex;flex-wrap:wrap;gap:8px 28px;padding:14px 16px;border:1px solid var(--line);border-top:2px solid var(--accent);border-radius:12px;background:var(--panel);margin-bottom:20px}
-.stats b{display:block;font-size:22px}.stats span{font:600 10px/1.4 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-h2{font-size:16px;margin:28px 0 8px}.meta{font:500 11px ui-monospace,monospace;color:var(--muted);margin-left:8px}.ok{font:500 11px ui-monospace,monospace;color:var(--muted);margin-left:8px}
+body{margin:0;background:var(--bg);color:var(--text);font:var(--fs-tertiary, 11px)/1.5 system-ui,sans-serif}
+main{max-width:1180px;margin:0 auto;padding:var(--sp-6, 29px) var(--sp-5, 18px) var(--sp-8, 76px)}
+h1{font-size:var(--fs-primary, 29px);margin:0 0 var(--sp-3, 7px);letter-spacing:-.02em}
+.lead{color:var(--muted);max-width:72ch;margin:0 0 var(--sp-5, 18px)}
+.stats{display:flex;flex-wrap:wrap;gap:var(--sp-3, 7px) var(--sp-6, 29px);padding:var(--sp-4, 11px) var(--sp-5, 18px);border:1px solid var(--line);border-top:2px solid var(--accent);border-radius:12px;background:var(--panel);margin-bottom:var(--sp-5, 18px)}
+.stats b{display:block;font-size:var(--fs-secondary, 18px)}.stats span{font:600 var(--fs-tertiary, 11px)/1.4 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h2{font-size:var(--fs-tertiary, 11px);margin:var(--sp-6, 29px) 0 var(--sp-3, 7px)}.meta{font:500 var(--fs-tertiary, 11px) ui-monospace,monospace;color:var(--muted);margin-left:var(--sp-3, 7px)}.ok{font:500 var(--fs-tertiary, 11px) ui-monospace,monospace;color:var(--muted);margin-left:var(--sp-3, 7px)}
 table{width:100%;min-width:720px;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
-th{font:600 10px/1.4 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+th,td{text-align:left;vertical-align:top;padding:var(--sp-3, 7px) var(--sp-4, 11px);border-bottom:1px solid var(--line)}
+th{font:600 var(--fs-tertiary, 11px)/1.4 ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 td.n{text-align:right;font-variant-numeric:tabular-nums}
-code{font:12px ui-monospace,monospace}.path{font:11px ui-monospace,monospace;color:var(--faint);margin-top:2px;overflow-wrap:anywhere}
+code{font:var(--fs-tertiary, 11px) ui-monospace,monospace}.path{font:var(--fs-tertiary, 11px) ui-monospace,monospace;color:var(--faint);margin-top:var(--sp-1, 2px);overflow-wrap:anywhere}
 .faint{color:var(--faint)}.err{color:var(--accent)}
 tr[data-why="canvas"],tr[data-why="image"],tr[data-why="locked"]{color:var(--muted)}
-ul.fixed li{margin:4px 0}
+ul.fixed li{margin:var(--sp-2, 4px) 0}
 .wrap{overflow-x:auto}
 </style></head><body><main>
 <h1>NFT skin coverage</h1>
@@ -534,5 +534,5 @@ Call log:
 <tr data-why="locked"><td><span class="faint">no text</span></td><td><code>canvas.world-canvas</code><div class="path">div.hero-alive › div.world-layer › canvas.world-canvas</div></td><td>Drawn in a canvas. A skin changes CSS colours only. By design for the ring world (owner, 2026-10-24).</td><td><span class="faint">none</span></td><td class="n">1</td></tr>
 <tr data-why="locked"><td><span class="faint">no text</span></td><td><code>canvas.defxn-brand-mesh</code><div class="path">div.hero-alive › div.defxn-brand-field › canvas.defxn-brand-mesh</div></td><td>Drawn in a canvas. A skin changes CSS colours only. By design for the ring world (owner, 2026-10-24).</td><td><span class="faint">none</span></td><td class="n">1</td></tr>
 </tbody></table></div></section>
-<p class="lead" style="margin-top:32px">How to read it again: open the site at 127.0.0.1:3437, open settings (the gear in the footer bar), and pick a card under “Test a skin”. The audit script lives in the session notes folder, not in the repo.</p>
+<p class="lead" style="margin-top:var(--sp-6, 29px)">How to read it again: open the site at 127.0.0.1:3437, open settings (the gear in the footer bar), and pick a card under “Test a skin”. The audit script lives in the session notes folder, not in the repo.</p>
 </main></body></html>

@@ -19,7 +19,7 @@
    and 1440, the MENU at 390, measured 2026-10-24). The number and name are in the menu and on /account. */
 .header-user-zone { display: inline-flex; flex: none; }
 .header-user-zone .defxn-seal__text { display: none; }
-.header-user-zone .defxn-seal--mark { padding: 0 4px; }
+.header-user-zone .defxn-seal--mark { padding: 0 var(--sp-2); }
 /* Phones: no room for one more control even as an icon (the MENU dropped at 390 and 561, measured 2026-10-24). The card shows on /account, where the
    Account button leads and where keys are asked, with its full seal; the bar keeps every site control. */
 @media (max-width: 639px) { .header-user-zone { display: none; } }
@@ -30,7 +30,7 @@
    a one-line key row: the padding took a row of products away at 720px tall. The skin's other rules still reach them. */
 #scene .ark-header .dx-bar__nav[data-ark-skin-density] { padding:0; }
 #scene .ark-header .dx-switch__panel[data-ark-skin-density] { padding:0; }
-#scene .dx-switch__panel .dx-switch__foot[data-ark-skin-density] { padding:8px 14px; }
+#scene .dx-switch__panel .dx-switch__foot[data-ark-skin-density] { padding:var(--sp-3) var(--sp-4); }
 /* The panel stays the kit's grid (find, rail, list, preview, foot). A card's "columns" layout made it a flex row on a
    phone, so the category list and the foot shrank to their content (197px of 358px at 390 wide). */
 #scene[data-ark-skin] .ark-header .dx-switch__panel:not([hidden]) { display:grid; }

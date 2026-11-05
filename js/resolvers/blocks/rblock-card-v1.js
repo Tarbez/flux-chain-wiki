@@ -32,7 +32,7 @@ ArkUI.register('RBLOCK_CARD_V1', {
       title.textContent = p.title;
       title.className = ArkUI.atomize({
         fontFamily: 'var(--font-display)',
-        fontSize: 'var(--type-h3)',
+        fontSize: 'var(--fs-primary)',
         color: 'hsl(var(--text-strong))',
         margin: '0 0 8px'
       });
@@ -43,7 +43,7 @@ ArkUI.register('RBLOCK_CARD_V1', {
       text.textContent = p.text;
       text.className = ArkUI.atomize({
         fontFamily: 'var(--font-sans)',
-        fontSize: 'var(--type-body)',
+        fontSize: 'var(--fs-secondary)',
         color: 'hsl(var(--text))',
         lineHeight: '1.6',
         margin: '0'

@@ -179,7 +179,7 @@
   }
   function paint(progress,motion){
    if(disposed||!canvas.getContext||!width)return;
-   var ctx=canvas.getContext('2d');ctx.setTransform(scale,0,0,scale,0,0);ctx.clearRect(0,0,width,height);ctx.font='500 5px ui-monospace,monospace';
+   var ctx=canvas.getContext('2d');ctx.setTransform(scale,0,0,scale,0,0);ctx.clearRect(0,0,width,height);ctx.font='500 7px ui-monospace,monospace';
    if(backgroundPaths){
     ctx.fillStyle=colors.quiet;ctx.fill(backgroundPaths.quiet);ctx.strokeStyle=colors.line;ctx.stroke(backgroundPaths.grid);
     var paths=backgroundPaths.levels;

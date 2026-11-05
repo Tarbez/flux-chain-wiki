@@ -127,8 +127,10 @@ const retired = {
   });
   assert.deepEqual(seen.steps.map((row) => row.name), SCALE.map((n) => '--type-' + n), 'one scale row per SDK step, in the SDK\'s order');
   seen.steps.forEach((row, i) => {
-    assert(row.meta.startsWith(seen.scaleValues[SCALE[i]].replace(/\s+/g, '')) || row.meta.replace(/\s+/g, '').startsWith(seen.scaleValues[SCALE[i]].replace(/\s+/g, '')), 'the row shows the declared value: ' + row.meta);
-    assert(/max\(var\(--type-/.test(row.size) && /12px/.test(row.size), 'a sample is never set below the site\'s 12px floor: ' + row.size);
+    /* owner ruling 2026-11-05: each SDK step aliases an FXN scale step (--type-h2: var(--fs-primary)), so the row shows
+       the step it resolves to, one of 7/11/18/29/47/76; the 12px floor the sample once held is retired */
+    assert(/^(7|11|18|29|47|76)px/.test(row.meta.replace(/\s+/g, '')) && /^var\(--fs-/.test(seen.scaleValues[SCALE[i]]), 'the row shows the step its role resolves to: ' + row.meta);
+    assert.equal(row.size, 'var(--type-' + SCALE[i] + ')', 'a sample is set in its own step');
   });
 
   /* ---- Contrast: every cell recomputed with the SDK's own contrastRatio --------------------- */

@@ -30,7 +30,7 @@ ArkUI.register('RBLOCK_CTA_V1', {
       gap: '8px',
       padding: '10px 20px',
       fontFamily: 'var(--font-sans)',
-      fontSize: 'var(--type-button)',
+      fontSize: 'var(--fs-tertiary)',
       fontWeight: '600',
       borderRadius: 'var(--size-control-radius)',
       textDecoration: 'none',

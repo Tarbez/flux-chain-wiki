@@ -38,103 +38,103 @@
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:24px}
-body{margin:0;background:hsl(var(--canvas));color:hsl(var(--text));font:16px/1.6 var(--font-sans);-webkit-font-smoothing:antialiased}
+body{margin:0;background:hsl(var(--canvas));color:hsl(var(--text));font:var(--fs-secondary, 18px)/1.6 var(--font-sans);-webkit-font-smoothing:antialiased}
 a{color:hsl(var(--text-strong));text-decoration-color:hsl(var(--primary));text-underline-offset:3px}
 a:hover,a:focus-visible{color:hsl(var(--primary))}
 :focus-visible{outline:2px solid hsl(var(--primary));outline-offset:2px}
-code,.mono{font-family:var(--font-mono);font-size:.86em}
-.mono{text-transform:uppercase;letter-spacing:.16em;font-size:11px;color:hsl(var(--text-muted))}
-code{background:hsl(var(--surface));border:1px solid hsl(var(--border));border-radius:4px;padding:1px 5px;overflow-wrap:anywhere}
+code,.mono{font-family:var(--font-mono);font-size:1em}
+.mono{text-transform:uppercase;letter-spacing:.16em;font-size:var(--fs-tertiary, 11px);color:hsl(var(--text-muted))}
+code{background:hsl(var(--surface));border:1px solid hsl(var(--border));border-radius:4px;padding:1px var(--sp-2, 4px);overflow-wrap:anywhere}
 
-.wrap{max-width:1200px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:1fr;gap:0}
-@media (min-width:1000px){.wrap{grid-template-columns:220px minmax(0,1fr);gap:56px;padding:0 32px}}
+.wrap{max-width:1200px;margin:0 auto;padding:0 var(--sp-5, 18px);display:grid;grid-template-columns:1fr;gap:0}
+@media (min-width:1000px){.wrap{grid-template-columns:220px minmax(0,1fr);gap:var(--sp-7, 47px);padding:0 var(--sp-6, 29px)}}
 nav.toc{display:none}
 @media (min-width:1000px){
-  nav.toc{display:block;position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding:40px 0}
-  nav.toc ol{list-style:none;margin:12px 0 0;padding:0;counter-reset:t}
+  nav.toc{display:block;position:sticky;top:0;align-self:start;max-height:100vh;overflow:auto;padding:var(--sp-7, 47px) 0}
+  nav.toc ol{list-style:none;margin:var(--sp-4, 11px) 0 0;padding:0;counter-reset:t}
   nav.toc li{counter-increment:t}
-  nav.toc a{display:flex;gap:10px;padding:5px 0;color:hsl(var(--text-muted));text-decoration:none;font-size:14px}
-  nav.toc a::before{content:counter(t,decimal-leading-zero);font:11px var(--font-mono);color:hsl(var(--text-faint));padding-top:3px}
+  nav.toc a{display:flex;gap:var(--sp-4, 11px);padding:var(--sp-2, 4px) 0;color:hsl(var(--text-muted));text-decoration:none;font-size:var(--fs-tertiary, 11px)}
+  nav.toc a::before{content:counter(t,decimal-leading-zero);font:var(--fs-tertiary, 11px) var(--font-mono);color:hsl(var(--text-faint));padding-top:var(--sp-2, 4px)}
   nav.toc a:hover{color:hsl(var(--text-strong))}
 }
-main{min-width:0;padding:40px 0 96px}
-header.top{padding:24px 0 40px;border-bottom:1px solid hsl(var(--border))}
-.eyebrow{display:flex;align-items:center;gap:10px}
+main{min-width:0;padding:var(--sp-7, 47px) 0 var(--sp-8, 76px)}
+header.top{padding:var(--sp-6, 29px) 0 var(--sp-7, 47px);border-bottom:1px solid hsl(var(--border))}
+.eyebrow{display:flex;align-items:center;gap:var(--sp-4, 11px)}
 .eyebrow::before{content:"";width:8px;height:8px;border-radius:50%;background:hsl(var(--primary))}
 h1,h2,h3{font-family:var(--font-display);color:hsl(var(--text-strong));letter-spacing:-.02em;line-height:1.15}
-h1{font-size:clamp(34px,5vw,56px);margin:16px 0 16px;font-weight:700}
+h1{font-size:var(--fs-hero, 47px);margin:var(--sp-5, 18px) 0 var(--sp-5, 18px);font-weight:700}
 h1 .dim,h2 .dim{color:hsl(var(--text-faint))}
-h2{font-size:clamp(24px,3vw,32px);margin:0 0 8px;font-weight:700}
-h3{font-size:18px;margin:32px 0 8px;font-weight:600}
-.lede{font-size:19px;max-width:62ch;color:hsl(var(--text))}
-p{max-width:70ch;margin:0 0 14px}
-section{padding:56px 0 8px;border-bottom:1px solid hsl(var(--border))}
+h2{font-size:var(--fs-primary, 29px);margin:0 0 var(--sp-3, 7px);font-weight:700}
+h3{font-size:var(--fs-secondary, 18px);margin:var(--sp-6, 29px) 0 var(--sp-3, 7px);font-weight:600}
+.lede{font-size:var(--fs-secondary, 18px);max-width:62ch;color:hsl(var(--text))}
+p{max-width:70ch;margin:0 0 var(--sp-4, 11px)}
+section{padding:var(--sp-7, 47px) 0 var(--sp-3, 7px);border-bottom:1px solid hsl(var(--border))}
 section:last-of-type{border-bottom:0}
-.num{font:12px var(--font-mono);color:hsl(var(--primary));letter-spacing:.14em}
-.meta{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:20px}
-.meta div{display:flex;flex-direction:column;gap:2px}
-.meta b{color:hsl(var(--text-strong));font-weight:500;font-size:15px}
+.num{font:var(--fs-tertiary, 11px) var(--font-mono);color:hsl(var(--primary));letter-spacing:.14em}
+.meta{display:flex;flex-wrap:wrap;gap:var(--sp-3, 7px) var(--sp-6, 29px);margin-top:var(--sp-5, 18px)}
+.meta div{display:flex;flex-direction:column;gap:var(--sp-1, 2px)}
+.meta b{color:hsl(var(--text-strong));font-weight:500;font-size:var(--fs-secondary, 18px)}
 
-.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;margin:20px 0;border-top:1px solid hsl(var(--border))}
-.facts>div{padding:14px 16px 14px 0;border-bottom:1px solid hsl(var(--border))}
-.facts dt{font:11px var(--font-mono);text-transform:uppercase;letter-spacing:.14em;color:hsl(var(--text-muted))}
-.facts dd{margin:4px 0 0;color:hsl(var(--text-strong));font-size:15px}
-.facts dd small{display:block;color:hsl(var(--text-muted));font-size:13px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0;margin:var(--sp-5, 18px) 0;border-top:1px solid hsl(var(--border))}
+.facts>div{padding:var(--sp-4, 11px) var(--sp-5, 18px) var(--sp-4, 11px) 0;border-bottom:1px solid hsl(var(--border))}
+.facts dt{font:var(--fs-tertiary, 11px) var(--font-mono);text-transform:uppercase;letter-spacing:.14em;color:hsl(var(--text-muted))}
+.facts dd{margin:var(--sp-2, 4px) 0 0;color:hsl(var(--text-strong));font-size:var(--fs-secondary, 18px)}
+.facts dd small{display:block;color:hsl(var(--text-muted));font-size:var(--fs-tertiary, 11px)}
 
-.callout{border-left:2px solid hsl(var(--primary));padding:4px 0 4px 16px;margin:20px 0;max-width:70ch}
+.callout{border-left:2px solid hsl(var(--primary));padding:var(--sp-2, 4px) 0 var(--sp-2, 4px) var(--sp-5, 18px);margin:var(--sp-5, 18px) 0;max-width:70ch}
 .callout.warn{border-color:hsl(var(--warn))}
 .callout b{color:hsl(var(--text-strong))}
 
-ol.steps{list-style:none;padding:0;margin:20px 0;counter-reset:s;max-width:72ch}
-ol.steps>li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:12px;padding:12px 0;border-top:1px solid hsl(var(--border))}
-ol.steps>li::before{content:counter(s);width:28px;height:28px;border:1px solid hsl(var(--border));border-radius:50%;display:grid;place-items:center;font:12px var(--font-mono);color:hsl(var(--text-strong))}
+ol.steps{list-style:none;padding:0;margin:var(--sp-5, 18px) 0;counter-reset:s;max-width:72ch}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:36px 1fr;gap:var(--sp-4, 11px);padding:var(--sp-4, 11px) 0;border-top:1px solid hsl(var(--border))}
+ol.steps>li::before{content:counter(s);width:28px;height:28px;border:1px solid hsl(var(--border));border-radius:50%;display:grid;place-items:center;font:var(--fs-tertiary, 11px) var(--font-mono);color:hsl(var(--text-strong))}
 ol.steps b{color:hsl(var(--text-strong))}
-ul.plain{padding-left:18px;max-width:70ch}
-ul.plain li{margin:4px 0}
+ul.plain{padding-left:var(--sp-5, 18px);max-width:70ch}
+ul.plain li{margin:var(--sp-2, 4px) 0}
 
-.tbl{overflow-x:auto;margin:16px 0 24px;border:1px solid hsl(var(--border));border-radius:8px}
-table{border-collapse:collapse;width:100%;font-size:14px}
-th,td{text-align:left;vertical-align:top;padding:10px 14px;border-bottom:1px solid hsl(var(--border))}
-th{font:11px var(--font-mono);text-transform:uppercase;letter-spacing:.12em;color:hsl(var(--text-muted));background:hsl(var(--surface));white-space:nowrap}
+.tbl{overflow-x:auto;margin:var(--sp-5, 18px) 0 var(--sp-6, 29px);border:1px solid hsl(var(--border));border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:var(--fs-tertiary, 11px)}
+th,td{text-align:left;vertical-align:top;padding:var(--sp-4, 11px) var(--sp-4, 11px);border-bottom:1px solid hsl(var(--border))}
+th{font:var(--fs-tertiary, 11px) var(--font-mono);text-transform:uppercase;letter-spacing:.12em;color:hsl(var(--text-muted));background:hsl(var(--surface));white-space:nowrap}
 tr:last-child td{border-bottom:0}
 td:first-child{color:hsl(var(--text-strong));font-weight:500;white-space:nowrap}
 td.n{font-family:var(--font-mono);text-align:right;white-space:nowrap}
 
-.tag{display:inline-block;font:10.5px var(--font-mono);text-transform:uppercase;letter-spacing:.1em;padding:2px 7px;border-radius:999px;border:1px solid hsl(var(--border));color:hsl(var(--text-muted));white-space:nowrap}
+.tag{display:inline-block;font:var(--fs-tertiary, 11px) var(--font-mono);text-transform:uppercase;letter-spacing:.1em;padding:var(--sp-1, 2px) var(--sp-3, 7px);border-radius:999px;border:1px solid hsl(var(--border));color:hsl(var(--text-muted));white-space:nowrap}
 .tag.built{border-color:hsl(var(--signal)/.6);color:hsl(var(--signal))}
 .tag.part{border-color:hsl(var(--warn)/.6);color:hsl(var(--warn))}
 .tag.dec{border-color:hsl(var(--identity)/.6);color:hsl(var(--identity))}
 .tag.no{color:hsl(var(--off))}
 
-.lanes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin:20px 0}
-.lane{border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));padding:18px}
-.lane h3{margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.lane>p{font-size:14px;color:hsl(var(--text-muted));margin-bottom:10px}
+.lanes{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--sp-5, 18px);margin:var(--sp-5, 18px) 0}
+.lane{border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));padding:var(--sp-5, 18px)}
+.lane h3{margin:0 0 var(--sp-2, 4px);display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-3, 7px)}
+.lane>p{font-size:var(--fs-tertiary, 11px);color:hsl(var(--text-muted));margin-bottom:var(--sp-4, 11px)}
 .lane ul{list-style:none;margin:0;padding:0}
-.lane li{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px 0;border-top:1px solid hsl(var(--border));font-size:14px}
+.lane li{display:grid;grid-template-columns:1fr auto;gap:var(--sp-2, 4px) var(--sp-4, 11px);padding:var(--sp-4, 11px) 0;border-top:1px solid hsl(var(--border));font-size:var(--fs-tertiary, 11px)}
 .lane li b{color:hsl(var(--text-strong));font-weight:600}
 .lane li span{grid-column:1/-1;color:hsl(var(--text-muted))}
-.lane li em{font-style:normal;font:12px var(--font-mono);color:hsl(var(--text-faint))}
+.lane li em{font-style:normal;font:var(--fs-tertiary, 11px) var(--font-mono);color:hsl(var(--text-faint))}
 
-figure{margin:24px 0;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));padding:20px;overflow-x:auto}
+figure{margin:var(--sp-6, 29px) 0;border:1px solid hsl(var(--border));border-radius:8px;background:hsl(var(--surface));padding:var(--sp-5, 18px);overflow-x:auto}
 figure svg{display:block;min-width:640px;width:100%;height:auto}
-figcaption{margin-top:12px;font-size:13px;color:hsl(var(--text-muted))}
+figcaption{margin-top:var(--sp-4, 11px);font-size:var(--fs-tertiary, 11px);color:hsl(var(--text-muted))}
 svg text{font-family:var(--font-sans);fill:hsl(var(--text))}
 svg .t-strong{fill:hsl(var(--text-strong));font-weight:600}
-svg .t-mono{font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;fill:hsl(var(--text-muted))}
+svg .t-mono{font-family:var(--font-mono);font-size:var(--fs-tertiary, 11px);letter-spacing:.12em;fill:hsl(var(--text-muted))}
 svg .box{fill:hsl(var(--raised));stroke:hsl(var(--border))}
 svg .ln{stroke:hsl(var(--text-faint));fill:none}
 svg .hot{stroke:hsl(var(--primary));fill:none}
 svg .dot{fill:hsl(var(--primary))}
 
-.two{display:grid;grid-template-columns:1fr;gap:24px}
+.two{display:grid;grid-template-columns:1fr;gap:var(--sp-6, 29px)}
 @media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
-.swatches{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 20px}
-.sw{display:flex;align-items:center;gap:10px;font-size:13px;min-width:200px}
+.swatches{display:flex;flex-wrap:wrap;gap:var(--sp-4, 11px);margin:var(--sp-4, 11px) 0 var(--sp-5, 18px)}
+.sw{display:flex;align-items:center;gap:var(--sp-4, 11px);font-size:var(--fs-tertiary, 11px);min-width:200px}
 .sw i{width:28px;height:28px;border-radius:6px;border:1px solid hsl(var(--border));flex:none}
 .sw code{background:none;border:0;padding:0}
 
-.theme{position:fixed;right:16px;bottom:16px;font:12px var(--font-mono);background:hsl(var(--raised));color:hsl(var(--text-strong));border:1px solid hsl(var(--border));border-radius:999px;padding:8px 14px;cursor:pointer;min-height:36px}
+.theme{position:fixed;right:16px;bottom:16px;font:var(--fs-tertiary, 11px) var(--font-mono);background:hsl(var(--raised));color:hsl(var(--text-strong));border:1px solid hsl(var(--border));border-radius:999px;padding:var(--sp-3, 7px) var(--sp-4, 11px);cursor:pointer;min-height:36px}
 @media print{nav.toc,.theme{display:none}.wrap{display:block}section{break-inside:avoid-page}}
 </style>
 </head>
@@ -225,17 +225,17 @@ svg .dot{fill:hsl(var(--primary))}
   <figure>
     <svg viewBox="0 0 900 230" role="img" aria-labelledby="f1t">
       <title id="f1t">Two signed intents go into a resolver, which signs one result. Copies go to several computers. An auditor follows the signatures.</title>
-      <rect class="box" x="20" y="40" width="150" height="56" rx="6"/><text class="t-strong" x="36" y="64">Alice signs</text><text x="36" y="84" font-size="12">"I give 10 A for B"</text>
-      <rect class="box" x="20" y="128" width="150" height="56" rx="6"/><text class="t-strong" x="36" y="152">Bob signs</text><text x="36" y="172" font-size="12">"I give B for 10 A"</text>
+      <rect class="box" x="20" y="40" width="150" height="56" rx="6"/><text class="t-strong" x="36" y="64">Alice signs</text><text x="36" y="84" font-size="11">"I give 10 A for B"</text>
+      <rect class="box" x="20" y="128" width="150" height="56" rx="6"/><text class="t-strong" x="36" y="152">Bob signs</text><text x="36" y="172" font-size="11">"I give B for 10 A"</text>
       <path class="ln" d="M170 68 C210 68 220 112 262 112M170 156 C210 156 220 112 262 112"/>
       <rect x="262" y="70" width="190" height="84" rx="8" fill="hsl(var(--raised))" stroke="hsl(var(--primary))"/>
-      <text class="t-strong" x="280" y="98">Resolver</text><text x="280" y="118" font-size="12">checks signatures and rules,</text><text x="280" y="136" font-size="12">clears the batch at one price</text>
+      <text class="t-strong" x="280" y="98">Resolver</text><text x="280" y="118" font-size="11">checks signatures and rules,</text><text x="280" y="136" font-size="11">clears the batch at one price</text>
       <path class="hot" d="M452 112 H520"/><circle class="dot" cx="520" cy="112" r="4"/>
-      <rect x="528" y="84" width="140" height="56" rx="6" fill="hsl(var(--record))"/><text x="544" y="108" font-weight="600" style="fill:hsl(var(--primary-ink))">Signed result</text><text x="544" y="126" font-size="12" style="fill:hsl(var(--primary-ink))">this is the truth</text>
+      <rect x="528" y="84" width="140" height="56" rx="6" fill="hsl(var(--record))"/><text x="544" y="108" font-weight="600" style="fill:hsl(var(--primary-ink))">Signed result</text><text x="544" y="126" font-size="11" style="fill:hsl(var(--primary-ink))">this is the truth</text>
       <path class="ln" d="M668 112 H700 M700 50 V174 M700 50 H730 M700 112 H730 M700 174 H730"/>
-      <rect class="box" x="730" y="34" width="140" height="32" rx="6"/><text x="744" y="55" font-size="12">copy, stored</text>
-      <rect class="box" x="730" y="96" width="140" height="32" rx="6"/><text x="744" y="117" font-size="12">copy, stored</text>
-      <rect class="box" x="730" y="158" width="140" height="32" rx="6"/><text x="744" y="179" font-size="12">copy, stored</text>
+      <rect class="box" x="730" y="34" width="140" height="32" rx="6"/><text x="744" y="55" font-size="11">copy, stored</text>
+      <rect class="box" x="730" y="96" width="140" height="32" rx="6"/><text x="744" y="117" font-size="11">copy, stored</text>
+      <rect class="box" x="730" y="158" width="140" height="32" rx="6"/><text x="744" y="179" font-size="11">copy, stored</text>
       <text class="t-mono" x="20" y="22">1 · TWO SIGN</text><text class="t-mono" x="262" y="22">2 · RESOLVE</text><text class="t-mono" x="528" y="22">3 · SIGN THE RESULT</text><text class="t-mono" x="730" y="22">4 · STORE</text>
       <text class="t-mono" x="262" y="214">5 · ANYONE CHECKS BY FOLLOWING THE SIGNATURES BACK</text>
     </svg>
@@ -349,10 +349,10 @@ svg .dot{fill:hsl(var(--primary))}
     <svg viewBox="0 0 900 140" role="img" aria-labelledby="f3t">
       <title id="f3t">Build in Resolver Studio, launch in Deploy, a provider proves and serves it, anyone inspects it in Explore.</title>
       <g>
-        <rect class="box" x="10" y="40" width="190" height="60" rx="6"/><text class="t-strong" x="26" y="66">1 · Build</text><text x="26" y="86" font-size="12">Resolver Studio</text>
-        <rect class="box" x="235" y="40" width="190" height="60" rx="6"/><text class="t-strong" x="251" y="66">2 · Launch</text><text x="251" y="86" font-size="12">Deploy · one signed record</text>
-        <rect class="box" x="460" y="40" width="190" height="60" rx="6" stroke-dasharray="4 3"/><text class="t-strong" x="476" y="66">3 · Prove and serve</text><text x="476" y="86" font-size="12">a provider passes the cases</text>
-        <rect class="box" x="685" y="40" width="200" height="60" rx="6"/><text class="t-strong" x="701" y="66">4 · Inspect</text><text x="701" y="86" font-size="12">Explore · checked in the page</text>
+        <rect class="box" x="10" y="40" width="190" height="60" rx="6"/><text class="t-strong" x="26" y="66">1 · Build</text><text x="26" y="86" font-size="11">Resolver Studio</text>
+        <rect class="box" x="235" y="40" width="190" height="60" rx="6"/><text class="t-strong" x="251" y="66">2 · Launch</text><text x="251" y="86" font-size="11">Deploy · one signed record</text>
+        <rect class="box" x="460" y="40" width="190" height="60" rx="6" stroke-dasharray="4 3"/><text class="t-strong" x="476" y="66">3 · Prove and serve</text><text x="476" y="86" font-size="11">a provider passes the cases</text>
+        <rect class="box" x="685" y="40" width="200" height="60" rx="6"/><text class="t-strong" x="701" y="66">4 · Inspect</text><text x="701" y="86" font-size="11">Explore · checked in the page</text>
       </g>
       <path class="hot" d="M200 70H235M425 70H460M650 70H685"/>
       <text class="t-mono" x="235" y="124">REFUSED IF THE GRAMMAR DOES NOT COMPILE</text>

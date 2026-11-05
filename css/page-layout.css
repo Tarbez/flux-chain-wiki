@@ -8,16 +8,15 @@
    specificity, so a component that sets its own font still wins. --font-sans is the brand slot
    (assets/kit/defxn-fonts.css). */
 /* The type scale (docs/PRODUCT-DESIGN-LAWS.md laws 78-83): base 11px, ratio 1.618, each step rounded
-   to whole px. Set once here; pages use these names and never write a raw px size. Roles: tertiary =
+   to whole px. Pages use these names and never write a raw px size. Roles: tertiary =
    captions, helper text, metadata, mono labels; secondary = body, lede, subheads, card titles; primary =
    section and panel headings; hero = a page hero; display = the one display headline of a page. micro is
    a last resort (law 81). A size between steps is a defect (law 82). */
-:root {
-  --fs-micro:7px; --fs-tertiary:11px; --fs-secondary:18px; --fs-primary:29px; --fs-hero:47px; --fs-display:76px;
-}
+/* The steps themselves are defined once, by the DEFXN product kit (assets/kit/defxn-fonts.css, synced from
+   flux/defxn-product-kit; owner ruling 2026-11-05: one definition). Every page loads that sheet. */
 :where(body) { font-family:var(--font-sans, system-ui, sans-serif); }
 :where(button, input, select, textarea) { font:inherit; }
-.hero-alive { --page-width:1080px; --page-gutter:clamp(20px,4cqw,56px); --page-top:clamp(32px,6cqh,64px); }
+.hero-alive { --page-width:1080px; --page-gutter:clamp(var(--sp-5),4cqw,var(--sp-7)); --page-top:clamp(32px,6cqh,64px); }
 /* The notes index and the notes (/learnings, /learnings/<slug>) are pages of Ark blocks since
    2026-10-19 (W3-LEARN): their frame is css/block-page.css, so the learning-page / article-* rules
    that framed the hand-built reader are gone. */
@@ -27,8 +26,8 @@
 
 /* Detail pages of the theory reuse the same rows, with a short paragraph and an onward link. */
 
-.content-layer-path { display:flex; flex-wrap:wrap; gap:7px 18px; max-width:680px; margin:0 0 26px; }
-.content-layer-path :is(a,span) { color:hsl(var(--text-faint)); font:600 9px/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.08em; text-decoration:none; text-transform:uppercase; }
+.content-layer-path { display:flex; flex-wrap:wrap; gap:var(--sp-3) var(--sp-5); max-width:680px; margin:0 0 var(--sp-6); }
+.content-layer-path :is(a,span) { color:hsl(var(--text-faint)); font:600 var(--fs-tertiary)/1.4 var(--font-mono,ui-monospace,monospace); letter-spacing:.08em; text-decoration:none; text-transform:uppercase; }
 .content-layer-path a:hover,.content-layer-path a:focus-visible,.content-layer-path [aria-current="page"] { color:hsl(var(--text-strong)); }
 
 /* One calm, resilient location control across inner pages. */
@@ -42,7 +41,7 @@
  max-width:100%;
  min-height:34px;
  gap:0;
- padding:3px;
+ padding:var(--sp-2);
  box-sizing:border-box;
  overflow:hidden;
  border:1px solid hsl(var(--border-subtle));
@@ -57,11 +56,11 @@
  align-items:center;
  min-width:0;
  min-height:26px;
- padding:0 11px;
+ padding:0 var(--sp-4);
  box-sizing:border-box;
  overflow:hidden;
  color:hsl(var(--text-faint));
- font:550 9px/1 var(--font-mono,ui-monospace,monospace);
+ font:550 var(--fs-tertiary)/1 var(--font-mono,ui-monospace,monospace);
  letter-spacing:.075em;
  text-decoration:none;
  text-overflow:ellipsis;
@@ -92,7 +91,7 @@
 }
 @media(max-width:480px) {
 
- #scene .content-layer-path > :is(a,span) { padding-inline:9px; }
+ #scene .content-layer-path > :is(a,span) { padding-inline:var(--sp-4); }
 }
 @media(max-width:620px) {
  #scene .content-layer-path { max-width:100%; }
@@ -131,14 +130,14 @@
 /* Deploy (js/pages/deploy.js, a page of Ark blocks since 2026-10-19, W3-GUIDE): only its command
    card -- the figure of each step -- is the page's own. Real, copyable commands; a flat monospace
    panel, no syntax glow; labels at 12px or more. */
-.deploy-command { position:relative; margin:0; padding:48px 16px 16px; background:hsl(var(--surface)); border:1px solid hsl(var(--border-default)); border-radius:10px; overflow-x:auto; }
-.deploy-command::before { content:"RUN"; position:absolute; top:12px; left:16px; font:600 12px/1 var(--font-mono,monospace); letter-spacing:.24em; color:hsl(var(--text-muted)); }
-.deploy-command code { font:400 13px/1.5 var(--font-mono,monospace); color:hsl(var(--text)); white-space:pre; }
+.deploy-command { position:relative; margin:0; padding:var(--sp-7) var(--sp-5) var(--sp-5); background:hsl(var(--surface)); border:1px solid hsl(var(--border-default)); border-radius:10px; overflow-x:auto; }
+.deploy-command::before { content:"RUN"; position:absolute; top:12px; left:16px; font:600 var(--fs-tertiary)/1 var(--font-mono,monospace); letter-spacing:.24em; color:hsl(var(--text-muted)); }
+.deploy-command code { font:400 var(--fs-tertiary)/1.5 var(--font-mono,monospace); color:hsl(var(--text)); white-space:pre; }
 /* Copy: the site's one (js/ark/page-kit.js ArkUI.copyCommand) is Ark's secondary button in an actions row, so it
    draws as every Ark button does; only where it sits is a page's choice. The status line says "copied", or when
    copying was refused what to do instead; a success is the button's own "Copied" (the line is for a screen reader), so nothing moves. */
 .copy-command[hidden] { display:none; }
-.copy-command-status { display:block; margin-top:8px; font:400 13px/1.5 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
+.copy-command-status { display:block; margin-top:var(--sp-3); font:400 var(--fs-tertiary)/1.5 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
 .copy-command-status:empty { display:none; }
 .copy-command-status[data-state="done"] { position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
 .deploy-command-card { position:relative; }
