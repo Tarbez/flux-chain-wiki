@@ -12,7 +12,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { webcrypto } from 'node:crypto';
-import { JSDOM } from '/Volumes/PortableSSD/flux/flux-launchpad/node_modules/jsdom/lib/api.js';
+// jsdom is this site's own dev dependency. The import named the Mac's sibling launchpad checkout, so on a build node
+// (or any machine laid out differently) the file failed to load before a test ran.
+import { JSDOM } from 'jsdom';
 import { unlockPortableAuthKit } from '../../fxn-auth/src/authKitMigration.mjs';
 import { fluxRootFromMnemonic } from '../../fxn-auth/src/rootFromMnemonic.mjs';
 import { genesisKeyFromRoot } from '../../fxn-auth/src/rootKeys.mjs';
@@ -20,7 +22,7 @@ import { verifyDetached } from '../../fxn-auth/src/ed25519.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BUNDLE_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'admin', 'auth.js'), 'utf8');
-const KIT_TEXT = fs.readFileSync('/Volumes/PortableSSD/flux/flux-launchpad/js/fixtures/real-auth-kit-v9.flx', 'utf8');
+const KIT_TEXT = fs.readFileSync(new URL('../../flux-launchpad/js/fixtures/real-auth-kit-v9.flx', import.meta.url), 'utf8');
 const KIT_PIN = '13572468';
 const KIT_PASSWORD = 'launchpad-test';
 const fromHex = (h) => Uint8Array.from(h.match(/../g), (x) => parseInt(x, 16));
@@ -49,14 +51,15 @@ async function signIn() {
   Object.defineProperty(input, 'files', { value: [new dom.window.File([KIT_TEXT], 'real.flx')], configurable: true });
   input.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
   await until(() => container.querySelector('[data-ark-auth="field-pin"]'), 'the unlock form');
-  const set = (name, value) => {
-    const field = container.querySelector(`[data-ark-auth="field-${name}"]`);
+  // Round 14: the panel asks one field per step (PIN, then password), with Next between them and Unlock on the last.
+  const step = async (name, value) => {
+    const field = await until(() => container.querySelector(`[data-ark-auth="field-${name}"]`), `the ${name} step`);
     Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype, 'value').set.call(field, value);
     field.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+    container.querySelector('[data-ark-auth="form"]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
   };
-  set('pin', KIT_PIN);
-  set('password', KIT_PASSWORD);
-  container.querySelector('[data-ark-auth="form"]').dispatchEvent(new dom.window.Event('submit', { bubbles: true, cancelable: true }));
+  await step('pin', KIT_PIN);
+  await step('password', KIT_PASSWORD);
   return until(() => changes.find(Boolean), 'sign-in');
 }
 
