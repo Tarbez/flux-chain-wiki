@@ -265,6 +265,10 @@ test('clicking the real "Rotate" button genuinely supersedes an older wallet wit
   assert.ok(rowOf(DEFAULT_ADDRESS), 'the superseded address stays in the list -- history, never overwritten');
   // Round 14: with Public IDs, the file's own wallets are listed as older wallets. The Public ID in use is what signs.
   for (const address of [newAddress, DEFAULT_ADDRESS]) assert.match(rowOf(address).textContent, /Older wallet, made by your Master ID/);
+  // Law 10: `identity.walletAddress` is a live getter, so the "Default" marker moves to the NEW address.
+  assert.match(rowOf(newAddress).textContent, /Default/, 'the default marker must move to the rotated-to address');
+  const oldLine = [...list.querySelectorAll('.ark-list__row')].find((li) => li.textContent.includes(DEFAULT_ADDRESS) && !li.textContent.includes(newAddress));
+  assert.doesNotMatch(oldLine.textContent, /Default/, 'the superseded address must no longer be marked as default');
 });
 
 test('clicking the real "Revoke" button genuinely retires a wallet, recorded in the real vault', async () => {
@@ -310,10 +314,11 @@ test('clicking the real "Delegate to identity" then "Revoke delegation" buttons 
   let result = await settledText(actionResult, 'the delegate result');
   assert.match(result, /^Delegated receive\+spend to this identity$/, `the real delegate result must show success, got: ${result}`);
 
-  // Round 14: with Public IDs the list shows the file's own wallets as older wallets, with no delegation line (only a
-  // file with no Public ID showed one, and such a file no longer signs in). The wallet stays listed.
+  // The real, signed delegation now appears in the live list via `identity.walletDelegations` (a live getter). Law 10:
+  // with Public IDs too, the older wallet's row says it is delegated.
   let list = panel.querySelector('#account-keys-list');
-  assert.ok([...list.querySelectorAll('.ark-list__row')].some((li) => li.textContent.includes(DEFAULT_ADDRESS)), 'the delegated wallet stays listed');
+  const delegatedLine = [...list.querySelectorAll('.ark-list__row')].find((li) => li.textContent.includes(DEFAULT_ADDRESS));
+  assert.match(delegatedLine.textContent, /delegated to identity/);
 
   actionResult.textContent = ''; // read the revoke's own outcome, not the delegate line above
   panel.querySelector('[data-action="keys-revoke-delegation"]').click();
@@ -322,5 +327,6 @@ test('clicking the real "Delegate to identity" then "Revoke delegation" buttons 
   assert.match(result, new RegExp('^Revoked the delegation for ' + DEFAULT_ADDRESS));
 
   list = panel.querySelector('#account-keys-list');
-  assert.ok([...list.querySelectorAll('.ark-list__row')].some((li) => li.textContent.includes(DEFAULT_ADDRESS)), 'and still listed after the revoke');
+  const revokedLine = [...list.querySelectorAll('.ark-list__row')].find((li) => li.textContent.includes(DEFAULT_ADDRESS));
+  assert.match(revokedLine.textContent, /delegation revoked/, 'the live list must reflect the real revoked-delegation state immediately');
 });

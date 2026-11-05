@@ -566,7 +566,15 @@
               items.push(row);
             });
           });
-          ((who.walletAddresses) || []).forEach(function (address) { items.push({ id: address, title: address, meta: 'Older wallet, made by your Master ID inside the file' }); });
+          /* Law 10 (owner, 2026-11-05): an older wallet keeps its decision facts beside the Public IDs: which one is the
+             default, and whether it is delegated to this identity or that delegation was revoked. */
+          var olderDelegations = who.walletDelegations || {};
+          ((who.walletAddresses) || []).forEach(function (address) {
+            var delegation = olderDelegations[address];
+            var row = { id: address, title: address, meta: 'Older wallet, made by your Master ID inside the file' + (delegation ? ' \u00b7 ' + (delegation.revoked ? 'delegation revoked' : 'delegated to identity') : '') };
+            if (address === who.walletAddress) row.status = { label: 'Default', tone: 'trust' };
+            items.push(row);
+          });
           return { label: 'Public IDs', empty: { reason: 'This FXN ID has no Public ID yet.', remedy: 'Press Add Public ID below, then save the new file.' }, items: once(items) };
         }
         var addresses = (who && who.walletAddresses) || [];
