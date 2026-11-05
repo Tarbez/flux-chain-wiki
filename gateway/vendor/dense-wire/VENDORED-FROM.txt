@@ -18,7 +18,7 @@ package.json holds only "type": "module", as dense-wire/web/package.json does, s
 (flx-state-grammar.js) load as modules in Node the same way they do in a browser.
 
 Re-vendored 2026-10-29 for name rent and the .fxndev ending (docs/DEFXN-NAMES-ONE-SYSTEM.md) and amounts with
-decimals (docs/FXN-DECIMALS-DESIGN.md). Source: flux/defxn-defi-rs-wt-dao-reapply/dense-wire/web, branch
+decimals (docs/FXN-DECIMALS-DESIGN.md). Source: flux/defxn-defi-rs-wt-main/dense-wire/web, branch
 fix/dao-reapply-after-blobs at e492b4c plus that worktree's uncommitted changes. flx-builders.mjs now imports
 flx-amount.mjs (rentDue), so the closure is 13 files; the drift test's FILES list still names 12 and gains
 flx-amount.mjs once the owner confirms this build. Copied files, sha256:
@@ -44,5 +44,5 @@ The drift check is tests/vendored-dense-wire.test.mjs. It reads every file in th
 Re-vendored 2026-11-03 (audit round 11 merge). The source is audit-fix-all-r11 (6494d65), read with git show.
 One copy was behind it: flx-dumb-parser.mjs. The parity lane moved every box read into that one parser.
 
-Re-vendored 2026-11-05 (release-ready). The source is defxn-defi-rs release-ready (617d534), read with git show.
+Re-vendored 2026-11-05 (release-ready). The source is defxn-defi-rs release-ready (8c8cedb), read with git show.
 One copy was behind it: flx-identity-bridge.mjs. Its comment named tweetnacl as the key source; the code is unchanged.

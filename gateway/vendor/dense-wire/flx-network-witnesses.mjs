@@ -39,9 +39,10 @@ import { NETWORKS } from "./fxn-network.mjs";
 /** A seat's witness label: its machine name without the fleet's `flx-` prefix (flx-big1 -> big1). */
 export const seatLabel = (name) => String(name).replace(/^flx-/, "");
 
-/** Each network's seats (labels) and the domain they are served under, derived from fxn-network.mjs's NETWORKS. */
+/** Each network's seats (labels), the domain they are served under, and its FXN ID gate (`{ url, committeeSha256 }`, or
+ *  null when the network names none), derived from fxn-network.mjs's NETWORKS. */
 export function seatsOf(networks = NETWORKS) {
-  return Object.freeze(Object.fromEntries(Object.entries(networks).map(([network, entry]) => [network, Object.freeze({ domain: entry.host, seats: Object.freeze(entry.seats.map((seat) => seatLabel(seat.name))) })])));
+  return Object.freeze(Object.fromEntries(Object.entries(networks).map(([network, entry]) => [network, Object.freeze({ domain: entry.host, seats: Object.freeze(entry.seats.map((seat) => seatLabel(seat.name))), gate: entry.gate ?? null })])));
 }
 
 /** Each network's seats and the domain they are served under. */
@@ -76,13 +77,18 @@ export function seatListRefusal(seats = NETWORK_SEATS) {
 
 /** The CSP connect-src sources a signing page needs on the network served at `host`: the host itself and each seat's
  *  own name under it, exact and in the network file's order (devnet.defxn.com gives wss://devnet.defxn.com,
- *  wss://big1.devnet.defxn.com, wss://lax24.devnet.defxn.com). A seat added to fxn-network.mjs is added here. Never a
- *  wildcard (owner ruling 2026-11-05). `{ sources }`, or `{ refusal: [failure, missing, remedy] }` when no network is
- *  served at `host` or its seat list cannot serve. */
-export function connectSourcesFor(host, seats = NETWORK_SEATS) {
+ *  wss://big1.devnet.defxn.com, wss://lax24.devnet.defxn.com), then the network's FXN ID gate origin
+ *  (https://gate.defxn.com), with which a signing site makes and opens v10 FXN IDs. A seat or gate added to
+ *  fxn-network.mjs is added here. Never a wildcard (owner ruling 2026-11-05). `{ signing: false }` leaves the gate out,
+ *  for a page that only reads. `{ sources, gate }`, or `{ refusal: [failure, missing, remedy] }` when no network is
+ *  served at `host`, its seat list cannot serve, or a signing site's network names no gate. */
+export function connectSourcesFor(host, seats = NETWORK_SEATS, { signing = true } = {}) {
   const broken = seatListRefusal(seats);
   if (broken !== null) return { refusal: [`the network file's seats cannot serve: ${broken}`, "a seat list every network can be witnessed by", "fix fxn-network.mjs and copy it to the sites again"] };
   const entry = Object.values(seats).find((e) => e.domain === host);
   if (!entry) return { refusal: [`no network in fxn-network.mjs is served at ${JSON.stringify(host)}`, `a network whose host is ${JSON.stringify(host)}, or a node host the network file names (${Object.values(seats).map((e) => e.domain).join(", ")})`, "pass a host from the network file, or add the network there first"] };
-  return { sources: Object.freeze([`wss://${host}`, ...entry.seats.map((seat) => `wss://${seat}.${host}`)]) };
+  const nodes = [`wss://${host}`, ...entry.seats.map((seat) => `wss://${seat}.${host}`)];
+  if (!signing) return { sources: Object.freeze(nodes), gate: entry.gate ?? null };
+  if (!entry.gate) return { refusal: [`the network served at ${JSON.stringify(host)} names no FXN ID gate`, "a gate (its https origin and the committee file's sha256) in that network's entry of fxn-network.mjs", "add the gate there and copy the network file to the sites again"] };
+  return { sources: Object.freeze([...nodes, entry.gate.url]), gate: entry.gate };
 }
