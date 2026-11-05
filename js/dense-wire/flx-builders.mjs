@@ -718,6 +718,64 @@ export async function signSafeVoteWithSigner(signer, covered) {
   return { signer: signer.pubHex, signature: await signer.signText(covered) };
 }
 
+/** Read a KDOMSAFE1 (Rust `name_safe::read_safe_decision`): `{ fqdn, head, safe, action, boxes, votes, m }`, or throws
+ *  naming the box that does not read. */
+export function readSafeDecision(raw) {
+  if (raw.payload("K") !== DOMAIN_KIND_SAFE) throw new Error(`K is ${raw.payload("K")}, not ${DOMAIN_KIND_SAFE}`);
+  const fqdn = utf8OfHex(raw.payload("W") ?? "");
+  if (!isClaimableDomainName(fqdn)) throw new Error("W must be hex-of-utf8 of one label plus .fxn or .fxndev");
+  const n = raw.cCount();
+  const head = raw.c(1);
+  const safe = raw.c(2);
+  if (!/^[0-9a-f]{64}$/.test(head ?? "")) throw new Error("C[1] must be the ownership head's CID");
+  if (!/^[0-9a-f]{64}$/.test(safe ?? "")) throw new Error("C[2] must be the safe's address");
+  const action = decodePriceField(raw.c(3) ?? "");
+  if (!SAFE_ACTIONS.includes(action)) throw new Error("C[3] must be take, give, point or renew");
+  if (n < 5) throw new Error("the votes ride in the last C box");
+  const votesBox = raw.c(n - 1) ?? "";
+  if (votesBox.length === 0 || votesBox.length % 192 !== 0 || votesBox.length / 192 > 256 || !/^[0-9a-f]+$/.test(votesBox)) {
+    throw new Error("the last C box must be 1 to 256 votes of <64 hex signer><128 hex signature>");
+  }
+  const votes = [];
+  for (let i = 0; i < votesBox.length; i += 192) votes.push({ signer: votesBox.slice(i, i + 64), signature: votesBox.slice(i + 64, i + 192) });
+  const boxes = [];
+  for (let i = 4; i < n - 1; i++) boxes.push(raw.c(i));
+  const ok =
+    (action === "take" && boxes.length === 0) ||
+    (action === "give" && boxes.length === 2 && /^[0-9a-f]{64}$/.test(boxes[0]) && /^[0-9a-f]{128}$/.test(boxes[1])) ||
+    (action === "point" && boxes.length >= 2 && /^[0-9a-f]{64}$/.test(boxes[0])) ||
+    (action === "renew" && boxes.length === 3 && /^[0-9a-f]{64}$/.test(boxes[2]));
+  if (!ok) throw new Error(`the ${action} decision's boxes do not read (name_safe.rs names each action's boxes)`);
+  return { fqdn, head, safe, action, boxes, votes, m: Number(raw.payload("M")) };
+}
+
+/** The domains a safe's address is hashed under (Rust `dao_treasury`: plain, vested, ruled safes). */
+export const SAFE_ADDRESS_DOMAINS = Object.freeze(["FLX-DAO-SAFE-ADDRESS-V1\0", "FLX-DAO-VESTED-SAFE-ADDRESS-V1\0", "FLX-DAO-RULED-SAFE-ADDRESS-V1\0"]);
+
+/** A safe's address from the preimage a node hands with a proof (Rust `dao_treasury::address_of_parts`): sha256 of the
+ *  domain and each field, length-prefixed as 8 big-endian bytes. `domainHex` is the domain's bytes as hex; `parts` the
+ *  fields as text. Fields 3 and 4 are the threshold and the comma-joined signers. `null` for any other domain. */
+export async function safeAddressOf(domainHex, parts) {
+  const domain = new Uint8Array((domainHex.match(/../g) ?? []).map((h) => parseInt(h, 16)));
+  if (!SAFE_ADDRESS_DOMAINS.includes(new TextDecoder().decode(domain))) return null;
+  const enc = new TextEncoder();
+  const chunks = [domain];
+  for (const part of parts) {
+    const bytes = enc.encode(part);
+    const len = new Uint8Array(8);
+    new DataView(len.buffer).setBigUint64(0, BigInt(bytes.length));
+    chunks.push(len, bytes);
+  }
+  const all = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
+  let at = 0;
+  for (const c of chunks) {
+    all.set(c, at);
+    at += c.length;
+  }
+  const digest = new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", all));
+  return [...digest].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 /** Build and sign a KDOMSAFE1 (Rust `chain::domain_safe`). Any key files it; `votes` are K of the safe's signers over
  *  `domainSafeCovered`. `boxes` are the action's own: none for take; [newOwnerPubHex, its dual-sig] for give; [prior
  *  record CID, ...target boxes] for point; [years, FXN, lock CID] (price-field encoded) for renew. */

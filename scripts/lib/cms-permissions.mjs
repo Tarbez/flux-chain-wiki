@@ -78,7 +78,7 @@ export function createCmsPermissions({ name, firstOwnerPublicKeyB64 = null, name
     if (reply.kind !== 'proof') {
       throw new SessionRefusal(`Signed in, but ${node} answered DOM_PROOF ${normalized} with something that is not a proof (${reply.reason || reply.kind}).`, 'a DOM_PROOF reply.', 'ask another node (DEFXN_NAME_NODES).', 503);
     }
-    const verified = await modules.verifyDomainProof({ fqdn: normalized, entries: reply.entries, genesisPubHex: genesis });
+    const verified = await modules.verifyDomainProof({ fqdn: normalized, entries: reply.entries, safes: reply.safes, genesisPubHex: genesis });
     if (verified.kind !== 'verified') {
       /* Refused by name: a proof that does not verify authorizes nobody. */
       throw new SessionRefusal(`Signed in, but the ownership proof for ${normalized} does not verify (${verified.code}): ${verified.failure}`, verified.missing, verified.remedy, 403);

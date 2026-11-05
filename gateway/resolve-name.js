@@ -103,7 +103,7 @@ export async function resolveName({ name, nodes, genesisPubHex, network, nowSec 
   if (reply.kind !== "proof") {
     return { ok: false, reason: "NAME_UNRESOLVABLE", detail: `${node} answered with something that is not a proof (${reply.reason || reply.kind}).` };
   }
-  const verified = await verifyDomainProof({ fqdn: name, entries: reply.entries, genesisPubHex, network, nowSec });
+  const verified = await verifyDomainProof({ fqdn: name, entries: reply.entries, safes: reply.safes, genesisPubHex, network, nowSec });
   if (verified.kind === "refused" && (verified.code === "InGrace" || verified.code === "Lapsed")) {
     /* Past its paid term: the page says so and who may act, and never renders the site. */
     const reason = verified.code === "InGrace" ? "NAME_UNPAID" : "NAME_LAPSED";
