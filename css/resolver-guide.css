@@ -80,7 +80,7 @@
 .resolver-guide-page .resolver-guide-links { animation-delay:230ms; }
 @media(max-width:760px) {
   .resolver-guide-content { padding-top:48px; }
-  .resolver-guide-content .learning-heading { font-size:var(--fs-display); }
+  .resolver-guide-content .learning-heading { font-size:var(--fs-hero); }
   .resolver-guide-copy { margin-top:36px; }
 }
 @media(prefers-reduced-motion:reduce) {
