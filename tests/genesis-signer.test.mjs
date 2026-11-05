@@ -12,7 +12,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { webcrypto } from 'node:crypto';
-import { JSDOM } from '/Volumes/PortableSSD/flux/flux-launchpad/node_modules/jsdom/lib/api.js';
+// jsdom is this site's own dev dependency. The import named the Mac's sibling launchpad checkout, so on a build node
+// (or any machine laid out differently) the file failed to load before a test ran.
+import { JSDOM } from 'jsdom';
 import { unlockPortableAuthKit } from '../../fxn-auth/src/authKitMigration.mjs';
 import { fluxRootFromMnemonic } from '../../fxn-auth/src/rootFromMnemonic.mjs';
 import { genesisKeyFromRoot } from '../../fxn-auth/src/rootKeys.mjs';
@@ -20,7 +22,7 @@ import { verifyDetached } from '../../fxn-auth/src/ed25519.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const BUNDLE_SOURCE = fs.readFileSync(path.join(HERE, '..', 'js', 'admin', 'auth.js'), 'utf8');
-const KIT_TEXT = fs.readFileSync('/Volumes/PortableSSD/flux/flux-launchpad/js/fixtures/real-auth-kit-v9.flx', 'utf8');
+const KIT_TEXT = fs.readFileSync(new URL('../../flux-launchpad/js/fixtures/real-auth-kit-v9.flx', import.meta.url), 'utf8');
 const KIT_PIN = '13572468';
 const KIT_PASSWORD = 'launchpad-test';
 const fromHex = (h) => Uint8Array.from(h.match(/../g), (x) => parseInt(x, 16));
