@@ -18,13 +18,13 @@ ArkManifest.define({
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Resolutions for the mesh."
+      "value": "What you can do with DEFXN"
     },
     "DECK": {
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "A resolution is a job a resolver can do, such as publishing a site or settling a payment. These are twenty ideas for what to build. Each page says which pieces work on devnet, which are being built, and which are only ideas. Everything runs on a development network."
+      "value": "Pick a job. See its three steps in the space."
     },
     "PROMISE": {
       "label": "Promise line",
@@ -42,7 +42,7 @@ ArkManifest.define({
       "label": "Fallback card link, when a resolution has no start page of its own",
       "kind": "link",
       "section": "Page",
-      "value": "route:resolver"
+      "value": "route:resolvers"
     },
     "BACK.HOME.HREF": {
       "label": "Breadcrumb: Home link",
@@ -360,7 +360,7 @@ ArkManifest.define({
       "label": "Status note",
       "kind": "text",
       "section": "Page",
-      "value": "Resolutions describe where DEFXN is going. The current status page lists what runs today and what is still being built."
+      "value": "These are proposals. The status page lists what runs today."
     },
     "NOTE.LINK": {
       "label": "Status link (an arrow is added)",
@@ -372,8 +372,12 @@ ArkManifest.define({
       "label": "Status link target",
       "kind": "link",
       "section": "Page",
-      "value": "doc:docs/status.md"
+      "value": "route:stats/now"
     },
+    "STAT.JOBS": { "label": "Stat label: how many jobs", "kind": "line", "section": "Page", "value": "Jobs" },
+    "STAT.DOMAINS": { "label": "Stat label: how many domains", "kind": "line", "section": "Page", "value": "Domains" },
+    "STAT.PAGES": { "label": "Stat label: jobs with a working page", "kind": "line", "section": "Page", "value": "With a page" },
+    "REPLAY": { "label": "Dock button that plays the job's steps again", "kind": "line", "section": "Page", "value": "Play the steps" },
     "JUMP": {
       "label": "Group jump label",
       "kind": "line",

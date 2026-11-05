@@ -1,0 +1,31 @@
+/* The journey bar (js/space/journey.mjs): the visitor's path as dots and the core actions, at the foot, right, above the site footer.
+   Type 11 and 18; --primary for here and Next (the page's own dock keeps the complement for its one dominant action). */
+.journey { position: fixed; right: 24px; bottom: 84px; z-index: 31; display: grid; gap: 8px; min-width: 280px; max-width: 420px; padding: 10px 12px; pointer-events: auto;
+  background: hsl(var(--surface) / .72); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 8px;
+  animation: journey-in .45s cubic-bezier(.22, .7, .18, 1) both; }
+.journey.hidden { display: none; }
+.journey-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.journey-label { font: 600 var(--fs-tertiary, 11px)/1.3 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.journey-dots { list-style: none; display: flex; align-items: center; gap: 0; margin: 0; padding: 0; }
+.journey-dots li { display: flex; align-items: center; }
+.journey-dots li + li::before { content: ''; width: 14px; height: 2px; background: hsl(var(--text-strong) / .15); }
+.journey-dots li.done + li::before, .journey-dots li.here + li::before { background: hsl(var(--primary) / .55); }
+.journey-dots button { width: 12px; height: 12px; padding: 0; border-radius: 50%; cursor: pointer; border: 2px solid hsl(var(--text-strong) / .3); background: transparent; }
+.journey-dots li.done button { background: hsl(var(--primary) / .6); border-color: hsl(var(--primary) / .6); }
+.journey-dots li.here button { background: hsl(var(--primary)); border-color: hsl(var(--primary)); box-shadow: 0 0 8px hsl(var(--primary) / .7); }
+.journey-acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.journey-next, .journey-back { cursor: pointer; padding: 8px 12px; border-radius: 6px; font: 600 var(--fs-tertiary, 11px)/1.2 var(--font-mono, monospace); letter-spacing: .1em; text-transform: uppercase; }
+.journey-next { color: hsl(var(--text-strong)); background: hsl(var(--primary) / .2); border: 1px solid hsl(var(--primary)); }
+.journey-next:hover { background: hsl(var(--primary) / .32); }
+.journey-back { color: hsl(var(--text-muted)); background: none; border: 1px solid hsl(var(--border-default, var(--border))); }
+.journey-back:hover { color: hsl(var(--text-strong)); }
+.journey-done { font: 600 var(--fs-tertiary, 11px)/1.2 var(--font-mono, monospace); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--live, var(--primary))); }
+.journey button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.journey button:active { transform: translateY(1px); }
+/* room for it: the HUD's right column and the keys legend sit above it */
+.hud .hud-right { max-height: calc(100vh - 96px - 230px) !important; }
+body.space-focused .journey { opacity: .4; }
+@keyframes journey-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (max-width: 900px) { .journey { left: 12px; right: 12px; bottom: 76px; max-width: none; } }
+@media (prefers-reduced-motion: reduce) { .journey { animation: none; } }
+html.quest-on .journey { display: none; }   /* the mission panel guides the front page until it is done (js/space/quest.mjs) */

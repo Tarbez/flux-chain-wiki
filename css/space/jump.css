@@ -1,0 +1,103 @@
+/* jump: the find-a-place palette. Contract: docs/design/space/SPACE.md. Glass surface, type scale only, no --complement. */
+.space-jump {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: auto;
+}
+.space-jump[hidden] { display: none; }
+
+.space-jump__dialog {
+  position: absolute;
+  top: 18vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, 92vw);
+  background: hsl(var(--surface) / .6);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: hsl(var(--text));
+  animation: space-jump-in .14s ease-out;
+}
+@keyframes space-jump-in {
+  from { opacity: 0; transform: translateX(-50%) scale(.97); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .space-jump__dialog { animation: none; }
+}
+
+.space-jump__input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--border-default);
+  background: transparent;
+  color: hsl(var(--text-strong));
+  font: inherit;
+  font-size: var(--fs-secondary);
+  outline: none;
+}
+.space-jump__input::placeholder { color: hsl(var(--text-faint)); }
+.space-jump__input:focus-visible { box-shadow: inset 0 -2px 0 hsl(var(--primary)); }
+
+.space-jump__list {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 6px 0;
+}
+.space-jump__list:empty { display: none; }
+
+.space-jump__group {
+  padding: 8px 16px 4px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-tertiary);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: hsl(var(--text-faint));
+}
+
+.space-jump__item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+.space-jump__item[aria-selected="true"] {
+  background: hsl(var(--primary) / .14);
+  box-shadow: inset 2px 0 0 hsl(var(--primary));
+}
+
+.space-jump__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: hsl(var(--jump-dot, var(--primary)));
+}
+
+.space-jump__name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: hsl(var(--text-strong));
+}
+
+.space-jump__kind {
+  flex: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-tertiary);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: hsl(var(--text-muted));
+}

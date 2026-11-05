@@ -57,20 +57,10 @@
      "Footer strip"; regression: tests/site-journeys.cjs, tests/browser/site-fixes.mjs). The
      Back control sits IN the footer row, after the credit: positioned on its own in the same
      corner it overlapped the strip's last link on a phone (2026-10-19, "MESH PI ← BACK HOME"). */
+  /* 2026-11-05 cut: the strip holds the credit and the price line only. The header carries the six pages, and the
+     "you" panel carries the rest, so the strip lists no page. */
   var paths = make('nav');
   paths.setAttribute('aria-label', 'Site sections');
-  if (typeof ArkSitePages !== 'undefined') ArkSitePages.journeys().forEach(function (journey) {
-    var lead = ArkSitePages.pages().find(function (row) { return row.journey === journey.id && row.lead && ArkUI.pageCatalog[row.key]; });
-    if (!lead) return;
-    /* A section the header bar already links is left out (ArkUI.headerPages, js/resolvers/header.js; a link the row
-       folds away on a narrow screen is in the MENU): the kit's footer text is 16px since 2026-10-20, and the owner kept
-       it and chose fewer links (2026-10-22), so a page is offered once in the chrome, not twice. */
-    if (ArkUI.headerPages && ArkUI.headerPages.indexOf(lead.key) >= 0) return;
-    var link = make('a', 'site-footer-link'); link.href = router.url(lead.key); link.dataset.sceneLink = lead.key;
-    link.dataset.journey = journey.id;
-    link.title = journey.title + ': ' + journey.note;
-    link.textContent = lead.label; paths.appendChild(link);
-  });
   function money(p) {
     var n = p.minor / p.fxn / 100;
     try { return new Intl.NumberFormat('en', { style: 'currency', currency: p.currency, minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(n); }

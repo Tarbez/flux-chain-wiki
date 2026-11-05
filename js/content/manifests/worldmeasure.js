@@ -52,25 +52,7 @@ ArkManifest.define({
       "label": "Resolvers page: note",
       "kind": "text",
       "section": "Resolvers",
-      "value": "Each cube is a resolver. The blocks below are the capabilities they name. Price: {price} for {n} of {total}."
-    },
-    "RESOLVERS.TITLE.MANY": {
-      "label": "Resolvers page: heading, many",
-      "kind": "line",
-      "section": "Resolvers",
-      "value": "Built from {n} capabilities."
-    },
-    "RESOLVERS.TITLE.ONE": {
-      "label": "Resolvers page: heading, one",
-      "kind": "line",
-      "section": "Resolvers",
-      "value": "Built from 1 capability."
-    },
-    "RESOLVERS.TITLE.NONE": {
-      "label": "Resolvers page: heading, empty text",
-      "kind": "line",
-      "section": "Resolvers",
-      "value": "Built on no shared capability."
+      "value": "Each cube is a resolver. Price: {price} for {n} of {total}."
     },
     "RESOLVERS.EMPTY.TITLE": {
       "label": "Resolvers page: empty state, heading",
@@ -84,35 +66,17 @@ ArkManifest.define({
       "section": "Resolvers",
       "value": "No resolver list is loaded."
     },
-    "RESOLVERS.STRIP.GRAMMAR": {
-      "label": "Resolvers page: summary strip label, grammar",
-      "kind": "line",
-      "section": "Resolvers",
-      "value": "Grammar"
-    },
     "RESOLVERS.STRIP.CAPS": {
       "label": "Resolvers page: summary strip label, capabilities",
       "kind": "line",
       "section": "Resolvers",
-      "value": "Capabilities"
+      "value": "Capabilities used"
     },
     "RESOLVERS.STRIP.OFFERS": {
       "label": "Resolvers page: summary strip label, offers",
       "kind": "line",
       "section": "Resolvers",
-      "value": "Offers"
-    },
-    "RESOLVERS.GRAMMAR.CHECKED": {
-      "label": "Resolvers page: grammar, \"checked\" text",
-      "kind": "line",
-      "section": "Resolvers",
-      "value": "Checked"
-    },
-    "RESOLVERS.GRAMMAR.OPEN": {
-      "label": "Resolvers page: grammar, open state",
-      "kind": "line",
-      "section": "Resolvers",
-      "value": "Not specified"
+      "value": "Actions offered"
     },
     "RESOLVERS.FACT.BUILT": {
       "label": "Resolvers page: fact label, built from",
@@ -132,12 +96,6 @@ ArkManifest.define({
       "section": "Resolvers",
       "value": "Price"
     },
-    "RESOLVERS.FACT.WHO": {
-      "label": "Resolvers page: fact label, who can change it",
-      "kind": "line",
-      "section": "Resolvers",
-      "value": "Who can change it"
-    },
     "RESOLVERS.OWNRULES": {
       "label": "Resolvers page: \"own rules only\" text",
       "kind": "line",
@@ -149,12 +107,6 @@ ArkManifest.define({
       "kind": "line",
       "section": "Resolvers",
       "value": "Not in its manifest"
-    },
-    "RESOLVERS.MORE": {
-      "label": "Resolvers page: \"more\" text",
-      "kind": "line",
-      "section": "Resolvers",
-      "value": "+{n} more"
     },
     "RESOLVERS.PICK": {
       "label": "Resolvers page: picker prompt",
@@ -570,41 +522,11 @@ ArkManifest.define({
       "section": "A chain of the network",
       "value": "Coin"
     },
-    "RING.STRIP.STATE": {
-      "label": "Network ring page: summary strip label, build state",
-      "kind": "line",
-      "section": "A chain of the network",
-      "value": "State"
-    },
-    "RING.STRIP.LOGO": {
-      "label": "Network ring page: summary strip label, logo",
-      "kind": "line",
-      "section": "A chain of the network",
-      "value": "Logo"
-    },
     "RING.NONE": {
       "label": "Network ring page: empty text",
       "kind": "line",
       "section": "A chain of the network",
       "value": "None"
-    },
-    "RING.SHOWN": {
-      "label": "Network ring page: \"shown\" text",
-      "kind": "line",
-      "section": "A chain of the network",
-      "value": "Shown"
-    },
-    "RING.NOTGIVEN": {
-      "label": "Network ring page: \"not given yet\" text",
-      "kind": "line",
-      "section": "A chain of the network",
-      "value": "Not given yet"
-    },
-    "RING.LOGO": {
-      "label": "Network ring page: logo",
-      "kind": "line",
-      "section": "A chain of the network",
-      "value": "Logo"
     },
     "RING.LOGO.LABEL": {
       "label": "Network ring page: logo, label",
@@ -720,12 +642,6 @@ ArkManifest.define({
       "section": "A chain of the network",
       "value": "DEFXN kernel"
     },
-    "RING.CHIP.SUPPLY": {
-      "label": "Network ring page: chip, supply",
-      "kind": "line",
-      "section": "A chain of the network",
-      "value": "FXN supply"
-    },
     "RING.CHIP.MINE": {
       "label": "Network ring page: chip, your chain",
       "kind": "line",
@@ -754,13 +670,13 @@ ArkManifest.define({
       "label": "Network ring page: button, fxn",
       "kind": "line",
       "section": "A chain of the network",
-      "value": "See the FXN supply"
+      "value": "See the FXN chain"
     },
     "RING.CTA.FXN.HREF": {
       "label": "Network ring page: button, fxn, link target",
       "kind": "link",
       "section": "A chain of the network",
-      "value": "route:fxn"
+      "value": "route:ring"
     },
     "RING.CTA.RESOLVE": {
       "label": "Network ring page: button, result view",
@@ -1163,6 +1079,90 @@ ArkManifest.define({
       "kind": "link",
       "section": "A chain of the network",
       "value": "route:works/layers"
+    },
+    "RESOLVERS.IS": {
+      "label": "Resolvers page: what a resolver is (10 words at most)",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "A resolver is a rulebook that runs as its own chain."
+    },
+    "RESOLVERS.WHAT": {
+      "label": "Resolvers page: \"what is a resolver\" disclosure",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "What is a resolver?"
+    },
+    "RESOLVERS.WHAT.TEXT": {
+      "label": "Resolvers page: what a resolver is, the guide in one paragraph",
+      "kind": "text",
+      "section": "Resolvers",
+      "value": "One signed record launches it. It is built from shared capabilities anyone can check. It refuses any record that does not fit its grammar."
+    },
+    "RESOLVERS.DEEP": {
+      "label": "Resolvers page: \"capabilities and offers\" disclosure",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "Its capabilities and offers"
+    },
+    "RESOLVERS.STRIP.COMMANDS": {
+      "label": "Resolvers page: strip label, commands",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "Commands"
+    },
+    "RESOLVERS.SUM.CAP": {
+      "label": "Resolvers page: one capability used",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "1 capability"
+    },
+    "RESOLVERS.SUM.CAPS": {
+      "label": "Resolvers page: capabilities used",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "{n} capabilities"
+    },
+    "RESOLVERS.SUM.OFFER": {
+      "label": "Resolvers page: one action offered",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "1 action"
+    },
+    "RESOLVERS.SUM.OFFERS": {
+      "label": "Resolvers page: actions offered",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "{n} actions"
+    },
+    "RESOLVERS.SUM.COMMANDS": {
+      "label": "Resolvers page: commands, and how many need a signature",
+      "kind": "line",
+      "section": "Resolvers",
+      "value": "{n} commands, {signed} signed"
+    },
+    "RING.ANSWER.NETWORK": {
+      "label": "Ring page: the answer for a network chain",
+      "kind": "line",
+      "section": "Ring",
+      "value": "{name}: a network chain, coin {coin}."
+    },
+    "RING.STRIP.HOLDS": {
+      "label": "Ring page: strip label, what the chain holds",
+      "kind": "line",
+      "section": "Ring",
+      "value": "Holds"
+    },
+    "RING.STRIP.SUPPLY": {
+      "label": "Ring page: strip label, starting supply",
+      "kind": "line",
+      "section": "Ring",
+      "value": "Starting supply"
+    },
+    "RING.SUPPLY": {
+      "label": "Ring page: the starting supply",
+      "kind": "line",
+      "section": "Ring",
+      "value": "{supply} {coin}"
     }
   }
 });

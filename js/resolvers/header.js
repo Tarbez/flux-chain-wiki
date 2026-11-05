@@ -119,7 +119,8 @@ function headerCriticalPages(catalog) {
    links in the bar's nav, then Account, Run DEFXN, the network pill and MENU in its actions.
    The kit's own fold-everything menu (menuAt) is not used: this site already has its
    all-pages MENU, so collapsing link by link into it keeps every other control in the row. */
-var HEADER_COLLAPSE_ORDER = ['about', 'explorer', 'resolutions', 'download'];
+/* 2026-11-05 cut: Notes folds first, then Explore, Resolutions and How it works; Grid and Get FXN Browser stay. */
+var HEADER_COLLAPSE_ORDER = ['learnings', 'explorer', 'resolutions', 'works', 'download'];
 function headerRowOverflows(header) {
   var box = header.getBoundingClientRect();
   if (!box.width) return false;                      /* not laid out (server render, hidden) */
@@ -162,18 +163,23 @@ function fitHeaderRow(header) {
 /* The header's own controls, built once. Each keeps the class and data-header-item hook the
    row fit, js/hero-motion.js (MENU open/close, route clicks), the editor's layer tools and the
    browser drivers read. */
-/* [copy key, page]: Overview and Mesh Explorer are the bar's nav (in this order: the row fit and
-   the editor's layer keys count them); Get FXN Browser leads the cluster; Account is the "you"
-   control's panel head. */
+/* [copy key, page, words until the key exists]: the six entries of the 2026-11-05 cut, in this order (the row fit and the
+   editor's layer keys count them): Grid, How it works, Resolutions, Explore, Notes in the bar's nav, Get FXN Browser as the
+   one action; Account is the "you" control's panel head. The third item is the shim for a key js/content/manifests/nav.js
+   does not hold yet (NAV.GRID, NAV.WORKS, NAV.EXPLORE, NAV.NOTES): once the manifest has it, the manifest's words win. */
 var HEADER_LINKS = [
-  ['NAV.OVERVIEW', 'about'],
-  ['NAV.MESH', 'explorer'],
+  ['NAV.GRID', 'zero', 'Grid'],
+  ['NAV.WORKS', 'works', 'How it works'],
+  ['NAV.PRODUCTS', 'resolutions'],
+  ['NAV.EXPLORE', 'explorer', 'Explore'],
+  ['NAV.NOTES', 'learnings', 'Notes'],
   ['NAV.ACCOUNT', 'account'],
   ['NAV.RUN', 'download']
 ];
-/* the footer leaves these out (js/hero-motion.js) */
-ArkUI.headerPages = HEADER_LINKS.map(function (item) { return item[1]; }).concat(['resolutions']);
-var HEADER_ICONS = { about: 'overview', explorer: 'network', stats: 'evidence', account: 'account', download: 'terminal', resolutions: 'cycle', learnings: 'document', 'stats/now': 'evidence', zero: 'overview' };
+/* the "you" panel reads these as the bar's pages */
+ArkUI.headerPages = HEADER_LINKS.map(function (item) { return item[1]; });
+var HEADER_ICONS = { zero: 'overview', works: 'cycle', resolutions: 'cycle', explorer: 'network', learnings: 'document', account: 'account', download: 'terminal', 'stats/now': 'evidence' };
+function headerWords(item) { return item[2] && !ArkCopy.has(item[0]) ? item[2] : ArkCopy.text(item[0]); }
 function headerNode(tag, className, text) {
   var item = document.createElement(tag);
   if (className) item.className = className;
@@ -183,7 +189,7 @@ function headerNode(tag, className, text) {
 function headerLink(item) {
   var key = item[1], link = document.createElement('a');
   link.href = ArkUI.route.href(ArkUI.pageCatalog[key].path);
-  link.textContent = ArkCopy.text(item[0]);
+  link.textContent = headerWords(item);
   link.dataset.headerItem = key;
   if (ArkUI.actionIcon) ArkUI.actionIcon(link, HEADER_ICONS[key]);
   return link;

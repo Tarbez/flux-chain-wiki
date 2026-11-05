@@ -1,0 +1,37 @@
+/* keys: the screen-reader list, the live region, and the keyboard legend. Contract: docs/design/space/SPACE.md. */
+.space-keys[hidden] { display: none; }
+/* Visually hidden, still read aloud and reachable by Tab. */
+.space-keys-sr {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+.space-keys-sr:focus-within {
+  /* A sighted keyboard visitor tabbing into the list sees where they are. */
+  width: auto; height: auto; margin: 0; clip: auto; clip-path: none; white-space: normal;
+  left: 24px; top: 24px; z-index: 5; pointer-events: auto;
+  padding: 11px; background: hsl(var(--surface) / .6); backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default); border-radius: 8px;
+  font: var(--fs-tertiary) / 1.5 var(--font-sans); color: hsl(var(--text));
+}
+.space-keys-sr ul { list-style: none; margin: 0; padding-left: 11px; }
+.space-keys-sr button { font: inherit; color: inherit; background: none; border: 0; padding: 2px 0; cursor: pointer; }
+.space-keys-btn {
+  position: fixed; right: 24px; bottom: 96px; width: 28px; height: 28px; border-radius: 50%;
+  pointer-events: auto; cursor: pointer;
+  background: hsl(var(--surface) / .6); backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default); color: hsl(var(--text-muted));
+  font: var(--fs-tertiary) / 1 var(--font-mono);
+}
+.space-keys-btn:hover, .space-keys-btn[aria-expanded="true"] { color: hsl(var(--text-strong)); }
+.space-keys button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.space-keys-pop {
+  position: fixed; right: 24px; bottom: 132px; pointer-events: auto;
+  padding: 11px; border-radius: 8px;
+  background: hsl(var(--surface) / .6); backdrop-filter: blur(12px);
+  border: 1px solid var(--border-default);
+  font: var(--fs-tertiary) / 1.6 var(--font-mono); color: hsl(var(--text));
+}
+.space-keys-pop[hidden] { display: none; }
+.space-keys-pop dl { display: grid; grid-template-columns: auto auto; gap: 0 11px; margin: 0; }
+.space-keys-pop dt { color: hsl(var(--text-strong)); text-transform: uppercase; }
+.space-keys-pop dd { margin: 0; color: hsl(var(--text-muted)); }

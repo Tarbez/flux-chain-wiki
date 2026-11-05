@@ -167,3 +167,13 @@
 @media (prefers-reduced-motion:reduce) {
   #scene .explore-page :is(.explore-browse,.explore-record-open,.explore-cards h2) { animation:none; }
 }
+
+/* In the HUD's left column (js/pages/explorer.js hud(), 2026-11-05 "total chaos"): the live card is the column's body, not a card in a
+   card. Its "LIVE / READ FROM THE PUBLIC MESH" head repeats the kicker above it, so it goes; the card spans the column with no frame;
+   and with nothing read yet (no kinds, no browse) it takes no room, since the answer and the status line already say so. */
+#scene .explore-page .hud-left .explore-live-card { width:100%; padding:0; border:0; background:none; box-shadow:none; }
+#scene .explore-page .hud-left .explore-live-card::before, #scene .explore-page .hud-left .explore-live-card::after { display:none; }
+#scene .explore-page .hud-left .explore-live-card .how-work-card-top { display:none; }
+#scene .explore-page .hud-left .ark-tabs__panel:has(.explore-live-card) { width:100%; }
+#scene .explore-page .hud-left .explore-cards:not(:has(.explore-kinds:not([hidden]), .explore-browse:not([hidden]))) { display:none; }
+#scene .explore-page .hud-left .ark-hero { min-height:0; padding:0; margin:0; }

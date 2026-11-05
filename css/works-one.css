@@ -1,0 +1,26 @@
+/* How it works on the HUD (js/pages/world-minute.js). The layout is css/space-frame.css (.hud-left, .hud-dock, .hud-chip,
+   .hud-go); this sheet only dresses what is this page's own: the beat ticks in the dock and the closer-look tabs and panel.
+   Type stays on the --fs-* scale; colours are the site's HSL-channel tokens. The open look is a clip, never a fade. */
+
+.wp-minute.hud .wp-sheet:empty { display: none; }   /* everything moved into the HUD; the old sheet must not take space */
+.wp-minute .hud-answer.wm-say { min-height: 2.8em; }   /* two lines held, so the tabs below do not jump per beat */
+
+.wp-minute .hud-dock .wm-ticks { display: flex; gap: 4px; margin: 0 8px 0 0; padding: 0; list-style: none; }
+.wp-minute .hud-dock .wm-ticks button { width: 22px; height: 30px; padding: 0; border: 0; background: none; cursor: pointer; position: relative; }
+.wp-minute .hud-dock .wm-ticks button::before { content: ''; position: absolute; left: 0; right: 0; top: 14px; height: 2px; background: hsl(var(--border-default)); }
+.wp-minute .hud-dock .wm-ticks button.done::before, .wp-minute .hud-dock .wm-ticks button.on::before { background: hsl(var(--primary)); }
+.wp-minute .hud-dock .wm-ticks button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.wp-minute .hud-chip svg { width: 11px; height: 11px; margin-right: 6px; vertical-align: -1px; }
+.wp-minute .hud-chip[hidden] { display: none; }
+
+.wo-tab { height: 30px; padding: 0 12px; border: 1px solid hsl(var(--border-default)); border-radius: 8px 3px 8px 3px; background: none; color: hsl(var(--text-muted)); font: 500 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.wo-tab:hover { color: hsl(var(--text-strong)); border-color: hsl(var(--text-muted)); }
+.wo-tab[aria-expanded="true"] { color: hsl(var(--text-strong)); border-color: hsl(var(--primary)); }
+.wo-tab:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+
+.wo-panel { padding: 10px 12px; border-left: 2px solid hsl(var(--primary)); animation: wo-open .4s var(--glide, ease-out); }
+.wo-panel[hidden] { display: none; }
+.wo-line { margin: 0 0 6px; font: 500 var(--fs-tertiary, 11px)/1.5 var(--font-sans); color: hsl(var(--text-strong)); }
+.wo-list { margin: 0; padding-left: 18px; display: grid; gap: 2px; font: 400 var(--fs-tertiary, 11px)/1.5 var(--font-sans); color: hsl(var(--text-muted)); }
+@keyframes wo-open { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
+@media (prefers-reduced-motion: reduce) { .wo-panel { animation: none; } }

@@ -1,0 +1,18 @@
+/* Resolutions on the game layout: css/space-frame.css places .hud-left/.hud-right/.hud-dock; this sheet only shapes the job list
+   and the open job's steps inside them. Type from the --fs-* scale, colours from SDK tokens; the middle stays the world's. */
+.res1 .hud-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.res1-list { min-height: 0; }
+.res1-rows { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.res1-row { padding: 4px 11px; border: 1px solid var(--border-default, transparent); border-radius: 6px; background: hsl(var(--surface) / .6); color: var(--text); font-size: var(--fs-tertiary, 11px); cursor: pointer; }
+.res1-row:hover { background: var(--raised); }
+.res1-row[aria-expanded="true"] { border-color: var(--primary); color: var(--text-strong); }
+.res1 .hud-tabs [aria-pressed="true"] { border-color: var(--primary); color: var(--text-strong); }
+.res1-panel { display: grid; align-content: start; gap: 7px; }
+.res1-panel-title { margin: 0; font-size: var(--fs-secondary, 18px); color: var(--text-strong); }
+.res1-shift { margin: 0; font-size: var(--fs-tertiary, 11px); color: var(--text-muted); }
+.res1-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.res1-step { display: grid; gap: 2px; padding: 4px 11px; border-left: 2px solid var(--primary); font-size: var(--fs-tertiary, 11px); }
+.res1-step-name { font-family: var(--font-mono, monospace); text-transform: uppercase; color: var(--text-strong); }
+.res1-note { margin: 0; font-size: var(--fs-tertiary, 11px); color: var(--text-muted); }
+.res1-link { font-size: var(--fs-tertiary, 11px); color: var(--primary); }
+.res1 :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }

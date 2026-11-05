@@ -13,16 +13,19 @@
      ring       state { view:'ring', i }                    select on a new ring           on('pickRing'): a ring of the network
 
    REDUCTION TEST (from docs/home-redesign/app.js and ring-view.js, kept)
-   resolvers 1 what one resolver is built from. 2 See its capabilities. 3 its grammar, its capabilities, its price, who
-     can change it. 4 the other resolvers (chips). 5 nothing. 6 the command count: left out. 7 nothing more. 8-9 the
-     address holds the resolver. 10 a fact the manifest does not give says "Not in its manifest"; the words read with no 3D.
+   resolvers 1 what a resolver is (one line) and this one's own line. 2 See its capabilities. 3 capabilities used, actions
+     offered, commands (2026-11-05: grammar cell and the always-unknown "who can change it" row cut; price said once in the
+     note). 4 the other resolvers (chips). 5 capability list, offers and "What is a resolver?" one click deeper. 6 nothing.
+     7 nothing more. 8-9 the address holds the resolver. 10 the words read with no 3D.
    measured  1 what is measured today. 2 See resolvers that use it. 3 a capability's checked cases, and that its speed is
      not measured yet. 4 the benchmark runs (tab). 5 nothing. 6 nothing. 7 nothing more. 8-9 the address holds the
      capability and the tab. 10 the runs name their records, dates and sources; the words read with no 3D.
    fxn       1 the starting supply, as decisions. 2 Create your identity (the sale is per identity). 3 the parts and the
      rule for the chosen part. 4 fees and money (tabs). 5 nothing. 6 nothing. 7 nothing more. 8-9 the address holds the
      part and the tab. 10 the page says these are decisions, mostly not in code.
-   ring      1 what one kind of chain is. 2 the kind's next step. 3 the kind, its coin if it has one, what it holds.
+   ring      1 what one kind of chain is; a network answers "{name}: a network chain, coin {coin}". 2 the kind's next step.
+     3 what it holds (counted from CHILDREN), and for FXN its starting supply (the old /fxn page's lead fact). State and
+     Logo cells cut 2026-11-05.
      4 the other kinds (chips). 5 nothing. 6 nothing. 7 nothing more. 8-9 the address holds the ring. 10 every ring but
      the named networks says it shows a kind, not a live chain; the page reads with no 3D. */
 (function () {
@@ -61,10 +64,40 @@
     b.setAttribute('aria-expanded', !!expanded);
   }
 
+  /* The game layout (css/space-frame.css, docs/design/space/SPACE.md "The page layout", 2026-11-05): the page root becomes .hud,
+     the old sheet and crumbs step aside so the middle is the 3D world's, and the page's parts go in .hud-left, .hud-right and
+     .hud-dock. The frame (world-sheet.js) still owns the address, the world state and the picks. */
+  function hud(f) {
+    f.page.classList.add('hud'); f.top.hidden = true; f.slot.hidden = true;
+    var h = { left: node('div', 'hud-left hud-card'), right: node('aside', 'hud-right'), dock: node('div', 'hud-dock') };
+    h.stats = h.right.appendChild(node('div', 'hud-stats')); h.actions = h.right.appendChild(node('div', 'hud-actions'));
+    f.page.appendChild(h.left); f.page.appendChild(h.right); f.page.appendChild(h.dock);
+    return h;
+  }
+  /* .hud-stat cells: [value, label]; an empty value leaves its cell out, because an absent fact is not shown as one */
+  function stats(box, rows) {
+    box.textContent = '';
+    rows.filter(function (r) { return r[0] !== '' && r[0] != null; }).slice(0, 3).forEach(function (r) {
+      var s = node('div', 'hud-stat'); s.appendChild(node('b', null, String(r[0]))); s.appendChild(node('span', null, r[1])); box.appendChild(s);
+    });
+  }
+  /* the dock's one dominant action: the frame's cut-corner link, worn as .hud-go */
+  function go(h) { var cta = W.cta('hud-go'); h.dock.appendChild(cta); return cta; }
+
   /* ================================================================ /resolvers */
   function resolversDef() {
     var RES = resolvers(), fold = { open: false };
     var ui = {};
+    /* a resolver's summary, every figure with its unit, derived from its own fields (composes, offers, commands,
+       signedCommands in resolvers-data.js, which make-resolvers.mjs generates), so no line is written per resolver */
+    function summary(r) {
+      var n = r.composes.length, o = r.offers.length;
+      return {
+        caps: T(n === 1 ? 'RESOLVERS.SUM.CAP' : 'RESOLVERS.SUM.CAPS', { n: n }),
+        offers: T(o === 1 ? 'RESOLVERS.SUM.OFFER' : 'RESOLVERS.SUM.OFFERS', { n: o }),
+        commands: T('RESOLVERS.SUM.COMMANDS', { n: r.commands, signed: r.signedCommands })
+      };
+    }
     function capLink(c) { var a = W.link(node('a', null, title(c)), 'measured', 'c=' + c); return a; }
     return {
       view: 'resolvers', key: 'resolvers', titleId: 'wm-resolvers-title', here: 'WORLDMEASURE.RESOLVERS.HERE',
@@ -83,30 +116,34 @@
         var i = RES.findIndex(function (r) { return r.id === st.id; }); ctx.set({ id: RES[(i + d + RES.length) % RES.length].id });
       },
       build: function (ctx) {
-        ui.kicker = ctx.f.add(node('p', 'eyebrow-dot mono'));
-        ui.title = ctx.f.add(node('h1', 'two'), true); ui.title.id = 'wm-resolvers-title';
-        ui.line = ctx.f.add(node('p', 'sheet-lede tight'), true);
-        ui.strip = ctx.f.add(dl('strip'), true);
-        ui.facts = ctx.f.add(dl('facts plain'), true);
-        ui.pick = ctx.f.add(node('div', 'chips')); ui.pick.setAttribute('role', 'group'); ui.pick.setAttribute('aria-label', T('RESOLVERS.PICK'));
-        ui.foot = foot(ctx.f);
+        var h = ui.hud = hud(ctx.f);
+        ui.kicker = h.left.appendChild(node('p', 'hud-kicker'));
+        ui.title = h.left.appendChild(node('h1', 'hud-title')); ui.title.id = 'wm-resolvers-title';
+        ui.line = h.left.appendChild(node('p', 'hud-answer'));
+        ui.pick = h.left.appendChild(node('div', 'hud-tabs chips')); ui.pick.setAttribute('role', 'group'); ui.pick.setAttribute('aria-label', T('RESOLVERS.PICK'));
+        /* one click deeper: what it is built from and what it offers; and what a resolver is, from the resolver guide */
+        var body = h.left.appendChild(node('div', 'hud-body'));
+        ui.deep = body.appendChild(node('details', 'wm-more')); ui.deep.appendChild(node('summary', null, T('RESOLVERS.DEEP')));
+        ui.facts = ui.deep.appendChild(dl('facts plain'));
+        ui.what = body.appendChild(node('details', 'wm-more'));
+        ui.what.appendChild(node('summary', null, T('RESOLVERS.WHAT'))); ui.what.appendChild(node('p', null, T('RESOLVERS.WHAT.TEXT')));
+        ui.note = h.actions.appendChild(node('p', 'wp-note mono'));
+        ui.more = h.dock.appendChild(node('a', 'hud-chip')); ui.more.textContent = T('RESOLVERS.LINK'); W.field(ui.more, 'WORLDMEASURE.RESOLVERS.LINK.HREF');
+        ui.cta = go(h);
         ui.pick.addEventListener('click', function (e) { var b = e.target.closest('[data-id]'); if (b) ctx.set({ id: b.dataset.id }); });
         folding(ui.pick, function () { return RES.length; }, fold);
-        ctx.f.sheet.addEventListener('click', function (e) {
-          var b = e.target.closest('[data-more]'); if (!b) return; b.nextElementSibling.hidden = false; b.hidden = true;
-        });
-        ui.foot.more.textContent = T('RESOLVERS.LINK'); W.field(ui.foot.more, 'WORLDMEASURE.RESOLVERS.LINK.HREF');
       },
       render: function (st, ctx) {
         var f = ctx.f;
         if (!RES.length) { W.title(ui.title, T('RESOLVERS.EMPTY.TITLE')); ui.line.textContent = T('RESOLVERS.EMPTY.LINE'); ui.kicker.textContent = ''; return; }
         var r = W.pick(RES, st.id), cs = r.composes;
+        /* the answer: what a resolver is in one line, then this one's name and its own line from the data */
         ui.kicker.textContent = T('RESOLVERS.KICKER', { n: RES.length });
-        W.title(ui.title, r.name + '.', cs.length ? T(cs.length === 1 ? 'RESOLVERS.TITLE.ONE' : 'RESOLVERS.TITLE.MANY', { n: cs.length }) : T('RESOLVERS.TITLE.NONE'));
-        ui.line.textContent = ''; ui.line.appendChild(node('span', null, r.line || '—'));
-        var checked = r.grammar === 'checked';
-        W.cells(ui.strip, [[T('RESOLVERS.STRIP.GRAMMAR'), T(checked ? 'RESOLVERS.GRAMMAR.CHECKED' : 'RESOLVERS.GRAMMAR.OPEN'), !checked],
-          [T('RESOLVERS.STRIP.CAPS'), String(cs.length)], [T('RESOLVERS.STRIP.OFFERS'), String(r.offers.length), !r.offers.length]]);
+        W.title(ui.title, r.name + '.', r.line || '');
+        ui.line.textContent = T('RESOLVERS.IS');
+        /* its two counts, derived from the data (composes, offers); the commands line stays one click deeper */
+        stats(ui.hud.stats, [[cs.length, T('RESOLVERS.STRIP.CAPS')], [r.offers.length, T('RESOLVERS.STRIP.OFFERS')]]);
+        ui.note.textContent = ctx.f.note ? ctx.f.note.textContent : '';
         /* an offer name keeps a resolver's own capitals: "Found DAO", not "Found dao" */
         var caps2 = RES.filter(function (x) { return x.name === x.name.toUpperCase(); }).map(function (x) { return x.name; });
         var offers = r.offers.map(function (o) { return caps2.reduce(function (s, n) { return s.replace(new RegExp('\\b' + n + '\\b', 'gi'), n); }, o); });
@@ -114,20 +151,9 @@
         function row(label, content) { ui.facts.appendChild(node('dt', null, label)); var dd = node('dd'); dd.appendChild(content); ui.facts.appendChild(dd); }
         function muted(text) { return node('span', 'muted', text); }
         row(T('RESOLVERS.FACT.BUILT'), cs.length ? chipsOf(cs.map(capLink)) : muted(T('RESOLVERS.OWNRULES')));
-        /* the first three offers, the rest one click deeper */
-        var offerCell = node('span');
-        if (offers.length) {
-          offerCell.appendChild(document.createTextNode(offers.slice(0, 3).join(' · ')));
-          if (offers.length > 3) {
-            offerCell.appendChild(document.createTextNode(' '));
-            var more = node('button', 'more-n', T('RESOLVERS.MORE', { n: offers.length - 3 })); more.type = 'button'; more.setAttribute('data-more', '');
-            var rest = node('span', null, ' · ' + offers.slice(3).join(' · ')); rest.hidden = true;
-            offerCell.appendChild(more); offerCell.appendChild(rest);
-          }
-        } else offerCell.appendChild(muted(T('RESOLVERS.UNKNOWN')));
-        row(T('RESOLVERS.FACT.OFFERS'), offerCell);
+        row(T('RESOLVERS.FACT.OFFERS'), offers.length ? document.createTextNode(offers.join(' · ')) : muted(T('RESOLVERS.UNKNOWN')));
+        row(T('RESOLVERS.STRIP.COMMANDS'), document.createTextNode(summary(r).commands));
         if ((r.price || '—') !== ui.usual) row(T('RESOLVERS.FACT.PRICE'), document.createTextNode(r.price || '—'));
-        row(T('RESOLVERS.FACT.WHO'), muted(T('RESOLVERS.UNKNOWN')));
         /* the pickers; a resolver whose grammar is not specified carries a hollow dot */
         ui.pick.querySelectorAll('[data-id]').forEach(function (b) { b.remove(); });
         var anchor = ui.pick.querySelector('.chips-all');
@@ -137,7 +163,7 @@
           ui.pick.insertBefore(b, anchor);
         });
         foldButton(ui.pick, RES.length, fold.open);
-        var cta = ui.foot.cta;
+        var cta = ui.cta;
         if (cs.length) { W.link(cta, 'measured', 'c=' + cs[0]); cta.say.textContent = T('RESOLVERS.CTA.CAPS'); }
         else { W.link(cta, 'works/resolve'); cta.say.textContent = T('RESOLVERS.CTA.RESOLVE'); }
         W.tags(f.tags, [{ id: 'name', name: r.name, sub: cs.length ? T('RESOLVERS.TAG.NAMES', { n: cs.length }) : T('RESOLVERS.TAG.NONE'), cls: 'hot' }]
@@ -352,7 +378,17 @@
     function index(id) { var i = N ? N.IDS.indexOf(id) : -1; return i >= 0 && i !== N.MINE ? i : N.IDS.indexOf('deark'); }
     function named(id) { for (var k in N.NAMED) if (N.NAMED[k].id === id) return N.NAMED[k]; return null; }
     var CHIPS = [['identity-1', 'RING.CHIP.IDENTITY'], ['resolver-1', 'RING.CHIP.RESOLVER'], ['token-1', 'RING.CHIP.TOKEN'], ['pool-1', 'RING.CHIP.POOL'],
-      ['fxn'], ['deark'], ['cr3tv'], ['defxn', 'RING.CHIP.KERNEL'], ['@fxn', 'RING.CHIP.SUPPLY'], ['@chain', 'RING.CHIP.MINE']];
+      ['fxn'], ['deark'], ['cr3tv'], ['defxn', 'RING.CHIP.KERNEL'], ['@chain', 'RING.CHIP.MINE']];
+    /* what a ring holds, counted from the chains inside it (network-data CHILDREN), each kind named by the data's own
+       NAMES in the singular for one: "1 coin ledger, 2 token ledgers, 1 pool chain" */
+    function holds(ri) {
+      var n = {}, order = [];
+      (N.CHILDREN || []).forEach(function (ch) { if (ch[0] !== ri) return; if (!n[ch[1]]) order.push(ch[1]); n[ch[1]] = (n[ch[1]] || 0) + 1; });
+      return order.map(function (kd) {
+        var plural = (N.NAMES[kd] || kd).toLowerCase(), one = plural.replace(/s$/, '');
+        return n[kd] + ' ' + (n[kd] === 1 ? one : plural);
+      }).join(', ');
+    }
     return {
       view: 'ring', key: 'ring', titleId: 'wm-ring-title', here: 'WORLDMEASURE.RING.HERE',
       note: false,
@@ -361,19 +397,20 @@
       world: function (st) { return W.state('ring', { i: st.i }); },
       picks: { pickRing: function (ri, b, ctx) {
         var id = N.IDS[typeof ri === 'object' && ri ? ri.index : ri]; if (!id) return;
-        if (id === 'fxn-ledger') W.go('fxn'); else if (N.IDS.indexOf(id) === N.MINE) W.go('chain'); else ctx.set({ i: id });
+        if (id === 'fxn-ledger') ctx.set({ i: 'fxn' }); else if (N.IDS.indexOf(id) === N.MINE) W.go('chain'); else ctx.set({ i: id });
       } },
       build: function (ctx) {
         var f = ctx.f;
-        f.note = node('p', 'wp-note mono rise'); f.stage.parentNode.appendChild(f.note);
-        ui.kind = f.add(node('p', 'eyebrow-dot mono'), true);
-        var head = f.add(node('div', 'ring-head'), true); ui.logo = node('span', 'logo-slot'); ui.logo.setAttribute('role', 'img');
-        ui.title = node('h1', 'two'); ui.title.id = 'wm-ring-title'; head.appendChild(ui.logo); head.appendChild(ui.title);
-        ui.what = f.add(node('p', 'sheet-lede'), true);
-        ui.strip = f.add(dl('strip'), true);
-        ui.also = f.add(node('p', 'aside'), true);
-        ui.pick = f.add(node('div', 'chips ring-chips')); ui.pick.setAttribute('role', 'group'); ui.pick.setAttribute('aria-label', T('RING.OTHER'));
-        ui.foot = foot(f); ui.foot.more.textContent = W.common('BACK'); W.link(ui.foot.more, 'zero');
+        var h = ui.hud = hud(f);
+        f.note = h.actions.appendChild(node('p', 'wp-note mono'));
+        ui.kind = h.left.appendChild(node('p', 'hud-kicker'));
+        var head = h.left.appendChild(node('div', 'ring-head')); ui.logo = node('span', 'logo-slot'); ui.logo.setAttribute('role', 'img');
+        ui.title = node('h1', 'hud-title'); ui.title.id = 'wm-ring-title'; head.appendChild(ui.logo); head.appendChild(ui.title);
+        ui.what = h.left.appendChild(node('p', 'hud-answer'));
+        ui.pick = h.left.appendChild(node('div', 'hud-tabs chips ring-chips')); ui.pick.setAttribute('role', 'group'); ui.pick.setAttribute('aria-label', T('RING.OTHER'));
+        ui.also = h.left.appendChild(node('p', 'hud-body aside'));
+        var back = h.dock.appendChild(node('a', 'hud-chip')); back.textContent = W.common('BACK'); W.link(back, 'zero');
+        ui.cta = go(h);
         ui.pick.addEventListener('click', function (e) { var a = e.target.closest('a[data-ring]'); if (a) ctx.stay(e, { i: a.dataset.ring }); });
       },
       render: function (st, ctx) {
@@ -385,17 +422,21 @@
         var first, second;
         if (kd === 'ledger') { first = nm.name + '.'; second = T('RING.SUB.INSIDE', { home: home.name }); }
         else if (nm && nm.kernel) { first = K(kd, 'TITLE'); second = K(kd, 'SUB'); }
+        else if (nm && kd === 'network') { first = T('RING.ANSWER.NETWORK', { name: nm.name, coin: nm.coin }); second = ''; }
         else if (nm) { first = nm.name + '.'; second = T(nm.first ? 'RING.SUB.FIRST' : 'RING.SUB.COIN', { coin: nm.coin }); }
         else if (home) { first = K(kd, 'TITLE'); second = T('RING.SUB.INSIDE', { home: home.name }); }
         else { first = K(kd, 'TITLE'); second = K(kd, 'SUB'); }
         W.title(ui.title, first, second);
         ui.what.textContent = ''; ui.what.appendChild(node('span', null, K(kd, 'WHAT')));
-        var state = K(kd, 'STATE'), logo = N.LOGOS[id];
-        var cells = [[T('RING.STRIP.KIND'), kindName]];
-        if (nm) cells.push([T('RING.STRIP.COIN'), nm.coin || T('RING.NONE'), !nm.coin]);
-        if (state) cells.push([T('RING.STRIP.STATE'), W.badge(state)]);
-        cells.push([T('RING.STRIP.LOGO'), logo ? T('RING.SHOWN') : T('RING.NOTGIVEN'), !logo]);
-        W.cells(ui.strip, cells);
+        /* at most three facts under the answer: a network's answer already names its kind and coin, so its strip says what it
+           holds and, for the first chain, its starting supply (what the old /fxn page led with; fxn-data.js when loaded) */
+        var logo = N.LOGOS[id], held = holds(ri), FX = window.DEFXN_FXN;
+        /* .hud-stat cells, value first: coin, what it holds, the first chain's supply; a kind with no name says its kind */
+        var cells = [];
+        if (nm) cells.push([nm.coin || T('RING.NONE'), T('RING.STRIP.COIN')]); else cells.push([kindName, T('RING.STRIP.KIND')]);
+        if (held) cells.push([held, T('RING.STRIP.HOLDS')]);
+        if (nm && nm.first && FX && FX.supply) cells.push([W.num(FX.supply), T('RING.STRIP.SUPPLY')]);
+        stats(ui.hud.stats, cells);
         /* what the kind holds, the one line that governs it, where it is used */
         ui.also.textContent = '';
         var also = node('span'); also.appendChild(document.createTextNode(K(kd, 'ALSO')));
@@ -403,10 +444,11 @@
         if (rule) { also.appendChild(document.createTextNode(' ')); also.appendChild(node('b', 'rule-line', rule)); }
         if (K(kd, 'USE')) also.appendChild(document.createTextNode(' ' + K(kd, 'USE')));
         if (K(kd, 'MORE')) { var uses = node('span', 'uses'), ma = W.fieldTo(node('a', null, K(kd, 'MORE')), 'WORLDMEASURE.RING.' + kd.toUpperCase() + '.MORE.HREF'); uses.appendChild(ma); also.appendChild(uses); }
-        ui.also.appendChild(also);
+        ui.also.appendChild(also); ui.also.hidden = kd === 'network';   /* a network's answer and strip already say it */
         ctx.f.note.textContent = ri === N.HUB ? T('RING.NOTE.HUB') : nm ? T('RING.NOTE.NAMED') : T('RING.NOTE.KIND');
         ui.logo.textContent = '';
-        if (logo) { var img = node('img'); img.src = logo; img.alt = ''; ui.logo.appendChild(img); } else ui.logo.appendChild(node('span', null, T('RING.LOGO')));
+        if (logo) { var img = node('img'); img.src = logo; img.alt = ''; ui.logo.appendChild(img); }
+        ui.logo.hidden = !logo;   /* no "Logo" placeholder: an empty slot is not a fact */
         ui.logo.setAttribute('aria-label', logo ? T('RING.LOGO.OF', { name: nm ? nm.name : kindName }) : T('RING.LOGO.LABEL'));
         /* the rings of this kind, one after another; then the kinds and the named networks as two groups */
         var peers = N.KIND.map(function (k2, i) { return k2 === kd && i !== N.MINE ? i : -1; }).filter(function (i) { return i >= 0; });
@@ -431,8 +473,9 @@
           ui.pick.appendChild(g);
         }
         group(T('RING.GROUP.KINDS'), CHIPS.slice(0, 4)); group(T('RING.GROUP.NETWORKS'), CHIPS.slice(4));
-        var cta = ui.foot.cta, fxn = (kd === 'ledger' || kd === 'network') && nm && nm.coin === 'FXN';
-        if (fxn) { W.fieldTo(cta, 'WORLDMEASURE.RING.CTA.FXN.HREF'); cta.say.textContent = T('RING.CTA.FXN'); }
+        /* the FXN ledger's way on is the FXN chain itself, which now carries the supply the /fxn page had */
+        var cta = ui.cta, fxn = kd === 'ledger' && nm && nm.coin === 'FXN';
+        if (fxn) { W.fieldTo(cta, 'WORLDMEASURE.RING.CTA.FXN.HREF', 'i=fxn'); cta.say.textContent = T('RING.CTA.FXN'); }
         else if (kd === 'ledger') { W.fieldTo(cta, 'WORLDMEASURE.RING.CTA.RESOLVE.HREF'); cta.say.textContent = T('RING.CTA.RESOLVE'); }
         else { W.fieldTo(cta, 'WORLDMEASURE.RING.' + kd.toUpperCase() + '.CTA.HREF', kd === 'hub' ? 's=0' : ''); cta.say.textContent = K(kd, 'CTA'); }
         W.tags(ctx.f.tags, [{ id: 'name', name: nm ? nm.name : kindName, sub: nm ? (nm.coin ? T('RING.TAG.COIN', { coin: nm.coin }) : T('RING.TAG.NOCOIN')) : T('RING.TAG.KIND'), cls: 'hot' }]);

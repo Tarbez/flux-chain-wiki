@@ -1,0 +1,5 @@
+/* The home on the HUD (css/space-frame.css owns .hud*): this sheet adds only the home's own pieces, the network chips' dot
+   and the chip row inside the dock. */
+.home-space .home-nets { display: flex; gap: 8px; flex-wrap: wrap; }
+.home-space .home-net { display: inline-flex; align-items: center; gap: 6px; }
+.home-space .home-net .dot { width: 8px; height: 8px; border-radius: 50%; background: hsl(var(--primary)); }

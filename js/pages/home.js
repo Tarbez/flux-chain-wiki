@@ -1,35 +1,29 @@
-/* /: home, standing on the 3D world (js/world/world-host.js).
+/* /: home (the 'zero' route). Layer: app (the defxn site). The home is the space itself, in the shared game layout
+   (css/space-frame.css, the .hud classes of docs/design/space/SPACE.md "The page layout"): kicker, heading and one line
+   top left, three counts top right, the networks and the one action in the dock. The middle is the 3D's; its show is
+   js/space/shows/zero.mjs.
 
    REDUCTION TEST
-   1 About: DEFXN is an open world of networks and chains under one set of rules, and you can run a node.
-   2 Dominant action: Explore a record (the outlined main action; the Measured rail's own action is a second
-     choice for those who want the numbers first).
-   3 Know now: what DEFXN is in two sentences; the three things you can do; one dated benchmark run, named by
-     what it counts, and what each capability checks.
-   4 Hidden until asked: each capability's checked cases and its plain words (a pick in the rail).
-   5 Repeated elsewhere: nothing. The kind labels live only in the 3D.
-   6 Only because the data has it: the fleet run and the capability list (js/content/capabilities-data.js).
+   1 About: DEFXN is a grid of networks you can move through.
+   2 Dominant action: the one .hud-go ("See the networks") flies to the first network (ArkSpace.focus); with no space it
+     follows its route (HOME.WORLD.CTA.HREF).
+   3 Know now: what DEFXN is in one heading and one line, and how many networks, chains and resolvers stand in it.
+   4 Hidden until asked: everything about a place. The space's focus card shows it once the visitor picks one.
+   5 Repeated elsewhere: nothing. The map, the path and the hover label are the space's parts.
+   6 Only because the data has it: the network chips are ArkSpace.targets() of kind 'network'; the counts are read from
+     js/content/network-data.js and resolvers-data.js, the files the intro counts from. None are typed here.
    7 Removable without changing the decision: nothing further.
-   8 Leaving keeps state: the chosen capability resets; the address is the page.
-   9 Returning: the world is already there; the camera flies back to the network.
-   10 If WebGL is missing: the words, the three actions and the rail all work without the 3D.
+   8 Leaving keeps state: the address is the page; the space keeps its own focus.
+   9 Returning: the space is already standing; the chips fill at once.
+   10 If WebGL or the space is missing: the heading, the line and the action still work; the chip row stays empty.
 
-   The words are the home manifest's (HOME.WORLD.*, read by ArkCopy). The 3D behind them is the world; the
-   page only leaves it room (js/world/world-host.js reads this page's .copy, .lede and .rail to size the network
-   it flies to). The three actions and the rail's action are links into the site's own pages.
-   Layout: css/world-pages.css. Motion: every .rise item rises in and leaves by transform and clip, with the
-   timings of ArkWorld.motion (ArkUI.worldRise); nothing fades.
-
-   This page replaces the Ark block home. The block page, its layout-key pins and its tab views are gone with
-   it; the pages it pointed at (/chain, /about, /explore, /stats) are the targets now. */
+   Kept hooks: data-world-home, .home-world, the h1 #home-title, .lede (world-host.js sizes its flight from h1 and .lede),
+   .home-nets/.home-net and the data-ark-insert anchor for the CMS. Removed 2026-11-05: nothing a visitor used; the column
+   became the HUD. Styles: css/space-home.css (a page sheet: the page loader takes css/<name>.css only). */
 (function () {
   'use strict';
-  var ARROW = '<svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M1 10h23M15 1l9 9-9 9"/></svg>';
-  var ICON = {
-    trace: '<svg viewBox="0 0 34 36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l15 8v16l-15 8-15-8V10z"/><path d="M2 10l15 8 15-8M17 18v16"/></svg>',
-    verify: '<svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M18 3l15 7-15 7-15-7z"/><path d="M3 18l15 7 15-7M3 26l15 7 15-7"/></svg>',
-    understand: '<svg viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="18" cy="7" r="4.5"/><circle cx="7" cy="28" r="4.5"/><circle cx="29" cy="28" r="4.5"/><path d="M15.6 10.8L9.4 24.2M20.4 10.8l6.2 13.4M11.5 28h13"/></svg>'
-  };
+  /* the files the intro counts from (js/pages/catalog.js 'intro'); loaded here because the home's route lists only this file */
+  var DATA = ['js/content/network-data.js', 'js/content/resolvers-data.js'];
   function copy(role) { return ArkCopy.text('HOME.WORLD.' + role); }
   function node(tag, className, text) {
     var el = document.createElement(tag);
@@ -37,71 +31,84 @@
     if (text != null) el.textContent = text;
     return el;
   }
-  /* a link field (route:<key>) becomes a link the router follows; anything else is a plain address */
+  /* the fallback address: a route:<key> field becomes a link the router follows; anything else is a plain address */
   function link(a, role) {
     var value = copy(role), tagged = /^route:(\S+)$/.exec(value);
     if (tagged) { a.dataset.sceneLink = tagged[1]; a.href = ArkUI.pageCatalog[tagged[1]] ? ArkUI.route.href(ArkUI.pageCatalog[tagged[1]].path) : '#'; }
     else a.href = value.replace(/^(url|doc):/, '');
     return a;
   }
-  function path(kind, role) {
-    var a = link(node('a'), role + '.HREF');
-    a.innerHTML = ICON[kind];
-    var words = node('span'); words.appendChild(node('b', null, copy(role + '.TITLE'))); words.appendChild(node('small', null, copy(role + '.LINE')));
-    a.appendChild(words);
-    return a;
+  function networks(space) {
+    return space.targets().filter(function (t) { return t.kind === 'network'; }).slice(0, 3);
+  }
+  /* networks, chains (every ring but the kernel, inner chains included) and resolvers; a count with no data is left out,
+     never drawn as 0 */
+  function counts() {
+    var N = window.DEFXN_NETWORK, R = window.DEFXN_RESOLVERS, kinds = N && N.KIND ? N.KIND : [];
+    return [
+      ['Networks', kinds.filter(function (k) { return k === 'network'; }).length],
+      ['Chains', kinds.filter(function (k) { return k !== 'hub'; }).length],
+      ['Resolvers', R && R.resolvers ? R.resolvers.length : 0]
+    ].filter(function (c) { return c[1] > 0; });
+  }
+  function fillStats(box) {
+    counts().forEach(function (c) {
+      var stat = node('div', 'hud-stat');
+      stat.appendChild(node('b', null, String(c[1])));
+      stat.appendChild(node('span', null, c[0]));
+      box.appendChild(stat);
+    });
   }
 
   ArkUI.pageModules.zero = {
     mount: function (host) {
-      var page = node('section', 'world-page home-world');
+      var page = node('section', 'hud world-page home-world home-space');
       page.setAttribute('data-world-home', '');
       page.setAttribute('aria-labelledby', 'home-title');
 
-      var lead = node('section', 'lead'), copyBox = node('div', 'copy');
-      var eyebrow = node('p', 'eyebrow mono rise'); eyebrow.setAttribute('data-ui', '');
-      eyebrow.appendChild(node('i')); eyebrow.appendChild(node('b', 'dash')); eyebrow.appendChild(document.createTextNode(copy('EYEBROW')));
-      /* the heading: one row per line of the field; the last row is the accent */
-      var h1 = node('h1', 'rise'); h1.id = 'home-title'; h1.setAttribute('data-ui', '');
-      var rows = copy('TITLE').split('\n');
-      rows.forEach(function (row, i) {
-        h1.appendChild(node(i === rows.length - 1 && rows.length > 1 ? 'span' : 'b', null, row));
-        if (i < rows.length - 1) h1.appendChild(document.createTextNode(' '));
-      });
-      var lede = node('p', 'lede rise'); lede.setAttribute('data-ui', '');
-      lede.appendChild(node('span', null, copy('LEDE1'))); lede.appendChild(document.createTextNode(' ')); lede.appendChild(node('span', null, copy('LEDE2')));
-      var cta = link(node('a', 'cta quiet rise'), 'CTA.HREF'); cta.innerHTML = '<span class="say"></span>';
-      cta.firstChild.appendChild(document.createTextNode(copy('CTA') + ' ')); cta.firstChild.insertAdjacentHTML('beforeend', ARROW);
-      var paths = node('nav', 'paths rise'); paths.setAttribute('aria-label', copy('PATHS.LABEL'));
-      paths.appendChild(path('trace', 'TRACE')); paths.appendChild(path('verify', 'VERIFY')); paths.appendChild(path('understand', 'UNDERSTAND'));
-      [eyebrow, h1, lede, cta, paths].forEach(function (el) { copyBox.appendChild(el); });
-      lead.appendChild(copyBox); page.appendChild(lead);
+      var left = node('div', 'hud-left');
+      left.appendChild(node('p', 'hud-kicker', 'DEFXN'));
+      /* the heading keeps its line breaks as spaces: one short heading, never a stacked poster */
+      var h1 = node('h1', 'hud-title home-title', copy('TITLE').split('\n').join(' ')); h1.id = 'home-title';
+      /* one line: the first sentence of the field, so the line is derived from the copy and never retyped here */
+      var lede = node('p', 'hud-answer lede', (copy('LEDE1').match(/^[^.!?]*[.!?]/) || [copy('LEDE1')])[0]);
+      left.appendChild(h1); left.appendChild(lede);
 
-      /* the Measured rail: js/world/rail-capabilities.js fills it from js/content/capabilities-data.js */
-      var rail = node('aside', 'rail rise'); rail.setAttribute('aria-labelledby', 'home-measured');
-      rail.innerHTML = '<svg class="rail-line" viewBox="0 0 60 1000" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="2.5" vector-effect="non-scaling-stroke" aria-hidden="true"><path d="M0 0 L30 45 L30 955 L60 1000" vector-effect="non-scaling-stroke"/></svg>' +
-        '<div class="rail-head"><i></i><span class="mono" id="home-measured"></span><p><span class="rail-line-text"></span> <span data-cap="summary"></span></p></div>' +
-        '<section class="rx-fleet" data-cap="fleet"></section>' +
-        '<section class="rx-caps"><div class="rx-row"><h3 class="mono"></h3><span class="rx-count" data-cap="count"></span></div><div class="rx-stack" data-cap="stack" aria-hidden="true"></div><ol class="rx-grid" data-cap="list"></ol></section>' +
-        '<section class="rx-focus" data-cap="focus" aria-live="polite"></section>';
-      rail.querySelector('#home-measured').textContent = copy('RAIL.TITLE');
-      rail.querySelector('.rail-line-text').textContent = copy('RAIL.LINE');
-      rail.querySelector('.rx-caps h3').textContent = copy('RAIL.CAPS');
-      rail.querySelector('.rx-caps').setAttribute('aria-label', copy('RAIL.CAPS'));
-      rail.querySelector('.rx-fleet').setAttribute('aria-label', copy('RAIL.FLEET'));
-      var railCta = link(node('a', 'cta small rail-cta'), 'RAIL.HREF'); railCta.innerHTML = '<span class="say"></span>';
-      railCta.firstChild.appendChild(document.createTextNode(copy('RAIL.CTA') + ' ')); railCta.firstChild.insertAdjacentHTML('beforeend', ARROW);
-      rail.appendChild(railCta);
-      page.appendChild(rail);
-      /* the CMS's insertion point for reusable blocks (js/content/components.js), as every world page has: empty, and
-         out of the layout (css/world-pages.css .world-insert). The block home had one; the world home shipped without it. */
+      var right = node('div', 'hud-right');
+      var stats = node('div', 'hud-stats'); right.appendChild(stats);
+
+      var dock = node('div', 'hud-dock');
+      var row = node('nav', 'home-nets'); row.setAttribute('aria-label', copy('NETS.LABEL'));
+      var cta = link(node('a', 'hud-go home-cta'), 'CTA.HREF'); cta.textContent = copy('NETS.CTA');
+      dock.appendChild(row); dock.appendChild(cta);
+
+      [left, right, dock].forEach(function (el) { page.appendChild(el); });
       var anchor = node('div', 'world-insert'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);
       host.appendChild(page);
 
-      if (window.DEFXNRail) DEFXNRail.mount(rail, {
-        fleet: copy('RAIL.FLEET'), oneRun: copy('RAIL.ONERUN'), nodes: copy('RAIL.NODES'), checked: copy('RAIL.CHECKED'), checkedCases: copy('RAIL.CHECKEDCASES'),
-        inFocus: copy('RAIL.INFOCUS'), of: copy('RAIL.OF'), speed: copy('RAIL.SPEED'), notMeasured: copy('RAIL.NOTMEASURED'), unverified: copy('RAIL.UNVERIFIED'), noWords: copy('RAIL.NOWORDS'),
-        counts: { 'ops/s': copy('RAIL.OPS'), 'swaps/s': copy('RAIL.SWAPS'), 'transfers/s': copy('RAIL.TRANSFERS'), 'records/s': copy('RAIL.RECORDS') }
+      var have = counts().length === 3;
+      if (have || !ArkUI.loadScript) fillStats(stats);
+      else Promise.all(DATA.map(function (u) { return ArkUI.loadScript(u); })).then(function () { fillStats(stats); }, function (error) {
+        /* the counts are the only thing lost; say which file and why in the console, keep the page standing */
+        console.error('Home counts not shown: ' + DATA.join(', ') + ' did not load (' + String(error && error.message || error) + '). Reload the page.');
+      });
+
+      var space = window.ArkSpace;
+      if (space && space.whenReady) space.whenReady(function (s) {
+        var nets = networks(s);
+        /* with the space standing, the action flies to the first network instead of leaving the page */
+        if (nets.length) cta.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); s.focus(nets[0].id); }, true);
+        nets.forEach(function (net) {
+          var b = node('button', 'hud-chip home-net'); b.type = 'button';
+          var dot = node('i', 'dot'); dot.setAttribute('aria-hidden', 'true');
+          if (net.token) dot.style.background = 'hsl(var(' + net.token + '))';
+          b.appendChild(dot); b.appendChild(node('span', null, net.short || net.name.split(' · ')[0]));
+          b.title = net.name;
+          b.addEventListener('click', function () { s.focus(net.id); });
+          b.addEventListener('mouseenter', function () { s.hover(net.id); });
+          b.addEventListener('mouseleave', function () { s.hover(null); });
+          row.appendChild(b);
+        });
       });
       return page;
     }

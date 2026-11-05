@@ -46,6 +46,11 @@
    Scoped Claim Authorization review (the Keys actions here; the FXN send and the identity publish in
    their own modules).
 
+   Game layout (2026-11-05, docs/design/space/SPACE.md "The page layout"; show: js/space/shows/account.mjs): the hero and
+   the open view are .hud-left (the view is .hud-body, the Ark tabs list wears .hud-tabs), the glance numbers (three:
+   FXN, domains, standing) and the identity's side facts are .hud-right, and .hud-dock holds the one dominant action
+   (dockPaint). The "how it fits together" figure stays in the page, hidden: the 3D shows it now.
+
    Layout keys: `was` pins keep every key the old page had (tests/fixtures/layout-keys/account.tsv,
    tests/account-blocks.cjs). The page's heading keeps the id `account-title`.
    ===================================================================== */
@@ -234,7 +239,7 @@
       var sessionState = '';
       var refs = {};                       // rendered block roots, by name
       var views = {};                      // the persistent view nodes, moved into whichever tabs exist
-      var cardHost = null, tabsEl = null, tabsValues = [], railEl = null, identityWrap = null, mapWrap = null, offstage = null;
+      var dockEl = null, cardHost = null, tabsEl = null, tabsValues = [], railEl = null, identityWrap = null, mapWrap = null, offstage = null;
       var fxnIdWrap = null, fxnIdStage = null;   // your FXN ID: the card, and the way into the FXN ID view (see "your FXN ID" below)
       var nftSample = null, profileCard = null, cardSeal = null, realCard = null, mintAsk = null, tradeAsk = null, tradeNote = null, salePrice = null, activateNote = null;   // the NFT card (js/ark/profile-card.js): a review sample named in the address
       var lastProps = Object.create(null); // props each live block was last painted with
@@ -284,7 +289,7 @@
         /* the same parts in every state (a block patched with another SHAPE would replace its children, and a pin or
            an id on one is lost): the status detail is always there, the verification detail once there is an identity */
         if (!next) return { eyebrow: 'Your identity', title: 'Sign in to DEFXN', density: 'compact',
-          lede: 'Choose your FXN ID file to sign in. It stays on your device, is never uploaded, and opens your identity, wallet, domains and publishing. No file yet? Open Create identity.',
+          lede: 'Your FXN ID file opens your identity, wallet, domains and publishing. It never leaves your device.',
           meta: [{ label: 'Status', value: 'Signed out' }] };
         var unlocked = !!session.isUnlocked();
         return { eyebrow: 'Your identity', title: plainLine(next.displayName || 'Your account', 48), density: 'compact',
@@ -511,21 +516,13 @@
       /* The glance rail: each tile opens the view that owns its number (Ark's interactive stat). A number that needs the
          unlocked key reads "No reading" with why, never a dash and never 0. */
       function railProps() {
-        var unlocked = !!(identity && session.isUnlocked());
-        var locked = { kind: 'unavailable', reason: 'Choose your FXN ID file to read this.' };
-        function count(label, value, action, extra) {
-          var tile = { label: label, action: action };
-          if (value == null) tile.absent = locked; else tile.value = String(value);
-          return Object.assign(tile, extra || {});
-        }
         var standing = mesh.standing, status = mesh.status;
         var fxn = { label: plainLine(holdingsApi.fxnUnit() === 'FXN' ? (wallet.symbol || 'FXN') : 'Base units', 48) + ' in your keys', action: 'rail-defi', format: 'plain' };
         if (wallet.balance == null) fxn.absent = { kind: 'unavailable', reason: wallet.message }; else fxn.value = wallet.balance;
-        return { label: 'Your account at a glance', columns: 4, items: [
+        /* three numbers (the HUD's right column): FXN, domains, standing. Contacts and invites live in the Contacts view;
+           Credits is not built, and an absent number is not worth a tile of its own */
+        return { label: 'Your account at a glance', columns: 1, items: [
           fxn,
-          { label: 'Credits', action: 'rail-defi', absent: { kind: 'not-built', reason: 'Credit balances are not available yet.' } },
-          count('Contacts', unlocked ? rail.contacts : null, 'rail-contacts'),
-          count('Invites', unlocked ? rail.invites : null, 'rail-contacts', unlocked && rail.invites > 0 ? { status: { label: 'Waiting', tone: 'drift' } } : null),
           { label: 'Domains', value: String(rail.domains), href: 'route:account/domains' },
           { label: 'Status', value: standing !== 'Not linked' ? standing : (status === 'Identity verified' ? 'Not linked' : status), action: 'rail-mesh' }] };
       }
@@ -905,6 +902,28 @@
         return node;
       }
 
+      /* ---- the game layout (docs/design/space/SPACE.md "The page layout") ---------- */
+      /* the hero block's own parts wear the HUD's type: eyebrow, heading, lede (Ark keeps the classes across its updates) */
+      function heroHud() {
+        [['[data-ark-part="eyebrow"], .ark-eyebrow', 'hud-kicker'], ['#account-title', 'hud-title'], ['[data-ark-part="hero-lede"]', 'hud-answer']].forEach(function (x) {
+          var n = refs.hero.querySelector(x[0]); if (n) n.classList.add(x[1]);
+        });
+      }
+      /* the dock's one dominant action, in the complement: signed out or locked, open the FXN ID file on /auth; unlocked, send FXN */
+      function dockPaint() {
+        if (!dockEl) return;
+        var unlocked = !!(identity && session.isUnlocked()), go;
+        if (unlocked) {
+          go = el('button', 'hud-go', 'Send FXN'); go.type = 'button';
+          go.addEventListener('click', function () { openTab('defi'); showWallet('send'); });
+        } else {
+          var entry = ArkUI.pageCatalog && ArkUI.pageCatalog.auth;
+          go = el('a', 'hud-go', identity ? 'Choose your FXN ID file' : 'Sign in with your FXN ID');
+          go.href = entry ? ArkUI.route.href(entry.path) : '/auth'; go.dataset.sceneLink = 'auth';
+        }
+        dockEl.replaceChildren(go);
+      }
+
       /* ---- the tabs: rebuilt only when the set of views changes (the session state) ---------- */
       function viewNode(value) {
         return { signin: views.session, create: views.create, session: views.session, defi: views.wallet, keys: views.keys, contacts: views.contacts, mesh: views.mesh }[value];
@@ -919,6 +938,7 @@
            (hidden) in every state: the CMS keys its elements, and a saved edit on one lands once its tab exists. */
         ['session', 'create', 'wallet', 'keys', 'contacts', 'mesh'].forEach(function (name) { if (!tabs.contains(views[name])) offstage.appendChild(views[name]); });
         /* the primitive handles the click; this only follows its result (js/pages/story.js does the same) */
+        tabs.querySelector('[data-ark-part="tabs-list"]').classList.add('hud-tabs');
         tabs.querySelector('[data-ark-part="tabs-list"]').addEventListener('click', function () { if (selectedTab() === 'create') createOpened(); });
         tabsEl = tabs; tabsValues = values;
         return tabs;
@@ -949,23 +969,25 @@
       var spec = [
         { block: 'custom', id: 'account-shell', was: WAS['account-shell'], mount: function () {
           var shell = el('div', 'account-shell');
-          var left = pin(el('div', 'account-hero'), HERO, true);
+          var left = pin(el('div', 'account-hero hud-left'), HERO, true);
+          /* the right column: the glance numbers, then the identity's own side facts (details, FXN ID, card) */
+          var right = el('div', 'hud-right'), side = el('div', 'hud-actions');
           refs.hero = make({ block: 'hero', id: 'account-headline', props: heroProps(identity), was: WAS['account-headline'] }); remember('hero', heroProps(identity));
-          left.appendChild(refs.hero);
+          left.appendChild(refs.hero); heroHud();
           nftSample = typeof DefxnProfileCard !== 'undefined' ? DefxnProfileCard.fromAddress() || DefxnSkinSite.heldNumber() : null;   /* the sample in the address, or the card held on this device */
-          if (nftSample) left.appendChild(buildNft(nftSample));
+          if (nftSample) side.appendChild(buildNft(nftSample));
           mapWrap = el('div', 'account-map');
           mapWrap.appendChild(make({ block: 'figure', id: 'account-map', was: WAS['account-map'], props: { kind: 'illustration', slot: 'account-map', aspect: 'auto', labelMin: '12',
             caption: 'How it fits together: your FXN ID file opens your identity, your wallet and publishing.' } }));
-          mapWrap.hidden = !!identity || !!nftSample;
-          left.appendChild(mapWrap);
+          mapWrap.hidden = true;   /* the 3D now shows how it fits together (js/space/shows/account.mjs); the figure stays for its CMS keys */
+          side.appendChild(mapWrap);
           /* a skin trade link: ?take-skin=<id> (the taker consents) or ?give-skin=<id>&consent=<id> (the owner moves it) */
-          if (identity && typeof DefxnSkinSite !== 'undefined') { var trade = buildTrade(); if (trade) left.insertBefore(trade, mapWrap); }
+          if (identity && typeof DefxnSkinSite !== 'undefined') { var trade = buildTrade(); if (trade) side.insertBefore(trade, mapWrap); }
           /* no sample: the signed-in identity's own PVA, when the chain holds one. A failed read leaves the map. */
           if (!nftSample && identity && typeof DefxnSkinSite !== 'undefined' && typeof DefxnProfileCard !== 'undefined') DefxnSkinSite.chainCard().then(function (rec) {
-            if (!rec && mapWrap.isConnected && !profileCard) { left.insertBefore(buildActivate(), mapWrap); return; }
+            if (!rec && mapWrap.isConnected && !profileCard) { side.insertBefore(buildActivate(), mapWrap); return; }
             if (!rec || !mapWrap.isConnected || profileCard) return;
-            left.insertBefore(buildNft(rec), mapWrap); mapWrap.hidden = true;
+            side.insertBefore(buildNft(rec), mapWrap);
           }, function (error) { console.info('[account] Your card was not read from the chain (' + error.message + '). The page shows the map.'); });
           identityWrap = pin(el('div', 'account-identity'), STATE, true);
           /* On a phone the identity details fold behind a press (Ark's disclosure, foldBelow 'phone'): the page
@@ -982,7 +1004,7 @@
           refs.devFacts = refs.dev.querySelector('#account-developer-facts'); remember('devFacts', developerProps(identity));
           identityWrap.appendChild(refs.fold); identityWrap.appendChild(refs.dev);
           identityWrap.hidden = !identity;
-          left.appendChild(identityWrap);
+          side.appendChild(identityWrap);
           /* your FXN ID (owner, 2026-10-31): the fxn-3d card FXN Browser shows, at its Master ID pose, and the way into the FXN ID
              view (js/ark/fxn-id-card/). Shown once the file is open, because the view reads the open file's Public IDs. */
           fxnIdWrap = el('div', 'account-fxnid'); fxnIdWrap.hidden = true;
@@ -990,18 +1012,21 @@
           fxnIdWrap.appendChild(fxnIdStage);
           refs.fxnId = make({ block: 'actions', id: 'account-fxnid-open', props: fxnIdProps() }); remember('fxnId', fxnIdProps());
           fxnIdWrap.appendChild(refs.fxnId);
-          left.appendChild(fxnIdWrap);
+          side.appendChild(fxnIdWrap);
           /* the frame the 3D world is fitted to (js/world/world-host.js frame()): your identity over the network, below the words */
           var worldStage = el('div', 'account-stage'); worldStage.setAttribute('data-stage', ''); worldStage.setAttribute('aria-hidden', 'true');
           left.appendChild(worldStage);
           shell.appendChild(left);
           views.session = buildSession(); views.create = buildCreate(); views.wallet = buildWallet(); views.keys = buildKeys(); views.contacts = buildContacts(); views.mesh = buildMesh();
           offstage = el('div', 'account-offstage'); offstage.hidden = true;
-          cardHost = el('section', 'account-card'); cardHost.setAttribute('aria-label', 'Account'); cardHost.setAttribute('data-panel', '');   /* the world draws its glass slab under this box */
+          cardHost = el('section', 'account-card hud-body'); cardHost.setAttribute('aria-label', 'Account'); cardHost.setAttribute('data-panel', '');   /* the world draws its glass slab under this box */
           cardHost.appendChild(buildTabs(sessionState, sessionState === 'verified-local' ? 'defi' : (sessionState === 'signed-out' ? 'signin' : 'session')));
-          shell.appendChild(cardHost);
+          left.appendChild(cardHost);   /* the open view is the left column's body */
           railEl = buildRail(); railEl.hidden = !identity;
-          shell.appendChild(railEl);
+          right.appendChild(railEl); right.appendChild(side);
+          shell.appendChild(right);
+          /* the dock: the one dominant action of the session state (dockPaint) */
+          dockEl = el('div', 'hud-dock'); shell.appendChild(dockEl); dockPaint();
           shell.appendChild(offstage);
           return shell;
         } },
@@ -2125,8 +2150,8 @@
           cardHost.replaceChildren(buildTabs(state, unlocked ? 'defi' : (identity ? 'session' : 'signin')));
         }
         identityWrap.hidden = !identity;
-        mapWrap.hidden = !!identity || !!nftSample;
         railEl.hidden = !unlocked;
+        dockPaint();
         if (unlocked && window.ArkUI && window.ArkUI.meshDirectory) { loadContacts(false); startContactsPolling(); }
         else { resetContacts(unlocked ? '' : 'Choose your FXN ID file to invite or respond to identities.'); stopContactsPolling(); }
         if (unlocked) loadWallet();
@@ -2152,6 +2177,7 @@
         paint('meshActions', meshActionProps());
         resetMesh(identity ? undefined : 'Sign in to verify your identity on DEFXN.');
       }
+      page.classList.add('hud', 'hud-account');
       var unsubscribeDomains = ArkUI.localDomains ? ArkUI.localDomains.subscribe(function (names) {
         rail.domains = names.length;
         syncRail();

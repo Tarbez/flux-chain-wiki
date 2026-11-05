@@ -65,6 +65,52 @@
     return [['COUNT.NETWORKS', networks], ['COUNT.CAPABILITIES', caps], ['COUNT.RESOLVERS', resolvers]].filter(function (c) { return c[1] > 0; });
   }
 
+  /* The intro film (2026-11-05, owner: "redesign the entire intro", "like a true cinematic intro"). The world plays it
+     (js/world2/world2-objects.mjs: four chapters, the camera's path, the objects arriving); this page shows what it needs
+     while it plays: the chapter's words bottom left, the chapter rail along the foot (a step jumps there), and Skip. The page's
+     own words, doors and counts wait off stage and rise in when the film ends. Played on every fresh load of /intro;
+     never with reduced motion. "Replay intro" under the counts plays it again. If the world never says it started, the page
+     shows itself after FILM_WAIT ms. */
+  var FILM_KEY = 'defxn-intro-film-v1', FILM_WAIT = 6000, CHAPTERS = 4;
+  function film() { return window.ArkWorldHost && ArkWorldHost.film ? ArkWorldHost.film() : null; }
+  /* the film plays on every fresh load of /intro (owner, 2026-11-05); a move back to /intro inside the site finds it done */
+  var loadedOnIntro = /\/intro\/?$/.test(location.pathname) || location.pathname === '/';
+  function filmWanted() {
+    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return loadedOnIntro && !(window.ArkWorldHost && ArkWorldHost.filmState && ArkWorldHost.filmState.done) && !still;
+  }
+  function filmChrome(page) {
+    var cap = node('div', 'intro-film'); cap.setAttribute('aria-live', 'polite');
+    var no = node('span', 'intro-film-no mono'), name = node('strong', 'intro-film-name'), line = node('p', 'intro-film-line');
+    cap.appendChild(no); cap.appendChild(name); cap.appendChild(line);
+    var rail = node('nav', 'intro-rail'); rail.setAttribute('aria-label', copy('FILM.RAIL'));
+    var steps = [];
+    for (var i = 0; i < CHAPTERS; i++) (function (i) {
+      var b = node('button', 'intro-rail-step'); b.type = 'button';
+      b.appendChild(node('i')); b.appendChild(node('span', 'mono', ('0' + (i + 1)) + ' ' + copy('FILM.C' + (i + 1) + '.NAME')));
+      b.addEventListener('click', function () { var f = film(); if (f) f.seek(i); });
+      rail.appendChild(b); steps.push(b);
+    })(i);
+    var skip = node('button', 'intro-skip mono', copy('FILM.SKIP')); skip.type = 'button';
+    skip.addEventListener('click', function () { var f = film(); if (f) f.skip(); else page.classList.remove('is-film'); });
+    page.appendChild(cap); page.appendChild(rail); page.appendChild(skip);
+    function show(d) {
+      if (!page.isConnected) { window.removeEventListener('ark-world-film', on); return; }
+      heard = true;
+      if (d.done || !d.playing) { page.classList.remove('is-film'); return; }
+      page.classList.add('is-film');
+      var c = Math.max(0, Math.min(CHAPTERS - 1, d.chapter));
+      no.textContent = ('0' + (c + 1)) + ' / 0' + CHAPTERS;
+      name.textContent = copy('FILM.C' + (c + 1) + '.NAME'); line.textContent = copy('FILM.C' + (c + 1) + '.LINE');
+      steps.forEach(function (b, j) { if (j === c) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); b.classList.toggle('done', j < c); });
+    }
+    var heard = false;
+    function on(e) { show(e.detail || {}); }
+    window.addEventListener('ark-world-film', on);
+    if (window.ArkWorldHost && ArkWorldHost.filmState) show(ArkWorldHost.filmState);
+    if (filmWanted() && !heard) { page.classList.add('is-film'); setTimeout(function () { if (!heard) page.classList.remove('is-film'); }, FILM_WAIT); }
+  }
+
   ArkUI.pageModules.intro = {
     mount: function (host) {
       var page = node('section', 'world-page intro-world');
@@ -101,12 +147,14 @@
         });
         ledger.appendChild(strip);
         ledger.appendChild(node('small', 'intro-note mono', copy('NOTE')));
+        var again = node('button', 'intro-replay mono', copy('FILM.REPLAY')); again.type = 'button';
+        again.addEventListener('click', function () { var f = film(); if (f) { page.classList.add('is-film'); f.replay(); } });
+        ledger.appendChild(again);
         slot.appendChild(ledger);
       }
-      /* the scrim under the words is a MaskLayer (css/cutouts.css .mk-scrim): dark behind the text, with a soft
-         elliptical KNOCKOUT over the network, so the 3D there stays at full brightness instead of being dimmed too */
-      var scrim = node('div', 'mk-scrim intro-scrim'); scrim.setAttribute('aria-hidden', 'true');
-      page.appendChild(stage); page.appendChild(scrim); page.appendChild(doors()); page.appendChild(slot);
+      /* no scrim under the words: the world's own edge fade darkens the rim the text sits on (js/content/world.js edgeFade, owner 2026-11-05) */
+      page.appendChild(stage); page.appendChild(doors()); page.appendChild(slot);
+      filmChrome(page);
       /* the CMS's insertion point for reusable blocks (js/content/components.js): empty, and out of the layout */
       var anchor = node('div', 'world-insert'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);
       host.appendChild(page);

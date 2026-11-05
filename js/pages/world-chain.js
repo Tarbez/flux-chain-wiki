@@ -1,34 +1,30 @@
-/* /chain, /chain/record, /chain/open, /chain/links: your chain on the 3D world (js/world/world-host.js).
+/* /chain: your chain on the 3D world (js/world2/world2-host.mjs), as ONE page (owner, 2026-11-05).
 
-   The mockup's four chain views (docs/home-redesign/home-mockup.html #/chain, #/record, #/open, #/links), each with its
-   own 3D, as site pages. /chain replaces the old chain page. The page carries the view: the camera's frame is its
-   [data-stage], the slab under its words is its [data-panel], and what the 3D must know (which record, which tab) goes to
-   ArkWorldHost.state() while the page mounts and ArkWorldHost.select() when a choice inside it changes. Clicks on the 3D
-   come back through ArkWorldHost.on('pick'), and a hover on a tile lights its row (on('hover')). Without the world every
-   page still reads and works on its own.
+   On the game layout since 2026-11-05 (K.hud, docs/design/space/SPACE.md "The page layout"; the show is
+   js/space/shows/chain.mjs). Left column: the answer "{n} records, all signed by your key", the row of four sections
+   (Revisions, One record, Links, Trace) and the body, which holds the records while no section is open and the open
+   section otherwise. Right column: records, signed, newest date. Dock: newer / where you are / older, and Open record
+   (the one dominant action). /chain/record, /chain/open, /chain/links and /trace redirect here with ?s=. The middle is
+   the 3D's. The crumbs and the Back link left this page: the space's own path and Back do that job.
+   The 3D is told { view: 'chain', r } while the page mounts and on every new record (ArkWorldHost.state / select). Clicks
+   on a tile come back through on('pick'), and a hover on a tile lights its row (on('hover')).
 
-   REDUCTION TEST (one answer for each of the four views, in the mockup's own order)
-   1 About. chain: your chain and the record you look at. record: one record, its versions, its place in time.
-     open: the content of one record. links: what one record is linked to.
-   2 Dominant action. chain: View record. record: Open record. open: See connections. links: Open record.
-   3 Know now. chain: how many records, the newest, how many are signed, what the chosen record links to, and that your key
-     signs each record. record: name, revision, date, signer, a first line of what it says, earlier versions, what comes
-     next, where it sits on the timeline. open: what it says, beside it its type, state, signer and next record.
-     links: the record before it, the one after it, its earlier versions, its related records, its signer.
-   4 Hidden until asked. chain: the activity (a tab). record: the full text, connections and history (one click on).
-     open: details, signature and history (tabs). links: the record's text.
-   5 Repeated elsewhere. Nothing: the path lives in the open card's top line, and connections live on their own page.
-   6 Only because the data has it. The records, dates, revisions, signers, related records and history are the sample
-     data (js/content/records-sample.js). Nothing here is live: every page says it is a sample or shows a dash.
-   7 Removable without changing the decision. Nothing more.
-   8 Leaving keeps state. The record and the tab ride in the address (?r=, ?tab=), so Back, Forward and a shared link work.
-   9 Returning. The address restores the same record and tab.
-   10 If WebGL is missing. The words, rows, tabs, arrows and the open card work with no 3D, on a flat glass slab.
+   REDUCTION TEST
+   1 About. Your chain, and the record you chose on it.
+   2 Dominant action. Open record (it opens the One record section).
+   3 Know now. How many records there are and how many your key signed, the newest date, and the records in order.
+   4 Hidden until asked. Revisions, the record's content and signature, its links, and the trace to the first record.
+   5 Repeated elsewhere. Nothing: each fact has one section.
+   6 Only because the data has it. Records, dates, revisions, signers, links and history are js/content/records-sample.js.
+     The title says "Sample chain" once; a missing value shows a dash, never a zero.
+   7 Removable without changing the decision. Nothing more. The nine-step identity strip was cut from this page.
+   8 Leaving keeps state. The record and the open section ride in the address (?r=, ?s=).
+   9 Returning. The address restores the same record and section.
+   10 If WebGL is missing. Every row, section and button works on a flat glass slab.
 
-   Words: the worldchain manifest (WORLDCHAIN.*, read by ArkCopy). No word is written in this file. The identity flow strip
-   that tops each page (steps 5 to 8 of 9) is built here and shared with js/pages/world-identity.js as ArkUI.worldFrame.
-   Layout: css/world-chain.css. Motion: every .rise item rises in and leaves by transform and clip (ArkUI.worldRise), and
-   a new choice wipes the changed words in by transform and clip. Nothing fades. */
+   Words: the worldchain manifest (WORLDCHAIN.*, read by ArkCopy). No word is written in this file. The helpers below
+   (ArkUI.worldFrame) are shared with js/pages/world-identity.js, which still draws the identity strip (K.flow).
+   Layout: css/space-frame.css (the .hud classes), css/world-chain.css for rows and facts, css/chain-one.css for the section row inside the HUD. Nothing fades. */
 (function () {
   'use strict';
   var K = ArkUI.worldFrame = ArkUI.worldFrame || {};
@@ -53,7 +49,7 @@
     return el;
   };
   K.fmt = function (text, vars) { return String(text).replace(/\{(\w+)\}/g, function (m, k) { return vars && vars[k] != null ? vars[k] : m; }); };
-  /* t = K.words('WORLDCHAIN.'): t('CHAIN.TITLE', { n: 5 }) reads the manifest field and fills its {n} */
+  /* t = K.words('WORLDCHAIN.'): t('ONE.COUNT.MANY', { n: 5 }) reads the manifest field and fills its {n} */
   K.words = function (area) { return function (role, vars) { return K.fmt(ArkCopy.text(area + role), vars); }; };
   K.pad = function (n) { return (n < 10 ? '0' : '') + n; };
   K.clamp = function (value, lo, hi, dflt) { var n = parseInt(value, 10); return isNaN(n) ? dflt : Math.min(hi, Math.max(lo, n)); };
@@ -206,12 +202,53 @@
     return f;
   };
 
+  /* ---------- the game layout (docs/design/space/SPACE.md "The page layout", css/space-frame.css) ----------
+     A page that stands on the space: the words in a left column, at most three real numbers in a right column, the
+     page's controls and its one dominant action in a dock at the bottom, and the middle left to the 3D. The same
+     f the slab frame returns (f.add, f.sheet, f.col), so a page moves onto it by passing hud: true to K.mount.
+     f.col is the dock's chip row; f.sheet is .hud-body, the one box that scrolls. */
+  K.hud = function (o) {
+    var t = K.words(o.area);
+    var page = K.node('section', 'world-page hud hud-' + o.view);
+    page.setAttribute('aria-labelledby', o.titleId);
+    var f = { page: page, t: t };
+    /* the frame the host fits an own-scene view to (world2-host.mjs reads [data-stage]): the whole screen, behind the columns */
+    f.stage = K.node('div', 'hud-stage'); f.stage.setAttribute('data-stage', ''); f.stage.setAttribute('aria-hidden', 'true');
+    f.stage.style.cssText = 'position:absolute;inset:0;pointer-events:none';
+    page.appendChild(f.stage);
+    f.left = K.node('div', 'hud-left'); f.left.setAttribute('data-panel', '');
+    f.kicker = f.left.appendChild(K.node('p', 'hud-kicker'));
+    f.title = f.left.appendChild(K.node('h1', 'hud-title')); f.title.id = o.titleId;
+    f.answer = f.left.appendChild(K.node('p', 'hud-answer'));
+    f.tabs = f.left.appendChild(K.node('div', 'hud-tabs'));
+    f.sheet = f.body = f.left.appendChild(K.node('div', 'hud-body'));
+    f.right = K.node('div', 'hud-right');
+    f.stats = f.right.appendChild(K.node('dl', 'hud-stats'));
+    f.actions = f.right.appendChild(K.node('div', 'hud-actions'));
+    f.dock = K.node('div', 'hud-dock');
+    f.col = f.dock.appendChild(K.node('div', 'hud-chips'));
+    page.appendChild(f.left); page.appendChild(f.right); page.appendChild(f.dock);
+    var anchor = K.node('div', 'world-insert'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);
+    f.add = function (el, swap, into) { if (swap) el.setAttribute('data-sw', ''); (into || f.sheet).appendChild(el); return el; };
+    /* the one dominant action: the complement, once per view (laws 71-77) */
+    f.go = function (el) { el.classList.add('hud-go'); f.dock.appendChild(el); return el; };
+    return f;
+  };
+  /* the right column's numbers: [value, label] pairs; a missing value shows the page's dash, never a zero */
+  K.stats = function (dl, rows, dash) {
+    dl.textContent = '';
+    rows.slice(0, 3).forEach(function (r) {
+      var d = K.node('div', 'hud-stat'); d.appendChild(K.node('b', null, r[0] == null || r[0] === '' ? dash : String(r[0]))); d.appendChild(K.node('span', null, r[1])); dl.appendChild(d);
+    });
+  };
+
   /* ---------- the controller: the address, the world, the words ----------
      def: view (the mockup's name for the view), key (the catalog route), area (manifest prefix), titleId, here, back,
      card (the opened record), parse(params) -> state, query(state) -> string, world(state) -> what the 3D is told,
      build(ctx) once, render(state, ctx) on every choice, keys(event, state, ctx), picks { name: fn(a, b, ctx, state) }. */
   K.mount = function (hostEl, def) {
-    var f = K.frame({ view: def.view, area: def.area, titleId: def.titleId, here: def.here, back: def.back, card: def.card, crumbs: def.crumbs });
+    var f = def.hud ? K.hud({ view: def.view, area: def.area, titleId: def.titleId })
+      : K.frame({ view: def.view, area: def.area, titleId: def.titleId, here: def.here, back: def.back, card: def.card, crumbs: def.crumbs });
     var path = entry(def.key).path, offs = [], listeners = [], st = def.parse(K.params());
     var ctx = { f: f, t: f.t, page: f.page, st: st, def: def, stops: [] };
     function world() { return def.world ? def.world(st) : null; }
@@ -263,7 +300,7 @@
   };
 
   /* =====================================================================
-     THE FOUR CHAIN VIEWS
+     THE CHAIN PAGE: the answer, the records, one section open at a time
      ===================================================================== */
   var area = 'WORLDCHAIN.';
   var t = K.words(area);
@@ -274,59 +311,214 @@
     for (var i = 0; i < all.length; i++) if (all[i].id === id) return { record: all[i], index: i };
     return { record: all[0] || null, index: 0 };
   }
-  function dayOf(r) { var d = Date.parse(r.date + ' UTC'); return isNaN(d) ? null : d / 864e5; }
   var missing = function () { return t('COMMON.MISSING'); };
-  /* metadata the kit way: revision, date, signer, a dash for none */
-  function facts(r) {
-    return [r.revision ? t('COMMON.REV', { n: K.pad(r.revision) }) : null, r.date, r.signedBy ? t('COMMON.SIGNEDBY', { name: r.signedBy }) : null].filter(Boolean).join(' · ');
-  }
-  function twoTitle(h, r, second) { var sub = second || (r.revision ? t('COMMON.REVISION', { n: K.pad(r.revision) }) : ''); K.title(h, r.title + '.', sub.replace(/\.$/, '') + ' · ' + t('COMMON.SAMPLE')); }
+  /* a count always carries its noun: "1 record", "5 records" */
+  function records(n) { return n === 1 ? t('ONE.COUNT.ONE') : t('ONE.COUNT.MANY', { n: n }); }
+  /* a row's second line: revision and date, each named, no abbreviation */
+  function rowNote(x) { return [x.revision ? t('ONE.ROW.REV', { n: x.revision }) : null, x.date].filter(Boolean).join(' · '); }
   function glyph(parent, name) { var mk = K.node('span', 'mk'); mk.innerHTML = GLYPH[name || 'doc']; parent.appendChild(mk); return mk; }
-  function earlierText(r) { return r.earlier ? t('COMMON.EARLIER', { a: K.pad(r.earlier[0]), b: K.pad(r.earlier[1]) }) : null; }
-  /* a state pill and the words: Signed or Not signed */
   function signedPill(r) { return r.signedBy ? K.node('span', 'st', t('COMMON.SIGNED')) : K.node('span', 'st none', t('COMMON.NOTSIGNED')); }
-  /* a list keeps its keyboard place when its rows are rebuilt */
   function keepFocus(box, build) {
     var was = document.activeElement && box.contains(document.activeElement) ? document.activeElement.getAttribute('data-pick') : null;
     build();
     if (was) { var again = box.querySelector('[data-pick="' + was + '"]'); if (again) again.focus({ preventScroll: true }); }
   }
+  /* a <dl> of [label, value] pairs; a value with a title is a record, chosen in place */
+  function factList(rows, cls) {
+    var dl = K.node('dl', cls || 'wc-facts plain');
+    rows.forEach(function (x) {
+      dl.appendChild(K.node('dt', null, x[0]));
+      var dd = K.node('dd');
+      if (x[1] && x[1].title) { var a = K.stayLink(K.node('a', null, x[1].title), 'chain', 'r=' + x[1].id); a.dataset.pick = x[1].id; dd.appendChild(a); }
+      else dd.textContent = x[1] || missing();
+      dl.appendChild(dd);
+    });
+    return dl;
+  }
+  /* a record as a choosable row: icon, title, note, and its signed state */
+  function recRow(x, j, note, current) {
+    var a = K.stayLink(K.node('a'), 'chain', 'r=' + x.id);
+    a.dataset.pick = x.id; a.dataset.j = j; if (current != null) a.setAttribute('aria-current', String(current));
+    glyph(a, x.glyph);
+    var words = K.node('span'); words.appendChild(K.node('b', null, x.title)); words.appendChild(K.node('small', null, note)); a.appendChild(words);
+    a.appendChild(signedPill(x));
+    return a;
+  }
 
-  var TABS = { chain: ['records', 'activity'], open: ['content', 'details', 'signature', 'history'] };
-  function parseChain(view) {
-    return function (params) {
-      var first = list()[0], r = find(params.get('r')).record, tabs = TABS[view] || [], tab = params.get('tab');
-      var st = { r: (r || first || {}).id || null };
-      if (tabs.length) st.tab = tabs.indexOf(tab) >= 0 ? tab : tabs[0];
-      return st;
-    };
+  /* the four sections, in the row's order; the ids are the ?s= values the redirects send */
+  var SECTIONS = ['record', 'open', 'links', 'trace'];
+  var SECTION_WORD = { record: 'ONE.SEC.RECORD', open: 'ONE.SEC.OPEN', links: 'ONE.SEC.LINKS', trace: 'ONE.SEC.TRACE' };
+
+  /* Revisions: which revision this is, what was kept, and the record's history */
+  function drawRevisions(box, r) {
+    box.appendChild(K.node('p', 'wc-lede tight', r.revision ? t('ONE.REV.THIS', { n: r.revision }) : t('ONE.REV.NOREV')));
+    box.appendChild(K.node('p', 'wc-lede tight' + (r.earlier ? '' : ' none'),
+      r.earlier ? t('ONE.REV.EARLIER', { a: r.earlier[0], b: r.earlier[1] }) : t('ONE.REV.NONE')));
+    if (r.provenance) {
+      var steps = K.node('ol', 'wc-steps');
+      r.provenance.forEach(function (x) { var li = K.node('li'); li.appendChild(K.node('span', null, t('ONE.REV.STEP', { what: x.what, by: x.by }))); li.appendChild(K.node('time', null, x.date)); steps.appendChild(li); });
+      box.appendChild(steps);
+    }
   }
-  function queryChain(view) {
-    return function (st) {
-      var q = ['r=' + encodeURIComponent(st.r)], tabs = TABS[view];
-      if (tabs && st.tab && st.tab !== tabs[0]) q.push('tab=' + st.tab);
-      return q.join('&');
-    };
+  /* One record: what it says, its facts, and how it is signed behind one more click */
+  function drawRecord(box, r, next) {
+    if (r.about) box.appendChild(K.node('p', 'wc-lede tight', r.about));
+    if (r.content) {
+      var cols = K.node('div', 'wc-cols');
+      r.content.forEach(function (sec) {
+        var part = K.node('section'); part.appendChild(K.node('h3', null, sec.head));
+        var ul = K.node('ul'); sec.items.forEach(function (x) { ul.appendChild(K.node('li', null, x)); }); part.appendChild(ul); cols.appendChild(part);
+      });
+      box.appendChild(cols);
+    } else box.appendChild(K.node('p', 'none', t('ONE.OPEN.NOCONTENT')));
+    box.appendChild(factList([[t('COMMON.FACT.TYPE'), r.type], [t('COMMON.FACT.STATE'), r.state || t('COMMON.NOTSIGNED')], [t('COMMON.FACT.SIGNEDBY'), r.signedBy], [t('ONE.FACT.DATE'), r.date]]));
+    var how = K.node('details', 'wc-how'); how.appendChild(K.node('summary', null, t('ONE.SIG.SUMMARY')));
+    var fig = K.node('figure', 'wc-anat'), ol = K.node('ol');
+    var parts = [[t('ONE.SIG.TYPE'), r.type || missing()], [t('ONE.SIG.TITLE'), r.title], [t('ONE.SIG.DATE'), r.date],
+      [t('ONE.SIG.LINKS'), next ? next.title : t('ONE.SIG.FIRST')], [t('ONE.SIG.SIGNATURE'), r.signedBy ? t('ONE.SIG.YOURKEY') : t('COMMON.NOTSIGNED')]];
+    parts.forEach(function (x, i) {
+      var last = i === parts.length - 1, li = K.node('li', last ? 'last' : ''), n = K.node('span');
+      if (last) n.innerHTML = GLYPH.key; else n.textContent = String(i + 1);
+      li.style.setProperty('--i', i); li.appendChild(n); li.appendChild(K.node('b', null, x[0])); li.appendChild(K.node('small', null, x[1])); ol.appendChild(li);
+    });
+    fig.appendChild(ol); fig.appendChild(K.node('figcaption', null, t('ONE.SIG.CAPTION'))); how.appendChild(fig);
+    how.appendChild(K.node('p', r.signedBy ? 'wc-lede tight' : 'none', r.signedBy ? t('ONE.SIG.SIGNED', { name: r.signedBy, date: r.date }) : t('ONE.SIG.NONE')));
+    if (r.signedBy) how.appendChild(K.node('p', 'wc-lede tight', t('ONE.SIG.NOTE')));
+    box.appendChild(how);
   }
-  /* what the 3D is told: the mockup's address state for the view */
-  function worldOf(view) { return function (st) { var w = { view: view, r: st.r }; if (st.tab) w.tab = st.tab; return w; }; }
+  /* Links: the record before it, the one after it, its related records, its signer; each group counts its records */
+  function drawLinks(box, r, idx, all) {
+    var next = all[idx + 1] || null, newer = all[idx - 1] || null;
+    function plain(mark, title, note) {
+      var el = K.node('span', 'row'); glyph(el, mark);
+      var words = K.node('span'); words.appendChild(K.node('b', null, title)); words.appendChild(K.node('small', null, note)); el.appendChild(words); return el;
+    }
+    var groups = [
+      ['LINKSTO', next ? [recRow(next, idx + 1, t('ONE.LINKS.BEFORE'))] : [], t('ONE.LINKS.NONE.LINKSTO')],
+      ['LINKEDFROM', newer ? [recRow(newer, idx - 1, t('ONE.LINKS.AFTER'))] : [], t('ONE.LINKS.NONE.LINKEDFROM')],
+      ['RELATED', (r.links || []).map(function (l) { return plain('doc', l.title, l.note); }), t('ONE.LINKS.NONE.RELATED')],
+      ['SIGNEDBY', r.signedBy ? [plain('key', t('ONE.SIG.YOURKEY'), t('ONE.LINKS.SIGNEDDATE', { date: r.date }))] : [], t('ONE.LINKS.NONE.SIGNEDBY')]
+    ];
+    var dl = K.node('dl', 'wc-groups');
+    groups.forEach(function (g) {
+      var dt = K.node('dt', null, t('ONE.LINKS.G.' + g[0]));
+      if (g[0] !== 'SIGNEDBY') dt.appendChild(K.node('span', 'n', ' · ' + records(g[1].length)));
+      dl.appendChild(dt);
+      var dd = K.node('dd'); if (g[1].length) g[1].forEach(function (el) { dd.appendChild(el); }); else dd.appendChild(K.node('p', 'none', g[2]));
+      dl.appendChild(dd);
+    });
+    box.appendChild(dl);
+  }
+  /* Trace: from the chosen record back along its links to the first record, each step with its signed state */
+  function drawTrace(box, idx, all) {
+    var path = all.slice(idx);
+    box.appendChild(K.node('p', 'wc-lede tight', t('ONE.TRACE.LEDE', { count: records(path.length) })));
+    var ol = K.node('ol', 'wc-recs wc-trace');
+    path.forEach(function (x, k) {
+      var li = K.node('li'), j = idx + k, last = j === all.length - 1;
+      li.appendChild(recRow(x, j, last ? t('ONE.TRACE.FIRST') : rowNote(x), k === 0));
+      ol.appendChild(li);
+    });
+    box.appendChild(ol);
+  }
+
+  ArkUI.pageModules.worldChain = {
+    mount: function (hostEl, opts) {
+      var hover, forced = opts && opts.section;
+      return K.mount(hostEl, {
+        view: 'chain', key: 'chain', area: area, titleId: 'wc-chain-title',
+        parse: function (params) {
+          var r = find(params.get('r')).record, s = params.get('s') || forced || '';
+          return { r: (r || {}).id || null, s: SECTIONS.indexOf(s) >= 0 ? s : '' };
+        },
+        query: function (st) { return 'r=' + encodeURIComponent(st.r) + (st.s ? '&s=' + st.s : ''); },
+        world: function (st) { return { view: 'chain', r: st.r }; },
+        hud: true,
+        build: function (c) {
+          var f = c.f, s = c.refs = {};
+          f.kicker.textContent = t('COMMON.HERE');
+          s.h1 = f.title; s.answer = f.answer;
+          /* the dock: newer, where you are, older (the arrow keys do the same) */
+          var turns = K.node('div', 'wc-turns'); turns.setAttribute('role', 'group'); turns.setAttribute('aria-label', t('ONE.TURN.LABEL'));
+          [[-1, ARROW_L, 'ONE.TURN.NEWER'], [1, ARROW_R, 'ONE.TURN.OLDER']].forEach(function (x, n) {
+            var b = K.node('button', 'turn hud-chip'); b.type = 'button'; b.innerHTML = x[1]; b.setAttribute('aria-label', t(x[2]));
+            b.addEventListener('click', function () { turn(c, c.st, x[0]); });
+            if (n === 1) turns.appendChild(s.count = K.node('span', 'hud-chip mono')); turns.appendChild(b);
+          });
+          s.count.setAttribute('aria-live', 'polite');
+          f.col.appendChild(turns);
+          /* the section row: four disclosure buttons, one open at a time; the arrow keys move between them */
+          var row = f.tabs; row.classList.add('wc-secrow'); row.setAttribute('role', 'group'); row.setAttribute('aria-label', t('ONE.SECTIONS'));
+          s.secs = SECTIONS.map(function (id, i) {
+            var b = K.node('button', null, t(SECTION_WORD[id])); b.type = 'button'; b.id = 'wc-sec-' + id; b.setAttribute('aria-controls', 'wc-secpanel');
+            b.addEventListener('click', function () { c.set({ s: c.st.s === id ? '' : id }); });
+            b.addEventListener('keydown', function (e) {
+              var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!d) return;
+              e.preventDefault(); e.stopPropagation(); s.secs[(i + d + SECTIONS.length) % SECTIONS.length].focus();
+            });
+            row.appendChild(b); return b;
+          });
+          /* the body: the records while no section is open, else the open section (one idea at a time) */
+          s.recs = f.add(K.node('ol', 'wc-recs')); s.recs.setAttribute('aria-label', t('ONE.LIST'));
+          s.panel = f.add(K.node('div', 'wc-secpanel'), true); s.panel.id = 'wc-secpanel'; s.panel.setAttribute('role', 'region');
+          s.cta = K.cta(); s.cta.say.textContent = t('ONE.CTA');
+          s.cta.addEventListener('click', function (e) { c.stay(e, { s: 'open' }); });
+          f.go(s.cta);
+          /* a record chosen anywhere on the page: the list, a link, a trace step */
+          f.left.addEventListener('click', function (e) { var a = e.target.closest('a[data-pick]'); if (a) c.stay(e, { r: a.dataset.pick }); });
+          hover = hoverRows(s.recs, 'a');
+          c.def.picks.hover = function (lab) { return hover(lab); };
+        },
+        render: function (st, c) {
+          var s = c.refs, all = list(), found = find(st.r), r = found.record, idx = found.index;
+          if (!r) return;
+          var signed = all.filter(function (x) { return x.signedBy; }).length;
+          K.title(s.h1, t('ONE.TITLE'));
+          s.answer.textContent = signed === all.length ? t('ONE.ANSWER.ALL', { count: records(all.length) }) : t('ONE.ANSWER.SOME', { count: records(all.length), s: signed });
+          K.stats(c.f.stats, [[all.length, t('ONE.STAT.RECORDS')], [signed, t('ONE.STAT.SIGNED')], [all[0].date, t('ONE.STAT.NEWEST')]], missing());
+          s.count.textContent = t('ONE.OF', { n: idx + 1, total: records(all.length) });
+          keepFocus(s.recs, function () {
+            s.recs.textContent = '';
+            all.forEach(function (x, i) { var li = K.node('li'); li.appendChild(recRow(x, i, rowNote(x), i === idx)); s.recs.appendChild(li); });
+          });
+          s.recs.hidden = !!st.s;
+          s.secs.forEach(function (b, i) { b.setAttribute('aria-expanded', String(SECTIONS[i] === st.s)); });
+          s.panel.textContent = ''; s.panel.hidden = !st.s;
+          if (st.s) {
+            s.panel.setAttribute('aria-labelledby', 'wc-sec-' + st.s);
+            if (st.s === 'record') drawRevisions(s.panel, r);
+            else if (st.s === 'open') drawRecord(s.panel, r, all[idx + 1] || null);
+            else if (st.s === 'links') drawLinks(s.panel, r, idx, all);
+            else drawTrace(s.panel, idx, all);
+          }
+          s.cta.hidden = st.s === 'open';
+          K.stayLink(s.cta, 'chain', 'r=' + encodeURIComponent(r.id) + '&s=open');
+          K.tags('chain', [
+            { id: 'key', name: t('ONE.TAG.KEY'), sub: records(all.length), cls: 'lit', at: 'above' },
+            { id: 'oldest', name: t('ONE.TAG.OLDEST'), cls: 'small', at: 'below' },
+            { id: 'newest', name: t('ONE.TAG.NEWEST'), cls: 'small', at: 'below' }
+          ]);
+        },
+        keys: function (e, st, c) { var d = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0; if (d) turn(c, st, d); },
+        picks: {
+          /* a click on the chosen tile opens One record; on another tile it chooses that record */
+          pick: function (v, j, c, st) {
+            var all = list();
+            if (v !== 'chain' || j == null || j < 0 || !all[j]) return false;
+            if (j === find(st.r).index) c.set({ s: 'open' }); else c.set({ r: all[j].id });
+            return true;
+          }
+        }
+      });
+    }
+  };
   /* the record turned to by the arrows: a step through the list, newest first */
   function turn(ctx, st, d) {
     var all = list(); if (!all.length) return;
-    var i = find(st.r).index; ctx.set({ r: all[(i + d + all.length) % all.length].id });
-  }
-  /* a click on a 3D tile: j is the record's index. Returns false for another view's click so the host keeps its own default. */
-  function tileClick(view, onChosen, onOther) {
-    return function (v, j, ctx, st) {
-      var all = list();
-      if (v !== view || j == null || j < 0 || !all[j]) return false;
-      var i = find(st.r).index;
-      if (j === i) onChosen(ctx, st, all[j]); else onOther(ctx, st, all[j]);
-      return true;
-    };
+    ctx.set({ r: all[(find(st.r).index + d + all.length) % all.length].id });
   }
   /* a hover on a tile lights its row, and a row lights its tile */
-  function hoverRows(ctx, box, rowSel) {
+  function hoverRows(box, rowSel) {
     var lit = null;
     function light(j) {
       var row = j >= 0 ? box.querySelector(rowSel + '[data-j="' + j + '"]') : null;
@@ -337,352 +529,8 @@
     box.addEventListener('mouseleave', function () { tell(-1); });
     return function (lab) { light(lab && lab.rec != null ? lab.rec : -1); return false; };
   }
-
-  /* ---------- /chain: every record, newest first ---------- */
-  ArkUI.pageModules.worldChain = {
-    mount: function (hostEl) {
-      var tabsApi, hover;
-      return K.mount(hostEl, {
-        view: 'chain', key: 'chain', area: area, titleId: 'wc-chain-title', here: t('COMMON.HERE'),
-        back: { key: 'zero', text: t('COMMON.BACKNETWORK') },
-        parse: parseChain('chain'), query: queryChain('chain'), world: worldOf('chain'),
-        build: function (c) {
-          var f = c.f, s = c.refs = {};
-          /* under the ring: newer, the count, older */
-          var turns = K.node('div', 'wc-turns rise'); turns.setAttribute('role', 'group'); turns.setAttribute('aria-label', t('CHAIN.TURN.LABEL'));
-          [['newer', -1, ARROW_L, 'CHAIN.TURN.NEWER'], ['older', 1, ARROW_R, 'CHAIN.TURN.OLDER']].forEach(function (x, n) {
-            var b = K.node('button', 'turn'); b.type = 'button'; b.innerHTML = x[2]; b.setAttribute('aria-label', t(x[3]));
-            b.addEventListener('click', function () { turn(c, c.st, x[1]); });
-            if (n === 1) turns.appendChild(s.count = K.node('span', 'mono')); turns.appendChild(b);
-          });
-          s.count.setAttribute('aria-live', 'polite');
-          f.col.appendChild(turns);
-          f.add(K.flow(4));
-          s.h1 = f.add(K.node('h1', 'wc-two')); s.h1.id = 'wc-chain-title';
-          var lede = f.add(K.node('p', 'wc-lede tight')); lede.appendChild(K.state(t('COMMON.SAMPLE'), 'none')); lede.appendChild(document.createTextNode(' ' + t('CHAIN.LEDE')));
-          s.strip = f.add(K.node('dl', 'wc-strip'));
-          s.next = f.add(K.node('p', 'wc-nextrow'), true);
-          var line = f.add(K.node('div', 'wc-tabline'));
-          tabsApi = K.tabs(t('CHAIN.TABS'), [
-            { id: 'records', text: t('CHAIN.TAB.RECORDS'), tab: 'wc-tab-records', panel: 'wc-records' },
-            { id: 'activity', text: t('CHAIN.TAB.ACTIVITY'), tab: 'wc-tab-activity', panel: 'wc-activity' }
-          ], function (id) { c.set({ tab: id }); });
-          line.appendChild(tabsApi.bar); c.stops.push(function () { if (tabsApi.stop) tabsApi.stop(); });
-          s.recs = f.add(K.node('ol', 'wc-recs')); s.recs.id = 'wc-records'; s.recs.setAttribute('role', 'tabpanel'); s.recs.setAttribute('aria-labelledby', 'wc-tab-records');
-          s.act = f.add(K.node('ol', 'wc-recs activity')); s.act.id = 'wc-activity'; s.act.setAttribute('role', 'tabpanel'); s.act.setAttribute('aria-labelledby', 'wc-tab-activity');
-          s.cta = K.cta(); s.cta.say.textContent = t('CHAIN.CTA');
-          s.links = K.node('a', null, t('COMMON.CONNECTIONS')); s.history = K.node('a', null, t('COMMON.HISTORY'));
-          f.add(K.foot(s.cta, [s.links, s.history]));
-          s.recs.addEventListener('click', function (e) { var a = e.target.closest('[data-pick]'); if (a) c.stay(e, { r: a.dataset.pick }); });
-          hover = hoverRows(c, s.recs, 'a');
-          c.def.picks.hover = function (lab) { return hover(lab); };
-        },
-        render: function (st, c) {
-          var s = c.refs, all = list(), found = find(st.r), r = found.record, idx = found.index, next = all[idx + 1] || null;
-          if (!r) return;
-          var signed = all.filter(function (x) { return x.signedBy; }).length;
-          K.title(s.h1, t('CHAIN.TITLE'), t('CHAIN.SUB', { n: all.length }));
-          K.cells(s.strip, [[t('CHAIN.CELL.RECORDS'), all.length], [t('CHAIN.CELL.NEWEST'), all[0].date], [t('CHAIN.CELL.SIGNED'), t('CHAIN.OF', { n: signed, total: all.length })]]);
-          /* what the chosen record links to: the record before it */
-          s.next.textContent = ''; s.next.appendChild(K.node('span', 'mono', t('CHAIN.LINKSTO')));
-          if (next) { var go = K.link(K.node('a', null, next.title + ' →'), 'chain/record', 'r=' + next.id); s.next.appendChild(go); }
-          else s.next.appendChild(K.node('span', null, t('CHAIN.ISFIRST')));
-          s.count.textContent = t('CHAIN.OF', { n: idx + 1, total: all.length });
-          keepFocus(s.recs, function () {
-            s.recs.textContent = '';
-            all.forEach(function (x, i) {
-              var li = K.node('li'), a = K.stayLink(K.node('a'), 'chain', 'r=' + x.id);
-              a.dataset.pick = x.id; a.dataset.j = i; a.setAttribute('aria-current', String(i === idx));
-              glyph(a, x.glyph);
-              var words = K.node('span'); words.appendChild(K.node('b', null, x.title));
-              words.appendChild(K.node('small', null, facts({ revision: x.revision, date: x.date })));
-              a.appendChild(words); a.appendChild(signedPill(x)); a.insertAdjacentHTML('beforeend', ARROW_R.replace('<svg ', '<svg class="go" '));
-              li.appendChild(a); s.recs.appendChild(li);
-            });
-          });
-          /* activity: the sample's history steps across the chain, newest first */
-          var acts = []; all.forEach(function (x) { (x.provenance || []).forEach(function (p, k) { acts.push({ x: x, p: p, k: k }); }); });
-          acts.sort(function (a, b) { return (dayOf(b.x) - dayOf(a.x)) || b.k - a.k; });
-          s.act.textContent = '';
-          if (!acts.length) s.act.appendChild(K.node('li', 'none', t('CHAIN.NOACTIVITY')));
-          acts.forEach(function (a) {
-            var li = K.node('li'); glyph(li, a.x.glyph);
-            var words = K.node('span'); words.appendChild(K.node('b', null, a.p.what)); words.appendChild(K.node('small', null, t('CHAIN.ACTIVITY', { title: a.x.title, by: a.p.by })));
-            li.appendChild(words); li.appendChild(K.node('time', null, a.p.date)); s.act.appendChild(li);
-          });
-          tabsApi.select(st.tab);
-          s.recs.hidden = st.tab !== 'records'; s.act.hidden = st.tab !== 'activity';
-          K.link(s.cta, 'chain/record', 'r=' + r.id); K.link(s.links, 'chain/links', 'r=' + r.id); K.link(s.history, 'chain/open', 'r=' + r.id + '&tab=history');
-          K.tags('chain', [
-            { id: 'key', name: t('CHAIN.TAG.KEY'), sub: t('CHAIN.TAG.KEYSUB', { n: all.length }), cls: 'lit', at: 'above' },
-            { id: 'oldest', name: t('CHAIN.TAG.OLDEST'), cls: 'small', at: 'below' },
-            { id: 'newest', name: t('CHAIN.TAG.NEWEST'), cls: 'small', at: 'below' }
-          ]);
-        },
-        keys: function (e, st, c) { var d = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0; if (d) turn(c, st, d); },
-        picks: {
-          pick: tileClick('chain', function (c, st, r) { K.go('chain/record', 'r=' + r.id); }, function (c, st, r) { c.set({ r: r.id }); })
-        }
-      });
-    }
-  };
-
-  /* ---------- /chain/record: one record, its versions, its place in time ---------- */
-  ArkUI.pageModules.worldRecord = {
-    mount: function (hostEl) {
-      return K.mount(hostEl, {
-        view: 'record', key: 'chain/record', area: area, titleId: 'wc-record-title', here: t('COMMON.HERE'),
-        back: { key: 'chain', text: t('COMMON.BACKCHAIN') },
-        parse: parseChain('record'), query: queryChain('record'), world: worldOf('record'),
-        build: function (c) {
-          var f = c.f, s = c.refs = {};
-          s.timeline = K.node('nav', 'wc-timeline rise'); s.timeline.setAttribute('aria-label', t('RECORD.TIMELINE'));
-          f.col.appendChild(s.timeline);
-          f.add(K.flow(5));
-          s.kind = f.add(K.node('p', 'wc-eyebrow mono'), true);
-          s.h1 = f.add(K.node('h1', 'wc-two'), true); s.h1.id = 'wc-record-title';
-          s.meta = f.add(K.node('p', 'wc-meta mono'), true);
-          s.about = f.add(K.node('p', 'wc-lede'), true);
-          s.preview = f.add(K.node('p', 'wc-preview'), true);
-          s.facts = f.add(K.node('dl', 'wc-facts'), true);
-          s.cta = K.cta(); s.cta.say.textContent = t('RECORD.CTA');
-          s.links = K.node('a', null, t('COMMON.CONNECTIONS')); s.history = K.node('a', null, t('COMMON.HISTORY'));
-          f.add(K.foot(s.cta, [s.links, s.history]));
-          /* one dot per record, placed by its date; the highlight slides from the old dot to the new one */
-          var all = list(), days = all.map(dayOf), lo = Math.min.apply(null, days), hi = Math.max.apply(null, days);
-          s.hi = K.node('b', 'tl-hi'); s.hi.setAttribute('aria-hidden', 'true'); s.timeline.appendChild(s.hi);
-          s.dots = all.slice().reverse().map(function (x, n) {
-            var j = all.length - 1 - n, a = K.stayLink(K.node('a', n % 2 ? 'low' : ''), 'chain/record', 'r=' + x.id);
-            a.dataset.pick = x.id; a.dataset.j = j; a.style.left = (hi > lo ? (days[j] - lo) / (hi - lo) * 100 : 50).toFixed(2) + '%';
-            a.setAttribute('aria-label', x.title + ', ' + x.date);
-            a.appendChild(K.node('i'));
-            var label = K.node('span');
-            if (x.revision) { label.appendChild(K.node('em', null, t('COMMON.REV', { n: K.pad(x.revision) }))); }
-            label.appendChild(K.node('u', null, x.date.slice(0, 6)));
-            a.appendChild(label); s.timeline.appendChild(a); return a;
-          });
-          s.timeline.addEventListener('click', function (e) { var a = e.target.closest('[data-pick]'); if (a) c.stay(e, { r: a.dataset.pick }, 'push'); });
-          /* two labels on one side that would touch shorten to the revision */
-          function polish() {
-            s.dots.forEach(function (a) { a.classList.remove('short'); });
-            [false, true].forEach(function (low) {
-              var row = s.dots.filter(function (a) { return a.classList.contains('low') === low; }).sort(function (x, y) { return parseFloat(x.style.left) - parseFloat(y.style.left); });
-              for (var i = 1; i < row.length; i++) {
-                var a = row[i - 1].lastChild.getBoundingClientRect(), b = row[i].lastChild.getBoundingClientRect();
-                if (a.width && b.left < a.right + 8) { row[i - 1].classList.add('short'); row[i].classList.add('short'); }
-              }
-            });
-          }
-          c.polish = function () { requestAnimationFrame(polish); };
-          var timer = 0, onResize = function () { clearTimeout(timer); timer = setTimeout(polish, 200); };
-          window.addEventListener('resize', onResize); c.stops.push(function () { clearTimeout(timer); window.removeEventListener('resize', onResize); });
-        },
-        render: function (st, c) {
-          var s = c.refs, all = list(), found = find(st.r), r = found.record, idx = found.index, next = all[idx + 1] || null;
-          if (!r) return;
-          s.kind.textContent = t('COMMON.KIND', { type: r.type || t('COMMON.DEFAULTTYPE'), chain: data().chain });
-          twoTitle(s.h1, r); s.meta.textContent = facts(r); K.link(c.f.back, 'chain', 'r=' + r.id);
-          s.about.textContent = r.about || t('RECORD.NODESC'); s.about.classList.toggle('none', !r.about);
-          /* a preview of what the record says: its first heading and its first line or two */
-          var first = r.content && r.content[0];
-          s.preview.textContent = '';
-          if (first) {
-            s.preview.appendChild(K.node('span', 'mono', first.head));
-            s.preview.appendChild(document.createTextNode(first.items[0] + (first.items.length > 1 ? ' · ' + first.items[1] : '') + '…'));
-          }
-          s.preview.hidden = !first;
-          s.facts.textContent = '';
-          [[t('COMMON.FACT.TYPE'), r.type || missing()], [t('COMMON.FACT.STATE'), r.state || t('COMMON.NOTSIGNED')], [t('COMMON.FACT.SIGNEDBY'), r.signedBy || missing()],
-            [t('COMMON.FACT.EARLIER'), earlierText(r) || missing()], [t('COMMON.FACT.NEXT'), next]].forEach(function (x) {
-            s.facts.appendChild(K.node('dt', null, x[0]));
-            var dd = K.node('dd');
-            if (x[1] && x[1].title) dd.appendChild(K.link(K.node('a', null, x[1].title), 'chain/record', 'r=' + x[1].id)); else dd.textContent = x[1] || missing();
-            s.facts.appendChild(dd);
-          });
-          K.link(s.cta, 'chain/open', 'r=' + r.id); K.link(s.links, 'chain/links', 'r=' + r.id); K.link(s.history, 'chain/open', 'r=' + r.id + '&tab=history');
-          s.dots.forEach(function (a) { a.setAttribute('aria-current', String(+a.dataset.j === idx)); });
-          s.hi.style.left = s.dots.filter(function (a) { return +a.dataset.j === idx; })[0].style.left;
-          c.polish();
-          var tags = [];
-          if (r.earlier) for (var i = 0; i < Math.min(3, r.earlier[1] - r.earlier[0] + 1); i++) tags.push({ id: 'g' + i, name: t('RECORD.TAG.REV', { n: K.pad(r.earlier[1] - i) }), cls: 'small', at: 'above' });
-          if (next) tags.push({ id: 'next', name: t('RECORD.TAG.NEXT'), sub: next.title, at: 'above' });
-          K.tags('record', tags);
-        },
-        picks: {
-          pick: tileClick('record', function (c, st, r) { K.go('chain/open', 'r=' + r.id); }, function (c, st, r) { c.set({ r: r.id }, 'push'); })
-        }
-      });
-    }
-  };
-
-  /* ---------- /chain/open: the record opened into its card ---------- */
-  ArkUI.pageModules.worldOpen = {
-    mount: function (hostEl) {
-      var tabsApi;
-      return K.mount(hostEl, {
-        view: 'open', key: 'chain/open', area: area, titleId: 'wc-open-title', card: true, crumbs: false,
-        parse: parseChain('open'), query: queryChain('open'), world: worldOf('open'),
-        build: function (c) {
-          var f = c.f, s = c.refs = {};
-          var card = f.add(K.node('article', 'wc-card'), false, f.sheet);
-          card.appendChild(K.flow(6));
-          var top = K.node('div', 'wc-cardtop');
-          s.back = K.node('a', 'back pill'); s.back.innerHTML = ARROW_L; s.back.appendChild(document.createTextNode(t('COMMON.BACKCHAIN')));
-          s.path = K.node('span', 'wc-path'); s.path.setAttribute('data-sw', '');
-          s.kind = K.node('span', 'wc-kind mono'); s.kind.setAttribute('data-sw', '');
-          top.appendChild(s.back); top.appendChild(s.path); top.appendChild(s.kind); card.appendChild(top);
-          s.h2 = K.node('h1', 'wc-two'); s.h2.id = 'wc-open-title'; s.h2.setAttribute('data-sw', ''); card.appendChild(s.h2);
-          s.meta = K.node('p', 'wc-meta mono'); s.meta.setAttribute('data-sw', ''); card.appendChild(s.meta);
-          var bar = K.node('div', 'wc-cardbar');
-          var names = ['content', 'details', 'signature', 'history'];
-          tabsApi = K.tabs(t('OPEN.TABS'), names.map(function (n) { return { id: n, text: t('OPEN.TAB.' + n.toUpperCase()), tab: 'wc-tab-' + n, panel: 'wc-panel-' + n }; }), function (id) { c.set({ tab: id }); });
-          bar.appendChild(tabsApi.bar); c.stops.push(function () { if (tabsApi.stop) tabsApi.stop(); });
-          s.cta = K.cta(); s.cta.say.textContent = t('OPEN.CTA'); bar.appendChild(s.cta); card.appendChild(bar);
-          var body = K.node('div', 'wc-cardbody'), panels = K.node('div', 'wc-panels');
-          s.panels = {};
-          names.forEach(function (n) {
-            var p = K.node('section', 'wc-panel'); p.id = 'wc-panel-' + n; p.setAttribute('role', 'tabpanel'); p.setAttribute('aria-labelledby', 'wc-tab-' + n); p.setAttribute('data-sw', '');
-            s.panels[n] = p; panels.appendChild(p);
-          });
-          s.facts = K.node('dl', 'wc-cardfacts'); s.facts.setAttribute('data-sw', '');
-          body.appendChild(panels); body.appendChild(s.facts); card.appendChild(body);
-          c.card = card;
-        },
-        render: function (st, c) {
-          var s = c.refs, all = list(), found = find(st.r), r = found.record, idx = found.index, next = all[idx + 1] || null;
-          if (!r) return;
-          K.link(s.back, 'chain', 'r=' + r.id); K.link(s.cta, 'chain/links', 'r=' + r.id);
-          s.path.textContent = data().chain + ' / '; s.path.appendChild(K.node('b', null, r.title));
-          s.kind.textContent = t('COMMON.KIND', { type: r.type || t('COMMON.DEFAULTTYPE'), chain: data().chain });
-          twoTitle(s.h2, r); s.meta.textContent = facts(r);
-          /* the rail beside the words: type, state, signer, next record */
-          s.facts.textContent = '';
-          [[t('COMMON.FACT.TYPE'), r.type || missing()], [t('COMMON.FACT.STATE'), r.state || t('COMMON.NOTSIGNED')], [t('COMMON.FACT.SIGNEDBY'), r.signedBy || missing()], [t('COMMON.FACT.NEXT'), next]].forEach(function (x) {
-            var cell = K.node('div'); cell.appendChild(K.node('dt', null, x[0]));
-            var dd = K.node('dd');
-            if (x[1] && x[1].title) dd.appendChild(K.link(K.node('a', null, x[1].title), 'chain/open', 'r=' + x[1].id)); else dd.textContent = x[1] || missing();
-            cell.appendChild(dd); s.facts.appendChild(cell);
-          });
-          /* content: the record's sections, side by side */
-          var p = s.panels;
-          p.content.textContent = '';
-          if (r.content) {
-            var cols = K.node('div', 'wc-cols');
-            r.content.forEach(function (sec) {
-              var box = K.node('section'); box.appendChild(K.node('h3', null, sec.head));
-              var ul = K.node('ul'); sec.items.forEach(function (x) { ul.appendChild(K.node('li', null, x)); }); box.appendChild(ul); cols.appendChild(box);
-            });
-            p.content.appendChild(cols);
-          } else p.content.appendChild(K.node('p', 'none', t('OPEN.NOCONTENT')));
-          /* details: what it says about itself, and its chain, revision and earlier versions */
-          p.details.textContent = '';
-          p.details.appendChild(K.node('p', r.about ? 'wc-about' : 'none', r.about || t('RECORD.NODESC')));
-          var dl = K.node('dl', 'wc-facts plain');
-          [[t('OPEN.DETAILS.CHAIN'), data().chain], [t('OPEN.DETAILS.REVISION'), r.revision ? K.pad(r.revision) : null], [t('OPEN.DETAILS.EARLIER'), r.earlier ? K.pad(r.earlier[0]) + '–' + K.pad(r.earlier[1]) : null]].forEach(function (x) {
-            dl.appendChild(K.node('dt', null, x[0])); dl.appendChild(K.node('dd', null, x[1] || missing()));
-          });
-          p.details.appendChild(dl);
-          /* signature: how the record is built, its fields in order and the signature last */
-          p.signature.textContent = '';
-          var fig = K.node('figure', 'wc-anat'), ol = K.node('ol');
-          var parts = [[t('OPEN.SIG.TYPE'), r.type || missing()], [t('OPEN.SIG.TITLE'), r.title], [t('OPEN.SIG.DATE'), r.date],
-            [t('OPEN.SIG.LINKS'), next ? next.title : t('OPEN.SIG.FIRST')], [t('OPEN.SIG.SIGNATURE'), r.signedBy ? t('OPEN.SIG.YOURKEY') : t('OPEN.SIG.NOTSIGNED')]];
-          parts.forEach(function (x, i) {
-            var li = K.node('li', i === parts.length - 1 ? 'last' : ''), n = K.node('span');
-            if (i === parts.length - 1) n.innerHTML = GLYPH.key; else n.textContent = String(i + 1);
-            li.style.setProperty('--i', i); li.appendChild(n); li.appendChild(K.node('b', null, x[0])); li.appendChild(K.node('small', null, x[1])); ol.appendChild(li);
-          });
-          fig.appendChild(ol); fig.appendChild(K.node('figcaption', null, t('OPEN.SIG.CAPTION'))); p.signature.appendChild(fig);
-          if (r.signedBy) {
-            var sig = K.node('div', 'wc-sig'), seal = K.node('span', 'seal'); seal.innerHTML = GLYPH.key; sig.appendChild(seal);
-            var words = K.node('div'); words.appendChild(K.node('p', null, t('OPEN.SIG.SIGNED', { name: r.signedBy, date: r.date }))); words.appendChild(K.node('p', null, t('OPEN.SIG.NOTE'))); sig.appendChild(words);
-            p.signature.appendChild(sig);
-          } else p.signature.appendChild(K.node('p', 'none', t('OPEN.SIG.NONE')));
-          /* history: the sample's steps, then the earlier revisions kept on file */
-          p.history.textContent = '';
-          if (r.provenance) {
-            var steps = K.node('ol', 'wc-steps');
-            r.provenance.forEach(function (x) { var li = K.node('li'); li.appendChild(K.node('span', null, t('OPEN.HISTORY.STEP', { what: x.what, by: x.by }))); li.appendChild(K.node('time', null, x.date)); steps.appendChild(li); });
-            if (r.earlier) { var kept = K.node('li'); kept.appendChild(K.node('span', null, t('OPEN.HISTORY.KEPT', { a: K.pad(r.earlier[0]), b: K.pad(r.earlier[1]) }))); kept.appendChild(K.node('time')); steps.appendChild(kept); }
-            p.history.appendChild(steps);
-          } else p.history.appendChild(K.node('p', 'none', t('OPEN.HISTORY.NONE')));
-          tabsApi.select(st.tab);
-          Object.keys(p).forEach(function (n) { p[n].hidden = n !== st.tab; });
-        },
-        picks: {
-          pick: function (v, j, c, st) {
-            var all = list();
-            if (v !== 'open' || j == null || j < 0 || !all[j] || j === find(st.r).index) return false;
-            c.set({ r: all[j].id }, 'push'); return true;
-          }
-        }
-      });
-    }
-  };
-
-  /* ---------- /chain/links: what the record links to, and what links to it ---------- */
-  ArkUI.pageModules.worldLinks = {
-    mount: function (hostEl) {
-      return K.mount(hostEl, {
-        view: 'links', key: 'chain/links', area: area, titleId: 'wc-links-title', here: t('COMMON.HERE'),
-        back: { key: 'chain/record', text: t('COMMON.BACKRECORD') },
-        parse: parseChain('links'), query: queryChain('links'), world: worldOf('links'),
-        build: function (c) {
-          var f = c.f, s = c.refs = {};
-          var legend = K.node('ul', 'wc-legend mono rise'); legend.setAttribute('aria-label', t('LINKS.LEGEND'));
-          [['lg-link', 'LINK'], ['lg-dots', 'DOTS'], ['lg-ghost', 'GHOST'], ['lg-key', 'KEY']].forEach(function (x) { var li = K.node('li'); li.appendChild(K.node('i', x[0])); li.appendChild(document.createTextNode(t('LINKS.LEGEND.' + x[1]))); legend.appendChild(li); });
-          f.col.appendChild(legend);
-          f.add(K.flow(7));
-          f.add(K.node('p', 'wc-eyebrow mono', t('LINKS.EYEBROW')));
-          s.h1 = f.add(K.node('h1', 'wc-two'), true); s.h1.id = 'wc-links-title';
-          s.groups = f.add(K.node('dl', 'wc-groups'), true);
-          s.cta = K.cta(); s.cta.say.textContent = t('LINKS.CTA'); s.chain = K.node('a', null, t('COMMON.BACKCHAIN'));
-          f.add(K.foot(s.cta, [s.chain]));
-          s.groups.addEventListener('click', function (e) { var a = e.target.closest('[data-pick]'); if (a) c.stay(e, { r: a.dataset.pick }); });
-          var hover = hoverRows(c, s.groups, 'a');
-          c.def.picks.hover = function (lab) { return hover(lab); };
-        },
-        render: function (st, c) {
-          var s = c.refs, all = list(), found = find(st.r), r = found.record, idx = found.index, next = all[idx + 1] || null, newer = all[idx - 1] || null;
-          if (!r) return;
-          twoTitle(s.h1, r, t('LINKS.SUB'));
-          function row(x, note) {
-            var a = K.stayLink(K.node('a'), 'chain/links', 'r=' + x.id); a.dataset.pick = x.id; a.dataset.j = all.indexOf(x); glyph(a, x.glyph);
-            var words = K.node('span'); words.appendChild(K.node('b', null, x.title)); words.appendChild(K.node('small', null, note)); a.appendChild(words); return a;
-          }
-          function plainRow(mark, title, note) {
-            var el = K.node('span', 'row'); glyph(el, mark);
-            var words = K.node('span'); words.appendChild(K.node('b', null, title)); words.appendChild(K.node('small', null, note)); el.appendChild(words); return el;
-          }
-          var groups = [
-            ['LINKSTO', next ? [row(next, t('LINKS.BEFORE'))] : [], t('LINKS.NONE.LINKSTO')],
-            ['LINKEDFROM', newer ? [row(newer, t('LINKS.AFTER'))] : [], t('LINKS.NONE.LINKEDFROM')],
-            ['EARLIER', r.earlier ? [plainRow('ghost', earlierText(r).replace(/, .*$/, ''), t('LINKS.EARLIERNOTE'))] : [], t('LINKS.NONE.EARLIER'), r.earlier ? r.earlier[1] - r.earlier[0] + 1 : 0],
-            ['RELATED', (r.links || []).map(function (l) { return plainRow('doc', l.title, t('LINKS.RELATEDNOTE', { note: l.note })); }), t('LINKS.NONE.RELATED')],
-            ['SIGNEDBY', r.signedBy ? [plainRow('key', t('LINKS.TAG.KEY'), t('LINKS.SIGNEDDATE', { date: r.date }))] : [], t('LINKS.NONE.SIGNEDBY')]
-          ];
-          s.groups.textContent = '';
-          groups.forEach(function (g) {
-            var n = g[3] != null ? g[3] : g[1].length, dt = K.node('dt', null, t('LINKS.G.' + g[0]));
-            dt.appendChild(K.node('span', 'n', ' · ' + n)); s.groups.appendChild(dt);
-            var dd = K.node('dd'); if (g[1].length) g[1].forEach(function (el) { dd.appendChild(el); }); else dd.appendChild(K.node('p', 'none', g[2]));
-            s.groups.appendChild(dd);
-          });
-          K.link(s.cta, 'chain/open', 'r=' + r.id); K.link(s.chain, 'chain', 'r=' + r.id);
-          K.link(c.f.back, 'chain/record', 'r=' + r.id);
-          var tags = all.map(function (x, i) {
-            return { id: 'rec-' + x.id, name: x.title, sub: x.revision ? t('COMMON.REV', { n: K.pad(x.revision) }) : '', cls: i === idx ? 'hot' : 'small', at: i === idx ? 'right' : 'below' };
-          });
-          tags.push({ id: 'ghosts', name: t('LINKS.TAG.GHOSTS'), sub: t('LINKS.TAG.GHOSTSSUB') });
-          tags.push({ id: 'key', name: t('LINKS.TAG.KEY'), sub: r.signedBy ? t('LINKS.TAG.SIGNEDIT') : t('LINKS.TAG.NOTSIGNED'), cls: 'lit', at: 'right' });
-          (r.links || []).forEach(function (l, i) { tags.push({ id: 'rel-' + i, name: l.title, sub: l.note, cls: 'small', at: 'below' }); });
-          K.tags('links', tags);
-        },
-        keys: function (e, st, c) { var d = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0; if (d) turn(c, st, -d); },
-        picks: {
-          pick: tileClick('links', function (c, st, r) { K.go('chain/open', 'r=' + r.id); }, function (c, st, r) { c.set({ r: r.id }); })
-        }
-      });
-    }
-  };
+  /* the old routes, until the catalog redirects them: each mounts this page with its section open */
+  [['worldRecord', 'record'], ['worldOpen', 'open'], ['worldLinks', 'links']].forEach(function (x) {
+    ArkUI.pageModules[x[0]] = { mount: function (hostEl) { return ArkUI.pageModules.worldChain.mount(hostEl, { section: x[1] }); } };
+  });
 })();

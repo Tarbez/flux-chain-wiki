@@ -264,6 +264,18 @@ ArkManifest.define({
       "section": "Home (3D world)",
       "value": "What you can do"
     },
+    "WORLD.NETS.CTA": {
+      "label": "Home: the one action (flies to the first network)",
+      "kind": "line",
+      "section": "Home (3D world)",
+      "value": "See the networks"
+    },
+    "WORLD.NETS.LABEL": {
+      "label": "Home: the row of networks, its name for screen readers",
+      "kind": "line",
+      "section": "Home (3D world)",
+      "value": "Networks"
+    },
     "WORLD.TRACE.TITLE": {
       "label": "Trace, title",
       "kind": "line",
@@ -545,6 +557,72 @@ ArkManifest.define({
       "kind": "line",
       "section": "Intro (3D world), link cards",
       "value": "The canonical reference."
+    },
+    "LANDING.FILM.C1.NAME": {
+      "label": "Film chapter 1, name",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "One kernel"
+    },
+    "LANDING.FILM.C1.LINE": {
+      "label": "Film chapter 1, one line",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Every network runs on it."
+    },
+    "LANDING.FILM.C2.NAME": {
+      "label": "Film chapter 2, name",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Many networks"
+    },
+    "LANDING.FILM.C2.LINE": {
+      "label": "Film chapter 2, one line",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Each network runs its own chains."
+    },
+    "LANDING.FILM.C3.NAME": {
+      "label": "Film chapter 3, name",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Signed chains"
+    },
+    "LANDING.FILM.C3.LINE": {
+      "label": "Film chapter 3, one line",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Every record is signed. Anyone can check it."
+    },
+    "LANDING.FILM.C4.NAME": {
+      "label": "Film chapter 4, name",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "The grid"
+    },
+    "LANDING.FILM.C4.LINE": {
+      "label": "Film chapter 4, one line",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Pick a network to look inside."
+    },
+    "LANDING.FILM.SKIP": {
+      "label": "Film: the skip button",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Skip intro"
+    },
+    "LANDING.FILM.REPLAY": {
+      "label": "Film: the replay link",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Replay intro"
+    },
+    "LANDING.FILM.RAIL": {
+      "label": "Film: the chapter rail's name, for screen readers",
+      "kind": "line",
+      "section": "Intro (3D world), the film",
+      "value": "Intro chapters"
     }
   }
 });

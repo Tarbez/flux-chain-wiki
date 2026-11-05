@@ -5,6 +5,34 @@
    loop (measured: tests/browser/idle-frames.mjs; memory defxn_animation_must_settle). */
 (function(){
  'use strict';
+ /* the five agreement stages' cell levels (intent, offer, agreement, fulfillment, receipt), for the lifecycle
+    diagrams. Moved here from js/lattice.js on 2026-11-05, when the signal grid left the page; this file was its only reader. */
+  function agreementCellLevel(stage,progress,cell){
+    var x=cell.x,y=cell.y,col=cell.col,row=cell.row,level=0;
+      if(stage==='intent'){
+        var radius=Math.max(Math.abs(x-.18)*2,Math.abs(y-.5));
+        level=radius<.1+progress*.22 ? .28 : 0;
+        if(Math.abs(radius-(.1+progress*.22))<.055)level=.65;
+      }else if(stage==='offer'){
+        var band=Math.abs(y-.28)<.14||Math.abs(y-.72)<.14;
+        level=band&&x>.12&&x<.12+progress*.56 ? .42 : 0;
+        if(band&&Math.abs(x-(.12+progress*.56))<.055)level=.75;
+      }else if(stage==='agreement'){
+        var gap=(1-progress)*.35;
+        level=Math.abs(y-.5)<.23&&Math.abs(x-.5)>gap&&Math.abs(x-.5)<gap+.13 ? .55 : 0;
+        if(progress>.8&&Math.abs(x-.5)<.15&&Math.abs(y-.5)<.25)level=.5;
+      }else if(stage==='fulfillment'){
+        var frontier=progress*.95;
+        level=x<frontier&&((col+row)%3===0) ? .32 : 0;
+        if(Math.abs(x-frontier)<.05)level=.7;
+      }else if(stage==='receipt'){
+        var order=cell.order;
+        level=order<progress&&row%2===0 ? .36 : 0;
+        if(order<progress&&col%5===0&&row%2===0)level=.65;
+      }
+    return level;
+  }
+ ArkUI.agreementCellLevel=agreementCellLevel;
  ArkUI.createMeshFabric=function(canvas,options){
   options=options||{};
   var stories={
@@ -147,7 +175,7 @@
 
    if(stage==='network')return cell.x>.12&&cell.x<.42&&cell.y>.18&&cell.y<.82&&cell.order<p?.38:0;
    if(stage==='logic')return Math.abs(cell.y-(.22+Math.floor(cell.x*4)*.14))<.07&&cell.x<p?.48:0;
-   return ArkUI.agreementCellLevel?ArkUI.agreementCellLevel(stage,p,cell):0;
+   return agreementCellLevel(stage,p,cell);
   }
   function paint(progress,motion){
    if(disposed||!canvas.getContext||!width)return;

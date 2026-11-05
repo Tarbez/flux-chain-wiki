@@ -18,19 +18,21 @@ var ArkResolutions = (function () {
     { key: 'INTELLIGENCE', items: ['INTELLIGENCE', 'DATA', 'ALGORITHMS', 'INFORMATION', 'RULES'] },
     { key: 'OPERATIONS', items: ['NETWORK', 'ENCRYPTIONS', 'AUTOMATION', 'PRODUCTIVITY', 'LOGISTICS'] }
   ];
-  /* A resolution with a page that already does part of the work links to it. */
+  /* A resolution with a page that already does part of the work links to it. Every target is a
+     page the site keeps (2026-11-05 one-page cut): the dropped pages' work moved to account (Bundle
+     Deployer, domains), zero (treasury, deposits), learnings (DAO, resolver math), resolvers (the
+     resolver guide) and download (running a node). */
   var start = {
-    WEBSITE: 'bundledeployer', DEPLOYMENTS: 'bundledeployer', PAYMENTS: 'treasury', GOVERNANCE: 'dao',
-    DATA: 'explorer', INFORMATION: 'explorer', ALGORITHMS: 'resolver', NETWORK: 'deploy', RULES: 'resolver'
+    WEBSITE: 'account', DEPLOYMENTS: 'account', PAYMENTS: 'zero', GOVERNANCE: 'learnings',
+    DATA: 'explorer', INFORMATION: 'explorer', ALGORITHMS: 'resolvers', NETWORK: 'download', RULES: 'resolvers'
   };
-  /* A second page that goes deeper than the start page (docs/ux-audit/pages.md "Next-step links":
-     publishing an algorithm or a rule IS writing a resolver, so they lead on to its math; personal
-     finance leads to the treasury preview, as payments does). Rendered as a secondary link. */
-  var also = { ALGORITHMS: 'resolver-math', RULES: 'resolver-math', FINANCE: 'treasury' };
-  /* A third page, for the resolution whose `also` is not the only place it leads (W5-PAGES, ledger
-     "Next-step links"): publishing an algorithm leads to the math AND to the list of what resolves it
-     (/resolvers). `also` stays one page (a string); this is its own map, rendered as one more related link. */
-  var alsoMore = { ALGORITHMS: 'resolvers' };
+  /* A second page that goes deeper than the start page: publishing an algorithm or a rule IS
+     writing a resolver, so they lead on to its math (now in learnings); personal finance leads to
+     the treasury preview (now on zero), as payments does. */
+  var also = { ALGORITHMS: 'learnings', RULES: 'learnings', FINANCE: 'zero' };
+  /* A third page; empty since the cut, because /resolvers became ALGORITHMS' start page. Kept as a
+     map so startingFrom() and older readers still find the field. */
+  var alsoMore = {};
 
   /* The inner pages stay deliberately short: one shift and three movements.
      This is product framing, not a claim that every capability runs today. */
@@ -41,11 +43,11 @@ var ArkResolutions = (function () {
     DEPLOYMENTS: { shift: 'From server releases to signed, addressable bundles.', old: 'Release servers, deployment accounts and mutable artifacts.', steps: ['Package code and assets into one bundle.', 'Sign the exact release that should run.', 'Publish and resolve it across the mesh.'] },
     PAYMENTS: { shift: 'From payment processors to direct partner settlement.', old: 'Processor accounts, settlement delays and platform tolls.', steps: ['Describe the value exchange in an agreement.', 'Authorize settlement with the participating keys.', 'Record a receipt both partners can verify.'] },
     FINANCE: { shift: 'From a finance dashboard to books held under your keys.', old: 'Hosted ledgers, exported statements and account lock-in.', steps: ['Keep balances in records you can inspect.', 'Agree each change with the relevant partners.', 'Reconcile from signed receipts, not screenshots.'] },
-    COMMUNITY: { shift: 'From an audience owned by a platform to a network of partners.', old: 'Follower graphs, rented reach and opaque moderation.', steps: ['Define the community and its membership rules.', 'Let members hold their own identity and history.', 'Resolve shared activity through agreed records.'] },
+    COMMUNITY: { line: 'From a platform audience to a network of partners.', shift: 'From an audience owned by a platform to a network of partners.', old: 'Follower graphs, rented reach and opaque moderation.', steps: ['Define the community and its membership rules.', 'Let members hold their own identity and history.', 'Resolve shared activity through agreed records.'] },
     COMMUNICATIONS: { shift: 'From platform messages to encrypted partner channels.', old: 'Central inboxes, harvested metadata and provider custody.', steps: ['Establish who the channel belongs to.', 'Encrypt messages for the intended partners.', 'Resolve conversation history from shared records.'] },
     COLLABORATIONS: { shift: 'From shared SaaS documents to checkable shared work.', old: 'Seat licenses, one provider and conflicting copies.', steps: ['Define the work and the partners involved.', 'Record contributions as signed changes.', 'Resolve the agreed state without a central owner.'] },
     GOVERNANCE: { shift: 'From platform administration to explicit network rules.', old: 'Hidden privileges, global roles and informal decisions.', steps: ['Write the decision rule before the vote.', 'Collect the required partner approvals.', 'Activate the outcome with its evidence attached.'] },
-    INTELLIGENCE: { shift: 'From sending data to a model to bringing logic to the data.', old: 'Remote inference silos and uncontrolled data copies.', steps: ['Name the intelligence task and its inputs.', 'Run agreed logic beside the relevant records.', 'Return a claim with evidence that can be checked.'] },
+    INTELLIGENCE: { line: 'From sending data to models to bringing logic to data.', shift: 'From sending data to a model to bringing logic to the data.', old: 'Remote inference silos and uncontrolled data copies.', steps: ['Name the intelligence task and its inputs.', 'Run agreed logic beside the relevant records.', 'Return a claim with evidence that can be checked.'] },
     DATA: { shift: 'From maintaining a database to resolving shared records.', old: 'Database servers, admin consoles and synchronization jobs.', steps: ['Write data as signed, addressed records.', 'Replicate it through participating peers.', 'Query the mesh and verify what comes back.'] },
     ALGORITHMS: { shift: 'From a private service endpoint to published resolver logic.', old: 'Opaque APIs, service accounts and changing implementations.', steps: ['Define the inputs and expected claim.', 'Publish the algorithm as a named resolver.', 'Run it anywhere and check the same result.'] },
     INFORMATION: { shift: 'From searching a silo to resolving a named source.', old: 'Provider indexes, broken links and missing provenance.', steps: ['Give the information a stable address.', 'Attach its source and change trail.', 'Resolve the current claim with that trail intact.'] },
@@ -62,6 +64,8 @@ var ArkResolutions = (function () {
     var profile = profiles[key] || {};
     return { key: key, slug: key.toLowerCase(), group: group, start: start[key] || null, also: also[key] || null, alsoMore: alsoMore[key] || null,
       title: copy(key + '.TITLE'), text: copy(key + '.TEXT'), shift: profile.shift || '',
+      /* the index's one line: the shift itself, unless a profile gives a shorter `line` (10 words at most) */
+      line: profile.line || profile.shift || '',
       old: profile.old || '', steps: (profile.steps || []).slice() };
   }
   function list() {

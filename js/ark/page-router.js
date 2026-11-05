@@ -193,7 +193,11 @@
          writeHistory below puts that page's own path in the address, so the old key is not kept alive by the address. One place for
          every visitor, with or without the 3D world. */
       var moved = catalog[page].redirect;
-      if (moved && moved !== page && Object.prototype.hasOwnProperty.call(catalog, moved)) page = moved;
+      if (moved && moved !== page && Object.prototype.hasOwnProperty.call(catalog, moved)) {
+        /* the section the retired page now is (stats/ceiling -> stats/now?s=ceiling), unless the caller named one */
+        if (catalog[page].redirectQuery && !settings.query) settings.query = catalog[page].redirectQuery;
+        page = moved;
+      }
       var ticket = ++request; requested = page; requestedSettings = settings;
       var run = null;
       if (page === active) {

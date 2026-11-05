@@ -1,5 +1,13 @@
-/* IN ONE MINUTE on the 3D world: the page (docs/home-redesign/MINUTE-EXPERIENCE.md). It replaces the five-idea page of
-   js/pages/world-works.js (worldMinute) when the route is swapped to it; this file is registered as worldMinuteMovie.
+/* HOW IT WORKS on the 3D world: the one page (docs/home-redesign/MINUTE-EXPERIENCE.md). It is registered as
+   worldMinuteMovie. Layer: app (a page of the site); it learns no chain word beyond what its manifest says.
+
+   ONE PAGE ON THE HUD (css/space-frame.css, docs/design/space/SPACE.md "The page layout"). The left column holds the kicker,
+   the answer and this beat's sentence, then the three closer looks as tabs and the open one. The dock holds the beat ticks,
+   Back / Play / Skip, the last beat's Create your identity and the one dominant action, Play the show, which plays
+   js/space/shows/works.mjs in the space. The middle is the 3D's. The three closer looks (a result, the layers, a resolver's life) opens one at a time. Their step names are read
+   from the worldworks manifest (WORLDWORKS.RESOLVE.STEPn.NAME, WORLDWORKS.LIFE.STEPn.LEAD), so the old chapter pages
+   and this row say the same steps from one place. ?s=resolve|layers|life opens that look (the retired chapter routes
+   redirect here with it); any other ?s= that is not a beat number is ignored.
 
    READER AND JOB. A visitor who has never seen DEFXN wants to know what it does. The page tells it in nine beats over
    60 seconds, one sentence each, while the camera flies through the real grid (the stage `movie` in
@@ -21,10 +29,10 @@
    WORDS. js/content/manifests/worldminute.js, read by ArkCopy (WORLDMINUTE.*). This file writes none.
 
    REDUCTION TEST (docs/PRODUCT-DESIGN-LAWS.md)
-   1 what DEFXN does, in one minute. 2 Next while it runs, then Create your identity at the end. 3 the sentence of this beat
-   and the part of the grid it lights. 4 sources, counts, the card note beyond its label. 5 the five old ideas live on the
-   other How it works pages. 6 nothing: every beat is a claim in a file. 7 beat 8, if fewer beats are wanted. 8-9 the beat
-   rides in the address. 10 with no 3D the sentences, ticks and controls work; if the card art fails, the pieces are listed. */
+   1 what happens when you ask DEFXN for something, in one line. 2 Play the show; Create your identity at the end. 3 the answer, the sentence of this beat and the part of the grid it lights. 4 the three closer looks, shut until
+   asked. 5 the kicker, the beat counter and the key hint (the ticks name each beat; the keys still work). 6 nothing:
+   every beat is a claim in a file. 7 beat 8, if fewer beats are wanted. 8-9 the beat or the open look rides in the
+   address. 10 with no 3D the sentences, ticks, controls and looks work; if the card art fails, the pieces are listed. */
 (function () {
   'use strict';
   var W = ArkUI.worldSheet, node = W.node;
@@ -34,6 +42,7 @@
   var SEEN = 'defxn-minute-seen';
   var BEATS = 9;
   var PIECES = ['frame', 'corner', 'tag', 'ornament', 'divider', 'emblem'];
+  var PARTS = ['resolve', 'layers', 'life'];
   var LAYERS = ['backdrop', 'aura', 'mark', 'signal', 'particles'];
   var SVGNS = 'http://www.w3.org/2000/svg';
 
@@ -143,8 +152,24 @@
   }
 
   /* ================================================================ the page */
+  var WW = function (key) { return W.text('WORLDWORKS.' + key); };
+  /* the lines of one closer look: its step names, read from the chapter pages' manifest, or the three layers */
+  function partLines(p) {
+    var out = [], i;
+    if (p === 'layers') for (i = 1; i <= 3; i++) out.push(T('PART.LAYERS.L' + i));
+    else for (i = 1; i <= 5; i++) out.push(p === 'resolve' ? WW('RESOLVE.STEP' + i + '.NAME') : WW('LIFE.STEP' + i + '.LEAD').replace(/\.$/, ''));
+    return out;
+  }
   function minuteDef() {
     var ui = {}, clock = null, card = null, ctxRef = null, first = true, asked = false;
+    function renderPart(p) {
+      ui.tabs.forEach(function (b) { b.setAttribute('aria-expanded', String(b.dataset.part === p)); });
+      ui.panel.hidden = !p; ui.panel.textContent = ''; if (!p) return;
+      ui.panel.appendChild(node('p', 'wo-line', T('PART.' + p.toUpperCase() + '.LINE')));
+      var ol = node(p === 'layers' ? 'ul' : 'ol', 'wo-list');
+      partLines(p).forEach(function (line) { ol.appendChild(node('li', null, line)); });
+      ui.panel.appendChild(ol);
+    }
     function toggle() { if (clock.playing()) clock.pause(); else clock.play(); }
     function go(n) {
       n = DEFXNMinute.clamp(n); clock.pause();
@@ -160,18 +185,26 @@
     }
     return {
       view: 'movie', key: KEY, titleId: 'wm-title', here: 'WORLDMINUTE.HERE', note: 'WORLDMINUTE.NOTE',
-      parse: function (q) { asked = q.has('s'); return { n: W.clamp(q.get('s'), 1, BEATS, 1) }; },
-      query: function (st) { return st.n > 1 ? 's=' + st.n : ''; },
+      /* ?s= is a beat number or the name of a closer look; a look opens with the sequence paused at beat 1 */
+      parse: function (q) {
+        var s = q.get('s'), part = PARTS.indexOf(s) >= 0 ? s : '';
+        asked = q.has('s'); return { n: part ? 1 : W.clamp(s, 1, BEATS, 1), part: part };
+      },
+      query: function (st) { return st.part ? 's=' + st.part : st.n > 1 ? 's=' + st.n : ''; },
       world: function (st) { return W.state('movie', { s: String(st.n) }); },
       build: function (ctx) {
         ctxRef = ctx; var f = ctx.f;
         ui.n = 0;
         f.page.classList.add('wp-minute');
         card = makeCard(f.stage); card.preload();
-        f.add(node('p', 'eyebrow-dot mono', T('KICKER')));
-        ui.count = f.add(node('p', 'wm-count mono'));
-        ui.say = f.add(node('h1', 'wm-say'), true); ui.say.id = 'wm-title'; ui.say.setAttribute('aria-live', 'polite');
-        ui.ticks = f.add(node('ol', 'wm-ticks')); ui.ticks.setAttribute('aria-label', T('BEATS.LABEL'));
+        ArkUI.loadStyles({ styles: ['css/works-one.css'] }).catch(function (e) { console.error('css/works-one.css did not load (' + (e && e.message) + '), so the closer looks show unstyled.'); });
+        /* THE HUD (css/space-frame.css): words on the left, the sequence in the dock, the middle left to the 3D */
+        f.page.classList.add('hud');
+        var left = f.page.appendChild(node('div', 'hud-left')), dock = f.page.appendChild(node('div', 'hud-dock'));
+        left.appendChild(node('p', 'hud-kicker', T('KICKER')));
+        var h = left.appendChild(node('h1', 'hud-title')); h.id = 'wm-title'; h.textContent = T('ANSWER');
+        ui.say = left.appendChild(node('p', 'hud-answer wm-say')); ui.say.setAttribute('aria-live', 'polite');
+        ui.ticks = dock.appendChild(node('ol', 'wm-ticks')); ui.ticks.setAttribute('aria-label', T('BEATS.LABEL'));
         ui.fills = [];
         for (var i = 1; i <= BEATS; i++) {
           var li = node('li'), b = node('button'), fill = node('i'); b.type = 'button'; b.dataset.n = String(i); b.appendChild(fill);
@@ -179,15 +212,31 @@
           li.appendChild(b); ui.ticks.appendChild(li); ui.fills.push(b);
         }
         ui.ticks.addEventListener('click', function (e) { var b = e.target.closest('button[data-n]'); if (b) go(+b.dataset.n); });
-        var bar = f.add(node('div', 'wm-bar'));
-        ui.back = node('button', 'wm-btn', T('BACK')); ui.back.type = 'button'; ui.back.addEventListener('click', function () { go(ui.n - 1); });
-        ui.toggle = node('button', 'wm-btn'); ui.toggle.type = 'button'; ui.toggle.addEventListener('click', toggle);
-        ui.skip = node('button', 'wm-btn', T('SKIP')); ui.skip.type = 'button'; ui.skip.addEventListener('click', function () { go(BEATS); });
-        bar.appendChild(ui.back); bar.appendChild(ui.toggle); bar.appendChild(ui.skip);
-        ui.hint = f.add(node('p', 'wm-hint mono', T('HINT'))); ui.hint.hidden = reduced();   /* its first line says Space pauses: with no autoplay there is nothing to pause */
-        var box = node('div', 'wp-foot'); ui.cta = W.cta('small'); ui.more = node('a', 'more');
-        box.appendChild(ui.cta); box.appendChild(ui.more); f.add(box);
-        ui.cta.addEventListener('click', function (e) { if (ui.cta.dataset.mode === 'next' && W.plainClick(e)) { e.preventDefault(); go(ui.n + 1); } });
+        function chip(text) { var c = node('button', 'hud-chip', text); c.type = 'button'; return dock.appendChild(c); }
+        ui.back = chip(T('BACK')); ui.back.addEventListener('click', function () { go(ui.n - 1); });
+        ui.toggle = chip(); ui.toggle.addEventListener('click', toggle);
+        ui.skip = chip(T('SKIP')); ui.skip.addEventListener('click', function () { go(BEATS); });
+        /* the last beat's one way on is a chip, so the show stays the dominant action */
+        ui.end = dock.appendChild(node('a', 'hud-chip', T('END.CTA'))); W.fieldTo(ui.end, 'WORLDMINUTE.END.CTA.HREF');
+        var show = dock.appendChild(node('button', 'hud-go', T('SHOW.GO'))); show.type = 'button';
+        show.addEventListener('click', function () {
+          clock.pause();
+          import('/js/space/shows/works.mjs').then(function (m) {
+            if (!window.ArkSpace) throw new Error('window.ArkSpace is missing, so the 3D space never loaded');
+            ArkSpace.whenReady(function (space) { space.play(m.SHOW); });
+          }).catch(function (e) { console.error('The show did not play (' + (e && e.message) + '). The nine beats still work.'); });
+        });
+        /* the closer looks: disclosure buttons, one open at a time; opening one pauses the sequence so the words hold still */
+        var row = left.appendChild(node('div', 'hud-tabs')); row.setAttribute('role', 'group'); row.setAttribute('aria-label', T('PARTS.LABEL'));
+        ui.tabs = PARTS.map(function (p) {
+          var b = node('button', 'wo-tab', T('PART.' + p.toUpperCase() + '.NAME')); b.type = 'button'; b.dataset.part = p; b.setAttribute('aria-controls', 'wo-panel');
+          row.appendChild(b); return b;
+        });
+        row.addEventListener('click', function (e) {
+          var b = e.target.closest('button[data-part]'); if (!b) return;
+          var p = ctxRef.st.part === b.dataset.part ? '' : b.dataset.part; if (p) clock.pause(); ctxRef.set({ part: p });
+        });
+        ui.panel = left.appendChild(node('div', 'hud-body wo-panel')); ui.panel.id = 'wo-panel';
         clock = DEFXNMinute.clock({
           start: ctx.st.n, reduced: reduced(),
           onBeat: function (n) { ctx.set({ n: n }); },
@@ -199,7 +248,7 @@
       render: function (st, ctx) {
         var n = st.n, was = ui.n; ui.n = n;
         clock.sync(n);
-        ui.count.textContent = T('BEAT.OF', { n: n, total: BEATS }) + ' · ' + T('BEAT' + n + '.NAME');
+        renderPart(st.part);
         ui.say.textContent = ''; ui.say.appendChild(node('span', null, T('BEAT' + n + '.SAY')));
         ui.fills.forEach(function (b, i) {
           var m = i + 1; b.classList.toggle('done', m < n); b.classList.toggle('on', m === n);
@@ -209,9 +258,7 @@
           fill.style.setProperty('--beat', DEFXNMinute.SECONDS[i] + 's');
         });
         ui.back.disabled = n === 1;
-        var last = n === BEATS;
-        if (last) { W.fieldTo(ui.cta, 'WORLDMINUTE.END.CTA.HREF'); ui.cta.dataset.mode = 'end'; ui.cta.say.textContent = T('END.CTA'); W.fieldTo(ui.more, 'WORLDMINUTE.END.MORE.HREF'); ui.more.textContent = T('END.MORE'); ui.more.hidden = false; }
-        else { delete ui.cta.dataset.sceneLink; ui.cta.href = W.href(KEY, 's=' + (n + 1)); ui.cta.dataset.mode = 'next'; ui.cta.say.textContent = T('NEXT'); ui.more.hidden = true; }
+        ui.end.hidden = n !== BEATS;
         paint();
         W.tags(ctx.f.tags, [{ id: 'focus', name: T('BEAT' + n + '.TAG.NAME'), sub: T('BEAT' + n + '.TAG.SUB'), cls: 'hot' }]);
         card.show(n);

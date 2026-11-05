@@ -26,7 +26,21 @@ export function boxShape(w, h, d, r, seg = 4) {
     const q = Math.max(-inner, Math.min(inner, g.pos[i + c])), band = g.pos[i + c] - q;
     pos.push(q / inner * (dim[c] / 2 - r) + band / rel * r);
   }
-  return { pos, nrm: g.nrm, uv: g.uv, idx: g.idx };
+  return { pos, nrm: g.nrm, uv: faceUv(pos, w, h, d, g.pos.length / 3 / 6), idx: g.idx };
+}
+
+/* Each face's image lies flat across that face, upright as seen from outside (2026-11-05: the tower's front plate showed one huge "D").
+   roundedBox's own uv is an even grid over its axis steps, and the rounded band takes most of the steps, so the flat face held only the
+   middle 11% of the image, turned on its side. Here u, v come from where each point really sits. Faces are roundedBox's order:
+   +x, -x, +y, -y, +z, -z, each `per` points. Images are not flipped on upload, so v 0 is the image's top row. */
+function faceUv(pos, w, h, d, per) {
+  const uv = [], c = (t) => Math.max(0, Math.min(1, t));
+  for (let i = 0, n = pos.length / 3; i < n; i++) {
+    const x = pos[i * 3] / w, y = pos[i * 3 + 1] / h, z = pos[i * 3 + 2] / d, f = Math.floor(i / per);
+    const [u, v] = f === 0 ? [.5 - z, .5 - y] : f === 1 ? [.5 + z, .5 - y] : f === 2 ? [.5 + x, .5 + z] : f === 3 ? [.5 + x, .5 - z] : f === 4 ? [.5 + x, .5 - y] : [.5 - x, .5 - y];
+    uv.push(c(u), c(v));
+  }
+  return uv;
 }
 
 /* The FXN ID card's layered plate (2026-10-31, docs/design/auth/FXN-ID-CARD.md): a block is a body with a plate a step proud of it on each of its
@@ -59,7 +73,7 @@ export function createPieces(R, mesh, env) {
   function boxUp(b, plated) {
     const key = (plated ? 'plated:' : 'box:') + b.join(',');
     if (ups.has(key)) return ups.get(key);
-    const g = plated ? platedShape(b[0], b[1], b[2], b[3]) : boxShape(b[0], b[1], b[2], b[3]), parsed = mesh.quantizedShape(g.pos, g.nrm, g.idx, [255, 255, 255, 255], Math.max(b[0], b[1], b[2]) / 2 + 1e-3), up = mesh.uploadMesh(gl, parsed);
+    const g = plated ? platedShape(b[0], b[1], b[2], b[3]) : boxShape(b[0], b[1], b[2], b[3]), parsed = mesh.quantizedShape(g.pos, g.nrm, g.idx, [255, 255, 255, 255], Math.max(b[0], b[1], b[2]) / 2 + 1e-3, g.uv), up = mesh.uploadMesh(gl, parsed);   /* g.uv: a part's image lies on its faces (2026-11-05) */
     ups.set(key, up); return up;
   }
   /* the opaque blocks take the card's layered plate; glass, rails and the thin sheets keep one box */

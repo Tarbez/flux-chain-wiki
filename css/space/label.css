@@ -1,0 +1,17 @@
+/* The hover label: the FXN ID card's print, matched to css/world.css .world-tags .tag (mono upper-case title tracked .14em, the
+   muted line under it, a thin edge, a 4px corner, a glass ground). js/space/label.mjs places it; it never takes the pointer, so a
+   click always reaches the place under it. */
+.space-label { position: fixed; left: 0; top: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity 120ms linear; }
+.space-label.on { opacity: 1; }
+.space-label[hidden] { display: none; }
+.space-label-box { position: fixed; left: 0; top: 0; display: grid; gap: 3px; max-width: 13em; padding: 6px 10px 7px; border-radius: 4px;
+  font: 400 var(--fs-tertiary, 11px)/1.4 var(--font-sans); color: hsl(var(--text-muted)); text-shadow: 0 0 10px hsl(var(--canvas)), 0 0 3px hsl(var(--canvas));
+  background: hsl(var(--canvas) / .86); box-shadow: inset 0 0 0 1px hsl(var(--border-default)), 0 8px 18px -10px hsl(var(--theme-shadow-color, 0 0% 0%) / .8);
+  -webkit-backdrop-filter: blur(8px) saturate(1.1); backdrop-filter: blur(8px) saturate(1.1); }
+.space-label-name { font: 600 var(--fs-tertiary, 11px)/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--label-ink, var(--primary))); }
+.space-label-line, .space-label-hint { font-size: var(--fs-tertiary, 11px); }
+.space-label-hint { color: hsl(var(--text-faint)); }
+.space-label-line:empty, .space-label-hint:empty { display: none; }
+/* The leader: 1px from the place's point to the label's near corner; js sets its length and turn for the side the label is on. */
+.space-label-lead { position: fixed; left: 0; top: 0; width: 1px; background: hsl(var(--text-faint)); transform-origin: 0 0; }
+@media (prefers-reduced-motion: reduce) { .space-label { transition: none; } }

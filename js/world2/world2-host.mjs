@@ -30,12 +30,15 @@
    ===================================================================== */
 import { fetchWorld, fetchBlob, fetchNames, fetchGroup, fetchLines, firstInstance, worldPath, PICTURE } from './world2-decode.mjs';
 import { createRenderer, FOV, afterRestore } from './world2-gl.mjs';
+import { readPalette as readThemePalette } from './world2-palette.mjs';
 import { createStage } from './world2-stage.mjs';
 import { createSites } from './world2-sites.mjs';
 import { createHelix } from './world2-helix.mjs';
 import { mountHubMark } from './world2-hubmark.mjs';
 import { createTags } from './world2-tags.mjs';
-import { mountDrums } from './world2-drums.mjs';   /* the rings as solid drums in the card's metal (2026-10-31) */
+import { mountDrums } from './world2-drums.mjs';
+import { mountObjects, FILM_KEY } from './world2-objects.mjs';
+import { attachSpace } from './world2-space.mjs';   /* window.ArkSpace: places, focus, the visitor's movement (docs/design/space/SPACE.md) */   /* the built objects (fxn-3d's kernel, node cube, drum, card) in place of the drums and the plate (2026-11-05) */   /* the rings as solid drums in the card's metal (2026-10-31) */
 import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './world2-cardlook.mjs';   /* the FXN ID card's surface on the network's parts, and the light along the links (docs/design/auth/FXN-ID-CARD.md) */
 
 (function () {
@@ -67,7 +70,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   function setView(key, view) { VIEW_OF[key] = view; KEY_OF[view] = key; }
   function pathOf(key) { var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key]; return entry ? entry.path : '/'; }
 
-  var host = window.ArkWorldHost = { version: VERSION, grammar: true, calm: CALM, viewOf: VIEW_OF, viewFor: viewFor, setView: setView, keyOf: function (view) { return KEY_OF[view] || null; }, ready: false, failed: false, covered: false, owns: owns, whenReady: whenReady };
+  var host = window.ArkWorldHost = { film: function () { return objects ? objects.film : null; }, filmState: null, version: VERSION, grammar: true, calm: CALM, viewOf: VIEW_OF, viewFor: viewFor, setView: setView, keyOf: function (view) { return KEY_OF[view] || null; }, ready: false, failed: false, covered: false, owns: owns, whenReady: whenReady };
   var wanted = wantWorld(), readyHooks = [];
   function owns() { return wanted && !host.failed; }
   function whenReady(fn) { if (host.ready) fn(); else readyHooks.push(fn); }
@@ -211,38 +214,9 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   }
   host.open = open;
 
-  /* ---------- the theme: 18 tones from the live tokens, as ring-kit.js readTheme() reads them ----------
-     HSL channels on body ("210 18% 72%"), to sRGB, to linear (Three.js's Color does the same under its colour
-     management), in the palette order of CONTRACT.md: 20 tones. Tone 7, the hub, is identity leaned to strong by .25. */
-  var TOKENS = [['--chain-identity', '#bcc3c8'], ['--chain-resolver', '#667e88'], ['--chain-token', '#525a5d'], ['--chain-pool', '#8e8a9f'], ['--chain-network', '#378f7c'], ['--chain-ledger', '#3aa88a'], ['--chain-other', '#525a5d'], null,
-    ['--signal', '#3fd1a8'], ['--text-muted', '#9aa3a8'], ['--canvas', '#0a100d'], ['--record', '#e6e1d8'], ['--text-strong', '#f3f8f4'], ['--text', '#c3cdd6'], ['--net-fxn', '#3d8f7c'], ['--net-deark', '#b5764a'], ['--net-cr3tv', '#b07890'], ['--ember', '#f7752a'],
-    /* 18 and 19, the halo's glass (glass-kit.js color(): the base and its deep tone, laws 71-74) */
-    ['--primary', '#ff8e59'], ['--primary-300', '#5a3424'],
-    /* 20, the auth stage's warning (auth-stage.js: the glow and a bead turn to --danger as a state goes bad). The engine palette holds all 22 tones (WORLD.tones), so tone 20 draws as --danger. */
-    ['--danger', '#d26a5f'],
-    /* 21, the identity steps' Partial: a dashed honey edge, never solid. The SDK token is --drift (honey, review); the Three.js stage read --state-partial, which no theme defines, so it always drew the fallback. */
-    ['--drift', '#e8b55a']];
-  function hslToRgb(h, s, l) {
-    h = ((h % 360) + 360) / 360; s /= 100; l /= 100;
-    function f(n) { var k = (n + h * 12) % 12, a = s * Math.min(l, 1 - l); return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)); }
-    return [f(0), f(8), f(4)];
-  }
-  function hexToRgb(hex) { var n = parseInt(hex.slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; }
-  function toLinear(c) { return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); }
+  /* ---------- the theme: the 22 tones from the live tokens (world2-palette.mjs, shared with the object previews) ---------- */
   var paletteNow = null;
-  function readPalette() {
-    var css = getComputedStyle(document.body || root), out = new Float32Array(66);
-    function tok(i) {
-      var t = TOKENS[i], v = css.getPropertyValue(t[0]).trim(), rgb;
-      if (v) { var p = v.split(/\s+/); rgb = hslToRgb(parseFloat(p[0]), parseFloat(p[1]), parseFloat(p[2])); } else rgb = hexToRgb(t[1]);
-      return rgb.map(toLinear);
-    }
-    for (var i = 0; i < 22; i++) {
-      var c = i === 7 ? (function () { var a = tok(0), b = tok(12); return [a[0] + (b[0] - a[0]) * .25, a[1] + (b[1] - a[1]) * .25, a[2] + (b[2] - a[2]) * .25]; })() : tok(i);
-      out[i * 3] = c[0]; out[i * 3 + 1] = c[1]; out[i * 3 + 2] = c[2];
-    }
-    return out;
-  }
+  function readPalette() { return readThemePalette(document.body || root); }
 
   /* ---------- the boxes the world asks for (copied: the frame the camera is fitted to) ---------- */
   var S = null, R = null, world = null, cur = null, flown = null, pending = null;
@@ -373,9 +347,11 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     var moving = false;
     if (stage) {
       var c = stage.cameraAt(now);
+      if (c && spaceView()) { if (c.done) flying = false; c = null; }   /* the space's camera owns it here: the stage's flight only drives its channels */
       if (c) { cam.aim = c.aim; cam.dist = c.dist; cam.elev = c.elev; cam.yaw = c.yaw; cam.tilt = c.tilt; if (c.done) { flying = false; if (to) fitShadowFor(to); measureSlab(); refit(); } else moving = true; }
       if (stage.step(now)) moving = true;
     }
+    if (objects && cam && spaceView() && objects.camera(now, cam)) moving = true;   /* the space's camera: the film, the hero pose, a focused place (world2-objects.mjs camera) */
     var tx = reduced() ? 0 : pointer.x, ty = reduced() ? 0 : pointer.y;
     lean.x += (tx - lean.x) * .08; lean.y += (ty - lean.y) * .08;
     if (Math.abs(tx - lean.x) > .001 || Math.abs(ty - lean.y) > .001) moving = true;
@@ -383,6 +359,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     draw(!!(stage && stage.busy()));
     if (sitesMoving) moving = true;
     if (helixMoving || haloMoving) moving = true;
+    if (objectsMoving) moving = true;
     if (kit) { kitMoving = kit.step(now); if (kitMoving) moving = true; }
     if (flowStep(now)) moving = true;
     afterDraw();
@@ -415,10 +392,29 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     if (!flowOn) flowLast = 0;
     return flowOn;
   }
-  var drums = null;
+  var drums = null, objects = null, objectsMoving = false, spaceCore = null;
+  /* once the objects stand, the space's camera is the ONE owner of the camera on every page (the motion audit, 2026-11-05: two owners wrote
+     it in the same frame), except the pages that draw a scene of their own and frame it themselves: the sign-in card, the Kit, the identity
+     steps and the how-it-works films keep the stage's camera */
+  /* 'movie' (How it works) left this list 2026-11-05: its own scene no longer draws, so the page stood empty while its space show
+     (js/space/shows/works.mjs) captioned a camera nobody owned; it is a space view now */
+  var OWN_SCENE = { auth: 1, authtall: 1, kit: 1, idstart: 1, idsign: 1, idsafe: 1, idyou: 1, idvalue: 1, resolve: 1, layers: 1, life: 1, trace: 1 };
+  function spaceView() { return !!objects && (!cur || OWN_SCENE[viewFor(cur.key)] !== 1); }
+  /* the built objects replace the frame's own parts; until they stand, the frame's parts are kept out of the picture too, so the old world
+     never shows for a frame while the objects load (owner, 2026-11-05: "a glitch ... the old 3Ds for a split second") */
+  var objectsWanted = !/[?&]objects=off(&|$)/.test(location.search), framePartsNow = null;
+  function hideFrame() { if (framePartsNow) framePartsNow.forEach(function (p) { p.count = 0; }); if (R && R.showPlate) R.showPlate(false); }
   function draw(forceShadow) {
     if (!cam || !R) return;
     if (drums) drums.hide();   /* the old tiles stay out of the picture whatever the stage writes */
+    if (objectsWanted && !objects) hideFrame();
+    /* on a space page the built world replaces every view's own frame parts (each page's old blocks and tiles), and the old world labels;
+       a page with a scene of its own (sign-in, Kit, identity steps, films) keeps both */
+    var spaceNow = !!objects && spaceView();
+    if (spaceNow && drawParts) drawParts.forEach(function (p) { p.count = 0; });
+    /* the space's camera frames the whole screen: an old view's own frame box (stats' box beside its slab) would put the grid off screen */
+    if (spaceNow) R.setFrame(whole(), W, H);
+    root.classList.toggle('space-world', spaceNow);
     surface();
     var c = drawn();
     drawnYaw = c.yaw;
@@ -427,13 +423,18 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     haloMoving = haloStep(performance.now());   /* the glass halo over the kernel fades with the view (glass-kit.js show: 1 on intro, .6 on home, 0 elsewhere, tau 320 ms) */
     helixInset = stepHelix(c);   /* the identity card's helix, where the page has its box */   /* the site panes: where each stands this frame, laid into the draw list */
     R.setPointLight(stage.idrig ? stage.idrig.light() : null);   /* the trace's ember light (world2-idrig.mjs light()) */
+    if (objects) objectsMoving = objects.flush(performance.now(), spaceView());   /* the built objects: their build, then their rest (world2-objects.mjs) */
     if (kit) kit.flush();   /* the Kit's objects: where each stands this frame, laid into the mesh pass and the draw list */
     var lg = stage.logoState(); R.setLogoState(lg.nb, lg.xl);   /* the kernel's light, pool and mark follow the view's step back and its lit state */
-    R.render(c, to ? to.dist : cam.dist, !!forceShadow, helixInset ? [helixInset] : undefined);
+    /* on a space page only the built objects draw through the mesh pass: every other piece (a view's old stage blocks, tiles, links and the
+       page slab, written by the stage, the kit or the sites this frame) leaves the picture */
+    if (spaceNow && piecesMod) piecesMod.list.forEach(function (p) { if (p.name.indexOf('obj-') !== 0) p.count = 0; });
+    /* the haze is measured from the camera that draws: on a space page the space's camera, never an old view's target distance */
+    R.render(c, spaceNow || !to ? cam.dist : to.dist, !!forceShadow, helixInset ? [helixInset] : undefined);
   }
   /* the camera exactly as it is drawn (radians, the lean applied), with the frame it is fitted to: what picking and the labels project through */
   function drawn() {
-    return { aim: cam.aim, dist: cam.dist, elev: (cam.elev - lean.y * cam.tilt * .6) * D2R, yaw: (cam.yaw + lean.x * cam.tilt) * D2R, frame: to ? to.frame : whole(), W: W, H: H };
+    return { aim: cam.aim, dist: cam.dist, elev: (cam.elev - lean.y * cam.tilt * .6) * D2R, yaw: (cam.yaw + lean.x * cam.tilt) * D2R, frame: to && !(objects && spaceView()) ? to.frame : whole(), W: W, H: H };
   }
   function redraw() { if (!raf) { draw(); afterDraw(); } }
 
@@ -449,8 +450,11 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   /* what is under a point of the page, through the camera as drawn; null off the canvas or over the page's own controls */
   function hitAt(x, y) {
     if (!stage || !cam || host.covered) return null;
-    var box = rect(layer);
-    return stage.pick(x - box.left, y - box.top, drawn());
+    var box = rect(layer), c = drawn();
+    /* a built object under the point is its ring: the same item, so the same words, hover and page as the ring had (world2-objects.mjs pick) */
+    var oi = objects ? objects.pick(x - box.left, y - box.top, c, stage.project) : -1;
+    if (oi >= 0) return { part: 'object', instance: 0, item: oi, slot: 0, t: 0 };
+    return stage.pick(x - box.left, y - box.top, c);
   }
   function hoverAt(x, y, target) {
     var pj = paneAt(x, y, target);
@@ -468,7 +472,10 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     if (stage.idrig && stage.idrig.hoverRow(hit && hit.rig ? hit.part : null, hit && hit.rig ? hit.instance : -1)) wake();   /* a block of a how-it-works view lifts under the pointer (world2-idrig.mjs) */
     var key = hit ? (dynHit ? 'd' : '') + hit.item + ':' + hit.slot : '';
     stage.hover(id, performance.now(), dynHit && id >= 0);
-    document.body.classList.toggle('picking', !!words);
+    var objHit = !!(hit && hit.part === 'object');
+    if (spaceCore) spaceCore.hoverItem(objHit ? hit.item : -1); else if (objects) objects.hover(objHit ? hit.item : -1);
+    if (objHit) words = null;   /* the space's label names an object; the old hover words stay for the rest of the world */
+    document.body.classList.toggle('picking', !!words || objHit);
     if (key !== over) { over = key; emit('hover', [words ? { name: words.name, act: words.act, rec: words.hook === 'pick' ? Number(words.arg) : undefined } : null, x, y]); }
     wake();
   }
@@ -481,7 +488,9 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
       open(to.view, to.key ? { [to.key]: to.value } : {}, {});
       return;
     }
-    var hit = hitAt(x, y), w = hit ? stage.wordsOf(hit) : null;
+    var hit = hitAt(x, y);
+    if (hit && hit.part === 'object' && spaceCore && spaceCore.click(hit.item)) return;   /* a built object: fly to it; on the focused one, open its page */
+    var w = hit ? stage.wordsOf(hit) : null;
     if (!w) return;
     if (w.hook === 'none') return;   /* an earlier version names itself and does nothing when clicked */
     var arg = Number(w.arg);
@@ -496,7 +505,20 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     pointer.x = e.clientX / innerWidth * 2 - 1; pointer.y = e.clientY / innerHeight * 2 - 1; hoverAt(e.clientX, e.clientY, e.target);
   }, { passive: true });
   document.addEventListener('pointerleave', function () { pointer.x = pointer.y = 0; if (stage) { stage.hover(-1, performance.now()); stage.hover(-1, performance.now(), true); document.body.classList.remove('picking'); if (over) { over = null; emit('hover', [null, 0, 0]); } } wake(); });
-  window.addEventListener('pointerdown', function (e) { down.x = e.clientX; down.y = e.clientY; }, { passive: true });
+  window.addEventListener('pointerdown', function (e) { down.x = e.clientX; down.y = e.clientY; drag = spaceView() && !overUI(e.target) && e.button === 0 ? { x: e.clientX, y: e.clientY } : null; }, { passive: true });
+  /* the visitor's own look round (the space's camera): drag turns it round the focus or the grid, the wheel moves it closer or farther */
+  var drag = null;
+  window.addEventListener('pointermove', function (e) {
+    if (!drag || !objects || !(e.buttons & 1)) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
+    if (Math.abs(dx) + Math.abs(dy) > 0) { objects.orbit(-dx * .25, dy * .18); wake(); }
+  }, { passive: true });
+  window.addEventListener('pointerup', function () { drag = null; }, { passive: true });
+  window.addEventListener('wheel', function (e) {
+    if (!objects || !spaceView() || overUI(e.target) || document.body.classList.contains('no-scene')) return;
+    if (e.target && e.target.closest && e.target.closest('[data-scroll], .world-page-scroll')) return;
+    e.preventDefault(); objects.zoom(Math.exp(e.deltaY * .0012)); wake();
+  }, { passive: false });
   window.addEventListener('click', function (e) {
     if (overUI(e.target) || document.body.classList.contains('no-scene')) return;
     if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
@@ -544,7 +566,8 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     if (cur && to) {
       to = target(viewFor(cur.key));
       /* mid-flight the flight lands on the new box: the same poses from here, for the time that is left */
-      if (!flying) Object.assign(cam, { aim: to.aim.slice(), dist: to.dist, elev: to.elev, yaw: to.yaw, tilt: to.tilt });
+      if (spaceView()) { /* the space's camera holds its own pose or flight through a resize */ }
+      else if (!flying) Object.assign(cam, { aim: to.aim.slice(), dist: to.dist, elev: to.elev, yaw: to.yaw, tilt: to.tilt });
       else if (stage) stage.fly({ aim: cam.aim.slice(), dist: cam.dist, elev: cam.elev, yaw: cam.yaw, tilt: cam.tilt }, { aim: to.aim.slice(), dist: to.dist, elev: to.elev, yaw: to.yaw, tilt: to.tilt }, Math.max(1, DUR - (performance.now() - t0)), performance.now());
       R.setFrame(to.frame, W, H);
       measureSlab();
@@ -580,7 +603,8 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     R.setFrameBlob(cid, buffer, parts);
     var groundPart = parts.filter(function (p) { return p.part === 'ground'; })[0];
     frameParts = new Set(parts);
-    drums = mountDrums(R, world, parts, buffer, groundPart ? firstInstance(buffer, groundPart) : null);   /* before the stage: it takes the drums' parts as the frame's own */
+    drums = mountDrums(R, world, parts, buffer, groundPart ? firstInstance(buffer, groundPart) : null);
+    framePartsNow = parts;   /* before the stage: it takes the drums' parts as the frame's own */
     /* the stage gives the parts their state and morph streams (the renderer's per-part buffers) and owns every channel */
     stage = createStage({ world: world, R: R, parts: parts, blob: buffer, names: words, fov: FOV, reduced: reduced, wake: wake, palette: function () { return paletteNow || (paletteNow = readPalette()); } });
     tags = createTags({ layerOf: function (v) { return host.tags(v); }, here: function () { return cur ? viewFor(cur.key) : null; }, scale: pageScale,
@@ -593,6 +617,28 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     /* the mark, by its content id; the plate draws without it until it lands */
     hubMark = mountHubMark(R, parts, world.stage.set.home && world.stage.set.home[0] && world.stage.set.home[0].hubtube || .045 / 1.02);   /* the hub's round mark: its parts are the home frame's */
     if (world.mark) { var img = new Image(); img.onload = function () { R.setMark(img); hubMarkImg = img; hubMark.paint(img); redraw(); }; img.src = worldPath(world.mark + '.png'); }
+    /* the built objects stand where the rings are, in place of the drums and the plate; ?objects=off keeps the old world to compare */
+    if (objectsWanted) fetchPieces().then(function (pm) {
+      if (!pm) throw new Error('the mesh pass did not start');
+      /* the intro film plays on every fresh load of /intro (owner, 2026-11-05), never on a move inside the site and never with reduced motion */
+      var seen = false;
+      var onIntro = !cur || viewFor(cur.key) === 'intro' || viewFor(cur.key) === 'introtall';
+      return mountObjects({ R: R, pieces: pm, geo: drums ? drums.geo : [], parts: parts, body: document.body, reduced: reduced,
+        itemOfTile: function (i) { return stage.itemAt('tile', i); }, aspect: function () { return W && H ? W / H : 1.6; }, film: onIntro && !seen && !reduced(),
+        onFilm: function (d) { host.filmState = d; if (spaceCore) spaceCore.film(d); window.dispatchEvent(new CustomEvent('ark-world-film', { detail: d })); } });
+    }).then(function (o) {
+      objects = o; if (!o) { objectsWanted = false; return; }
+      spaceCore = attachSpace({ objects: o,
+        words: function (item) { var w = stage.wordsOf({ item: item, slot: 0 }); return w || null; },
+        openView: function (key, query) { if (router && ArkUI.pageCatalog[key]) router.navigate(key, { query: queryOf(query || {}) }); },
+        keyOf: function (view) { return KEY_OF[view] || null; },
+        project: function (p) { var q = stage.project(p, drawn()), b = rect(layer); return q ? [q[0] + b.left, q[1] + b.top] : null; },
+        wake: wake });
+      if (host.filmState) spaceCore.film(host.filmState);
+      import((location.protocol === 'file:' ? '' : '/') + 'js/space/space.mjs').then(function (m) { return m.mountSpaceParts(window.ArkSpace); })
+        .catch(function (e) { if (window.console) console.warn('[world2] the space parts did not load (' + e.message + ')'); });
+      wake();
+    }).catch(function (e) { objectsWanted = false; if (R && R.showPlate) R.showPlate(true); if (window.console) console.warn('[world2] the built objects did not mount (' + e.message + '); the old world stays'); });
     /* the chain marks, by content id, in LOGO record order (the mark part's instance order); each quad's world width
        is read from its instance so the renderer can wear the mask's edge by the inlay's .05 units. The floor draws
        without them until every mask has landed. */
@@ -608,7 +654,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     }
     R.setDim(0);   /* a stepped-back instance is its colour times (1 - dim), as chains-scene.js tints it (1 - dims[ring]); the engine's default floor of .25 left the focus dimming weaker than Three.js */
     R.setPalette((paletteNow = readPalette()));
-    var repaint = function () { R.setPalette((paletteNow = readPalette())); if (sites) sites.repaint(); if (helix) helix.repaint(); if (hubMark) hubMark.paint(hubMarkImg); if (kit) kit.repaint(); if (stage.dyn) { stage.dyn.paintAll(); stage.refresh(); } if (stage.rig) { stage.rig.repaint(); stage.refresh(); } if (stage.idrig) { stage.idrig.repaint(); stage.refresh(); } redraw(); };
+    var repaint = function () { R.setPalette((paletteNow = readPalette())); if (objects) objects.repaint(); if (sites) sites.repaint(); if (helix) helix.repaint(); if (hubMark) hubMark.paint(hubMarkImg); if (kit) kit.repaint(); if (stage.dyn) { stage.dyn.paintAll(); stage.refresh(); } if (stage.rig) { stage.rig.repaint(); stage.refresh(); } if (stage.idrig) { stage.idrig.repaint(); stage.refresh(); } redraw(); };
     new MutationObserver(repaint).observe(root, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', repaint);
     new ResizeObserver(resize).observe(layer);
@@ -633,7 +679,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     /* the groups of the views a visitor goes to first (the chain views, the identity steps, how a result is made) are read and mounted when the page has nothing else to do, so the first flight
        to one of them starts on time: a flight waited 100 to 250 ms for its group to mount (BOARD-GAPS, lane A). One at a time, in idle time, after home has drawn. */
     warmGroups();
-    window.__world2 = { R: R, parts: function () { return drawParts; }, kit: function () { return kit; }, target: function () { return to; }, sites: function () { return sites; }, helix: function () { return helix; },  stage: stage, hit: hitAt, project: function (p) { var q = stage.project(p, drawn()), b = rect(layer); return q ? [q[0] + b.left, q[1] + b.top] : null; }, stats: R.stats, redraw: function () { draw(true); }, gl: R.gl, world: world, programs: R.programs, halfFloat: R.halfFloat, shadows: R.shadows, camera: function () { return cam; }, card: function () { return cardOn && cards[cardOn] ? cards[cardOn] : null; }, pieces: function () { return piecesMod; } };
+    window.__world2 = { R: R, objects: function () { return objects; }, parts: function () { return drawParts; }, kit: function () { return kit; }, target: function () { return to; }, sites: function () { return sites; }, helix: function () { return helix; },  stage: stage, hit: hitAt, project: function (p) { var q = stage.project(p, drawn()), b = rect(layer); return q ? [q[0] + b.left, q[1] + b.top] : null; }, stats: R.stats, redraw: function () { draw(true); }, gl: R.gl, world: world, programs: R.programs, halfFloat: R.halfFloat, shadows: R.shadows, camera: function () { return cam; }, card: function () { return cardOn && cards[cardOn] ? cards[cardOn] : null; }, pieces: function () { return piecesMod; } };
     var key = pending || state.get().page;
     pending = null;
     if (key === 'zero' && (toIntro || (!arrived && wanted && !preview && ArkUI.pageCatalog.intro))) setTimeout(function () { toIntro = false; if (flown === null) fly(state.get().page); }, 4000);
@@ -1066,12 +1112,11 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   router.onMount(function (el, key) { if (key !== flown) fly(key); });
   window.addEventListener('ark:route-ready', function () { var key = state.get().page; if (key !== flown) fly(key); });
 
-  /* ---------- the fallback: as the Three.js host, the particle relief runs instead ---------- */
+  /* ---------- the fallback: the world is off and the page shows its colour alone (no particle relief since 2026-11-05) ---------- */
   function fail(why) {
     host.failed = true; root.dataset.world = 'off';
     if (layer.parentNode) layer.remove();
     Object.keys(layers).forEach(function (v) { var l = layers[v]; if (l && l.parentNode) l.remove(); });
-    if (window.console) console.warn('[world2] the grammar world is off (' + why + '); the particle relief runs instead');
-    var relief = document.createElement('script'); relief.src = (location.protocol === 'file:' ? '' : '/') + 'js/zero-webgl.js?v=' + VERSION; document.head.appendChild(relief);
+    if (window.console) console.warn('[world2] the grammar world is off (' + why + '); the page shows its colour alone');
   }
 })();

@@ -6,6 +6,30 @@ ArkManifest.define({
   "group": "site",
   "meta": {},
   "fields": {
+    "GRID": {
+      "label": "Header link: the grid (home)",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Grid"
+    },
+    "WORKS": {
+      "label": "Header link: how it works",
+      "kind": "line",
+      "section": "Header links",
+      "value": "How it works"
+    },
+    "EXPLORE": {
+      "label": "Header link: the explorer",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Explore"
+    },
+    "NOTES": {
+      "label": "Header link: notes (long reading)",
+      "kind": "line",
+      "section": "Header links",
+      "value": "Notes"
+    },
     "PRODUCTS": {
       "label": "Header menu: resolutions",
       "kind": "line",

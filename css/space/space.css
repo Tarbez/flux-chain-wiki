@@ -1,0 +1,15 @@
+/* The space as a whole (js/space/space.mjs; docs/design/space/SPACE.md). Owner, 2026-11-05: "reduce information", "so much noise".
+   While a place is focused (body.space-focused) the page's own words step aside and the space's parts speak; back on the grid they return.
+   The map is a tool for moving between places, so it shows only while a place is focused. */
+body.space-focused .intro-world .intro-slot, body.space-focused .intro-world .intro-doors,
+body.space-focused .home-world > :not(.world-insert) {
+  opacity: 0; transform: translateY(16px); visibility: hidden; pointer-events: none;
+  transition: opacity .35s var(--glide, ease), transform .45s var(--glide, ease), visibility 0s linear .45s;
+}
+body:not(.space-focused) .space-map, body:not(.space-focused) [data-space-part="map"] { opacity: 0; visibility: hidden; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { body.space-focused .intro-world .intro-slot, body.space-focused .intro-world .intro-doors, body.space-focused .home-world > * { transition: none; } }
+
+/* on a space page the old world's labels give way to the space's own tags (js/space/beacons.mjs); html.space-world is set by world2-host.mjs draw */
+/* the old world's own tags and legends (the stats page's cube-chart ticks "643,632", "Swaps", and its "One cube = ..." legend) name a picture the
+   space no longer draws: on a space page they go with it */
+html.space-world .world-tags, html.space-world .wp-tags, html.space-world .ws-legend { display: none !important; }

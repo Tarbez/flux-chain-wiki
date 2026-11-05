@@ -133,6 +133,14 @@
   // signed + verified + priced + chained, not custodied. Each point is the median of the timed reps (5, warm-ups
   // discarded); 256 and 1,000 connections are the median of THREE runs of the same binary (25.0k/26.8k/34.0k and
   // 28.6k/31.0k/34.1k): the spread is competing machine load, not a code difference.
+  var CLIENT_BY_CONNECTIONS = Object.freeze([
+    Object.freeze({ connections: 1, swapsPerSecond: 4425 }),
+    Object.freeze({ connections: 4, swapsPerSecond: 5345 }),
+    Object.freeze({ connections: 24, swapsPerSecond: 12197 }),
+    Object.freeze({ connections: 128, swapsPerSecond: 18397 }),
+    Object.freeze({ connections: 256, swapsPerSecond: 26754 }),
+    Object.freeze({ connections: 1000, swapsPerSecond: 31009 })
+  ]);
   var CLIENT_PATH = Object.freeze({
     date: '2026-10-15',
     record: 'BENCH-015',
@@ -141,14 +149,7 @@
     mode: 'one local release chain-server, pre-signed swaps, one signing key per connection, one curve, loopback',
     replicationNote: 'store replica requirement 0 (zero replication cost)',
     machine: 'Apple M2, 8 cores (4 performance + 4 efficiency), 8 GB',
-    byConnections: Object.freeze([
-      Object.freeze({ connections: 1, swapsPerSecond: 4425 }),
-      Object.freeze({ connections: 4, swapsPerSecond: 5345 }),
-      Object.freeze({ connections: 24, swapsPerSecond: 12197 }),
-      Object.freeze({ connections: 128, swapsPerSecond: 18397 }),
-      Object.freeze({ connections: 256, swapsPerSecond: 26754 }),
-      Object.freeze({ connections: 1000, swapsPerSecond: 31009 })
-    ]),
+    byConnections: CLIENT_BY_CONNECTIONS,
     otherAxes: Object.freeze([
       Object.freeze({ label: '256 connections over 16 tokens', swapsPerSecond: 16500 }),
       Object.freeze({ label: '64 connections, a curve with 0 holders', swapsPerSecond: 23427 }),
@@ -179,7 +180,8 @@
       processesNote: 'With the client split over processes the server reaches ~25,000/s using ~2.9 of 8 cores; past 2 processes the clients and the server share one saturated machine, so ~25,000/s is that machine\u2019s limit, not necessarily the server\u2019s. Measured in-process (no network, pre-signed) the ledger fix took 8 concurrent callers from ~13-15k to ~25-26k/s; end to end the gain is smaller (+13-15%) because real clients arrive close to timestamp order.'
     }),
     previousBuild: Object.freeze({ note: 'Before the chain-position build the same node held ~300 swaps/s on one connection and ~15,000/s at 256-1,500 connections; a curve with 10,000 holders fell to ~1,350/s and 16 tokens to ~2,450/s.' }),
-    ceilingSwapsPerSecond: 31009,
+    // the highest row above, derived so the headline (/stats Throughput) is never typed twice
+    ceilingSwapsPerSecond: CLIENT_BY_CONNECTIONS.reduce(function (a, p) { return Math.max(a, p.swapsPerSecond); }, 0),
     serverCoresAtCeiling: 4,
     cores: 8,
     verdict: 'One connection now gets ~4,400 swaps/s (it was ~300: a lone client no longer waits out two batching windows), and throughput climbs with concurrent connections to ~31,000/s at 1,000. At the top the server uses about four of the eight cores, so the machine, not one coordinator thread, is the limit: the first-run numbers at 256 and 1,000 connections ranged 25k to 34k across three runs of one binary while other apps competed for the CPU. A curve holding 10,000 holders still does ~20,000/s (it used to fall to ~1,350/s), and spreading the same swaps over 16 tokens holds ~16,500/s (it used to fall to ~2,450/s). More headroom comes from more cores and more nodes, as BENCH-013 found, not from more connections.',

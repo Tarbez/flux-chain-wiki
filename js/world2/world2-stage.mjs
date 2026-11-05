@@ -558,7 +558,15 @@ export function createStage(o) {
     const fl = live.flight, a = live.auth, view = world.views[shownView];
     return { nb: Math.min(1, fl && engaged ? (fl.n || 0) : ((view && view.back) || 0)), xl: a ? a.beam * (a.present == null ? 1 : a.present) : 0 };
   }
-  return { unbuilt: () => { if (live.home) { live.home.build = 0; dirtyAll = true; } }, homeW: () => lastHw, logoState, step, fly, cameraAt, setState, rest, startBuild, hover, focus, pick, ray, project, clockMs, tagsReady: () => !building || clockMs() >= tagsAt() - 9, wordsOf, setView, arrival, hoverable,
+  /* the item an instance of a part belongs to (a tile's ring), -1 for none. Read from the ranges, not itemOf: itemOf is sized by the part's
+     count when the stage is made, and the drums have set the tiles' count to 0 by then (world2-objects.mjs asks for the hidden tiles) */
+  function itemAt(part, i) {
+    const map = ranges[owner[part]]; if (!map) return -1;
+    for (const [id, rs] of map) for (const r of rs) if (r.part === part && i >= r.first && i < r.first + r.count) return id;
+    return -1;
+  }
+  return { itemAt,
+    unbuilt: () => { if (live.home) { live.home.build = 0; dirtyAll = true; } }, homeW: () => lastHw, logoState, step, fly, cameraAt, setState, rest, startBuild, hover, focus, pick, ray, project, clockMs, tagsReady: () => !building || clockMs() >= tagsAt() - 9, wordsOf, setView, arrival, hoverable,
     mountDyn, mountRig, mountId, present, presentOnly, enterId, setNet, get idrig() { return idrigs.length ? idrig_ : null; }, rigFor: (v) => !!idrig_.rigOf(v), groupOf: (v) => (ID_STEPS.has(v) ? 'id' : v), IDV, CHAIN, stateIndexOf: (v) => stateIndex[v] || 0, get rig() { return rig; }, enter, turnTo, setOf, refresh: () => { dynDirty = true; dirtyAll = true; wake(60); }, FAMILY, get dyn() { return dyn; }, get engaged() { return engaged; }, get view() { return view; },
     /* the chain group's page slab and labels follow the camera as drawn: laid after the camera moves, before the draw */
     place: (cam, rect) => { if (dyn && engaged) dyn.place(cam, rect, flightValue); if (rig && rigOn) rig.place(rigOn); },

@@ -40,7 +40,7 @@ export function mountDrums(R, world, parts, blob, plate) {
     const k = rows.length; cx /= k; cy /= k; cz /= k; h /= k; d /= k;
     let rad = 0; rows.forEach((j) => { const o = j * 16; rad += Math.hypot(f[o + 9] - cx, f[o + 11] - cz); }); rad /= k;
     const o0 = rows[0] * 16;
-    geo.push({ x: cx, y: cy, z: cz, H: h, R: rad + d / 2, tone: [f[o0 + 12], f[o0 + 13], f[o0 + 14]] });
+    geo.push({ x: cx, y: cy, z: cz, H: h, R: rad + d / 2, tone: [f[o0 + 12], f[o0 + 13], f[o0 + 14]], rows });   /* rows: the ring's tile instances, for its item (world2-objects.mjs) */
   });
   /* the kernel's own ring (round the plate) is the kernel's stack; a ring whose centre lies inside a bigger one stands on that one's lid */
   const hubAt = plate ? [plate.x, plate.z] : null;

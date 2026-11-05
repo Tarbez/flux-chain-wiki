@@ -7,7 +7,7 @@
   var PUBLIC_BASE = 'https://public.defxn.com';
   var NODES = [['public', PUBLIC_BASE], ['st1', 'https://st1.defxn.com'], ['st2', 'https://st2.defxn.com'], ['st3', 'https://st3.defxn.com'], ['st4', 'https://st4.defxn.com']];
   /* Counts come from walking a source's own cursor pages (the API has no total). Capped so a big source can't hang the page. */
-  var COUNTED = [['identities', 'Identities'], ['networks', 'Networks'], ['miners', 'Miners announcing'], ['publications', 'Publications'], ['documents', 'Documents']];
+  var COUNTED = [['identities', 'Identities'], ['networks', 'Networks'], ['miners', 'Nodes announcing'], ['publications', 'Publications'], ['documents', 'Documents']];
   var COUNT_PAGE = 100, COUNT_PAGES = 5;
   /* The node list is probed on connect and then on every sixth 10 s refresh: whether a node is up changes slowly. */
   var NODE_PROBE_EVERY = 6;
@@ -47,7 +47,7 @@
     ['Publish to the mesh', 'Many independent machines keep a copy and serve it. There is no single server to fail or rent.', 'story-request', 'Publish'],
     ['People use it', 'Anyone can use what you made and check the answer is genuine, without trusting you or us.', 'story-check', 'Use']
   ];
-  /* Record categories in everyday words. A category this map does not know keeps the Miner's own name. */
+  /* Record categories in everyday words. A category this map does not know keeps the node's own name. */
   var KINDS = {
     identity: ['People & names', 'Who someone is, and the names that point to them.', '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6"/>'],
     network: ['Networks', 'The machines that keep the mesh running.', '<circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h10M6 8l5 8M18 8l-5 8"/>'],
@@ -64,8 +64,8 @@
     notification: ['Notifications', 'Alerts sent to people about what changed.', '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>'],
     thread: ['Threads', 'Conversations kept together by topic.', '<path d="M4 6h16M4 12h10M4 18h13"/>']
   };
-  var COUNT_WORDS = { identities: 'identities', networks: 'networks', miners: 'miners', publications: 'publications', documents: 'documents' };
-  /* One plural rule for every counted noun on this page ("1 miner", "2 miners", "1 identity"). The
+  var COUNT_WORDS = { identities: 'identities', networks: 'networks', miners: 'nodes', publications: 'publications', documents: 'documents' };
+  /* One plural rule for every counted noun on this page ("1 node", "2 nodes", "1 identity"). The
      table above holds the PLURAL a count is shown with; the singular is derived from it by the
      English rule below, never typed a second time, so a new kind needs one entry or none. The
      tile's figure is a count of records, so exactly one (and not "100+") takes the singular. */
@@ -117,7 +117,7 @@
       '<div data-explore-steps></div></article>' +
       '<section class="how-work-card explore-live-card" aria-labelledby="explore-live-title">' +
       '<div class="how-work-card-top"><span class="how-work-number">LIVE</span><span class="how-work-signal">READ FROM THE PUBLIC MESH</span></div>' +
-      '<h2 id="explore-live-title">Running on the mesh now</h2>' +
+      '<h2 id="explore-live-title" data-explore-answer>Asking the nodes…</h2>' +
       '<div class="explore-live-body" data-explore-body data-state="kinds"><div class="explore-kinds" data-explore-kinds></div><div class="explore-browse" data-explore-browse hidden></div></div>' +
       '<p class="explore-private" data-explore-private hidden></p></section></div>' +
       '<div class="explore-status" role="status" aria-live="polite"><span class="how-boundary-label"><span class="mesh-explorer-status-dot" aria-hidden="true"></span>PUBLIC MESH</span>' +
@@ -165,7 +165,7 @@
   var WAS = {
     'explore-home': { ':root': 'page:/div:1', '.explore-status': FOOT + '/div:1' },
     'explore-crumbs': { ':root': 'page:/div:1/nav:1', 'breadcrumb-item': 'page:/div:1/nav:1/a:1', 'breadcrumb-item#2': 'page:/div:1/nav:1/span:1' },
-    'explore-hero': { ':root': { key: 'page:/div:1/header:1', self: true }, 'hero-lede': 'page:/div:1/header:1/p:1' },
+    'explore-hero': { ':root': { key: 'page:/div:1/header:1', self: true } },   /* the hero's lede left on 2026-11-05 (the answer moved to .hud-answer), so its pin went with it */
     'explore-raw-view': { ':root': 'page:/div:2' }
   };
 
@@ -187,15 +187,21 @@
     onward.push({ label: 'How the chain works', href: 'route:chain', tone: 'link' });
     return [
       { block: 'custom', id: 'explore-home', was: WAS['explore-home'], mount: function (ctx) {
-        var home = node('div', 'explore-home'); home.setAttribute('data-explore-home', '');
-        home.appendChild(ctx.render({ block: 'breadcrumb', id: 'explore-crumbs', was: WAS['explore-crumbs'], props: { label: 'Your place', items: [{ label: 'Home', href: 'route:zero' }, { label: 'Mesh Explorer' }] } }));
-        home.appendChild(ctx.render({ block: 'hero', id: 'explore-hero', was: WAS['explore-hero'], props: { title: 'Mesh Explorer', density: 'compact',
-          lede: 'The records the public DEFXN machines hold right now, read live. Open a kind to see its latest records.' } }));
+        /* The home is the HUD's left column (css/space-frame.css): kicker, title, the one answer, the two panes as tabs, their body, the
+           status line. The breadcrumb and the hero's lede are gone: the space's path says where you are, and the 3D show says what this is. */
+        var home = node('div', 'explore-home hud-left'); home.setAttribute('data-explore-home', '');
+        home.appendChild(node('p', 'hud-kicker', 'Public mesh · live'));
+        var hero = home.appendChild(ctx.render({ block: 'hero', id: 'explore-hero', was: WAS['explore-hero'], props: { title: 'Mesh Explorer', density: 'compact' } }));
+        var heading = hero.querySelector('h1, h2'); if (heading) heading.classList.add('hud-title');
         var live = node('div'); live.innerHTML = cards();
+        /* the one answer stands under the title, out of the live card; the card keeps a plain name for screen readers */
+        var answerEl = live.querySelector('[data-explore-answer]'), liveCard = live.querySelector('.explore-live-card');
+        liveCard.removeAttribute('aria-labelledby'); liveCard.setAttribute('aria-label', 'Live now');
+        answerEl.removeAttribute('id'); answerEl.className = 'hud-answer'; answerEl.setAttribute('aria-live', 'polite'); home.appendChild(answerEl);
         live.querySelector('[data-explore-steps]').replaceWith(ctx.render(stepsSpec()));
         var panes = ctx.render(panesSpec()), panels = panes.querySelectorAll('[data-ark-part="tabs-content"]');
-        panes.classList.add('explore-cards');
-        panes.querySelector('[data-ark-part="tabs-list"]').classList.add('explore-panes');
+        panes.classList.add('explore-cards', 'hud-body');
+        panes.querySelector('[data-ark-part="tabs-list"]').classList.add('explore-panes', 'hud-tabs');
         Array.prototype.forEach.call(panes.querySelectorAll('[data-ark-part="tabs-trigger"]'), function (tab, i) { tab.setAttribute('data-explore-pane', PANES[i]); });
         var CARD = { live: ['.explore-live-card', '/section:1'], how: ['.explore-how-card', '/article:1'] };
         PANES.forEach(function (pane, i) {
@@ -207,8 +213,9 @@
         var onwardWas = { ':root': { key: FOOT + '/div:2', self: true }, 'button': FOOT + '/div:2/a:1' };
         if (product) onwardWas['button#2'] = { key: FOOT + '/div:2/a:2', self: true };
         onwardWas['button#' + (product ? 3 : 2)] = FOOT + '/div:2/button:1';
+        /* the ways on render here and mount() moves them into the HUD's dock; the fleet's measured numbers (ArkUI.journeyPageBlocks) are no longer drawn here:
+           the HUD's right column carries this page's numbers */
         home.appendChild(ctx.render({ block: 'actions', id: 'explore-onward', was: onwardWas, props: { label: 'Ways on', items: onward } }));
-        (ArkUI.journeyPageBlocks ? ArkUI.journeyPageBlocks('explorer') : []).forEach(function (b) { home.appendChild(ctx.render(b)); });
         return home;
       } },
       { block: 'custom', id: 'explore-raw-view', was: WAS['explore-raw-view'], mount: rawBox }
@@ -223,7 +230,7 @@
   var RAW_HEADER = 'page:/div:2/div:1/header:1', RAW_DOCK = 'page:/div:2/div:1/nav:1';
   var POPOVERS = {
     connect: { label: 'Public mesh', tone: 'secondary', align: 'end', pin: RAW_HEADER + '/details:1', inner: '/section:1',
-      html: '<section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local Miner · 127.0.0.1:8766</option></select></label>' +
+      html: '<section class="mesh-explorer-connect" aria-label="Observation controls"><div class="mesh-explorer-connect-actions"><label for="mesh-origin"><span>OBSERVE FROM</span><select id="mesh-origin"><option value="public">Public mesh · public.defxn.com</option><option value="local">Local node · 127.0.0.1:8766</option></select></label>' +
         '<div class="mesh-explorer-buttons"><button type="button" data-explorer-connect>Reconnect</button><button type="button" data-explorer-refresh disabled>Refresh</button><button type="button" data-explorer-disconnect disabled>Disconnect</button></div>' +
         '<span data-explore-operator-slot></span></div></section>' },
     nodes: { label: '03 Node pulse', tone: 'ghost', align: 'end', side: 'top', dock: true, pin: RAW_DOCK + '/details:1', inner: '/section:1',
@@ -235,7 +242,7 @@
     details: { label: '05 Observation details', tone: 'ghost', align: 'end', side: 'top', dock: true, pin: RAW_DOCK + '/details:3', inner: '/div:1',
       html: '<div class="mesh-explorer-stats" data-explorer-stats aria-live="polite"></div>' },
     topology: { label: '06 Operator topology', tone: 'ghost', align: 'end', side: 'top', dock: true, pin: RAW_DOCK + '/details:4', inner: '/div:1',
-      html: '<div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected Miner; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="' + docHref('docs/operators/verification.md') + '" data-scene-link="reference">How to verify an observation →</a> · <a href="' + docHref('docs/evidence/registry.md') + '" data-scene-link="reference">Evidence registry →</a></p></div>' }
+      html: '<div class="mesh-explorer-reference-body"><p>Topology is operator-only. This view reports only nodes and edges returned by the selected node; absence here does not prove the wider mesh is empty.</p><div data-explorer-topology>Connect with an operator key to inspect topology.</div><p><a href="' + docHref('docs/operators/verification.md') + '" data-scene-link="reference">How to verify an observation →</a> · <a href="' + docHref('docs/evidence/registry.md') + '" data-scene-link="reference">Evidence registry →</a></p></div>' }
   };
   /* The optional operator key: a password field the page reads by id (setup()), in the disclosure's slot. Its label keeps the old key. */
   function operatorKey() {
@@ -276,11 +283,11 @@
         '<span class="mesh-connect-slot" data-explore-popover="connect"></span></header>' +
         '<section class="mesh-observatory" aria-labelledby="mesh-glance-title"><div class="mesh-source-plane"><div class="mesh-explorer-section-head mesh-source-head"><h2 id="mesh-glance-title"><span class="mesh-explorer-kicker">01</span>What this node exposes</h2>' +
         '<div class="mesh-explorer-core-stats" data-explorer-core-stats aria-live="polite"></div><span class="mesh-source-stamp" data-explorer-glance-stamp>—</span></div><div class="mesh-source-filter" data-explorer-source-filter hidden><label class="mesh-source-search"><span>Filter sources</span><input type="search" autocomplete="off" spellcheck="false" placeholder="Search sources…" data-explorer-source-search></label><div class="mesh-source-chips" role="group" aria-label="Filter by access" data-explorer-access-chips></div></div><div class="mesh-source-crumb" data-explorer-crumb hidden></div><div class="mesh-source-field" data-explorer-source-field><p>Waiting for the source catalog.</p></div></div>' +
-        '<aside class="mesh-source-inspector" aria-labelledby="mesh-source-inspector-title"><p class="mesh-explorer-kicker">02 / INSPECTOR</p><h2 id="mesh-source-inspector-title" data-explorer-source-title>No source selected</h2><p data-explorer-source-summary>Connect to inspect the catalog returned by a Miner.</p>' +
+        '<aside class="mesh-source-inspector" aria-labelledby="mesh-source-inspector-title"><p class="mesh-explorer-kicker">02 / INSPECTOR</p><h2 id="mesh-source-inspector-title" data-explorer-source-title>No source selected</h2><p data-explorer-source-summary>Connect to inspect the catalog returned by a node.</p>' +
         '<div class="mesh-source-guide" data-explorer-source-guide></div><dl class="mesh-source-facts"><div><dt>Category</dt><dd data-explorer-source-category>—</dd></div><div><dt>State</dt><dd data-explorer-source-state>—</dd></div><div><dt>Access</dt><dd data-explorer-source-access>—</dd></div></dl>' +
         '<div class="mesh-explorer-controls"><label for="mesh-source">Selected source<select id="mesh-source" disabled><option value="">Connect to load sources</option></select></label>' +
         '<form data-explorer-lookup><label for="mesh-record-id">Exact record ID<input id="mesh-record-id" type="search" autocomplete="off" placeholder="Paste an exact record ID" disabled></label><button type="submit" disabled>Inspect</button></form><div class="mesh-inspect-result" role="status" aria-live="polite" data-explorer-inspect-result hidden></div></div>' +
-        '<p class="mesh-explorer-boundary">A returned record is evidence from this Miner, not automatic proof of a production deployment.</p></aside></section>' +
+        '<p class="mesh-explorer-boundary">A returned record is evidence from this node, not automatic proof of a production deployment.</p></aside></section>' +
         '<nav class="mesh-observatory-dock" aria-label="Observation layers"><span data-explore-popover="nodes"></span><span data-explore-popover="ledger"></span><span data-explore-popover="details"></span><span data-explore-popover="topology"></span></nav>' +
         /* Anchor for reusable content blocks (js/content/components.js); rendering into it is
            centralized in js/main.js's onMount hook, not called here. It stays where it was (inside
@@ -299,11 +306,39 @@
       if (open) open.setAttribute('data-explore-raw-open', '');
       var rawBack = page.querySelector('[data-action="explore-raw-back"]');
       if (rawBack) rawBack.setAttribute('data-explore-raw-back', '');
+      hud(page);
       if (page.querySelector('[data-explorer-connect]')) setup(page);
       return page;
     }
   };
 
+  /* The HUD around the home (docs/design/space/SPACE.md "The page layout"): .hud-right holds three numbers that setup() fills from the
+     live counts, and .hud-dock holds the ways on as chips with "Browse the raw records" as the one .hud-go. The raw view stays a
+     full view of its own; while it is open the right column and the dock hide with the home. */
+  var STATS = [['nodes', 'nodes answering'], ['identities', 'identities'], ['networks', 'networks']];
+  function hud(page) {
+    page.classList.add('hud');
+    var right = node('aside', 'hud-right'), list = node('div', 'hud-stats');
+    right.setAttribute('aria-label', 'The numbers');
+    right.dataset.exploreHud = '';
+    STATS.forEach(function (s) {
+      var cell = node('div', 'hud-stat');
+      cell.dataset.exploreStat = s[0];
+      cell.appendChild(node('b', '', '…'));
+      cell.appendChild(node('span', '', s[1]));
+      list.appendChild(cell);
+    });
+    right.appendChild(list);
+    var dock = node('div', 'hud-dock');
+    dock.dataset.exploreHud = '';
+    var onward = page.querySelector('#explore-onward');
+    if (onward) {
+      Array.from(onward.querySelectorAll('a, button')).forEach(function (el) { el.classList.add(el.getAttribute('data-action') === 'explore-raw' ? 'hud-go' : 'hud-chip'); });
+      dock.appendChild(onward);
+    }
+    var home = page.querySelector('[data-explore-home]');
+    home.after(right, dock);
+  }
   function setup(page) {
     var $ = function (selector) { return page.querySelector(selector); };
     var status = $('[data-explorer-status]');
@@ -326,6 +361,22 @@
     var glanceStamp = $('[data-explorer-glance-stamp]');
     var glance = $('.mesh-observatory');
     var browseBox = $('[data-explore-browse]'), browsing = { category: null, source: null, token: 0 };
+    /* the first view's one answer: how many of the public nodes answer, and how many identities they hold */
+    var answerLine = $('[data-explore-answer]'), nodesUp = null;
+    function answer() {
+      if (!answerLine) return;
+      var parts = [], ids = liveCounts.identities;
+      if (originSelect.value !== 'local' && nodesUp != null) parts.push(nodesUp + ' of ' + NODES.length + ' nodes answering');
+      if (ids) parts.push(countPhrase(ids.capped ? COUNT_PAGE * COUNT_PAGES : ids.count, ids.capped, 'identities'));
+      answerLine.textContent = parts.length ? parts.join(' · ') : 'Asking the nodes…';
+      /* the right column: each number as read, or the ellipsis while it is not read yet (never 0 for a count nobody took) */
+      var nets = liveCounts.networks;
+      [['nodes', originSelect.value !== 'local' && nodesUp != null ? nodesUp + ' of ' + NODES.length : null],
+        ['identities', ids ? (ids.capped ? COUNT_PAGE * COUNT_PAGES + '+' : String(ids.count)) : null],
+        ['networks', nets ? (nets.capped ? COUNT_PAGE * COUNT_PAGES + '+' : String(nets.count)) : null]].forEach(function (pair) {
+        var cell = page.querySelector('[data-explore-stat="' + pair[0] + '"] b'); if (cell) cell.textContent = pair[1] == null ? '…' : pair[1];
+      });
+    }
     var kindsBox = $('[data-explore-kinds]'), privateLine = $('[data-explore-private]'), raw = $('[data-explore-raw]'), liveCounts = {};
     var home = $('[data-explore-home]'), liveBody = $('[data-explore-body]'), stepTimer = 0, step = 0, stepObserver = null;
     var fabricCanvas = $('[data-explore-fabric]');
@@ -363,7 +414,8 @@
     /* The two cards are the panels of Ark tabs that only a phone or tablet draws. From 901px (the width
        css/explore-story.css sets them side by side at) both panels show; below it Ark shows the selected one. */
     var panePanels = Array.from(page.querySelectorAll('#explore-panes > [data-ark-part="tabs-content"]'));
-    var wide = window.matchMedia ? window.matchMedia('(min-width: 901px)') : null;
+    /* On the HUD the left column is 380px at every width, so Ark's tabs show one pane at a time everywhere: no wide case. */
+    var wide = null;
     function syncPanes() { panePanels.forEach(function (panel) { panel.hidden = !(wide && wide.matches) && panel.getAttribute('data-state') !== 'active'; }); }
     if (wide && panePanels.length) {
       syncPanes();
@@ -371,13 +423,14 @@
     }
     function showView(view) {
       page.dataset.view = view; raw.hidden = view !== 'raw'; home.hidden = view === 'raw';
+      Array.from(page.querySelectorAll('[data-explore-hud]')).forEach(function (el) { el.hidden = view === 'raw'; });
       if (view === 'raw') $('[data-explore-raw-back]').focus({ preventScroll: true });
       else $('[data-explore-raw-open]').focus({ preventScroll: true });
     }
     $('[data-explore-raw-open]').addEventListener('click', function () { showView('raw'); });
     $('[data-explore-raw-back]').addEventListener('click', function () { showView('home'); });
     function base() { return originSelect.value === 'local' ? LOCAL_MINER : PUBLIC_BASE; }
-    function originName() { return originSelect.value === 'local' ? 'local Miner' : 'public mesh'; }
+    function originName() { return originSelect.value === 'local' ? 'local node' : 'public mesh'; }
     var source = $('#mesh-source');
     var recordId = $('#mesh-record-id');
     var lookup = $('[data-explorer-lookup]');
@@ -449,7 +502,7 @@
       filterBox.hidden = true; crumb.hidden = true; selectedId = null;
       nodesBox.replaceChildren(); glanceStamp.textContent = '—';
       $('[data-explorer-source-title]').textContent = 'No source selected';
-      $('[data-explorer-source-summary]').textContent = 'Connect to inspect the catalog returned by a Miner.';
+      $('[data-explorer-source-summary]').textContent = 'Connect to inspect the catalog returned by a node.';
       $('[data-explorer-source-category]').textContent = '—';
       $('[data-explorer-source-state]').textContent = '—';
       $('[data-explorer-source-access]').textContent = '—';
@@ -477,7 +530,7 @@
     }
     function errorText(error) {
       if (error && error.name === 'AbortError') return 'The ' + originName() + ' did not respond within 10 seconds.';
-      if (error instanceof TypeError) return 'Cannot reach the ' + originName() + '. ' + (originSelect.value === 'local' ? 'Check that it is running and allows this site origin (CORS).' : 'The node may be offline, or your network is blocking it.');
+      if (error instanceof TypeError) return 'Cannot reach the ' + originName() + '. ' + (originSelect.value === 'local' ? 'Check that it is running and accepts requests from this site.' : 'The node may be offline, or your network is blocking it.');
       return error && error.message || 'The ' + originName() + ' could not be read.';
     }
     function sourceAllowsQuery(item) {
@@ -492,23 +545,23 @@
       if (item.enumeration === 'exact_id_only' || item.visibility === 'exact_id_only') return 'Exact ID only';
       return sourceAllowsQuery(item) ? 'Public query' : safeString(item.visibility, 'Declared');
     }
-    /* Plain-language notes shown beside a selected source. A catalog `description` from the Miner wins. */
+    /* Plain-language notes shown beside a selected source. A catalog `description` from the node wins. */
     var SOURCE_NOTES = {
       'device-keys': 'Public keys a device has registered for an account. Each record ties a device to the key it signs with.',
       'device-revocations': 'Notices that retire a device key so it can no longer be trusted. Look up a key to see whether it was revoked.',
       'dm-devices': 'Devices enrolled to take part in direct messaging.',
       'dm-device-approvals': 'Approvals that let an enrolled device join a direct-message conversation.',
-      'dm-core-coordinates': 'Routing coordinates for direct messages. The Miner declares them but keeps them out of Explorer.',
+      'dm-core-coordinates': 'Routing coordinates for direct messages. The node declares them but keeps them out of Explorer.',
       'dm-memberships': 'Who belongs to a direct-message conversation, as signed membership records.',
       'dm-transitions': 'Signed changes to a conversation, such as members added or removed.',
-      'conversation-runtime': 'Live conversation state. Declared by the Miner but excluded from Explorer reads.',
+      'conversation-runtime': 'Live conversation state. Declared by the node but excluded from Explorer reads.',
       'documents': 'Published documents and their metadata.',
       'support-graph': 'Links showing who supports whom across the economy.',
       'economy-policies': 'Rules that govern how value and rewards are shared.',
       'payouts': 'Recorded payouts made under an economy policy.',
-      'dao-registry': 'The registry of DAOs known to this Miner.',
+      'dao-registry': 'The registry of DAOs known to this node.',
       'dao-attestations': 'Signed statements made by or about a DAO.',
-      'writer-authorizations': 'Grants that let a key write to a source or namespace.',
+      'writer-authorizations': 'Grants that let a key write to a source or a group of sources.',
       'signer-governance': 'Rules and changes for who may sign on a group’s behalf.',
       'checkpoints': 'Agreed snapshots of state that later records can build on.',
       'disputes': 'Challenges raised against a record or decision.',
@@ -517,8 +570,8 @@
       'names': 'Human-readable names and the identity each one points to.',
       'name-revocations': 'Notices that a name no longer points where it did.',
       'accounts': 'Account records. Never listed; you must supply the exact account ID.',
-      'miners': 'Miners announcing themselves on the network.',
-      'networks': 'Named miner-presence networks.',
+      'miners': 'Nodes announcing themselves on the network.',
+      'networks': 'Named networks of nodes.',
       'notifications': 'Notification records. Declared but excluded from Explorer reads.',
       'presence': 'Live presence signals. Declared but excluded from Explorer reads.',
       'publications': 'Items published to the mesh.',
@@ -530,23 +583,23 @@
     var CATEGORY_NOTES = {
       device: 'Device identity records.', dm: 'Direct-message coordination records.', document: 'Published documents.',
       economy: 'Economy rules and payouts.', governance: 'Governance, authorization and dispute records.',
-      identity: 'Identity and naming records.', network: 'Network and miner records.', notification: 'Notification records.',
+      identity: 'Identity and naming records.', network: 'Network and node records.', notification: 'Notification records.',
       presence: 'Presence records.', publication: 'Publication records.', runtime: 'Operator-facing runtime state.',
       social: 'Social graph records.', storage: 'Storage and content records.', thread: 'Thread records.'
     };
     function accessSteps(item) {
       var kind = sourceAccessKind(item);
-      return kind === 'public' ? ['Public query', 'The Miner lists the latest records. Open the Record ledger (04) to browse them, or paste an ID below to open one.']
+      return kind === 'public' ? ['Public query', 'The node lists the latest records. Open the Record ledger (04) to browse them, or paste an ID below to open one.']
         : kind === 'exact' ? ['Exact ID only', 'Records are never listed. Paste the exact record ID below and press Inspect to read just that record.']
         : kind === 'operator' ? ['Operator only', 'Needs an operator key. Add it under Operator access, then reconnect.']
-        : ['Excluded', 'The Miner declares this source but does not serve it through Explorer.'];
+        : ['Excluded', 'The node declares this source but does not serve it through Explorer.'];
     }
     function renderGuide(item) {
       guide.replaceChildren();
-      var note = item.description || SOURCE_NOTES[item.id] || CATEGORY_NOTES[item.category] || 'Declared by this Miner.';
+      var note = item.description || SOURCE_NOTES[item.id] || CATEGORY_NOTES[item.category] || 'Declared by this node.';
       var steps = accessSteps(item);
       [['What it is', safeString(note)], ['How to read it', steps[1]],
-        ['Evidence', 'A returned record is evidence from this Miner, not proof of a production deployment.']].forEach(function (pair) {
+        ['Evidence', 'A returned record is evidence from this node, not proof of a production deployment.']].forEach(function (pair) {
         var block = node('div', 'mesh-source-guide-step');
         block.appendChild(node('h4', '', pair[0])); block.appendChild(node('p', '', pair[1])); guide.appendChild(block);
       });
@@ -590,11 +643,11 @@
       $('[data-explorer-source-category]').textContent = safeString(item.category, 'other');
       $('[data-explorer-source-state]').textContent = safeString(item.state);
       $('[data-explorer-source-access]').textContent = sourceAccess(item);
-      var summary = sourceAllowsQuery(item) ? 'This source can be enumerated from the selected Miner.'
+      var summary = sourceAllowsQuery(item) ? 'The selected node lists the records in this source.'
         : item.enumeration === 'exact_id_only' || item.visibility === 'exact_id_only' ? 'Records remain private until you provide an exact record ID.'
-        : item.visibility === 'operator_only' || item.state === 'restricted' ? 'This source requires operator access from the selected Miner.'
-        : item.visibility === 'excluded' ? 'The Miner declares this source but excludes it from Explorer reads.'
-        : 'The Miner declares this source without a public enumeration path.';
+        : item.visibility === 'operator_only' || item.state === 'restricted' ? 'This source requires operator access from the selected node.'
+        : item.visibility === 'excluded' ? 'The node declares this source but excludes it from Explorer reads.'
+        : 'The node declares this source but does not list it publicly.';
       $('[data-explorer-source-summary]').textContent = summary;
       sourceButtons.forEach(function (button) { button.setAttribute('aria-pressed', String(button.dataset.sourceId === item.id)); });
       renderGuide(item); showInspect('');
@@ -687,7 +740,7 @@
       var first = sources.find(sourceAllowsQuery);
       selectedId = first ? first.id : null;
       renderFilters(); renderField(); renderKinds();
-      if (!first) { source.replaceChildren(node('option', '', 'No enumerable source available')); source.disabled = true; }
+      if (!first) { source.replaceChildren(node('option', '', 'No source here can be listed')); source.disabled = true; }
       else { source.value = first.id; source.disabled = false; inspectSource(first); }
       recordId.disabled = !sources.length;
       lookup.querySelector('button').disabled = !sources.length;
@@ -828,7 +881,7 @@
     }
     function renderDetail(payload, origin) {
       var data = payload.data, record = data.record;
-      if (!record || !record.id) throw new Error('Miner returned no record for that ID.');
+      if (!record || !record.id) throw new Error('node returned no record for that ID.');
       restoreRecord(false,false);
       var before=origin && origin.getBoundingClientRect ? origin.getBoundingClientRect() : null;
       if(origin && origin.isConnected){
@@ -865,12 +918,12 @@
       try {
         var payload = await request('/explorer/v1/record', { sourceId: selected, recordId: id, scope: recordScopes[id] });
         if (token!==generation||requestedDetail!==detailRequest||source.value!==selected||!connected || !page.isConnected) return;
-        if(!payload.data.record || payload.data.record.id!==id || payload.data.record.sourceId!==selected) throw new Error('The Miner returned a different record or source. The requested record is not displayed.');
+        if(!payload.data.record || payload.data.record.id!==id || payload.data.record.sourceId!==selected) throw new Error('The node returned a different record or source. The requested record is not displayed.');
         if (inline) renderInspectRecord(payload); else { renderDetail(payload, origin); resultMessage.textContent = ''; }
       } catch (error) {
         if (token===generation&&requestedDetail===detailRequest&&page.isConnected) {
           if (inline) {
-            var other = originSelect.value === 'local' ? 'public mesh' : 'local Miner';
+            var other = originSelect.value === 'local' ? 'public mesh' : 'local node';
             showInspect(errorText(error) + ' Asked the ' + originName() + ', source ' + selected + '.', 'error',
               { label: 'Try the ' + other, run: function () { retryOnOther(selected, id); } });
           } else resultMessage.textContent = errorText(error);
@@ -886,7 +939,7 @@
         resultMessage.textContent = selectedSource.enumeration === 'exact_id_only' || selectedSource.visibility === 'exact_id_only'
           ? 'This source is exact-ID only. Paste a record ID in the inspector to request it.'
           : selectedSource.visibility === 'operator_only' || selectedSource.state === 'restricted'
-            ? 'This source requires operator access from the selected Miner.'
+            ? 'This source requires operator access from the selected node.'
             : 'This source is declared but cannot be enumerated in this observation.';
         return;
       }
@@ -916,7 +969,7 @@
           box.appendChild(button);records.appendChild(box);
         });
         }
-        resultMessage.textContent = list.length ? list.length + ' records from this Miner' + (lastCursor ? ' · more available through the Explorer API' : '') +
+        resultMessage.textContent = list.length ? list.length + ' records from this node' + (lastCursor ? ' · more available through the Explorer API' : '') +
           (payload.partial ? ' · partial result' : '') : 'This source returned no records in this observation.';
       } catch (error) { if (token === generation && page.isConnected) { if(page.dataset.recordView!=='detail')records.replaceChildren(); resultMessage.textContent = errorText(error); } }
     }
@@ -933,7 +986,7 @@
         topology.appendChild(list);
       } catch (error) { if (page.isConnected) topology.textContent = errorText(error); }
     }
-    /* Miner records live under their network, and an unscoped query reads only the default network.
+    /* node records live under their network, and an unscoped query reads only the default network.
        So the scopes come from the node's own network list, never from a name written here. */
     async function minerScopes() {
       var payload = await request('/explorer/v1/query', { sourceId: 'networks', limit: COUNT_PAGE });
@@ -1011,7 +1064,7 @@
         var result = results[index];
         if (result === null) return;
         liveCounts[entry[0]] = result;
-        var value = result ? String(result.count) + (result.capped ? '+' : '') : 'Unavailable';
+        var value = result ? (result.capped ? cap + '+' : String(result.count)) : 'Unavailable';
         var note = result ? (result.capped ? 'first ' + cap + ' counted' : 'counted from the node') : 'this node could not be read';
         cards.push(statCard(entry[1], value, note));
         if (entry[0] === 'networks' || entry[0] === 'miners') coreCards.push(statCard(entry[1], value, note));
@@ -1027,7 +1080,7 @@
       cards.push(statCard('Node health', safeString(lastHealth && lastHealth.data && lastHealth.data.status, 'Unknown'), 'API ' + API_VERSION));
       coreCards.push(statCard('Node health', safeString(lastHealth && lastHealth.data && lastHealth.data.status, 'Unknown'), 'reported by the node'));
       cards.push(statCard('Counted in', (Date.now() - started) + ' ms', 'live from ' + originName()));
-      stats.replaceChildren.apply(stats, cards); stats.hidden = false; renderKinds();
+      stats.replaceChildren.apply(stats, cards); stats.hidden = false; renderKinds(); answer();
       coreStats.replaceChildren.apply(coreStats, coreCards);
       glanceStamp.textContent = 'UPDATED ' + new Date().toLocaleTimeString();
       return health;
@@ -1045,17 +1098,18 @@
       try {
         var response = await fetch(entry[1] + '/explorer/v1/health', { headers: { accept: 'application/json' }, signal: controller.signal, cache: 'no-store' });
         var payload = await response.json().catch(function () { return null; });
-        if (!response.ok || !payload || payload.apiVersion !== API_VERSION) return { up: false, detail: 'answered, but not as a DEFXN Miner (HTTP ' + response.status + ')' };
+        if (!response.ok || !payload || payload.apiVersion !== API_VERSION) return { up: false, detail: 'answered, but not as a DEFXN node (HTTP ' + response.status + ')' };
         return { up: true, ms: Date.now() - started, detail: safeString(payload.data && payload.data.status, 'reported') };
       } catch (error) {
         return { up: false, detail: error && error.name === 'AbortError' ? 'no answer in 6 seconds' : 'cannot be reached' };
       } finally { window.clearTimeout(timeout); controllers.delete(controller); }
     }
     async function loadNodes(token) {
-      if (originSelect.value === 'local') { nodesBox.replaceChildren(node('p', 'mesh-explorer-result-message', 'Reading your local Miner only. Switch to the public mesh to see the defxn nodes.')); return; }
+      if (originSelect.value === 'local') { nodesBox.replaceChildren(node('p', 'mesh-explorer-result-message', 'Reading your local node only. Switch to the public mesh to see the defxn nodes.')); return; }
       var results = await Promise.all(NODES.map(function (entry) { return probe(entry, token); }));
       if (token !== generation || !page.isConnected) return;
       nodesBox.replaceChildren.apply(nodesBox, NODES.map(function (entry, index) { return nodeRow(entry[0], entry[1], results[index]); }));
+      nodesUp = results.filter(function (r) { return r.up; }).length; answer();
     }
     async function observe() {
       if (!connected || busy || !page.isConnected) return;
@@ -1101,7 +1155,7 @@
     }
     connect.addEventListener('click', start);
     var originLabel = $('[data-explorer-origin-label]');
-    function syncOriginLabel() { originLabel.textContent = originSelect.value === 'local' ? 'Local Miner' : 'Public mesh'; }
+    function syncOriginLabel() { originLabel.textContent = originSelect.value === 'local' ? 'Local node' : 'Public mesh'; }
     originSelect.addEventListener('change', function () { return start(); });
     refresh.addEventListener('click', observe);
     disconnect.addEventListener('click', function () { clearLive(); key.value = ''; setStatus('offline', 'Disconnected', 'No live records are shown.'); });

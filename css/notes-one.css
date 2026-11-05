@@ -1,0 +1,12 @@
+/* Notes (/learnings) on the HUD (css/space-frame.css owns .hud*): this sheet styles only the rows and the reader inside
+   .hud-body, which is the one part that scrolls. Sizes come from the --fs-* scale. */
+.notes-one__rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid hsl(var(--border-default)); }
+.notes-one__row { border-bottom: 1px solid hsl(var(--border-default)); }
+.notes-one__link { display: grid; gap: 2px; padding: 6px 0; font-size: var(--fs-tertiary); line-height: 1.5; color: hsl(var(--text)); text-decoration: none; min-width: 0; }
+.notes-one__title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: hsl(var(--text-strong)); }
+.notes-one__summary { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: hsl(var(--text-muted)); }
+.notes-one__link:hover .notes-one__title, .notes-one__link[aria-current] .notes-one__title { color: hsl(var(--primary)); }
+.notes-one__link:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.notes-one__back { margin-bottom: 11px; }
+.notes-one__reader { font-size: var(--fs-tertiary); }
+.notes-one__empty { margin: 0; font-size: var(--fs-tertiary); color: hsl(var(--text-muted)); }

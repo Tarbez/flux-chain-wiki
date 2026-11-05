@@ -1,0 +1,66 @@
+/* The space as a game (js/space/quest.mjs). Type: 11, 18, 29 on the scale. Colour by role: --primary for progress and the lit tick,
+   --live (a meaning token) for a finished mission, glass for every surface. No complement: the page owns its one dominant action. */
+.quest { position: fixed; inset: 0; pointer-events: none; z-index: 36; font-family: var(--font-sans, system-ui); }
+.quest.hidden { display: none; }
+.quest [hidden] { display: none !important; }
+
+/* who are you? */
+.quest-pick { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: auto; background: hsl(var(--canvas) / .45); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+.quest-pick-box { width: min(760px, 92vw); padding: 28px 28px 22px; background: hsl(var(--surface) / .72); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 10px; animation: quest-rise .45s var(--glide, ease) both; }
+.quest-kicker { margin: 0 0 6px; font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono, monospace); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--primary)); }
+.quest-pick-title { margin: 0 0 18px; font: 700 var(--fs-primary, 29px)/1.1 var(--font-display, inherit); letter-spacing: -.02em; color: hsl(var(--text-strong)); }
+.quest-pick-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.quest-role { display: grid; gap: 6px; align-content: start; min-height: 132px; padding: 16px; text-align: left; cursor: pointer; color: hsl(var(--text));
+  background: hsl(var(--canvas) / .5); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 8px; transition: border-color .2s, transform .2s, background .2s; }
+.quest-role strong { font: 600 var(--fs-secondary, 18px)/1.2 var(--font-sans, inherit); color: hsl(var(--text-strong)); }
+.quest-role span { font-size: var(--fs-tertiary, 11px); line-height: 1.5; color: hsl(var(--text-muted)); }
+.quest-role em { margin-top: auto; font: normal 500 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--primary)); }
+.quest-role:hover, .quest-role:focus-visible { border-color: hsl(var(--primary) / .7); background: hsl(var(--primary) / .08); transform: translateY(-2px); outline: none; }
+.quest-skip { margin-top: 14px; padding: 0; background: none; border: 0; cursor: pointer; font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase;
+  color: hsl(var(--text-muted)); border-bottom: 1px solid hsl(var(--text-strong) / .2); }
+.quest-skip:hover, .quest-skip:focus-visible { color: hsl(var(--text-strong)); outline: none; }
+
+/* the mission panel */
+.quest-panel { position: fixed; left: 24px; top: 104px; width: 260px; padding: 12px 14px 10px; pointer-events: auto;
+  background: hsl(var(--surface) / .62); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 8px; animation: quest-rise .4s var(--glide, ease) both; }
+.quest-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.quest-title { font: 600 var(--fs-tertiary, 11px)/1.4 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--text-strong)); }
+.quest-score { font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); color: hsl(var(--primary)); }
+.quest-bar { height: 3px; margin: 8px 0 10px; background: hsl(var(--text-strong) / .1); border-radius: 2px; overflow: hidden; }
+.quest-bar i { display: block; height: 100%; width: 0; background: hsl(var(--primary)); transition: width .5s var(--glide, ease); }
+.quest-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.quest-list li { display: grid; grid-template-columns: 14px 1fr auto; gap: 8px; align-items: center; font-size: var(--fs-tertiary, 11px); line-height: 1.4; color: hsl(var(--text)); }
+.quest-tick { width: 12px; height: 12px; border: 1.5px solid hsl(var(--text-muted)); border-radius: 3px; transition: background .25s, border-color .25s; }
+.quest-list li.done { color: hsl(var(--text-muted)); }
+.quest-list li.done span { text-decoration: line-through; text-decoration-color: hsl(var(--text-muted) / .6); }
+.quest-list li.done .quest-tick { background: hsl(var(--primary)); border-color: hsl(var(--primary)); box-shadow: 0 0 10px hsl(var(--primary) / .6); }
+.quest-go { padding: 2px 8px; font: 600 var(--fs-tertiary, 11px)/1.3 var(--font-mono, monospace); letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+  color: hsl(var(--primary)); background: none; border: 1px solid hsl(var(--primary) / .5); border-radius: 4px; }
+.quest-go:hover, .quest-go:focus-visible { background: hsl(var(--primary) / .12); outline: none; }
+.quest-foot:empty { display: none; }
+.quest-foot { margin-top: 10px; padding-top: 10px; border-top: 1px solid hsl(var(--text-strong) / .1); display: grid; gap: 8px; }
+.quest-win { margin: 0; font: 600 var(--fs-secondary, 18px)/1.2 var(--font-sans, inherit); color: hsl(var(--live, var(--primary))); }
+.quest-next { justify-self: start; padding: 7px 12px; cursor: pointer; font: 600 var(--fs-tertiary, 11px)/1.3 var(--font-mono, monospace); letter-spacing: .12em; text-transform: uppercase;
+  color: hsl(var(--text-strong)); background: hsl(var(--primary) / .16); border: 1px solid hsl(var(--primary) / .6); border-radius: 5px; }
+.quest-change { margin-top: 8px; padding: 0; background: none; border: 0; cursor: pointer; font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono, monospace); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-faint, var(--text-muted))); }
+.quest-change:hover, .quest-change:focus-visible { color: hsl(var(--text-strong)); outline: none; }
+.quest-reopen { position: fixed; left: 24px; top: 104px; padding: 6px 12px; pointer-events: auto; cursor: pointer; font: 600 var(--fs-tertiary, 11px)/1.3 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase;
+  color: hsl(var(--text-strong)); background: hsl(var(--surface) / .6); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 5px; }
+.quest-panel button:focus-visible, .quest-reopen:focus-visible, .quest-role:focus-visible, .quest-skip:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+
+/* the toast */
+.quest-toast { position: fixed; left: 50%; top: 84px; transform: translate(-50%, -8px); padding: 8px 14px; opacity: 0; pointer-events: none;
+  font: 600 var(--fs-tertiary, 11px)/1.3 var(--font-mono, monospace); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-strong));
+  background: hsl(var(--surface) / .8); border: 1px solid hsl(var(--primary) / .6); border-radius: 999px; box-shadow: 0 0 18px hsl(var(--primary) / .25);
+  transition: opacity .25s, transform .25s var(--glide, ease); }
+.quest-toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@keyframes quest-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (max-width: 760px) {
+  .quest-pick-opts { grid-template-columns: 1fr; }
+  .quest-role { min-height: 0; }
+  .quest-panel { left: 12px; right: 12px; width: auto; top: auto; bottom: 84px; }
+}
+@media (prefers-reduced-motion: reduce) { .quest-pick-box, .quest-panel { animation: none; } .quest-role, .quest-toast, .quest-bar i { transition: none; } }

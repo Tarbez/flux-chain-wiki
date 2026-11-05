@@ -12,12 +12,6 @@ ArkManifest.define({
       "section": "Shared",
       "value": "In one minute"
     },
-    "KICKER": {
-      "label": "Kicker",
-      "kind": "line",
-      "section": "Shared",
-      "value": "How it works · in one minute"
-    },
     "NOTE": {
       "label": "Note under the stage",
       "kind": "line",
@@ -240,12 +234,6 @@ ArkManifest.define({
       "section": "Beat 9",
       "value": "Signed"
     },
-    "BEAT.OF": {
-      "label": "Beat counter ({n} of {total})",
-      "kind": "line",
-      "section": "Controls",
-      "value": "Beat {n} of {total}"
-    },
     "BEATS.LABEL": {
       "label": "Beat list: accessible name",
       "kind": "line",
@@ -270,12 +258,6 @@ ArkManifest.define({
       "section": "Controls",
       "value": "Pause"
     },
-    "NEXT": {
-      "label": "Next (the dominant action while it runs)",
-      "kind": "line",
-      "section": "Controls",
-      "value": "Next"
-    },
     "BACK": {
       "label": "Back",
       "kind": "line",
@@ -286,19 +268,13 @@ ArkManifest.define({
       "label": "Skip to the end",
       "kind": "line",
       "section": "Controls",
-      "value": "Skip to the end"
+      "value": "Skip"
     },
     "RESTART": {
       "label": "Start again",
       "kind": "line",
       "section": "Controls",
       "value": "Start again"
-    },
-    "HINT": {
-      "label": "Keys",
-      "kind": "line",
-      "section": "Controls",
-      "value": "Space pauses. Arrow keys step."
     },
     "END.CTA": {
       "label": "End: the one action",
@@ -311,18 +287,6 @@ ArkManifest.define({
       "kind": "link",
       "section": "End",
       "value": "route:identity"
-    },
-    "END.MORE": {
-      "label": "End: second link",
-      "kind": "line",
-      "section": "End",
-      "value": "Follow a record back"
-    },
-    "END.MORE.HREF": {
-      "label": "End: second link target",
-      "kind": "link",
-      "section": "End",
-      "value": "route:trace"
     },
     "CARD.LABEL": {
       "label": "Card layer: accessible name",
@@ -371,6 +335,84 @@ ArkManifest.define({
       "kind": "line",
       "section": "Card",
       "value": "Open"
+    },
+    "KICKER": {
+      "label": "Kicker above the answer",
+      "kind": "line",
+      "section": "One page",
+      "value": "How it works"
+    },
+    "SHOW.GO": {
+      "label": "The dominant action: plays the show in the 3D space",
+      "kind": "line",
+      "section": "One page",
+      "value": "Play the show"
+    },
+    "ANSWER": {
+      "label": "The answer, first line of the page",
+      "kind": "line",
+      "section": "One page",
+      "value": "You ask. A signed rulebook answers, and anyone can check it."
+    },
+    "PARTS.LABEL": {
+      "label": "Label of the three closer looks",
+      "kind": "line",
+      "section": "One page",
+      "value": "Look closer"
+    },
+    "PART.RESOLVE.NAME": {
+      "label": "Tab: a result",
+      "kind": "line",
+      "section": "One page",
+      "value": "How a result is made"
+    },
+    "PART.RESOLVE.LINE": {
+      "label": "Tab: a result, one line",
+      "kind": "line",
+      "section": "One page",
+      "value": "Two people sign. A resolver, a signed rulebook, answers."
+    },
+    "PART.LAYERS.NAME": {
+      "label": "Tab: layers",
+      "kind": "line",
+      "section": "One page",
+      "value": "Three layers"
+    },
+    "PART.LAYERS.LINE": {
+      "label": "Tab: layers, one line",
+      "kind": "line",
+      "section": "One page",
+      "value": "Each layer has one rule."
+    },
+    "PART.LAYERS.L1": {
+      "label": "Layer 1, short",
+      "kind": "line",
+      "section": "One page",
+      "value": "Kernel: the shared base. It never learns what a record means."
+    },
+    "PART.LAYERS.L2": {
+      "label": "Layer 2, short",
+      "kind": "line",
+      "section": "One page",
+      "value": "Capabilities: tested building blocks. Each ships with its checks."
+    },
+    "PART.LAYERS.L3": {
+      "label": "Layer 3, short",
+      "kind": "line",
+      "section": "One page",
+      "value": "Resolvers: signed rulebooks. Each names its blocks."
+    },
+    "PART.LIFE.NAME": {
+      "label": "Tab: life",
+      "kind": "line",
+      "section": "One page",
+      "value": "A resolver’s life"
+    },
+    "PART.LIFE.LINE": {
+      "label": "Tab: life, one line",
+      "kind": "line",
+      "section": "One page",
+      "value": "A builder takes a resolver from build to inspect."
     }
   }
 });

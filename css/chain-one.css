@@ -1,0 +1,24 @@
+/* THE ONE CHAIN PAGE (/chain, js/pages/world-chain.js) on the game layout: css/space-frame.css owns the columns, the
+   dock and the .hud-* type; this sheet only shapes what sits inside them. The four section buttons sit in .hud-tabs,
+   the records or the open section sit in .hud-body (which scrolls inside itself), and the turn buttons sit in the dock.
+   Sizes come from the type scale (the --fs-* variables). Nothing here places a column: the middle stays the 3D's. */
+
+/* four disclosure buttons; the open one carries the primary tone, so nothing competes with the dock's one action */
+.hud-chain .wc-secrow { display: flex; flex-wrap: wrap; gap: 6px; }
+.hud-chain .wc-secrow button { font: 500 var(--fs-tertiary, 11px)/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; padding: 8px 12px; border-radius: 999px; border: 0;
+  background: transparent; color: hsl(var(--text-muted)); box-shadow: inset 0 0 0 1px hsl(var(--border-default)); cursor: pointer; }
+.hud-chain .wc-secrow button:hover { color: hsl(var(--text-strong)); }
+.hud-chain .wc-secrow button[aria-expanded="true"] { color: hsl(var(--text-strong)); box-shadow: inset 0 0 0 1px hsl(var(--primary)); background: hsl(var(--primary) / .12); }
+.hud-chain .wc-secrow button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+
+/* the body shows one thing: the records, or the open section */
+.hud-chain .wc-recs[hidden], .hud-chain .wc-secpanel[hidden] { display: none; }
+.hud-chain .wc-secpanel .wc-cols { margin-top: 8px; }
+.hud-chain .wc-how { margin: 10px 0 0; }
+.hud-chain .wc-how summary { cursor: pointer; font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.hud-chain .wc-how summary:hover { color: hsl(var(--text-strong)); }
+
+/* the dock: newer, where you are, older */
+.hud-chain .wc-turns { display: flex; align-items: center; gap: 6px; }
+.hud-chain .wc-turns .turn svg { width: 16px; height: 14px; }
+.hud-chain .hud-go[hidden] { display: none; }

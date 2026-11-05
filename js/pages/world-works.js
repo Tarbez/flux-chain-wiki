@@ -1,4 +1,6 @@
-/* The How it works pages and /trace on the 3D world. Ported from docs/home-redesign (concept-views.js, app.js, trace-view.js,
+/* The How it works chapter pages and /trace on the 3D world. How it works is now one page (js/pages/world-minute.js);
+   its closer looks read the step names below from the same manifest, and the chapter routes redirect to it. The three
+   chapter pages stay until the redirects land; the five-idea port (worldMinute) is removed, since no route used it. Ported from docs/home-redesign (concept-views.js, app.js, trace-view.js,
    home-mockup.html) on the shared frame js/pages/world-sheet.js. How it works is one sequence in space: four chapters in
    order (/how-it-works, /how-it-works/resolve, /how-it-works/layers, /how-it-works/life); the camera pans from one to
    the next and the words are meant to leave and arrive sideways in the same direction (docs/home-redesign/app.js
@@ -10,16 +12,12 @@
    js/content/records-sample.js for the records on /trace). Nothing here is live.
 
    WHAT THE WORLD IS TOLD (see world-sheet.js: state() while mounting, select() on a choice, on() for 3D clicks)
-     minute   state { view:'minute',  s:'1'..'5' }  select on a new idea
      resolve  state { view:'resolve', step:1..5 }   select on a new step                   arrow keys move the step
      layers   state { view:'layers',  s:'0'..'2' }  select on a new layer
      life     state { view:'life',    s:'1'..'5' }  select on a new step
      trace    state { view:'trace',   s:<record id> } select on a new record               on('pick'): a record in 3D
 
    REDUCTION TEST (from docs/home-redesign/concept-views.js, app.js and trace-view.js, kept)
-   minute  1 what DEFXN is. 2 Next idea, then See how a result is made. 3 the five ideas, one at a time. 4 the closing line
-     (FXN, DAOs). 5 nothing. 6 nothing. 7 nothing. 8-9 the idea rides in the address. 10 the words read alone; the network
-     only lights what they say.
    resolve 1 how one signed result is made. 2 Next step, then Create your identity. 3 the step in front of you, and that you
      choose whom to trust before you send. 4 the other steps, one line each. 5 nothing. 6 nothing. 7 nothing. 8-9 the step
      rides in the address. 10 an illustration: it says so, and the steps read with no 3D.
@@ -83,37 +81,6 @@
     return out;
   }
   function title(h, key, n) { W.title(h, T(key), n ? T(n) : ''); }
-
-  /* ================================================================ /how-it-works: In one minute */
-  function minuteDef() {
-    var ui = {};
-    return {
-      view: 'minute', key: 'works', titleId: 'ww-minute-title', here: 'WORLDWORKS.HERE', note: 'WORLDWORKS.MINUTE.NOTE',
-      parse: function (q) { return { n: W.clamp(q.get('s'), 1, 5, 1) }; },
-      query: function (st) { return st.n > 1 ? 's=' + st.n : ''; },
-      world: function (st) { return W.state('minute', { s: String(st.n) }); },
-      build: function (ctx) {
-        var f = ctx.f;
-        f.add(node('p', 'eyebrow-dot mono', T('MINUTE.KICKER')));
-        chapters(f, 'MINUTE');
-        var h = f.add(node('h1', 'two'), true); h.id = 'ww-minute-title'; W.title(h, T('MINUTE.TITLE'), T('MINUTE.TITLE2'));
-        ui.lede = f.add(node('p', 'sheet-lede'), true);
-        ui.body = f.add(node('div', 'cbody'), true);
-        ui.foot = foot(f); onPatch(ctx, f.sheet);
-      },
-      render: function (st, ctx) {
-        var n = st.n;
-        ui.lede.textContent = ''; ui.lede.hidden = n !== 1 && n !== 5;
-        if (!ui.lede.hidden) ui.lede.appendChild(node('span', null, T(n === 1 ? 'MINUTE.LEDE.FIRST' : 'MINUTE.LEDE.LAST')));
-        ui.body.textContent = ''; ui.body.appendChild(story(steps('MINUTE', 5), n, 'works', function (i) { return i > 1 ? 's=' + i : ''; }, function (i) { return { n: i }; }));
-        var cta = ui.foot.cta, more = ui.foot.more;
-        if (n < 5) { inPage(cta, 'works', 's=' + (n + 1), { n: n + 1 }); cta.say.textContent = T('MINUTE.CTA.NEXT'); }
-        else { W.fieldTo(cta, 'WORLDWORKS.MINUTE.CTA.RESOLVE.HREF'); delete cta.dataset.patch; cta.say.textContent = T('MINUTE.CTA.RESOLVE'); }
-        more.hidden = n === 1; more.textContent = T('MINUTE.BACK'); if (n > 1) inPage(more, 'works', n - 1 > 1 ? 's=' + (n - 1) : '', { n: n - 1 });
-        W.tags(ctx.f.tags, [{ id: 'focus', name: T('MINUTE.TAG' + n + '.NAME'), sub: T('MINUTE.TAG' + n + '.SUB'), cls: 'hot' }]);
-      }
-    };
-  }
 
   /* ================================================================ /how-it-works/resolve: How a result is made */
   function resolveDef() {
@@ -285,7 +252,6 @@
   }
 
   function page(def) { return W.page(def); }
-  ArkUI.pageModules.worldMinute = page(minuteDef);
   ArkUI.pageModules.worldResolve = page(resolveDef);
   ArkUI.pageModules.worldLayers = page(layersDef);
   ArkUI.pageModules.worldLife = page(lifeDef);

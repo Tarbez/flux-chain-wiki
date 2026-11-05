@@ -24,30 +24,6 @@ ArkManifest.define({
       "section": "Shared",
       "value": "Your chain"
     },
-    "COMMON.BACKNETWORK": {
-      "label": "Shared: back link to the network",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Back to network"
-    },
-    "COMMON.BACKCHAIN": {
-      "label": "Shared: back link to the chain",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Back to chain"
-    },
-    "COMMON.BACKRECORD": {
-      "label": "Shared: back link to the record",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Back to record"
-    },
-    "COMMON.SAMPLE": {
-      "label": "Shared: \"Sample\" tag",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Sample"
-    },
     "COMMON.SIGNED": {
       "label": "Shared: \"Signed\" state",
       "kind": "line",
@@ -60,47 +36,17 @@ ArkManifest.define({
       "section": "Shared",
       "value": "Not signed"
     },
-    "COMMON.REV": {
-      "label": "Shared: short revision",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Rev {n}"
-    },
-    "COMMON.REVISION": {
-      "label": "Shared: revision sentence",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Revision {n}."
-    },
     "COMMON.SIGNEDBY": {
       "label": "Shared: \"signed by\" line",
       "kind": "line",
       "section": "Shared",
       "value": "Signed by {name}"
     },
-    "COMMON.DEFAULTTYPE": {
-      "label": "Shared: default record type",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Record"
-    },
-    "COMMON.KIND": {
-      "label": "Shared: kind line",
-      "kind": "line",
-      "section": "Shared",
-      "value": "{type} · {chain}"
-    },
     "COMMON.MISSING": {
       "label": "Shared: dash for a missing value",
       "kind": "line",
       "section": "Shared",
       "value": "—"
-    },
-    "COMMON.EARLIER": {
-      "label": "Shared: earlier revisions line",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Revisions {a}–{b}, kept on file"
     },
     "COMMON.FACT.TYPE": {
       "label": "Shared: fact label, type",
@@ -119,30 +65,6 @@ ArkManifest.define({
       "kind": "line",
       "section": "Shared",
       "value": "Signed by"
-    },
-    "COMMON.FACT.EARLIER": {
-      "label": "Shared: fact label, earlier revisions line",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Earlier"
-    },
-    "COMMON.FACT.NEXT": {
-      "label": "Shared: fact label, next",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Next in chain"
-    },
-    "COMMON.CONNECTIONS": {
-      "label": "Shared: \"Connections\" label",
-      "kind": "line",
-      "section": "Shared",
-      "value": "Connections"
-    },
-    "COMMON.HISTORY": {
-      "label": "Shared: \"History\" label",
-      "kind": "line",
-      "section": "Shared",
-      "value": "History"
     },
     "FLOW.LABEL": {
       "label": "Flow strip: label",
@@ -228,485 +150,335 @@ ArkManifest.define({
       "section": "The identity flow strip",
       "value": "One identity, many chains"
     },
-    "CHAIN.TITLE": {
+    "ONE.TITLE": {
       "label": "Chain page: heading",
       "kind": "line",
       "section": "Your chain (/chain)",
-      "value": "Your chain."
+      "value": "Sample chain."
     },
-    "CHAIN.SUB": {
-      "label": "Chain page: line under the heading",
+    "ONE.ANSWER.ALL": {
+      "label": "Chain page: answer line, when every record is signed",
       "kind": "line",
       "section": "Your chain (/chain)",
-      "value": "{n} records."
+      "value": "{count}, all signed by your key"
     },
-    "CHAIN.LEDE": {
-      "label": "Chain page: intro",
-      "kind": "text",
-      "section": "Your chain (/chain)",
-      "value": "A record counts once your key signs it. Each one links to the one before it."
-    },
-    "CHAIN.CELL.RECORDS": {
-      "label": "Chain page: cell, records",
+    "ONE.ANSWER.SOME": {
+      "label": "Chain page: answer line, when some records are unsigned",
       "kind": "line",
       "section": "Your chain (/chain)",
-      "value": "Records"
+      "value": "{count}, {s} signed by your key"
     },
-    "CHAIN.CELL.NEWEST": {
-      "label": "Chain page: cell, newest",
+    "ONE.COUNT.ONE": {
+      "label": "Chain page: count of one record",
       "kind": "line",
       "section": "Your chain (/chain)",
-      "value": "Newest"
+      "value": "1 record"
     },
-    "CHAIN.CELL.SIGNED": {
-      "label": "Chain page: cell, \"Signed\" state",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Signed"
-    },
-    "CHAIN.OF": {
-      "label": "Chain page: \"of\" connector",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "{n} of {total}"
-    },
-    "CHAIN.LINKSTO": {
-      "label": "Chain page: \"links to\"",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Links to"
-    },
-    "CHAIN.ISFIRST": {
-      "label": "Chain page: first-record text",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "It is the first record."
-    },
-    "CHAIN.TABS": {
-      "label": "Chain page: tab group name",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Your chain"
-    },
-    "CHAIN.TAB.RECORDS": {
-      "label": "Chain page: tab name, records",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Records"
-    },
-    "CHAIN.TAB.ACTIVITY": {
-      "label": "Chain page: tab name, activity line",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Activity"
-    },
-    "CHAIN.NOACTIVITY": {
-      "label": "Chain page: no-activity text",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "No activity in this sample."
-    },
-    "CHAIN.ACTIVITY": {
-      "label": "Chain page: activity line",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "{title} · by {by}"
-    },
-    "CHAIN.TURN.LABEL": {
-      "label": "Chain page: ring control, label",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Turn the ring"
-    },
-    "CHAIN.TURN.NEWER": {
-      "label": "Chain page: ring control, newer",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Newer record"
-    },
-    "CHAIN.TURN.OLDER": {
-      "label": "Chain page: ring control, older",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Older record"
-    },
-    "CHAIN.CTA": {
-      "label": "Chain page: button",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "View record"
-    },
-    "CHAIN.TAG.KEY": {
-      "label": "Chain page: label drawn in the 3D scene, key",
-      "kind": "line",
-      "section": "Your chain (/chain)",
-      "value": "Your chain"
-    },
-    "CHAIN.TAG.KEYSUB": {
-      "label": "Chain page: label drawn in the 3D scene, keysub",
+    "ONE.COUNT.MANY": {
+      "label": "Chain page: count of records",
       "kind": "line",
       "section": "Your chain (/chain)",
       "value": "{n} records"
     },
-    "CHAIN.TAG.OLDEST": {
-      "label": "Chain page: label drawn in the 3D scene, oldest",
+    "ONE.ROW.REV": {
+      "label": "Chain page: record row: revision",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Revision {n}"
+    },
+    "ONE.LIST": {
+      "label": "Chain page: record list name, for screen readers",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Records, newest first"
+    },
+    "ONE.OF": {
+      "label": "Chain page: under the drum: where you are",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "{n} of {total}"
+    },
+    "ONE.TURN.LABEL": {
+      "label": "Chain page: drum control: group name",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Turn the chain"
+    },
+    "ONE.TURN.NEWER": {
+      "label": "Chain page: drum control: newer",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Newer record"
+    },
+    "ONE.TURN.OLDER": {
+      "label": "Chain page: drum control: older",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Older record"
+    },
+    "ONE.SECTIONS": {
+      "label": "Chain page: section row name, for screen readers",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "About the chosen record"
+    },
+    "ONE.SEC.RECORD": {
+      "label": "Chain page: section: revisions",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Revisions"
+    },
+    "ONE.SEC.OPEN": {
+      "label": "Chain page: section: one record",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "One record"
+    },
+    "ONE.SEC.LINKS": {
+      "label": "Chain page: section: links",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Links"
+    },
+    "ONE.SEC.TRACE": {
+      "label": "Chain page: section: trace",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Trace"
+    },
+    "ONE.CTA": {
+      "label": "Chain page: button",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Open record"
+    },
+    "ONE.REV.THIS": {
+      "label": "Chain page: revisions: this version",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "You are looking at revision {n}."
+    },
+    "ONE.REV.NOREV": {
+      "label": "Chain page: revisions: no revision number",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "This record has no revision number."
+    },
+    "ONE.REV.EARLIER": {
+      "label": "Chain page: revisions: earlier versions",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Revisions {a} to {b} are kept. Nothing is rewritten."
+    },
+    "ONE.REV.NONE": {
+      "label": "Chain page: revisions: no earlier versions",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "No earlier versions."
+    },
+    "ONE.REV.STEP": {
+      "label": "Chain page: revisions: history step",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "{what} by {by}"
+    },
+    "ONE.OPEN.NOCONTENT": {
+      "label": "Chain page: one record: no content",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "No content recorded."
+    },
+    "ONE.FACT.DATE": {
+      "label": "Chain page: one record: fact label, date",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Date"
+    },
+    "ONE.SIG.SUMMARY": {
+      "label": "Chain page: one record: signature disclosure",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "How it is signed"
+    },
+    "ONE.SIG.TYPE": {
+      "label": "Chain page: signature: field 1",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Type"
+    },
+    "ONE.SIG.TITLE": {
+      "label": "Chain page: signature: field 2",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Title"
+    },
+    "ONE.SIG.DATE": {
+      "label": "Chain page: signature: field 3",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Date"
+    },
+    "ONE.SIG.LINKS": {
+      "label": "Chain page: signature: field 4",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Links to"
+    },
+    "ONE.SIG.SIGNATURE": {
+      "label": "Chain page: signature: last field",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Signature"
+    },
+    "ONE.SIG.FIRST": {
+      "label": "Chain page: signature: first record links to nothing",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Nothing. It is the first record."
+    },
+    "ONE.SIG.YOURKEY": {
+      "label": "Chain page: signature: your key",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Your key"
+    },
+    "ONE.SIG.CAPTION": {
+      "label": "Chain page: signature: caption",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Its fields in order, then your signature."
+    },
+    "ONE.SIG.SIGNED": {
+      "label": "Chain page: signature: signed line",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Signed by {name} on {date}. Anyone with your public key can check it."
+    },
+    "ONE.SIG.NOTE": {
+      "label": "Chain page: signature: what it proves",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "A signature shows who signed. It does not prove the words are true."
+    },
+    "ONE.SIG.NONE": {
+      "label": "Chain page: signature: unsigned",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Not signed. A record counts once its key signs it."
+    },
+    "ONE.LINKS.G.LINKSTO": {
+      "label": "Chain page: links: group, links to",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Links to"
+    },
+    "ONE.LINKS.G.LINKEDFROM": {
+      "label": "Chain page: links: group, linked from",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Linked from"
+    },
+    "ONE.LINKS.G.RELATED": {
+      "label": "Chain page: links: group, related",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Related"
+    },
+    "ONE.LINKS.G.SIGNEDBY": {
+      "label": "Chain page: links: group, signed by",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Signed by"
+    },
+    "ONE.LINKS.BEFORE": {
+      "label": "Chain page: links: the record before",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "The record before it"
+    },
+    "ONE.LINKS.AFTER": {
+      "label": "Chain page: links: the record after",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "The record after it"
+    },
+    "ONE.LINKS.NONE.LINKSTO": {
+      "label": "Chain page: links: first record",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Nothing. It is the first record."
+    },
+    "ONE.LINKS.NONE.LINKEDFROM": {
+      "label": "Chain page: links: newest record",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Nothing yet. It is the newest record."
+    },
+    "ONE.LINKS.NONE.RELATED": {
+      "label": "Chain page: links: no related records",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "No related records."
+    },
+    "ONE.LINKS.NONE.SIGNEDBY": {
+      "label": "Chain page: links: unsigned",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Not signed."
+    },
+    "ONE.LINKS.SIGNEDDATE": {
+      "label": "Chain page: links: signed date",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Signed on {date}"
+    },
+    "ONE.TRACE.LEDE": {
+      "label": "Chain page: trace: intro",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Follow the links back to the first record: {count}."
+    },
+    "ONE.TRACE.FIRST": {
+      "label": "Chain page: trace: the first record",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "The first record"
+    },
+    "ONE.TAG.KEY": {
+      "label": "Chain page: label drawn in the 3D scene: the chain",
+      "kind": "line",
+      "section": "Your chain (/chain)",
+      "value": "Your chain"
+    },
+    "ONE.TAG.OLDEST": {
+      "label": "Chain page: label drawn in the 3D scene: oldest",
       "kind": "line",
       "section": "Your chain (/chain)",
       "value": "Oldest"
     },
-    "CHAIN.TAG.NEWEST": {
-      "label": "Chain page: label drawn in the 3D scene, newest",
+    "ONE.TAG.NEWEST": {
+      "label": "Chain page: label drawn in the 3D scene: newest",
       "kind": "line",
       "section": "Your chain (/chain)",
       "value": "Newest"
     },
-    "RECORD.NODESC": {
-      "label": "Revisions page: no-description text",
+    "ONE.STAT.RECORDS": {
+      "label": "Number label: records",
       "kind": "line",
-      "section": "Revisions (/chain/record)",
-      "value": "No description in this sample."
+      "section": "Your chain (/chain)",
+      "value": "Records"
     },
-    "RECORD.TIMELINE": {
-      "label": "Revisions page: timeline label",
+    "ONE.STAT.SIGNED": {
+      "label": "Number label: signed",
       "kind": "line",
-      "section": "Revisions (/chain/record)",
-      "value": "Records by date"
+      "section": "Your chain (/chain)",
+      "value": "Signed"
     },
-    "RECORD.CTA": {
-      "label": "Revisions page: button",
+    "ONE.STAT.NEWEST": {
+      "label": "Number label: newest date",
       "kind": "line",
-      "section": "Revisions (/chain/record)",
-      "value": "Open record"
-    },
-    "RECORD.TAG.NEXT": {
-      "label": "Revisions page: label drawn in the 3D scene, next",
-      "kind": "line",
-      "section": "Revisions (/chain/record)",
-      "value": "Next in chain"
-    },
-    "RECORD.TAG.REV": {
-      "label": "Revisions page: label drawn in the 3D scene, short revision",
-      "kind": "line",
-      "section": "Revisions (/chain/record)",
-      "value": "Rev {n}"
-    },
-    "OPEN.TABS": {
-      "label": "Record page: tab group name",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Record"
-    },
-    "OPEN.TAB.CONTENT": {
-      "label": "Record page: tab name, content",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Content"
-    },
-    "OPEN.TAB.DETAILS": {
-      "label": "Record page: tab name, details",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Details"
-    },
-    "OPEN.TAB.SIGNATURE": {
-      "label": "Record page: tab name, signature",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Signature"
-    },
-    "OPEN.TAB.HISTORY": {
-      "label": "Record page: tab name, \"History\" label",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "History"
-    },
-    "OPEN.CTA": {
-      "label": "Record page: button",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "See connections"
-    },
-    "OPEN.NOCONTENT": {
-      "label": "Record page: no-content text",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "No content in this sample."
-    },
-    "OPEN.DETAILS.CHAIN": {
-      "label": "Record page: details, chain",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Chain"
-    },
-    "OPEN.DETAILS.REVISION": {
-      "label": "Record page: details, revision sentence",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Revision"
-    },
-    "OPEN.DETAILS.EARLIER": {
-      "label": "Record page: details, earlier revisions line",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Earlier"
-    },
-    "OPEN.SIG.TYPE": {
-      "label": "Record page: sig, type",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Type"
-    },
-    "OPEN.SIG.TITLE": {
-      "label": "Record page: sig, heading",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Title"
-    },
-    "OPEN.SIG.DATE": {
-      "label": "Record page: sig, date",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Date"
-    },
-    "OPEN.SIG.LINKS": {
-      "label": "Record page: sig, links",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Links to"
-    },
-    "OPEN.SIG.SIGNATURE": {
-      "label": "Record page: sig, signature",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Signature"
-    },
-    "OPEN.SIG.FIRST": {
-      "label": "Record page: sig, first line",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Nothing: it is first"
-    },
-    "OPEN.SIG.YOURKEY": {
-      "label": "Record page: sig, \"your key\" text",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Your key"
-    },
-    "OPEN.SIG.NOTSIGNED": {
-      "label": "Record page: sig, \"Not signed\" state",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Not signed"
-    },
-    "OPEN.SIG.CAPTION": {
-      "label": "Record page: sig, caption",
-      "kind": "text",
-      "section": "Record (/chain/open)",
-      "value": "One signed entry on a chain. It is small, packed text in a fixed grammar, with the signature last."
-    },
-    "OPEN.SIG.SIGNED": {
-      "label": "Record page: sig, \"Signed\" state",
-      "kind": "text",
-      "section": "Record (/chain/open)",
-      "value": "Signed by {name}, on {date}. The signature is the last field of the record. Anyone with your public key can check it."
-    },
-    "OPEN.SIG.NOTE": {
-      "label": "Record page: sig, note",
-      "kind": "text",
-      "section": "Record (/chain/open)",
-      "value": "A signature shows who signed. It does not show that the words are right."
-    },
-    "OPEN.SIG.NONE": {
-      "label": "Record page: sig, empty text",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Not signed in this sample. A record counts once its key signs it."
-    },
-    "OPEN.HISTORY.STEP": {
-      "label": "Record page: \"History\" label, step",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "{what} by {by}"
-    },
-    "OPEN.HISTORY.KEPT": {
-      "label": "Record page: \"History\" label, kept",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "Revisions {a}–{b} kept on file. Nothing is rewritten."
-    },
-    "OPEN.HISTORY.NONE": {
-      "label": "Record page: \"History\" label, empty text",
-      "kind": "line",
-      "section": "Record (/chain/open)",
-      "value": "No history in this sample."
-    },
-    "LINKS.EYEBROW": {
-      "label": "Connections page: small heading above",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Connections"
-    },
-    "LINKS.SUB": {
-      "label": "Connections page: line under the heading",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "What it links to."
-    },
-    "LINKS.G.LINKSTO": {
-      "label": "Connections page: group, \"links to\"",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Links to"
-    },
-    "LINKS.G.LINKEDFROM": {
-      "label": "Connections page: group, \"linked from\"",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Linked from"
-    },
-    "LINKS.G.EARLIER": {
-      "label": "Connections page: group, earlier revisions line",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Earlier"
-    },
-    "LINKS.G.RELATED": {
-      "label": "Connections page: group, related",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Related"
-    },
-    "LINKS.G.SIGNEDBY": {
-      "label": "Connections page: group, \"signed by\" line",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Signed by"
-    },
-    "LINKS.BEFORE": {
-      "label": "Connections page: record before",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "The record before it"
-    },
-    "LINKS.AFTER": {
-      "label": "Connections page: record after",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "The record after it"
-    },
-    "LINKS.NONE.LINKSTO": {
-      "label": "Connections page: empty text, \"links to\"",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Nothing. It is the first record."
-    },
-    "LINKS.NONE.LINKEDFROM": {
-      "label": "Connections page: empty text, \"linked from\"",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Nothing yet. It is the newest record."
-    },
-    "LINKS.EARLIERNOTE": {
-      "label": "Connections page: earliernote",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Kept on file. Nothing is rewritten."
-    },
-    "LINKS.NONE.EARLIER": {
-      "label": "Connections page: empty text, earlier revisions line",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "No earlier versions in this sample."
-    },
-    "LINKS.NONE.RELATED": {
-      "label": "Connections page: empty text, related",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "No related records in this sample."
-    },
-    "LINKS.RELATEDNOTE": {
-      "label": "Connections page: related-record note",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "{note} · sample"
-    },
-    "LINKS.SIGNEDDATE": {
-      "label": "Connections page: signed-date line",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Signed {date}"
-    },
-    "LINKS.NONE.SIGNEDBY": {
-      "label": "Connections page: empty text, \"signed by\" line",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Not signed in this sample."
-    },
-    "LINKS.LEGEND": {
-      "label": "Connections page: legend",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "What the lines mean"
-    },
-    "LINKS.LEGEND.LINK": {
-      "label": "Connections page: legend, link text",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Chain link"
-    },
-    "LINKS.LEGEND.DOTS": {
-      "label": "Connections page: legend, related-record legend",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Related record"
-    },
-    "LINKS.LEGEND.GHOST": {
-      "label": "Connections page: legend, earlier-version legend",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Earlier version"
-    },
-    "LINKS.LEGEND.KEY": {
-      "label": "Connections page: legend, key",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Signed by your key"
-    },
-    "LINKS.CTA": {
-      "label": "Connections page: button",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Open record"
-    },
-    "LINKS.TAG.GHOSTS": {
-      "label": "Connections page: label drawn in the 3D scene, earlier versions",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Earlier versions"
-    },
-    "LINKS.TAG.GHOSTSSUB": {
-      "label": "Connections page: label drawn in the 3D scene, earlier versions caption",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Kept on file"
-    },
-    "LINKS.TAG.KEY": {
-      "label": "Connections page: label drawn in the 3D scene, key",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Your key"
-    },
-    "LINKS.TAG.SIGNEDIT": {
-      "label": "Connections page: label drawn in the 3D scene, \"signed it\"",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Signed it"
-    },
-    "LINKS.TAG.NOTSIGNED": {
-      "label": "Connections page: label drawn in the 3D scene, \"Not signed\" state",
-      "kind": "line",
-      "section": "Connections (/chain/links)",
-      "value": "Has not signed it"
+      "section": "Your chain (/chain)",
+      "value": "Newest"
     }
   }
 });

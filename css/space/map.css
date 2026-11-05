@@ -1,0 +1,35 @@
+/* The map part: a 160px glass square, bottom-left above the footer. */
+.space-map {
+  position: fixed; left: 24px; bottom: 96px;
+  width: 160px; height: 160px;
+  pointer-events: auto;
+  background: hsl(var(--surface) / .6);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--border-default));
+  border-radius: 8px;
+  overflow: hidden;
+}
+.space-map[hidden] { display: none; }
+.space-map.is-collapsed { width: 32px; height: 32px; }
+.space-map.is-collapsed .space-map__svg { display: none; }
+.space-map__svg { display: block; width: 160px; height: 160px; }
+.space-map__toggle {
+  position: absolute; right: 0; top: 0; width: 32px; height: 32px;
+  border: 0; background: none; cursor: pointer;
+  color: hsl(var(--text-muted));
+  font: var(--fs-tertiary, 11px)/1 var(--font-mono);
+}
+.space-map__toggle:hover { color: hsl(var(--text-strong)); }
+.space-map__toggle:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: -2px; }
+.space-map__links line { stroke: hsl(var(--primary-300)); stroke-width: .6; opacity: .6; }
+.space-map__cone { fill: hsl(var(--primary) / .18); stroke: hsl(var(--primary) / .5); stroke-width: .5; }
+.space-map__place { cursor: pointer; outline: none; opacity: .85; }
+.space-map__kernel { fill: none; stroke: hsl(var(--text)); stroke-width: 1.5; }
+.space-map__net { stroke: none; }
+.space-map__chain { fill: hsl(var(--text-muted)); }
+.space-map__place.is-hovered,
+.space-map__place:hover { opacity: 1; filter: brightness(1.4); }
+.space-map__place.is-focused > *,
+.space-map__place:focus-visible > * { stroke: hsl(var(--primary)); stroke-width: 1.5; }
+.space-map__place.is-focused { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .space-map, .space-map * { transition: none !important; animation: none !important; } }

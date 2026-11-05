@@ -24,71 +24,75 @@
    keyed by seoId, so a row's seoId never changes once published. */
 var ArkSitePages = (function () {
   'use strict';
+  /* The journeys, cut with the pages on 2026-11-05 (owner: about 85 pages down to 22). The previews journey went
+     with its pages (/palette, /treasury, /deposits). */
   var JOURNEYS = [
-    { id: 'understand', title: 'Understand', note: 'What DEFXN is: the overview, how it works, agreements and the operating model' },
-    { id: 'build', title: 'Build', note: 'Resolve something: resolutions, resolvers, your account and the tools that publish' },
-    { id: 'prove', title: 'Prove', note: 'Measured evidence: benchmarks, the live mesh explorer and the evidence standard' },
-    { id: 'run', title: 'Run', note: 'Operate a node: run from source and join a named network' },
-    { id: 'read', title: 'Read', note: 'Notes and articles from the work' },
-    { id: 'preview', title: 'Previews', note: 'Design previews: not live data' }
+    { id: 'understand', title: 'Understand', note: 'What DEFXN is: the grid, your chain and your FXN ID' },
+    { id: 'build', title: 'Build', note: 'Resolve something with resolutions and resolvers' },
+    { id: 'prove', title: 'Prove', note: 'Measured evidence: the live mesh explorer and the network stats' },
+    { id: 'run', title: 'Run', note: 'Get FXN Browser and run a node' },
+    { id: 'read', title: 'Read', note: 'Notes and articles from the work' }
   ];
+  /* The pages that stay after the 2026-11-05 cut. A page that left is a row of RETIRED below, never deleted:
+     its address keeps working and opens the page that now holds it. */
   var PAGES = [
     { key: 'zero', path: '/', label: 'Home', seoId: 'home', journey: 'understand' },
     { key: 'intro', path: '/intro', label: 'Enter the grid', seoId: 'home', journey: null, note: 'The first page of a fresh visit: the network from above, and one card that opens home' },
-    { key: 'about', path: '/about', label: 'Overview', journey: 'understand', lead: true },
-    { key: 'resolutions', path: '/resolutions', label: 'Resolutions', journey: 'build', lead: true, note: 'Every thing you can resolve on the mesh, one page each' },
+    { key: 'works', path: '/how-it-works', label: 'How it works', journey: 'understand', lead: true },
+    { key: 'resolutions', path: '/resolutions', label: 'Resolutions', journey: 'build', lead: true, note: 'Every thing you can resolve on the mesh, one section each' },
     { key: 'learnings', path: '/learnings', label: 'Notes', journey: 'read', lead: true, note: 'Choose an architectural question' },
-    { key: 'explorer', path: '/explore', label: 'Mesh Explorer', journey: 'prove' },
-    { key: 'palette', path: '/palette', label: 'Interface palette', journey: 'preview', lead: true },   /* the lead since /experiments was deleted (owner, 2026-10-24) */
-    { key: 'resolver', path: '/what-is-a-resolver', label: 'What is a resolver?', journey: 'build' },
-    { key: 'resolver-math', path: '/resolver-math', label: 'Resolver math', seoId: 'resolvermath', journey: 'build' },
+    { key: 'explorer', path: '/explore', label: 'Mesh Explorer', journey: 'prove', lead: true },
+    { key: 'stats/now', path: '/stats/now', label: 'Network stats', journey: 'prove' },
     { key: 'resolvers', path: '/resolvers', label: 'Resolvers and capabilities', journey: 'build' },
-    { key: 'references', path: '/start-from-something-real', label: 'Reference resolvers', journey: 'build' },
     { key: 'auth', path: '/auth', label: 'Sign in', journey: null, note: 'Sign in with your FXN ID file; the master account opens after' },
     { key: 'account', path: '/account', label: 'Your account', journey: 'build' },
-    { key: 'account/domains', path: '/account/domains', label: 'Your domains', journey: 'build' },
-    { key: 'bundledeployer', path: '/bundle-deployer', label: 'FXN Bundle Deployer', journey: 'build' },
-    { key: 'treasury', path: '/treasury', label: 'Treasury preview', journey: 'preview' },
-    { key: 'deposits', path: '/deposits', label: 'Deposit preview', journey: 'preview' },
-    /* The stats section (2026-10-24, owner: "/measured is where we show capabilities, benchmarks, live data"): one 3D stage,
-       inner pages. It replaces /stats, /stats/gpu, /stats/ledger and /measured, whose keys stay in js/pages/catalog.js
-       as redirects. Its week pages are not listed here: they come from STATS_RUNS below, one per week that holds a run. */
-    /* the three steps of the stats section, in story order (2026-10-25: reduced from five, "we are repeating ourselves nonstop") */
-    { key: 'stats/now', path: '/stats/now', label: 'Network stats', journey: 'prove', lead: true },
-    { key: 'stats/capabilities', path: '/stats/capabilities', label: 'Operations, measured', journey: 'prove' },
-    { key: 'stats/ceiling', path: '/stats/ceiling', label: 'One node, measured', journey: 'prove' },
-    { key: 'how/ask', path: '/how-deployment-works/ask', label: 'State the request', journey: 'understand' },
-    { key: 'how/work', path: '/how-deployment-works/work', label: 'Agree on the terms', journey: 'understand' },
-    { key: 'how/check', path: '/how-deployment-works/check', label: 'Verify the result', journey: 'understand' },
-    { key: 'reference', path: '/reference', label: 'Canonical reference', journey: null },
-    { key: 'lifecycle', path: '/lifecycle', label: 'Agreement lifecycle', short: 'View the full lifecycle', journey: 'understand', note: 'Follow one request through five signed records' },
-    { key: 'lifecycle/intent', path: '/lifecycle/intent', label: 'Intent / Agreement lifecycle', short: 'Intent', journey: 'understand' },
-    { key: 'lifecycle/offer', path: '/lifecycle/offer', label: 'Offer / Agreement lifecycle', short: 'Offer', journey: 'understand' },
-    { key: 'lifecycle/agreement', path: '/lifecycle/agreement', label: 'Agreement / Agreement lifecycle', short: 'Agreement', journey: 'understand' },
-    { key: 'lifecycle/fulfillment', path: '/lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle', short: 'Fulfillment', journey: 'understand' },
-    { key: 'lifecycle/receipt', path: '/lifecycle/receipt', label: 'Receipt / Agreement lifecycle', short: 'Receipt', journey: 'understand' },
     { key: 'chain', path: '/chain', label: 'Every identity, its own chain', journey: 'understand' },
-    /* the redesign's views (docs/home-redesign/home-mockup.html), each on its own 3D view (js/world/world-host.js VIEW_OF).
-       Pages A: your chain and the identity flow (js/pages/world-chain.js, js/pages/world-identity.js) */
-    { key: 'chain/record', path: '/chain/record', label: 'Revisions', journey: 'understand' },
-    { key: 'chain/open', path: '/chain/open', label: 'Record', journey: 'understand' },
-    { key: 'chain/links', path: '/chain/links', label: 'Connections', journey: 'understand' },
     { key: 'identity', path: '/identity', label: 'Your FXN ID', journey: 'understand' },
-    { key: 'identity/sign', path: '/identity/sign', label: 'Signing in', journey: 'understand' },
-    { key: 'identity/safe', path: '/identity/safe', label: 'Security', journey: 'understand' },
-    { key: 'identity/you', path: '/identity/you', label: 'Your identity', journey: 'understand' },
-    /* Pages B: the network's numbers and how it works (js/pages/world-measure.js, js/pages/world-works.js) */
-    { key: 'fxn', path: '/fxn', label: 'FXN supply', journey: 'understand' },
     { key: 'ring', path: '/ring', label: 'A chain of the network', journey: 'understand' },
-    { key: 'works', path: '/how-it-works', label: 'In one minute', journey: 'understand' },
-    { key: 'works/resolve', path: '/how-it-works/resolve', label: 'How a result is made', journey: 'understand' },
-    { key: 'works/layers', path: '/how-it-works/layers', label: 'Three layers', journey: 'understand' },
-    { key: 'works/life', path: '/how-it-works/life', label: 'Life of a resolver', journey: 'understand' },
-    { key: 'trace', path: '/trace', label: 'Trace a record', journey: 'understand' },
-    { key: 'concept', path: '/concept', label: 'The operating model', journey: 'understand', note: 'Choose the mechanism you want to inspect' },
-    { key: 'dao', path: '/dao', label: 'How DEFXN is governed', journey: 'understand' },
-    { key: 'download', path: '/download', label: 'Get FXN Browser', journey: 'run', lead: true },
-    { key: 'deploy', path: '/deploy', label: 'Create or join a network', journey: 'run' }
+    { key: 'download', path: '/download', label: 'Get FXN Browser', journey: 'run', lead: true }
+  ];
+  /* The pages the 2026-11-05 cut retired: each old key keeps its old address, and opens `to`, the page that holds it now.
+     `query` is what that page reads to open the right section (?s=<section>, ?i=<item>). js/pages/catalog.js turns every row
+     into an ArkUI.pageRedirects entry with the old path as its alias, so a saved link still lands. The module files stay
+     on disk, out of the catalog. `short` and `label` stay because a reader names the old pages by them: ArkUI.lifecycleStages
+     (js/lattice.js, js/pages/lifecycle.js) is derived from the lifecycle/* rows. Keys that are routes derived from content
+     (resolutions/<slug>, concept/<id>) are retired by their family in FAMILIES, not listed here. */
+  var RETIRED = [
+    { key: 'about', path: '/about', label: 'Overview', to: 'zero' },
+    { key: 'palette', path: '/palette', label: 'Interface palette', to: 'zero' },
+    { key: 'treasury', path: '/treasury', label: 'Treasury preview', to: 'zero' },
+    { key: 'deposits', path: '/deposits', label: 'Deposit preview', to: 'zero' },
+    { key: 'reference', path: '/reference', label: 'Canonical reference', to: 'learnings', query: 'open=reference', keep: true },
+    { key: 'how/ask', path: '/how-deployment-works/ask', label: 'State the request', to: 'works' },
+    { key: 'how/work', path: '/how-deployment-works/work', label: 'Agree on the terms', to: 'works' },
+    { key: 'how/check', path: '/how-deployment-works/check', label: 'Verify the result', to: 'works' },
+    { key: 'lifecycle', path: '/lifecycle', label: 'Agreement lifecycle', to: 'works' },
+    { key: 'lifecycle/intent', path: '/lifecycle/intent', label: 'Intent / Agreement lifecycle', short: 'Intent', to: 'works' },
+    { key: 'lifecycle/offer', path: '/lifecycle/offer', label: 'Offer / Agreement lifecycle', short: 'Offer', to: 'works' },
+    { key: 'lifecycle/agreement', path: '/lifecycle/agreement', label: 'Agreement / Agreement lifecycle', short: 'Agreement', to: 'works' },
+    { key: 'lifecycle/fulfillment', path: '/lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle', short: 'Fulfillment', to: 'works' },
+    { key: 'lifecycle/receipt', path: '/lifecycle/receipt', label: 'Receipt / Agreement lifecycle', short: 'Receipt', to: 'works' },
+    { key: 'resolver', path: '/what-is-a-resolver', label: 'What is a resolver?', to: 'resolvers' },
+    { key: 'references', path: '/start-from-something-real', label: 'Reference resolvers', to: 'resolvers' },
+    { key: 'resolver-math', path: '/resolver-math', label: 'Resolver math', to: 'learnings', query: 'open=resolver-math', keep: true },
+    { key: 'concept', path: '/concept', label: 'The operating model', to: 'learnings', query: 'open=concept', keep: true },
+    { key: 'dao', path: '/dao', label: 'How DEFXN is governed', to: 'learnings', query: 'open=dao', keep: true },
+    { key: 'account/domains', path: '/account/domains', label: 'Your domains', to: 'account' },
+    { key: 'bundledeployer', path: '/bundle-deployer', label: 'FXN Bundle Deployer', to: 'account' },
+    { key: 'stats/capabilities', path: '/stats/capabilities', label: 'Operations, measured', to: 'stats/now', query: 's=capabilities' },
+    { key: 'stats/ceiling', path: '/stats/ceiling', label: 'One node, measured', to: 'stats/now', query: 's=ceiling' },
+    { key: 'chain/record', path: '/chain/record', label: 'Revisions', to: 'chain', query: 's=record' },
+    { key: 'chain/open', path: '/chain/open', label: 'Record', to: 'chain', query: 's=open' },
+    { key: 'chain/links', path: '/chain/links', label: 'Connections', to: 'chain', query: 's=links' },
+    { key: 'trace', path: '/trace', label: 'Trace a record', to: 'chain', query: 's=trace' },
+    { key: 'identity/sign', path: '/identity/sign', label: 'Signing in', to: 'identity', query: 's=sign' },
+    { key: 'identity/safe', path: '/identity/safe', label: 'Security', to: 'identity', query: 's=safe' },
+    { key: 'identity/you', path: '/identity/you', label: 'Your identity', to: 'identity', query: 's=you' },
+    { key: 'works/resolve', path: '/how-it-works/resolve', label: 'How a result is made', to: 'works', query: 's=resolve' },
+    { key: 'works/layers', path: '/how-it-works/layers', label: 'Three layers', to: 'works', query: 's=layers' },
+    { key: 'works/life', path: '/how-it-works/life', label: 'Life of a resolver', to: 'works', query: 's=life' },
+    { key: 'fxn', path: '/fxn', label: 'FXN supply', to: 'ring', query: 'i=fxn' },
+    { key: 'deploy', path: '/deploy', label: 'Create or join a network', to: 'download' }
   ];
   /* The dated runs the stats section can show with their figures, and the only source of its week pages. A run is listed
      here when js/content/stats-highlights.js (window.ArkStatsHighlights) holds its figures, because a week page must
@@ -143,10 +147,14 @@ var ArkSitePages = (function () {
   /* the week pages were retired on 2026-10-25 (every stats card names its run and date): js/pages/catalog.js redirects their keys to stats/now */
   /* Routes derived from content registries (js/pages/catalog.js catalogContentRoutes and the
      resolutions loop): their journey comes from what kind of route they are, not a row. */
+  /* `to` (2026-11-05): the family is retired, and each of its keys opens that page; `query` names the key's own section by
+     its slug (resolutions/files opens /resolutions?s=files), or by its whole key with `whole` (concept/depth opens
+     /learnings?open=concept/depth). `keep` (here and in RETIRED): Notes opens that page in place by its own catalog
+     entry (ArkUI.loadPage), so the entry keeps its own module and scripts and only its address moves. */
   var FAMILIES = [
-    { prefix: 'resolutions/', journey: 'build' },
+    { prefix: 'resolutions/', journey: null, to: 'resolutions', query: 's' },
     { prefix: 'article/', journey: 'read' },
-    { prefix: 'concept/', journey: 'understand' }
+    { prefix: 'concept/', journey: null, to: 'learnings', query: 'open', whole: true, keep: true }
   ];
   function row(key) { for (var i = 0; i < PAGES.length; i++) if (PAGES[i].key === key) return PAGES[i]; return null; }
   /* The journey of any catalog key: its row's, else its family's, else null (in no list). */
@@ -161,6 +169,7 @@ var ArkSitePages = (function () {
     journeys: function () { return copy(JOURNEYS); },
     pages: function () { return copy(PAGES); },
     families: function () { return copy(FAMILIES); },
+    retired: function () { return copy(RETIRED); },
     row: function (key) { var r = row(key); return r ? copy(r) : null; },
     statsRuns: function () { return copy(STATS_RUNS); },
     statsWeeks: function (live) { return copy(statsWeeks(live)); },

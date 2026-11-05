@@ -238,13 +238,9 @@ body.picking { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .rx-focus.swap > * { animation: none; } .rx-stack i, .rx-grid button { transition: none; } }
 
 /* ---- cutouts on the intro (css/cutouts.css) ----
-   The scrim is the MaskLayer: the old ::after gradient dimmed the network along with the words. Its knockout sits
-   over the network (the kernel stands at the top centre, js/world/intro-stage.js), its gradient deepens to the foot
-   where the words are. The doors use the shared glass (.tp-panel) instead of their own fill. */
+   No scrim: the world's edge fade darkens the rim under the words (2026-11-05). The doors use the shared glass (.tp-panel) instead of their own fill. */
 .intro-world::after { content:none; }
-.intro-world .intro-scrim { --mk-alpha:.92; --mk-hole-x:50%; --mk-hole-y:34%; --mk-hole-w:32%; --mk-hole-h:30%; z-index:0; }
 .intro-door.tp-panel { --tp-alpha:.62; --tp-blur:12px; background:linear-gradient(135deg, hsl(var(--text-strong) / .05), transparent 60%), hsl(var(--canvas) / var(--tp-alpha)); }
-@media (max-width: 900px) { .intro-world .intro-scrim { --mk-hole-y:22%; --mk-hole-w:60%; --mk-hole-h:22%; } }
 
 /* ---- cutouts on home ----
    The dot grid behind the lead loses a soft ellipse where the heading and the lede stand (the grid MINUS a soft ellipse:
@@ -261,3 +257,43 @@ body.picking { cursor: pointer; }
 }
 /* the rail's fleet run with no verified figure: one quiet line where the tiles go (owner's pick, 2026-10-27) */
 .rx-unverified { margin: 8px 0 0; font: 500 var(--fs-tertiary)/1.4 var(--font-mono); letter-spacing: .08em; color: hsl(var(--text-muted)); }
+
+/* ---- the intro film (js/pages/intro.js filmChrome, js/world2/world2-objects.mjs, 2026-11-05) ----
+   While the film plays the page's words, doors and counts wait off stage (down and clear) and the film's own three parts show:
+   the chapter's words bottom left, the chapter rail along the foot, Skip bottom right. When it ends the page rises in, one part
+   after another. Type: 11, 29 and 18 on the scale. Colour: --primary for the chapter number and the lit rail, nothing else. */
+.intro-world .intro-slot, .intro-world .intro-doors { transition: opacity .7s var(--glide), transform .9s var(--glide), visibility 0s linear 0s; }
+.intro-world .intro-doors { transition-delay: .25s; }
+.intro-world .intro-ledger { transition: opacity .7s var(--glide) .45s, transform .9s var(--glide) .45s; }
+.intro-world.is-film .intro-slot, .intro-world.is-film .intro-doors { opacity: 0; transform: translateY(28px); visibility: hidden; pointer-events: none;
+  transition: opacity .4s var(--glide), transform .4s var(--glide), visibility 0s linear .4s; }
+.intro-world.is-film .intro-doors { transform: translateX(28px); }
+.intro-film, .intro-rail, .intro-skip { position: absolute; z-index: 2; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .6s var(--glide), visibility 0s linear .6s; }
+.intro-world.is-film .intro-film, .intro-world.is-film .intro-rail, .intro-world.is-film .intro-skip { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .6s var(--glide); }
+.intro-film { left: 72px; bottom: 156px; display: grid; gap: 8px; max-width: 520px; pointer-events: none; }
+.intro-film-no { font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono); letter-spacing: .18em; color: hsl(var(--primary)); }
+.intro-film-name { font: 700 var(--fs-primary, 29px)/1.1 var(--font-display); letter-spacing: -.02em; color: hsl(var(--text-strong)); }
+.intro-film-line { margin: 0; font: 400 var(--fs-secondary, 18px)/1.4 var(--font-sans); color: hsl(var(--text-muted)); }
+.intro-world.is-film .intro-film-name, .intro-world.is-film .intro-film-line { animation: intro-film-in .7s var(--glide) both; }
+@keyframes intro-film-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+/* above the site's footer strip (about 62px tall from the bottom), which covers anything lower and takes its clicks */
+.intro-rail { left: 72px; right: 200px; bottom: 92px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.intro-rail-step { display: grid; gap: 8px; padding: 0; text-align: left; background: none; border: 0; color: hsl(var(--text-faint, var(--text-muted))); cursor: pointer; }
+.intro-rail-step i { display: block; height: 2px; background: hsl(var(--text-strong) / .14); transition: background .4s var(--glide); }
+.intro-rail-step span { font-size: var(--fs-tertiary, 11px); letter-spacing: .14em; text-transform: uppercase; }
+.intro-rail-step.done i { background: hsl(var(--primary) / .5); }
+.intro-rail-step[aria-current="step"] { color: hsl(var(--text-strong)); }
+.intro-rail-step[aria-current="step"] i { background: hsl(var(--primary)); }
+.intro-rail-step:focus-visible, .intro-skip:focus-visible, .intro-replay:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
+.intro-skip { right: 64px; bottom: 84px; padding: 8px 14px; font-size: var(--fs-tertiary, 11px); letter-spacing: .16em; text-transform: uppercase;
+  color: hsl(var(--text-strong)); background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 4px; cursor: pointer;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.intro-replay { justify-self: start; padding: 0; margin-top: 2px; font-size: var(--fs-tertiary, 11px); letter-spacing: .14em; text-transform: uppercase;
+  color: hsl(var(--text-muted)); background: none; border: 0; border-bottom: 1px solid hsl(var(--text-strong) / .2); cursor: pointer; }
+.intro-replay:hover { color: hsl(var(--text-strong)); }
+@media (max-width: 900px) {
+  .intro-film { left: 24px; right: 24px; bottom: 140px; }
+  .intro-rail { left: 24px; right: 24px; bottom: 116px; }
+  .intro-rail-step span { display: none; }
+  .intro-skip { right: 24px; bottom: 72px; }
+}

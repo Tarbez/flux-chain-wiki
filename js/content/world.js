@@ -44,6 +44,10 @@ var ArkWorld = (function () {
       contrast: [0, 1, 0.32, 0.01, 'Contrast'],
       fogStart: [0.3, 3, 0.93, 0.01, 'Haze starts (times the view distance)'],
       fogEnd: [0.6, 6, 2.4, 0.05, 'Haze is full (times the view distance)'],
+      /* the edge fade (fxn-3d WORLD.knobs edgefade, edgestart; the engine's own default is .8 from .6). The page paints two layers, its colour
+         and this world (owner, 2026-11-05), so the dark scrim that kept the text readable is now this fade: stronger, and nearer the centre. */
+      edgeFade: [0, 1, 1, 0.01, 'Edge fade (how dark the rim gets)'],
+      edgeStart: [0.1, 1, 0.38, 0.01, 'Edge fade starts (from the centre)'],
       grain: [0, 1, 1, 0.05, 'Surface grain'],
       logoLight: [0, 60, 22, 0.5, 'Ground logo light'],
       logoReach: [2, 40, 16, 0.5, 'Ground logo light reach'],

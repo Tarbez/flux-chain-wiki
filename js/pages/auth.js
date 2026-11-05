@@ -35,7 +35,11 @@
    own card). It is blank until you press "Create a new identity", then it builds and does each step's part:
    docs/design/auth/FXN-ID-CARD.md.
 
-   Layout: css/auth.css. */
+   On the game layout since 2026-11-05 (docs/design/space/SPACE.md "The page layout"): the words are .hud-left, the
+   right column holds three real facts (the step, the network, whether the file is open), and the dock holds the four
+   steps as chips and the state's one dominant action (.hud-go, moved out of the body when the body is built). The
+   create wizard, the panel's form and every card stay in the body. Show: js/space/shows/auth.mjs (captions only).
+   Layout: css/space-frame.css (.hud*), then css/auth.css. */
 (function () {
   'use strict';
   var SVG = function (paths, view) { return '<svg viewBox="' + (view || '0 0 24 24') + '" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>'; };
@@ -142,7 +146,7 @@
   ArkUI.pageModules.auth = {
     mount: function (host) {
       var session = ArkUI.openAccountSession();
-      var page = el('section', 'world-page auth-world');
+      var page = el('section', 'world-page auth-world hud hud-auth');
       page.setAttribute('aria-labelledby', 'auth-title');
       /* the frame the 3D is fitted to (world-host.js frame()): the open room between the words and the rail. It comes
          first in the page, because the sign-in panel's own root also carries a data-stage attribute. */
@@ -158,23 +162,33 @@
       markVar(); if (!window.DEFXN_MARK && window.ArkWorldHost && window.ArkWorldHost.whenReady) window.ArkWorldHost.whenReady(markVar);
 
       /* ---- the words ---- */
-      var words = el('div', 'auth-words rise'); words.setAttribute('data-ui', '');
-      var eyebrow = el('p', 'auth-eyebrow mono'); eyebrow.appendChild(el('i')); eyebrow.appendChild(el('b', 'dash')); eyebrow.appendChild(document.createTextNode('FXN ID · Sign in'));
-      var title = el('h1'); title.id = 'auth-title'; var t1 = el('b'), t2 = el('span'); title.appendChild(t1); title.appendChild(t2);
-      var lede = el('p', 'auth-lede');
-      var body = el('div', 'auth-body');
+      var words = el('div', 'auth-words hud-left rise'); words.setAttribute('data-ui', '');
+      var eyebrow = el('p', 'auth-eyebrow hud-kicker mono'); eyebrow.appendChild(el('i')); eyebrow.appendChild(el('b', 'dash')); eyebrow.appendChild(document.createTextNode('FXN ID · Sign in'));
+      var title = el('h1', 'hud-title'); title.id = 'auth-title'; var t1 = el('b'), t2 = el('span'); title.appendChild(t1); title.appendChild(t2);
+      var lede = el('p', 'auth-lede hud-answer');
+      var body = el('div', 'auth-body hud-body');
       words.appendChild(eyebrow); words.appendChild(title); words.appendChild(lede); words.appendChild(body);
       page.appendChild(words);
 
-      /* ---- the rail ---- */
-      var rail = el('ol', 'auth-rail rise'); rail.dataset.rise = 'side'; rail.setAttribute('aria-label', 'Sign-in steps');
+      /* ---- the right column: three facts of the real state (the step, the network, the session) ---- */
+      var right = el('div', 'hud-right rise'), stats = el('dl', 'hud-stats'); right.appendChild(stats); page.appendChild(right);
+      function stat(value, label) { var d = el('div', 'hud-stat'); d.appendChild(el('b', null, value)); d.appendChild(el('span', null, label)); stats.appendChild(d); }
+      function statsPaint(s, r) {
+        stats.textContent = '';
+        stat((Math.min(r.at, STEPS.length - 1) + 1) + ' of ' + STEPS.length, 'Step');
+        stat(network.label || '\u2014', 'Network');
+        stat(s === 'connected' || s === 'offline' ? 'Open' : 'Closed', 'FXN ID file');
+      }
+      /* ---- the dock: the four steps as chips, lit as you move, and the state's one dominant action ---- */
+      var dock = el('div', 'hud-dock'); page.appendChild(dock);
+      var rail = el('ol', 'auth-rail hud-chips'); rail.setAttribute('aria-label', 'Sign-in steps');
       var railItems = STEPS.map(function (s, i) {
-        var li = el('li', 'auth-step'); var dot = el('span', 'auth-step-dot'); dot.innerHTML = ICON.check;
+        var li = el('li', 'auth-step hud-chip'); var dot = el('span', 'auth-step-dot'); dot.innerHTML = ICON.check;
         var txt = el('div', 'auth-step-words'); txt.appendChild(el('small', 'mono', '0' + (i + 1))); txt.appendChild(el('b', null, s[0])); var line = el('span', 'auth-step-line', s[1]); txt.appendChild(line);
         li.appendChild(dot); li.appendChild(txt); rail.appendChild(li);
         return { li: li, line: line, base: s[1] };
       });
-      page.appendChild(rail);
+      dock.appendChild(rail);
 
       /* the panel lives in this page while it is mounted (/account takes it back when it mounts); hidden except in the
          file state, where its form is the page's form */
@@ -351,6 +365,7 @@
           it.line.textContent = r.lines[i] || it.base;
         });
         if (s === 'connected') railItems[3].li.classList.add('is-here');
+        statsPaint(s, r);
       }
 
       /* ---- the bodies of the five states ---- */
@@ -676,6 +691,10 @@
         body.textContent = '';
         body.appendChild(BODY[s]());
         wireExplain(body);
+        /* the state's dominant action (the first .auth-main the body built) stands in the dock; in the file state it is the
+           panel's own Open button, which stays in its form */
+        [].slice.call(dock.querySelectorAll('.hud-go')).forEach(function (n) { n.remove(); });
+        var go = body.querySelector('.auth-main'); if (go) { go.classList.add('hud-go'); dock.appendChild(go); }
         var moveIn = changed || s === 'create';
         if (moveIn && !document.hidden && body.animate && !(ArkUI.prefersReducedMotion && ArkUI.prefersReducedMotion())) {
           /* motion only (never a fade): a new state rises in; a wizard step slides in from the side it comes from */

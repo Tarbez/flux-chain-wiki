@@ -1,7 +1,7 @@
-/* One page's copy. Edit it in admin.html, or by hand: keep the object valid JSON. */
+/* One page's copy. Edit it in admin.html, or by hand: keep the object in the shape admin.html reads. */
 ArkManifest.define({
   "id": "worldstats",
-  "title": "Stats pages",
+  "title": "Stats page",
   "route": "/stats/now",
   "group": "page",
   "meta": {},
@@ -46,61 +46,37 @@ ArkManifest.define({
       "label": "No reading: interactions",
       "kind": "line",
       "section": "Why there is no reading",
-      "value": "The fleet does not stream interactions yet."
+      "value": "The nodes do not stream live requests yet."
     },
     "PULSE.WAIT": {
       "label": "Fleet pulse: waiting",
       "kind": "line",
       "section": "Why there is no reading",
-      "value": "Asking the fleet pulse."
+      "value": "Asking the nodes."
     },
     "PULSE.HTTP": {
       "label": "Fleet pulse: answered with an error",
       "kind": "line",
       "section": "Why there is no reading",
-      "value": "The fleet pulse answered HTTP {code}."
+      "value": "The nodes’ self-check answered HTTP {code}."
     },
     "PULSE.TIMEOUT": {
       "label": "Fleet pulse: no answer in time",
       "kind": "line",
       "section": "Why there is no reading",
-      "value": "The fleet pulse did not answer in 6 seconds."
+      "value": "The nodes’ self-check did not answer in 6 seconds."
     },
     "PULSE.SHAPE": {
       "label": "Fleet pulse: answer in a shape the page does not read",
       "kind": "line",
       "section": "Why there is no reading",
-      "value": "The fleet pulse answered in a shape this page does not read."
+      "value": "The nodes’ self-check answered in a shape this page does not read."
     },
     "PULSE.OFFLINE": {
       "label": "Fleet pulse: not reachable",
       "kind": "line",
       "section": "Why there is no reading",
-      "value": "The fleet pulse could not be reached."
-    },
-    "NOW.ROW.PULSE": {
-      "label": "Now: row, the fleet self-check",
-      "kind": "line",
-      "section": "Now",
-      "value": "Fleet self-check"
-    },
-    "CEILING.STRIP.CORES": {
-      "label": "Ceiling: cell, server cores in use",
-      "kind": "line",
-      "section": "Ceiling",
-      "value": "Server cores used"
-    },
-    "CEILING.CORES": {
-      "label": "Ceiling: cores in use, of all",
-      "kind": "line",
-      "section": "Ceiling",
-      "value": "{used} of {all}"
-    },
-    "FIG.ONE": {
-      "label": "Figure: rate at one connection",
-      "kind": "line",
-      "section": "Weekly runs",
-      "value": "One connection"
+      "value": "The nodes’ self-check could not be reached."
     },
     "UNIT.MS": {
       "label": "Unit: milliseconds",
@@ -114,239 +90,23 @@ ArkManifest.define({
       "section": "Weekly runs",
       "value": "swaps/s"
     },
-    "KPI.PULSE.SUB": {
-      "label": "Dashboard: under the self-check rate: nodes that answered and the age of the answer",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "{ok} of {total} nodes, {age}"
-    },
-    "STORY.CEILING.LIMIT.SUB": {
-      "label": "Story: step 3, under the limit",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Sending one result to {peers} replicas takes {times} times as long as resolving it ({resolve} ms), and it is not pipelined yet. Measured in {record}."
-    },
-    "STORY.CEILING.LIMIT": {
-      "label": "Story: step 3, the fact that says what limits it",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "What limits it"
-    },
-    "STORY.NODE.MANY": {
-      "label": "Story: unit, nodes",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "nodes"
-    },
-    "STORY.NODE.ONE": {
-      "label": "Story: unit, one node",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "node"
-    },
-    "STORY.NOW.NODES": {
-      "label": "Story: step 1, a fact",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Nodes"
-    },
-    "STORY.NOW.STORES": {
-      "label": "Story: step 1, a fact",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Records stored"
-    },
-    "STORY.NOW.TRANSFERS": {
-      "label": "Story: step 1, the transfers block and fact",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Transfers"
-    },
-    "STORY.NOW.SWAPS": {
-      "label": "Story: step 1, the swaps block",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Swaps"
-    },
-    "STORY.NOW.MEANS": {
-      "label": "Story: step 1, what the answer measures",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Every node at the same time, each measured inside its own machine with no network, then added up."
-    },
-    "STORY.NOW.Q": {
-      "label": "Story: step 1, the question",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "What do all the nodes do at once?"
-    },
-    "STORY.NOW.NAME": {
-      "label": "Story: step 1, short name",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "The network"
-    },
-    "STORY.STEPS": {
-      "label": "Story: the stepper's name for screen readers",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "The three steps"
-    },
-    "STORY.NEXT": {
-      "label": "Story: a step's action, the next question",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Next: {q}"
-    },
-    "STORY.SOURCE": {
-      "label": "Story: the line under a card, record, date and conditions",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "{record} · {date}"
-    },
-    "STORY.CAPABILITIES.NAME": {
-      "label": "Story: step 1, short name",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Capabilities"
-    },
-    "STORY.CAPABILITIES.Q": {
-      "label": "Story: step 1, the question",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "How fast is each operation?"
-    },
-    "STORY.CAPABILITIES.PICK": {
-      "label": "Story: step 1, name of the operation chips",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Operation"
-    },
-    "STORY.CAPABILITIES.MEANS": {
-      "label": "Story: step 1, what the answer measures",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "The fastest way to run {op}: {variant}. One machine, no network."
-    },
-    "STORY.CAPABILITIES.NOTBUILT": {
-      "label": "Story: step 1, the fact that lists what is not built",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Not built yet"
-    },
-    "STORY.NOTBUILT.TAG": {
-      "label": "Story: step 1, the label under a dotted outline",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "not built"
-    },
-    "STORY.CEILING.NAME": {
-      "label": "Story: step 3, short name",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "One node"
-    },
-    "STORY.CEILING.Q": {
-      "label": "Story: step 3, the question",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "How much does one node take, through the network?"
-    },
-    "STORY.CEILING.MEANS": {
-      "label": "Story: step 3, what the answer measures",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "At {n} connections, through the real WebSocket wire into one node on an {machine}."
-    },
-    "STORY.CONN.ONE": {
-      "label": "Story: step 3, one connection",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "{n} connection"
-    },
-    "STORY.CONN.MANY": {
-      "label": "Story: step 3, many connections",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "{n} connections"
-    },
-    "STORY.CORE.ONE": {
-      "label": "Story: step 4, one core",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "{n} core"
-    },
-    "STORY.CORE.MANY": {
-      "label": "Story: step 4, many cores",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "{n} cores"
-    },
-    "STORY.UNIT.TRANSFERS": {
-      "label": "Story: unit, transfers a second",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "transfers/s"
-    },
-    "STORY.UNIT.RECORDS": {
-      "label": "Story: unit, records a second",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "records/s"
-    },
-    "STORY.KEY.CUBE.RATE": {
-      "label": "Story: legend, a cube on a rate",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "One cube = {n} a second"
-    },
-    "STORY.KEY.CUBE.SWAPS": {
-      "label": "Story: legend, a cube on a swap rate",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "One cube = {n} swaps a second"
-    },
-    "STORY.KEY.NOTBUILT": {
-      "label": "Story: legend, a dotted outline",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Dotted outline = not built yet"
-    },
-    "STORY.KEY.HIGHEST": {
-      "label": "Story: legend, the highest column",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Highest"
-    },
-    "STORY.KEY.LIVE": {
-      "label": "Story: legend, the live line",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Dotted line = live readings, none yet"
-    },
-    "STORY.LIVE.TAG": {
-      "label": "Story: label of the live line",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Live readings"
-    },
     "UNIT.OPS.S": {
       "label": "Dashboard: unit, operations a second",
       "kind": "line",
       "section": "Dashboard",
       "value": "ops/s"
     },
+    "UNIT.REQ.S": {
+      "label": "Unit: requests a second",
+      "kind": "line",
+      "section": "Live",
+      "value": "requests/s"
+    },
     "LEGEND.LABEL": {
       "label": "Dashboard: name of the legend of the 3D",
       "kind": "line",
       "section": "Dashboard",
       "value": "How to read the 3D"
-    },
-    "LEGEND.CHOSEN": {
-      "label": "Dashboard: legend, the chosen capability",
-      "kind": "line",
-      "section": "Dashboard",
-      "value": "Chosen"
     },
     "LIVE.WAIT": {
       "label": "Live: waiting",
@@ -450,12 +210,6 @@ ArkManifest.define({
       "section": "Why there is no reading",
       "value": "The benchmark runs could not be read."
     },
-    "UNIT.REQ.S": {
-      "label": "Unit: requests a second",
-      "kind": "line",
-      "section": "Live",
-      "value": "requests/s"
-    },
     "NOW.LIVE.SUB": {
       "label": "Now: under the live rate",
       "kind": "line",
@@ -466,31 +220,13 @@ ArkManifest.define({
       "label": "Now: the latest benchmark run",
       "kind": "line",
       "section": "Live",
-      "value": "Latest benchmark run"
+      "value": "Newest test run"
     },
     "NOW.RUN.SUB": {
       "label": "Now: under the latest run",
       "kind": "line",
       "section": "Live",
       "value": "{kind} run, week {week}, {date}. {device}"
-    },
-    "STORY.KEY.BEADS": {
-      "label": "Legend: one bead for each interaction",
-      "kind": "line",
-      "section": "Live",
-      "value": "One bead = one interaction, the latest {n}"
-    },
-    "STORY.LIVE.BEADS": {
-      "label": "Label under the live line, with beads",
-      "kind": "line",
-      "section": "Live",
-      "value": "latest {n}"
-    },
-    "CAP.LIVE.TITLE": {
-      "label": "Operations: the live table",
-      "kind": "line",
-      "section": "Live",
-      "value": "Each capability, live"
     },
     "CAP.LIVE.META": {
       "label": "Operations: the live table window",
@@ -502,25 +238,13 @@ ArkManifest.define({
       "label": "Operations: live table column",
       "kind": "line",
       "section": "Live",
-      "value": "Capability"
-    },
-    "CAP.COL.P95": {
-      "label": "Operations: live table column",
-      "kind": "line",
-      "section": "Live",
-      "value": "p95"
-    },
-    "CAP.COL.ROOM": {
-      "label": "Operations: live table column",
-      "kind": "line",
-      "section": "Live",
-      "value": "Headroom"
+      "value": "Operation"
     },
     "CEIL.RES": {
       "label": "One node: resolver load now",
       "kind": "line",
       "section": "Live",
-      "value": "Resolvers now"
+      "value": "Swaps through the nodes now"
     },
     "CEIL.RES.SUB": {
       "label": "One node: under resolver load",
@@ -532,13 +256,343 @@ ArkManifest.define({
       "label": "One node: the newest ceiling run",
       "kind": "line",
       "section": "Live",
-      "value": "Newest ceiling run"
+      "value": "Newest load test"
     },
     "CEIL.RUN.SUB": {
       "label": "One node: under the newest ceiling run",
       "kind": "line",
       "section": "Live",
-      "value": "{run} at {n} connections, {date}. {device}"
+      "value": "{run}, {n} connections, {date}. {device}"
+    },
+    "TITLE": {
+      "label": "Stats: the title",
+      "kind": "line",
+      "section": "Page",
+      "value": "Network stats"
+    },
+    "DEVNET": {
+      "label": "Stats: beside the title, the network this page reads (said once per page)",
+      "kind": "line",
+      "section": "Page",
+      "value": "Devnet"
+    },
+    "MORE": {
+      "label": "Stats: the disclosure that holds a section’s detail",
+      "kind": "line",
+      "section": "Page",
+      "value": "More"
+    },
+    "SEC.NOW": {
+      "label": "Section name: now",
+      "kind": "line",
+      "section": "Now",
+      "value": "Now"
+    },
+    "SEC.THROUGHPUT": {
+      "label": "Section name: throughput",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Throughput"
+    },
+    "SEC.OPS": {
+      "label": "Section name: operations",
+      "kind": "line",
+      "section": "Operations",
+      "value": "Operations"
+    },
+    "NOW.COUNT": {
+      "label": "Now: nodes that answered, of all",
+      "kind": "line",
+      "section": "Now",
+      "value": "{ok} of {total}"
+    },
+    "NOW.UNIT": {
+      "label": "Now: unit after the count",
+      "kind": "line",
+      "section": "Now",
+      "value": "nodes answering"
+    },
+    "NOW.AGE": {
+      "label": "Now: when the nodes answered",
+      "kind": "line",
+      "section": "Now",
+      "value": "Checked {age}"
+    },
+    "NOW.NONE": {
+      "label": "Now: no node feed is live",
+      "kind": "line",
+      "section": "Now",
+      "value": "Nothing is live yet"
+    },
+    "NOW.ROW.PULSE": {
+      "label": "Now: the nodes’ hourly self-check rate",
+      "kind": "line",
+      "section": "Now",
+      "value": "Self-check rate"
+    },
+    "NOW.LIVE": {
+      "label": "Now: live requests over every operation",
+      "kind": "line",
+      "section": "Now",
+      "value": "Live requests"
+    },
+    "NOW.SOURCE": {
+      "label": "Now: where the reading comes from",
+      "kind": "line",
+      "section": "Now",
+      "value": "Live, from each node’s hourly self-check"
+    },
+    "THRU.MEANS": {
+      "label": "Throughput: what the headline measures, five words at most",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Into one node, through the network"
+    },
+    "THRU.SOURCE": {
+      "label": "Throughput: the source in plain words",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Lab run on an {machine}, {date}"
+    },
+    "THRU.RUN": {
+      "label": "Throughput: the run id, behind More",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Run {record}"
+    },
+    "THRU.CAVEAT": {
+      "label": "Throughput: the conditions, behind More",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Client and node ran on one machine. Swaps move no balance yet, so real use will be slower."
+    },
+    "THRU.NODATA": {
+      "label": "Throughput: the data file did not load",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "The throughput data file did not load."
+    },
+    "THRU.CONNS": {
+      "label": "Throughput: connections at the headline",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Connections at the top"
+    },
+    "THRU.ONE": {
+      "label": "Throughput: rate at one connection",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "One connection gets {n} swaps/s."
+    },
+    "THRU.CORES": {
+      "label": "Throughput: server cores in use at the top",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Server cores used"
+    },
+    "THRU.CORES.OF": {
+      "label": "Throughput: cores used, of all",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "{used} of {all}"
+    },
+    "THRU.LIMIT": {
+      "label": "Throughput: what limits it",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "What limits it"
+    },
+    "THRU.LIMIT.SUB": {
+      "label": "Throughput: under what limits it",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Sending one result to {peers} copies takes {times} times as long as resolving it ({resolve} ms). Sends do not overlap yet. Run {record}."
+    },
+    "THRU.LAB": {
+      "label": "Throughput: the summed lab figure, never the headline",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Lab sum, no network"
+    },
+    "THRU.LAB.SUB": {
+      "label": "Throughput: under the lab sum",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "{nodes} nodes, each measured alone with no network, then added up. No client sent these swaps. Run {record}, {date}."
+    },
+    "THRU.COL.CONNS": {
+      "label": "Throughput: table column",
+      "kind": "line",
+      "section": "Throughput",
+      "value": "Connections"
+    },
+    "OPS.MEANS": {
+      "label": "Operations: what the number measures, five words at most",
+      "kind": "line",
+      "section": "Operations",
+      "value": "{op}, fastest way: {variant}"
+    },
+    "OPS.SOURCE": {
+      "label": "Operations: the source in plain words",
+      "kind": "line",
+      "section": "Operations",
+      "value": "Lab run, one machine, no network, {date}"
+    },
+    "OPS.RUN": {
+      "label": "Operations: the run id, behind More",
+      "kind": "line",
+      "section": "Operations",
+      "value": "Run {record}"
+    },
+    "OPS.PICK": {
+      "label": "Operations: name of the operation buttons",
+      "kind": "line",
+      "section": "Operations",
+      "value": "Operation"
+    },
+    "OPS.NOTBUILT": {
+      "label": "Operations: what is not built",
+      "kind": "line",
+      "section": "Operations",
+      "value": "Not built yet"
+    },
+    "OPS.NODATA": {
+      "label": "Operations: the data file did not load",
+      "kind": "line",
+      "section": "Operations",
+      "value": "The operations data file did not load."
+    },
+    "CAP.LIVE.TITLE": {
+      "label": "Operations: the live table, when it has no reading",
+      "kind": "line",
+      "section": "Operations",
+      "value": "Each operation, live"
+    },
+    "CAP.COL.P95": {
+      "label": "Operations: live table column, p95 explained",
+      "kind": "line",
+      "section": "Operations",
+      "value": "Slowest 5% (p95)"
+    },
+    "CAP.COL.ROOM": {
+      "label": "Operations: live table column, headroom explained",
+      "kind": "line",
+      "section": "Operations",
+      "value": "Room left before the top"
+    },
+    "KEY.CUBE.RATE": {
+      "label": "Legend: a cube on a rate",
+      "kind": "line",
+      "section": "3D",
+      "value": "One cube = {n} a second"
+    },
+    "KEY.CUBE.SWAPS": {
+      "label": "Legend: a cube on a swap rate",
+      "kind": "line",
+      "section": "3D",
+      "value": "One cube = {n} swaps a second"
+    },
+    "KEY.CUBE.LAB": {
+      "label": "Legend: a cube on the lab sum",
+      "kind": "line",
+      "section": "3D",
+      "value": "One cube = {n} a second, lab sum, no network"
+    },
+    "KEY.NOTBUILT": {
+      "label": "Legend: a dotted outline",
+      "kind": "line",
+      "section": "3D",
+      "value": "Dotted outline = not built yet"
+    },
+    "KEY.HIGHEST": {
+      "label": "Legend: the highest column",
+      "kind": "line",
+      "section": "3D",
+      "value": "Highest"
+    },
+    "KEY.CHOSEN": {
+      "label": "Legend: the chosen operation",
+      "kind": "line",
+      "section": "3D",
+      "value": "Chosen"
+    },
+    "KEY.LIVE": {
+      "label": "Legend: the live line",
+      "kind": "line",
+      "section": "3D",
+      "value": "Dotted line = live requests, none yet"
+    },
+    "KEY.BEADS": {
+      "label": "Legend: one bead for each request",
+      "kind": "line",
+      "section": "3D",
+      "value": "One bead = one request, the latest {n}"
+    },
+    "TAG.SWAPS": {
+      "label": "Label: the swaps block",
+      "kind": "line",
+      "section": "3D",
+      "value": "Swaps"
+    },
+    "TAG.TRANSFERS": {
+      "label": "Label: the transfers block",
+      "kind": "line",
+      "section": "3D",
+      "value": "Transfers"
+    },
+    "TAG.LAB": {
+      "label": "Label: under a lab block",
+      "kind": "line",
+      "section": "3D",
+      "value": "lab sum, no network"
+    },
+    "TAG.LIVE": {
+      "label": "Label: the live line",
+      "kind": "line",
+      "section": "3D",
+      "value": "Live requests"
+    },
+    "TAG.LIVE.N": {
+      "label": "Label: under the live line, with beads",
+      "kind": "line",
+      "section": "3D",
+      "value": "latest {n}"
+    },
+    "TAG.CONN.ONE": {
+      "label": "Label: one connection",
+      "kind": "line",
+      "section": "3D",
+      "value": "{n} connection"
+    },
+    "TAG.CONN.MANY": {
+      "label": "Label: many connections",
+      "kind": "line",
+      "section": "3D",
+      "value": "{n} connections"
+    },
+    "TAG.NOTBUILT": {
+      "label": "Label: under a dotted outline",
+      "kind": "line",
+      "section": "3D",
+      "value": "not built"
+    },
+    "TABS": {
+      "label": "HUD: name of the section tabs, for screen readers",
+      "kind": "line",
+      "section": "HUD",
+      "value": "Sections"
+    },
+    "STATS": {
+      "label": "HUD: name of the numbers column, for screen readers",
+      "kind": "line",
+      "section": "HUD",
+      "value": "The numbers"
+    },
+    "GO": {
+      "label": "HUD: the one action, to the explorer",
+      "kind": "line",
+      "section": "HUD",
+      "value": "Browse the records"
     }
   }
 });

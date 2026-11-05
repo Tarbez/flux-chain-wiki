@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en" data-theme="ember">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Object preview</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="../css/themes.css">
+<link rel="stylesheet" href="../css/flux-themes.css">
+<link rel="stylesheet" href="../assets/kit/defxn-fonts.css">
+<link rel="stylesheet" href="../css/page-layout.css">
+<style>
+  /* The object preview (2026-11-05). Layer: app (a page of the site that is not linked from it yet). For the owner, before an object
+     joins the world: ?o=<id> names it (fxn-3d js/render/world2-<id>.mjs). One idea: the object and its build steps. One dominant action: Play the build, on the complement, once.
+     The canvas is the whole window; three glass parts float over it: the name and the step's line, the six steps, the theme.
+     Type: 11 and 18 on the scale, by name. Colours by role only (laws 71-77): --primary for the chosen step, --complement once for Play.
+     Nothing scrolls at 1280x720. The object is fxn-3d's; this page only draws it. */
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body { background: hsl(var(--canvas)); color: hsl(var(--text)); font: 400 var(--fs-tertiary, 11px)/1.45 var(--font-sans, system-ui); }
+  #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+  #scene.drag { cursor: grabbing; }
+  .glass { position: fixed; z-index: 2; background: hsl(var(--surface) / .66); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 6px; }
+  button { font: inherit; color: inherit; background: none; border: 1px solid transparent; border-radius: 4px; cursor: pointer; }
+  button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+  .mono { font-family: var(--font-mono, ui-monospace, monospace); letter-spacing: .14em; text-transform: uppercase; }
+
+  #head { top: 16px; left: 16px; padding: 12px 16px; max-width: 360px; }
+  #head h1 { margin: 0 0 4px; font: 600 var(--fs-secondary, 18px)/1.2 var(--font-sans, system-ui); color: hsl(var(--text-strong)); }
+  #head p { margin: 0; color: hsl(var(--text-muted)); }
+  #head .mono { color: hsl(var(--primary)); margin-bottom: 6px; display: block; }
+  #head #title { color: hsl(var(--text-muted)); margin-bottom: 2px; }
+
+  #steps { left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; align-items: stretch; gap: 4px; padding: 6px; }
+  #steps button.step { display: grid; gap: 2px; text-align: left; padding: 6px 10px; min-width: 104px; color: hsl(var(--text-muted)); }
+  #steps button.step b { font-weight: 600; color: hsl(var(--text-faint, var(--text-muted))); }
+  #steps button.step[aria-current="step"] { border-color: hsl(var(--primary) / .6); color: hsl(var(--text-strong)); background: hsl(var(--primary) / .08); }
+  #steps button.step[aria-current="step"] b { color: hsl(var(--primary)); }
+  #play { margin-left: 6px; padding: 0 18px; white-space: nowrap; background: hsl(var(--complement)); color: hsl(var(--text-inverse, var(--canvas))); font-weight: 600; }
+
+  #themes { top: 16px; right: 16px; display: flex; gap: 4px; padding: 6px; }
+  #themes button { padding: 4px 10px; color: hsl(var(--text-muted)); }
+  #themes button[aria-pressed="true"] { color: hsl(var(--text-strong)); border-color: hsl(var(--border-default, var(--border))); }
+
+  #note { position: fixed; right: 16px; bottom: 22px; z-index: 2; color: hsl(var(--text-faint, var(--text-muted))); }
+  #fail { position: fixed; inset: 0; display: none; place-items: center; z-index: 3; color: hsl(var(--text-strong)); }
+  @media (max-width: 900px) { #steps button.step span { display: none; } #steps button.step { min-width: 0; } #note { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="scene" aria-label="The object, drawn in 3D. Drag to turn it, scroll to move closer."></canvas>
+
+<header id="head" class="glass">
+  <span class="mono" id="title"></span>
+  <span class="mono" id="stepNo"></span>
+  <h1 id="stepName"></h1>
+  <p id="stepLine"></p>
+</header>
+
+<nav id="themes" class="glass" aria-label="Theme">
+  <button type="button" data-theme-id="ember">Ember</button>
+  <button type="button" data-theme-id="defxn-tide">Tide</button>
+  <button type="button" data-theme-id="defxn-moss">Moss</button>
+  <button type="button" data-theme-id="defxn-dune">Dune</button>
+  <button type="button" data-theme-id="defxn-dusk">Dusk</button>
+</nav>
+
+<nav id="steps" class="glass" aria-label="Build steps"></nav>
+<p id="note" class="mono">Drag to turn · scroll to zoom</p>
+<div id="fail" role="alert"></div>
+
+<script type="module" src="object.mjs"></script>
+</body>
+</html>

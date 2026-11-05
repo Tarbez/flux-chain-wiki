@@ -1,0 +1,16 @@
+/* The one stats page (js/pages/world-stats.js) on the HUD of css/space-frame.css, which places .hud-left, .hud-right and .hud-dock and sets
+   the type of .hud-kicker, .hud-title, .hud-answer and .hud-stat. This sheet keeps only what is the page's own: the section tabs' pressed
+   state, the open body's source line, its More and the live table. Loaded after css/world-stats.css (the legend, the 3D's labels, the facts).
+   Type on the scale only (11 / 18 / 29, docs/PRODUCT-DESIGN-LAWS.md 78-83). The open tab takes --primary; nothing else is tinted. */
+.wp-stats .hud-tabs { display: flex; gap: 4px; margin-top: 12px; border-bottom: 1px solid hsl(var(--border-default)); }
+.wp-stats .hud-tabs [role="tab"] { all: unset; cursor: pointer; padding: 8px 10px; font: 500 11px/1 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); border-bottom: 2px solid transparent; }
+.wp-stats .hud-tabs [role="tab"][aria-selected="true"] { color: hsl(var(--primary)); border-bottom-color: hsl(var(--primary)); cursor: default; }
+.wp-stats .hud-tabs [role="tab"]:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.ws-open { padding: 10px 0; }
+.ws-open > * + * { margin-top: 8px; }
+.ws-open .ws-source { margin: 0; font: 400 11px/1.45 var(--font-mono); color: hsl(var(--text-muted)); }
+.ws-open .ws-note { margin: 0; font: 400 11px/1.45 var(--font-sans); color: hsl(var(--text-muted)); }
+.ws-open .ws-live > * + * { margin-top: 8px; }
+/* the operation picker sits in the dock */
+.wp-stats .hud-chips, .wp-stats .ws-ops { display: flex; flex-wrap: wrap; gap: 6px; }
+.wp-stats .ws-ops .hud-chip[aria-pressed="true"] { color: hsl(var(--primary)); border-color: hsl(var(--primary)); }
