@@ -35,5 +35,6 @@ test('the gateway shell and the CMS permission check read no retired name source
   }
   assert.deepEqual(offenders, []);
   assert.equal(fs.existsSync(path.join(ROOT, 'gateway', 'verify-name-record.js')), false, 'the retired verifier is back');
-  assert.match(fs.readFileSync(path.join(ROOT, 'gateway', 'index.html'), 'utf8'), /connect-src 'self' wss:\/\/nodes\.defxn\.com/, 'the CSP must let the shell reach the name node');
+  // Owner decision 2026-11-05: the shell reads names through the gateway's relay on its own origin, never the node.
+  assert.match(fs.readFileSync(path.join(ROOT, 'gateway', 'index.html'), 'utf8'), /connect-src 'self';/, "the shell's CSP connects to its own origin only");
 });

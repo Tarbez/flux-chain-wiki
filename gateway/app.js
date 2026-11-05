@@ -4,8 +4,9 @@
    project's own convention (see ../scripts/serve-site.mjs).
 
    Flow: location.hostname -> "<label>.<ending>" (.fxn on the mainnet, .fxndev on a test
-   network: resolve-name.js servedNetwork) -> DOM_PROOF over a name node's
-   WebSocket line protocol (name-config.js) -> verified with the ONE shared
+   network: resolve-name.js servedNetwork) -> DOM_PROOF through the gateway's name
+   proof relay on this origin (name-config.js NAME_PROOF_PATH; the relay carries the
+   node's reply unchanged) -> verified with the ONE shared
    verifier (resolve-name.js; vendor/dense-wire/flx-domain-proof.mjs) against the
    pinned genesis key -> the record's blake3_cid target -> GET
    /fxn-store/v1/<cid> (same-origin, answered from the node's byte store) ->
@@ -36,9 +37,9 @@
    failure set is for a different content shape (dense-encoding-v4 CMS posts)
    entirely. */
 import { decodeArchiveAsync } from "./vendor/flx-codec/index.js";
-import { resolveName as resolveOnChain, servedNetwork } from "./resolve-name.js";
+import { resolveName as resolveOnChain, servedNetwork, askGatewayProof } from "./resolve-name.js";
 import { fetchVerifiedContent } from "./content.js";
-import { NAME_NODES, GENESIS_PUB_HEX, NETWORK } from "./name-config.js";
+import { NAME_PROOF_PATH, GENESIS_PUB_HEX, NETWORK } from "./name-config.js";
 import { FOLDER_SITE_SCHEMA, readFolderSite, pageForAddress, buildPageHtml, loadPageFiles } from "./folder-site.js";
 import { FOLDER_SITE_INDEX_SCHEMA, readIndexSite, createBlockReader, BlockRefusal } from "./index-site.js";
 import { releaseRequestOf, readRelease, downloadRelease } from "./release.js";
@@ -53,7 +54,7 @@ const FAILURE_MESSAGES = {
   NAME_WRONG_ENDING: "This name belongs to another network, so this gateway does not open it.",
   NAME_UNPAID: "This name's paid term has ended. Its holder can still renew it, so its site is not shown.",
   NAME_LAPSED: "This name lapsed without a payment. Anyone can claim it again.",
-  PROOF_INVALID: "The name node sent an ownership proof that does not verify. This page refuses to render what it points at.",
+  PROOF_INVALID: "The ownership proof for this name does not verify. This page refuses to render what it points at.",
   GATEWAY_NOT_CONFIGURED: "This gateway has no genesis key pinned, so it cannot verify any name.",
   CONTENT_UNREACHABLE: "This site's content is not reachable right now.",
   CONTENT_TOO_LARGE: "This site's content is larger than the public gateway will serve.",
@@ -110,7 +111,7 @@ function renderStatus(reason, detail) {
 }
 
 async function resolveName(name, network) {
-  return resolveOnChain({ name, nodes: NAME_NODES, genesisPubHex: GENESIS_PUB_HEX, network });
+  return resolveOnChain({ name, nodes: [], genesisPubHex: GENESIS_PUB_HEX, network, askProof: (fqdn) => askGatewayProof(fqdn, { path: NAME_PROOF_PATH }) });
 }
 
 function decodeSite(decoded) {
@@ -564,7 +565,7 @@ function renderTesterRelease(name, release) {
 async function main() {
   /* A folder site's frame sent to one of this gateway's own addresses would load the shell inside it. */
   if (window.top !== window) return;
-  const served = await servedNetwork({ network: NETWORK, nodes: NAME_NODES });
+  const served = await servedNetwork({ network: NETWORK, nodes: [] });
   if (!served.ok) return renderStatus(served.reason, served.detail);
   const label = labelFromHostname(location.hostname, served.ending);
   const name = `${label}.${served.ending}`;

@@ -1,11 +1,15 @@
 /* Where the *.defxn.com gateway shell reads names from (docs/DEFXN-NAMES-ONE-SYSTEM.md).
 
-   NAME_NODES      chain-server WebSocket line-protocol endpoints, asked in order. The
-                   page's CSP (index.html, connect-src) and the node site's /ws Origin
-                   list (dense-wire/web/nodes-site.caddy, exact-match today) must both
-                   allow the pair: until that list admits every <label>.defxn.com, only
-                   the labels it names can resolve here. /native is not an option for a
-                   page: browsers always send Origin, and /native refuses any.
+   NAME_PROOF_PATH where a <label>.defxn.com page asks for a name's proof: the gateway's name
+                   proof relay, on the page's own origin (owner decision 2026-11-05). Caddy
+                   proxies this one path to the gateway's ask server, which reads DOM_PROOF
+                   from a node over the line port, server side, and returns the reply
+                   unchanged. The page verifies it (resolve-name.js). The node's /ws admits
+                   an exact list of origins (dense-wire web/flx-network-origins.mjs), and no
+                   list can name every label, so the shell's CSP connects to 'self' only.
+   NAME_NODES      chain-server WebSocket line-protocol endpoints, asked in order, for a
+                   page whose origin the node admits (defxn.com's site check,
+                   js/ark/skin-site.js). The gateway shell does not use them for names.
    GENESIS_PUB_HEX the chain's genesis public key (its CHAIN_SERVER_GENESIS_KEY), 64
                    lowercase hex: the only key whose name claims count. Empty means no
                    key is pinned yet, and the shell says so instead of rendering anything.
@@ -19,6 +23,7 @@
 import { networkConfig, PAGE_NETWORK } from "./fxn-network.mjs";
 
 const NET = networkConfig(PAGE_NETWORK);
+export const NAME_PROOF_PATH = "/_names/proof";
 export const NAME_NODES = NET.pageNodes.slice();
 export const GENESIS_PUB_HEX = NET.genesisPubHex;
 export const NETWORK = NET.network;
