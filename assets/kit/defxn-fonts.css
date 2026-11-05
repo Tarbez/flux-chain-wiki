@@ -65,3 +65,6 @@
 
 /* The type scale (laws 78-83): base 11px, ratio 1.618, one set of variables. A page uses these by name and never writes a raw px size. */
 :root { --fs-micro: 7px; --fs-tertiary: 11px; --fs-secondary: 18px; --fs-primary: 29px; --fs-hero: 47px; --fs-display: 76px; }
+
+/* The spacing scale: the type scale's modular scale (base 11px, ratio 1.618) run down to 2 and up to 123. Spacing uses these by name. */
+:root { --sp-1: 2px; --sp-2: 4px; --sp-3: 7px; --sp-4: 11px; --sp-5: 18px; --sp-6: 29px; --sp-7: 47px; --sp-8: 76px; --sp-9: 123px; }
