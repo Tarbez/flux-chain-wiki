@@ -8,6 +8,9 @@
 // its `W` box, then its `C[1]`, when either names a launched chain (hex of UTF-8, `\0`-padded).
 
 import { launchedChainWord } from "./flx-builders.mjs";
+import * as shadow from "./flx-v1-shadow.mjs";
+// Migration step 3: this file's box readers, in shadow beside the generated V1 reader.
+const SHADOW_DOOR_0 = new shadow.Door("flx-payment-status listOfRecord");
 
 function utf8OfHex(hex) {
   if (!/^(?:[0-9a-f]{2})*$/.test(hex)) return null;
@@ -22,6 +25,7 @@ function utf8OfHex(hex) {
 
 /** The list a signed record is on: `{ holder, chain, position }`, `chain` null for the base list. */
 export function listOfRecord(text) {
+  shadow.firstLetters(SHADOW_DOOR_0, String(text));
   const boxes = String(text).split("-");
   const one = (label) => boxes.find((b) => b[0] === label)?.slice(1);
   const cs = boxes.filter((b) => b[0] === "C").map((b) => b.slice(1));

@@ -28,12 +28,16 @@
     return (who && who.publicKeyB64) || 'local-admin';
   }
   function ownMediaKeyPair() { return ArkContentCrypto.createOrLoadKeyPair(mediaOwnerId()); }
+  /* "Add my own key" waits for the key (WebCrypto's X25519 is async); Encrypt waits for that add, so a press of
+     Encrypt right after it still sees the key in the recipients. One pending add per item. */
+  var pendingOwnKey = {};
 
   function parseRecipientKeys(text) {
     return (text || '').split(/[\n,]/).map(function (s) { return s.trim(); }).filter(Boolean);
   }
 
   async function encryptSecretDraft(secret, id) {
+    if (pendingOwnKey[id]) await pendingOwnKey[id];
     var recipients = parseRecipientKeys(state.secretRecipientsText[id]);
     var plaintext = (state.secretPlaintext[id] || '').trim();
     if (!recipients.length) { status('Add at least one recipient public key first.', 'error'); return; }
@@ -49,7 +53,7 @@
 
   async function decryptSecretDraft(secret, id) {
     try {
-      var own = ownMediaKeyPair();
+      var own = await ownMediaKeyPair();
       var read = await ArkContentCrypto.decryptForSelf(secret, own);
       if (read === null) { status('This browser’s key is not one of the recipients: cannot decrypt.', 'warn'); return; }
       state.secretDecrypted[id] = read.content || ''; repaintPanels('secret', id);
@@ -72,7 +76,7 @@
     /* plain words first; how it is encrypted is Developer details (docs/ux-audit/cms.md P1-2) */
     var about = h('fieldset', {}, h('legend', { text: 'Encrypted content' }),
       h('p', { class: 'hint' }, 'Only the people you add as readers below can open this. Nothing readable is saved or published: you encrypt it here, in this browser.'),
-      A.devDetails([['Body', 'AES-GCM ciphertext'], ['Key', 'wrapped once per recipient with nacl box'], ['Plaintext', 'never on disk or on the mesh']]));
+      A.devDetails([['Body', 'AES-GCM ciphertext'], ['Key', 'wrapped once per recipient with the NaCl box (X25519 + XSalsa20-Poly1305)'], ['Plaintext', 'never on disk or on the mesh']]));
     about.appendChild(textRow('Label', 'sec-' + id + '-label', {}, function () { return secret.label; }, function (v) {
       secret.label = v;
       var name = root.parentNode && root.parentNode.querySelector('[data-cms-item="secret:' + id + '"] .vault-name');
@@ -82,9 +86,16 @@
     root.appendChild(about);
 
     var keyBox = h('fieldset', {}, h('legend', { text: 'Your key (this browser)' }));
-    var own = ownMediaKeyPair();
-    var keyRow = textRow('Share this so someone can add you as a recipient', 'sec-' + id + '-own-key', { readOnly: true, spellcheck: false }, function () { return own.publicKey; }, function () {});
+    /* the key is made or loaded asynchronously (js/admin/fxn-box.js uses WebCrypto's X25519): the row fills when it is ready */
+    var own = null;
+    var keyRow = textRow('Share this so someone can add you as a recipient', 'sec-' + id + '-own-key', { readOnly: true, spellcheck: false }, function () { return own ? own.publicKey : ''; }, function () {});
+    ownMediaKeyPair().then(function (pair) {
+      own = pair;
+      var field = keyRow.querySelector('input, textarea');
+      if (field) field.value = pair.publicKey;
+    }).catch(function (error) { status('Could not load this browser’s key: ' + error.message, 'error'); });
     keyRow.appendChild(h('button', { type: 'button', class: 'btn', text: 'Copy', onclick: function () {
+      if (!own) { status('Your key is not ready yet; try again in a moment.', 'warn'); return; }
       navigator.clipboard.writeText(own.publicKey).then(function () { status('Copied your public key.', 'ok'); }).catch(function () { status('Could not copy; select and copy it by hand.', 'warn'); });
     } }));
     keyBox.appendChild(keyRow);
@@ -108,9 +119,12 @@
     var recipientsArea = recipientsRow.children[1];
     writeBox.appendChild(recipientsRow);
     writeBox.appendChild(h('button', { type: 'button', class: 'btn', text: 'Add my own key', onclick: function () {
-      var lines = parseRecipientKeys(recipientsArea.value);
-      if (lines.indexOf(own.publicKey) < 0) lines.push(own.publicKey);
-      recipientsArea.value = lines.join('\n'); state.secretRecipientsText[id] = recipientsArea.value;
+      var done = pendingOwnKey[id] = ownMediaKeyPair().then(function (pair) {
+        var lines = parseRecipientKeys(recipientsArea.value);
+        if (lines.indexOf(pair.publicKey) < 0) lines.push(pair.publicKey);
+        recipientsArea.value = lines.join('\n'); state.secretRecipientsText[id] = recipientsArea.value;
+      }).catch(function (error) { status('Could not add your key: ' + error.message, 'error'); })
+        .then(function () { if (pendingOwnKey[id] === done) delete pendingOwnKey[id]; });
     } }));
     writeBox.appendChild(textRow('Content', 'sec-' + id + '-plaintext', { type: 'textarea', rows: 6, placeholder: 'The content to encrypt' },
       function () { return state.secretPlaintext[id] || ''; }, function (v) { state.secretPlaintext[id] = v; }));

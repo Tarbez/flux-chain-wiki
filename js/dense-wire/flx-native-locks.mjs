@@ -30,6 +30,9 @@ import { resolverRecordBody, isChainIdShape } from "./flx-builders.mjs";
 import { sha256Hex } from "./flx-crypto.mjs";
 import { utf8OfHex } from "./flx-dumb-parser.mjs";
 import { readLaunchPrice } from "./flx-launch-blobs.mjs";
+import * as shadow from "./flx-v1-shadow.mjs";
+// Migration step 3: this file's box readers, in shadow beside the generated V1 reader.
+const SHADOW_DOOR_0 = new shadow.Door("flx-native-locks readNativeLock");
 
 /** `chain::BASE_CHAIN_ID`: the chain whose native FXN the wallet shows (`NATIVE_BALANCE defxn <key>`). */
 export const BASE_CHAIN_ID = "defxn";
@@ -188,6 +191,7 @@ export async function buildRegistryBondLock(signer, wire, { pos, prev, nowSec, d
 /** `native_locks::read` for a lock or a refund: what the signed text says, or null when it is not one. Checks no
  *  signature. `at` is the record's own M. */
 export function readNativeLock(text) {
+  shadow.firstLetters(SHADOW_DOOR_0, String(text ?? "").trim());
   const blocks = String(text ?? "").trim().split("-");
   const one = (role) => blocks.find((b) => b[0] === role)?.slice(1) ?? null;
   const cs = blocks.filter((b) => b[0] === "C").map((b) => b.slice(1));

@@ -7,7 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { existsSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -69,8 +69,8 @@ test('build-auth refuses a bundle that carries tweetnacl and removes it', { skip
 //    create panel uses the bundle's createFxnId. The signing pages are FOUND: every catalog route whose scripts include
 //    js/admin/auth.js, and every HTML file that loads it. Each one's scripts (the route's scripts, the shell's when a route
 //    signs, and their built copies under js/min/) must carry no tweetnacl code. Fails on 493aee1: /account served
-//    js/admin/vendor/auth-kit-create.js. admin-app.html keeps js/admin/vendor/tweetnacl.js (nacl.box content encryption;
-//    no native XSalsa20) and loads no sign-in, so it is no signing page; the case requires that it stays so.
+//    js/admin/vendor/auth-kit-create.js. admin-app.html loads no sign-in, so it is no signing page; the case requires that
+//    it stays so. (Until round 14 "signin-native" it loaded js/admin/vendor/tweetnacl.js for the NaCl box; case 7 covers it.)
 const require_ = createRequire(import.meta.url);
 const { loadCatalog, servedPath, keyOf } = require_('../scripts/lib/page-scripts.cjs');
 const scriptTags = (html) => [...html.matchAll(/<script[^>]*\ssrc="([^"?#]+)/g)].map((m) => m[1].replace(/^\.?\//, ''));
@@ -89,7 +89,7 @@ test('no file a signing page serves carries tweetnacl code', () => {
   assert.equal(files.includes('js/admin/vendor/tweetnacl.js'), false, 'a signing page loads js/admin/vendor/tweetnacl.js');
   const carrying = files.map((f) => [f, tweetnaclMarks(readFileSync(join(site, f)))]).filter(([, m]) => m.length).map(([f, m]) => `${f} (${m.join(', ')})`);
   assert.deepEqual(carrying, [], 'these files a signing page serves carry tweetnacl code');
-  assert.equal(scriptTags(readFileSync(join(site, 'admin-app.html'), 'utf8')).includes('js/admin/auth.js'), false, 'admin-app.html (which loads tweetnacl.js for nacl.box) loads no sign-in');
+  assert.equal(scriptTags(readFileSync(join(site, 'admin-app.html'), 'utf8')).includes('js/admin/auth.js'), false, 'admin-app.html (the editor) loads no sign-in');
   assert.equal(keyOf('js/ark/auth-kit-create-panel.js'), 'ark/auth-kit-create-panel');
 });
 
@@ -99,4 +99,39 @@ test('the create panel has one writer: ArkAdminAuth.createFxnId', () => {
   assert.match(panel, /window\.ArkAdminAuth\.createFxnId\(/);
   assert.doesNotMatch(panel, /ArkAuthKitCreate\.create|auth-kit-create\.js/);
   assert.equal(existsSync(join(site, 'js', 'admin', 'vendor', 'auth-kit-create.js')), false);
+});
+
+// 7. Round 14 "signin-native": no file this site can serve carries or loads tweetnacl, signing page or not. The walk
+//    FINDS its subjects (scripts/tweetnacl-free.cjs servedFiles reads every folder outside NOT_SERVED), so a file nobody
+//    listed is checked too. Fails on 13bb230 (the round-14 merge): admin-app.html loaded js/admin/vendor/tweetnacl.js for
+//    the NaCl box, which js/admin/fxn-box.js replaced. tweetnacl stays only as tests/reference/, which is not served.
+const { siteFindings, servedFiles, NOT_SERVED } = require_('../scripts/tweetnacl-free.cjs');
+test('no file this site serves carries, loads or is named after tweetnacl', () => {
+  const { files, skipped, findings } = siteFindings(site);
+  assert.ok(files.includes('admin-app.html') && files.includes('js/admin/fxn-box.js') && files.includes('js/admin/auth.js'), 'the walk reaches the editor, the box and the sign-in');
+  assert.ok(files.length > 100, `the walk found ${files.length} served files`);
+  assert.ok(skipped.includes('tests') && skipped.every((d) => NOT_SERVED.includes(d.split('/').pop())), 'only NOT_SERVED folders are skipped');
+  assert.deepEqual(findings.map((f) => f.file), [], 'these served files carry or load tweetnacl');
+  const tags = scriptTags(readFileSync(join(site, 'admin-app.html'), 'utf8'));
+  assert.ok(tags.indexOf('js/admin/fxn-box.js') >= 0 && tags.indexOf('js/admin/fxn-box.js') < tags.indexOf('js/admin/crypto.js'), 'the editor loads the box before the content crypto');
+});
+
+// 8. The walk catches what it was not told about: a temp site with tweetnacl under a folder name and a file name nobody
+//    listed, a page that loads it by src, and a module that imports it, is refused on each.
+test('the site walk finds a tweetnacl copy in a place nobody listed', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'tweetnacl-site-'));
+  const reference = readFileSync(join(site, 'tests', 'reference', 'tweetnacl-1.0.3-nacl-fast.min.js'));
+  for (const sub of ['js/deep/er', 'tests', 'assets']) mkdirSync(join(dir, sub), { recursive: true });
+  writeFileSync(join(dir, 'js', 'deep', 'er', 'helper.js'), reference);
+  writeFileSync(join(dir, 'page.html'), '<script src="assets/nacl-fast.min.js"></script>');
+  writeFileSync(join(dir, 'assets', 'nacl-fast.min.js'), '/* empty */');
+  writeFileSync(join(dir, 'js', 'mod.mjs'), "import nacl from 'tweetnacl';\nexport default nacl;\n");
+  writeFileSync(join(dir, 'tests', 'ref.js'), reference);
+  const { findings, skipped } = siteFindings(dir);
+  assert.deepEqual(findings.map((f) => f.file), ['assets/nacl-fast.min.js', 'js/deep/er/helper.js', 'js/mod.mjs', 'page.html']);
+  assert.deepEqual(skipped, ['tests'], 'the test reference folder is skipped, by name');
+  let why = '';
+  try { execFileSync(process.execPath, [join(site, 'scripts', 'tweetnacl-free.cjs'), '--site', dir], { stdio: 'pipe' }); } catch (error) { why = String(error.stderr); }
+  assert.match(why, /js\/deep\/er\/helper\.js carries tweetnacl code .*Missing: .*To fix: /);
+  assert.deepEqual(servedFiles(dir).files.includes('tests/ref.js'), false);
 });

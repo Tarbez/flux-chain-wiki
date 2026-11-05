@@ -1,7 +1,8 @@
 const assert = require('node:assert/strict'), fs = require('node:fs'), vm = require('node:vm');
 // ArkContentCrypto (js/admin/crypto.js) is the multi-recipient encryption scheme for ArkSecret
-// content: AES-GCM body + one nacl-box-wrapped file key per recipient. This proves the round
-// trip on the real vendored code, not a reimplementation, so a change to either file is caught here.
+// content: AES-GCM body + one NaCl-box-wrapped file key per recipient. This proves the round
+// trip on the real served code (js/admin/fxn-box.js, which replaced tweetnacl.js in round 14), so a
+// change to either file is caught here. tests/fxn-box.test.mjs proves the box bytes equal tweetnacl's.
 const context = vm.createContext({
   console,
   window: { localStorage: (function () { var store = {}; return { getItem: (k) => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } }; })() },
@@ -12,19 +13,19 @@ const context = vm.createContext({
   TextEncoder, TextDecoder,
 });
 context.globalThis = context; context.self = context;
-vm.runInContext(fs.readFileSync('js/admin/vendor/tweetnacl.js', 'utf8'), context);
+vm.runInContext(fs.readFileSync('js/admin/fxn-box.js', 'utf8'), context);
 vm.runInContext(fs.readFileSync('js/admin/crypto.js', 'utf8'), context);
 const ArkContentCrypto = vm.runInContext('ArkContentCrypto', context);
 
 (async () => {
   // Two identities, each with their own keypair (persisted under their own owner id, like two admins).
-  const alice = ArkContentCrypto.createOrLoadKeyPair('alice');
-  const bob = ArkContentCrypto.createOrLoadKeyPair('bob');
-  const mallory = ArkContentCrypto.createOrLoadKeyPair('mallory');
+  const alice = await ArkContentCrypto.createOrLoadKeyPair('alice');
+  const bob = await ArkContentCrypto.createOrLoadKeyPair('bob');
+  const mallory = await ArkContentCrypto.createOrLoadKeyPair('mallory');
   assert.notEqual(alice.publicKey, bob.publicKey, 'each owner gets a distinct keypair');
 
   // Loading the same owner id again returns the identical keypair (persisted, not regenerated).
-  const aliceAgain = ArkContentCrypto.createOrLoadKeyPair('alice');
+  const aliceAgain = await ArkContentCrypto.createOrLoadKeyPair('alice');
   assert.equal(aliceAgain.publicKey, alice.publicKey, 'the same owner id loads the same keypair');
 
   const payload = { kind: 'flux_secret_payload', version: 1, title: 'Draft', content: 'not yet public' };
@@ -51,7 +52,7 @@ const ArkContentCrypto = vm.runInContext('ArkContentCrypto', context);
   await assert.rejects(() => ArkContentCrypto.decryptForSelf(tampered, alice), 'a tampered body is refused, not decrypted');
 
   // Wrapping the same file key for a wrong recipient key and trying to unwrap it with a different secret key must fail loudly.
-  assert.throws(() => ArkContentCrypto.unwrapKeyFromEnvelope(secretFields.envelopes[0], bob.secretKey), /Failed to unwrap/, 'unwrapping with the wrong secret key is refused, not silently wrong');
+  await assert.rejects(() => ArkContentCrypto.unwrapKeyFromEnvelope(secretFields.envelopes[0], bob.secretKey), /Failed to unwrap/, 'unwrapping with the wrong secret key is refused, not silently wrong');
 
   console.log('PASS: ArkContentCrypto multi-recipient round trip, persisted keypairs, non-recipient returns null, tamper and wrong-key are refused.');
 })().catch((e) => { console.error(e); process.exit(1); });
