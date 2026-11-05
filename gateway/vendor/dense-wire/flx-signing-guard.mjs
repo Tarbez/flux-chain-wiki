@@ -32,6 +32,13 @@
 //                    round 12 only a timeout resent identical bytes; any "refused" reply let the page sign the same
 //                    position with a new M, and a node that withheld the first could freeze the key with it.
 //   releaseHeld      drops a hold only when a SECOND node's HEAD shows the held position filled.
+//   refusedByName    2026-11-05 (Studio/Deploy/Explore run): a reply in which the node refused the bytes by name (its
+//                    failure, what is missing, the remedy), so they never entered it. submitAtPosition then releases the
+//                    hold at that position, once the node and every witness still show it empty (releaseRefused). Until
+//                    then one refused record (a launch with no bond: BondNotHeld) left its position held across reloads,
+//                    and every later record of the key was refused HELD_OTHER_RECORD. No answer, a reply that is not a
+//                    named refusal, and a refusal whose bytes may still land (held here to wait, a replication or store
+//                    failure whose remedy is the same bytes again) keep the hold: the safe side.
 // Callers that chain on a reply (round 12 list): submitAtPosition here (every door that uses it: genesis
 // genesis-distribute.js, genesis-dao.js, genesis-release.js, genesis-network.js, genesis-dao-records.js, genesis-app.js
 // mint; defxn-dao fxn-dao-app.mjs; deploy post-launch-flow.mjs; defxn fxn-holdings.mjs), genesis-authorization.js's
@@ -306,7 +313,44 @@ export async function submitAtPosition(wire, { pubHex, at, kind, text, chain, ne
     );
   }
   if (reply?.kind === "ok") return { ...reply, cid: await admittedCid(reply, text) };
+  if (refusedByName(reply)) {
+    const released = await releaseRefused(wire, { network, pubHex, chain, at, text });
+    return { ...reply, released };
+  }
   return reply;
+}
+
+/* The wire codes whose bytes may still land after the refusal: the node's own remedy for each is to send the same record
+   again (`replication`: some peers may hold it; `cache`: the admission did not finish), and a fork or chain break is
+   the chain's evidence (submitAtPosition throws KEY_FROZEN for those first). The codes are the kernel's
+   (`err_code_and_reason` in chain_server.rs). */
+const BYTES_MAY_LAND = new Set(["replication", "cache", "equivocation", "chain-break"]);
+
+/** 2026-11-05: true when `reply` is the node refusing the record by name, so the bytes did not enter it: an ERR with a
+ *  code and the kernel's three parts (`Missing:` and `To fix:` in its reason), and not a record the node holds to admit
+ *  later (`is held here, not admitted`) or a code whose bytes may still land. */
+export function refusedByName(reply) {
+  if (reply?.kind !== "err" || typeof reply.code !== "string" || typeof reply.reason !== "string") return false;
+  if (BYTES_MAY_LAND.has(reply.code)) return false;
+  if (/is held here, not admitted/.test(reply.reason)) return false;
+  return /Missing:/.test(reply.reason) && /To fix:/.test(reply.reason);
+}
+
+/** 2026-11-05: drops the hold of `text` at `at.pos` after the node refused it by name, when the node and every witness
+ *  still show that position empty at the same previous record (chainPosition). Returns true when dropped. A hold of
+ *  other bytes, a moved head, or a head that cannot be read keeps the hold, and false is returned. */
+export async function releaseRefused(wire, { network, pubHex, chain, at, text }) {
+  const held = heldAt({ network, pubHex, chain });
+  if (!held || held.pos !== at.pos || held.text !== text) return false;
+  let now;
+  try {
+    now = await chainPosition(wire, pubHex, chain);
+  } catch {
+    return false;
+  }
+  if (now.pos !== at.pos || now.prevCid !== at.prevCid) return false;
+  holds().delete(holdKey({ network, pubHex, chain }));
+  return true;
 }
 
 /** How a record goes out (round 13). A wire with `submit` and no `parse` takes `(kind, text)` and answers parsed

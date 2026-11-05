@@ -46,7 +46,9 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 export const OVERRIDE = process.env.DENSE_WIRE_WEB || null;
 export const REPO = process.env.DENSE_WIRE_REPO || path.resolve(ROOT, '..', 'defxn-defi-rs');
-export const REV = process.env.DENSE_WIRE_REV || 'f41e5049af25fd1eafa2bb20ae6572dbc64e9cfd';
+// 2026-11-05 (client-door-refusals): dense-wire 4cb55e2. flx-signing-guard.mjs re-copied with git show: a record the node
+// refused by name releases its hold at that position. Both folders.
+export const REV = process.env.DENSE_WIRE_REV || '4cb55e2e436211a75b56265d870a5a0d0807adac';
 
 /** Where `name` (a path under dense-wire/web) is read from, for messages. */
 export function sourceName(name) {
