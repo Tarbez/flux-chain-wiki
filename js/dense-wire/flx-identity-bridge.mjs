@@ -31,16 +31,17 @@ export function cryptoKeySigner({ privateKey, pubHex }) {
  *  `defxn/js/admin/auth.js`) to the `{pubHex, signText, signBytes}`
  *  interface.
  *
- *  CONFIRMED (not assumed) by reading `defxn/js/admin/auth.js` directly
- *  (grep `publicKeyB64`): the identity's keypair comes from tweetnacl's
- *  `nacl.sign.keyPair.fromSeed(...)`, whose `publicKey` is the raw 32-byte
- *  ed25519 public key, and `publicKeyB64` is built as
- *  `btoa(String.fromCharCode(...rawPublicKeyBytes))` — i.e. plain base64
- *  of those same 32 raw bytes, no DER/SPKI wrapping. So `base64ToHex(
- *  who.publicKeyB64)` below really is the hex the `G`/`pubHex` fields want.
- *  `who.signBytes` is likewise already present in that file, wrapping the
- *  identity's raw `sign(bytes)` and base64-encoding the 64-byte detached
- *  signature the same way.
+ *  Read from the source, 2026-11-05 (round 14): `who` is the current
+ *  public id of the opened FXN ID (`defxn/scripts/auth-entry.js`, built into
+ *  `defxn/js/admin/auth.js`). Its key pair comes from that public id's
+ *  32-byte seed through native WebCrypto Ed25519 (`fxn-auth/public-ids`
+ *  `seedSigner`, over `flux-claims/src/ed25519.mjs` `keyPairFromSeed`;
+ *  no tweetnacl, and a runtime with no built-in Ed25519 is refused).
+ *  `publicKeyB64` is `hexToBase64(id.key)`: plain base64 of the raw 32-byte
+ *  Ed25519 public key, no DER/SPKI wrapping. So `base64ToHex(
+ *  who.publicKeyB64)` below is the hex the `G`/`pubHex` fields want.
+ *  `who.signBytes` base64-encodes the 64-byte detached signature the
+ *  same way.
  *
  *  `who.sign(text)` takes UTF-8-safe text only; dense-wire's grammar
  *  alphabet (`[A-Za-z0-9-]`) is always UTF-8-safe, so every manifest text
