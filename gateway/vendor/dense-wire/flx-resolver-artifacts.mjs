@@ -17,6 +17,9 @@
 //
 // No dependencies beyond the language. ES module; runs in a browser and in Node unchanged.
 
+import * as shadow from "./flx-v1-shadow.mjs";
+// Migration step 3: this file's box readers, in shadow beside the generated V1 reader.
+const SHADOW_DOOR_0 = new shadow.Door("flx-resolver-artifacts kindOfRecord");
 export const GRAMMAR_V2_MAGIC = "FLX-RESOLVER-GRAMMAR-V2";
 export const OFFER_V2_MAGIC = "FLX-RESOLVER-OFFER-V2";
 export const SIG_V1_MAGIC = "FLX-MANIFEST-SIG-V1";
@@ -861,6 +864,7 @@ export function sigFromJson(doc) {
 
 /** The kind marker a record's `KK` block names (`...-KKDAO1-...` is `KDAO1`), or `null`. */
 export function kindOfRecord(text) {
+  shadow.firstLetters(SHADOW_DOOR_0, String(text));
   for (const block of String(text).split("-")) {
     if (block.startsWith("KK") && block.length > 2) return `K${block.slice(2)}`;
   }

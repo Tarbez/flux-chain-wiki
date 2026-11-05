@@ -79,6 +79,10 @@ import { grammarFromJson, offerFromJson } from "./flx-resolver-artifacts.mjs";
 // shared byte-identical with ark-browser) sets `globalThis.ARK_FLX_STATE`
 // -- the same way `flx-kit-codec.mjs` reaches it.
 import "./flx-state-grammar.js";
+import * as shadow from "./flx-v1-shadow.mjs";
+// Migration step 3: this file's box readers, in shadow beside the generated V1 reader.
+const SHADOW_DOOR_0 = new shadow.Door("flx-resolver-record-client cBlocks");
+const SHADOW_DOOR_1 = new shadow.Door("flx-resolver-record-client blockOf");
 
 export const BASE_CHAIN_ID = "defxn";
 
@@ -201,10 +205,12 @@ export function encodeRecordPayload(value) {
 /** The `C` blocks of a record, in order, excluding a `CHAIN` scope block
  *  (the Rust `Raw::c` rule). */
 function cBlocks(text) {
+  shadow.chainAwareLetters(SHADOW_DOOR_0, String(text));
   return String(text).split("-").filter((b) => b.startsWith("C") && !b.startsWith("CHAIN")).map((b) => b.slice(1));
 }
 
 function blockOf(text, prefix) {
+  shadow.firstLetters(SHADOW_DOOR_1, String(text));
   const block = String(text).split("-").find((b) => b.startsWith(prefix));
   return block === undefined ? null : block.slice(prefix.length);
 }

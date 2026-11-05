@@ -31,6 +31,10 @@
 
 import { sha256Hex, verifyHex } from "./flx-crypto.mjs";
 import { keyName, isKeyNameLabel } from "./flx-object-builders.mjs";
+import * as shadow from "./flx-v1-shadow.mjs";
+// Migration step 3: this file's box readers, in shadow beside the generated V1 reader.
+const SHADOW_DOOR_0 = new shadow.Door("flx-object-proof readRecord");
+const SHADOW_DOOR_1 = new shadow.Door("flx-object-proof wallet lines");
 
 export const PVA_CHAIN = "pva";
 export const SKIN_CHAIN = "skin";
@@ -94,6 +98,7 @@ export function parseObjsOfReply(reply) {
 async function readRecord(text, i) {
   const bad = (code, failure, missing) => refuse(code, `record ${i} ${failure}`, missing, "ask another node for the proof", i);
   if (typeof text !== "string" || !/^[A-Za-z0-9-]+$/.test(text)) return bad("Grammar", "has characters outside [A-Za-z0-9-]", "a signed record");
+  shadow.firstLetters(SHADOW_DOOR_0, text);
   const blocks = text.split("-");
   if (blocks.some((b) => b.length < 2)) return bad("Grammar", "has an empty block", "no block without a payload");
   const get = (label) => blocks.filter((b) => b[0] === label).map((b) => b.slice(1));
@@ -268,6 +273,7 @@ export async function verifyWalletsOf({ publicId, reply } = {}) {
   for (let i = 0; i < frames.length - 1; i++) {
     if (!frames[i].startsWith("WALLET\t")) return refuse("Grammar", `line ${i} is not a WALLET line`, "WALLET<TAB><record>", "ask another node", i);
     const text = frames[i].slice("WALLET\t".length);
+    shadow.firstLetters(SHADOW_DOOR_1, text);
     const blocks = text.split("-"), get = (l) => blocks.filter((b) => b[0] === l).map((b) => b.slice(1)), refs = get("C");
     const wallet = get("G")[0] || "", last = blocks.at(-1) || "";
     const shapeOk = get("K")[0] === "KWALLET1" && get("N")[0] === PVA_CHAIN && get("J")[0] === "0" && refs.length === 3 && refs[0] === "0".repeat(64) && refs[1] === publicId && HEX64.test(wallet) && get("H")[0] === hexOfUtf8(wallet);

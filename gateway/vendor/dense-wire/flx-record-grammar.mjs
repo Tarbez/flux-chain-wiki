@@ -51,6 +51,9 @@
 import { grammarToJson, isGrammarV2, isOfferV2 } from "./flx-resolver-artifacts.mjs";
 // The vendored state grammar is a classic script: importing it sets `globalThis.ARK_FLX_STATE` (see flx-kit-codec.mjs).
 import "./flx-state-grammar.js";
+import * as shadow from "./flx-v1-shadow.mjs";
+// Migration step 3: the resolver grammar check, in shadow beside the generated V1 reader.
+const SHADOW_DOOR = new shadow.Door("flx-record-grammar checkRecord");
 
 export const GRAMMAR_SCHEMA = "flx-resolver-grammar/1";
 
@@ -476,6 +479,8 @@ export function checkRecord(grammar, text) {
   let kind = null;
   let cCount = 0;
   const seen = [];
+  // grammar door: wired in shadow (migration step 3). The labels are this resolver grammar's, longest first.
+  shadow.slices(SHADOW_DOOR, String(text), ((read) => (read.every((l) => l !== null) ? read : null))(String(text).split("-").map((b) => labels.find((l) => b.startsWith(l.label))?.label ?? null)));
   for (const block of String(text).split("-")) {
     // `labels` is sorted longest-first, so the first match is the
     // longest label the block starts with.

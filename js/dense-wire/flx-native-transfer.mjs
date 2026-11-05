@@ -15,6 +15,9 @@
 // Signer shape (same as flx-transfer-builders.mjs): `{ pubHex, signText(asciiText): Promise<hexSig> }`.
 // Exports only; no top-level work.
 
+import * as shadow from "./flx-v1-shadow.mjs";
+// Migration step 3: this file's box readers, in shadow beside the generated V1 reader.
+const SHADOW_DOOR_0 = new shadow.Door("flx-native-transfer verifySigned");
 export const KIND_NATIVE_TRANSFER = "KNXFER1";
 export const MAX_TRANSFER_MEMO_BYTES = 64;
 
@@ -171,6 +174,7 @@ async function verifySigned(record, expectedKind) {
   const cut = record.lastIndexOf("-S");
   if (cut < 0) throw new Error("not a signed record");
   const body = record.slice(0, cut), sig = record.slice(cut + 2);
+  shadow.firstLetters(SHADOW_DOOR_0, record);
   const parts = body.split("-");
   if (!parts.includes(expectedKind)) throw new Error(expectedKind === BAL_KIND ? "not a balance result (K must be KBALR1)" : expectedKind === HAND_KIND ? "not a handover (K must be KBALH1)" : "not a recovery rotation (K must be KBALK1)");
   const signer = parts[0].slice(1);

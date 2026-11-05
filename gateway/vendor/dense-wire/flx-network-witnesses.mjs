@@ -29,8 +29,10 @@
 //                  respond "fxn devnet seat big1: pages witness at wss://big1.devnet.defxn.com/ws" 200
 //              }
 //          }
-//   The chain checks each page's Origin (CHAIN_SERVER_WS_ORIGINS, which must admit the signing sites), and the
-//   signing sites' CSP admits the seat names (connect-src wss://*.devnet.defxn.com; each site's deploy script adds it).
+//   The chain checks each page's Origin (CHAIN_SERVER_WS_ORIGINS, which must admit the signing sites), and each signing
+//   site's CSP names the host and every seat exactly (`connectSourcesFor`, written by its deploy script through
+//   flx-network-csp.mjs). Never a wildcard: wss://*.defxn.com-style sources would let a signing page connect to any
+//   label under the domain, a user-published gateway site among them (owner ruling 2026-11-05).
 
 import { NETWORKS } from "./fxn-network.mjs";
 
@@ -70,4 +72,17 @@ export function seatListRefusal(seats = NETWORK_SEATS) {
     if (bad !== undefined) return `${network}: ${JSON.stringify(bad)} is not a seat name (one DNS label)`;
   }
   return null;
+}
+
+/** The CSP connect-src sources a signing page needs on the network served at `host`: the host itself and each seat's
+ *  own name under it, exact and in the network file's order (devnet.defxn.com gives wss://devnet.defxn.com,
+ *  wss://big1.devnet.defxn.com, wss://lax24.devnet.defxn.com). A seat added to fxn-network.mjs is added here. Never a
+ *  wildcard (owner ruling 2026-11-05). `{ sources }`, or `{ refusal: [failure, missing, remedy] }` when no network is
+ *  served at `host` or its seat list cannot serve. */
+export function connectSourcesFor(host, seats = NETWORK_SEATS) {
+  const broken = seatListRefusal(seats);
+  if (broken !== null) return { refusal: [`the network file's seats cannot serve: ${broken}`, "a seat list every network can be witnessed by", "fix fxn-network.mjs and copy it to the sites again"] };
+  const entry = Object.values(seats).find((e) => e.domain === host);
+  if (!entry) return { refusal: [`no network in fxn-network.mjs is served at ${JSON.stringify(host)}`, `a network whose host is ${JSON.stringify(host)}, or a node host the network file names (${Object.values(seats).map((e) => e.domain).join(", ")})`, "pass a host from the network file, or add the network there first"] };
+  return { sources: Object.freeze([`wss://${host}`, ...entry.seats.map((seat) => `wss://${seat}.${host}`)]) };
 }

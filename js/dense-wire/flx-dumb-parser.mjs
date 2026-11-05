@@ -17,6 +17,8 @@
 // `native/android/defxn-node/src/dumb-parser.js` is a byte-identical copy, so the Android package installs alone.
 // Edit this file, copy it there; the parity test fails while the two differ.
 
+import * as shadow from "./flx-v1-shadow.mjs";
+
 const MAX_MANIFEST_LEN = 65_536;
 const ALLOWED = /^[A-Za-z0-9-]+$/;
 
@@ -111,8 +113,28 @@ const RULE = {
   E: hexPayload(true),
 };
 
-/** Parse-and-validate a record exactly as the node's door does. Returns a `Raw` or throws a `ParseError`. */
+// Migration step 3: this door and its lookups, in shadow beside the generated V1 reader (flx-v1-shadow.mjs).
+const DOOR_ADMIT = new shadow.Door("browser door admit");
+const DOOR_PAYLOAD = new shadow.Door("browser door Raw.payload");
+const DOOR_C = new shadow.Door("browser door Raw.c");
+const DOOR_SIGNATURE = new shadow.Door("browser door signaturePrefix");
+
+/** Parse-and-validate a record exactly as the node's door does. Returns a `Raw` or throws a `ParseError`. The
+ *  generated V1 reader reads it too, in shadow; this door's verdict stands. */
 export function admit(text) {
+  let raw;
+  try {
+    raw = admitV1(text);
+  } catch (e) {
+    if (e instanceof ParseError) shadow.verdict(DOOR_ADMIT, text, { ok: false, code: e.code });
+    throw e;
+  }
+  shadow.verdict(DOOR_ADMIT, text, { ok: true, labels: raw.blocks.map(ledgerBoxLabel) });
+  return raw;
+}
+
+function admitV1(text) {
+  // grammar door: browser door admit
   if (!text) throw new ParseError(ErrGrammar, "the record is empty");
   if (text.length > MAX_MANIFEST_LEN) throw new ParseError(ErrGrammar, `the record is over the ${MAX_MANIFEST_LEN}-byte limit`);
   if (!ALLOWED.test(text)) throw new ParseError(ErrGrammar, "charset: only ASCII letters, digits and '-'");
@@ -171,14 +193,18 @@ export class Raw {
   }
   payload(role) {
     const b = this.blocks.find((b) => b.startsWith(role) && !(role === "C" && b.startsWith("CHAIN")));
-    return b ? b.slice(1) : null;
+    const found = b ? b.slice(1) : null;
+    shadow.lookup(DOOR_PAYLOAD, this.text, role, 0, found);
+    return found;
   }
   #cs() {
     return this.blocks.filter((b) => b.startsWith("C") && !b.startsWith("CHAIN"));
   }
   c(n) {
     const cs = this.#cs();
-    return cs[n] ? cs[n].slice(1) : null;
+    const found = cs[n] ? cs[n].slice(1) : null;
+    shadow.lookup(DOOR_C, this.text, "C", n, found);
+    return found;
   }
   cCount() {
     return this.#cs().length;
@@ -212,6 +238,7 @@ export class Raw {
  *  a node or anyone on the wire could add a record target or fork a CID.
  *  Throws ParseError(ErrSig) naming which rule failed. */
 export function signaturePrefix(text) {
+  shadow.firstLetters(DOOR_SIGNATURE, String(text));
   const blocks = String(text).split("-");
   const sBlocks = blocks.filter((b) => b.startsWith("S"));
   if (sBlocks.length === 0) throw new ParseError(ErrSig, "no S");

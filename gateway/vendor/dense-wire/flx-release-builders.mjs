@@ -12,6 +12,10 @@
 // every earlier body keeps its bytes). A record carries the hex of its UTF-8 bytes in C[1]. Self-contained (no
 // import), so a page vendors this one file. Exports only; no top-level work.
 
+import * as shadow from "./flx-v1-shadow.mjs";
+// Migration step 3: this file's box readers, in shadow beside the generated V1 reader.
+const SHADOW_DOOR_0 = new shadow.Door("flx-release-builders recordBlock");
+const SHADOW_DOOR_1 = new shadow.Door("flx-release-builders recordCBlocks");
 export const KIND_RELEASE = "KNODEREL1";
 export const KIND_RELEASE_CANCEL = "KNODERELOFF1";
 export const NETPARAMS_CHAIN = "netparams";
@@ -167,12 +171,14 @@ export function renderReleaseBodyHex(body) {
 /** The payload of the first block labelled `label` in a record text (`CHAIN...` is another label that starts with
  *  `C`; the crate's `record_block` and dense-wire's `Raw::c` skip it the same way). */
 export function recordBlock(text, label) {
+  shadow.chainAwareLetters(SHADOW_DOOR_0, String(text));
   const block = String(text).split("-").find((b) => b.startsWith(label) && !(label === "C" && b.startsWith("CHAIN")));
   return block === undefined ? null : block.slice(1);
 }
 
 /** Every `C` block of a record text, in order: C[0] is the previous record, the rest the kind's own. */
 export function recordCBlocks(text) {
+  shadow.chainAwareLetters(SHADOW_DOOR_1, String(text));
   return String(text).split("-").filter((b) => b.startsWith("C") && !b.startsWith("CHAIN")).map((b) => b.slice(1));
 }
 
