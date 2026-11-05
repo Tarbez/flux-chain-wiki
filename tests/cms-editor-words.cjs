@@ -22,8 +22,9 @@ const seo = fs.readFileSync('js/admin/seo.js', 'utf8');
 assert(seo.includes('are in Site style \\u2192 Search defaults.') && !seo.includes('are in Design \\u2192 Theme & defaults'), 'Page SEO names the place the site-wide settings are now');
 assert(/label: 'Search defaults'/.test(fs.readFileSync('js/admin/design.js', 'utf8')), 'Site style really has a Search defaults tab');
 const embed = fs.readFileSync('css/studio-embed.css', 'utf8');
-const textarea = /#studioRoot \.pop textarea \{[^}]*font: 400 (\d+)px\/[\d.]+ var\(--(\w+)\)/.exec(embed);
-assert(textarea && Number(textarea[1]) >= 12 && textarea[2] === 'sans', 'a popover text box is sans at the 12px floor or above');
+// owner ruling 2026-11-05: sizes are --fs-* steps (laws 78-83); prose being written is body text, secondary 18 (law 79)
+const textarea = /#studioRoot \.pop textarea \{[^}]*font: 400 var\(--fs-(\w+)\)\/[\d.]+ var\(--(\w+)\)/.exec(embed);
+assert(textarea && textarea[1] === 'secondary' && textarea[2] === 'sans', 'a popover text box is sans at the body step, --fs-secondary');
 assert(/#studioRoot \.pop textarea\.code-view \{[^}]*var\(--mono\)/.test(embed), 'a code view keeps mono');
 
 const app = fs.readFileSync('admin-app.html', 'utf8');

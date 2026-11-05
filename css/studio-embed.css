@@ -400,7 +400,7 @@
 #studioRoot .pop .field input, #studioRoot .pop textarea { border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-md); padding: 6px 8px; background: hsl(var(--surface)); }
 /* page words (an SEO description, a text field) are read and written as prose: the editor's sans at the
    12px floor and up, not 11px mono (docs/ux-audit/cms.md P2-10); a code view keeps .code-view's own mono */
-#studioRoot .pop textarea { width: 100%; min-height: 120px; font: 400 var(--fs-tertiary)/1.45 var(--sans); }
+#studioRoot .pop textarea { width: 100%; min-height: 120px; font: 400 var(--fs-secondary)/1.45 var(--sans); }
 #studioRoot .pop textarea.code-view { font: 400 var(--fs-tertiary)/1.45 var(--mono); }
 /* segmented control: the same pressed state as every segmented control in the editor */
 #studioRoot .ctl-seg { display: flex; border: 1px solid hsl(var(--border-default)); border-radius: var(--radius-sm); overflow: hidden; min-width: 0; }
