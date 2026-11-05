@@ -249,7 +249,16 @@ export function isClaimableDomainName(name) {
   const [label, tld] = parts;
   // a label of the key-name shape belongs to the key it is made from (keyName), never to a claim
   if (isKeyNameLabel(label)) return false;
+  // owner ruling 2026-11-05: no `xn--` label and no lookalike letters, decided by structure (isTaggedLabel)
+  if (isTaggedLabel(label)) return false;
   return NAME_ENDINGS.includes(tld);
+}
+
+/** Same rule as the Rust `chain::is_tagged_label`: hyphens in a label's third and fourth places (RFC 5891 section
+ *  4.2.3.1). `xn--` is punycode, which decodes to letters of another script; refused by position, so a tag invented
+ *  later is refused too. Without tags a label holds Latin small letters, digits and hyphens only: one script. */
+export function isTaggedLabel(label) {
+  return label.length >= 4 && label[2] === "-" && label[3] === "-";
 }
 
 // --- Name rent (owner rulings 2026-10-29; Rust `name_rent.rs`) ---------------
@@ -690,6 +699,167 @@ export async function buildDomainRentWithSigner({ signer, pos, prevCid, fqdn, he
     throw new Error(`A rent pays FXN in base units. Missing: an amount of 1 base unit or more (got ${JSON.stringify(String(amount))}). To fix: pay what DOM_RENT_QUOTE names.`);
   }
   const body = `${domainEntryHead(signer.pubHex, DOMAIN_KIND_RENT, fqdn, pos, prevCid, nowSec)}-C${headCid}-C${encodePriceField(String(years))}-C${encodePriceField(units.toString())}-C${lockCid}`;
+  return signDomainEntry(signer, body);
+}
+
+// --- A name a DAO safe holds (owner ruling 2026-11-05; Rust `name_safe.rs`) ----
+
+export const DOMAIN_KIND_SAFE = "KDOMSAFE1";
+export const SAFE_ACTIONS = Object.freeze(["take", "give", "point", "renew"]);
+
+/** The message every vote of a safe's decision signs (Rust `name_safe::covered`): the name, the ownership head, the
+ *  safe, the action and the action's own boxes, one per line. */
+export function domainSafeCovered({ fqdn, headCid, safe, action, boxes = [] }) {
+  return `FXN-DOMSAFE-V1\n${fqdn}\n${headCid}\n${safe}\n${action}\n${boxes.map((b) => `${b}\n`).join("")}`;
+}
+
+/** The bytes a safe signer's vote signs: `domainSafeCovered(...)` bound to the network (Rust
+ *  `chain::network_covered`), so a vote given on one network counts on no other. */
+export function domainSafeVoteBytes(network, covered) {
+  return networkCovered(network, new TextEncoder().encode(covered));
+}
+
+/** One safe signer's vote: `{ signer, signature }` over `domainSafeVoteBytes(network, covered)`. Past A10 a council
+ *  seat also files its `KDAOPQAPPR1` over those bytes, or its vote does not count. */
+export async function signSafeVoteWithSigner(signer, covered, network) {
+  return { signer: signer.pubHex, signature: await signer.signBytes(domainSafeVoteBytes(network, covered)) };
+}
+
+/** Read a KDOMSAFE1 (Rust `name_safe::read_safe_decision`): `{ fqdn, head, safe, action, boxes, votes, m }`, or throws
+ *  naming the box that does not read. */
+export function readSafeDecision(raw) {
+  if (raw.payload("K") !== DOMAIN_KIND_SAFE) throw new Error(`K is ${raw.payload("K")}, not ${DOMAIN_KIND_SAFE}`);
+  const fqdn = utf8OfHex(raw.payload("W") ?? "");
+  if (!isClaimableDomainName(fqdn)) throw new Error("W must be hex-of-utf8 of one label plus .fxn or .fxndev");
+  const n = raw.cCount();
+  const head = raw.c(1);
+  const safe = raw.c(2);
+  if (!/^[0-9a-f]{64}$/.test(head ?? "")) throw new Error("C[1] must be the ownership head's CID");
+  if (!/^[0-9a-f]{64}$/.test(safe ?? "")) throw new Error("C[2] must be the safe's address");
+  const action = decodePriceField(raw.c(3) ?? "");
+  if (!SAFE_ACTIONS.includes(action)) throw new Error("C[3] must be take, give, point or renew");
+  if (n < 5) throw new Error("the votes ride in the last C box");
+  const votesBox = raw.c(n - 1) ?? "";
+  if (votesBox.length === 0 || votesBox.length % 192 !== 0 || votesBox.length / 192 > 256 || !/^[0-9a-f]+$/.test(votesBox)) {
+    throw new Error("the last C box must be 1 to 256 votes of <64 hex signer><128 hex signature>");
+  }
+  const votes = [];
+  for (let i = 0; i < votesBox.length; i += 192) votes.push({ signer: votesBox.slice(i, i + 64), signature: votesBox.slice(i + 64, i + 192) });
+  const boxes = [];
+  for (let i = 4; i < n - 1; i++) boxes.push(raw.c(i));
+  let batch = null;
+  if (boxes.length > 0 && boxes.at(-1).startsWith("Z")) batch = readSafeBatchPath(boxes.pop());
+  const ok =
+    (action === "take" && boxes.length === 0) ||
+    (action === "give" && boxes.length === 2 && /^[0-9a-f]{64}$/.test(boxes[0]) && /^[0-9a-f]{128}$/.test(boxes[1])) ||
+    (action === "point" && boxes.length >= 2 && /^[0-9a-f]{64}$/.test(boxes[0])) ||
+    (action === "renew" && boxes.length === 3 && /^[0-9a-f]{64}$/.test(boxes[2]));
+  if (!ok) throw new Error(`the ${action} decision's boxes do not read (name_safe.rs names each action's boxes)`);
+  return { fqdn, head, safe, action, boxes, votes, batch, m: Number(raw.payload("M")) };
+}
+
+function readSafeBatchPath(path) {
+  const body = path.slice(1);
+  const why = "the batch box must be Z<8 hex row index><64 hex sibling>..., at most 16 siblings, the index inside them";
+  if (body.length < 8 || (body.length - 8) % 64 !== 0 || !/^[0-9a-f]+$/.test(body)) throw new Error(why);
+  const index = parseInt(body.slice(0, 8), 16);
+  const siblings = body.slice(8).match(/.{64}/g) ?? [];
+  if (siblings.length > 16 || index >= 2 ** siblings.length) throw new Error(why);
+  return { index, siblings };
+}
+
+const safeHex = (bytes) => [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
+const safeUnhex = (hex) => new Uint8Array((hex.match(/../g) ?? []).map((h) => parseInt(h, 16)));
+async function safeSha(...parts) {
+  const all = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const p of parts) {
+    all.set(p, at);
+    at += p.length;
+  }
+  return safeHex(new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", all)));
+}
+const safeLeaf = (covered) => safeSha(new TextEncoder().encode("FXN-DOMSAFE-LEAF-V1\0"), new TextEncoder().encode(covered));
+const safeNode = (left, right) => safeSha(new TextEncoder().encode("FXN-DOMSAFE-NODE-V1\0"), safeUnhex(left), safeUnhex(right));
+
+/** The root a batch row and its path compute (Rust `name_safe::batch_root_of`). */
+export async function safeBatchRootOf(covered, index, siblings) {
+  let at = await safeLeaf(covered);
+  let i = index;
+  for (const sibling of siblings) {
+    at = i % 2 === 1 ? await safeNode(sibling, at) : await safeNode(at, sibling);
+    i = Math.floor(i / 2);
+  }
+  return at;
+}
+
+/** What a voter signs for a batch, before the network binding (Rust `name_safe::batch_covered`). */
+export function domainSafeBatchCovered(root) {
+  return `FXN-DOMSAFE-BATCH-V1\n${root}\n`;
+}
+
+/** A batch's root and each row's path box, in row order (Rust `name_safe::batch_tree`). `rows` are `domainSafeCovered`
+ *  results. A seat signs `domainSafeBatchCovered(root)` once; each record carries its row's path as its last box. */
+export async function domainSafeBatch(rows) {
+  let size = 1;
+  while (size < rows.length) size *= 2;
+  let level = await Promise.all(rows.map((r) => safeLeaf(r)));
+  const empty = await safeSha(new TextEncoder().encode("FXN-DOMSAFE-EMPTY-V1\0"));
+  while (level.length < size) level.push(empty);
+  const paths = rows.map(() => []);
+  let width = 1;
+  while (level.length > 1) {
+    paths.forEach((path, row) => path.push(level[Math.floor(row / width) ^ 1]));
+    const next = [];
+    for (let i = 0; i < level.length; i += 2) next.push(await safeNode(level[i], level[i + 1]));
+    level = next;
+    width *= 2;
+  }
+  return { root: level[0], paths: paths.map((path, row) => `Z${row.toString(16).padStart(8, "0")}${path.join("")}`) };
+}
+
+/** The domains a safe's address is hashed under (Rust `dao_treasury`: plain, vested, ruled safes). */
+export const SAFE_ADDRESS_DOMAINS = Object.freeze(["FLX-DAO-SAFE-ADDRESS-V1\0", "FLX-DAO-VESTED-SAFE-ADDRESS-V1\0", "FLX-DAO-RULED-SAFE-ADDRESS-V1\0"]);
+
+/** A safe's address from the preimage a node hands with a proof (Rust `dao_treasury::address_of_parts`): sha256 of the
+ *  domain and each field, length-prefixed as 8 big-endian bytes. `domainHex` is the domain's bytes as hex; `parts` the
+ *  fields as text. Fields 3 and 4 are the threshold and the comma-joined signers. `null` for any other domain. */
+export async function safeAddressOf(domainHex, parts) {
+  const domain = new Uint8Array((domainHex.match(/../g) ?? []).map((h) => parseInt(h, 16)));
+  if (!SAFE_ADDRESS_DOMAINS.includes(new TextDecoder().decode(domain))) return null;
+  const enc = new TextEncoder();
+  const chunks = [domain];
+  for (const part of parts) {
+    const bytes = enc.encode(part);
+    const len = new Uint8Array(8);
+    new DataView(len.buffer).setBigUint64(0, BigInt(bytes.length));
+    chunks.push(len, bytes);
+  }
+  const all = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0));
+  let at = 0;
+  for (const c of chunks) {
+    all.set(c, at);
+    at += c.length;
+  }
+  const digest = new Uint8Array(await globalThis.crypto.subtle.digest("SHA-256", all));
+  return [...digest].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** Build and sign a KDOMSAFE1 (Rust `chain::domain_safe`). Any key files it; `votes` are K of the safe's signers over
+ *  `domainSafeCovered`. `boxes` are the action's own: none for take; [newOwnerPubHex, its dual-sig] for give; [prior
+ *  record CID, ...target boxes] for point; [years, FXN, lock CID] (price-field encoded) for renew; then the row's batch
+ *  path box (`domainSafeBatch`) when the votes are over a batch root. */
+export async function buildDomainSafeWithSigner({ signer, pos, prevCid, fqdn, headCid, safe, action, boxes = [], votes, nowSec }) {
+  if (!isClaimableDomainName(fqdn)) throw refuseName(fqdn, "carry a safe's decision for");
+  requireCid(headCid, "ownership head CID", `read the current head with DOM_WHO ${fqdn} and use its CID.`);
+  requireCid(safe, "safe address", "pass the safe's 64-hex address (the genesis plan's safe row).");
+  if (!SAFE_ACTIONS.includes(action)) {
+    throw new Error(`That safe action is not one this chain reads. Missing: one of ${SAFE_ACTIONS.join(", ")} (got ${JSON.stringify(action)}). To fix: pick one.`);
+  }
+  if (!Array.isArray(votes) || votes.length < 1 || votes.some((v) => !/^[0-9a-f]{64}$/.test(v.signer ?? "") || !/^[0-9a-f]{128}$/.test(v.signature ?? ""))) {
+    throw new Error("A safe's decision carries its signers' votes. Missing: at least one { signer: 64 hex, signature: 128 hex }. To fix: gather the votes with signSafeVoteWithSigner over domainSafeCovered.");
+  }
+  const body = `${domainEntryHead(signer.pubHex, DOMAIN_KIND_SAFE, fqdn, pos, prevCid, nowSec)}-C${headCid}-C${safe}-C${encodePriceField(action)}${boxes.map((b) => `-C${b}`).join("")}-C${votes.map((v) => v.signer + v.signature).join("")}`;
   return signDomainEntry(signer, body);
 }
 

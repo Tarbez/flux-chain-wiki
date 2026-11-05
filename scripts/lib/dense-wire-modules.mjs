@@ -33,8 +33,8 @@ export async function loadDenseWire() {
     loaded = (async () => {
       const dir = denseWireWebDir();
       if (!dir) throw new DenseWireMissing('The one name system cannot be read from this checkout.', `dense-wire's web modules (flx-wire.mjs, flx-domain-proof.mjs, flx-builders.mjs) at ${CANDIDATES.map((c) => c.pathname).join(' or ')}.`, 'check out defxn-defi-rs beside this repo with the fix/one-name-system branch merged, or set DENSE_WIRE_WEB.');
-      const [wire, proof, builders] = await Promise.all(['flx-wire.mjs', 'flx-domain-proof.mjs', 'flx-builders.mjs'].map((file) => import(new URL(file, dir).href)));
-      return { dir, WireClient: wire.WireClient, verifyDomainProof: proof.verifyDomainProof, isClaimableDomainName: builders.isClaimableDomainName };
+      const [wire, proof, builders, list] = await Promise.all(['flx-wire.mjs', 'flx-domain-proof.mjs', 'flx-builders.mjs', 'fxn-network.mjs'].map((file) => import(new URL(file, dir).href)));
+      return { dir, WireClient: wire.WireClient, verifyDomainProof: proof.verifyDomainProof, isClaimableDomainName: builders.isClaimableDomainName, PAGE_NETWORK: list.PAGE_NETWORK };
     })().catch((error) => { loaded = null; throw error; });
   }
   return loaded;

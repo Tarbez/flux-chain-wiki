@@ -72,6 +72,17 @@ export async function verifyHex(pubHex, messageAscii, sigHex) {
   }
 }
 
+/** [`verifyHex`] over bytes: a signature over a message bound to a network (`networkCovered`). False, never a throw. */
+export async function verifyBytesHex(pubHex, bytes, sigHex) {
+  try {
+    if (!/^[0-9a-f]{64}$/.test(pubHex) || !/^[0-9a-f]{128}$/.test(sigHex)) return false;
+    const key = await crypto.subtle.importKey("raw", hexToBytes(pubHex), KEYGEN_ALG, false, ["verify"]);
+    return await crypto.subtle.verify("Ed25519", key, hexToBytes(sigHex), bytes);
+  } catch {
+    return false;
+  }
+}
+
 /** Sign arbitrary bytes with a private Ed25519 key. Used for the
  *  segment-covered-bytes signing path. */
 export async function signBytesHex(privateKey, bytes) {
