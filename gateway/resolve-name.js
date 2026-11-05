@@ -1,10 +1,12 @@
 /* A name, as the dense-wire name chain holds it, verified. Pure: no DOM, so it is
    tested in Node (tests/gateway-name-resolve.test.mjs) and used by app.js.
 
-   The shell asks a node `DOM_PROOF <name>` and verifies the answer with the ONE
+   The shell asks for `DOM_PROOF <name>` and verifies the answer with the ONE
    shared verifier (vendor/dense-wire/flx-domain-proof.mjs, vendored byte for byte;
    tests/gateway-dense-wire-vendor.test.mjs keeps it that way) against the pinned
-   genesis key. The node is not trusted: a proof that does not verify is refused by
+   genesis key. On a <label>.defxn.com page the ask goes to the gateway's chain read relay on the page's own origin
+   (askGatewayProof, chain-relay.js), which carries the node's reply unchanged; elsewhere (defxn.com) it may go to a node's /ws
+   (askDomainProof). Neither the node nor the gateway is trusted: a proof that does not verify is refused by
    name, a name the chain does not hold is "no such name", and nothing falls back to
    the retired names/* registry (the Explorer `names` source this shell read until
    2026-10-23).
@@ -16,6 +18,7 @@
    site is never shown. */
 import { WireClient } from "./vendor/dense-wire/flx-wire.mjs";
 import { verifyDomainProof } from "./vendor/dense-wire/flx-domain-proof.mjs";
+import { relayWire } from "./chain-relay.js";
 import { isClaimableDomainName, nameEnding } from "./vendor/dense-wire/flx-builders.mjs";
 
 export const NAME_AUTHORITY_URL = "https://domains.defxn.com";
@@ -73,6 +76,20 @@ export async function askDomainProof({ nodes, fqdn, wireClient = (url) => new Wi
     }
   }
   return { node: null, reply: null, failures };
+}
+
+/** Ask the gateway's chain read relay (same origin, `path`, name-config.js CHAIN_READ_PATH) for `fqdn`'s DOM_PROOF.
+ *  The relay carries the node's reply unchanged and checks nothing, so this checks nothing either: resolveName
+ *  verifies what comes back. Owner decision 2026-11-05: the node admits an exact list of browser origins, and a
+ *  label page is not on it, so a label page never opens the node itself.
+ *  -> { node: "gateway <path>", reply, failures } or { node: null, reply: null, failures } */
+export async function askGatewayProof(fqdn, { path, fetchImpl } = {}) {
+  const node = `gateway ${path}`;
+  try {
+    return { node, reply: await relayWire({ path, fetchImpl }).domProof(fqdn), failures: [] };
+  } catch (error) {
+    return { node: null, reply: null, failures: [`${node}: ${describe(error)}`] };
+  }
 }
 
 /** -> { ok: true, name, owner, ownerEntryCid, record: { cid, targets, updatedAt } | null,

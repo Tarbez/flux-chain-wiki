@@ -45,11 +45,12 @@ test('the gateway shell and the CMS permission check read no retired name source
 // one network file, so a seat added there fails this test until the pages name it.
 test('the shell and the site CSP name the network host and each witness seat exactly, with no wildcard', () => {
   const { sources } = connectSourcesFor(NETWORKS[PAGE_NETWORK].host);
-  for (const file of [path.join('gateway', 'index.html'), 'index.html']) {
+  // The gateway shell left this list on 2026-11-05: it reaches no node at all (the assertion below).
+  for (const file of ['index.html']) {
     const connect = (fs.readFileSync(path.join(ROOT, file), 'utf8').match(/connect-src ([^;]+);/) || [])[1] || '';
     assert.ok(!connect.includes('*'), `${file}: connect-src must never use a wildcard (${connect})`);
     for (const source of sources) assert.ok(connect.split(/\s+/).includes(source), `${file}: connect-src must name ${source} (${connect})`);
   }
-  const shell = fs.readFileSync(path.join(ROOT, 'gateway', 'index.html'), 'utf8');
-  assert.ok(shell.includes(`connect-src 'self' ${sources.join(' ')};`), 'the gateway shell connects to the node and its witnesses, and nothing else');
+  // Owner decision 2026-11-05: the shell reads names through the gateway's relay on its own origin, never the node.
+  assert.match(fs.readFileSync(path.join(ROOT, 'gateway', 'index.html'), 'utf8'), /connect-src 'self';/, "the shell's CSP connects to its own origin only");
 });

@@ -1,7 +1,8 @@
 /* The FXN networks the app pages and services connect to. Layer: app (deploy values). The kernel learns none of this.
 
    One list, here. Every app reads it and none keeps its own copy of these values:
-     - the *.defxn.com gateway shell and the defxn.com site, through gateway/name-config.js;
+     - the defxn.com site, through gateway/name-config.js (the *.defxn.com gateway shell reads names through the gateway's
+       name proof relay instead, and takes only the network and the genesis key from here);
      - the Domains page (product-surfaces), the Bundles page and CLI (bundle-deploy), each as a pinned byte-for-byte copy
        (ops/scripts/vendor/pin-copies.mjs; each product's package.json "pins");
      - `npm run names:system` (ops/scripts/names/system-names.mjs), which reads this file in place;
