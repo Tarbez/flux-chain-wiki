@@ -7,12 +7,15 @@ import assert from 'node:assert/strict';
 import { resolveName, askDomainProof } from '../gateway/resolve-name.js';
 import { signer, buildProof, answers, tamper } from './lib/dense-wire-proof.mjs';
 
-const FQDN = 'site.fxn';
+// The network is pinned, as name-config.js pins it (NETWORK): resolveName refuses to guess which ending is its own.
+// fxn-devnet serves .fxndev, and its names are free.
+const NETWORK = 'fxn-devnet';
+const FQDN = 'site.fxndev';
 const TARGETS = [{ type: 'blake3_cid', value: '6437b3ac38465133ffb63b75273a8db548c558465d79db03fd359c6cd5bd9d85' }];
 const genesis = signer();
 let proof;
 test.before(async () => { proof = await buildProof({ fqdn: FQDN, genesis, targets: TARGETS }); });
-const resolve = (askProof, extra = {}) => resolveName({ name: FQDN, nodes: ['ws://node-a'], genesisPubHex: genesis.pubHex, askProof, ...extra });
+const resolve = (askProof, extra = {}) => resolveName({ name: FQDN, nodes: ['ws://node-a'], genesisPubHex: genesis.pubHex, network: NETWORK, askProof, ...extra });
 
 test('a verified proof resolves to its record, with the owner and node named', async () => {
   const result = await resolve(answers.proof(proof));
@@ -26,7 +29,7 @@ test('a verified proof resolves to its record, with the owner and node named', a
 test('a name the chain does not hold is "no such name", and the detail is the remedy', async () => {
   const result = await resolve(answers.none());
   assert.deepEqual([result.ok, result.reason], [false, 'NAME_NOT_FOUND']);
-  assert.match(result.detail, /holds no owner for site\.fxn\. Claim it at https:\/\/domains\.defxn\.com/);
+  assert.match(result.detail, /holds no owner for site\.fxndev\. Claim it at https:\/\/domains\.defxn\.com/);
 });
 
 test('a tampered proof, or a claim by a key that is not the pinned genesis key, is refused by name', async () => {
@@ -47,7 +50,7 @@ test('with no genesis key pinned the gateway says so and resolves nothing', asyn
 
 test('no node answering, a non-flat name, and an owned name without a record are each named', async () => {
   assert.equal((await resolve(answers.silent())).reason, 'NAME_UNRESOLVABLE');
-  assert.equal((await resolveName({ name: 'a.b.fxn', nodes: [], genesisPubHex: genesis.pubHex, askProof: answers.none() })).reason, 'NAME_NOT_FOUND');
+  assert.equal((await resolveName({ name: 'a.b.fxndev', nodes: [], genesisPubHex: genesis.pubHex, network: NETWORK, askProof: answers.none() })).reason, 'NAME_NOT_FOUND');
   const bare = await resolve(answers.proof(await buildProof({ fqdn: FQDN, genesis })));
   assert.equal(bare.ok, true);
   assert.equal(bare.record, null);

@@ -1,12 +1,14 @@
 /* Where the *.defxn.com gateway shell reads names from (docs/DEFXN-NAMES-ONE-SYSTEM.md).
 
-   NAME_PROOF_PATH where a <label>.defxn.com page asks for a name's proof: the gateway's name
-                   proof relay, on the page's own origin (owner decision 2026-11-05). Caddy
-                   proxies this one path to the gateway's ask server, which reads DOM_PROOF
-                   from a node over the line port, server side, and returns the reply
-                   unchanged. The page verifies it (resolve-name.js). The node's /ws admits
-                   an exact list of origins (dense-wire web/flx-network-origins.mjs), and no
-                   list can name every label, so the shell's CSP connects to 'self' only.
+   CHAIN_READ_PATH where a <label>.defxn.com page reads the chain: the gateway's chain read
+                   relay, on the page's own origin (owner decision 2026-11-05). Caddy
+                   proxies this one path to the gateway's ask server, which sends the read
+                   (DOM_PROOF for a name, RESOLVER_RECORDS for /_release/) to a node over the
+                   line port, server side, and returns the reply unchanged. The page
+                   verifies it (resolve-name.js, release.js; chain-relay.js carries it).
+                   The node's /ws admits an exact list of origins (dense-wire
+                   web/flx-network-origins.mjs), and no list can name every label, so the
+                   shell's CSP connects to 'self' only.
    NAME_NODES      chain-server WebSocket line-protocol endpoints, asked in order, for a
                    page whose origin the node admits (defxn.com's site check,
                    js/ark/skin-site.js). The gateway shell does not use them for names.
@@ -23,7 +25,7 @@
 import { networkConfig, PAGE_NETWORK } from "./fxn-network.mjs";
 
 const NET = networkConfig(PAGE_NETWORK);
-export const NAME_PROOF_PATH = "/_names/proof";
+export const CHAIN_READ_PATH = "/_chain/read";
 export const NAME_NODES = NET.pageNodes.slice();
 export const GENESIS_PUB_HEX = NET.genesisPubHex;
 export const NETWORK = NET.network;

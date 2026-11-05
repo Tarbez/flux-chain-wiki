@@ -4,9 +4,9 @@
    project's own convention (see ../scripts/serve-site.mjs).
 
    Flow: location.hostname -> "<label>.<ending>" (.fxn on the mainnet, .fxndev on a test
-   network: resolve-name.js servedNetwork) -> DOM_PROOF through the gateway's name
-   proof relay on this origin (name-config.js NAME_PROOF_PATH; the relay carries the
-   node's reply unchanged) -> verified with the ONE shared
+   network: resolve-name.js servedNetwork) -> DOM_PROOF through the gateway's chain
+   read relay on this origin (name-config.js CHAIN_READ_PATH, chain-relay.js; the relay
+   carries the node's reply unchanged) -> verified with the ONE shared
    verifier (resolve-name.js; vendor/dense-wire/flx-domain-proof.mjs) against the
    pinned genesis key -> the record's blake3_cid target -> GET
    /fxn-store/v1/<cid> (same-origin, answered from the node's byte store) ->
@@ -39,7 +39,7 @@
 import { decodeArchiveAsync } from "./vendor/flx-codec/index.js";
 import { resolveName as resolveOnChain, servedNetwork, askGatewayProof } from "./resolve-name.js";
 import { fetchVerifiedContent } from "./content.js";
-import { NAME_PROOF_PATH, GENESIS_PUB_HEX, NETWORK } from "./name-config.js";
+import { CHAIN_READ_PATH, GENESIS_PUB_HEX, NETWORK } from "./name-config.js";
 import { FOLDER_SITE_SCHEMA, readFolderSite, pageForAddress, buildPageHtml, loadPageFiles } from "./folder-site.js";
 import { FOLDER_SITE_INDEX_SCHEMA, readIndexSite, createBlockReader, BlockRefusal } from "./index-site.js";
 import { releaseRequestOf, readRelease, downloadRelease } from "./release.js";
@@ -66,6 +66,7 @@ const FAILURE_MESSAGES = {
   SITE_LEFT_ARCHIVE: "This page tried to show something from outside its site, so the gateway stopped it.",
   RELEASE_NONE: "Nothing is published for this download yet.",
   RELEASE_CONFLICT: "Two releases claim the same place, so this page offers neither.",
+  RELEASE_PROOF_INVALID: "This download does not match what the name's owner signed, so this page refuses to offer it.",
   RELEASE_ADDRESS: "This download address names no product.",
 };
 
@@ -111,7 +112,7 @@ function renderStatus(reason, detail) {
 }
 
 async function resolveName(name, network) {
-  return resolveOnChain({ name, nodes: [], genesisPubHex: GENESIS_PUB_HEX, network, askProof: (fqdn) => askGatewayProof(fqdn, { path: NAME_PROOF_PATH }) });
+  return resolveOnChain({ name, nodes: [], genesisPubHex: GENESIS_PUB_HEX, network, askProof: (fqdn) => askGatewayProof(fqdn, { path: CHAIN_READ_PATH }) });
 }
 
 function decodeSite(decoded) {
