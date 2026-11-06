@@ -1,0 +1,15 @@
+# Pinned byte for byte by ops/scripts/vendor/pin-copies.mjs. Do not edit these copies: fix the source, then copy again.
+# synced	2026-11-06
+# from	../genesis-wt-safes-pin/js	safes-pin c5cb46898f0362e723af8a4d9c81989bd37a294c
+5a51c7fad3c5abff543ac38d22d583fa7f67acb95bc4bf61627085f3e8cb348e	dense-wire/flx-amount.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-amount.mjs
+132e96ecc4b78d6d06c59d7cb58924e82383b7e8c91cf7651baaf145ac97a380	dense-wire/flx-attest-builders.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-attest-builders.mjs
+a7b74522cc7713a72c5704305e84cb8861d8588f9fb840b9f3ba45af5e4d32c8	dense-wire/flx-builders.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-builders.mjs
+099246d55db5dc2d0d0c57ce39beaa5c0483e6fc9bfc257a820ed6778f84b2bb	dense-wire/flx-crypto.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-crypto.mjs
+3ae37e86f55c8b4d2342655e9ee45f8444f0ba769d534e2b1af84fef7d99b35b	dense-wire/flx-dao-gov-builders.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-dao-gov-builders.mjs
+938045d458d1219405e2e35c72526980a19985d9836489bb5b5692226947bd62	dense-wire/flx-dumb-parser.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-dumb-parser.mjs
+bc4089477ef7fab124cbd6a9d67db4abed5f4ba3857609e972fd0eaefae2611f	dense-wire/flx-object-builders.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-object-builders.mjs
+0c81ac200e0c1ef83f21ed0caebe6bbf3edb9b7ac01bf647b5d54b029ecc51f7	dense-wire/flx-quorum.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-quorum.mjs
+181653786f0eee178b9116e89213a63e7ee8b73cf19d7510ace2107e7280e579	dense-wire/flx-release-builders.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-release-builders.mjs
+24dcd42794530f320e289b44e82c220989239e30412cb903c6402954357fa0a3	dense-wire/flx-v1-reader.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-v1-reader.mjs
+49d00feae05f805c3be6a4cbe41d727a52bebb8f0ba8d00fa3eb211e27c037ab	dense-wire/flx-v1-shadow.mjs	../genesis-wt-safes-pin/js/dense-wire/flx-v1-shadow.mjs
+5262505c6218c7ee90c23a102dcb25c389fe5048630e4a82fe6f941508729a4c	genesis-safes.js	../genesis-wt-safes-pin/js/genesis-safes.js
