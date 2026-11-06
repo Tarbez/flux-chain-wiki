@@ -1,0 +1,2 @@
+# sha256<TAB>served path<TAB>source (repo@<commit>:<path>). test/safes-pin.test.mjs checks it; the bytes are copied by ops/scripts/vendor/pin-copies.mjs (npm run pins), never edited.
+5262505c6218c7ee90c23a102dcb25c389fe5048630e4a82fe6f941508729a4c	js/genesis-safes.js	genesis@c5cb46898f0362e723af8a4d9c81989bd37a294c:js/genesis-safes.js

@@ -8,7 +8,8 @@
     "check:ark": "node scripts/build-ark-vendor.cjs --check",
     "build:pages": "node scripts/build-ark-vendor.cjs --pages",
     "check:pages": "node scripts/build-ark-vendor.cjs --pages --check",
-    "census": "node scripts/ux-component-census.mjs"
+    "census": "node scripts/ux-component-census.mjs",
+    "pins": "node ../../ops/scripts/vendor/pin-copies.mjs ."
   },
   "dependencies": {
     "jsdom": "30.1.3",
@@ -47,5 +48,15 @@
       "site": "https://defxn.com",
       "local": "http://127.0.0.1:3438/"
     }
-  }
+  },
+  "pins": [
+    {
+      "into": "js",
+      "from": "../genesis/js",
+      "env": "GENESIS_JS",
+      "files": [
+        "genesis-safes.js"
+      ]
+    }
+  ]
 }
