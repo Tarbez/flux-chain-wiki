@@ -1798,7 +1798,7 @@
       if (window.ArkElementMotion && site.elementMotion) { cmsElementMotionDraft = ArkElementMotion.define(site.elementMotion); }
       if (window.ArkSEO && ArkUI.pageCatalog) Object.keys(ArkUI.pageCatalog).forEach(function (key) {
         var entry = ArkUI.pageCatalog[key];
-        if (!entry.cmsFallbackTitle) entry.cmsFallbackTitle = String(entry.title || key).replace(/\s+[—-]\s+(?:DEFXN|Flux Protocol).*$/, '');
+        if (!entry.cmsFallbackTitle) entry.cmsFallbackTitle = String(entry.title || key).replace(/\s+[—-]\s+(?:DEFXN|FXN|Flux Protocol).*$/, '');
         if (entry.seoArticle) {
           var article = LearningContent.find(entry.seoArticle);
           entry.title = ArkSEO.articleTitle(entry.seoArticle, article ? article.title : entry.cmsFallbackTitle);

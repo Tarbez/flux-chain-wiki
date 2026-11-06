@@ -189,7 +189,7 @@ async function rootHandle({ mnemonic, derivation, callsign }) {
    out kept the secret: defxn.com's account wallet (which sends FXN) and its broker did, and under one FXN ID that
    file also derives the genesis signer. Keeping is opt-in: a page that wants "keep me signed in" passes
    keepSignedIn: true (an owner value; no signing page passes it). */
-export function create({ container, onChange = () => {}, product = 'Flux Protocol', keepSignedIn = false }) {
+export function create({ container, onChange = () => {}, product = 'FXN', keepSignedIn = false }) {
   // No default stylesheet: the panel's own `data-ark-auth` hooks are styled entirely by css/admin.css,
   // so its look is one thing with the rest of the gate, not two stylesheets negotiating a cascade.
   let active = null;   // { handle, walletHandle, identity, vault, secret }

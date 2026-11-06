@@ -5,7 +5,7 @@
 var ArkGlossary = {
   source: "docs/glossary.md",
   map: {
-    "flux protocol": { term: "Flux Protocol", definition: "The product and protocol name. Use this in titles, navigation, metadata, and explanatory copy." },
+    "fxn": { term: "FXN", definition: "The product and protocol name. Formerly Flux Protocol. The site editor is FXN Site Editor. Use this in titles, navigation, metadata, and explanatory copy." },
     "flux chain": { term: "Flux Chain", definition: "A legacy or technical name that may remain in historical artifacts, file names, storage keys, or compatibility surfaces. Do not use it as the current product name." },
     "pattern": { term: "Pattern", definition: "A definition of a recognizable request or statement shape." },
     "object": { term: "Object", definition: "Addressed data evaluated or referenced by protocol logic." },

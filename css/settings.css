@@ -1,4 +1,4 @@
-/* SDK semantic tokens supply alternate palettes, while Flux Protocol stays the default.
+/* SDK semantic tokens supply alternate palettes, while FXN stays the default.
    --ark-canvas (js/tokens.js) is a separate, hardcoded-dark token that ArkUI's atomizer
    bakes straight into generated classes (eg. the scene wrapper's own background) -- it
    was never theme-aware, and only read as correct because js/settings/panel.js's

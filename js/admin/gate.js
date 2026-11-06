@@ -307,7 +307,7 @@
   function openEditor() {
     if (frame) return;
     frame = document.createElement('iframe');
-    frame.id = 'app'; frame.title = 'Flux Protocol admin'; frame.src = 'admin-app.html';
+    frame.id = 'app'; frame.title = 'FXN Site Editor'; frame.src = 'admin-app.html';
     document.body.appendChild(frame);
     $('gate').hidden = true; document.body.classList.remove('locked');
   }

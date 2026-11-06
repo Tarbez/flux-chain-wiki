@@ -141,7 +141,7 @@ const { bootForms, type, choose } = require('./lib/admin-forms-dom.cjs');
   /* ---- data-driven selects write the value their label names ---- */
   const nav = A.renderPageFields(detached(), state.ids.find((id) => (state.drafts[id].meta || {}).next) || 'home');
   const next = nav.querySelector('#m-the-onward-link-opens');
-  if (next) for (const o of [...next.options]) assert.equal(o.textContent, (window.ArkUI.pageCatalog[o.value].title.replace(' — Flux Protocol', '') + '  ' + window.ArkUI.pageCatalog[o.value].path), 'a route option shows its own route');
+  if (next) for (const o of [...next.options]) assert.equal(o.textContent, (window.ArkUI.pageCatalog[o.value].title.replace(/ — (?:FXN|Flux Protocol)$/, '') + '  ' + window.ArkUI.pageCatalog[o.value].path), 'a route option shows its own route');
 
   /* ---- articles ---- */
   const slug = state.slugs[0];

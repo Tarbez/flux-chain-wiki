@@ -96,7 +96,7 @@ var ArkAdminStore = (function () {
       var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
       return await content.getDirectoryHandle('manifests', { create: true });
     } catch (e) {
-      throw new Error('That folder is not the Flux Protocol project. Pick the folder that contains index.html and js/content.');
+      throw new Error('That folder is not the FXN site project. Pick the folder that contains index.html and js/content.');
     }
   }
 
@@ -108,7 +108,7 @@ var ArkAdminStore = (function () {
       /* root: the project folder itself, for the site-root files Save derives (saveSearchFiles) */
       return { content: content, articles: await content.getDirectoryHandle('articles', { create: true }), root: root };
     } catch (e) {
-      throw new Error('That folder is not the Flux Protocol project. Pick the folder that contains index.html and js/content.');
+      throw new Error('That folder is not the FXN site project. Pick the folder that contains index.html and js/content.');
     }
   }
 
@@ -119,7 +119,7 @@ var ArkAdminStore = (function () {
       var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
       return await content.getDirectoryHandle('assets', { create: true });
     } catch (e) {
-      throw new Error('That folder is not the Flux Protocol project. Pick the folder that contains index.html and js/content.');
+      throw new Error('That folder is not the FXN site project. Pick the folder that contains index.html and js/content.');
     }
   }
 
@@ -153,7 +153,7 @@ var ArkAdminStore = (function () {
       var content = await (await root.getDirectoryHandle('js')).getDirectoryHandle('content');
       return await content.getDirectoryHandle('secrets', { create: true });
     } catch (e) {
-      throw new Error('That folder is not the Flux Protocol project. Pick the folder that contains index.html and js/content.');
+      throw new Error('That folder is not the FXN site project. Pick the folder that contains index.html and js/content.');
     }
   }
 

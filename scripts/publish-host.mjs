@@ -110,7 +110,7 @@ export function createHost({ root = defaultProjectRoot, publisher, port, dataDir
     const allowed = SERVED.includes(relative) || (SERVED_DIRS.includes(relative.split('/')[0]) && relative.includes('/'));
     if (!allowed || relative.startsWith('..')) return send(res, 404, { ok: false, error: 'NOT_FOUND' });
     if (isLockedAsset(relative) && !session && !localAccess) {
-      return send(res, 401, '<!doctype html><meta charset="utf-8"><title>Locked</title><p>The Flux Protocol admin is locked. <a href="/admin.html">Sign in</a>.</p>', 'text/html; charset=utf-8');
+      return send(res, 401, '<!doctype html><meta charset="utf-8"><title>Locked</title><p>The FXN Site Editor is locked. <a href="/admin.html">Sign in</a>.</p>', 'text/html; charset=utf-8');
     }
     if (isLockedAsset(relative) && !localAccess) await permissions(session.publicKeyB64);
     fs.readFile(file, (error, data) => (error ? send(res, 404, { ok: false, error: 'NOT_FOUND' }) : send(res, 200, data, TYPES[path.extname(file)] || 'application/octet-stream')));
@@ -249,7 +249,7 @@ async function main() {
     else { console.error(`Port ${port} is in use by something else. Pass --port <another>.`); process.exitCode = 1; }
   });
   server.listen(port, '127.0.0.1', async () => {
-    console.log(`Flux Protocol publish host: ${url}  (name ${publisher.name}; ${args.origin ? 'protected domain mode' : 'local development'}). Close this window to stop it.`);
+    console.log(`FXN Site Editor publish host: ${url}  (name ${publisher.name}; ${args.origin ? 'protected domain mode' : 'local development'}). Close this window to stop it.`);
     const status = await publisher.status();
     console.log(status.reachable ? `Miner: ${status.miner?.label || status.miner?.statusBase}${status.miner?.networkId ? ` (network ${status.miner.networkId})` : ''}.` : `Publishing connection unavailable: ${status.detail}`);
     openPage();

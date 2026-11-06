@@ -45,7 +45,7 @@
   function routeOptions() {
     return Object.keys(ArkUI.pageCatalog).map(function (key) {
       var def = ArkUI.pageCatalog[key];
-      return { key: key, label: def.title.replace(' — Flux Protocol', '') + '  ' + def.path };
+      return { key: key, label: def.title.replace(/ — (?:FXN|Flux Protocol)$/, '') + '  ' + def.path };
     });
   }
 

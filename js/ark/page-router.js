@@ -223,7 +223,7 @@
         outlet.setAttribute('aria-busy', 'false'); report('', false); writeHistory(page, settings.history, settings.query);
         return true;
       }
-      report('Loading ' + catalog[page].title.replace(' — Flux Protocol', '') + '…', false);
+      report('Loading ' + catalog[page].title.replace(/ — (?:FXN|Flux Protocol)$/, '') + '…', false);
       outlet.setAttribute('aria-busy', 'true');
       try {
         // Reject a mismatched scene registry before mounting or hiding the
