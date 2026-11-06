@@ -14,7 +14,7 @@ ArkUI.openAccountSession = function () {
   if (ArkUI.accountSession) return ArkUI.accountSession;
   var container = document.createElement('div');
   var preservingIdentity = false;
-  /* Round 13 (round-12 verifier, ZD3-3): this session signs FXN sends, skin trades and council acts, and under one FXN
+  /* Round 13 (round-12 verifier, ZD3-3): this session signs FXN sends, skin trades and multisig acts, and under one FXN
      ID its file also derives the genesis signer. No sign-in is kept in the browser's persisted-secret vault, and one
      kept on this origin before round 13 is deleted, not restored: any script the origin serves could ask a kept
      record to sign. Reloading signs out. */

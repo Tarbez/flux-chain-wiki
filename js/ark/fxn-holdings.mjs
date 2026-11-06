@@ -4,7 +4,7 @@
    ---------------------------------------------------------------------
    Why (owner, 2026-10-29: "why can't i see my fxn balance inside defxn site?"): the Wallet tab read ONE key, the
    Public ID in use, so it said 0 while the mint had paid the genesis allocation into fxndao's safes. FXN reaches
-   one of your keys only when the council approves a spend from an unlocked part of a safe.
+   one of your keys only when the multisig approves a spend from an unlocked part of a safe.
 
    Nothing here re-implements dense-wire or the genesis page:
      - the plan read is js/genesis-safes.js's `parsePlan` (a verbatim copy of flux/genesis/js/genesis-safes.js);
@@ -144,8 +144,8 @@ export async function readKeyBalances(wire, keys) {
 /** How a safe's FXN can leave it, by its kind (dense-wire src/dao_treasury.rs, GovAction::SafeSend and the ruled-safe
  *  refusals). Only `council` is a spend its signers make alone. */
 const PATH = {
-  [KIND_VESTED_SAFE_CREATE]: { path: "council", how: "The council approves each spend of what has unlocked." },
-  [KIND_SAFE_CREATE]: { path: "council", how: "The council approves each spend." },
+  [KIND_VESTED_SAFE_CREATE]: { path: "council", how: "The multisig approves each spend of what has unlocked." },
+  [KIND_SAFE_CREATE]: { path: "council", how: "The multisig approves each spend." },
   [KIND_SALE_SAFE_CREATE]: { path: "sale", how: "Sells FXN in the public sale. No signer moves it." },
   [KIND_VOTE_SAFE_CREATE]: { path: "vote", how: "Each spend needs a holder vote." },
   [KIND_FUND_SAFE_CREATE]: { path: "vote", how: "Each spend needs a holder vote, with a cap per receiving key." },
@@ -286,9 +286,9 @@ export function decodeSpend(text) {
 export function spendRefusal(safes, terms) {
   const safe = safes.safes.find((s) => s.label === terms.label);
   if (!safe) return { failure: `The safe ${terms.label} is not in the ${safes.daoId} plan.`, missing: "one of the plan's safes", remedy: "open the spend from the Safes list" };
-  if (safe.path !== "council") return { failure: `The ${safe.label} safe does not spend by council approval. ${safe.how}`, missing: "a safe the council spends (creator or cofounder)", remedy: "spend from a vested safe" };
+  if (safe.path !== "council") return { failure: `The ${safe.label} safe does not spend by multisig approval. ${safe.how}`, missing: "a safe the multisig spends (creator or cofounder)", remedy: "spend from a vested safe" };
   if (!safe.created) return { failure: `The ${safe.label} safe has no create record yet, so the chain does not know it.`, missing: "the safe's create record", remedy: "create the safes on the Genesis page's Safes step first" };
-  if (!safes.onCouncil.length) return { failure: `None of your keys is on the ${safes.daoId} council.`, missing: "a council key, your genesis key", remedy: "sign in with the FXN ID whose genesis key is on the council" };
+  if (!safes.onCouncil.length) return { failure: `None of your keys is on the ${safes.daoId} multisig.`, missing: "a multisig key, your genesis key", remedy: "sign in with the FXN ID whose genesis key is on the multisig" };
   if (!isHex64(terms.to)) return { failure: "The receiving key is not a public key.", missing: "64 lowercase hex characters", remedy: "pick one of your keys" };
   if (terms.to === safe.address) return { failure: "The receiving key is the safe itself.", missing: "another key", remedy: "pick one of your keys" };
   let amount;
@@ -296,28 +296,28 @@ export function spendRefusal(safes, terms) {
   if (amount <= 0n) return { failure: "The amount is not above 0.", missing: "an amount of FXN above 0", remedy: "enter the amount again" };
   if (safe.unlocked === null) return { failure: `The node did not say how much of ${safe.label} has unlocked.`, missing: "the safe's unlocked amount", remedy: "refresh, or switch to a node that answers the plan in full" };
   if (amount > BigInt(safe.unlocked)) {
-    const wait = safe.next ? `wait for the next part on ${dateOf(safe.next)}` : "wait for the council to approve less";
+    const wait = safe.next ? `wait for the next part on ${dateOf(safe.next)}` : "wait for the multisig to approve less";
     return { failure: safe.unlocked ? `Only ${fxnText(safe.unlocked)} of ${safe.label} is unlocked now.` : `Nothing in ${safe.label} is unlocked yet.`,
       missing: `${fxnText(amount - BigInt(safe.unlocked))} more unlocked`, remedy: safe.unlocked ? `spend ${fxnText(safe.unlocked)} or less, or ${wait}` : wait };
   }
   return null;
 }
 
-/** The exact bytes each council signer signs for `terms`: safeSendCovered, bound to the node's network. */
+/** The exact bytes each multisig signer signs for `terms`: safeSendCovered, bound to the node's network. */
 function spendBytes(safes, terms) {
   const safe = safes.safes.find((s) => s.label === terms.label);
   return networkCovered(safes.network || undefined, safeSendCovered(safes.daoId, safe.address, BASE_CHAIN_ID, terms.to, terms.amount, terms.atMs));
 }
 
 /** The pasted approval lines checked against the bytes the chain checks: `{ good: Map(key -> sig), bad: [why] }`.
- *  A line from a key off the council, or a signature that does not verify, is named. Ed25519 is WebCrypto's. */
+ *  A line from a key off the multisig, or a signature that does not verify, is named. Ed25519 is WebCrypto's. */
 export async function checkApprovals(safes, terms, text) {
   const { approvals, bad: unreadable } = parseApprovalLines(text);
   const bad = unreadable.map((line) => `"${line}…" is not "<signer key> <signature>"`);
   const good = new Map();
   const bytes = spendBytes(safes, terms);
   for (const [key, sig] of approvals) {
-    if (!safes.plan.head.signers.includes(key)) { bad.push(`${short(key)} is not on the ${safes.daoId} council`); continue; }
+    if (!safes.plan.head.signers.includes(key)) { bad.push(`${short(key)} is not on the ${safes.daoId} multisig`); continue; }
     if (good.has(key)) continue;
     let ok = false;
     try {
@@ -339,18 +339,18 @@ function spendFacts(safes, terms, signer) {
   ];
 }
 
-/** Your approval as a council signer, after the full review of the exact bytes. -> the line `<key> <signature>`. */
+/** Your approval as a multisig signer, after the full review of the exact bytes. -> the line `<key> <signature>`. */
 export async function approveSpend(dw, { who, wire, safes, terms }) {
   const why = spendRefusal(safes, terms);
   if (why) throw new Error(`${why.failure} Missing: ${why.missing}. To fix: ${why.remedy}.`);
   const signer = who.genesisSigner();
-  if (!safes.plan.head.signers.includes(signer.pubHex)) throw new Error(`Your genesis key ${short(signer.pubHex)} is not on the ${safes.daoId} council. Missing: a council key. To fix: sign in with the FXN ID whose genesis key is on the council.`);
+  if (!safes.plan.head.signers.includes(signer.pubHex)) throw new Error(`Your genesis key ${short(signer.pubHex)} is not on the ${safes.daoId} multisig. Missing: a multisig key. To fix: sign in with the FXN ID whose genesis key is on the multisig.`);
   const bytes = spendBytes(safes, terms);
   const safe = safes.safes.find((s) => s.label === terms.label);
   return dw.reviewThen({
     who, pubHex: signer.pubHex, wireUrl: wire.url,
     title: `Approve: ${fxnText(terms.amount)} from the ${safe.label} safe`,
-    description: `This is your approval as a council signer. It authorizes only this spend. The spend needs ${safe.threshold} of ${safe.signers.length} council approvals before anyone can send it.`,
+    description: `This is your approval as a multisig signer. It authorizes only this spend. The spend needs ${safe.threshold} of ${safe.signers.length} multisig approvals before anyone can send it.`,
     claims: [`evidence safe ${safe.address}`, `evidence recipient ${terms.to}`, `evidence amount ${terms.amount} base units`, `evidence at ${terms.atMs}`],
     manifest: { schema: "dense-wire.dao-safe-send-vote/1", daoId: safes.daoId, safe: safe.address, chainId: BASE_CHAIN_ID, to: terms.to, amount: String(terms.amount), atMs: terms.atMs, network: safes.network || null },
     facts: spendFacts(safes, terms, signer), unsigned: bytesHex(bytes),
@@ -366,7 +366,7 @@ export async function submitSpend(dw, { who, wire, safes, terms, approvals }) {
   const why = spendRefusal(safes, terms);
   if (why) throw new Error(`${why.failure} Missing: ${why.missing}. To fix: ${why.remedy}.`);
   const safe = safes.safes.find((s) => s.label === terms.label);
-  if (approvals.size < safe.threshold) throw new Error(`The spend has ${approvals.size} of ${safe.threshold} council approvals. Missing: ${safe.threshold - approvals.size} more. To fix: send the spend link to the other council signers and paste their lines.`);
+  if (approvals.size < safe.threshold) throw new Error(`The spend has ${approvals.size} of ${safe.threshold} multisig approvals. Missing: ${safe.threshold - approvals.size} more. To fix: send the spend link to the other multisig signers and paste their lines.`);
   const signer = who.genesisSigner();
   const payload = safeSendPayload({ daoId: safes.daoId, safe: safe.address, chainId: BASE_CHAIN_ID, to: terms.to, amount: terms.amount, atMs: terms.atMs, approvals: [...approvals.entries()] });
   const reply = await withKeyLock(signer.pubHex, async () => {
@@ -375,7 +375,7 @@ export async function submitSpend(dw, { who, wire, safes, terms, approvals }) {
     const text = await dw.reviewThen({
       who, pubHex: signer.pubHex, wireUrl: wire.url, network: safes.network,
       title: `Send ${fxnText(terms.amount)} from the ${safe.label} safe`,
-      description: `This sends the spend to the network with ${approvals.size} council approvals inline. The chain checks each approval and the unlocked amount.`,
+      description: `This sends the spend to the network with ${approvals.size} multisig approvals inline. The chain checks each approval and the unlocked amount.`,
       claims: [`evidence safe ${safe.address}`, `evidence recipient ${terms.to}`, `evidence amount ${terms.amount} base units`, `evidence approvals ${approvals.size}`],
       manifest: { schema: "dense-wire.dao-safe-send/1", daoId: safes.daoId, safe: safe.address, to: terms.to, amount: String(terms.amount), atMs: terms.atMs, approvals: approvals.size, position: at.pos },
       facts: spendFacts(safes, terms, signer).concat([{ label: "Approvals", value: `${approvals.size} of ${safe.threshold} needed` }]), unsigned: body,

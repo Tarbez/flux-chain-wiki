@@ -517,7 +517,7 @@ and each is a choice for the owners rather than an engineering task.
 - **Who may issue.** Issue entries are checked against an issuance
   roster (`IssuancePolicy::Roster`). Who is on it at genesis, and how it
   changes, is a monetary decision: a single genesis key, a fixed roster,
-  or the registered authority-policy ceremony.
+  or the registered authority-policy signing round.
 - **When a holder publishes their head.** A fork is only caught by
   someone who sees both halves. Heads and fork evidence are gossiped
   (`receive_fork_evidence`, the automatic broadcaster), but the rule for
@@ -545,7 +545,7 @@ apply to the chain unchanged:
 | Gap | State |
 |---|---|
 | A devnet on separate hosts, keys and domain, so experiments never share machines with production | Not built. A benchmark once took production down for 19 minutes. |
-| Membership admission and removal beyond a shared secret | Partial. The 7-member authority ceremony exists in code but is not wired in. |
+| Membership admission and removal beyond a shared secret | Partial. The 7-member authority signing round exists in code but is not wired in. |
 | Membership that survives a restart | Not built |
 | TLS between clients and nodes, and between nodes | Not built. Records are signed, so tampering shows, but traffic is readable. |
 | Every role under systemd, with restart and log capture | Partial |

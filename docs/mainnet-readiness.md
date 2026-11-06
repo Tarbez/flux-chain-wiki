@@ -92,7 +92,7 @@ multiple seats, and epoch-numbered rotations with a signed predecessor→
 successor transition. It is real, tested-looking code — and it is not
 wired into the currently-running `agreement-certifier` role, which loads a
 flat static `signedRegistry` instead. Before mainnet: either activate that
-real ceremony for agreement-fabric membership changes, or consciously
+real signing round for agreement-fabric membership changes, or consciously
 decide the shared-secret model is the launch policy and say so publicly.
 
 ### 3. Durable finality: three real fixes landed, now ~3.6-4.4x off accepted, close to the plan's ~3x target
@@ -310,7 +310,7 @@ Three consequences for the plan above:
    persist membership (#4) together — they're the same underlying gap
    (membership state isn't durable) wearing two symptoms.
 3. Decide and implement the real admission policy (#2) — activating the
-   existing ceremony code vs. formalizing the shared-secret model as a
+   existing signing round code vs. formalizing the shared-secret model as a
    conscious launch choice.
 4. TLS (#5), systemd + monitoring (#7, #8) — mechanical, parallelizable,
    no design decisions blocking them.

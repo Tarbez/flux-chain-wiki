@@ -25,7 +25,7 @@ window.DEFXN_FXN = {
       { id: 'cofounder', name: 'Co-founder', pct: 6, schedule: { first: 90, every: 90, last: 720 }, rule: 'The same schedule as the creator: the first eighth at day 90, all by day 720.' }
     ] },
     { id: 'ops', name: 'Operations', parts: [
-      { id: 'operations', name: 'Operations', pct: 17, rule: 'In a DAO safe, released monthly over 3 years. A 3-of-5 council spends it, only inside budgets that holders approved.' }
+      { id: 'operations', name: 'Operations', pct: 17, rule: 'In a DAO safe, released monthly over 3 years. A 3-of-5 multisig spends it, only inside budgets that holders approved.' }
     ] }
   ],
   fees: { parts: [

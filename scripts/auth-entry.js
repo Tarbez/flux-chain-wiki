@@ -180,7 +180,7 @@ async function rootHandle({ mnemonic, derivation, callsign }) {
 /* container: where the sign-in panel is drawn.
    onChange(identity | null): called on sign-in and sign-out.
    identity: { publicKeyB64, displayName, sign(text) -> Promise<signatureB64> } */
-/* keepSignedIn (round 12, flooder ZD3-3): false on a page that signs genesis, council or treasury acts. The panel then
+/* keepSignedIn (round 12, flooder ZD3-3): false on a page that signs genesis, multisig or treasury acts. The panel then
    offers no "keep me signed in", nothing is written to the persisted-secret vault, and a record kept earlier under this
    product's scope is not restored. A kept record is locked under a key this browser cannot copy out, yet any script
    served from the origin could still ask it to sign: a page whose served files are changed would sign with it on the

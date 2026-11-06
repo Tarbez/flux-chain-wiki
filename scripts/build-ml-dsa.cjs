@@ -1,7 +1,7 @@
 // Build js/ark/ml-dsa.js, the ML-DSA-87 bundle every signing page loads (window.ArkMlDsa), from pinned inputs.
 //
 // Why (pre-genesis repo map 2026-11-03, round 13 frontend lane): js/ark/ml-dsa.js was a noble bundle with no version
-// and no hash, copied into genesis, the DAO, deploy and treasury, and council seats sign with ML-DSA-87. Nobody could
+// and no hash, copied into genesis, the DAO, deploy and treasury, and multisig members sign with ML-DSA-87. Nobody could
 // say which code it was. It is rebuilt here byte for byte (proved 2026-11-03: the served body is exactly this build)
 // from scripts/ml-dsa-entry.mjs and @noble/post-quantum 0.7.0 (@noble/curves 2.3.0, @noble/hashes 2.3.0) as installed
 // in fxn-auth's node_modules. Every file esbuild reads is found from its metafile and must match its sha256 in

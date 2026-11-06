@@ -38,7 +38,7 @@ first implementation step.
    signed result one machine holds. Getting it onto replicas is a build item
    (§1.1). *DECISION*
 3. **Who may issue value?** One genesis key signs every issuance, so one key is the
-   whole monetary policy. Single key, a roster, or the existing ceremony code? *DECISION*
+   whole monetary policy. Single key, a roster, or the existing signing round code? *DECISION*
 4. **Does it stand beside the certified fabric or replace it?** The certified path has a
    threshold certificate and the prototype does not. Splitting by transfer size or by
    trust level is a legitimate design; silently swapping is not. *DECISION*

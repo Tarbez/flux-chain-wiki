@@ -336,7 +336,7 @@
         var tile = { label: 'In safes you sign for', format: 'plain', action: 'wallet-safes' }, got = holdings.safes;
         if (!got) tile.absent = { kind: 'unavailable', reason: holdings.safesWhy || 'Reading the safes\u2026' };
         else if (got.kind !== 'ok') tile.absent = { kind: 'unavailable', reason: got.why || 'The node did not answer the safes read.' };
-        else if (!got.onCouncil.length) { tile.value = 'None'; tile.detail = 'None of your keys is on the ' + got.daoId + ' council.'; }
+        else if (!got.onCouncil.length) { tile.value = 'None'; tile.detail = 'None of your keys is on the ' + got.daoId + ' multisig.'; }
         else if (got.total == null) tile.absent = { kind: 'unavailable', reason: 'The node left the safe balances out.' };
         else {
           tile.value = holdingsApi.fxn(got.total); tile.unit = holdingsApi.fxnUnit();
@@ -388,7 +388,7 @@
       /* ---- your FXN: keys, safes, a spend from a safe, history (js/ark/fxn-holdings.mjs) ------------------------
          Owner, 2026-10-29: the page showed one key's balance, so it read 0 while the mint paid the genesis allocation
          into fxndao's safes. These views list every key the FXN ID holds and every safe one of them signs for, and
-         let a council signer approve and send a spend of an unlocked part to one of their keys. */
+         let a multisig signer approve and send a spend of an unlocked part to one of their keys. */
       function keyLabel(k) { return plainLine(k.name + (k.balance != null ? ' \u00b7 ' + holdingsApi.fxnText(k.balance) : ''), 64); }
       /* the keys that can sign a send on this sign-in: every Public ID, the wallets of the one in use, the genesis key */
       function sendFromField() {
@@ -408,17 +408,17 @@
             var item = { id: k.key, title: plainLine(k.name, 96), meta: short(k.key) + ' \u00b7 ' + (k.balance != null ? holdingsApi.fxnText(k.balance) : 'No reading: ' + plainLine(k.why || 'no answer', 48)),
               actions: [{ label: 'Copy key', action: 'fxn-copy-key', tone: 'ghost' }] };
             if (k.current) item.status = { label: 'In use', tone: 'trust' };
-            else if (council.indexOf(k.key) >= 0) item.status = { label: 'Council signer', tone: 'reference' };
+            else if (council.indexOf(k.key) >= 0) item.status = { label: 'Multisig signer', tone: 'reference' };
             else if (k.kind === 'wallet' && !k.published) item.status = { label: 'Private', tone: 'hidden' };
             if (k.signer && k.balance != null && k.balance > 0n) item.actions.unshift({ label: 'Send from', action: 'fxn-send-from', tone: 'secondary' });
             return item;
           }) };
       }
-      var PATH_STATUS = { council: { label: 'Council spends', tone: 'trust' }, sale: { label: 'Sale only', tone: 'reference' }, vote: { label: 'Holder vote', tone: 'drift' }, budget: { label: 'Budgets only', tone: 'drift' }, unknown: { label: 'Unknown kind', tone: 'warning' } };
+      var PATH_STATUS = { council: { label: 'Multisig spends', tone: 'trust' }, sale: { label: 'Sale only', tone: 'reference' }, vote: { label: 'Holder vote', tone: 'drift' }, budget: { label: 'Budgets only', tone: 'drift' }, unknown: { label: 'Unknown kind', tone: 'warning' } };
       function safesViewProps() {
         var got = holdings.safes;
         if (!got || got.kind !== 'ok') return { label: 'Safes you sign for', items: [], empty: { reason: got ? (got.why || 'The node did not answer the safes read.') : 'Reading the safes\u2026', remedy: 'Press Refresh, or pick another network below.' } };
-        if (!got.onCouncil.length) return { label: 'Safes you sign for', items: [], empty: { reason: 'None of your keys is on the ' + got.daoId + ' council, so you sign for no safe.', remedy: 'Sign in with the FXN ID whose genesis key is on the council.' } };
+        if (!got.onCouncil.length) return { label: 'Safes you sign for', items: [], empty: { reason: 'None of your keys is on the ' + got.daoId + ' multisig, so you sign for no safe.', remedy: 'Sign in with the FXN ID whose genesis key is on the multisig.' } };
         return { label: 'Safes you sign for', empty: { reason: 'The plan names no safe.' }, items: got.signed.map(function (sf) {
           var f = holdingsApi.fxn;
           var item = { id: sf.label, title: plainLine(sf.label + ' safe \u00b7 ' + (sf.balance != null ? holdingsApi.fxnText(sf.balance) : 'balance not read'), 96),
@@ -463,18 +463,18 @@
       function spendCouncilProps() {
         var got = holdings.safes, approved = spendApprovedBy();
         var signers = got && got.kind === 'ok' ? got.plan.head.signers : [];
-        return { label: 'Council approvals', empty: { reason: 'The council was not read.', remedy: 'Press Refresh.' }, items: signers.map(function (key, i) {
+        return { label: 'Multisig approvals', empty: { reason: 'The multisig was not read.', remedy: 'Press Refresh.' }, items: signers.map(function (key, i) {
           var mine = got.onCouncil.indexOf(key) >= 0;
           return { id: key, title: 'Signer ' + (i + 1) + (mine ? ' (you)' : ''), meta: short(key), status: approved.has(key) ? { label: 'Approved', tone: 'trust' } : { label: 'Waiting', tone: 'drift' } };
         }) };
       }
       function spendHeadProps() {
         var sf = spendSafe();
-        if (!spend || !spend.atMs) return { tone: 'info', title: 'Spend from the ' + ((spend && spend.label) || '') + ' safe', body: 'Set the amount and the key it goes to, then approve. The spend needs ' + (sf ? sf.threshold + ' of ' + sf.signers.length : 'the council\u2019s') + ' council approvals before it can be sent.' };
+        if (!spend || !spend.atMs) return { tone: 'info', title: 'Spend from the ' + ((spend && spend.label) || '') + ' safe', body: 'Set the amount and the key it goes to, then approve. The spend needs ' + (sf ? sf.threshold + ' of ' + sf.signers.length : 'the multisig\u2019s') + ' multisig approvals before it can be sent.' };
         var st = spendStage();
-        if (st.ready) return { tone: 'success', title: 'Ready to send', body: 'The spend has enough council approvals. Review it, then send it to the network.' };
-        if (st.mineDone) return { tone: 'drift', title: 'Waiting for the council', body: 'Copy the spend link and send it to the other council signers. Paste the lines they send back.' };
-        return { tone: 'drift', title: 'Your approval is missing', body: 'Check the terms, then approve them as a council signer.' };
+        if (st.ready) return { tone: 'success', title: 'Ready to send', body: 'The spend has enough multisig approvals. Review it, then send it to the network.' };
+        if (st.mineDone) return { tone: 'drift', title: 'Waiting for the multisig', body: 'Copy the spend link and send it to the other multisig signers. Paste the lines they send back.' };
+        return { tone: 'drift', title: 'Your approval is missing', body: 'Check the terms, then approve them as a multisig signer.' };
       }
       function spendStage() {
         var sf = spendSafe(), have = spendApprovedBy();
@@ -483,7 +483,7 @@
       }
       function spendLinesProps() {
         var st = spendStage();
-        return { label: 'Approval lines', fields: [{ name: 'lines', label: 'Approval lines from the council', type: 'textarea', rows: 3, autocomplete: 'off', placeholder: '<signer key> <signature>',
+        return { label: 'Approval lines', fields: [{ name: 'lines', label: 'Approval lines from the multisig', type: 'textarea', rows: 3, autocomplete: 'off', placeholder: '<signer key> <signature>',
           hint: 'One line per signer. Paste the lines the other signers send you.' }],
           submit: { label: 'Check approvals', action: 'spend-check', tone: 'secondary' },
           actions: [{ label: 'Approve as me', action: 'spend-approve', tone: st.mineDone ? 'ghost' : 'primary', disabled: spendBusy || st.mineDone },
@@ -695,7 +695,7 @@
         keysView.appendChild(make({ block: 'actions', id: 'account-fxn-keys-back', props: { items: [back] } }));
         node.appendChild(keysView);
         var safesView = el('div', 'account-wallet-form'); safesView.setAttribute('data-account-wallet-view', 'safes'); safesView.hidden = true;
-        refs.safesHint = safesView.appendChild(el('p', 'account-hint', 'The genesis mint paid the allocation into these safes. FXN reaches your keys only when the council approves a spend of an unlocked part.'));
+        refs.safesHint = safesView.appendChild(el('p', 'account-hint', 'The genesis mint paid the allocation into these safes. FXN reaches your keys only when the multisig approves a spend of an unlocked part.'));
         refs.safes = make({ block: 'list', id: 'account-safes', props: safesViewProps() }); remember('safes', safesViewProps());
         safesView.appendChild(refs.safes);
         refs.held = make({ block: 'facts', id: 'account-safes-held', props: heldFactsProps() }); remember('held', heldFactsProps());
@@ -1645,9 +1645,9 @@
       }
       function paintHoldings() {
         var got = holdings.safes;
-        /* the plan's own start and council, said once above the rows */
-        if (refs.safesHint) refs.safesHint.textContent = 'The genesis mint paid the allocation into these safes. FXN reaches your keys only when the council approves a spend of an unlocked part.'
-          + (got && got.kind === 'ok' ? ' Schedules run from ' + holdingsApi.dateOf(got.plan.head.start) + '. ' + got.plan.head.threshold + ' of ' + got.plan.head.signers.length + ' council signers approve each spend.' : '');
+        /* the plan's own start and multisig, said once above the rows */
+        if (refs.safesHint) refs.safesHint.textContent = 'The genesis mint paid the allocation into these safes. FXN reaches your keys only when the multisig approves a spend of an unlocked part.'
+          + (got && got.kind === 'ok' ? ' Schedules run from ' + holdingsApi.dateOf(got.plan.head.start) + '. ' + got.plan.head.threshold + ' of ' + got.plan.head.signers.length + ' multisig signers approve each spend.' : '');
         paint('balances', walletStats());
         paint('fxnKeys', keysViewProps());
         paint('safes', safesViewProps());
@@ -1726,7 +1726,7 @@
 
       /* ---- a spend from a safe ------------------------------------------------------------------
          Terms (safe, amount, key, time) are fixed by the first approval and carried by the spend link, so every
-         council signer signs the same bytes. Each step refuses before anything is signed, naming what failed, what is
+         multisig signer signs the same bytes. Each step refuses before anything is signed, naming what failed, what is
          missing and how to fix it (fxn-holdings.mjs spendRefusal); every signature opens the full review first. */
       function refusalText(why) { return why.failure + ' Missing: ' + why.missing + '. To fix: ' + why.remedy + '.'; }
       function linesField() { return views.wallet.querySelector('#account-spend-lines textarea'); }
@@ -1755,7 +1755,7 @@
         if (holdings.safes && holdings.safes.kind === 'ok' && !sf) result('spendStatus', 'The ' + terms.label + ' safe is not in the ' + holdings.safes.daoId + ' plan. Missing: a safe the plan names. To fix: open the spend from the Safes list.', 'danger');
         if (spend.atMs) spendCheck(false);
       }
-      /* ?safe-spend=<label>.<to>.<amount>.<at ms>: a spend link another council signer sent. It opens once the safes are read. */
+      /* ?safe-spend=<label>.<to>.<amount>.<at ms>: a spend link another multisig signer sent. It opens once the safes are read. */
       var spendFromAddressDone = false;
       function openSpendFromAddress() {
         if (spendFromAddressDone || !holdings.safes || holdings.safes.kind !== 'ok') return;
@@ -1813,7 +1813,7 @@
         if (!spend || !spend.atMs) return;
         var link = location.origin + '/account?safe-spend=' + holdingsApi.encodeSpend(spend);
         var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(link) : Promise.reject(new Error('no clipboard'));
-        clip.then(function () { result('spendStatus', 'Spend link copied. Each council signer opens it, approves and sends you their line.', 'trust'); },
+        clip.then(function () { result('spendStatus', 'Spend link copied. Each multisig signer opens it, approves and sends you their line.', 'trust'); },
           function () { result('spendStatus', 'Copy is blocked in this browser. Send this link by hand: ' + link); });
       }
       async function spendSubmit() {

@@ -1,6 +1,6 @@
 /* One genesis safe, built from the mint's plan (devnet genesis safes, 2026-10-23).
 
-   The one place this page turns a planned safe into the records that create it: its configuration (the council, under
+   The one place this page turns a planned safe into the records that create it: its configuration (the multisig, under
    the DAO's public treasury), its schedule (starting at the mint's M) and, for a ruled safe, its rule. The rule's
    values come from the plan (FXN_GENESIS_PLAN's last three columns), never from this page. The address is derived
    here and must equal the one the mint paid, so a page that builds another safe refuses before anything is signed.
@@ -78,7 +78,7 @@ export async function readPlan(wire, daoId) {
 }
 
 /** One planned safe as the records build it: `{ kind, config, vesting, rule }`, from the plan. Its address is
- *  derived here from the council, the mint's start and the rule, and must equal the address the mint paid. A rule or
+ *  derived here from the multisig, the mint's start and the rule, and must equal the address the mint paid. A rule or
  *  schedule the chain would refuse is refused here, in the chain's words, before anything is signed. */
 export async function safeOf(plan, safe) {
   const config = safeConfig({ daoId: plan.head.daoId, treasury: DEFAULT_TREASURY_LABEL, label: safe.label, threshold: plan.head.threshold, signers: plan.head.signers });
@@ -97,7 +97,7 @@ export async function safeOf(plan, safe) {
   return { kind: rule ? ruledSafeKind(rule) : vesting ? KIND_VESTED_SAFE_CREATE : KIND_SAFE_CREATE, config, vesting, rule };
 }
 
-/** The bytes the council approves to create `built` (from `safeOf`). */
+/** The bytes the multisig approves to create `built` (from `safeOf`). */
 export function createCovered(built, foundingCid) {
   const { config, vesting, rule } = built;
   if (rule) return ruledSafeCreateCovered(config, foundingCid, vesting, rule);
