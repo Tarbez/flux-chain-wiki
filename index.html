@@ -27,7 +27,6 @@
      (node scripts/page-styles.mjs --write rewrites this list and the lists in js/pages/catalog.js;
      --check fails on drift). Do not add a page's sheet here by hand. -->
 <link rel="stylesheet" href="css/themes.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/flux-themes.css?v=20261014-nav2" />
 <link rel="stylesheet" href="assets/kit/defxn-fonts.css?v=20261019-kit1" />
 <!-- The DEFXN family kit (flux/defxn-product-kit, synced by its npm run sync): the bar, the product
      switcher and the footer this site shares with every DEFXN product. Components read tokens only,
@@ -63,10 +62,27 @@
      last. -->
 <link rel="stylesheet" href="css/world.css?v=20261024-tags1" />
 <link rel="stylesheet" href="css/world-pages.css?v=20261025-ac1" />
+<link rel="stylesheet" href="css/space-frame.css?v=20261025-ac1" />
+<link rel="stylesheet" href="css/lattice.css?v=20261025-ac1" />
 <link rel="stylesheet" href="css/ark-blocks.css?v=20261026-ark43" />
 <link rel="stylesheet" href="css/components.css?v=20261020-w4" />
+<!-- The loading mark (owner, 2026-11-07, for testing: one of the 3D logo renders): centred on black from first paint until the world's
+     first paint until the page shell is up, a slow breathe only while loading, then a 300 ms fade and every animation stops. Reduced motion: no breathe, the fade
+     alone. js/main.js takes it away as soon as the shell renders (html.shell-ready), so the page shows while the world still loads;
+     js/world2/world2-host.mjs also takes it away (html.world-ready); if neither comes it fades at 8 s and its breathe stops by itself (four turns, 9.6 s); the page's CSP allows no inline script. -->
+<style>
+#world-loader{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;background:#000;pointer-events:none;transition:opacity .3s ease-out;animation:world-loader-out .3s ease-out 8s forwards}
+@keyframes world-loader-out{to{opacity:0;visibility:hidden}}
+#world-loader img{width:min(160px,36vw);height:auto;-webkit-mask-image:radial-gradient(closest-side,#000 72%,transparent);mask-image:radial-gradient(closest-side,#000 72%,transparent);animation:world-loader-breathe 2.4s ease-in-out 4}
+@keyframes world-loader-breathe{0%,100%{transform:scale(1);opacity:.82}50%{transform:scale(1.04);opacity:1}}
+html.world-ready #world-loader,html.shell-ready #world-loader{opacity:0;visibility:hidden;transition:opacity .3s ease-out,visibility 0s linear .3s}
+html.world-ready #world-loader img,html.shell-ready #world-loader img,html.world-gone #world-loader img{animation:none}
+html.world-gone #world-loader{display:none}
+@media (prefers-reduced-motion:reduce){#world-loader img{animation:none}}
+</style>
 </head>
 <body>
+<div id="world-loader" aria-hidden="true"><img src="assets/marks/loading.png" alt="" decoding="async" fetchpriority="low" width="160" height="160"></div>
 
 <!-- The scene host. Empty on purpose: the Ark UI runtime fills it from the
      single F-SCENE-RZERO_V0 pattern in js/scene.flux.js. No scene markup is
@@ -108,6 +124,8 @@
      Every file only defines something; js/main.js is the one that runs. -->
 
 <!-- 1. design tokens -->
+<!-- One frame scheduler for every view (ArkFrame: once, idle, settleLoop): before the header, main and hero-motion use it. -->
+<script src="js/lib/frame.js" defer></script>
 <script src="js/tokens.js" defer></script>
 <script src="js/ark/vendor/backgrounds.js" defer></script>
 <script src="js/content/theme.js?v=20261020-theme-ids" defer></script>
@@ -126,7 +144,7 @@
 <script src="js/content/canvas-transitions-data.js" defer></script>
 <script src="js/content/element-motion.js" defer></script>
 <script src="js/content/element-motion-data.js" defer></script>
-<!-- The 3D world's editable numbers (js/content/world.js): FLX records of the structured-state grammar, then the saved draft. The world itself loads after first paint (js/world/world-host.js). -->
+<!-- The 3D world's editable numbers (js/content/world.js): FLX records of the structured-state grammar, then the saved draft. The world itself loads after first paint (js/world2/world2-host.mjs). -->
 <script src="js/content/world.js" defer></script>
 <script src="js/content/world-data.js" defer></script>
 
@@ -164,7 +182,7 @@
 <script src="js/pages/catalog.js?v=20261026-kit" defer></script>
 <script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/min/manifest.js?v=d04e9aeb" defer></script>
+<script src="js/min/manifest.js?v=371fb4dc" defer></script>
 <script src="js/ark/page-loader.js?v=20261025-ac1" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
 <script src="js/ark/panel-continuity.js?v=20261024-world1" defer></script>
@@ -197,9 +215,8 @@
 <script src="js/main.js?v=20261026-kit" defer></script>
 <script src="js/halo/proximity.js" defer></script>
 <script src="js/halo/words.js" defer></script>
-<script src="js/halo/surface-motion.js" defer></script>
-<script src="js/halo/iceberg.js" defer></script>
-<script src="js/halo/image-shape.js" defer></script>
+<!-- js/halo/surface-motion.js, iceberg.js and image-shape.js are not linked: their one reader, js/zero-webgl.js, is on no route
+     (Chrome coverage 2026-11-08: none of their functions ran on /, /intro or /chain). The editor links image-shape.js itself. -->
 <script src="js/content/mesh-settings.js" defer></script>
 <script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/halo/shaders.js" defer></script>

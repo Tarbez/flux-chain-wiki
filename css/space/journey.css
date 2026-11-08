@@ -2,7 +2,7 @@
    Type 11 and 18; --primary for here and Next (the page's own dock keeps the complement for its one dominant action). */
 .journey { position: fixed; right: 24px; bottom: 84px; z-index: 31; display: grid; gap: 8px; min-width: 280px; max-width: 420px; padding: 10px 12px; pointer-events: auto;
   background: hsl(var(--surface) / .72); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 8px;
-  animation: journey-in .45s cubic-bezier(.22, .7, .18, 1) both; }
+  animation: journey-in .45s var(--ease-ui) both; }
 .journey.hidden { display: none; }
 .journey-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .journey-label { font: 600 var(--fs-tertiary, 11px)/1.3 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--text-muted)); }

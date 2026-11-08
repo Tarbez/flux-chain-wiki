@@ -8,7 +8,7 @@
      the parts    js/ark/skin-parts.js: which Ark UI part each hand-built piece is (the navbar, its mega dropdown).
      the skin     js/ark/vendor/ark-kit-skin.js (@deadark/ark-ui/skin): tokens, theme-resolved part colours,
                   chrome, rules, exact undo. Loaded only when a skin is applied.
-     the grid     js/world/ring-kit.js never takes a skin's colours (the owner, 2026-10-24); it keeps the site's theme.
+     the grid     the ring view of js/world2/world2-host.mjs never takes a skin's colours (the owner, 2026-10-24); it keeps the site's theme.
      the art      js/nft/scene.js (DefxnScene), the NFT session's: the card's world, which never covers the ring world
                   (the owner: do not alter the core 3D grid); it shows only where the ring world is off. The header's
                   one picture of the card is the wearer's menu (js/nft/user-navbar.js), not an avatar.
@@ -59,7 +59,7 @@ var DefxnSkinSite = (function () {
      The profile card (js/ark/profile-card.js) and the scene below both draw with it. The load order is the NFT
      session's: js/ark/mark-data.js and the recipe before art3d.js. art3d.js loads the grammar renderer's card module
      (js/nft/card-gl.mjs) itself and draws in one shared card context; the page loads no Three.js for the card. Either
-     world host (js/world/world-host.js, or the grammar host under ?world=2) answers owns() and covered the same way, so
+     world host (js/world2/world2-host.mjs, or the grammar host under ?world=2) answers owns() and covered the same way, so
      reading() and clip() below hold under both. A mark tag already loading is waited for, never loaded twice. */
   function shared(global, path) {
     if (window[global]) return Promise.resolve();

@@ -1,6 +1,6 @@
 /* The measure pages on the 3D world: /resolvers, /measured, /fxn and /ring. Ported from docs/home-redesign (app.js,
    ring-view.js, home-mockup.html) on the shared frame js/pages/world-sheet.js; each page stands on its own 3D view
-   (js/world/world-host.js) and carries only the words, the pickers and the panel.
+   (js/world2/world2-host.mjs) and carries only the words, the pickers and the panel.
 
    Words: the worldmeasure manifest (WORLDMEASURE.*, read by ArkCopy). Numbers and names: the data files, never typed
    here: js/content/resolvers-data.js, capabilities-data.js (with its two dated runs), fxn-data.js and network-data.js.

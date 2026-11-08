@@ -22,7 +22,7 @@
      pages   every .html file on disk that is served, the page catalog's routes (scripts/lib/site-routes.mjs, what the router reads),
              and every route named in a docs/design/world-grammar/parity/*.txt sweep.
    What counts as Three.js (a line that is not a comment): a reference to three-r180-defxn, a reference to js/world/<file>.js or
-   js/min/world/<file>.js (js/world/rail-capabilities.js is exempt while it holds no THREE), a call on THREE (THREE. / THREE[),
+   js/min/world/<file>.js, a call on THREE (THREE. / THREE[),
    or a file that lives in js/world/ and calls THREE. A comment that only names Three.js is listed as kind=mention and does not fail the gate.
    Dynamic: each page is opened in real Chrome with empty storage; a request for three-r180-defxn.js or js/world/ or js/min/world/,
    window.THREE being defined, a page error and every 4xx/5xx response are recorded.
@@ -78,7 +78,7 @@ export function servedFiles() {
 
 const PATTERNS = [
   ['lib', /three-r180-defxn/],
-  ['scene', /js\/(?:min\/)?world\/(?!rail-capabilities)[\w.-]+\.js/],
+  ['scene', /js\/(?:min\/)?world\/[\w.-]+\.js/],
   ['call', /\bTHREE\s*[.[]/],
 ];
 /* Splits a file into code and comment text. Block comments and html comments, and line comments (// at the start of a line or after
@@ -99,7 +99,7 @@ export function splitComments(text, rel) {
 export function scanText(rel, text) {
   const { code, comment } = splitComments(text, rel);
   const uses = new Set(), mentions = new Set();
-  const inWorldFolder = /^js\/(?:min\/)?world\//.test(rel) && !/rail-capabilities/.test(rel);
+  const inWorldFolder = /^js\/(?:min\/)?world\//.test(rel);
   for (const [kind, re] of PATTERNS) { if (re.test(code)) uses.add(kind); else if (re.test(comment)) mentions.add(kind); }
   if (inWorldFolder && uses.has('call')) uses.add('scene-file');
   if (rel === 'js/vendor/three-r180-defxn.js') { uses.clear(); uses.add('library'); }
@@ -133,7 +133,7 @@ export async function pageList() {
   return pages;
 }
 
-const HIT = /three-r180-defxn|\/js\/(?:min\/)?world\/(?!rail-capabilities)/;
+const HIT = /three-r180-defxn|\/js\/(?:min\/)?world\//;
 
 async function dynamicReport(only) {
   const dir = process.env.PLAYWRIGHT_DIR;

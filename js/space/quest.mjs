@@ -40,24 +40,7 @@ export function mount(space, host) {
   let filmPlaying = false, filmDone = false, toastTimer = 0;
   const stops = [];
 
-  /* ---------- who are you? ---------- */
-  const pick = el('div', 'quest-pick'); pick.setAttribute('role', 'dialog'); pick.setAttribute('aria-modal', 'true'); pick.setAttribute('aria-labelledby', 'quest-pick-title');
-  const box = el('div', 'quest-pick-box');
-  box.appendChild(el('p', 'quest-kicker', 'Start here'));
-  const h = el('h2', 'quest-pick-title', 'Who are you?'); h.id = 'quest-pick-title'; box.appendChild(h);
-  const opts = el('div', 'quest-pick-opts');
-  ROLES.forEach((r) => {
-    const b = el('button', 'quest-role'); b.type = 'button';
-    b.appendChild(el('strong', null, r.name)); b.appendChild(el('span', null, r.line)); b.appendChild(el('em', null, r.steps.length + ' steps'));
-    b.addEventListener('click', () => { state = { role: r.id, done: [], skipped: false }; save(state); render(); });
-    opts.appendChild(b);
-  });
-  box.appendChild(opts);
-  const skip = el('button', 'quest-skip', 'Just look around'); skip.type = 'button';
-  skip.addEventListener('click', () => { state = { role: null, done: [], skipped: true }; save(state); render(); });
-  box.appendChild(skip);
-  pick.appendChild(box); root.appendChild(pick);
-
+  /* who are you? is the intro's shot 5 now (js/space/intro.mjs): the role is kept there, in this same key */
   /* ---------- the mission panel ---------- */
   const panel = el('section', 'quest-panel'); panel.setAttribute('aria-label', 'Your mission');
   const head = el('div', 'quest-head'), title = el('strong', 'quest-title'), score = el('span', 'quest-score');
@@ -67,12 +50,15 @@ export function mount(space, host) {
   const foot = el('div', 'quest-foot');
   const change = el('button', 'quest-change', 'Change'); change.type = 'button';
   change.addEventListener('click', () => { state = { role: null, done: [], skipped: false }; save(state); render(); });
-  panel.appendChild(head); panel.appendChild(bar); panel.appendChild(list); panel.appendChild(foot); panel.appendChild(change);
+  const again = el('button', 'quest-change', 'Watch again'); again.type = 'button';   /* replays this role's cinematic (js/space/cinematic.mjs) */
+  const play = () => { if (state.role) window.dispatchEvent(new CustomEvent('ark-cinematic-play', { detail: { role: state.role } })); };
+  again.addEventListener('click', play);
+  panel.appendChild(head); panel.appendChild(bar); panel.appendChild(list); panel.appendChild(foot); panel.appendChild(again); panel.appendChild(change);
   root.appendChild(panel);
 
   /* the small button that brings missions back after "just look around" */
   const reopen = el('button', 'quest-reopen', 'Missions'); reopen.type = 'button';
-  reopen.addEventListener('click', () => { state = { role: null, done: [], skipped: false }; save(state); render(); });
+  reopen.addEventListener('click', () => window.dispatchEvent(new CustomEvent('ark-intro-picker')));
   root.appendChild(reopen);
 
   const toast = el('div', 'quest-toast'); toast.setAttribute('role', 'status'); toast.setAttribute('aria-live', 'polite'); root.appendChild(toast);
@@ -83,18 +69,20 @@ export function mount(space, host) {
     clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('on'), 2400);
   }
   /* the role picker asks only on the front pages (intro, home): a visitor who lands deep in the site is not stopped by a question */
-  /* "Pick your path" (js/space/journey.mjs) opens the picker on any page */
-  let forced = false;
-  window.addEventListener('ark-quest-open', () => { forced = true; state = { role: null, done: [], skipped: false }; save(state); render(); });
+  /* "Pick your path" (js/space/journey.mjs) stands the intro's shot 5 on any page */
+  /* the intro keeps the role and tells us; the intro's state hides this part while it plays */
+  let introOn = false;
+  const onKept = () => { state = load() || state; render(); };
+  const onIntro = (e) => { introOn = !!(e.detail && e.detail.playing); render(); };
+  window.addEventListener('ark-quest-change', onKept); window.addEventListener('ark-intro-state', onIntro);
+  stops.push(() => { window.removeEventListener('ark-quest-change', onKept); window.removeEventListener('ark-intro-state', onIntro); });
   const front = () => { const st = window.ArkUI && ArkUI.sceneState && ArkUI.sceneState.get ? ArkUI.sceneState.get() : null; return !st || st.page === 'intro' || st.page === 'zero'; };
   function render() {
     const r = roleOf(), ready = filmDone && !filmPlaying;
-    root.classList.toggle('hidden', !ready);
-    pick.hidden = !ready || !!r || state.skipped || !(front() || forced);
-    if (r) forced = false;
+    root.classList.toggle('hidden', !ready || introOn || document.documentElement.classList.contains('intro-picker'));
     const n = r ? r.steps.length : 0, d = r ? r.steps.filter((_, i) => state.done.includes(i)).length : 0;
     /* one guide a screen (owner, 2026-11-05: "total chaos"): the mission panel lives on the front page only, and only until the mission
-       is done; everywhere else, and after it, the journey bar (js/space/journey.mjs) is the guide. html.quest-on tells the bar to wait. */
+       is done (Watch again lives in that panel, so it goes with it: the journey bar has no place for it); everywhere else, and after it, the journey bar (js/space/journey.mjs) is the guide. html.quest-on tells the bar to wait. */
     panel.hidden = !ready || !r || !front() || d === n;
     document.documentElement.classList.toggle('quest-on', !panel.hidden);
     reopen.hidden = !ready || !(state.skipped || (!r && !front()));
@@ -124,6 +112,7 @@ export function mount(space, host) {
   }
   /* a step is done: tick it, say so, and say the whole mission is done when it is */
   function did(match) {
+    if (window.ArkCinematicActive || window.ArkCinematicNav > 0) return;   /* a cinematic is a guide: it ticks nothing */
     const r = roleOf(); if (!r) return;
     const i = r.steps.findIndex((s, j) => !state.done.includes(j) && match(s));
     if (i < 0) return;

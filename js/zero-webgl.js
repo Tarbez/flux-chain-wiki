@@ -4,7 +4,7 @@
    one draw call at rest, and two additional delayed traces during transitions. */
 (function () {
   'use strict';
-  /* The 3D world (js/world/world-host.js) stands under every page now. This relief is its fallback: it runs
+  /* The 3D world (js/world2/world2-host.mjs) stands under every page now. This relief is its fallback: it runs
      only when the world cannot start (no WebGL 2, a failed load), and the host then loads this file again. */
   if (window.ArkWorldHost && window.ArkWorldHost.owns()) return;
 

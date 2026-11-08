@@ -222,7 +222,7 @@
         el.hidden = !active;
         return Promise.resolve();
       }
-      /* a world page (js/world/world-host.js ArkUI.worldRise): its words rise and leave by transform and clip, with the
+      /* a world page (js/world2/world2-host.mjs ArkUI.worldRise): its words rise and leave by transform and clip, with the
          timings of ArkWorld.motion, and nothing fades */
       if (el.classList && el.classList.contains('world-page') && ArkUI.worldRise && typeof el.animate === 'function') {
         el.hidden = false;

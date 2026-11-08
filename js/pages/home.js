@@ -51,12 +51,21 @@
       ['Resolvers', R && R.resolvers ? R.resolvers.length : 0]
     ].filter(function (c) { return c[1] > 0; });
   }
+  /* what each stat counts, as a name ArkUI.placeResponse (js/pages/intro.js) turns into places */
+  var STAT_PLACE = { Networks: 'networks', Chains: 'chains', Resolvers: 'kernel' };
+  /* the shared response lives in intro.js; load it if the home was reached first */
+  function withResponse(fn) {
+    if (ArkUI.placeResponse) return fn();
+    if (ArkUI.loadScript) ArkUI.loadScript('js/pages/intro.js').then(function () { if (ArkUI.placeResponse) fn(); }, function () {});
+  }
   function fillStats(box) {
     counts().forEach(function (c) {
-      var stat = node('div', 'hud-stat');
-      stat.appendChild(node('b', null, String(c[1])));
+      var stat = node('div', 'hud-stat'), b = node('b', null, String(c[1]));
+      stat.appendChild(b);
       stat.appendChild(node('span', null, c[0]));
       box.appendChild(stat);
+      stat.tabIndex = 0;
+      withResponse(function () { ArkUI.placeResponse(stat, STAT_PLACE[c[0]], true); ArkUI.rollIn(b); });
     });
   }
 
@@ -105,8 +114,8 @@
           b.appendChild(dot); b.appendChild(node('span', null, net.short || net.name.split(' · ')[0]));
           b.title = net.name;
           b.addEventListener('click', function () { s.focus(net.id); });
-          b.addEventListener('mouseenter', function () { s.hover(net.id); });
-          b.addEventListener('mouseleave', function () { s.hover(null); });
+          b.addEventListener('pointerenter', function () { s.hover(net.id); });
+          b.addEventListener('pointerleave', function () { s.hover(null); });
           row.appendChild(b);
         });
       });

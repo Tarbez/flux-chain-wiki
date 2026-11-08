@@ -17,9 +17,7 @@
    the frames: it is the page's box on the screen, which only the browser knows, laid over from the chosen tile as the page opens
    (ring-kit.js k.panel). Nothing here schedules a frame: step() reports whether anything still moves. No JSON; the words are tab
    separated text. */
-import { prism, torus } from '/fxn-3d/js/render/world2-shapes.mjs';
-import { eyeOf, view as viewMatrix } from '/fxn-3d/js/render/world2-math.mjs';
-import { easeOf } from '/fxn-3d/scripts/lib/anim-sample.mjs';
+import { prism, torus, eyeOf, view as viewMatrix, easeOf } from './world2-gl.mjs';
 import { paintPlate } from './world2-plates.mjs';
 import { loadPart, resolveRow } from './world2-rows.mjs';
 import { SATIN, RAIL, STAMP, GLASS, SHELL, SLAB, SLAB_RIM } from './world2-cardlook.mjs';

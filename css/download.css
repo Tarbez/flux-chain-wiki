@@ -77,16 +77,16 @@
 #scene .dl-win-view { position:absolute; left:0; right:0; top:32px; bottom:0; -webkit-backdrop-filter:brightness(1.9) contrast(1.08) saturate(1.25); backdrop-filter:brightness(1.9) contrast(1.08) saturate(1.25); }
 #scene .dl-win-word { position:absolute; left:0; right:0; bottom:var(--s3); display:grid; justify-items:center; gap:1px; pointer-events:none; text-shadow:0 0 12px hsl(var(--canvas)); }
 #scene .dl-win-word b { font:800 var(--fs-tertiary)/1 var(--font-display,var(--font-sans)); letter-spacing:.2em; color:hsl(var(--text-strong)); }
-#scene .dl-win-word small { font:500 var(--fs-micro)/1.4 var(--font-mono,monospace); letter-spacing:.32em; color:hsl(var(--text-muted)); }
+#scene .dl-win-word small { font:500 var(--fs-tertiary)/1.4 var(--font-mono,monospace); letter-spacing:.32em; color:hsl(var(--text-muted)); }
 #scene .dl-id { position:absolute; z-index:2; left:332px; top:52px; width:176px; padding:var(--s3) var(--s4); border-radius:12px; border:1px solid hsl(var(--border-strong));
   background:linear-gradient(160deg, hsl(var(--text-strong) / .06), transparent 60%), hsl(var(--canvas) / .9); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
-  box-shadow:0 24px 40px -18px hsl(0 0% 0% / .7); transform:rotateY(18deg) rotateZ(1deg); transform-origin:0 50%; transition:transform .5s var(--glide, ease); }
+  box-shadow:0 24px 40px -18px hsl(0 0% 0% / .7); transform:rotateY(18deg) rotateZ(1deg); transform-origin:0 50%; transition:transform .5s var(--glide, var(--ease-ui)); }
 #scene .download-art[data-step="4"] .dl-id { transform:rotateY(12deg) translateY(-4px); }
 #scene .dl-id-title { margin:0 0 var(--s2); font:600 var(--fs-tertiary)/1.2 var(--font-sans,sans-serif); color:hsl(var(--text-strong)); }
 #scene .dl-id-key { margin:0 0 var(--s3); padding:var(--s1) var(--s2); border-radius:6px; border:1px solid hsl(var(--border-default)); background:hsl(var(--surface)); font:500 var(--fs-tertiary)/1.3 var(--font-mono,monospace); color:hsl(var(--text-strong)); }
 #scene .dl-id-rows { display:grid; gap:var(--s2); margin:0; padding:0; list-style:none; }
-#scene .dl-id-rows li { display:flex; align-items:center; justify-content:space-between; font:500 var(--fs-tertiary)/1.2 var(--font-sans,sans-serif); color:hsl(var(--text-muted)); transition:color .4s ease; }
-#scene .dl-id-rows li i { width:7px; height:7px; border-radius:50%; border:1px solid hsl(var(--text-faint)); transition:background-color .4s ease, box-shadow .4s ease, border-color .4s ease; }
+#scene .dl-id-rows li { display:flex; align-items:center; justify-content:space-between; font:500 var(--fs-tertiary)/1.2 var(--font-sans,sans-serif); color:hsl(var(--text-muted)); transition:color .4s var(--ease-ui); }
+#scene .dl-id-rows li i { width:7px; height:7px; border-radius:50%; border:1px solid hsl(var(--text-faint)); transition:background-color .4s var(--ease-ui), box-shadow .4s var(--ease-ui), border-color .4s var(--ease-ui); }
 #scene .dl-id-rows li.is-on { color:hsl(var(--text-strong)); }
 #scene .dl-id-rows li.is-on i { border-color:hsl(var(--primary)); background:hsl(var(--primary)); box-shadow:0 0 8px hsl(var(--primary)); }
 @media(prefers-reduced-motion:reduce){ #scene .dl-id, #scene .dl-id-rows li, #scene .dl-id-rows li i { transition:none; } }
@@ -148,7 +148,7 @@
 #scene .download-progress { font:500 var(--fs-tertiary) var(--font-sans,sans-serif); color:hsl(var(--text-muted)); }
 #scene .download-dots-row { display:flex; align-items:center; gap:var(--s4); }
 #scene .download-dots { display:flex; gap:var(--s3); }
-#scene .download-dot { width:10px; height:10px; padding:0; border-radius:50%; border:1.5px solid hsl(var(--text-faint)); background:none; cursor:pointer; transition:background-color .3s ease, border-color .3s ease, box-shadow .3s ease; }
+#scene .download-dot { width:10px; height:10px; padding:0; border-radius:50%; border:1.5px solid hsl(var(--text-faint)); background:none; cursor:pointer; transition:background-color .3s var(--ease-ui), border-color .3s var(--ease-ui), box-shadow .3s var(--ease-ui); }
 #scene .download-dot[aria-current="step"] { border-color:hsl(var(--primary)); background:hsl(var(--primary)); box-shadow:0 0 8px hsl(var(--primary) / .8); }
 #scene .download-dot:focus-visible, #scene .download-play:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:3px; }
 #scene .download-play { display:inline-flex; align-items:center; gap:var(--sp-3); height:26px; padding:0 var(--sp-4) 0 var(--sp-3); border:1px solid hsl(var(--border-default)); border-radius:13px; background:none; color:hsl(var(--text-muted)); font:500 var(--fs-tertiary)/1 var(--font-sans,sans-serif); cursor:pointer; }

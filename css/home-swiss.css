@@ -24,7 +24,7 @@
 .world-you-name {fill:hsl(var(--canvas));font:600 var(--fs-tertiary) var(--font-mono,monospace);letter-spacing:.02em;}
 .world-icon path {fill:none;stroke:hsl(var(--canvas));stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 /* Draws in once, then holds still. With motion off the lines are simply there. */
-.world-track {animation:world-draw 1100ms cubic-bezier(.4,0,.2,1) backwards;animation-delay:calc(200ms + var(--i,0) * 120ms);}
+.world-track {animation:world-draw 1100ms var(--ease-type) backwards;animation-delay:calc(200ms + var(--i,0) * 120ms);}
 .world-line:not(.world-mine) :is(.world-station,.world-name),.world-mine :is(.world-record,.world-interchange) {animation:hl-fade 500ms ease-out backwards;animation-delay:calc(700ms + var(--i,0) * 120ms);}
 @keyframes world-draw {from {stroke-dasharray:1;stroke-dashoffset:1;}to {stroke-dasharray:1;stroke-dashoffset:0;}}
 @keyframes hl-fade {from {opacity:0;}}
@@ -62,7 +62,7 @@
 .land-panel-heavy {fill:hsl(var(--anchor));}
 .land-leader {stroke:hsl(var(--text-faint));stroke-width:1;}
 /* The record in flight: hovering and dashed until the chain is extended. */
-.land-record-new,.land-head {transition:transform 640ms cubic-bezier(.22,.72,.22,1);}
+.land-record-new,.land-head {transition:transform 640ms var(--ease-ui);}
 .flow-landscape[data-placed="false"] .land-record-new {transform:translateY(-28px);}
 .flow-landscape[data-placed="false"] .land-record-new :is(.land-top,.land-front,.land-side) {fill:none;stroke:hsl(var(--text-strong));stroke-dasharray:3 3;}
 .land-accent {fill:hsl(var(--primary));transform-box:fill-box;transform-origin:center;transform:scale(var(--primary-scale,1));}
@@ -104,7 +104,7 @@
 .land-ballot-slot {stroke:hsl(var(--text-strong));stroke-width:2;}
 .land-vote {stroke:hsl(var(--text-faint));stroke-width:1;stroke-dasharray:2 4;}
 .land-slab .land-top {fill:hsl(var(--raised));stroke:hsl(var(--text-faint));}
-.land-slab-new {opacity:0;transform:translateY(-18px);transition:opacity 400ms,transform 640ms cubic-bezier(.22,.72,.22,1);}
+.land-slab-new {opacity:0;transform:translateY(-18px);transition:opacity 400ms,transform 640ms var(--ease-ui);}
 .land-counterpart[data-resolved="true"] .land-slab-new {opacity:1;transform:none;}
 /* Readout marks: passed is solid ink, pending is an outline. No hue. */
 .land-check,.land-peer {opacity:0;transition:opacity 240ms;}

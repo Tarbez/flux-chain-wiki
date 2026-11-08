@@ -11,7 +11,9 @@ Flux Protocol is a resolver-based system: each resolver is a rulebook with its o
 - **Evaluate readiness:** inspect [current status](status.md), [verification](operators/verification.md), the [evidence registry](evidence/registry.md), the [public claim inventory](evidence/public-claim-inventory.md), and the [mainnet readiness gap inventory](mainnet-readiness.md) (devnet/mainnet separation, governance, durability, ops).
 - **Review the interface contract:** use the [state and layer system](ui-state-system.md) for Focus, Context, inner detail, and transition behavior.
 - **Plan the public-site redesign:** read the [guided-knowledge audit and batch plan](ux-storytelling-redesign-audit.md) for all 31 routes, color/shape semantics, progressive disclosure, and batch acceptance checks.
+- **Write for the site:** read the brand direction and the three-pass claim check in [brand/DEFXN.md](brand/DEFXN.md#direction-and-the-claim-check-2026-11-07) before a sentence goes on defxn.com. It holds the claims table with the words each claim may use.
 - **Resolve a problem:** use [troubleshooting](operators/troubleshooting.md) and collect the evidence requested there.
+- **Build 2D motion on the fxn-3d clock:** read [the motion plan](design/motion/MOTION.md), the one document for films (2D layers and 3D shots on one timeline, in their own grammar).
 
 ## Documentation contract
 

@@ -12,8 +12,7 @@
    (the file puts a pane at foot + (place + slide - foot) x u), and it moves the pane's rows, the line's far end and the bead there; the line's near end and the bead on the ring stay.
    Time: a pane's rise and sink run on the clock, not on frames; the pointer's follower is the file's own step per frame (hovstep). Nothing here schedules a frame: step(now) says whether
    anything still moves, and the host asks for another frame only then (workspace law: animations settle). No JSON. */
-import { uvSphere, prism } from '/fxn-3d/js/render/world2-shapes.mjs';
-import { projection, view as viewMatrix, eyeOf } from '/fxn-3d/js/render/world2-math.mjs';
+import { uvSphere, prism, projection, view as viewMatrix, eyeOf } from './world2-gl.mjs';
 import { paintIdPlate } from './world2-plates.mjs';
 import { loadPart, resolveRow, alongPts } from './world2-rows.mjs';
 

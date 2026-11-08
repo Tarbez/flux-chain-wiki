@@ -12,7 +12,6 @@
      instead of a stylesheet guessing from prefers-color-scheme. -->
 <script src="js/bootstrap.js"></script>
 <link rel="stylesheet" href="css/themes.css" />
-<link rel="stylesheet" href="css/flux-themes.css?v=20261006-system1" />
 <link rel="stylesheet" href="assets/kit/defxn-fonts.css" />
 <link rel="stylesheet" href="css/admin.css" />
 <link rel="stylesheet" href="css/authorization-dialog.css" />
@@ -337,11 +336,13 @@
 <script src="js/content/manifest.js" defer></script>
 <script src="js/content/manifests/index.js"></script>
 <script src="js/content/assets.js" defer></script>
-<script src="js/content/assets/index.js"></script>
+<script src="js/content/assets/index.js" data-ark-assets="all"></script>
 <script src="js/content/secrets.js" defer></script>
 <script src="js/content/secrets/index.js"></script>
 <script src="js/halo/image-shape.js" defer></script>
 <script src="js/tokens.js" defer></script>
+<!-- One frame scheduler for every view (ArkFrame: once, idle, settleLoop); before js/admin/rail.js. -->
+<script src="js/lib/frame.js" defer></script>
 <script src="js/ark/vendor/backgrounds.js" defer></script>
 <script src="js/content/theme.js" defer></script>
 <script src="js/content/theme-data.js" defer></script>

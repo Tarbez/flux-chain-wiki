@@ -1,7 +1,7 @@
-/* /auth: signing in with your FXN ID file, on the 3D world (js/world/world-host.js). Split out of /account
+/* /auth: signing in with your FXN ID file, on the 3D world (js/world2/world2-host.mjs). Split out of /account
    (owner, 2026-10-25: the old sign-in there was "totally awful"); built from the owner's five screens in
    docs/design/auth/. One layout for every state: the words on the left, your FXN ID card in 3D standing on the
-   kernel in the centre (js/world/auth-stage.js draws it and its glass status panels), and a four-step rail on the
+   kernel in the centre (the Three.js auth stage, removed 2026-11-08; js/world2/world2-host.mjs draws /auth now draws it and its glass status panels), and a four-step rail on the
    right (Identity, Verify, Connect, Ready) that lights as you move.
 
    Every screen is the REAL state of the visitor's identity. Nothing here reads a file, keeps a key or decides a

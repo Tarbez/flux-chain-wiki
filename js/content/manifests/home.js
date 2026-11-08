@@ -450,179 +450,365 @@ ArkManifest.define({
       "section": "Home (3D world), the Measured rail",
       "value": "Stored results"
     },
-    "LANDING.EYEBROW": {
-      "label": "Eyebrow",
-      "kind": "line",
-      "section": "Intro (3D world)",
-      "value": "DEFXN · devnet"
-    },
     "LANDING.TITLE": {
-      "label": "Heading, two rows (the second is muted)",
-      "kind": "text",
-      "section": "Intro (3D world)",
-      "value": "Enter the grid.\nMany networks. One kernel."
-    },
-    "LANDING.LEDE": {
-      "label": "Lede",
-      "kind": "text",
-      "section": "Intro (3D world)",
-      "value": "DEFXN is the kernel of the grid. FXN is its first chain and that chain’s coin. Every record is signed, so anyone can check it."
-    },
-    "LANDING.CTA": {
-      "label": "Card action",
+      "label": "Page name, for screen readers",
       "kind": "line",
-      "section": "Intro (3D world)",
-      "value": "Explore the network"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Intro"
     },
-    "LANDING.NOTE": {
-      "label": "Note under the card",
+    "LANDING.S1.LINE": {
+      "label": "Shot 1: caption",
       "kind": "line",
-      "section": "Intro (3D world)",
-      "value": "Counted from the data files · all on a devnet · nothing is live"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "You get an FXN ID."
     },
-    "LANDING.COUNT.NETWORKS": {
-      "label": "Count: network chains",
+    "LANDING.S1.REHEARSAL": {
+      "label": "Rehearsal line (shot 1 and the end), set in mono capitals",
       "kind": "line",
-      "section": "Intro (3D world)",
-      "value": "Network chains"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "A rehearsal. Nothing is live."
     },
-    "LANDING.COUNT.CAPABILITIES": {
-      "label": "Count: capabilities",
+    "LANDING.S1.CHIP": {
+      "label": "Shot 1: chip on the card",
       "kind": "line",
-      "section": "Intro (3D world)",
-      "value": "Capabilities"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Press your ID"
     },
-    "LANDING.COUNT.RESOLVERS": {
-      "label": "Count: resolvers",
+    "LANDING.S1.HOVER": {
+      "label": "Shot 1: label on the card",
       "kind": "line",
-      "section": "Intro (3D world)",
-      "value": "Resolvers"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Your FXN ID. It keeps its own chain."
     },
-    "LANDING.LINK.NETWORK.NAME": {
-      "label": "Link card: Network, name",
+    "LANDING.S2.LINE": {
+      "label": "Shot 2: caption",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "Network"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Pay. A keeper signs it. No vote."
     },
-    "LANDING.LINK.NETWORK.LINE": {
-      "label": "Link card: Network, one line",
+    "LANDING.S2.TRACK": {
+      "label": "Shot 2: drag track label",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "Measured numbers from the devnet."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Drag to pay"
     },
-    "LANDING.LINK.CHAINS.NAME": {
-      "label": "Link card: Chains, name",
+    "LANDING.S2.PAY": {
+      "label": "Shot 2: button for reduced motion and keyboard",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "Chains"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Pay"
     },
-    "LANDING.LINK.CHAINS.LINE": {
-      "label": "Link card: Chains, one line",
+    "LANDING.S3.LINE": {
+      "label": "Shot 3: caption",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "Every identity keeps its own chain."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Final. One keeper signed the receipt."
     },
-    "LANDING.LINK.RESOLVERS.NAME": {
-      "label": "Link card: Resolvers, name",
+    "LANDING.S3.CHIP": {
+      "label": "Shot 3: chip on the receipt",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "Resolvers"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Press the receipt"
     },
-    "LANDING.LINK.RESOLVERS.LINE": {
-      "label": "Link card: Resolvers, one line",
+    "LANDING.S3.HOVER": {
+      "label": "Shot 3: label on the payment record",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "What each resolver reads and signs."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Your payment. Signed by the keeper."
     },
-    "LANDING.LINK.PRODUCTS.NAME": {
-      "label": "Link card: Products, name",
+    "LANDING.S3.KEEP": {
+      "label": "Shot 3: caption after the press",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "Products"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Keep it. Anyone can check it."
     },
-    "LANDING.LINK.PRODUCTS.LINE": {
-      "label": "Link card: Products, one line",
+    "LANDING.S4.LINE": {
+      "label": "Shot 4: caption",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "What you can resolve today."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Copies go to pinners on other machines."
     },
-    "LANDING.LINK.DOCS.NAME": {
-      "label": "Link card: Docs, name",
+    "LANDING.S4.CHIP": {
+      "label": "Shot 4: chip, desktop",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "Docs"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Scroll out"
     },
-    "LANDING.LINK.DOCS.LINE": {
-      "label": "Link card: Docs, one line",
+    "LANDING.S4.CHIP.TOUCH": {
+      "label": "Shot 4: chip, phone",
       "kind": "line",
-      "section": "Intro (3D world), link cards",
-      "value": "The canonical reference."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Pinch out"
     },
-    "LANDING.FILM.C1.NAME": {
-      "label": "Film chapter 1, name",
+    "LANDING.S4.STEP": {
+      "label": "Shot 4: button for reduced motion",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "One kernel"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Show the copies"
     },
-    "LANDING.FILM.C1.LINE": {
-      "label": "Film chapter 1, one line",
+    "LANDING.S4.NUMBER": {
+      "label": "Shot 4: the one number, after the copies land",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "Every network runs on it."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "A copy reached each pinner in about 1.1 s."
     },
-    "LANDING.FILM.C2.NAME": {
-      "label": "Film chapter 2, name",
+    "LANDING.S4.CONDITION": {
+      "label": "Shot 4: the number's condition, on the same screen",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "Many networks"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Measured on 5 test nodes on one machine. Nothing live."
     },
-    "LANDING.FILM.C2.LINE": {
-      "label": "Film chapter 2, one line",
+    "LANDING.S5.LINE": {
+      "label": "Shot 5: the picker's heading",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "Each network runs its own chains."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Who are you?"
     },
-    "LANDING.FILM.C3.NAME": {
-      "label": "Film chapter 3, name",
+    "LANDING.S5.CURIOUS.NAME": {
+      "label": "Role tag: just curious, name",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "Signed chains"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Just curious"
     },
-    "LANDING.FILM.C3.LINE": {
-      "label": "Film chapter 3, one line",
+    "LANDING.S5.CURIOUS.LINE": {
+      "label": "Role tag: just curious, mono line",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "Every record is signed. Anyone can check it."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "The kernel"
     },
-    "LANDING.FILM.C4.NAME": {
-      "label": "Film chapter 4, name",
+    "LANDING.S5.BUILDER.NAME": {
+      "label": "Role tag: builder, name",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "The grid"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "I build apps"
     },
-    "LANDING.FILM.C4.LINE": {
-      "label": "Film chapter 4, one line",
+    "LANDING.S5.BUILDER.LINE": {
+      "label": "Role tag: builder, mono line",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "Pick a network to look inside."
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Your chain"
     },
-    "LANDING.FILM.SKIP": {
-      "label": "Film: the skip button",
+    "LANDING.S5.OPERATOR.NAME": {
+      "label": "Role tag: operator, name",
       "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "Skip intro"
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "I run computers"
     },
-    "LANDING.FILM.REPLAY": {
-      "label": "Film: the replay link",
+    "LANDING.S5.OPERATOR.LINE": {
+      "label": "Role tag: operator, mono line",
       "kind": "line",
-      "section": "Intro (3D world), the film",
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "The keeper"
+    },
+    "LANDING.S5.LOOK.NAME": {
+      "label": "Role tag: look around, name",
+      "kind": "line",
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Just look around"
+    },
+    "LANDING.S5.LOOK.LINE": {
+      "label": "Role tag: look around, mono line",
+      "kind": "line",
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "No mission"
+    },
+    "LANDING.B1.HEAD": {
+      "label": "Beat 1 Welcome: 47 heading",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Welcome to FXN."
+    },
+    "LANDING.B1.LINE": {
+      "label": "Beat 1: 18 line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "A new internet, built in the open."
+    },
+    "LANDING.B1.REHEARSAL": {
+      "label": "Rehearsal line, mono, beat 1 to the end",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "A rehearsal. Nothing is live."
+    },
+    "LANDING.B1.CHIP": {
+      "label": "Beat 1: chip on the kernel",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Switch on the kernel"
+    },
+    "LANDING.B2.LINE": {
+      "label": "Beat 2 Your chain: 29 line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Every person keeps their own chain."
+    },
+    "LANDING.B2.MONO": {
+      "label": "Beat 2: mono line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Your FXN ID. Only your key writes to it."
+    },
+    "LANDING.B2.CHIP": {
+      "label": "Beat 2: chip on the card",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Press your ID"
+    },
+    "LANDING.B2.HOVER": {
+      "label": "Beat 2: label on the card",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Your FXN ID. It keeps its own chain."
+    },
+    "LANDING.B3.LINE": {
+      "label": "Beat 3 Final: 29 line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Pay. One keeper signs. It is final."
+    },
+    "LANDING.B3.MONO": {
+      "label": "Beat 3: mono line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "No vote. A keeper posts a bond and loses it if it cheats."
+    },
+    "LANDING.B3.TRACK": {
+      "label": "Beat 3: drag track label",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Drag to pay"
+    },
+    "LANDING.B3.PAY": {
+      "label": "Beat 3: button for reduced motion and keyboard",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Pay"
+    },
+    "LANDING.B3.HOVER": {
+      "label": "Beat 3: label on the receipt",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Keep it. Anyone can check it."
+    },
+    "LANDING.B3.CHIP": {
+      "label": "Beat 3: chip on the receipt",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Press the receipt"
+    },
+    "LANDING.NEXT": {
+      "label": "Intro: chip that moves on to the next beat",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Next"
+    },
+    "LANDING.B4.LINE": {
+      "label": "Beat 4 What is built: 29 line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Seven lanes of products on one kernel."
+    },
+    "LANDING.B4.MONO": {
+      "label": "Beat 4: mono line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Build. Ship. Network. Govern. Social and live. Assets. DeFi."
+    },
+    "LANDING.B4.CHIP": {
+      "label": "Beat 4: chip on a lane marker",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Light a lane"
+    },
+    "LANDING.B5.LINE": {
+      "label": "Beat 5 The proof: 29 line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Every number names its machine."
+    },
+    "LANDING.B5.MONO": {
+      "label": "Beat 5: mono line, the number with its condition",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "26,274 final payments a second. 5 test nodes on one machine. 1,000 in flight."
+    },
+    "LANDING.B5.CHIP": {
+      "label": "Beat 5: chip, desktop",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Scroll out"
+    },
+    "LANDING.B5.CHIP.TOUCH": {
+      "label": "Beat 5: chip, phone",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Pinch out"
+    },
+    "LANDING.B5.STEP": {
+      "label": "Beat 5: button for reduced motion",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Show the copies"
+    },
+    "LANDING.B5.NUMBER": {
+      "label": "Beat 5: after the copies land",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "A copy reached each pinner in about 1.1 s."
+    },
+    "LANDING.B5.CONDITION": {
+      "label": "Beat 5: the number's condition, same screen",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Measured on 5 test nodes on one machine. Nothing live."
+    },
+    "LANDING.B6.LINE": {
+      "label": "Beat 6 What comes next: 29 line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Devnet genesis is next."
+    },
+    "LANDING.B6.MONO": {
+      "label": "Beat 6: mono line",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Up to 16 of our 20 machines. Test money. No date until the gate passes."
+    },
+    "LANDING.B6.CHIP": {
+      "label": "Beat 6: chip on the road marker",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "See the road"
+    },
+    "LANDING.B7.LINE": {
+      "label": "Beat 7 Who are you: 47 heading",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "Who are you?"
+    },
+    "LANDING.B7.CLAIMS.NAME": {
+      "label": "Beat 7: fifth tag at the dock, opens Network stats",
+      "kind": "line",
+      "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
+      "value": "I check claims"
+    },
+    "LANDING.LOCKUP": {
+      "label": "The 3D lockup word (baked in world/trip-letters.bin)",
+      "kind": "line",
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "FINAL"
+    },
+    "LANDING.SKIP": {
+      "label": "Skip button",
+      "kind": "line",
+      "section": "Intro (in-world, 2026-11-07)",
+      "value": "Skip"
+    },
+    "LANDING.REPLAY": {
+      "label": "Replay chip at the dock",
+      "kind": "line",
+      "section": "Intro (in-world, 2026-11-07)",
       "value": "Replay intro"
-    },
-    "LANDING.FILM.RAIL": {
-      "label": "Film: the chapter rail's name, for screen readers",
-      "kind": "line",
-      "section": "Intro (3D world), the film",
-      "value": "Intro chapters"
     }
   }
 });

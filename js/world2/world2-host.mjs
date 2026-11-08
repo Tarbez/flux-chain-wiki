@@ -17,9 +17,8 @@
    Three.js host's CALM pose did. The 3D of the chain, identity, stats and other pages is not here yet; their routes
    fly to calm, which is what a reading page gets today.
 
-   Left out of this slice, on purpose (reported, not hidden): hover lift and ring lift under the pointer, picks
-   (clicks on rings), hover labels and the per-view .tags placement (host.tags still returns a layer, nothing fills
-   it), the page slab under [data-panel], the first-visit build-up and the beam's rise. After the owner confirmed
+   Slice 1 left out the hover lift, picks, labels and the first-visit build-up; they came in later (world2-stage.mjs hover,
+   the touch section below, world2-tags.mjs, stage.unbuilt). After the owner confirmed
    slice 1 (2026-10-29) the floor came in: the grid and its orbit rings, the kernel's glow pool, the chain marks under
    their rings (WLOGO records, SVG masks by content id) and the key light's shadow map, fitted round each view's aim
    as chains-scene.js fitShadow does (40 round the network, 14 on the calm pose). The card (/auth, MESH.md): a
@@ -29,7 +28,7 @@
    fxn-3d FXN ID card replaced it.
    ===================================================================== */
 import { fetchWorld, fetchBlob, fetchNames, fetchGroup, fetchLines, firstInstance, worldPath, PICTURE } from './world2-decode.mjs';
-import { createRenderer, FOV, afterRestore } from './world2-gl.mjs';
+import { createRenderer, FOV, afterRestore, engine as engineMod, orbitCoast } from './world2-gl.mjs';
 import { readPalette as readThemePalette } from './world2-palette.mjs';
 import { createStage } from './world2-stage.mjs';
 import { createSites } from './world2-sites.mjs';
@@ -146,6 +145,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   var persistent = scene.querySelector('[data-ark-layer="persistent"]');
   if (!persistent) { fail('no persistent layer'); return; }
   var layer = document.createElement('div'), canvas = document.createElement('canvas');
+  layer.style.touchAction = 'none';   /* the world's touch surface: the browser never pans or pinches it */
   layer.className = 'world-layer'; layer.setAttribute('aria-hidden', 'true');
   canvas.id = 'chains'; canvas.className = 'world-canvas'; layer.appendChild(canvas);
   persistent.parentNode.insertBefore(layer, persistent);
@@ -336,7 +336,10 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   var hubMark = null, hubMarkImg = null, helix = null, helixLoad = null, helixBox = null, helixMoving = false, helixInset = null;
   /* the Kit's 3D (world2-kit.mjs): mounted when the camera is first to fly to /kit; false when it could not load, so /kit keeps the calm world */
   var kit = null, kitLoad = null, kitMoving = false, msaa = 0;   /* msaa: 4 while the Kit shows (its thin lit lines), else 0 */
-  var pointer = { x: 0, y: 0 }, lean = { x: 0, y: 0 }, W = 1, H = 1, ratio = 1;
+  var pointer = { x: 0, y: 0 }, lean = { x: 0, y: 0 }, W = 1, H = 1, ratio = 1, carry = null;
+  /* the pointer's lean of the camera on a space page: 4 degrees yaw / 2.4 elev on the grid, 2.5 / 1.5 on a focused place (about 29 px at 1440) */
+  var LEAN = { grid: [4, 2.4], focus: [2.5, 1.5] };
+  function leanOf() { var k = objects && spaceView() ? (objects.focused() ? LEAN.focus : LEAN.grid) : [cam.tilt, cam.tilt * .6]; return k; }
   function motion() { var m = world.knobs.motion; return { flight: m && m.flight ? m.flight / 1750 : 1 }; }
   function wake() { if (!raf) raf = requestAnimationFrame(tick); }
   /* one frame: the stage plays its channels and the camera's flight through the one sampler (world2-stage.mjs), plus the pointer's lean;
@@ -352,6 +355,11 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
       if (stage.step(now)) moving = true;
     }
     if (objects && cam && spaceView() && objects.camera(now, cam)) moving = true;   /* the space's camera: the film, the hero pose, a focused place (world2-objects.mjs camera) */
+    if (carry && objects) {   /* the orbit carries on after release (the engine's orbit-camera coast: decays exp(-dt / .25 s)); reduced motion never starts it */
+      var cs = orbitCoast(carry, now);
+      objects.orbit(cs.step[0], cs.step[1]);
+      if (!cs.moving) carry = null; else moving = true;
+    }
     var tx = reduced() ? 0 : pointer.x, ty = reduced() ? 0 : pointer.y;
     lean.x += (tx - lean.x) * .08; lean.y += (ty - lean.y) * .08;
     if (Math.abs(tx - lean.x) > .001 || Math.abs(ty - lean.y) > .001) moving = true;
@@ -431,15 +439,22 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     if (spaceNow && piecesMod) piecesMod.list.forEach(function (p) { if (p.name.indexOf('obj-') !== 0) p.count = 0; });
     /* the haze is measured from the camera that draws: on a space page the space's camera, never an old view's target distance */
     R.render(c, spaceNow || !to ? cam.dist : to.dist, !!forceShadow, helixInset ? [helixInset] : undefined);
+    if (!loaderGone && (objects || !objectsWanted)) loaderOff();   /* the world's first frame with its objects: the loading mark leaves (index.html #world-loader) */
+  }
+  var loaderGone = false;
+  function loaderOff() {
+    loaderGone = true;
+    var d = document.documentElement; d.classList.add('world-ready');
+    setTimeout(function () { d.classList.add('world-gone'); }, 320);   /* after its 300 ms fade it leaves the page, so nothing of it is drawn or animated */
   }
   /* the camera exactly as it is drawn (radians, the lean applied), with the frame it is fitted to: what picking and the labels project through */
   function drawn() {
-    return { aim: cam.aim, dist: cam.dist, elev: (cam.elev - lean.y * cam.tilt * .6) * D2R, yaw: (cam.yaw + lean.x * cam.tilt) * D2R, frame: to && !(objects && spaceView()) ? to.frame : whole(), W: W, H: H };
+    return { aim: cam.aim, dist: cam.dist, elev: (cam.elev - lean.y * leanOf()[1]) * D2R, yaw: (cam.yaw + lean.x * leanOf()[0]) * D2R, frame: to && !(objects && spaceView()) ? to.frame : whole(), W: W, H: H };
   }
   function redraw() { if (!raf) { draw(); afterDraw(); } }
 
   /* ---------- touch: hover, lift, picks, labels (world2-stage.mjs, world2-tags.mjs) ---------- */
-  var tags = null, spots = [], over = null, down = { x: 0, y: 0 };
+  var tags = null, spots = [], over = null, down = { x: 0, y: 0 }, lastTarget = null;
   /* home's two site panes (world2-sites.mjs): the pane under a point of the page, for the camera as drawn; -1 over none, over the page's own controls or while a worn card covers the world */
   function paneAt(x, y, t) {
     if (!sites || !cam || host.covered || (t && overUI(t))) return -1;
@@ -448,16 +463,17 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   }
   function overUI(t) { return !!(t && t.closest && t.closest('a,button,input,select,textarea,label,[role="tab"],[data-ui]')); }
   /* what is under a point of the page, through the camera as drawn; null off the canvas or over the page's own controls */
-  function hitAt(x, y) {
+  function hitAt(x, y, track) {
     if (!stage || !cam || host.covered) return null;
     var box = rect(layer), c = drawn();
     /* a built object under the point is its ring: the same item, so the same words, hover and page as the ring had (world2-objects.mjs pick) */
-    var oi = objects ? objects.pick(x - box.left, y - box.top, c, stage.project) : -1;
+    var oi = objects ? objects.pick(x - box.left, y - box.top, c, stage.project, track) : -1;
     if (oi >= 0) return { part: 'object', instance: 0, item: oi, slot: 0, t: 0 };
     return stage.pick(x - box.left, y - box.top, c);
   }
   function hoverAt(x, y, target) {
     var pj = paneAt(x, y, target);
+    if (objects) objects.pointerX(pointer.x);
     if (sites) sites.hover(pj);
     if (pj >= 0) {   /* a pane lifts under the pointer and names itself; nothing else of the world is under it */
       var pw = sites.wordsOf(pj), pkey = 'p' + pj;
@@ -467,7 +483,8 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
       wake(); return;
     }
     if (!stage) return;   /* a pointer move can arrive before the stage is built (owner's browser, 2026-10-30: 26 errors) */
-    var hit = !overUI(target) ? hitAt(x, y) : null, words = hit ? stage.wordsOf(hit) : null, dynHit = !!(hit && hit.dyn);
+    var uiOver = overUI(target); if (uiOver && objects) objects.clearNear();
+    var hit = !uiOver ? hitAt(x, y, true) : null, words = hit ? stage.wordsOf(hit) : null, dynHit = !!(hit && hit.dyn);
     var id = hit && hit.item >= 0 && (dynHit ? !!words : stage.hoverable.has(hit.item)) ? hit.item : -1;
     if (stage.idrig && stage.idrig.hoverRow(hit && hit.rig ? hit.part : null, hit && hit.rig ? hit.instance : -1)) wake();   /* a block of a how-it-works view lifts under the pointer (world2-idrig.mjs) */
     var key = hit ? (dynHit ? 'd' : '') + hit.item + ':' + hit.slot : '';
@@ -489,7 +506,8 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
       return;
     }
     var hit = hitAt(x, y);
-    if (hit && hit.part === 'object' && spaceCore && spaceCore.click(hit.item)) return;   /* a built object: fly to it; on the focused one, open its page */
+    if (hit && hit.part === 'object' && spaceCore && spaceCore.click(hit.item)) return;
+    if (!hit && spaceCore && spaceCore.hasFocus() && objects && spaceView() && lastTarget && (lastTarget === layer || (layer.contains && layer.contains(lastTarget)))) { spaceCore.escape(); wake(); return; }   /* a press on the bare floor goes up one place */   /* a built object: fly to it; on the focused one, open its page */
     var w = hit ? stage.wordsOf(hit) : null;
     if (!w) return;
     if (w.hook === 'none') return;   /* an earlier version names itself and does nothing when clicked */
@@ -504,25 +522,74 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     if (e.pointerType === 'touch') return;
     pointer.x = e.clientX / innerWidth * 2 - 1; pointer.y = e.clientY / innerHeight * 2 - 1; hoverAt(e.clientX, e.clientY, e.target);
   }, { passive: true });
-  document.addEventListener('pointerleave', function () { pointer.x = pointer.y = 0; if (stage) { stage.hover(-1, performance.now()); stage.hover(-1, performance.now(), true); document.body.classList.remove('picking'); if (over) { over = null; emit('hover', [null, 0, 0]); } } wake(); });
-  window.addEventListener('pointerdown', function (e) { down.x = e.clientX; down.y = e.clientY; drag = spaceView() && !overUI(e.target) && e.button === 0 ? { x: e.clientX, y: e.clientY } : null; }, { passive: true });
-  /* the visitor's own look round (the space's camera): drag turns it round the focus or the grid, the wheel moves it closer or farther */
-  var drag = null;
+  document.addEventListener('pointerleave', function () { pointer.x = pointer.y = 0; if (objects) { objects.clearNear(); objects.pointerX(0); } if (stage) { stage.hover(-1, performance.now()); stage.hover(-1, performance.now(), true); document.body.classList.remove('picking'); if (over) { over = null; emit('hover', [null, 0, 0]); } } wake(); });
+  /* the visitor's own look round (the space's camera). One finger or the mouse orbits (-0.25 deg/px yaw, .18 elev), two fingers pinch the WORLD
+     (never the browser), the wheel zooms toward the pointer. On a phone the top 46vh is the world's strip: a touch below it scrolls the page. */
+  var drag = null, pts = new Map(), pinch = 0, vel = null;
+  var stripOf = function (e) { return e.pointerType !== 'touch' || innerWidth >= 900 || e.clientY <= innerHeight * .46; };
+  window.addEventListener('pointerdown', function (e) {
+    down.x = e.clientX; down.y = e.clientY; carry = null;
+    var ok = spaceView() && !overUI(e.target) && e.button === 0 && stripOf(e) && !(e.target && e.target.closest && e.target.closest('[data-scroll], .world-page-scroll'));
+    if (e.pointerType === 'touch' && ok) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size >= 2) { drag = null; var q = Array.from(pts.values()); pinch = Math.hypot(q[0].x - q[1].x, q[0].y - q[1].y); return; }
+    drag = ok ? { x: e.clientX, y: e.clientY } : null; vel = ok ? { t: performance.now(), vy: 0, ve: 0 } : null;
+    if (drag && objects) { objects.dragging(true); wake(); }
+  }, { passive: true });
+  /* where on the floor (x, z from the aim, world units) a page point is: the floor round the aim is flat, so two projected unit steps solve it */
+  function floorOffset(cx, cy) {
+    if (!stage || !cam) return null;
+    var c = drawn(), b = rect(layer), p0 = stage.project(cam.aim, c), px = stage.project([cam.aim[0] + 1, cam.aim[1], cam.aim[2]], c), pz = stage.project([cam.aim[0], cam.aim[1], cam.aim[2] + 1], c);
+    if (!p0 || !px || !pz) return null;
+    var ax = px[0] - p0[0], ay = px[1] - p0[1], bx = pz[0] - p0[0], by = pz[1] - p0[1], det = ax * by - ay * bx, rx = cx - b.left - p0[0], ry = cy - b.top - p0[1];
+    if (Math.abs(det) < 1e-6) return null;
+    return [(rx * by - ry * bx) / det, (ax * ry - ay * rx) / det];
+  }
   window.addEventListener('pointermove', function (e) {
+    if (pts.has(e.pointerId)) pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pts.size >= 2 && objects) {
+      var q = Array.from(pts.values()), d = Math.hypot(q[0].x - q[1].x, q[0].y - q[1].y), fo = floorOffset((q[0].x + q[1].x) / 2, (q[0].y + q[1].y) / 2);
+      if (pinch > 0 && d > 0) { objects.zoom(pinch / d, fo && fo[0], fo && fo[1]); wake(); }
+      pinch = d; return;
+    }
     if (!drag || !objects || !(e.buttons & 1)) return;
     var dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
-    if (Math.abs(dx) + Math.abs(dy) > 0) { objects.orbit(-dx * .25, dy * .18); wake(); }
+    if (Math.abs(dx) + Math.abs(dy) > 0) {
+      objects.orbit(-dx * .25, dy * .18); wake();
+      var now = performance.now(), dt = Math.max(.008, (now - vel.t) / 1000); vel.t = now;
+      vel.vy = vel.vy * .6 + (-dx * .25 / dt) * .4; vel.ve = vel.ve * .6 + (dy * .18 / dt) * .4;
+    }
   }, { passive: true });
-  window.addEventListener('pointerup', function () { drag = null; }, { passive: true });
+  function release(e) {
+    pts.delete(e.pointerId); if (pts.size < 2) pinch = 0;
+    if (drag && vel && objects) {
+      objects.dragging(false);
+      var quiet = performance.now() - vel.t > 90;   /* a hand that stopped before it let go carries nothing */
+      if (!quiet && !reduced() && Math.abs(vel.vy) + Math.abs(vel.ve) > 4) carry = { t: performance.now(), yaw: Math.max(-16, Math.min(16, vel.vy * .1)), pitch: Math.max(-12, Math.min(12, vel.ve * .1)) };   /* a fast flick carries about 2 degrees */
+      wake();
+    }
+    drag = null;
+  }
+  window.addEventListener('pointerup', release, { passive: true });
+  window.addEventListener('pointercancel', release, { passive: true });
+  /* the browser never pinches or scrolls the page from a touch on the world's strip */
+  window.addEventListener('touchmove', function (e) {
+    if (!spaceView() || !e.cancelable || !e.touches.length) return;
+    var t = e.touches[0];
+    if (e.touches.length > 1 || drag) { if (innerWidth >= 900 || t.clientY <= innerHeight * .46) e.preventDefault(); }
+  }, { passive: false });
+  document.addEventListener('gesturestart', function (e) { if (spaceView()) e.preventDefault(); });
   window.addEventListener('wheel', function (e) {
     if (!objects || !spaceView() || overUI(e.target) || document.body.classList.contains('no-scene')) return;
     if (e.target && e.target.closest && e.target.closest('[data-scroll], .world-page-scroll')) return;
-    e.preventDefault(); objects.zoom(Math.exp(e.deltaY * .0012)); wake();
+    e.preventDefault(); carry = null;
+    var fo = floorOffset(e.clientX, e.clientY);
+    objects.zoom(Math.exp(e.deltaY * .0012), fo && fo[0], fo && fo[1]); wake();
   }, { passive: false });
   window.addEventListener('click', function (e) {
     if (overUI(e.target) || document.body.classList.contains('no-scene')) return;
     if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
-    clickAt(e.clientX, e.clientY);
+    if (objects && spaceView() && cam) { var fo = floorOffset(e.clientX, e.clientY); if (fo) { objects.ripple(cam.aim[0] + fo[0], cam.aim[2] + fo[1]); wake(); } }   /* the press ripple: every press and tap answers on the floor */
+    lastTarget = e.target; clickAt(e.clientX, e.clientY);
   });
   /* after a draw the labels follow the camera: each tag's point on the canvas, placed clear of the page (home's wait for the build) */
   function afterDraw() {
@@ -577,6 +644,9 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   }
 
   /* ---------- the world starts: after first paint, three requests, one upload ---------- */
+  /* the look's numbers: the world records' knobs (world/world.flx, derived from js/content/world-data.js by scripts/world-encode.mjs); a CMS
+     change re-applies through applyWorld */
+  function lookNow() { return Object.assign({}, world && world.knobs && world.knobs.look); }
   function afterPaint(fn) {
     requestAnimationFrame(function () { requestAnimationFrame(function () { (window.requestIdleCallback || function (f) { setTimeout(f, 0); })(fn, { timeout: 1500 }); }); });
   }
@@ -588,7 +658,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     fetchWorld().then(function (w) {
       world = w;
       if (w.views.calm) { CALM.n = w.views.calm.back; CALM.elev = w.views.calm.elev; CALM.dist = w.views.calm.dist; CALM.tilt = w.views.calm.tilt; }
-      R.setLook(w.knobs.look); R.setLook({ flow: 0 });   /* the light along the links runs only from an arrival (flowStep) */
+      R.setLook(lookNow()); R.setLook({ flow: 0 });   /* the light along the links runs only from an arrival (flowStep) */
       /* one blob serves every view in slice 1; a view with its own blob would be fetched here on its first flight */
       var first = w.frames.intro || w.frames[Object.keys(w.frames)[0]];
       if (!first) throw new Error('no frame record');
@@ -624,7 +694,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
       var seen = false;
       var onIntro = !cur || viewFor(cur.key) === 'intro' || viewFor(cur.key) === 'introtall';
       return mountObjects({ R: R, pieces: pm, geo: drums ? drums.geo : [], parts: parts, body: document.body, reduced: reduced,
-        itemOfTile: function (i) { return stage.itemAt('tile', i); }, aspect: function () { return W && H ? W / H : 1.6; }, film: onIntro && !seen && !reduced(),
+        itemOfTile: function (i) { return stage.itemAt('tile', i); }, aspect: function () { return W && H ? W / H : 1.6; }, film: onIntro && !seen && !reduced(), look: lookNow,
         onFilm: function (d) { host.filmState = d; if (spaceCore) spaceCore.film(d); window.dispatchEvent(new CustomEvent('ark-world-film', { detail: d })); } });
     }).then(function (o) {
       objects = o; if (!o) { objectsWanted = false; return; }
@@ -694,6 +764,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     if (!host.ready) return;
     var look = {}; Object.keys(w.look || {}).forEach(function (k) { if (typeof w.look[k] === 'number') look[k.toLowerCase()] = w.look[k]; });
     R.setLook(look); R.setLook({ flow: 0 }); flowStart();
+    if (objects) objects.relook();   /* the hour and the intro's exposure ride on the look's own numbers */
     if (cur) flyTo(target(viewFor(cur.key)), 500, null);
   }
 
@@ -913,7 +984,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   }
   /* the Kit (world2-kit.mjs): its module, the mesh pass and its records are fetched once, the first time the camera is to fly to /kit. The page reads ArkWorldHost.kit once it stands. */
   function loadKit() {
-    if (!kitLoad) kitLoad = Promise.all([import('./world2-kit.mjs'), import('/fxn-3d/js/render/world2-mesh.mjs'), fetchPieces()]).then(function (m) {
+    if (!kitLoad) kitLoad = Promise.all([import('./world2-kit.mjs'), engineMod('js/render/world2-mesh.mjs'), fetchPieces()]).then(function (m) {
       return m[0].createKit({ R: R, mesh: m[1], pieces: m[2], list: drawParts, wake: wake, reduced: reduced,
         project: function (p) { var q = stage.project(p, drawn()), b = rect(layer); return q ? [q[0] + b.left, q[1] + b.top] : null; },
         size: function () { var b = rect(layer); return { w: b.width, h: b.height }; },
@@ -937,7 +1008,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     return piecesLoad;
   }
   function loadPieces() {
-    return Promise.all([import('/fxn-3d/js/render/world2-mesh.mjs'), import('./world2-pieces.mjs')]).then(function (m) {
+    return Promise.all([engineMod('js/render/world2-mesh.mjs'), import('./world2-pieces.mjs')]).then(function (m) {
       return m[0].fetchEnvironment().then(function (env) { return env; }, function () { return null; }).then(function (env) { piecesMod = m[1].createPieces(R, m[0], env); R.setPieces(piecesMod); return piecesMod; });
     }).catch(function (e) { if (window.console) console.warn('[world2] the mesh pass did not start (' + e.message + '); record tiles are lit without a clear coat'); return null; });
   }
@@ -949,7 +1020,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     return fetchGroup(world, v).then(function () {
       var fr = world.frames[g], nm = world.stage.names[g];
       if (!fr || !nm) throw new Error('the ' + g + ' group names no blob or no words');
-      return Promise.all([fetchBlob(fr.cid), fetchLines(nm.cid), fetchPieces(), import('/fxn-3d/js/render/world2-mesh.mjs')]);
+      return Promise.all([fetchBlob(fr.cid), fetchLines(nm.cid), fetchPieces(), engineMod('js/render/world2-mesh.mjs')]);
     }).then(function (got) {
       var shape = world.stage.shape, names = (world.parts[g] || []).map(function (p) { return p.part; }).filter(function (n) { return n in shape; });
       return Promise.all(names.map(function (n) { return got[3].fetchMesh(shape[n].cid); })).then(function (list) {
@@ -983,7 +1054,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     return fetchGroup(world, 'auth').then(function () {
       var fr = world.frames.rig, nm = world.stage.names.auth;
       if (!fr || !nm) throw new Error('the auth group names no blob or no words');
-      return Promise.all([fetchBlob(fr.cid), fetchLines(nm.cid), fetchPieces(), import('/fxn-3d/js/render/world2-mesh.mjs')]);
+      return Promise.all([fetchBlob(fr.cid), fetchLines(nm.cid), fetchPieces(), engineMod('js/render/world2-mesh.mjs')]);
     }).then(function (got) {
       var shape = world.stage.shape, names = Object.keys(shape);
       return Promise.all(names.map(function (n) { return got[3].fetchMesh(shape[n].cid); })).then(function (list) {
@@ -1097,7 +1168,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
     if (!world.views[base] || world.frames[base] || stage.FAMILY.has(base) || /^ring\d+$/.test(base) || NO_MESH_CARD[base]) { cardOn = null; R.setCard(null); return; }
     cardOn = base;
     if (!(base in cards)) {
-      cards[base] = (meshMod ? Promise.resolve(meshMod) : import('/fxn-3d/js/render/world2-mesh.mjs').then(function (m) { meshMod = m; return m; }))
+      cards[base] = (meshMod ? Promise.resolve(meshMod) : engineMod('js/render/world2-mesh.mjs').then(function (m) { meshMod = m; return m; }))
         .then(function (m) { return m.fetchCard(base); })
         .then(function (card) {
           var mount = meshMod.mountCard(R.gl, card);
@@ -1114,6 +1185,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
 
   /* ---------- the fallback: the world is off and the page shows its colour alone (no particle relief since 2026-11-05) ---------- */
   function fail(why) {
+    if (!loaderGone) loaderOff();
     host.failed = true; root.dataset.world = 'off';
     if (layer.parentNode) layer.remove();
     Object.keys(layers).forEach(function (v) { var l = layers[v]; if (l && l.parentNode) l.remove(); });

@@ -8,8 +8,7 @@
    the part's window (a `gate` line of the group's words), where Three.js scaled each form about its frame; at rest the pictures are the same.
    What each part is, its size, its colour mixes and the words on its plates are lines of the group's words (WNAMES): `kind`, `tone`, `plate`, `gate`, `spot`, `focus`. This file maps a
    kind to the renderer's kind of draw. Nothing here schedules a frame. No JSON. */
-import { easeOf } from '/fxn-3d/scripts/lib/anim-sample.mjs';
-import { uvSphere, torus, prism } from '/fxn-3d/js/render/world2-shapes.mjs';
+import { easeOf, uvSphere, torus, prism } from './world2-gl.mjs';
 import { boxShape } from './world2-pieces.mjs';
 import { SATIN, SHELL, PANEL } from './world2-cardlook.mjs';
 import { drumsOfRows, createDrumParts } from './world2-drums.mjs';   /* a ring of blocks drawn as one solid drum (2026-10-31) */   /* the card's surfaces (docs/design/auth/FXN-ID-CARD.md) */

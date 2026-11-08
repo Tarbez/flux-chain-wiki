@@ -3,7 +3,7 @@
    comes (the stage's home weight) and the FXN view lifts it into the middle of its supply ring (the view's weight). The encoder wrote its three rows into the home frame (parts hubdisc, hubrim, hubface);
    the stage moves them through the state stream (world2-stage.mjs write()). This file only says how each is drawn: the disc as a lit solid, the rim as light, the face as a plate whose canvas is the
    mark's mask in the signal colour. No JSON. */
-import { prism, torus } from '/fxn-3d/js/render/world2-shapes.mjs';
+import { prism, torus } from './world2-gl.mjs';
 
 const TAU = Math.PI * 2;
 /* parts: the home frame's part list; img: the kernel's mark image (loaded), or null until it lands */

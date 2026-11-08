@@ -20,24 +20,24 @@ function go(page) { if (window.ArkUI && ArkUI.pageRouter && ArkUI.pageCatalog &&
 
 export function mount(space, host) {
   const bar = el('nav', 'journey'); bar.setAttribute('aria-label', 'Your path'); host.appendChild(bar);
-  let film = false, last = null;
+  let film = false, last = null, introOn = false;
   const stops = [];
 
   function render() {
-    bar.classList.toggle('hidden', film);
+    bar.classList.toggle('hidden', film || introOn || document.documentElement.classList.contains('intro-picker'));
     const role = roleNow(), j = JOURNEYS[role], page = pageNow();
     bar.replaceChildren();
     if (!j) {
       /* no path yet: one question */
       const ask = el('button', 'journey-next', 'Pick your path'); ask.type = 'button';
-      ask.addEventListener('click', () => window.dispatchEvent(new CustomEvent('ark-quest-open')));
+      ask.addEventListener('click', () => window.dispatchEvent(new CustomEvent('ark-intro-picker')));
       bar.appendChild(el('span', 'journey-label', 'New here?')); bar.appendChild(ask);
       return;
     }
     const i = j.pages.findIndex((p) => p[0] === page);
     /* the path as dots: done, here, ahead; each dot is a way there */
     const head = el('div', 'journey-head');
-    head.appendChild(el('span', 'journey-label', j.name + (i >= 0 ? ' · ' + (i + 1) + ' of ' + j.pages.length : '')));
+    head.appendChild(el('span', 'journey-label', j.name + (i > 0 ? ' · ' + i + ' of ' + (j.pages.length - 1) : '')   /* the grid is where the path starts, not a step */));
     const dots = el('ol', 'journey-dots');
     j.pages.forEach(([key, name], k) => {
       const li = el('li', k < i ? 'done' : k === i ? 'here' : '');
@@ -66,6 +66,8 @@ export function mount(space, host) {
     const off = ArkUI.sceneState.subscribe((st) => { if (!st || st.page === last) return; last = st.page; render(); });
     if (typeof off === 'function') stops.push(off);
   }
+  const onIntro = (e) => { introOn = !!(e.detail && e.detail.playing); render(); };
+  window.addEventListener('ark-intro-state', onIntro); stops.push(() => window.removeEventListener('ark-intro-state', onIntro));
   const onRole = () => render();
   window.addEventListener('ark-quest-change', onRole);
   window.addEventListener('storage', onRole);

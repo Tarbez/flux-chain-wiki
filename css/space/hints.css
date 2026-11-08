@@ -1,7 +1,7 @@
 /* hints: first-visit pill, bottom centre, above the focus card band when a place is focused */
 .sp-hints { position: absolute; inset: 0; pointer-events: none; }
 .sp-hints[hidden] { display: none; }
-.sp-hints__line { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .4s ease; }
+.sp-hints__line { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .4s var(--ease-ui); }
 .sp-hints__line line { stroke: hsl(var(--primary)); stroke-width: 1px; }
 .sp-hints__line.is-on { opacity: .6; }
 .sp-hints__pill {
@@ -10,7 +10,7 @@
   background: hsl(var(--surface) / .6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-default); border-radius: 999px;
   font: var(--fs-tertiary) / 1.4 var(--font-sans); color: hsl(var(--text));
-  white-space: nowrap; opacity: 0; transition: opacity .4s ease, bottom .4s ease;
+  white-space: nowrap; opacity: 0; transition: opacity .4s var(--ease-ui), bottom .4s var(--ease-ui);
 }
 .sp-hints__pill.is-on { opacity: 1; pointer-events: auto; }
 .sp-hints--lifted .sp-hints__pill { bottom: calc(150px + 120px); }

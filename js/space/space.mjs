@@ -5,7 +5,7 @@
 const PARTS = [
   ['routes', false],      /* a page's place; no DOM, no stylesheet */
   /* hints left on 2026-11-05: the missions (quest) teach the moves by giving the visitor something to do */
-  ['label', true], ['path', true], ['map', true], ['focus-card', true], ['keys', true], ['jump', true], ['quest', true], ['beacons', true], ['shows', true], ['journey', true]
+  ['label', true], ['path', true], ['map', true], ['focus-card', true], ['keys', true], ['jump', true], ['quest', true], ['beacons', true], ['shows', true], ['journey', true], ['cinematic', true], ['intro', true]
 ];
 
 const base = (location.protocol === 'file:' ? '' : '/');

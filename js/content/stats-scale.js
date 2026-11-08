@@ -1,4 +1,4 @@
-/* The two scales of the stats section's one canyon (js/world/stats-stage.js draws with them, js/pages/world-stats.js labels with them).
+/* The two scales of the stats section's one canyon (js/world2/world2-stage.mjs draws with them, js/pages/world-stats.js labels with them).
    One file, so the 3D and the words beside it cannot disagree about where 10 ms or 20,000 swaps a second stands.
 
    A scale is not a reading. Its numbers (1, 10 and 100 ms; 10,000, 20,000 and 30,000 swaps a second) are marks on a ruler, chosen by the rules below

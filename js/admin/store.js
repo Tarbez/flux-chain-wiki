@@ -126,11 +126,16 @@ var ArkAdminStore = (function () {
   /* The list the site loads its image assets from. */
   function indexTextAssets(ids) {
     return '/* The image assets, in no particular order. The admin editor (admin-app.html) rewrites this list; edit it by hand only to reorder.\n' +
-      '   It loads each asset while the page is still being read, so every asset is defined before any script runs.\n' +
+      '   No public route shows an asset (iceberg-blocks alone is 1,985,029 bytes, measured on the home route 2026-11-08), so the tags\n' +
+      '   are written only where an asset is read: the editor, whose tag carries data-ark-assets="all", and its canvas (?cms-preview or\n' +
+      '   ?preview, where js/main.js matches a Media image). There each asset loads while the page is still being read, so it is\n' +
+      '   defined before any script runs.\n' +
       '   An id is written into a script tag, so only a plain id (lowercase letters, digits and hyphens, starting with a letter) is loaded. */\n' +
       'var ArkAssetIds = ' + JSON.stringify(ids) + ';\n' +
+      'var ArkAssetsWanted = typeof document !== \'undefined\' && !!document.currentScript && (document.currentScript.getAttribute(\'data-ark-assets\') === \'all\' ||\n' +
+      '  (typeof location !== \'undefined\' && /[?&](?:cms-)?preview(?:[=&]|$)/.test(location.search || \'\')));\n' +
       'ArkAssetIds.forEach(function (id) {\n' +
-      '  if (!/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) return;\n' +
+      '  if (!ArkAssetsWanted || !/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/.test(id)) return;\n' +
       '  document.write(\'<script src="js/content/assets/\' + id + \'.js\' + ArkManifestSearch + \'" defer><\\/script>\');\n' +
       '});\n';
   }

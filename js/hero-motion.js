@@ -11,8 +11,22 @@
   var persistent = scene.querySelector('[data-ark-layer="persistent"]');
   var router = ArkUI.pageRouter;
   var pages = router.pages;
-  var frame = 0;
   var pointer = null;
+  /* the scene's box, measured once and again only after a resize or scroll moves it: a pointermove never forces a layout read */
+  var sceneRect = null;
+  function sceneBox() { return sceneRect || (sceneRect = scene.getBoundingClientRect()); }
+  function forgetSceneBox() { sceneRect = null; }
+  window.addEventListener('resize', forgetSceneBox, { passive: true });
+  window.addEventListener('scroll', forgetSceneBox, { passive: true, capture: true });
+  /* the lean is written at most once per frame (js/lib/frame.js) */
+  var leanNextFrame = ArkFrame.once(function () {
+    if (!pointer || !enabled()) return;
+    var rect = sceneBox();
+    var x = Math.max(-1, Math.min(1, (pointer.x - rect.left) / rect.width * 2 - 1));
+    var y = Math.max(-1, Math.min(1, (pointer.y - rect.top) / rect.height * 2 - 1));
+    scene.style.setProperty('--hero-x', (x * 5).toFixed(2) + 'px');
+    scene.style.setProperty('--hero-y', (y * 3).toFixed(2) + 'px');
+  });
 
   function make(tag, className) {
     var node = document.createElement(tag);
@@ -170,8 +184,7 @@
   function enabled() { return !state.get().paused && !reduced.matches && visible && !document.hidden; }
 
   function resetPointer() {
-    if (frame) window.cancelAnimationFrame(frame);
-    frame = 0;
+    leanNextFrame.cancel();
     pointer = null;
     scene.style.removeProperty('--hero-x');
     scene.style.removeProperty('--hero-y');
@@ -272,16 +285,7 @@
   scene.addEventListener('pointermove', function (event) {
     if (state.get().page==='zero' || !enabled() || !finePointer.matches || event.pointerType !== 'mouse') return;
     pointer = { x: event.clientX, y: event.clientY };
-    if (frame) return;
-    frame = window.requestAnimationFrame(function () {
-      frame = 0;
-      if (!pointer || !enabled()) return;
-      var rect = scene.getBoundingClientRect();
-      var x = Math.max(-1, Math.min(1, (pointer.x - rect.left) / rect.width * 2 - 1));
-      var y = Math.max(-1, Math.min(1, (pointer.y - rect.top) / rect.height * 2 - 1));
-      scene.style.setProperty('--hero-x', (x * 5).toFixed(2) + 'px');
-      scene.style.setProperty('--hero-y', (y * 3).toFixed(2) + 'px');
-    });
+    leanNextFrame();
   }, { passive: true });
   scene.addEventListener('pointerleave', resetPointer);
 

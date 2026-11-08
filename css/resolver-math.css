@@ -51,7 +51,7 @@
 }
 .rm-eq-gloss {grid-column:3;font-size:var(--fs-tertiary);line-height:1.35;color:hsl(var(--text-muted));}
 /* Each term arrives as its cells land. */
-.rm-eq-sum .rm-eq-row {opacity:.22;transform:translateY(4px);transition:opacity 320ms ease,transform 320ms cubic-bezier(.22,1,.36,1),background-color 160ms;}
+.rm-eq-sum .rm-eq-row {opacity:.22;transform:translateY(4px);transition:opacity 320ms var(--ease-ui),transform 320ms var(--ease-ui),background-color 160ms;}
 .rm-eq-sum .rm-eq-row[data-in] {opacity:1;transform:none;}
 .rm-equation[data-played] .rm-eq-sum .rm-eq-row {opacity:1;transform:none;}
 .rm-eq-sum .rm-eq-row[data-term]:hover {background:hsl(var(--text-strong) / .05);}
@@ -87,7 +87,7 @@
 .rm-field-of {font-size:var(--fs-tertiary);color:hsl(var(--text-faint));}
 .rm-field-svg {display:block;width:100%;height:auto;overflow:visible;}
 .rm-field-foot {margin:0;font-size:var(--fs-tertiary);line-height:1.5;color:hsl(var(--text-faint));max-width:44ch;}
-.rm-cell {fill:hsl(var(--text-strong) / .07);stroke:none;transition:fill 260ms ease,opacity 200ms ease;}
+.rm-cell {fill:hsl(var(--text-strong) / .07);stroke:none;transition:fill 260ms var(--ease-ui),opacity 200ms var(--ease-ui);}
 /* Term order follows the sum in js/pages/resolver-math.js: letters, labels, verbs, types,
    type-scoped shapes, chains, capabilities. */
 .rm-cell[data-term="0"] {fill:hsl(var(--primary-400));}
@@ -172,7 +172,7 @@
   background:hsl(var(--nested));
   color:hsl(var(--text-muted));
   border:1px solid hsl(var(--reference-300));
-  transition:color 140ms ease, border-color 140ms ease, background-color 140ms ease;
+  transition:color 140ms var(--ease-ui), border-color 140ms var(--ease-ui), background-color 140ms var(--ease-ui);
 }
 .rm-chip:is(:hover, :focus-visible) {color:hsl(var(--text-strong));border-color:hsl(var(--reference-400));background:hsl(var(--reference-200));}
 .rm-verdict {margin:var(--sp-5) 0 0;padding:var(--sp-4) var(--sp-5);border-radius:8px;border:1px solid hsl(var(--reference-300));background:hsl(var(--nested));}
@@ -195,8 +195,8 @@
 .story-drawing .rm-fig-letter {fill:hsl(var(--text-strong));font:600 var(--fs-tertiary) var(--font-mono, monospace);text-anchor:middle;}
 .story-drawing .rm-fig-mid {font-size:var(--fs-tertiary);text-anchor:middle;fill:hsl(var(--text));}
 .story-drawing .rm-fig-mid-left {font-size:var(--fs-tertiary);fill:hsl(var(--text));}
-.story-drawing .rm-fig-small {font-size:var(--fs-micro);text-anchor:middle;fill:hsl(var(--text-faint));}
-.story-drawing .rm-fig-small-left {font-size:var(--fs-micro);fill:hsl(var(--text-faint));}
+.story-drawing .rm-fig-small {font-size:var(--fs-tertiary);text-anchor:middle;fill:hsl(var(--text-faint));}
+.story-drawing .rm-fig-small-left {font-size:var(--fs-tertiary);fill:hsl(var(--text-faint));}
 .story-drawing .rm-fig-danger {stroke:hsl(var(--danger));stroke-width:1.5;}
 .story-drawing .rm-fig-small-danger {font-size:var(--fs-tertiary);text-anchor:middle;fill:hsl(var(--danger));}
 .story-drawing .rm-fig-mid-danger {font-size:var(--fs-tertiary);text-anchor:middle;fill:hsl(var(--danger));}

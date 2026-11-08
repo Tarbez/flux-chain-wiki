@@ -136,101 +136,34 @@
 /* the CMS's component anchor stands out of the layout: a page with no inserted block shows nothing there */
 .world-insert { position: absolute; left: 0; right: 0; top: 0; pointer-events: auto; }
 
-/* ---------- intro: the network from above, the words in home's voice ----------
-   Redesigned 2026-10-25 (owner: "far more attractive", "follow the rules from the home page"). No card: the words stand
-   bottom left on the dot grid, as home's lead does -- the square-and-dash eyebrow, the display heading with its second
-   row in the primary colour, the lede, the one cut-corner action. The counts stand bottom right as a ledger, sliding in
-   from the right like home's rail. A scrim at the foot keeps the words readable over the 3D. Fits 1280x720 and
-   1440x900 with no scroll. */
-.intro-world { display: block; padding: 0; }
+/* ---------- intro: the world and the intro part (js/space/intro.mjs, css/space/intro.css) ----------
+   The page holds no words of its own (SPACE.md "Intro: plan", lane 3): the stage, a visually hidden name and the "Replay intro" chip at the
+   dock. The doors, counters, hero words and film chrome left. While the intro plays the nav is at 0 and takes no pointer; it returns at
+   shot 5 (the part clears html[data-intro]). Type on the scale: 11 mono chip. */
+.intro-world { display: block; padding: 0; position: absolute; inset: 0; pointer-events: none; }
 .intro-world .intro-stage { position: absolute; inset: 0; pointer-events: none; }
-.intro-world::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 58%; pointer-events: none; z-index: 0;
-  background: linear-gradient(0deg, hsl(var(--canvas) / .92) 0, hsl(var(--canvas) / .78) 34%, hsl(var(--canvas) / 0) 100%); }
-.intro-world .intro-slot { --intro-ledger-w: clamp(240px, 21vw, 300px); position: absolute; left: 0; right: 0; bottom: 58px; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--sp-7);
-  padding: 0 var(--sp-8) max(var(--sp-6), 4vh) var(--sp-8); }
-.intro-card { position: relative; display: flex; flex-direction: column; min-width: 0; max-width: 680px; isolation: isolate; }
-.intro-card::before { content: ''; position: absolute; inset: -40px -120px -20px -72px; z-index: -1; pointer-events: none;
-  background-image: radial-gradient(circle, hsl(var(--text-faint) / .5) 1px, transparent 1.3px); background-size: 26px 26px;
-  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 20% 60%, #000 0, transparent 75%); mask-image: radial-gradient(ellipse 70% 80% at 20% 60%, #000 0, transparent 75%); }
-.intro-card .eyebrow { display: flex; align-items: center; gap: var(--sp-5); width: fit-content; margin: 0 0 max(var(--sp-4), 2.4vh); color: hsl(var(--text)); font-size: var(--fs-tertiary); }
-.intro-card .eyebrow i { width: 10px; height: 10px; border: 2px solid hsl(var(--primary)); flex: none; }
-.intro-card .eyebrow .dash { width: 66px; height: 1px; background: hsl(var(--text-faint)); }
-.intro-card h1 { width: fit-content; margin: 0; font: 800 var(--fs-display)/.97 var(--font-display); letter-spacing: -.04em; color: hsl(var(--text-strong));
-  text-shadow: 0 0 18px hsl(var(--canvas)), 0 0 4px hsl(var(--canvas)); }
-/* Each line on one line while it fits beside the ledger; a wider display face (a worn card's mono) wraps it instead of
-   running it under the ledger's numbers (skin audit, 2026-10-25: 1107px of 956px on /intro). */
-.intro-card h1 { width: max-content; max-width: calc(100vw - 72px - 64px - 48px - var(--intro-ledger-w)); }
-.intro-card h1 b { font-weight: inherit; display: block; text-wrap: balance; }
-.intro-card h1 span { display: block; text-wrap: balance; color: hsl(var(--primary)); }
-.intro-lede { margin: max(var(--sp-4), 2.8vh) 0 0; max-width: 31em; font-size: var(--fs-secondary); line-height: 1.6; color: hsl(var(--text));
-  text-shadow: 0 0 14px hsl(var(--canvas)), 0 0 3px hsl(var(--canvas)); }
-.intro-card .intro-go { align-self: flex-start; margin-top: max(var(--sp-5), 3.6vh); }
-.intro-card .intro-go:focus-visible { outline: 2px solid hsl(var(--text-strong)); outline-offset: 4px; }
-
-/* the ledger: three figures, each a large numeral over its mono name, hairlines between, the source note under */
-.intro-ledger { flex: none; width: var(--intro-ledger-w, clamp(240px, 21vw, 300px)); display: grid; gap: var(--sp-4); }
-.intro-strip { margin: 0; display: grid; gap: 0; border-top: 1px solid hsl(var(--border-default)); }
-.intro-strip div { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-5); min-width: 0; padding: max(var(--sp-4), 1.6vh) 0; border-bottom: 1px solid hsl(var(--border-default)); }
-.intro-strip dd { margin: 0; order: 0; font: 700 var(--fs-hero)/1 var(--font-display); letter-spacing: -.03em; color: hsl(var(--text-strong)); font-variant-numeric: tabular-nums; }
-.intro-strip dt { order: 1; font: 500 var(--fs-tertiary)/1.2 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--text-muted)); text-align: right; }
-.intro-strip div:first-child dd { color: hsl(var(--primary)); }
-.intro-note { display: block; font-size: var(--fs-tertiary); line-height: 1.6; letter-spacing: .08em; color: hsl(var(--text-faint)); }
-
-/* the five doors (owner, 2026-10-25): compact glass cards, top right, as wide as the ledger below them; the first is lit */
-.intro-doors { position: absolute; z-index: 1; top: max(20px, 3vh); right: 64px; width: clamp(240px, 21vw, 300px); display: grid; gap: var(--sp-3); }
-.intro-door { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr) 28px; align-items: center; gap: var(--sp-4); min-height: 56px; padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-4);
-  border-radius: 12px; color: hsl(var(--text)); text-decoration: none; overflow: hidden;
-  background: linear-gradient(135deg, hsl(var(--text-strong) / .06), hsl(var(--text-strong) / .015) 60%), hsl(var(--canvas) / .72);
-  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
-  box-shadow: inset 0 0 0 1px hsl(var(--border-default)), inset 0 1px 0 hsl(var(--text-strong) / .06);
-  transition: box-shadow .18s var(--glide, ease), background-color .18s ease, transform .18s var(--glide, ease); }
-.intro-door::after { content: ''; position: absolute; right: -18px; bottom: -26px; width: 96px; height: 70px; pointer-events: none; opacity: .5;
-  background: radial-gradient(closest-side, hsl(var(--primary) / .22), transparent); }
-.intro-door:hover { transform: translateX(-3px); box-shadow: inset 0 0 0 1px hsl(var(--border-strong)), inset 0 1px 0 hsl(var(--text-strong) / .08); }
-.intro-door.is-lead { box-shadow: inset 0 0 0 1px hsl(var(--primary) / .7), 0 0 24px -6px hsl(var(--primary) / .55); }
-.intro-door.is-lead::after { opacity: 1; }
-.intro-door-mark { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 9px; color: hsl(var(--primary)); background: hsl(var(--primary) / .1); box-shadow: inset 0 0 0 1px hsl(var(--primary) / .25); }
-.intro-door-mark svg { width: 20px; height: 20px; }
-.intro-door-words { display: grid; gap: var(--sp-1); min-width: 0; }
-.intro-door-words b { font: 600 var(--fs-secondary)/1.2 var(--font-display); letter-spacing: -.01em; color: hsl(var(--text-strong)); }
-.intro-door-words small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-tertiary); line-height: 1.35; color: hsl(var(--text-muted)); }
-.intro-door-go { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: hsl(var(--text-strong)); box-shadow: inset 0 0 0 1px hsl(var(--border-strong)); }
-.intro-door-go svg { width: 14px; height: 14px; }
-.intro-door.is-lead .intro-door-go { box-shadow: inset 0 0 0 1.5px hsl(var(--primary)); color: hsl(var(--primary)); }
-.intro-door:focus-visible { outline: 2px solid hsl(var(--text-strong)); outline-offset: 3px; }
-@media (prefers-reduced-motion: reduce) { .intro-door { transition: none; } .intro-door:hover { transform: none; } }
-
-/* short screens (1280x720): the same composition, tighter */
-@media (max-height: 760px) and (min-width: 901px) {
-  .intro-world .intro-slot { padding-bottom: var(--sp-5); }
-  .intro-lede { max-width: 34em; }
-  .intro-doors { gap: var(--sp-3); }
-  .intro-door { min-height: 50px; padding-block: var(--sp-3); }
-  .intro-note { display: none; }
-}
-/* a tablet or phone: one column that scrolls as a document; the ledger becomes a row of three under the action */
+.intro-world .intro-title { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.intro-replay { position: absolute; z-index: 2; left: 64px; bottom: 84px; min-height: 44px; padding: 0 var(--sp-4); pointer-events: auto; cursor: pointer;
+  font: 500 var(--fs-tertiary, 11px)/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--text-muted));
+  background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 4px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: color .18s ease, opacity .6s var(--glide); }
+.intro-replay:hover { color: hsl(var(--text-strong)); }
+.intro-replay:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
+/* while it plays: no nav (its filled button would be a second action), no replay chip */
+html[data-intro="playing"] #scene .ark-header { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; transition: opacity .4s var(--glide), visibility 0s linear .4s; }
+html[data-intro="playing"] .intro-replay { opacity: 0; visibility: hidden; pointer-events: none; }
+#scene .ark-header { transition: opacity .6s var(--glide); }
+/* a phone: the world is the whole screen. No column, no scroll; the world takes the touch (pan, orbit, pinch). The chip sits in the thumb
+   zone above the safe-area inset. */
 @media (max-width: 900px) {
-  .intro-world { position: relative; inset: auto; min-height: 100%; padding-top: var(--sp-8); overflow: auto; pointer-events: auto; }
-  .intro-world::after { height: 68%; }
-  .intro-world { display: flex; flex-direction: column; }
-  .intro-world .intro-slot { order: 1; }
-  .intro-doors { order: 2; position: relative; top: auto; right: auto; width: auto; margin: calc(var(--sp-8) * -1) var(--sp-5) var(--sp-9); }
-  .intro-door small { white-space: normal; }
-  .intro-world .intro-slot { position: relative; bottom: auto; flex-direction: column; align-items: stretch; gap: var(--sp-6); min-height: calc(100dvh - 64px); justify-content: flex-end; padding: 0 var(--sp-5) var(--sp-8); }
-  .intro-card h1 { font-size: var(--fs-hero); width: auto; max-width: none; }
-  .intro-card h1 b, .intro-card h1 span { white-space: normal; }
-  .intro-ledger { width: auto; }
-  .intro-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid hsl(var(--border-default)); }
-  .intro-strip div { flex-direction: column; align-items: flex-start; gap: var(--sp-3); border-bottom: 0; padding: var(--sp-4) 0; }
-  .intro-strip div + div { padding-left: var(--sp-4); border-left: 1px solid hsl(var(--border-default)); }
-  .intro-strip dd { font-size: var(--fs-primary); }
-  .intro-strip dt { text-align: left; letter-spacing: .12em; }
+  .intro-world { overflow: hidden; touch-action: none; }
+  .intro-replay { left: var(--sp-5, 16px); right: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); }
 }
+@media (max-width: 899px) { .intro-world .intro-stage { touch-action: none; } }
 /* The headline is the page's one display line (76, law 80) where the screen gives it room. Below that, it and the
    intro's figures drop one whole step (law 82): the headline to the hero size, the figures to primary. */
 @media (max-width: 1399px), (max-height: 819px) {
-  .home-world h1, .intro-card h1 { font-size: var(--fs-hero); }
-  .intro-strip dd { font-size: var(--fs-primary); }
+  .home-world h1 { font-size: var(--fs-hero); }
 }
 /* the toggle that returns to the zero hero has no place over the intro */
 #scene [data-page="intro"] .hero-motion-toggle { display: none; }
@@ -238,9 +171,8 @@ body.picking { cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .rx-focus.swap > * { animation: none; } .rx-stack i, .rx-grid button { transition: none; } }
 
 /* ---- cutouts on the intro (css/cutouts.css) ----
-   No scrim: the world's edge fade darkens the rim under the words (2026-11-05). The doors use the shared glass (.tp-panel) instead of their own fill. */
+   No scrim: the world's edge fade darkens the rim under the words (2026-11-05). */
 .intro-world::after { content:none; }
-.intro-door.tp-panel { --tp-alpha:.62; --tp-blur:12px; background:linear-gradient(135deg, hsl(var(--text-strong) / .05), transparent 60%), hsl(var(--canvas) / var(--tp-alpha)); }
 
 /* ---- cutouts on home ----
    The dot grid behind the lead loses a soft ellipse where the heading and the lede stand (the grid MINUS a soft ellipse:
@@ -258,42 +190,4 @@ body.picking { cursor: pointer; }
 /* the rail's fleet run with no verified figure: one quiet line where the tiles go (owner's pick, 2026-10-27) */
 .rx-unverified { margin: var(--sp-3) 0 0; font: 500 var(--fs-tertiary)/1.4 var(--font-mono); letter-spacing: .08em; color: hsl(var(--text-muted)); }
 
-/* ---- the intro film (js/pages/intro.js filmChrome, js/world2/world2-objects.mjs, 2026-11-05) ----
-   While the film plays the page's words, doors and counts wait off stage (down and clear) and the film's own three parts show:
-   the chapter's words bottom left, the chapter rail along the foot, Skip bottom right. When it ends the page rises in, one part
-   after another. Type: 11, 29 and 18 on the scale. Colour: --primary for the chapter number and the lit rail, nothing else. */
-.intro-world .intro-slot, .intro-world .intro-doors { transition: opacity .7s var(--glide), transform .9s var(--glide), visibility 0s linear 0s; }
-.intro-world .intro-doors { transition-delay: .25s; }
-.intro-world .intro-ledger { transition: opacity .7s var(--glide) .45s, transform .9s var(--glide) .45s; }
-.intro-world.is-film .intro-slot, .intro-world.is-film .intro-doors { opacity: 0; transform: translateY(28px); visibility: hidden; pointer-events: none;
-  transition: opacity .4s var(--glide), transform .4s var(--glide), visibility 0s linear .4s; }
-.intro-world.is-film .intro-doors { transform: translateX(28px); }
-.intro-film, .intro-rail, .intro-skip { position: absolute; z-index: 2; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .6s var(--glide), visibility 0s linear .6s; }
-.intro-world.is-film .intro-film, .intro-world.is-film .intro-rail, .intro-world.is-film .intro-skip { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .6s var(--glide); }
-.intro-film { left: 72px; bottom: 156px; display: grid; gap: 8px; max-width: 520px; pointer-events: none; }
-.intro-film-no { font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono); letter-spacing: .18em; color: hsl(var(--primary)); }
-.intro-film-name { font: 700 var(--fs-primary, 29px)/1.1 var(--font-display); letter-spacing: -.02em; color: hsl(var(--text-strong)); }
-.intro-film-line { margin: 0; font: 400 var(--fs-secondary, 18px)/1.4 var(--font-sans); color: hsl(var(--text-muted)); }
-.intro-world.is-film .intro-film-name, .intro-world.is-film .intro-film-line { animation: intro-film-in .7s var(--glide) both; }
-@keyframes intro-film-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-/* above the site's footer strip (about 62px tall from the bottom), which covers anything lower and takes its clicks */
-.intro-rail { left: 72px; right: 200px; bottom: 92px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.intro-rail-step { display: grid; gap: 8px; padding: 0; text-align: left; background: none; border: 0; color: hsl(var(--text-faint, var(--text-muted))); cursor: pointer; }
-.intro-rail-step i { display: block; height: 2px; background: hsl(var(--text-strong) / .14); transition: background .4s var(--glide); }
-.intro-rail-step span { font-size: var(--fs-tertiary, 11px); letter-spacing: .14em; text-transform: uppercase; }
-.intro-rail-step.done i { background: hsl(var(--primary) / .5); }
-.intro-rail-step[aria-current="step"] { color: hsl(var(--text-strong)); }
-.intro-rail-step[aria-current="step"] i { background: hsl(var(--primary)); }
-.intro-rail-step:focus-visible, .intro-skip:focus-visible, .intro-replay:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
-.intro-skip { right: 64px; bottom: 84px; padding: 8px 14px; font-size: var(--fs-tertiary, 11px); letter-spacing: .16em; text-transform: uppercase;
-  color: hsl(var(--text-strong)); background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 4px; cursor: pointer;
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
-.intro-replay { justify-self: start; padding: 0; margin-top: 2px; font-size: var(--fs-tertiary, 11px); letter-spacing: .14em; text-transform: uppercase;
-  color: hsl(var(--text-muted)); background: none; border: 0; border-bottom: 1px solid hsl(var(--text-strong) / .2); cursor: pointer; }
-.intro-replay:hover { color: hsl(var(--text-strong)); }
-@media (max-width: 900px) {
-  .intro-film { left: 24px; right: 24px; bottom: 140px; }
-  .intro-rail { left: 24px; right: 24px; bottom: 116px; }
-  .intro-rail-step span { display: none; }
-  .intro-skip { right: 24px; bottom: 72px; }
 }

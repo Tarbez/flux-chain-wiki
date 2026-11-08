@@ -152,8 +152,9 @@ function fitHeaderRow(header) {
      it would resize an observed element mid-delivery ("ResizeObserver loop completed with
      undelivered notifications"). The fit is idempotent, so the bar's re-measure after it
      settles in one more frame. */
-  var queued = 0;
-  function queue() { if (!queued) queued = requestAnimationFrame(function () { queued = 0; fit(); }); }
+  /* one fit per frame however many observers fire (js/lib/frame.js) */
+  var fitNextFrame = ArkFrame.once(function () { fit(); });
+  function queue() { fitNextFrame(); }
   var observer = new ResizeObserver(queue);
   observer.observe(header);
   ['.dx-bar__brand', '.dx-switch__trigger', '.header-core-links', '.header-account-link', '.dx-bar__actions', '.nav-toggle'].forEach(function (selector) { var target = header.querySelector(selector); if (target) observer.observe(target); });

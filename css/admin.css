@@ -3,7 +3,7 @@
    ---------------------------------------------------------------------
    Every colour in this file and in css/studio-embed.css is an SDK semantic token
    (@deadark/sdk/theme, as generated into css/themes.css and redeclared per palette by
-   css/flux-themes.css): --canvas/--depth/--surface/--raised/--nested/--overlay,
+   css/themes.css): --canvas/--depth/--surface/--raised/--nested/--overlay,
    --text-strong/--text/--text-muted/--text-faint/--text-inverse, --border-*, --reference
    (+ its -100/-300 shades), --trust, --warning, --danger, --drift, --reference, --hidden. They are HSL
    channels, so they are always read as hsl(var(--x)) or hsl(var(--x) / alpha).
@@ -541,7 +541,7 @@ body.locked { overflow: auto; }
 /* the wordmark stacks (brand, then a small tracked line beneath), matching .ark-studio-identity/.ark-wordmark on every routed page */
 .gate-bar .bar-brand { flex-direction: column; align-items: flex-start; gap: var(--sp-3); }
 .gate-bar .bar-brand strong { font: 400 var(--fs-secondary)/1 var(--sans); letter-spacing: .18em; }
-.gate-bar .bar-brand span { font: 400 var(--fs-micro)/1.4 var(--sans); letter-spacing: .14em; }
+.gate-bar .bar-brand span { font: 400 var(--fs-tertiary)/1.4 var(--sans); letter-spacing: .14em; }
 .gate { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: clamp(var(--sp-7), 12vh, var(--sp-9)) clamp(var(--sp-5), 4vw, var(--sp-7)) var(--sp-8); }
 .gate-card { max-width: 480px; }
 .gate-eyebrow { margin: 0 0 var(--sp-5); font: 400 var(--fs-tertiary)/1.5 var(--sans); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--text-muted)); }
@@ -550,7 +550,7 @@ body.locked { overflow: auto; }
 
 /* the three-step ladder: the concept page's own numbered-principle-row idiom (index, hairline, title), reused verbatim */
 .gate-steps { list-style: none; margin: 0 0 var(--sp-6); padding: 0; }
-.gate-steps li { position: relative; display: grid; grid-template-columns: 26px 1fr; gap: var(--sp-4); align-items: baseline; padding: var(--sp-4) 0; border-top: 1px solid hsl(var(--border-soft)); color: hsl(var(--text-faint)); transition: color 220ms ease; }
+.gate-steps li { position: relative; display: grid; grid-template-columns: 26px 1fr; gap: var(--sp-4); align-items: baseline; padding: var(--sp-4) 0; border-top: 1px solid hsl(var(--border-soft)); color: hsl(var(--text-faint)); transition: color 220ms var(--ease-ui); }
 .gate-steps li:last-child { border-bottom: 1px solid hsl(var(--border-soft)); }
 .gate-steps b { font: 400 var(--fs-tertiary)/1.5 var(--sans); color: inherit; }
 .gate-steps .step-label { font: 400 var(--fs-tertiary)/1.4 var(--sans); letter-spacing: -.005em; }
@@ -589,12 +589,12 @@ body.locked { overflow: auto; }
 [data-ark-auth="actions"] button, .gate-btn {
   display: inline-flex; align-items: center; gap: var(--sp-4); min-height: 44px; padding: 0;
   border: 0; background: none; color: hsl(var(--text-strong)); font: 400 var(--fs-tertiary)/1.4 var(--sans);
-  letter-spacing: .01em; cursor: pointer; transition: transform 200ms ease, color 180ms ease;
+  letter-spacing: .01em; cursor: pointer; transition: transform 200ms var(--ease-ui), color 180ms var(--ease-ui);
 }
 [data-ark-auth="actions"] button::after, .gate-btn:not(.quiet)::after {
   content: "\2192"; display: inline-grid; place-items: center; flex: none;
   width: 34px; height: 34px; border-radius: 50%; background: hsl(var(--text-strong) / .1);
-  font-size: var(--fs-secondary); transition: transform 200ms ease;
+  font-size: var(--fs-secondary); transition: transform 200ms var(--ease-ui);
 }
 [data-ark-auth="actions"] button:hover:not(:disabled)::after, .gate-btn:hover:not(:disabled)::after { transform: translate(2px, -2px); }
 [data-ark-auth="actions"] button:hover:not(:disabled), .gate-btn:hover:not(:disabled) { transform: translateY(-1px); }

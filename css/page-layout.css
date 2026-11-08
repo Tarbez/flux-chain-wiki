@@ -21,7 +21,7 @@
    2026-10-19 (W3-LEARN): their frame is css/block-page.css, so the learning-page / article-* rules
    that framed the hand-built reader are gone. */
 
-.cta-arrow { display:inline-block; margin-left:.3em; transition:transform 220ms cubic-bezier(.2,.7,.2,1); }
+.cta-arrow { display:inline-block; margin-left:.3em; transition:transform 220ms var(--ease-ui); }
 /* Compact, living principle rows: number, title and link share one line; a line draws in on hover. */
 
 /* Detail pages of the theory reuse the same rows, with a short paragraph and an onward link. */
@@ -78,11 +78,11 @@
  border-left:1px solid hsl(var(--border-subtle));
 }
 #scene .content-layer-path > [aria-current="page"] { color:hsl(var(--text-muted)); }
-#scene .content-layer-path > a { transition:color 160ms ease,background-color 160ms ease; }
+#scene .content-layer-path > a { transition:color 160ms var(--ease-ui),background-color 160ms var(--ease-ui); }
 #scene .content-layer-path > a:hover,#scene .content-layer-path > a:focus-visible { background:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
 
 @keyframes concept-rise { from { opacity:0; transform:translateY(8px); } }
-:is(.concept-page,.theory-page) :is(.concept-deck,.concept-links,.theory-footer) { animation:concept-rise 520ms cubic-bezier(.2,.7,.2,1) both; }
+:is(.concept-page,.theory-page) :is(.concept-deck,.concept-links,.theory-footer) { animation:concept-rise 520ms var(--ease-ui) both; }
 
 :is(.concept-page,.theory-page) :is(.concept-links,.theory-footer) { animation-delay:560ms; }
 @media(prefers-reduced-motion:reduce) {

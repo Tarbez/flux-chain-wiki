@@ -6,8 +6,11 @@
     "sync:ark": "deadark-theme sync-consumer . --no-build",
     "build:ark": "node scripts/build-ark-vendor.cjs",
     "check:ark": "node scripts/build-ark-vendor.cjs --check",
+    "check:seam": "node scripts/fxn3d-seam-gate.mjs",
     "build:pages": "node scripts/build-ark-vendor.cjs --pages",
     "check:pages": "node scripts/build-ark-vendor.cjs --pages --check",
+    "preserve": "npm run build:pages",
+    "serve": "node scripts/serve-site.mjs",
     "census": "node scripts/ux-component-census.mjs",
     "pins": "node ../../ops/scripts/vendor/pin-copies.mjs ."
   },
@@ -15,7 +18,7 @@
     "jsdom": "30.1.3",
     "playwright": "^1.64.1",
     "@deadark/ark-ui": "file:.vendor/deadark-ark-ui-0.2.62.tgz",
-    "@deadark/sdk": "file:.vendor/deadark-sdk-0.2.55.tgz",
+    "@deadark/sdk": "file:.vendor/deadark-sdk-0.2.56.tgz",
     "@deadark/flux-algebra": "file:.vendor/deadark-flux-algebra-0.2.1.tgz",
     "@deadark/flx-codec": "file:.vendor/deadark-flx-codec-0.1.2.tgz",
     "@deadark/flux-state": "file:.vendor/deadark-flux-state-0.1.0.tgz",
@@ -57,6 +60,15 @@
       "files": [
         "genesis-safes.js"
       ]
+    },
+    {
+      "into": "js/vendor",
+      "from": "../ark-browser/src/shared",
+      "env": "ARK_BROWSER_SHARED",
+      "files": [
+        "flx-state-grammar.js"
+      ],
+      "follow": false
     }
   ]
 }

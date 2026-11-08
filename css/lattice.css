@@ -7,7 +7,7 @@
   height:100%;
   opacity:0;
   pointer-events:none;
-  transition:opacity 520ms ease;
+  transition:opacity 520ms var(--ease-ui);
 }
 .lattice { display:block; }
 .lattice-field.lattice-active { opacity:.55; }

@@ -15,6 +15,7 @@ export function mount(space, host) {
   const stops = [];
 
   async function start(key) {
+    if (window.ArkCinematicActive) return;   /* the cinematic owns the show */
     const my = ++ticket;
     space.stopShow();
     if (!key || filmPlaying || !WITH_SHOW.includes(key)) return;
@@ -42,7 +43,8 @@ export function mount(space, host) {
   stops.push(space.on('focus', () => requestAnimationFrame(lift)));
   stops.push(space.on('film', (f) => { const was = filmPlaying; filmPlaying = !!(f && f.playing); if (was && !filmPlaying) start(page); }));
   if (window.ArkUI && ArkUI.sceneState && ArkUI.sceneState.subscribe) {
-    const off = ArkUI.sceneState.subscribe((st) => { if (!st || st.page === page) return; page = st.page; start(page); });
+    const off = ArkUI.sceneState.subscribe((st) => { if (!st || st.page === page) return; if (window.ArkCinematicActive) return;   /* not recorded as shown: its own show plays when the visitor opens it after the trip */
+      page = st.page; start(page); });
     if (typeof off === 'function') stops.push(off);
   }
   space.whenReady(() => { const st = window.ArkUI && ArkUI.sceneState ? ArkUI.sceneState.get() : null; page = st ? st.page : null; start(page); });

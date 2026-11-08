@@ -5,7 +5,7 @@ document.documentElement.classList.add('js');
 // routes stayed for seconds, in the default palette.
 //
 // Palette ids are the SDK's published names (ember, ember-light, defxn-tide, ...; see
-// scripts/build-flux-themes.cjs). Stored choices come in two vocabularies, kept in SEPARATE keys
+// @deadark/sdk/theme, folded into css/themes.css). Stored choices come in two vocabularies, kept in SEPARATE keys
 // because the old word `moss` meant Moss light while the new `defxn-moss` is Moss dark:
 //   defxn-theme-v1              visitor's choice, published ids   (written by js/settings/panel.js)
 //   flux-chain-theme            visitor's choice, OLD ids         (read only; never rewritten or removed)

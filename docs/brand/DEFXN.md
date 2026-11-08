@@ -91,3 +91,938 @@ Blocks uses the network arrangement, Traces the stepped logic path, and Layers t
 Choices persist under `defxn-motif-v1`. Older ornament choices migrate to mesh patterns; the prior weave choice migrates to Wave. Patterns are decorative, excluded from accessibility and fade out through the reading area. Mobile reduces their opacity.
 
 The color regression (`tests/theme-color-contrast.cjs`) checks all ten palettes for: palette authority, secondary owning every action token, perceptually distinct roles and states, balanced role lightness, vivid accents, near-neutral canvases, ordered shade ladders and tonal scales, readable text on fills and on subtle fills, 4.5:1 inks, a four-step text ladder, surface separation, visible borders, and distinct families. `tests/components.cjs` checks that the component layer loads last and is the only place action color appears, that pages use shade tokens rather than ad-hoc tints, and that no interaction state uses the identity color. These are scoped assertions, not a blanket claim about every site element.
+
+## Direction and the claim check (2026-11-07)
+
+Reader: the owner, who approves this before any page is rebuilt on it. Then the writer of each page, and the critic who scores it. Status: plan and words only. No code, no tests, nothing committed. Layer: app (the defxn site). The kernel learns no word here.
+
+Owner's words, 2026-11-07: "We need a step by step marketing check trivium for brand building and claims, and follow our laws. Welcome them and explain what FXN has accomplished, because basically it is a new internet and new world and everything. Only the direction is critical."
+
+Facts in this section come from `docs/status.md`, `docs/evidence/registry.md`, `docs/evidence/public-claim-inventory.md`, the keeper notes in `/Volumes/PortableSSD/docs/fxn-vs-osf-2026-10-31/keeper-work/FACTS-2026-11-05.md` and the roadmap `/Volumes/PortableSSD/docs/fxn-vs-osf-2026-10-31/devnet-roadmap.html`. State on 2026-11-07: nothing is live. The devnet plan is proved on test nodes. Deploy day has no date.
+
+### 1. The check: three passes, in order
+
+Every sentence and every claim on defxn.com passes three gates, in this order. A sentence that fails a gate does not go to the next one. It is cut or reworded. It is never softened with a bigger word.
+
+Before the first pass, write two lines in the page's notes: who reads this sentence, and the one thing they need from it (copy law 1). A sentence with no reader has no job and is cut.
+
+**Pass 1. Grammar: is it plain and lawful?** Yes to every question, or fix it.
+
+1. Does it use one brand? DEFXN is the infrastructure and the kernel. FXN is the chain and its token. "Flux" never names FXN work.
+2. Is every word on the allowed side of `docs/BANNED-WORDS.txt`? The check reads that file, so a banned word fails the build. Say initiation, multisig, keeper, FXN ID and Account.
+3. Does it use only technical blockchain words? No religious word, no invented jargon, no lore word on a product screen.
+4. Is it one idea in one sentence? No semicolon joining two ideas, no second em dash, no stack of hyphenated compounds before a noun.
+5. Is it free of machine shapes? None of the eleven shapes in the table of copy law 5: no setup-and-reveal pair, no "whether you're", no "imagine", no self-answering question, no throat-clearing, no boilerplate call to action, no hedged benefit.
+6. Does it say what happens, not how to feel? A promotional word is replaced by what the reader does, sees or gets.
+7. Is the list its natural length? Two items are fine. Three are not a goal.
+8. Are the plain words before the system words? A record kind, an ID or a protocol label appears only where the reader needs it.
+9. Does `npm run copy:check` score it 5/5? If a needed phrase trips a rule, keep it and say why in the notes.
+
+**Pass 2. Logic: is it true?** Yes to every question, or cut it.
+
+1. Which file or measurement proves it? Name the path or the record ID in the page's notes. No file, no sentence.
+2. What is its status word? One of `Live`, `Partial`, `Not built`, `Unverified` from `docs/status.md`, or for keeper work one of the roadmap's words: `Landed` (code on a branch), `Tested` (a run in a lane report), `Measured` (a run that names its machine), `Not run`, `Plan`. Missing evidence is `Unverified`, never `Not built`.
+3. Does the sentence carry its condition in the same place? A number stands beside its machine, its date and what was held constant. "On 5 test nodes on one machine" is part of the claim, not a footnote.
+4. Which question does the number answer? Write it down. A count that answers a question nobody asked is cut.
+5. Is anything absent shown as zero? Absent is "not built" or "not measured", never 0.
+6. Is anything not live called live? On 2026-11-07 nothing is live. "Devnet", "test money" and "nothing is live" stay on the screen until the day that changes.
+7. Does it report only a conclusion a system reached? If no run, test or audit reached it, the sentence names the missing run instead.
+8. Is the number from the current design? Numbers from retired directions (the chain-era paper, BENCH-011's transfers per second, seat finality) are history and never quoted as the present.
+9. Is a comparison sourced? A figure about another chain needs its source on the same screen, or it does not appear.
+10. Is a date or an estimate marked as such? "No date until the gate passes" is the only date. An estimate says "estimate", and estimates stay off the site.
+
+**Pass 3. Rhetoric: does it welcome and move the reader?** Yes to every question, or rewrite it.
+
+1. Does the first sentence of the screen name the reader, or make plain who it is for?
+2. Does it answer the reader's first question first? Read the first line alone. Can the reader say what this is?
+3. Does it say what happens next, as one action the reader can take now?
+4. Does the screen have one dominant action, and does this sentence serve it?
+5. Does the site answer what the visitor just did? The world responds to a press, a hover, a drag. A paragraph that tells what the interaction already shows is cut.
+6. Is it teaching first and caveats last? The core thing, then the condition, both on the same screen.
+7. Is it marketing inside the product? Past the intro and home, operational screens stop selling and say what changed.
+8. Would the reader trust it more after reading it? If the honest version is smaller, the smaller version ships.
+
+A page is done when every sentence has passed, the notes name each sentence's reader and evidence, the ten-question reduction test of `docs/PRODUCT-DESIGN-LAWS.md` is answered, and the copy score is reported.
+
+### 2. The direction in one line
+
+**FXN is a new internet in the making: you hold your own chain, one keeper's signed receipt makes your payment final, and anyone can start a chain. Today it runs on test nodes. Nothing is live.**
+
+Positioning, in the words the check allows:
+
+- **What is new.** Every FXN ID keeps its own chain, and only its key writes to it. A payment is final when one bonded keeper signs the receipt. There is no vote on each payment. Pinners keep copies and catch a keeper that cheats, and the cheater's bond pays the victim. The kernel holds structure only. Resolvers and capabilities carry every business rule, so anyone can start a chain and launch a token on the same kernel.
+- **For whom.** A person who wants an identity and a wallet that are theirs. A builder who wants a chain of their own without writing a kernel. An operator who wants to run a keeper or a pinner and be paid for it. A reader who wants every number with its machine.
+- **What exists today.** The design is confirmed. The keeper code is landed on the branch `keepers-v1`. Finality on five test nodes is proved on one machine. Payments, DAO, safes, treasury, the launchpad lane and the bridge lane are landed. Two machines build the same release byte for byte. Seven lanes of products exist, each at its own status.
+- **What is planned.** Devnet genesis with up to 16 of our 20 machines and at least 5 foundation nodes, on test money. A 4-of-5 multisig changes fees and settings while the network is young, and that power ends when attesters are filed. A founder bridge test before mainnet. A 300-angle attack round after genesis. Outside keepers after the known limits close.
+- **What the site never says.** "Live", "mainnet", a date, a rate per second with no machine, a comparison with no source, "pinned by thousands", an estimate.
+
+### 3. The welcome: who arrives
+
+The intro's role tags and the site's five paths (`js/content/site-pages.js`: Understand, Build, Prove, Run, Read) give the roles. Each role has one thing to understand before anything else.
+
+| Who arrives | First thing they must understand | Where the site sends them |
+|---|---|---|
+| **Just curious** | You get an FXN ID, it keeps its own chain, and one keeper's receipt makes a payment final. Nothing is live yet. | Home, the curious list, then How it works |
+| **I build apps** (a builder, or someone starting a chain) | A resolver is a chain of its own, built from capabilities, launched by one signed record. You can start one and launch a token. Today this waits for the devnet, and a token launch needs the multisig's approval at genesis. | Home, the builder list, then Resolutions and Resolvers |
+| **I run computers** (an operator) | A keeper posts a bond, signs receipts and is paid. A pinner keeps copies off the hot path and is paid per copy. At genesis only our own machines run keepers. Outside keepers join after the known limits close. | Home, the operator list, then Network stats and Get FXN Browser |
+| **I check claims** (an evaluator, a journalist, an investor's reader) | Every number names its machine, its date and its condition. The status words are `Live`, `Partial`, `Not built`, `Unverified`. The evidence registry is public in the docs. | Mesh Explorer, Network stats, Notes |
+| **Just look around** | The grid is a world you can move through. Nothing is asked of you. | The free grid, the Missions chip only |
+
+The co-founder and the multisig members arrive by their own page (`devnet-roadmap.html`). They are not a site role.
+
+### 4. What FXN has built: the claims table
+
+Only rows that pass Pass 2 are here. The site uses the exact words in the last column, or a shorter cut of them. The condition travels with the words. A row with status `Plan` may appear only in a "what comes next" place, never as a thing that exists.
+
+| # | Accomplishment | Evidence | Status | Condition | Words the site may use |
+|---|---|---|---|---|---|
+| 1 | One chain per identity, every record signed by its key | `docs/status.md` row "Per-identity signed records", BENCH-012 | Live | Dense FLX records, Ed25519. The record is the unit a resolver reads. | "Your FXN ID keeps its own chain. Only your key writes to it." |
+| 2 | A payment is final on one keeper's receipt, with no vote | FACTS updates 3, 13, 36. Roadmap "Deploy rehearsal 1": one digest on 5 of 5 nodes | Landed, Measured on test nodes | Five nodes on one machine (flx-nyc1), loopback, throwaway keys. Not a network. | "One keeper signs the receipt and the payment is final. No vote. Proved on 5 test nodes on one machine. Nothing is live." |
+| 3 | A keeper posts a bond and loses it if it cheats. Pinners keep copies and catch the cheat | FACTS updates 3, 10, 13, 14. Roadmap "Words on this page" | Landed | Built on `keepers-v1`. The fraud path has tests (fraud 54 pass) and has not run on a real network. | "A keeper posts a bond. If it cheats, the bond pays the victim. Pinners keep copies and catch it. Built, not yet run on a real network." |
+| 4 | The kernel holds structure only. Resolvers and capabilities carry meaning | `AGENTS.md` "Place it first", `docs/PLACE-IT-FIRST.md`, CAP-010 to CAP-012 | Partial | 12 resolver chains on the old devnet at 2026-10-18. Grammar enforced for 10 of 12 first-party grammars at that commit. Not production. | "The kernel never learns a business word. Every rule lives in a resolver or a capability, with its own chain and its own grammar." |
+| 5 | Anyone can start a chain and launch a token | CAP-010 (one signed launch record). Roadmap "Launchpad steps" and "Try it together" | Landed in part, Not run | Launch and curve lanes landed. The launchpad wiring is on a side branch, not merged. Never run on real machines. A token launch needs multisig approval at genesis. A test chain costs 30,000 test FXN. | "You can start your own chain and launch a token on the same kernel. Built, waiting for the devnet. A launch needs the multisig's approval at genesis." |
+| 6 | Speed, measured | Roadmap "Throughput r01" | Measured | Round 6, 5 nodes on one host (flx-nyc1), 1,000 in flight, load from other jobs. 0.098 of the 16-node baseline, a different scope. A quiet node has not measured it. | "26,274 final payments a second. Measured on 5 test nodes on one machine, 1,000 in flight. Not a network speed." |
+| 7 | A copy reaches a pinner fast | Roadmap "Pin lag" | Measured | Five live nodes on flx-nyc1. Mean about 1.1 s, max 3.4 s. | "A copy reached each pinner in about 1.1 s. Measured on 5 test nodes on one machine. Nothing live." |
+| 8 | The release builds the same on two machines | Roadmap "Release build twice, two machines" | Measured | flx-eul-4c and flx-hstgr1 at commit bd74aa17. 6 of 6 sums match. Must run again on the final commit. | "Two machines build the six programs and every sum matches. Checked on one commit, to be checked again on the final one." |
+| 9 | Safes, treasury, DAO, proposals, vesting, weekly pay | Roadmap "Money, bridge and launchpad", "DAO probes" | Landed, Tested | DAO probes 12 pass, 0 fail on flx-eul-4c. Nothing on the new devnet yet. Nobody holds a key to a safe. 4 of 5 must sign a move. | "A safe is an address with no private key. Its rules alone move money, and the multisig signs 4 of 5. Tested on one machine, not yet on the devnet." |
+| 10 | The multisig while the network is young | FACTS update 17. Roadmap step 14b | Plan | Founded at genesis. Changes fees, budget and settings until attesters are filed, then that power ends. | "While the network is young, a 4-of-5 multisig changes fees and settings. That power ends when attesters are filed." |
+| 11 | The bridge | FACTS update 24, 27. Roadmap "Bridge lane and sale order", "Founder bridge test" | Landed, Not run on nodes | Declaring, minting, burning and releasing are lane records. The vault is not made. The founder test has not run. It blocks mainnet. | "Value comes in over a bridge, and a deposit and the sale use the same path. Built. Its founder test has not run." |
+| 12 | Free payments | FACTS update 9 | Landed on the pages | 30 per FXN ID per day. The DAO can change it. Free payments do not count as paid use. | "30 free payments per FXN ID a day. The DAO can change the number." |
+| 13 | Machines at genesis | FACTS update 25 | Plan | Up to 16 of 20 machines. At least 5 foundation nodes. The other 4 move after genesis. | "At genesis, up to 16 of our 20 machines run keepers, on test money." |
+| 14 | Names | `docs/DEFXN-NAMES-ONE-SYSTEM.md`, FACTS update 9 names lines | Landed | One name system in dense-wire. Flat names. Only the genesis key can claim one for now. The multisig holds the 51 genesis names. | "A .fxn name is a signed record with one verifier. For now only the genesis key can claim one." |
+| 15 | Seven product lanes | `assets/kit/defxn-product.js` catalog | Per product | Each product carries its own status word in the catalog (`building` or none). Public hosting of Explore and Deploy is not established (CAP-014). | "Build, Ship, Network, Govern, Social and live, Assets, DeFi." Each product shows its catalog status beside its name. |
+| 16 | Swap batches as signed resolution | BENCH-012, `docs/status.md` | Fleet, verified, dated | 2026-10-10. 256 swaps a batch, 13.874 ms, 60 of 60 audits passed, 10 replicas. Reported per batch, never per second. Swaps now move to keepers (lane L9), so this number carries its date. | "256 swaps in one batch, 13.9 ms, every audit passed. Measured 2026-10-10 on 10 replicas." |
+
+Numbers that do not pass today, and why:
+
+- The 16-node ladder (239,037 to 268,647 final a second, FACTS update 6): one unit per payment, same-keeper credits only, keeper v1.1 rules off, 20-second steps, prototype build. It answers a question the site does not ask. Not until re-measured under the full rules in L15.
+- The chain-era 82,863 transfers a second (BENCH-011): a retired direction. History only.
+- "500 nodes about 6 to 10 million a second": an estimate. Never on the site.
+- Other chains' rates on the main page (FACTS update 6): no source cited in the notes. `Unverified` until the source stands beside the figure.
+- "Pinned by thousands": false by design. Pinning keeps data on our own nodes (FACTS update 15).
+- Any date for deploy day: withdrawn by the roadmap.
+
+### 5. The intro's story, rebuilt on this direction
+
+The intro is interactive: the world does nothing until the visitor acts, and answers every press. The shot mechanics (bars, camera, lit object, chip) stay as planned in `docs/design/space/SPACE.md` "Intro: plan". What changes is the order of the story: welcome first, then what FXN is and what it has built, then where to go. The payment is beat 3, never the opening. One number per screen, with its condition on the same screen. The rehearsal line stays on screen from beat 1 to the end.
+
+| Beat | Words (29 line, 11 mono under it) | What the visitor does | How the world answers |
+|---|---|---|---|
+| 1 Welcome | 47 "Welcome to FXN." 18 "A new internet, built in the open." 11 mono "A REHEARSAL. NOTHING IS LIVE." Chip "Switch on the kernel" | Presses the one lit thing, the kernel | The world is dark. One lamp comes on at the kernel, the floor grid comes down, the first network rises. A ripple at the press. |
+| 2 Your chain | 29 "Every person keeps their own chain." 11 mono "YOUR FXN ID. ONLY YOUR KEY WRITES TO IT." Chip "Press your ID" | Presses the card that landed beside a chain drum | The card lifts and lights. The drum's top ring turns: your chain wakes. Hover on the card: "Your FXN ID. It keeps its own chain." |
+| 3 Final | 29 "Pay. One keeper signs. It is final." 11 mono "NO VOTE. A KEEPER POSTS A BOND AND LOSES IT IF IT CHEATS." Drag track "Drag to pay" | Drags the knob to the end | The trace runs from the drum to the keeper in step with the drag. At release the keeper pulses, a receipt lands by the card, the FINAL lockup rises. Hover on the receipt: "Keep it. Anyone can check it." |
+| 4 What is built | 29 "Seven lanes of products on one kernel." 11 mono "BUILD. SHIP. NETWORK. GOVERN. SOCIAL AND LIVE. ASSETS. DEFI." Chip "Light a lane" | Hovers a lane marker, presses one | Each lane's products rise as places, each with its catalog status word. The pressed lane's trace runs from the kernel. Nothing is named "live". |
+| 5 The proof | 29 "Every number names its machine." 11 mono "26,274 FINAL PAYMENTS A SECOND. 5 TEST NODES ON ONE MACHINE. 1,000 IN FLIGHT." Chip "Scroll out" (phone "Pinch out") | Wheels out one notch | The pinners land round the keeper. Copies arrive 1.1 s later, together. 29 "A copy reached each pinner in about 1.1 s." 11 mono "MEASURED ON 5 TEST NODES ON ONE MACHINE. NOTHING LIVE." |
+| 6 What comes next | 29 "Devnet genesis is next." 11 mono "UP TO 16 OF OUR 20 MACHINES. TEST MONEY. NO DATE UNTIL THE GATE PASSES." Chip "See the road" | Presses the road marker | The 16 machines light one by one across the grid. The 4 that wait stay dim. The multisig's five places light together. |
+| 7 Who are you | 47 "Who are you?" Four tags: "Just curious", "I build apps", "I run computers", "Just look around". A fifth, 11 mono, at the dock: "I check claims" | Hovers a tag, then presses one | Hover lights the tag's place and runs its trace. The press keeps the role, the other tags wipe, home rises in the same world with that role's list. "I check claims" opens Network stats. |
+
+With every press on its downbeat the intro is about 14 bars, 28 s, plus the visitor's own time. Skip and Esc go to beat 7 in one flight. Reduced motion: every spawn placed at once, the drag track a "Pay" button, the wheel a "Show the copies" button. The role is kept in `defxn-quest-v1` as today.
+
+Each beat's words pass the three gates here: beat 1 names the reader and the state, beats 2 and 3 are rows 1 to 3 of the claims table, beat 4 is row 15, beat 5 rows 6 and 7, beat 6 rows 10 and 13. Beat 7 hands over one action.
+
+### 6. Words, and the voice
+
+**Use.** FXN (the chain, the token). DEFXN (the infrastructure, the kernel, the product family, the site). FXN ID. Account, Account key. Keeper, pinner, receipt, Final, bond. Multisig, safe, treasury, DAO, proposal. Kernel, resolver, capability, grammar, chain, record. Devnet, test money, genesis, initiation. Launchpad, bridge, vault. Landed, tested, measured, not run, plan. "Nothing is live."
+
+**Never.** Every row of `docs/BANNED-WORDS.txt`: the check reads it, and a hit fails the build. Say initiation, multisig, keeper, FXN, approved, restore, rule, profile, FXN ID and Account in their place. Also never: "live" or "mainnet" as a present thing, a rate with no machine, "pinned by thousands", a comparison with no source, an estimate, a date, the chain-era numbers, a religious or invented word, a lore word on a product screen, and the promotional words of copy law 4 (the reader gets an action or a result instead).
+
+**The voice, in five lines.**
+
+1. We name the reader and answer their first question before anything else.
+2. We say what happened and on which machine, in the same sentence.
+3. We say "not built", "not run" and "nothing is live" in plain words, beside the claim they limit.
+4. One idea in one sentence, in technical blockchain words only.
+5. We welcome, we show, and we hand the visitor one action.
+
+### 7. The pages, in the site's order
+
+From `js/content/site-pages.js`. One line each: its job in the story, and the first question it answers.
+
+| Page | Job in the story | First question answered |
+|---|---|---|
+| `/` Home | The visitor has a role. Home gives that role its list of steps and the "why it holds" shows (the bond, the pinners, the multisig). | "What do I do first, as this role?" |
+| `/intro` | The welcome, beats 1 to 7 above. | "What is this, and is it live?" (Answer: a new internet in the making, on test nodes, nothing live.) |
+| `/how-it-works` | The mechanism in one pass: FXN ID, keeper, receipt, pinners, bond, kernel and resolvers. | "How is a payment final with no vote?" |
+| `/resolutions` | What you can make: every thing a resolver resolves, one section each, with its catalog status. | "What can I build or use today, and what is still building?" |
+| `/learnings` Notes | The reasoning behind the design, one question per note. | "Why was it built this way?" |
+| `/explore` Mesh Explorer | The proof surface: every launched resolver and capability with its history, re-checked in the page. Labelled devnet. | "Can I check this myself?" |
+| `/stats/now` Network stats | Every measured number with its machine, date and condition. "I check claims" lands here. | "How fast, on what, and when?" |
+| `/resolvers` Resolvers and capabilities | How you start a chain of your own: one signed launch, capabilities, grammar, upgrade by the control key. | "How do I start a chain?" |
+| `/auth` Sign in | The one gate: sign in with your FXN ID file. No marketing. | "How do I get in?" |
+| `/account` Your account | Operational: wallet, receipts, deposit. Status only where it changes a decision. | "What do I hold, and what is final?" |
+| `/chain` Every identity, its own chain | Depth on row 1 of the claims table: records, revisions, connections, trace. | "What is on my chain?" |
+| `/identity` Your FXN ID | Depth on the ID: signing, security, recovery kit. | "How do I keep my ID safe?" |
+| `/ring` A chain of the network | A network's chain and the FXN supply, with the genesis split as planned. | "Where does FXN come from?" |
+| `/download` Get FXN Browser | The operator's and the curious reader's one action: get the browser, run a node. | "How do I run it?" |
+
+Each page's rebuild answers the ten-question reduction test in its notes and reports its copy score before it is called done.
+
+## Creative treatment (2026-11-08)
+
+Reader: the owner, who approves this before anything is built. Then the 3D lane, the intro lane and the critic who scores the build from stills. Status: plan and words only. No code, no tests, nothing committed. Layer: app (the defxn site) on fxn-3d's engine and object library. The kernel learns no word here. Every word this section proposes for a screen passes the three gates of "Direction and the claim check" above. Nothing live is claimed. Every number carries its condition on the same screen. No date.
+
+Owner's brief, 2026-11-08: "Research film direction, story building, game lore building. How can we make the site communicate to you while we explain defxn itself? Think bigger. We can create any 3D shape in the fxn-3d studio, and rig it, and we have motion and animation inside the studio. All out." The influences he named: art, Apple quality, cyberpunk, Scandinavian minimalism, Japanese void.
+
+This treatment stands on three plans in `docs/design/space/SPACE.md` that already exist: the scene redesign (with the owner's decisions of 2026-11-07: districts on one hall floor, the drum stays, a book object beside it), the intro plan and the interaction map. It does not restate their numbers. Where it changes one of them, it says so in place.
+
+### 0. Research: the rule the site takes from each source
+
+Read on 2026-11-08. A row marked "secondary" is commentary on the work, not the maker's own words.
+
+| Source | What it says | The rule the site takes |
+|---|---|---|
+| Roger Deakins on Blade Runner 2049, [American Cinematographer](https://theasc.com/articles/deakins-blade-runner-2049) | Keep it simple. Character and emotion come first. Lighting and framing follow. The look came "as much through architecture as lighting". The Wallace interiors always had "the feeling of moving sunlight". | The architecture lights the hall: signs, rails, lamps and the ceiling's hour. One subject is lit at a time. The light moves with the hour and with the visitor's flight, never with a timer. |
+| Kubrick's one-point perspective, [Filmmaker Magazine](https://filmmakermagazine.com/?p=85083), [Open Culture](https://www.openculture.com/2012/09/signature_shots_from_the_films_of_stanley_kubrick.html) | Lines converge on one point, usually dead ahead. The frame holds, and the hold is the tension. | Every hold frame is a one-point frame: the lit subject on the camera's axis, one rail converging to it. The hold waits for the visitor. |
+| Ghost in the Shell (1995), the city montage, [The Dissolve](https://thedissolve.com/reviews/1100-ghost-in-the-shell), [AV Club](https://www.avclub.com/a-thoughtful-examination-of-ghost-in-the-shell-s-artful-1798284420) (secondary) | The plot stops for three minutes of city. Reflections in water and glass carry the weight. | A still frame is allowed. The wet deck reflects every lit edge. Idle is a picture, not a loop. |
+| Apple product films, [Manfrotto's guide](https://www.manfrotto.com/global-en/stories/how-to-shoot-cinematic-tech-videos-like-apple/) (secondary) | Hero reveal, then detail, then the product in context. One idea per shot. One warm element against a quiet palette. Cuts nearly invisible. | Every object enters in three steps: a silhouette in the dark, then the light finds its material, then its place in the district. One idea per shot. No cuts: the camera is one curve. |
+| Apple, "Designing Fluid Interfaces", [WWDC 2018](https://developer.apple.com/videos/play/wwdc2018/803/) | "Respond instantly." "Fully redirectable." "Behavior over animation." Springs tuned by damping and response, "start with 100% damping". "Touch and content should move together." People "discover the interface through play". | Every response is a spring at damping 1, except the chip's 3% overshoot. The visitor's input always wins and redirects a move in flight. The drag track moves one to one with the hand. The intro teaches by play, not by watching. |
+| Kishōtenketsu, [Wikipedia](https://en.wikipedia.org/wiki/Kish%C5%8Dtenketsu), [Nelson Literary Agency](https://nelsonagency.com/2022/01/kishotenketsu-and-non-western-story-structures/) quoting Kim Yoon Mi | Four acts: introduction, development, twist, conclusion. "Tension isn't the heart of the story. The twist is the high point." Conflict is not built into the structure. | The site's story is ki, shō, ten, ketsu. The ten is a mechanism, not a villain: a keeper signs twice and the copies catch it. |
+| The story spine, Kenn Adams, [NPR](https://www.wlrn.org/npr-breaking-news/2026-06-23/meet-the-creator-of-the-story-spine-an-8-sentence-tool-to-create-and-analyze-stories), [SessionLab](https://www.sessionlab.com/methods/story-spine) | "Once upon a time. Every day. Until one day. Because of that. Until finally." | Each page's show is one spine of at most five lines, and the visitor's press is the "until one day". |
+| Show, don't tell, [No Film School](https://nofilmschool.com/show-dont-tell) on Percy Lubbock (1921) | Let the picture carry it. The rule is a preference, not a ban on telling. | A paragraph that says what the world just showed is cut (claim check, pass 3, question 5). The condition of a number is the one thing always told. |
+| StoryBrand, Donald Miller, [DigitalMarketer](https://digitalmarketer.com/?p=83637) (secondary) | "Your customer should be the hero of the story, not your brand." The brand is the guide. | The visitor is the only one who acts. No character acts for them. DEFXN is the guide: it lights the next thing and waits. |
+| FromSoftware, Hidetaka Miyazaki, [Den of Geek](https://www.denofgeek.com/?p=781317), [GamesRadar](https://gamesradar.com/games/action-rpg/hidetaka-miyazaki-likes-to-watch-videos-of-fans-trying-to-make-sense-of-elden-ring-lore-of-course-i-cant-watch-all-of-them-but-i-do-like-to-watch-them) | The story is in fragments the player assembles. Reading above his level as a child felt like "co-writing the fiction alongside its original author". | Lore lives in the objects: a page count engraved on a lid, a number on a page, a lamp that is lit or dark. A visitor who reads no caption still gets the mechanism from the things. |
+| Environmental storytelling, Smith and Worch, GDC 2010, via [Game Developer](https://gamedeveloper.com/design/what-you-give-is-what-you-get-environmental-storytelling-in-games) | "Staging player-space with environmental properties that can be interpreted as a meaningful whole." | Every FXN idea is a thing with a place, a state and a rail to the thing it depends on. |
+| Journey (the game), Jenova Chen, [GDC 2013 talk](https://gdcvault.com/play/1017700/Designing), [Game Developer](https://www.gamedeveloper.com/game-platforms/in-depth-hunicke-and-chen-talk-tgc-s-intriguing-new-i-journey-i-) | A wordless story told through play. The aim: players feel small and "with a great sense of awe". Remove distractions so players care. | The visitor arrives small on a wet deck under a far ceiling. On screen: the lit thing, one line, one chip. |
+| Monument Valley, Ken Wong, [GDC "Less Game, More Experience"](https://gdcvault.com/play/1020878/Designing-Monument-Valley-Less-Game), [Kill Screen](https://killscreen.com/how-m-c-eschers-little-worlds-inspired-gorgeous-upcoming-monument-valley) | Each screen a finished picture. "Little worlds" surrounded by empty space. | Every hold frame is worth a still. A district is a little world in the void. |
+| Outer Wilds, Beachum and Verneau, [GDC 2020](https://www.gdconf.com/news/attend-gdc-and-learn-how-outer-wilds-nailed-curiosity-driven-game-design), [Game Developer](https://www.gamedeveloper.com/design/live-die-repeat-how-i-outer-wilds-i-piques-curiosity-in-an-ambivalent-solar-system) | Progress is knowledge. Curiosity is the only motor. Nothing is locked. | The visitor can fly anywhere from the first bar. The intro gives no permission, only a place to look. |
+| Death Stranding, Hideo Kojima, [Stevivor](https://stevivor.com/news/death-stranding-creator-hideo-kojima-explains-strand/) | The strand: story, world and game "all connected by strand", twisted threads and bonds. | The rails. Light runs along a rail when its dependency is used, so the visitor sees what holds what. |
+| Dead Space, diegetic interface, [HUDs and GUIs](https://www.hudsandguis.com/home/2012/08/22/dead-space-2-diegetic-interface-design) (secondary) | Health on the suit's spine. The locator a line from the palm. Usability wins where purity would hurt. | Facts live on the objects: the bond lamp is the bond, the page count is on the lid, a tower's lamp is its up state. Words a screen reader must read stay DOM. |
+| Game feel and juice, Steve Swink, [Game Developer](https://www.gamedeveloper.com/game-platforms/feature-game-feel---the-secret-ingredient-), Jonasson and Purho "Juice it or lose it" (2012) via [Wikipedia](https://Www.wikipedia.org/wiki/Game_feel) | Polish makes an action feel significant. | One response per input: a lift, a turn, a light, a run or a wipe. No shake, no particles, no burst. |
+| Ma, [Japan House Los Angeles](https://japanhousela.com/articles/a-perspective-on-the-japanese-concept-of-ma), [Wikipedia](https://en.wikipedia.org/wiki/Ma_(negative_space)) | The gap, in space and in time. The alcove that holds one object. The pause at the end of a bow. | The canvas is 92 to 95 percent of every frame. A hold is a pause the visitor ends. The empty sector of the hall is the launch pad: emptiness as the place a thing can stand. |
+| Dieter Rams, ten principles, [Vitsoe](https://www.vitsoe.com/gb/about/good-design) | "Good design is honest." "Unobtrusive." "Thorough down to the last detail." "As little design as possible." | A number's condition is part of the design. Nothing on screen that is not a fact or an action. |
+| Scandinavian minimalism, [Scan Magazine](https://scanmagazine.co.uk/?p=82821), [Mid-Century Home](https://midcenturyhome.substack.com/p/the-foundations-of-modern-scandinavian) (secondary) | Material honesty, human proportion, light as a material. | Chrome is chrome, stone is stone, light is the warmest thing in the room. The eye stands at a visitor's height (elev 28). |
+| Cyberpunk, Syd Mead, [1987 interview](https://chadtaylormarginalia.blogspot.com/2011/11/syd-mead-interview-1987.html), [PST ART](https://pst.art/en/college-and-university/cyberpunk-envisioning-possible-futures-through-cinema-visions-of-the-future) | "High-tech and low-life backwashed with smoke, rain and neon." Neon on wet pavement in a city still recognisably real. | Neon is service lighting in a network's token, reflected in the wet deck. The city is real: every lit thing is a real place in the network. No ads, no glitch, no rain. |
+
+### 1. The concept
+
+**You switch on the new internet. The hall is dark until your hand moves, and every press you make becomes a thing that stands in the world.**
+
+The site is one underground machine hall seen at a visitor's height. It is dark when you arrive. One lamp comes on, and from then on nothing moves until you move. Your press puts a card beside a chain. Your drag sends a page down a rail. Your release makes a keeper's stamp fall, and a receipt rises that is yours. When you try to make the keeper lie, the copies on the towers catch it and its bond lamp goes dark. By the end of two minutes you have built the scene with your own hands, and it stays standing while you choose who you are. The world explains DEFXN by answering you, and every answer is true to the claims table: it is a rehearsal on test nodes, and the screen says so from the first frame to the last.
+
+### 2. The fusion
+
+Five influences, one look. Each shows in one place and is kept out of another.
+
+| Influence | Where it shows | Where it must not show |
+|---|---|---|
+| Art (film grammar) | Reveal, material, context for every object. One-point holds. One camera curve, no cuts. Light leads, the camera follows. | Never as ornament. A shape that stands for nothing is not built (law 54). |
+| Apple quality | Springs at damping 1. Instant response, redirectable. One idea per shot. Honest materials: chrome reflects the room, crystal refracts what is behind it. | Never as an ad. No slogan, no superlative. Past the intro and home no screen sells (law 66). The condition stays beside the number. |
+| Cyberpunk | Neon as service lighting in each network's token. The wet deck. Districts in depth under fog. Rock and machine fused. | No ads, no glitch, no scanlines, no rain, no chromatic aberration, no green terminal text. One saturated subject per frame (law 75). |
+| Scandinavian minimalism | Stone plinths, plated steel, one lit edge. The eye at a visitor's height. Light as the warmest material. Rams: nothing on screen that is not a fact or an action. | No wood, no cream, no warm canvas. The dark stays dark. Minimal never means fewer facts (law 10). |
+| Japanese void (ma) | The canvas is most of the frame. A hold is a pause the visitor ends. One caption block. Fog ends the hall instead of a wall. The empty sector is the launch pad. | A hold is never a dead frame: one lit chip is always up. Emptiness is never decorated (law 54). |
+
+**Light.** One key light whose direction and colour come from the ceiling's hour (a blue morning, a white noon, an amber night, read from the visitor's clock at load and at each flight, never ticking). One back light. The hemisphere takes the ceiling's colour. Everything else is lit by the architecture: signs, rails, stamps, bond lamps, the mark. One subject at 2.2, every other glow at .45. Exposure .35 at the dark start of the intro and 1 at the hero pose. The key rises from floor level to the hero's height across the intro.
+
+**Colour.** The SDK roles, by thing:
+
+| Role | Token | In the world | In the DOM |
+|---|---|---|---|
+| Base | `--primary` | the lit subject's glow, every lamp, the stamp's face, the receipt's token | the step label, Skip, the kicker |
+| Neighbour | `--primary-300`, `-400`, `-600`, `-700` | the deck's engraved seams at gain .2, every unlit edge at .45, the hot core of a lit drum | nothing |
+| Complement | `--secondary` | nothing, ever | the one chip per state. Nothing else in the view |
+| Reference | `--reference` | nothing | hover, selected, current, links, focus ring |
+| Meaning | `--net-*` | a network's sign and its rails. Its cube's lamp | its chip on home |
+| Meaning | `--trust` | a bond lamp while the keeper is bonded. The card's face when the bond pays | nothing |
+| Meaning | `--live` | a copy tower's top lamp when the pinner is up. Absent when unknown, never dark as zero | the status word beside a product |
+| Meaning | `--danger` | the gate's scan line for one beat, the desk's rim for one bar, the forged page's strip | nothing |
+| Text | `--text-strong` | the lockup letters, the gate's scan line at rest | every caption |
+
+**Material.** Five, each honest to its shape. Chrome (metal 1, rough .08, the room environment) on rings, bevels, rails' edges and the mark's frame. Crystal (transmission, thickness, iridescence, rim, facets) on the crown, the seal stones, the card's face, the mark and the lockup letters' tops. Stone (procedural pattern, rough .8) on plinths, the pad and the bridge's piers. Plated gunmetal (today's `steel`) on cubes, drums, desks and towers. Emission on signs, rails, stamps, lamps, the mark. No image texture over 1024 px. No wood, no fabric, no skin.
+
+**Emptiness.** The canvas `#0c0a09` is 92 to 95 percent of every frame (measured on the trips' stills). One caption block. One chip. No frame border, no letterbox, no gradient title card. The far districts dissolve in fog. The hall has one empty sector, and that is where a chain is started.
+
+**Type.** The laws' scale by name only: 11 mono for conditions, step labels and chips, 18 for a second line (once per trip), 29 for a caption of at most ten words, 47 for a lockup and a count-up, 76 only for home's hero line. Two faces: Albert Sans and IBM Plex Mono. One 3D word in the world per trip, chrome with a crystal top.
+
+**Motion.** 120 BPM: a beat is .5 s, a bar 2 s, a state change lands on a beat, a big moment on a downbeat. Springs by role, closed form: `ui` 220/22 (.37 s, 3% overshoot), `type` 170/26, `letter` 140/24, `number` 60/15.5, `heavy` 40/12.6 (.63 s). Nothing fades: a response lifts, turns, lights, runs or wipes. Light leads and the camera follows. The camera is one curve with one owner. The visitor's drag, wheel or press wins over any move in flight. Idle is 0 frames requested. One response per input.
+
+### 3. The world and its lore
+
+**The place.** The site's world is the machine hall under the game's city: the Deep Works of `fxn-3d/docs/design/engine/WORLD-LORE.md`, seen from inside. The game shows the people who live over it. The site shows the machine they live on. The two share a look and nothing else: wet plated floors, neon as old service lighting, machine fused into rock, an hour that moves. No person, place name or story beat of the game appears on the site. The lore words (the Works, the Well, the Stacks, the Gate) stay in the design docs. On a site screen every thing is named by its technical word: kernel, network, node, keeper, gate, chain, record, pinner, multisig, bridge.
+
+**Why the hall exists.** The site's one job is to make the claim "a payment is final on one keeper's receipt, with no vote, and a cheater loses its bond" something the visitor has done, not read. A hall gives each part of that claim a place to stand and a rail to the part it depends on. The visitor walks the mechanism.
+
+**How every FXN idea becomes a thing.** The lore a thing carries is on the thing, never in a paragraph. The claim row is the one in section 4 of "Direction and the claim check".
+
+| FXN idea | The thing in the hall | The lore it carries on itself | Claim row | The word on screen |
+|---|---|---|---|---|
+| FXN ID | the card, crystal face over a plated body | its name line, and its drum beside it | 1 | "Your FXN ID. It keeps its own chain." |
+| chain | the drum, lid lifted a hair, and the book beside it | the page count engraved on the lid. Pages visible under it | 1 | "Your chain. Only your key writes to it." |
+| record | a page: a thin slab, a number engraved, a stamp lit | its number is its place in the chain | 1 | "A record. Signed by its writer." |
+| keeper | the desk beside the cube: a stamp on an arm, a tray, a bond lamp | the lamp lit means bonded. The tray holds what it signed | 2, 3 | "A keeper. Bonded. Signs your receipt." |
+| receipt | the page the tray gives back, with the keeper's mark beside yours | two marks on one page | 2 | "Your receipt. Keep it. Anyone can check it." |
+| bond | the bond lamp on the desk's post | lit `--trust` while honest. Dark when lost, and it stays dark | 3 | "The bond. It pays the receipt holder if the keeper cheats." |
+| pinner | the copy tower on the district's rim | one slot per copy, a lamp on top when it is up | 3, 7 | "A pinner. Keeps a copy on another machine." |
+| kernel | the tower on its chrome ring, a crystal crown, the mark lit inside | no words on it at all: structure only | 4 | "The kernel. It holds structure, never a rule." |
+| capability | a lit plate set into the launch pad's rim, a glyph engraved | the plates a resolver was built from stay lit round its drum | 4, 5 | "A capability. A rule a chain is built from." |
+| resolver | a drum with the resolver stripe on its own small plinth | its plates round it | 4, 5 | "A resolver. A chain of its own, built from capabilities." |
+| multisig | five seal stones round the kernel's foot, crystal, a lit seal each | four lit, one dark, always | 9, 10 | "Four of five keys change a rule. That power ends when attesters are filed." |
+| bridge | the span over the dark channel to the far gate at the hall's edge | a lit line along the rail | 11 | "Value comes in over the bridge. Built. Its founder test has not run." |
+| starting a chain | the launch pad: an empty plinth with a sunk slot | the plates light, a drum rises, a coin lands | 5 | "Start your own chain here. Built, waiting for the devnet." |
+| the devnet road | twenty road markers along the far edge, 16 lit and 4 dim | the count is the plan | 13 | "Up to 16 of our 20 machines, on test money." |
+| a .fxn name | the sign over a district's gate | the network's name in its own token | 14 | "A name. A signed record with one verifier." |
+| free payments, speed | no object | a fact on the account page and the stats page, each with its condition | 12, 6 | the claims table's words |
+
+**Characters.** None. The visitor is the only one who acts, and a character would take that role from them. The keeper is a desk with an arm. The pinner is a tower. The multisig is five stones. The game has the people.
+
+### 4. The story structure for the site
+
+The site's story is Kishōtenketsu, chosen for three reasons. The claim check forbids a villain we cannot prove, and this structure needs none. Its high point is a twist that re-reads what came before, and "a keeper that signs twice loses its bond" is exactly that: it turns "one keeper signs, no vote" from a convenience into a guarantee. And it puts the twist in the third of four acts, which is where the intro's beat grid has room for it. The Pixar story spine is the smaller tool: each page's show is one spine of at most five lines, and the visitor's press is its "until one day".
+
+| Act | What it is | Where it lives | The visitor's move |
+|---|---|---|---|
+| Ki, introduction | A dark hall. One lamp. You get an FXN ID and it keeps its own chain. | intro shots 0 and 1 | one press |
+| Shō, development | You pay. A keeper signs. It is Final. Copies reach the pinners. | intro shots 2 to 4 | a drag, a press, a wheel |
+| Ten, twist | You make the keeper sign twice. The copies catch it. Its bond pays you. | intro shot 5 | one press |
+| Ketsu, conclusion | Anyone can start a chain on this kernel. The road to devnet. Who are you. | intro shot 6, then home | one press, and the role is kept |
+
+Home and the pages continue the acts in depth rather than repeating them (law 1). Each page's show is one spine.
+
+| Page | Act it deepens | Its spine (at most five lines, the press is "until one day") | First question answered |
+|---|---|---|---|
+| `/` home | Ketsu | Every day the hall stands. You chose a role. Because of that, your list lights its first place. Until finally you press it. | "What do I do first, as this role?" |
+| `/how-it-works` | Shō and Ten | A page waits in the gate. You send it. The scan passes, the stamp drops, four copies climb. Until one day a second page comes. The lamp goes dark. | "How is a payment final with no vote?" |
+| `/chain` | Ki | Your drum. Your book opens. A page turns on each record. | "What is on my chain?" |
+| `/identity` | Ki | Your card turns to face you. Its name line. Its key never leaves it. | "How do I keep my ID safe?" |
+| `/resolvers` | Ketsu | The pad is empty. You pick plates. A drum rises. A coin lands. "Built, waiting for the devnet." | "How do I start a chain?" |
+| `/resolutions` | Ketsu | The seal ring. Four stones light. Each product's drum lights with its status word. | "What can I use today, and what is still building?" |
+| `/explore`, `/stats/now` | Shō (proof) | The copy towers. The lamps that are up. Each number beside its machine. | "Can I check this myself? How fast, on what, when?" |
+| `/ring` | Ki and Ketsu | A district's sign. Its drums. The genesis split as planned. | "Where does FXN come from?" |
+| `/download` | Ketsu | One copy tower, close. Your machine could be this. | "How do I run it?" |
+| `/auth`, `/account` | operational | no show. The card and the receipts, and status only where it changes a decision. | "How do I get in? What do I hold?" |
+
+### 5. The intro as a film
+
+**The open question, decided: all hands-on, with one unprompted bar.** The world moves first for exactly one bar (a lamp comes on, a card comes down) and never again without the visitor. Why. The measured intro of 2026-11-07 played 12.9 s with no hook in 2 s and nothing that answered a pointer, and the owner's words are "the site responds to you". Apple's fluid interface rule is behaviour over animation and discovery through play. Chen's and Wong's games teach without a word by letting the hand find the thing. Outer Wilds locks nothing. But a fully dark frame waiting for a press has no affordance: Apple's "hinting" and Deakins' silhouette both say show the edge of the thing first. So bar 1 is the hint, and the chip on its downbeat is the hand-over. Every later shot is a call (one bar of world motion), a hold (one lit chip, the world still) and the visitor's answer, which is the next call. Film grammar lives inside each call. The visitor owns the clock.
+
+**Fixed for the whole intro.** One lens, the site's 12 degree long lens: flat perspective, an object keeps its size as the camera orbits. The camera is one Catmull-Rom curve through every waypoint, so velocity carries from shot to shot. The nav dims to 0 at the start and returns at shot 6. 11 mono `A REHEARSAL. NOTHING IS LIVE.` stands from the first frame to the last. Skip (11 mono outline, top right) and Esc fly to shot 6. Sound is **not built** on the site and is reported as such. The sound ideas below are written so a later sound layer can land on the same beats, and nothing in the build waits on them. Places: `drum` is the first chain of the first network, your chain. `desk` is its district's keeper desk. `towers` are that district's four copy towers. Spares from the pools: the card, the pages, the receipt, the forged page, the coin. Phone: the intro plan's section 5 holds (dist x 1.35, type one step down, the thumb zone, tap is press, pinch is the wheel).
+
+Columns: bars on the 120 BPM grid. Camera as `place dist/elev/turn` with the move's name. Light. What moves. Sound idea (not built). The words with sizes and their moves. Where the visitor takes over, and how the world answers.
+
+| # | Bars | Camera and lens | Light | What moves | Sound idea | Words | The visitor takes over | The world answers |
+|---|---|---|---|---|---|---|---|---|
+| 0 Dark | b1 call, b2 hold | `drum 0.9/10/-50`, floor level, the drum fills the right half. Push to `drum 1.1/16/-25` over b1. Long lens. | exposure .35. Beat 1: the drum's lamp comes on, the first light in the frame. Beat 2: the deck's seams catch it and the drum's reflection stands under it. | Beat 3: the card comes down. Downbeat b2: it lands beside the drum, a ripple. | a low hum begins with the lamp | 29 `You get an FXN ID.` per-word rise at 0:00.5, left half. 11 mono `A REHEARSAL. NOTHING IS LIVE.` track-in with it. Chip (complement, `ui`) `Press your ID` rises on the card at 0:02. | at 0:02. Near the card: it glows. Hover: it turns to face the camera (`heavy`), label "Your FXN ID. It keeps its own chain." Drag orbits. Wheel zooms. Press the card (tap, Enter). | shot 1 |
+| 1 Your chain | b3 answer, hold until the next press | hold at `drum 1.1/16/-25`. The drum on the axis, its rail to the gate converging: a one-point hold. | the card's face lights `--primary`. The drum lit, the rest .45. | the card lifts .12 R. The drum's top ring turns 20 degrees (`heavy`). Its lid lifts a hair and the pages show. The book beside it opens its cover (`heavy`). | one soft click as the lid lifts | 29 `Your FXN ID keeps its own chain.` rise at +0.5 beat, wipe at the end of b4. 11 mono `01 / 06`. Chip `Pay` on the drum at the downbeat of b4. | press the chip, or press the drum | shot 2 |
+| 2 Pay | b5 call, b6 hold | crane up and back to `drum 1.5/28/10` over b5, so the rail, the gate and the desk are in frame. | the desk lights at landing. Its bond lamp is already lit `--trust`. | the keeper's node cube behind the desk comes down on beat 1 and lands on beat 3. | the hum gains a second note | 29 `Pay. A keeper signs it. No vote.` rise at +0.5 beat. 11 mono `02 / 06` and under it `A KEEPER POSTS A BOND AND LOSES IT IF IT CHEATS.` A DOM drag track 320 x 44 px, knob left, `Drag to pay`, up on the downbeat of b6. | drag the knob (pointer, finger). Enter pays at once. Reduced motion: a `Pay` button. | a page leaves the card and travels the rail toward the gate one to one with the knob (the run's head at the drag's fraction). A release under .9 runs it back on `type`. At .9 or more: shot 3 |
+| 3 Final | b7 answer, b8 hold | whip to `desk 1.0/14/40` in beat 1 (the one whip of the intro), settle beats 2 to 4. | the desk at 2.2, everything else .45. The gate's scan line sweeps once as the page passes. | beat 1: the page passes the gate. Beat 2: the stamp arm drops (`ui`) and the page's stamp lights. Beats 2 to 4: the 3D lockup `FINAL` floor-rises beside the desk, one letter a beat (`heavy`). Downbeat b8: the receipt rises from the tray and lands beside the card. | one dry click for the stamp. The hum resolves. | 29 `Final. One keeper signed the receipt.` rise at +0.5 beat, out before b9. 11 mono `03 / 06`. Chip `Press the receipt` on the receipt at b8. | hover the page in the tray: "Your payment. Signed by the keeper." Press the receipt. | the receipt lifts .12 R. The card's face pulses once. 29 `Keep it. Anyone can check it.` for one bar. The lockup sinks. Shot 4 |
+| 4 Copies | b9 call, b10 hold | crane up to `network 1.3/30/0` over b9. Then the visitor's wheel is the camera: zoom out toward the pointer, clamped. | the desk and the four towers as they land. The key light begins to rise toward the hero's height. | the four copy towers come down one per beat on b9 at the district's rim. | four short tones, one per tower | 29 `Copies go to pinners on other machines.` rise at +0.5 beat. 11 mono `04 / 06`. Chip `Scroll out` at b10 (phone `Pinch out`, keyboard the minus key). | wheel out one notch or more | on the first notch the desk pulses and a copy climbs each tower slot by slot, 60 ms a slot, landing together 1.1 s later. At the landing 29 `A copy reached each pinner in about 1.1 s.` and 11 mono `MEASURED ON 5 TEST NODES ON ONE MACHINE. NOTHING LIVE.` The camera keeps zooming with the wheel. |
+| 5 The cheat (ten) | b11 call, b12 hold | crane back down to `desk 0.9/16/-30` over b11, the desk and the four towers' tops in one frame. | the desk lit. The forged page's strip `--danger`, the one red thing in the frame. | a second page comes down into the tray on beat 2 and lands on the downbeat of b12. It carries the same number as the receipt. | the hum drops a fifth | 29 `A keeper can try to sign twice.` rise at +0.5 beat. 11 mono `05 / 06`. Chip `Forge a receipt` on the stamp at b12. | press the stamp (tap, Enter) | b13: beat 1 the stamp drops and the forged page's stamp lights. Beat 2 it runs to the gate. The scan line goes `--danger` for one beat and the page stops in the arch. Beat 3 the four towers' lamps flash and their light runs back down the slots to the desk. Beat 4 the bond lamp goes dark. Downbeat b14: the desk's rim `--danger` for one bar, and the lamp's light travels the rail to the card, whose face fills `--trust`. 29 `It loses its bond. The copies prove it.` 11 mono `THE BOND PAYS THE RECEIPT HOLDER. BUILT. NOT YET RUN ON A REAL NETWORK.` The lamp stays dark. Chip `See the hall` at the end of b14. |
+| 6 Who are you (ketsu) | b15 to b16 call, then hold | crane out to the hero pose (elev 28, the kernel right of centre, the nearest district in the foreground, the far districts under fog, the ceiling's panels in the top sixth) over 4 s, settle. | exposure 1. The key at the hero's height. The launch pad's slot lights dim in the empty sector. The 16 road markers light one per beat along the far edge on b16, 4 stay dim. | nothing clears. The card, the receipt, the desk, the towers, the dark lamp and the forged page in the arch stay standing. The 3D mark turns once to the camera over the kernel (`heavy`). | the hum opens into a chord and holds | 29 `Anyone can start a chain on the same kernel.` rise at +0.5 beat of b15, wipe at the end of b16. 11 mono `BUILT. WAITING FOR THE DEVNET. NO DATE UNTIL THE GATE PASSES.` 47 `Who are you?` scale-down lockup top left at b16 beat 3. 11 mono `06 / 06`. Four role tags (DOM, 44 px, 18 name and 11 mono line) rise one per beat on b17 at their places. 11 mono `I check claims` at the dock. | hover a tag: its place lights and the rail to it runs from the kernel. Press a tag. Tab moves between them. | the pressed tag's place pulses, the other three wipe upward, the role is kept, home rises in the same hall with that role's list. "I check claims" opens Network stats. |
+
+The tags' places (a change to the intro plan's section 4, so each role stands by the thing it will use): **Just curious** at the kernel, the lead, in the complement. **I build apps** at the launch pad. **I run computers** at a copy tower. **Just look around** at the dock, no place.
+
+With every press on its downbeat the intro is 17 bars, 34 s, plus the visitor's own time. The hook is bar 1: a lamp in the dark, a card landing, a word rising, a chip asking, all before 0:02. Reduced motion: every spawn, lift and light placed at once, captions still 4 s each, the drag track a `Pay` button, the wheel a `Show the copies` button, the stamp a `Forge a receipt` button. The press still advances.
+
+Rules the shots keep, from the style guide: words enter at least half a beat after the move starts and leave at least one beat before the next move. Type never covers the lit subject's screen point. Nothing fades. One complement per frame. One number per screen, with its condition on the same screen. No size off the ladder. No banned word. No real `.fxn` name. The visitor's drag or wheel during a call wins and the call's end pose is where the camera settles after.
+
+Each shot's words pass the three gates: shots 0 and 1 are claim row 1, shots 2 and 3 are row 2, shot 4 is rows 3 and 7, shot 5 is row 3, shot 6 is rows 5 and 13. Shot 5's condition "built, not yet run on a real network" is the fraud path's status (54 tests pass, no real network), and it is on the same screen as the mechanism.
+
+### 6. The interaction grammar
+
+The interaction map in `SPACE.md` holds the per-object cells and their numbers. This is the grammar those cells obey, with what this treatment adds.
+
+| Input | What the world does | Rule |
+|---|---|---|
+| **Approach** (pointer within 2 radii) | the object's glow rises x(1 + .3k), it lifts .01 R. A drum's lid lifts a hair. A book's cover opens a finger's width. A rail's dashes near the pointer light. | the world notices before you touch. k is 0 at 2 radii and 1 at the edge. |
+| **Hover** | lit at 1.5, every other glow .45. The object lifts (kernel .02 R, cube .08, drum .12), a drum's ring turns 20 degrees, a sign turns toward the pointer, a card faces the camera. Its rail from its parent runs toward it. Its label answers at `screenOf`: name and one line. | one lit subject. Light leads. The label is the only new text. |
+| **Press** | pop (.22 R hop, 520 ms), pulse, a ripple on the deck, one flight. At landing the thing's children rise one per beat, and its page's one dominant action is lit. | the press is the dominant action. A second press on a focused thing opens its page. |
+| **Drag** on the floor | orbit at -.25 degree per px yaw, .18 per px elev, velocity carries on release and decays over .25 s. The deck's seams gain .2 to .3 while the drag runs. | the world turns under the hand, one to one. |
+| **Drag** on a track | the thing moves one to one with the knob (a page on its rail). Under the threshold it runs back. | Apple's one-to-one rule. Nothing happens the hand did not do. |
+| **Scroll / wheel** | zoom toward the pointer, clamped to the focus's range. Over a panel it scrolls the panel only. | the page never scrolls the world. |
+| **Idle** | 0 frames. After two idle bars in a hold: the lamp pulses once and the chip nudges 2 px, once. Then still. | idle is a picture, not a loop. Nothing nags (law 26). |
+| **Reduced motion** | every state placed at once. Tracks and wheels become buttons. Glow still answers. | a cell without a reduced form is not done. |
+
+**Diegetic information.** A fact lives on its object: the bond lamp, the page count on the lid, the tower's lamp, the four lit stones, the 16 lit markers. The DOM holds only what a screen reader must read and what the type scale governs: one caption, one condition line, one chip, labels, the focus card. A caption never says what the world just showed. When a fact changes, the object changes first and the words follow half a beat later.
+
+**Restraint.** One response per input. A response is a lift, a turn, a light, a run or a wipe, never a fade, a shake, a particle or a burst. Springs land at damping 1. The chip alone gets 3% overshoot, so the one thing asking for a press is the one thing that is a little alive. The world never asks twice: a chip that was pressed does not come back. The world never fights the visitor: any input during a call wins.
+
+### 7. The object list
+
+Columns: the object. What it stands for. Form and material in one line. Its rig (a mechanical rig is parented pieces with rotation keys. No skinned character). Animations and states. Where it appears. Status: exists, restyle or new. Priority: P1 is the intro, P2 is home and how it works, P3 is the deeper pages. Every new object is a library object with six build steps and a preview page, like the seven that exist, and a reduced-motion form for every state.
+
+**A. Environment**
+
+| Object | Stands for | Form and material | Rig | Animations and states | Where | Status | Priority |
+|---|---|---|---|---|---|---|---|
+| deck | the floor of the hall | one dark coated plate over the grid span, seams engraved, the mirror twins on | none | ripple on press, seams gain .2 to .3 on drag | all | restyle | P1 |
+| ceiling and the hour | the hour of the hall, the key light's source | a far plane of panels, emissive in the hour's colour, the hemisphere reads from it | none | set at load and at each flight, never ticks | all | new | P1 |
+| fog | depth, the end of the hall | fog fitted to the hall's depth so the far districts dissolve | none | none | all | restyle (knobs) | P1 |
+| district plinth | a network's ground | a raised stone step the network's radius, rim lit in its token, a gap at the gate | none | rim lights x1.15 with the family, 2.2 when lit | home, pages | new | P2 |
+| rail | a dependency, the way a record travels | one continuous engraved rail per link, emissive in the token at .55, chrome edge | none | run: the head at x4 leads, light follows. A run at a drag's fraction | all | restyle (9 dashes become 1 piece) | P1 |
+| channel and far gate | the hall's edge, where value comes from | a dark slot in the deck under the bridge, a gate arch at the hall's edge | none | the far gate lights once on a crossing | bridge page, shot 6 far | new | P3 |
+| road markers (20) | the devnet road, 16 of 20 machines | twenty low posts along the far edge, chrome stem, `--primary-300` cap | none | 16 light one per beat, 4 stay dim | shot 6, home "what comes next" | new | P2 |
+
+**B. The kernel**
+
+| Object | Stands for | Form and material | Rig | Animations and states | Where | Status | Priority |
+|---|---|---|---|---|---|---|---|
+| kernel tower | the kernel, structure only | the octagonal tower on a chrome ring, a crystal crown, the mark lit inside, gunmetal panels | none | pulse, lift .02 R, every rail runs out on hover | all | restyle | P1 |
+| seal stones (5) | the 4 of 5 multisig | five low faceted crystal stones round the foot, a lit seal on each | one hinge each (15 degree turn) | four light one per beat, the fifth never. Hover: label "Four of five keys change a rule." | home show, resolutions | new | P2 |
+| the 3D mark | the brand | the cut crystal mark of `world/marks/defxncut9.fxn`: facets, film glow, rim, a chrome frame | none | refracts with the camera, one slow turn to face it on hover (`heavy`) | kernel's crown, shot 6, home | exists in the studio, new as a world object | P1 |
+
+**C. A district's actors**
+
+| Object | Stands for | Form and material | Rig | Animations and states | Where | Status | Priority |
+|---|---|---|---|---|---|---|---|
+| node cube | a network's machine | the six-step cube, plated gunmetal, top inlay and lamp emissive | none (its build frame is its state) | build, lift .08 R, the core unseats on hover | all | restyle | P1 |
+| sign | a network's name | a double-sided lit panel on a boom over the gate, emissive in the token, chrome frame | one hinge (yaw) | turns 8 degrees toward the pointer | all | restyle (the card becomes the sign) | P2 |
+| gate | the grammar check | an arch over the rail at the district's entry, a scan line in `--text-strong` | none | the scan line sweeps once per record. A bad record: `--danger` for one beat, the page stops in the arch | shots 3 and 5, how it works | new | P1 |
+| keeper desk | a bonded keeper | a desk beside the cube: a stamp on an arm, a receipt tray, a bond lamp on a post, gunmetal, the stamp face emissive | a two-joint arm (shoulder and stamp head), the tray's lift | idle: lamp lit `--trust`. Busy: the arm drops on `ui`, a receipt rises. Caught: the lamp goes dark, the rim `--danger` for one bar, the lamp stays dark until Back | shots 2 to 6, how it works, home | new | P1 |
+| chain drum | a key's chain | the confirmed drum, chrome bevels, the kind's stripe emissive, pages under the lid | the lid's hinge, the top ring's spin | near: the lid lifts a hair. Hover: the ring turns 20 degrees, lift .12 R. Busy: the lid lifts and the count on it ticks up | all | restyle | P1 |
+| book | a key's records as numbered pages | a bound stack with a spine beside the drum, pale coated pages, numbers engraved | the spine's hinge, the top page's turn | opens on near, a page turns on each record (`heavy`) | shot 1, chain page, how it works | new (owner decision 2026-11-07) | P2 |
+| page (record) | one signed record | a thin slab, a number engraved, the stamp mark lit `--primary`, a crystal strip | none | travels along a rail, lands, lifts .12 R on hover | all | restyle | P1 |
+| link rail | a record links to the one before | a short lit rail between two pages, set into the deck | none | runs toward the pointer's end | chain page | restyle | P3 |
+| copy tower | a pinner | a thin tall stack of page slots on the district's rim, a lamp on top | none | a copy climbs one slot per 60 ms, the count ticks. Lamp `--live` when up, absent when unknown. Flash and run back on a disagreement | shots 4 and 5, stats, download | new | P1 |
+
+**D. Story objects**
+
+| Object | Stands for | Form and material | Rig | Animations and states | Where | Status | Priority |
+|---|---|---|---|---|---|---|---|
+| FXN ID card | the visitor's key | the card spare, a crystal face over a plated body, the name line emissive | none | faces the camera on hover (`heavy`), lifts .12 R on press, its face pulses on a receipt and fills `--trust` when the bond pays | shots 0 to 6, account, identity | restyle | P1 |
+| receipt | the keeper's receipt, Final | a page with the visitor's stamp and the keeper's mark, token `--primary` | none | rises from the tray, lands beside the card, lifts on press | shots 3 and 5, account | restyle (the record spare with a token) | P1 |
+| forged page | the cheat, the story's twist | a page with a `--danger` strip and the same number as the receipt | none | comes down into the tray, stops in the gate's arch and stays there | shot 5, how it works | new (a record state) | P1 |
+| bridge | value over the bridge | a span over the channel, stone piers, a chrome rail, a lit line in `--primary` | none | the line runs across on hover, a page crosses on a deposit | bridge page, home | new | P3 |
+| launch pad | start a chain | an empty stone plinth at the hall's edge with a sunk slot, its rim `--primary-300` dim | the slot's plate (one hinge) | hover: the slot lights. Launch: the plates light, a drum rises on `heavy` over 1 s, a coin lands | shot 6, resolvers, launch | new | P2 |
+| capability plates | the capabilities a chain is built from | lit tiles set into the pad's rim, one glyph engraved each | none | light one per beat as picked, stay lit round the risen drum | resolvers show, launch | new | P2 |
+| token coin | a launched token | a chrome disc with an emissive edge | none | drops and lands on the drum's lid | launch show | new | P3 |
+
+**E. UI in the world**
+
+| Object | Stands for | Form and material | Rig | Animations and states | Where | Status | Priority |
+|---|---|---|---|---|---|---|---|
+| 3D lockup letters | the one word in the world per trip | baked letters (FINAL, CURIOUS, BUILDER, OPERATOR), chrome with a crystal top face | none | floor-rise one letter a beat (`heavy`), sink | shot 3, the trips | exists (add FINAL, restyle the material) | P1 |
+| FXN wordmark lockup | the brand's name in the world | `WTEXT` per letter in Albert Sans 700, chrome, crystal top | none | floor-rise at shot 6 beside the mark, once | shot 6, home | new | P2 |
+| the ripple | the press landed | a ring on the deck that fades in a second | none | one per press and tap | all | exists | P1 |
+| the glow and the lit set | the world's answer | glow factors on each object's emissive parts | none | near x(1 + .3k), hover 1.5, lit 2.2 with the rest at .45 | all | exists | P1 |
+| DOM parts | the words a screen reader reads | caption block, condition line, chip, drag track, role tags, focus card, label, on glass, at 11/18/29/47 | none | words rise one by one, letters track in, a mask wipes a line out, a lockup scales down to rest, a number counts up | all | plan (the intro plan) | P1 |
+
+**Build order.** It follows the scene plan's phases, one 3D lane at a time, each scored by the critic from stills. Phase 1, the ground and the light: deck, hour, fog, the material pass on the seven existing objects and the mark as a world object. Phase 2, scale: plinths, rails as one piece, the hero at elev 28. Phase 3, the actors: keeper desk, copy tower, gate, the forged page state, the receipt token. Phase 4, the edge: bridge, launch pad, capability plates, coin, road markers. Phase 5, the book and the page: the drum's lid, the book, the page, the card's crystal face, the lockups' chrome and the wordmark. Phase 6, the phone path. Phase 7, states and the hour wired to every input. The intro needs phases 1, 3 and the lid of 5. Home needs 2 and 4.
+
+### 8. What the fxn-3d studio must add
+
+One line each. "Exists" means the site only calls it.
+
+1. **A studio document as a world object.** A pack exported from the studio (shapes, materials, keys) is placed in the hall by the world look through `pieces.add` with the six build steps and `frame(T)` every object has, so a thing made and keyed in the studio stands in the world without a hand-written `world2-*.mjs`. Required: it is how "any shape in the studio" reaches the site.
+2. **Named states on an object's timeline.** The animate grammar gains a named frame range (the shape of the motion grammar's `WCUT`: `N<state> A<first> A<last>`), so an object's idle, near, hover, press, lit, busy and caught are cuts of one timeline and the site plays `state(name, T)`. Required.
+3. **Kinetic 3D type in the world.** A text piece whose letters are instanced rows from `textMesh(font, text, { perLetter: true })`, lit by the key light (`js/render/world2-text.mjs`, as the cinematic style guide asks). Required: the FINAL lockup and the wordmark.
+4. **Material v2 in the world look's object kit.** Chrome with the room environment, crystal (transmission, rim, facets, film glow) and emissive maps on world objects. The channels exist in the pieces program. The world kit's five materials do not read them. Required for the fusion.
+5. **The hour.** `setLook({ hour })` derives the key's direction and colour and the hemisphere from one number, and one far panel piece wears it. Exists in parts (key, exposure, fog knobs). The derivation is new. Required.
+6. **A moving point light with reach.** Slot 1 of `setPointLight` exists. Add a falloff radius the host sets and a cap so two sweeps never add, for the light that runs a rail ahead of the camera. Optional: the run of lit rail segments gives the effect without it.
+7. **Rack focus in the world look.** The cinema runtime has `LENS` and `LENSTO` for the game player, and `post.mjs` has depth of field for the studio frame. The world look's comp has none. Optional: measure on SwiftShader first.
+8. **Parented pieces with rotation keys as a mechanical rig.** Parents exist in the GLB export, keys exist in the animate grammar. Confirm a child turns about its parent's hinge in the world look, so the stamp arm, the lid, the sign and the seal stones need no skinned rig. Required, small.
+9. **Mirror twins on in the world.** `MIRROR .55` and the `mirror` knob exist and are off because there was no floor. The deck turns them on. Exists.
+10. **A sound layer on the beat grid.** Not built anywhere on the site. The game runtime has `CUE` and `LOOP`. A site layer would be one short synthesized cue per state from a records file, off by default, a toggle at the dock, never autoplay. Later, after the hall scores 8/10 silent.
+11. **The studio can preview a hall object in its district.** `previews/object.html?o=<id>` shows one object. A preview of the district (plinth, cube, desk, gate, drum, towers) in the hour's light lets the 3D lane judge composition before the site does. Optional.
+
+### 9. Two decisions for the owner
+
+1. **The twist in the intro, or on home.** This treatment puts "a keeper signs twice and loses its bond" inside the intro as shot 5, pressed by the visitor. The alternative keeps the intro on the happy path (shots 0 to 4, then 6) and plays the cheat on home's "why it holds" show. **Recommendation: in the intro.** Kishōtenketsu needs its ten, "fair by design" is the claim the site exists to make, and the cost is one desk state and one page state that phase 3 builds anyway. The condition stands on the same screen.
+2. **Sound now or later.** Build the sound layer (item 10) in the first build, off by default, or leave it "not built" until the hall scores 8/10 silent. **Recommendation: later.** The beat grid is written so the cues land on the same beats when they come, and a silent hall that scores 8/10 proves the picture carries the story on its own.
+
+Everything else here takes the safest option, built modular and fast, and is not re-asked: no characters, one lens, hands-on with one unprompted bar, the role tags at the things each role will use, the lore words off every screen.
+
+Score of this section on `npm run copy:check` (2026-11-08): 4/5. The one match is the word "journey" in the research table, where it is the title of thatgamecompany's game and stays (copy law 12). The check also holds "Ghost" once, the title of the 1995 film, for the owner. The whole file scores 3/5: its other matches ("landscape", two lists of three) are in the "Color roles" and "Home: colour as data" sections of 2026-10 and were there before this section.
+
+## Why, how, what (2026-11-08)
+
+Reader: the owner, who supplies the missing why and approves the order before any page is rebuilt. Then the writer of the intro and of each page. Status: plan and words only. No code, no tests, nothing committed. Layer: app (the defxn site). The kernel learns no word here.
+
+Owner's words, 2026-11-08: "Not good enough. It doesn't build up properly; it goes straight to action instead of the why, the philosophy: what DeadArk, FXN, CR3TV and the Trivium Institution stand for. That's the core. Then how it happens: build the new internet, your chain, create an economy, get funded, create a chain, deploy an app, purchase a domain... we are covering 10 of 100."
+
+How this section was made. Every line names the file it comes from. The why was first written as "not found" after a search of the chain docs alone. The owner said it exists, and a second search of the brand folders found it (section 1 names every folder searched). No philosophy is invented: every line of the why is a quotation with its file. Older files use the old names. This section translates them (FXN for the chain, DEFXN for the kernel and the family). The status words are the ones of "Direction and the claim check", pass 2: `Live`, `Partial`, `Not built`, `Unverified` from `docs/status.md`, or `Landed`, `Tested`, `Measured`, `Not run`, `Plan` from the roadmap. `Building` is the catalog's own word (`assets/kit/defxn-product.js`, `status: "building"`). A product with no catalog word and no evidence record is `Unverified`, never live.
+
+Files read for this section: `AGENTS.md`. `docs/status.md` (`flux/defxn/docs/STATUS.md`). `docs/evidence/public-claim-inventory.md`. `/Volumes/PortableSSD/docs/fxn-vs-osf-2026-10-31/keeper-work/FACTS-2026-11-05.md` (updates 1 to 43). `/Volumes/PortableSSD/docs/fxn-vs-osf-2026-10-31/devnet-roadmap.html`. `/Volumes/PortableSSD/docs/README.md`. `/Volumes/PortableSSD/docs/DEFXN-NAMES-ONE-SYSTEM.md`. `/Volumes/PortableSSD/docs/FXN_ID_SECRET_KEY_v0.md`. `/Volumes/PortableSSD/docs/FXN-STORAGE-WIN-WIN-DESIGN.md`. `/Volumes/PortableSSD/docs/GAME-BUILDER-VISION.md`. `/Volumes/PortableSSD/docs/DEFXN-UNIFIED-EXPERIENCE-VISION-v0.md`. `docs/whitepaper-chain-era.md` and `docs/mainnet-readiness.md` (both marked superseded, read as history only). `assets/kit/defxn-product.js`. `js/content/site-pages.js`. `/Volumes/PortableSSD/deark/ark-app/branding/CORE_PHILOSOPHY.md`. `/Volumes/PortableSSD/deark/ark-app/docs/DEAD_ARK_PROJECT_PLATFORM_ETHOS.md`. `/Volumes/PortableSSD/deark/ark-app/README.md`. `/Volumes/PortableSSD/deark/articles.deadark.com/src/app/page.tsx`. `/Volumes/PortableSSD/deark/chat.deadark.com/README.md`. `/Volumes/PortableSSD/cr3tv/cr3tv-network-desktop/README.md`. The memory hubs `hub_economy_rulings.md`, `hub_names_identity.md`, `hub_apps_products.md`, `hub_chain_architecture.md` and the memories they link (cited by file name below). For the why: `/Volumes/PortableSSD/ops/dead-ark-content/` (`projects/INDEX.md` and its eleven brand files, `README.md`, `ARCHITECTURE.md`, `LAWS.md`, `NETWORK_MODEL.md`, `CANONICAL_CONCEPTS.md`). `/Volumes/PortableSSD/library/Learning/TriviumFramework/` (`00_README.md`, `01`, `02`, `03`, `04`, `05`, `06`, `10`, `14`, `26`, `63`). `/Volumes/PortableSSD/studio/tarbez-ark/Platform.md` and `Laws.md`. `/Volumes/PortableSSD/studio/subzero/README.md` and `js/content/manifests/*.js`. `/Volumes/PortableSSD/deark/ark-app/claim-stack-portable/FRAMEWORK_REFERENCE.md`. `/Volumes/PortableSSD/deark/public-ark/src`. `/Volumes/PortableSSD/trust-language-models/README.md` and `docs/architecture/claim-stack-trivium-layer.md`. `/Volumes/PortableSSD/flux/defxn/docs/whitepaper.md` and `resolver-math.md`. `/Volumes/PortableSSD/flux/flux-grammar-atlas/docs/FXN-GRAMMAR-PHILOSOPHY.md`. The spec the CR3TV README links, `shared/flux-spec/spec/ecosystem-defi-rollout-v1.md`, is not on this drive: `shared/` is empty here.
+
+### 1. WHY: one philosophy, FXN at its core, each brand one side of it
+
+Owner, 2026-11-08: "FXN is the core, while all these brands form one unified philosophy that I have designed. Each describes a side of me."
+
+The family is written down. The registry is `/Volumes/PortableSSD/ops/dead-ark-content/projects/INDEX.md` (May 2026), one founding file per brand: Dead Ark, Trivium, BesUp as core infrastructure. CR3TV, Tarbez, AYTAR, Besbes as creative networks. Isteda, SAITRA, DedNews as domain platforms. The method they all use is the Trivium Framework, a 149-file curriculum at `/Volumes/PortableSSD/library/Learning/TriviumFramework/`. The chain came after these files, so none of them names FXN. Its own why is in the chain's rulings. Subzero and the micro AI (TLM, the DPN) have their own files and belong to the same body of work.
+
+**The shared idea, in the docs' own words.** One sentence per line, each from a named file. Where two brands say the same thing in different words, both are cited: that is the evidence that the philosophy is one.
+
+| The idea | Where it is written |
+|---|---|
+| A claim carries what makes it true and what proves it. "Primary + Complement + Reference." "A smaller stable claim is stronger than a larger unstable one." | `library/Learning/TriviumFramework/03_CLAIM_STACK.md`. `ops/dead-ark-content/projects/besbes.md` 3.2 ("A claim that survives pressure was specified under pressure"). `BesUp.md` R.06. This file, pass 2 of the claim check |
+| Corrections are appended, never overwritten. "The original record stays visible. We treat silent edits to published work as a governance failure." | `trivium.md` commitment 02. `AGENTS.md` "Future law only: you do not change the past". `tarbez.md` archive law ("A revision is a new index entry, not a quiet overwrite"). `besbes.md` 3.4 |
+| Coherence is engineered, not assumed. "The Trivium Concept is the core idea that coherence and interpretability must be engineered, not assumed." Drift has a name: capture, drift, ossification, entropy. | `trivium.md` sections 2 and "The concept". `01_PURPOSE_LIMITS_AND_EVIDENCE.md` |
+| The reason decays first, so the reason is written down and reissued. | `tarbez.md` section 4. `besbes.md` section 4. `AGENTS.md` "Every doc, commit, comment and error string is training data" |
+| Infrastructure instead of incentives. A rule holds because the structure refuses the abuse, not because someone promised. | `deark/ark-app/branding/CORE_PHILOSOPHY.md` section 3. Memory `fair_by_design_not_hope.md` ("make the abuse unrepresentable or refused by the chain, not prevented by a promise"). `flux/flux-grammar-atlas/docs/FXN-GRAMMAR-PHILOSOPHY.md` ("What a grammar cannot spell, nobody can send"). `FACTS-2026-11-05.md` update 13 ("Security belongs in grammar and architecture") |
+| Identity is structural. "Identity Becomes Routing: identity is infrastructure." "Identity is not declared. It is revealed through behavior." "Identity = archive." | `ops/dead-ark-content/LAWS.md` L02. `CORE_PHILOSOPHY.md` section 5. `CR3TV.md` principle 7. `tarbez.md` section 4. The FXN ID: `FXN_ID_SECRET_KEY_v0.md` and claims row 1 ("Only your key writes to it") |
+| Verification is not trust. "The trail is the proof." Anyone audits by walking the chain. Every number names its machine. | `LAWS.md` L06. `saitra.md` ("Every action has a reasoning trail"). `docs/whitepaper.md` section 1 ("Anyone audits by walking the signature chain"). This file, pass 2, question 3 |
+| No hidden ranking. The reader, not the platform, decides what enters. "No algorithm." "Scope-first." "Threads are sorted by quality of citation, not popularity." | `CR3TV.md` principle 2. `dedark.md` section 6. `isteda.md` section 2. `deark/articles.deadark.com/src/app/page.tsx` line 11 ("with no hidden ranking"). `deark/public-ark` ("Nothing is secretly ranked to keep you hooked") |
+| Reversibility and exit. "Undo, exit and cooling-off preserve learning and dignity." "No platform lock-in." One honest node keeps a chain alive. | `LAWS.md` L07. `dedark.md` section 5. Memory `no_point_of_failure_one_node_keeps_chain.md`. Memory `fxn_name_rent_rulings.md` ("isolation from the main internet, not competing with it") |
+| Nothing is promised. Outcomes are earned. No hype, no persuasion. The system "does not convince. It allows." | `CORE_PHILOSOPHY.md` sections 1 and 6. `Dead-ark.md` "Ethos". `tarbez.md` law 19 ("The wearer is never the audience"). `docs/COPY-LAWS.md` (via `AGENTS.md`). This file, pass 3 |
+| Restraint. One thing at a time, and the pause is part of the design. "The work is recognized by what it removes." "Give people room to take something in before asking for the next move." | `tarbez.md` section 2. `studio/subzero/js/content/manifests/*.js` (the purpose lines). `BesUp.md` R.05 ("No streaks, no scores, no congratulations"). `docs/PRODUCT-DESIGN-LAWS.md` (via `AGENTS.md`) |
+| Show it working before explaining it. "A control that visibly changes something teaches faster than a definition." | `studio/subzero/js/content/manifests/*.js`. Memory `defxn_site_responds_to_you.md`. This file, pass 3, question 5 |
+| Participation is optional and a pseudonym is enough. "Legal identity is never required to participate." "Membership does not gate access to reading, citation, discussion, or correction." | `CR3TV.md` principle 4. `trivium.md` commitment 03. `isteda.md` section 3. The FXN ID is a file you hold, `FXN_ID_SECRET_KEY_v0.md` |
+| Those who do the work are paid by those they serve, and growth is paid from the network's revenue, never from the buyer. "Readers fund the beats they want to keep alive." "Earning through helping others grow." | `dedark.md` section 6 ("Fuel-first"). `CORE_PHILOSOPHY.md` section 11. Memory `referrals_discounts_rulings.md`. Memory `resolver_pricing_owner_answers.md` (FINAL MODEL: providers paid at cost from the mining pool) |
+| Speed is the design. A check that slows the hot path is a failed check. | `FACTS-2026-11-05.md` update 13. Memory `speed_is_the_design_security_in_grammar.md` |
+
+**Why FXN is the core.** Every line above is a rule about claims, records, identity and correction. A chain is where such rules stop being a policy and become a structure. On FXN a record is signed by its key, a grammar refuses what it cannot spell, a correction supersedes and never rewrites, a receipt is something anyone can check, and a safe has no private key. That is the Claim Stack, the append-only archive and "infrastructure instead of incentives" built into a kernel. The brand files predate the chain and say nothing about it. The sentence above is derived from the table and is marked so. Owner to confirm it in his words.
+
+**The side each brand shows.** One line of what it is and one of what it stands for, from its own file. The site may use the words in the "What it stands for" column. It may not use any number from these files (the counts in `CR3TV.md` section 9 and `trivium.md` "What it does" are project definitions written in May 2026 and carry no evidence record).
+
+| Brand | What it is | What it stands for | Source |
+|---|---|---|---|
+| **FXN** (chain and coin) and **DEFXN** (kernel, infrastructure, the family's home). One brand. | A new internet in the making. Every FXN ID keeps its own chain, one keeper's receipt makes a payment final, anyone can start a chain. Today on test nodes, nothing live. | Fair by design, not by hope: "I spent decades building this and I want to make sure it is fair for everyone and no one can come and mess it up for others." Show the rules and the live numbers, never claim. No point of failure: "truly unstoppable internet." Think in dense wires, not like a traditional blockchain. | this file, section 2 of the claim check. Memory `fair_by_design_not_hope.md`. Memory `fxn_genesis_allocation_2026_10_21.md`. Memory `no_point_of_failure_one_node_keeps_chain.md`. Memory `genesis_upfront_and_dao_first.md`. Memory `merge_all_names_to_fxn_brand.md` ("DEFXN IS FXN, THEY ARE ONE") |
+| **Dead Ark** (DeadArk, DeArk. Chain Daro) | "A local social network and publishing infrastructure for people, communities, businesses, projects, publications, and institutions to connect through shared interests and place." Surfaces: articles, chat, write, threads, docs, maintainers. | "Dead Ark is a system, not a stage." "Ownership over exposure. Process over performance. Contribution over identity. Signal over noise. Reality over simulation." "Dead Ark does not chase attention. It builds infrastructure." "Dead Ark gives people and groups a place they can keep." | `ops/dead-ark-content/projects/Dead-ark.md`. `deark/ark-app/branding/CORE_PHILOSOPHY.md`. `deark/ark-app/docs/DEAD_ARK_PROJECT_PLATFORM_ETHOS.md`. `deark/public-ark/src/components` (the about copy). Chain: memory `chain_model_native_chains_and_custody.md` |
+| **Trivium** (the Framework, the Institution, the Press) | The Framework: "a systems framework for keeping systems coherent, interpretable, inspectable, and correctable under pressure," two wrappers (Claim Stack, Identity Layer), seven cycles, sixty-three steps. The Institution: "Independent Research & Publishing Institution. Building coherent systems through research, books, and implementation." Three in one: a research archive, a publishing house (Trivium Press), an implementation library. | "Coherence as a property an institution can lose." Five commitments in priority order: public access first. Corrections are appended, not overwritten. Participation is optional. Funding is structurally non-coercive. No role survives its holder. "We don't claim the design is finished. We claim it is legible, falsifiable, and improvable in public." "We optimize for outliving the people who built us." | `library/Learning/TriviumFramework/00_README.md`, `01_PURPOSE_LIMITS_AND_EVIDENCE.md`. `ops/dead-ark-content/projects/trivium.md`. `deark/ark-app/claim-stack-portable/FRAMEWORK_REFERENCE.md` |
+| **CR3TV** (chain CR3) | "A creative production network ... structured like a studio system, not a feed." Four layers: Projects, Studios, Field, Profiles. "A network for making, not posting." | "Creativity should be treated as infrastructure, not as content." "If a platform makes you a better performer, it has done its job for the platform. If a platform makes you a better maker, it has done its job for you. We are building for the second." "The unfinished is the point." | `ops/dead-ark-content/projects/CR3TV.md`. The desktop today: `cr3tv/cr3tv-network-desktop/README.md`. Chain: memory `flux_economy_token_naming.md`, memory `fleet_roles_and_upgrade_authority.md` ("cr3tv later") |
+| **Tarbez** | "A creative identity system": atelier, studio and press under one authorship. Fashion, direction, media, motion, code. Releases in volumes, not seasons. | "Identity is structural, not graphic." "Restraint is a kindness, not an austerity." "The reason is the part that decays first." "Quiet royalty, not loud authority." The laws are binding: "A garment, image, or release that breaks a Law here does not ship under the Tarbez name." | `ops/dead-ark-content/projects/tarbez.md`. `studio/tarbez-ark/Platform.md`. `studio/tarbez-ark/Laws.md` |
+| **AYTAR** | "A practice platform": one album, one movement vocabulary, one lyrical system, one live format, published as a single state. "One volume at a time. Built through repetition." | "Body first." "Pressure, not propulsion." "Repetition is the method, not the constraint." "Discipline is the freedom, not the cost of it." | `ops/dead-ark-content/projects/aytar.md` |
+| **Besbes** | "An operating network for honest systems": Dead Ark as the runtime, Trivium Institute as the record, Claim Stack as the protocol. "Three surfaces, one system." The owner's own body of work, Tunis and Berlin. | "Drift is the slow conversion of intentional design into invisible convention." "No ticket, no claim. No claim, no commit." "Observation before performance. Claim before commit. Refusal as design." | `ops/dead-ark-content/projects/besbes.md` |
+| **BesUp** | "Operational memory, not a productivity tool." The structural memory of an operator who runs a portfolio across years. Built on the Trivium and the Claim Stack. | "Hold the long arc. Quietly." "Drift is honey, never red." "Memory before action." "It refuses to celebrate motion." | `ops/dead-ark-content/projects/BesUp.md` |
+| **Isteda** | "A structured interfaith knowledge environment." Discussions, schools and groups, a library, profiles, kept apart by design. Invitation only, text first, slow. | "A house for difficult questions." "Disagreement is not the enemy of understanding. Hurry is." A patient platform that optimizes for deposit, not throughput: "Does this leave something worth keeping?" | `ops/dead-ark-content/projects/isteda.md` |
+| **SAITRA** | "A co-pilot, not a black box": a trading agent on Solana markets where every decision carries its reasoning. | "The pattern is the language. The trail is the proof. The trader stays in charge." "Trade transparency for performance." "If the bot cannot state the trade in this form, it does not take it." | `ops/dead-ark-content/projects/saitra.md` |
+| **DedNews** | "A decentralized publishing and curation platform for primary-source news": a wire where the people inside the story publish it, scoped by the reader, funded by the reader. | "The wire, not the page." Source-first, scope-first, fuel-first. "The people who are the news should be able to publish it themselves." | `ops/dead-ark-content/projects/dedark.md` |
+| **Subzero** (token SUB) | "An independent design and experimentation studio. We build rich digital experiences with a purpose: to enrich, educate, and make room for discovery." Publishes its whole copy to the mesh as one archive under `subzero.ark`. | "Show the idea working before explaining it." "Every step should have a reason." "Open questions are worth publishing." "Work in progress teaches more than a finished surface." | `studio/subzero/js/content/manifests/*.js`. `studio/subzero/README.md`. Memory `subzero_mesh_publishing.md`. Memory `flux_economy_token_naming.md` |
+| **TLM and the DPN** (the micro AI) | "DeadArk Micro-AI Models": small, auditable model pieces. A dictionary that answers to a model a person designs. A Trivium Framework micro-model among them. "It is not an LLM." | Nothing a person states is measured as the system's own. A guess exists only as a proposal that prices itself. Evidence freezes. Code never freezes. A refusal names what it needs. "Context is the user's to control." | `trust-language-models/README.md`. `trust-language-models/CLAUDE.md` (the E program ledger). `library/Learning/TriviumFramework/14_TRAINING_AND_EVALUATION.md`. Memory `dpn_user_controlled_context.md`. `scripts/lib/refusal.mjs` (via `AGENTS.md`) |
+
+**How they relate, as the docs have it.**
+
+- Technically: one kernel and one base network. DEFXN is the kernel and the family's home. FXN is its chain and coin. Dead Ark (Daro), CR3TV (CR3) and Subzero (SUB) are networks or tokens on it, each with its own genesis from the same table record and FXN's bands as floors (`fxn_genesis_allocation_2026_10_21.md`, "Network template decisions". `flux_economy_token_naming.md`. `fleet_roles_and_upgrade_authority.md`). Trivium's publishing can run on Dead Ark (`ops/dead-ark-content/README.md`: TI "can publish on Dead Ark").
+- As brands: the owner keeps the names apart. "Defxn is Fxn but not flux, flxd, flx, ark, dearkos" (`merge_all_names_to_fxn_brand.md`). `ops/dead-ark-content/README.md` adds a boundary of its own: "Dead Ark does not own or claim authorship of the Trivium Framework." The Framework is independent. The Institution uses it. Dead Ark uses its lenses "without implying ownership."
+- As a body of work: `besbes.md` is the one file that names the whole as one thing, "the registry of one body of work, the press that publishes its reasoning, and the protocol that keeps the two from drifting apart." That file predates the chain. With the owner's word of 2026-11-08 the core of that body is FXN.
+- The method is explicit in the family's own content rules: "Do not make Trivium / Claim Stack / Dead Ark philosophy mandatory entry points. Most readers enter via domain value first." "The philosophical spine is emergent: the worldview is inferred through repeated structural integrity, not preached." (`ops/dead-ark-content/ARCHITECTURE.md`, `NETWORK_MODEL.md`). This is the same rule as the site's pass 3: show, then tell the condition.
+
+**Still not sourced, and where I looked.** Who publishes defxn.com as a legal entity: no file names a company or a foundation. `besbes.md` names the owner's own operating network and `trivium.md` names an institution. Searched: `ops/dead-ark-content/` (all files), `library/Learning/`, `platform/`, `studio/`, `deark/*/README.md` and `deark/ark-app/docs`, `deark/ark-app/branding`, `deark/public-ark/src`, `cr3tv/`, `docs/` and `docs/archive/`, `flux/defxn/docs/`, `trust-language-models/docs/`, and every memory file. `shared/` is empty on this drive, so `ecosystem-defi-rollout-v1.md` was not read. The Dead Ark founding file (`Dead-ark.md`) and the ark-app README disagree in register: the README still opens with "Web3 Social Gamification Platform, Solana, EVM, XP, souls". The founding file is the word.
+
+**Questions for the owner.** Four, none of them "what do you stand for": the docs answer that.
+
+1. Which brands does defxn.com name? All twelve, or FXN and DEFXN with Dead Ark, CR3TV and Trivium as the three the intro lights?
+2. The publisher line in the footer: the Trivium Institution, Besbes, or another name?
+3. The derived core sentence under "Why FXN is the core": confirm it, or give it in your words.
+4. Dead Ark's spelling on the site (Dead Ark, DeadArk, DeArk), and whether the ark-app README's "Solana, EVM, XP, souls" opening is marked as history.
+
+### 2. HOW: the path a person takes in the new internet
+
+Ordered the way a person meets it. Each step: one plain line, the products that serve it, the evidence, the status, and the words the site may use. Nothing planned is called live.
+
+| # | Step | Plain line | Products that serve it | Evidence | Status | Words the site may use |
+|---|---|---|---|---|---|---|
+| 1 | Get an FXN ID | You make one identity file, locked by your PIN and password. It signs everything you do. You create it on any signing site through the one gate. | fxn-auth (the FXN ID gate, gate.defxn.com), FXN Browser, `/auth`, `/identity` | `FXN_ID_SECRET_KEY_v0.md`. Memory `hub_names_identity.md` line of 2026-11-05 (Create an FXN ID on every signing site through the one gate). `FACTS` update 5 | Landed (the one gate on every signing site). Secret Key v10: sealed and opened in ark-ui, 49 of 49 tests. No writer makes v10 yet, so `Not built` on the user path | "Your FXN ID is a file you hold. It signs for you. Create it on any signing site through one gate." |
+| 2 | Your own chain | Every FXN ID keeps its own chain of signed records. Only your key writes to it. | `/chain`, DB Studio (Building), the Data resolver (Building) | `docs/status.md` row "Per-identity signed records". BENCH-012 | Live (the record kind). DB Studio: Building | "Your FXN ID keeps its own chain. Only your key writes to it." |
+| 3 | Pay, and it is Final | You pay. One bonded keeper signs the receipt and the payment is final. No vote. 30 payments a day are free. | FXN Browser wallet, `/account` | `FACTS` updates 3, 9, 36. Roadmap "Deploy rehearsal 1" (one digest on 5 of 5 nodes) | Landed, Measured on 5 test nodes on one machine (flx-nyc1). Not a network | "One keeper signs the receipt and the payment is final. No vote. Proved on 5 test nodes on one machine. Nothing is live." |
+| 4 | Hold a name (`.fxn`) | You claim a flat name like `radio.fxn`, point it later, and renew it for 3 EUR a year paid in FXN. On the test network names are free and end in `.fxndev`. | Domains (domains.defxn.com), FXN Browser | `DEFXN-NAMES-ONE-SYSTEM.md`. Memory `fxn_name_rent_rulings.md`. `FACTS` update 9 names lines, update 41 | Landed (one name system in dense-wire). Claims: only the genesis key for now. Rent: chain side built in a worktree, uncommitted. The surfaces `Not built` | "A .fxn name is a signed record with one verifier. For now only the genesis key can claim one." |
+| 5 | Build an app and ship it | You write it in Code, give its records a grammar, approve one Bundle on your machine, publish exact versions, bind a name, and stand up a test environment. | Repo, Code, DB Studio, Grammar, Resolver Studio, Bundles, Packages (FXN Packages), Remote | catalog. Memory `app_release_is_a_bundle.md`. `FACTS` done-today (Studio, Deploy, Explore flow end to end on a round 14 node). `FACTS` update 33 (Repo page after genesis), update 41 (FXN Packages) | Bundles, Remote, Studio, DB Studio: Building (catalog). Repo, Code, Grammar, Packages: no catalog word, no evidence record: Unverified. The unified deployer: `Not built` (`docs/status.md`) | "Build it in Code. One Bundle is your release. A name points at it. Each product shows its own status word." |
+| 6 | Start a chain and launch a token | One signed launch record gives your resolver its own chain, built from capabilities, with its own grammar. A token launches on a curve and moves to a pool when the curve completes. A launch needs the multisig's approval at genesis and costs 30,000 test FXN. | Deploy, Explore, Resolver Studio, the launch product (catalog id `launch`. Its display name fails the banned-words check and becomes FXN Launchpad) | CAP-010 to CAP-013 (`docs/status.md`). Roadmap "Launchpad steps". `FACTS` update 24, 37. This file, claims row 5 | Resolver launch: Partial (development network). Launch and curve lanes: Landed. Launchpad wiring: on a side branch, not merged. On real machines: Not run | "You can start your own chain and launch a token on the same kernel. Built, waiting for the devnet. A launch needs the multisig's approval at genesis." |
+| 7 | Get funded | Value comes in over the bridge. A deposit runs from your account. The public sale is the same deposit taken as an event. The sale is one 30-day phase at 0.90 EUR, then a pool sets the price. The DAO can fund a service round from the investing fund. | Genesis, Treasury, DAO, the bridge | `FACTS` updates 24, 27. Roadmap "Deposits and the sale", "Founder bridge test". Memory `fxn_sale_one_phase_then_pool.md`. Memory `genesis_upfront_and_dao_first.md` | Bridge lane and sale order: Landed, Tested in the lane, Not run on nodes. Vault: not made. Founder bridge test: Not run, blocks mainnet. Sale phase: built on a branch (2026-10-26), merge state not re-read | "Value comes in over a bridge, and a deposit and the sale use the same path. Built. Its founder test has not run." |
+| 8 | Create an economy | The token: 1,000,000,000 FXN, fixed. 47 percent mining, 3 sale, 12 operations, 11 service fund, 12 investing, 9 creator, 6 co-founder. Customers pay measured cost. Providers are paid at cost from the mining pool. Credits buy outside services. Referrals pay 3 to 15 percent from network revenue. | Genesis (`/ring`), Treasury, the credits capability (`flx-cap-credits`), referrals and discounts (defxn-chain resolvers), name rent | memory `genesis_upfront_and_dao_first.md`. Memory `native_coin_supply_cap_1b.md`. Memory `resolver_pricing_owner_answers.md` (FINAL MODEL). Memory `apikey_capability_key_pool_rulings.md`. Memory `referrals_discounts_rulings.md`. Memory `interest_revenue_split_ruling.md` | Allocation: Landed (the genesis set pays the six plan safes, roadmap). Credits: on branch `kv1-credits-lane`, not merged, after genesis by ruling. Referrals, discounts: `Not built`. Interest split: `Not built`. Rent: chain side uncommitted | "One billion FXN, fixed. Where it goes is a table on the chain, and the page reads it." The numbers appear only beside the table they come from. |
+| 9 | Govern | A DAO is a roster, a threshold and signed decisions. A safe has no private key. 4 of 5 sign a move. While the network is young the multisig changes fees and settings. That power ends when attesters are filed. | DAO (dao.defxn.com), Treasury (treasury.defxn.com), Genesis | roadmap "DAO probes" (12 pass, 0 fail, flx-eul-4c). `FACTS` updates 17, 20. This file, claims rows 9 and 10 | Landed, Tested on one machine. Not on the devnet. Multisig power ending: Plan | "A safe is an address with no private key. Its rules alone move money, and the multisig signs 4 of 5. Tested on one machine, not yet on the devnet." |
+| 10 | Run a node and earn | A keeper posts a bond, signs receipts and is paid. A pinner keeps copies off the hot path and is paid per copy consumed. A browser tab signs segments and earns FXN. Storage and compute work are paid at cost from the mining pool. At genesis only our machines run keepers. | Node (nodes.defxn.com), FXN Browser (`/download`), Storage (Building), keeper and pinner (kernel roles) | catalog. `FACTS` updates 3, 10, 13, 25. Memory `browser_earning_per_id_work_not_replication.md`. Memory `receipt_is_first_copy_earn_per_consumption.md`. CAP-001 | Keeper: Landed. Node: Partial (CAP-001, no independent-host run). Earning per copy: unmeasured until L15 (`FACTS` update 10). Outside keepers: Plan | "A keeper posts a bond. If it cheats, the bond pays the victim. Pinners keep copies and catch it. Built, not yet run on a real network." |
+| 11 | Store data | Your records live on your chain. Files are stored as compressed, coded pieces at one price per GB-month. A pin is a hash-checked write into the keeper store. IPFS is removed. | Storage, DB Studio, the Data resolver, Bundles (pin a release) | `FXN-STORAGE-WIN-WIN-DESIGN.md` (a design, nothing built unless a line says so). Roadmap "IPFS removed" and "Pin into the keeper store" (Measured, flx-nyc1) | Storage product: Building. Priced storage: Plan. Pin into the keeper store: Landed, Measured | "A pin is a hash-checked write into the keeper store. Measured on one machine." |
+| 12 | Publish and talk | Posts in content types you define as grammars. Sealed mail between FXN IDs. Signed notifications. Turn-based matches with every move signed. Live radio and video between tabs. On Dead Ark: long-form articles with no hidden ranking, encrypted chat, threads. | Posts (Content resolver), Mail, Inbox (Notify resolver), Play (Games resolver), Radio (Streams resolver). The Dead Ark apps: articles, chat, write, threads | catalog. `FACTS` update 39 (the four social repos after genesis), update 29 (defxn-radio after genesis). `FACTS` done-today (Mail real pages on branch `mail-pages`). `chat.deadark.com/README.md` ("Channel subscriptions have no live implementation yet") | Posts, Mail, Inbox, Play: Building (catalog), after genesis by ruling. Radio: no catalog word, after genesis: Unverified. Dead Ark apps: their own readiness docs. Chat says a passing local build "does not establish ... live message delivery" | "Each of these is its own resolver with its own chain. Each shows its catalog status beside its name. They join after the devnet starts." |
+| 13 | Hold and trade assets | Permanent verifiable assets: papers, collections and the listings that trade them. Every item carries its signed history. | PVA, Collections, Market, Books | catalog. `FACTS` update 30 (collections, market, pva held after genesis. Books folds into the articles site. Nft-cli Sale moves no funds) | No catalog word. Held after genesis. Sale moves no funds yet: Unverified for the site | "Papers, collections and listings, each with its signed history. They join after the devnet starts." |
+| 14 | Swap | Swaps are signed resolution in batches. On keepers a swap reaches Final after the pool batch. | the launch product's curve and pool, Explore | BENCH-012 (2026-10-10: 256 swaps a batch, 13.874 ms, 60 of 60 audits). Roadmap "Swap to Final on keepers" (28 of 28 Final, median 30.0 s on flx-nyc1, a fixed wait) | Measured, dated. The FXN pool on the base chain: `Not built` (memory `fxn_sale_one_phase_then_pool.md`) | "256 swaps in one batch, 13.9 ms, every audit passed. Measured 2026-10-10 on 10 replicas." |
+| 15 | Check every claim | Every launched resolver with its history, re-checked in the page. Every number with its machine, its date and its condition. | Explore (explore.defxn.com), `/stats/now`, Claims (on hold), the evidence registry | CAP-014 (public hosting not established). `docs/evidence/registry.md`. `FACTS` update 28 | Explore: Partial. Stats: the pages exist in the site. Their figures trace to BENCH-012, 013, 015 and INFRA-001 (`site-pages.js` STATS_RUNS). Claims: on hold | "Every number names its machine. Check it yourself." |
+| 16 | Use an outside service with credits | Claude is the first app on the API key capability. Anyone adds a key to the pool and earns the price less a 1 percent cut. The node sees a unit word and a price, never the service. | claude.defxn.com (a Bundle), `flx-cap-apikey`, `flx-cap-credits` | memory `apikey_capability_key_pool_rulings.md`. `FACTS` update 38 | Built on branches, designs unconfirmed, after genesis by ruling: Plan for the site | Appears only in a "what comes next" place: "Outside services run as apps, paid in credits. After the devnet starts." |
+| 17 | Enter the world | The portal game: an open world where other people's worlds are doors, and the studio that builds a world stands inside it. | fxn-3d (`world/portal/game.html`), World Studio | `GAME-BUILDER-VISION.md`. Memory `portal_worlds_plan.md` (owner scored the game 2 of 10 on 2026-11-07. The world lore is confirmed) | Plan. Not a site page | Nothing on the site until the owner confirms the game. |
+| 18 | Start a network of your own | A network on DEFXN runs its own genesis from the table record, pays a launch fee and dues in FXN, and keeps FXN's bands as floors. Dead Ark and CR3TV are the first two. | Genesis, Deploy. `/download` ("Create or join a network", the retired `/deploy`) | memory `fxn_genesis_allocation_2026_10_21.md` "Network template decisions". CAP-003 (named-network create and list: Partial, miner presence only). Memory `fleet_roles_and_upgrade_authority.md` | Plan (the template. Gap report in dense-wire). Create and list: Partial | Appears only in "what comes next": "Dead Ark and CR3TV start as networks on the same kernel. Planned." |
+
+Steps the owner named that this table places: "build the new internet" is the whole table. "your chain" is step 2. "create an economy" is step 8. "get funded" is step 7. "create a chain" is step 6. "deploy an app" is step 5. "purchase a domain" is step 4.
+
+History the table does not count as a step: the agreement lifecycle (CAP-006, Partial) belongs to a dropped design and is read-only. The chain-era paper and the mainnet-readiness inventory are superseded and say so at their top.
+
+### 3. WHAT: every product and capability, by step
+
+Every catalog product and resolver, and every capability the HOW table names. Status words as in the table above. "Catalog: none" means the catalog gives no status word for it.
+
+| Step | Product or capability | Kind | Catalog status | Status from evidence |
+|---|---|---|---|---|
+| 1 | fxn-auth, the FXN ID gate | capability and app | not in catalog | Landed |
+| 1 | FXN Browser (`flux/ark-browser`) | app | not in catalog | at genesis by ruling (`FACTS` update 39). Chrome of 00fddab confirmed (update 37) |
+| 1 | `/auth`, `/identity` | site pages | — | exist in `site-pages.js` |
+| 2 | `/chain` | site page | — | exists |
+| 2 | DB Studio | product, Build lane | building | Building. After genesis (update 31) |
+| 2 | Data | resolver (one chain per table) | building | Building |
+| 3 | FXN Browser wallet, `/account` | app, site page | — | at genesis by ruling |
+| 3 | Keeper receipt, Final | kernel | — | Landed, Measured on 5 test nodes, one machine |
+| 3 | Free payments, 30 a day | rule | — | Landed on the pages |
+| 4 | Domains | product, Ship lane | none | Landed (dense-wire names). The Domains page stays in genesis (update 33) |
+| 4 | Name rent, `.fxndev` | rule | — | chain side uncommitted. Surfaces Not built |
+| 5 | Repo | product, Build lane | none | Unverified. Page after genesis (update 33) |
+| 5 | Code | product, Build lane | none | Unverified (memory `flux_code_app_architecture.md`: browser signs, host never holds the key). After genesis (update 31) |
+| 5 | Grammar | product, Build lane | none | Unverified |
+| 5 | Resolver Studio | product, Build lane | building | flow works end to end on a round 14 node. After genesis (update 39) |
+| 5 | Bundles | product, Ship lane | building | Building. After genesis (update 39) |
+| 5 | Packages (FXN Packages, was mesh-registry) | product, Ship lane | none | renamed by ruling (update 41). After genesis (update 39) |
+| 5 | Remote | product, Ship lane | building | Building. After genesis (update 39) |
+| 6 | Deploy | product, Network lane | none | Partial (CAP-010, CAP-014). At genesis |
+| 6 | Explore | product, Network lane | none | Partial (CAP-014). At genesis |
+| 6 | the launch product (`launch`) | product, DeFi lane | none | lanes Landed, wiring not merged, Not run on real machines. Required at genesis (update 24) |
+| 6 | Capabilities registry and composition check | kernel | — | Partial (CAP-011) |
+| 6 | Grammar enforcement at launch | kernel | — | Partial (CAP-012) |
+| 7 | Genesis | product, Govern lane | none | at genesis. The genesis set pays the six plan safes (roadmap) |
+| 7 | the bridge (declare, mint, burn, release) | lane records | not in catalog | Landed, Tested in the lane, Not run on nodes. Vault not made |
+| 7 | the public sale (one 30-day phase) | rule | not in catalog | built on a branch (2026-10-26). Merge state not re-read |
+| 7 | the old deposit gateway | server | not in catalog | built on a branch, made to refuse to credit (`launchpad-unify`), not merged |
+| 8 | the token FXN, the allocation table | kernel | — | Landed (`src/fxn_genesis.rs` read by the genesis page) |
+| 8 | credits (`flx-cap-credits`) | capability | — | on branch, after genesis |
+| 8 | API key pool (`flx-cap-apikey`) | capability | — | on branch, unconfirmed |
+| 8 | referrals and discount codes | resolvers on the defxn chain | — | Not built |
+| 8 | the price rules for compute, storage, bandwidth | rule | — | rulings (`FXN-COMPUTE-PRICES-2026-10-29.md`). Not deployed |
+| 8 | interest revenue split 50/50 | rule | — | Not built |
+| 9 | DAO | product, Govern lane | none | Landed, Tested (12 of 12 probes, flx-eul-4c) |
+| 9 | Treasury | product, Govern lane | none | Landed, Tested |
+| 9 | safes, escrows, vested safes, weekly pay | kernel rules | — | Landed, Tested on one machine |
+| 9 | the multisig (4 of 5) | rule | — | Plan (started at genesis, step 14b of the roadmap) |
+| 10 | Node | product, Network lane | none | Partial (CAP-001) |
+| 10 | Storage | product, Network lane | building | Building |
+| 10 | keeper, pinner | kernel roles | — | Landed. Earning per copy unmeasured |
+| 10 | `/download` | site page | — | exists |
+| 11 | pin into the keeper store | kernel | — | Landed, Measured |
+| 11 | priced storage (pieces, compression) | design | — | Plan |
+| 12 | Inbox | product, Social lane | building | after genesis |
+| 12 | Notify | resolver | building | after genesis |
+| 12 | Mail | product, Social lane | building | real pages on a branch. After genesis |
+| 12 | Posts | product, Social lane | building | after genesis |
+| 12 | Content | resolver | building | after genesis |
+| 12 | Play | product, Social lane | building | after genesis |
+| 12 | Games | resolver (gtictactoe, gconnectfour, gnim, gprogress) | building | after genesis |
+| 12 | Radio | product, Social lane | none | Unverified. After genesis (update 29) |
+| 12 | Streams | resolver | building | after genesis |
+| 12 | Dead Ark: articles, chat, write, threads, ark-app | apps on the Dead Ark side | not in catalog | their own docs. Not on the genesis path |
+| 13 | PVA | product, Assets lane | none | held after genesis |
+| 13 | Collections | product, Assets lane | none | held after genesis. Local-identity still uses tweetnacl (update 30) |
+| 13 | Market | product, Assets lane | none | held after genesis. Sale moves no funds |
+| 13 | Books | product, Assets lane | none | folds into the articles site later |
+| 14 | swaps as signed resolution. Pools on launched chains | kernel | — | Measured 2026-10-10. Swap to Final on keepers Measured (a fixed wait) |
+| 15 | Claims | product, Network lane | none | on hold until the Dead Ark chain is live (update 28) |
+| 15 | `/stats/now`, `/explore` | site pages | — | exist |
+| 15 | the evidence registry | docs | — | `docs/evidence/registry.md` |
+| 16 | claude.defxn.com | app (Bundle) | not in catalog | after genesis (update 38) |
+| 17 | the portal game, World Studio | app (fxn-3d) | not in catalog | Plan |
+| 18 | the network genesis template | kernel | — | Plan |
+| 18 | CR3TV creator network desktop | app on the CR3TV side | not in catalog | "does not close production financial integration" (its README) |
+| — | `/`, `/intro`, `/how-it-works`, `/resolutions`, `/learnings`, `/resolvers`, `/ring` | site pages | — | exist |
+
+Count: 27 catalog products, 5 catalog resolvers, 1 catalog home, fourteen site pages, and 27 capabilities, rules and apps outside the catalog. Every catalog row is in the table.
+
+Two catalog words to fix before any page shows them: the DeFi product's display name fails `docs/BANNED-WORDS.txt` (it becomes FXN Launchpad), and the Govern lane's line begins "Found a network's DAO" where the owner's word for a chain is "start" (memory `defxn_site_direction_welcome_first.md`). The roadmap's step 14b also says "Found the DAO". Owner to rule whether "start" covers a DAO too.
+
+### 4. COVERAGE: what the intro and the treatment cover, against this map
+
+Counted on the tables above. A step counts as covered when a beat or a shot gives it a line of its own, not when it is named in a list.
+
+| Surface | WHY: brands with a stated why on screen (of 12 in the docs) | HOW: steps with a line of their own (of 18) | WHAT: products and capabilities shown with a status (of 60) |
+|---|---|---|---|
+| The intro's story (this file, section 5 of "Direction and the claim check", 7 beats) | 0. Beat 1 says "A new internet, built in the open." No brand's why. | 4: steps 1, 2, 3 and 15 (beats 2, 3, 5). Beat 4 names the seven lanes as a list. Beat 6 is the devnet road, not a step. | 27 catalog products as lane markers with a status word (beat 4). No capability outside the catalog. |
+| The creative treatment (7 shots) | 0 | 5: steps 1, 2, 3, 15 and 6 (shot 6, one line: "Anyone can start a chain on the same kernel"). | the same 27 by lane, on home |
+| The 14 pages of `site-pages.js` | 0 | 8: steps 1 (`/auth`, `/identity`), 2 (`/chain`), 3 (`/account`), 5 and 6 (`/resolvers`, `/resolutions`), 8 in part (`/ring`: the supply), 10 (`/download`), 15 (`/explore`, `/stats/now`). | the 27 catalog products on `/resolutions` with their catalog word. No capability outside the catalog has a page |
+| This map | 12, each with its file. FXN's core sentence derived and marked | 18 | 60 |
+
+So the intro covers 4 of 18 steps and none of the twelve whys. The pages cover 8 of 18 steps. Steps with no page anywhere: 4 (names), 7 (get funded), 8 (the economy, past the supply), 9 (govern. The old `/dao` is a redirect into Notes), 11 (store), 12 (publish and talk), 13 (assets), 14 (swap), 16, 17 and 18. The owner's "10 of 100" reads here as 4 of 18 on the intro and 8 of 18 on the pages, with the why at 0 of 12.
+
+### 5. THE BUILD-UP: a site that goes WHY, then HOW, then WHAT
+
+One rule for the order: the intro tells the why, home shows the how as a way through the world, and each page is one what. A page past the intro and home stops selling (pass 3, question 7). Every sentence passes the three gates. The hall, the objects and the beat grid of "Creative treatment" stay. What changes is what the beats say.
+
+**The intro: WHY.** Seven beats, each one press. The rehearsal line stays on screen from the first frame to the last.
+
+| Beat | What it says (reader: the newcomer) | Source of the words | What must come from the owner first |
+|---|---|---|---|
+| 1 Welcome | "Welcome to FXN. A new internet, built in the open. A rehearsal. Nothing is live." | this file, section 2 | nothing |
+| 2 Why | The shared idea, five lines at most, one per press of the lamp: a claim carries its proof. A correction is appended, never overwritten. Identity is a key you hold. The structure refuses the abuse, not a promise. Nothing is promised, everything is checked. Then the core sentence: a chain is where these rules become structure. | section 1, the shared-idea table (each line has its file) and "Why FXN is the core" | the core sentence (question 3) |
+| 3 The family | One kernel, one chain, and the brands as districts. DEFXN lights at the kernel, FXN on its chain. Dead Ark and CR3TV as two signs over two districts, dim, "planned", each with its one line from the side table. Trivium as the book beside the drum: the method the whole family reads by. | section 1, "The side each brand shows" and "How they relate" | which brands the site names (question 1). The Dead Ark spelling (question 4) |
+| 4 The sides | Press a district and its sign speaks its one line: "Dead Ark is a system, not a stage." "A network for making, not posting." "Coherence as a property an institution can lose." The twelve lines are in the side table. The owner picks which districts stand in the hall. | section 1, the side table | question 1 |
+| 5 What is built | The claims table's rows 2, 3 and 8 as three things that happen when pressed: the receipt, the bond lamp, the two-machine build. | this file, section 4 | nothing |
+| 6 What comes next | "Devnet genesis is next. Up to 16 of our 20 machines. Test money. No date until the gate passes." | claims rows 10 and 13 | nothing |
+| 7 Who are you | the four role tags and "I check claims" | this file, section 3 | nothing |
+
+The payment moves from beat 3 to beat 5. The mechanism is still done by hand, in "How it works".
+
+**Home: HOW.** Home is the path of section 2 drawn as places along one rail in the hall, in the order of the table: the card (1), the drum (2), the keeper desk (3), the sign over the gate (4), the pad with its plates (5 and 6), the bridge and the far gate (7), the seal stones and the treasury (8 and 9), the copy towers (10 and 11), the district of the social resolvers (12), the assets district (13), the pool (14), the stats readout (15), and three dim markers at the hall's edge for 16, 17 and 18. A place is lit by its status: lit for Landed or Live, half-lit for Partial or Building, dim with a "planned" label for Plan, and absent (no object) where nothing is built or measured, never a dark lamp read as zero (pass 2, question 5). The role chosen in the intro lights that role's first place. Hover on a place gives its one line from the table. Press opens its page.
+
+**The pages: WHAT.** One page per step, one job each, one dominant action. Existing pages keep their key and address. New pages go in `site-pages.js` under the five paths that exist (Understand, Build, Prove, Run, Read). The count stays near the 22 the owner set on 2026-11-05.
+
+| Page | Existing or new | Path | One job | Place in the world |
+|---|---|---|---|---|
+| `/intro` | existing | — | the why, beats 1 to 7 | the dark hall, one lamp |
+| `/` | existing | understand | the how: the path of 18 places, lit by status, with the chosen role's first place | the hero pose over the whole hall |
+| `/how-it-works` | existing | understand | step 3 done by hand: the page, the gate, the stamp, the copies, the cheat | the keeper desk |
+| `/identity` | existing | understand | step 1: the file, signing, the recovery kit | the card |
+| `/chain` | existing | understand | step 2: records, revisions, connections, trace | the drum and the book |
+| `/account` | existing | build | step 3 operational: wallet, receipts, deposit | the card and the tray |
+| `/names` | new (the retired `/account/domains` was folded into `/account`) | build | step 4: look a name up, what claiming costs, `.fxndev` on the test network. Status: only the genesis key claims today | the sign over a district's gate |
+| `/resolutions` | existing | build | step 5 and 12 and 13 as a catalog: every product with its catalog status | the lane markers |
+| `/resolvers` | existing | build | step 6: start a chain, launch a token. The multisig's approval. "built, waiting for the devnet" | the launch pad |
+| `/fund` | new | understand | step 7: the bridge, the deposit and the sale as one path, the founder test that has not run | the bridge and the far gate |
+| `/economy` | new | understand | step 8: the supply table read from the chain, cost pricing, credits, referrals, rent, each with its status word | the treasury floor beside the seal stones |
+| `/ring` | existing | understand | the FXN supply and a network's chain (folds into `/economy` if the owner prefers one page) | a district's sign |
+| `/govern` | new (the retired `/dao` redirect into Notes becomes a page again) | understand | step 9: the DAO, the safes, 4 of 5, weekly pay and vesting, the multisig's end | the five seal stones |
+| `/earn` | new | run | step 10: keeper, pinner, node tab, storage provider. What is paid, what is unmeasured | a copy tower, close |
+| `/download` | existing | run | get FXN Browser, run a node | the copy tower's door |
+| `/store` | new | build | step 11: your chain's records, pinned segments, priced storage as a plan | the copy tower's slots |
+| `/publish` | new | build | step 12: posts, mail, inbox, play, radio, each its own resolver, each after genesis. Dead Ark's apps named with their own docs | the social district |
+| `/assets` | new | build | step 13: PVA, collections, market, books, held after genesis | the assets district |
+| `/explore` | existing | prove | step 15: every launched resolver, re-checked in the page, labelled devnet | the copy towers' lamps |
+| `/stats/now` | existing | prove | step 15: every number with its machine, date and condition. Step 14's swap figures | the readout on the anchor |
+| `/learnings` | existing | read | why it was built this way, one question per note | the book |
+| `/road` | new | read | steps 16, 17, 18 and the devnet road: what comes next, each line marked Plan, no date | the twenty road markers |
+| `/auth` | existing | — | sign in with the FXN ID file | the gate |
+
+Twenty-three pages: fourteen existing and nine new. `/ring` can fold into `/economy` to land on twenty-two.
+
+**Before any page is written.** The owner answers the four questions in section 1. Beats 2 to 4 can now be written from the cited files. The one sentence that is derived, not quoted, is marked and waits for his word. Everything else in this section can be written now.
+
+**Reduction test.** The ten questions of `docs/PRODUCT-DESIGN-LAWS.md` are answered per page in that page's notes when it is built, not here.
+
+Score of this section on `npm run copy:check`: reported in the line below, written after the run. Four lists of three stay because they are quotations from the brand files (copy law 12): Trivium's "interpretable, inspectable, and correctable" and "research, books, and implementation" and "legible, falsifiable, and improvable", and Subzero's "enrich, educate, and make room for discovery". Dead Ark's six-item category sentence stays for the same reason.
+
+## Owner answers and the intro draft, why first (2026-11-08)
+
+### Owner answers
+
+- **Brands named on the site:** all of them. The site names every brand of the family: FXN and DEFXN, Dead Ark, Trivium, CR3TV, Tarbez, AYTAR, Besbes, BesUp, Isteda, SAITRA, DedNews, Subzero, and the micro AI (TLM and the DPN). Each one shows its own line from its founding file, never a number from those files.
+- **Footer:** the footer reads "FXN Bundler".
+- **The core sentence** (derived from the shared-idea table, waiting for the owner's own words): "Every rule above is about claims, records, identity and correction. A chain is where such rules stop being a policy and become structure."
+- **DEFXN in the story:** named once, as the network under the world. After that the site says FXN or a product's own name (story ruling of 2026-11-08).
+
+### The intro, beat by beat
+
+Layer: app (the defxn site). The world and its objects are fxn-3d. The words are page DOM placed in the world.
+Shape: why first. The intro tells the why and ends at the door to home, where the how begins.
+Rhythm: 120 BPM, one bar is 2 s. Each beat opens with one bar the world plays alone, then waits for the visitor.
+Always on screen: "A rehearsal. Nothing is live." (11, mono). Skip, top right.
+Type: 47 for the beat's one line, 29 for a second line, 18 for a label in the world, 11 for mono data.
+Light: one lit subject at a time. Everything else sits in the void.
+
+#### Beat 0. The void (no bar count, ends on any input)
+
+- **The world:** black. One object: the DEFXN mark in crystal (logo A06, the shared cut shape), floating at eye height. Nothing else exists yet.
+- **3D:** the mark breathes once (scale 1.00 to 1.015 over 2 s, heavy spring) and then holds still. A thin rim light runs once around its edge.
+- **The visitor:** moving the pointer turns the mark up to 8 degrees toward it (ui spring). On phone, tilt or touch does the same.
+- **The answer:** the first input lights the mark from inside. The 11 line fades up: "A rehearsal. Nothing is live."
+- **Data:** none. The void is the first idea: room before the first claim.
+
+#### Beat 1. Welcome (2 bars)
+
+- **Words:** "Welcome to FXN." (47). "A new internet, built in the open." (29).
+- **3D:** the mark sinks through a floor plate. The camera follows it down a shaft of plated rock into the hall below. Service lights wake in a ring, one per beat, cold blue to warm.
+- **Words, second bar:** "DEFXN is the network under it." (18, in the world, on the shaft wall). This is the one time the site names DEFXN this way.
+- **The visitor:** the pointer leans the camera 4 degrees as it falls. A press skips the fall and lands at once.
+- **The answer:** the mark lands on the kernel tower's crown and seats with a click of light.
+
+#### Beat 2. The shared idea (five presses, one law each)
+
+- **Words:** "Five rules hold everything here." (29). Then one law per press, at 47, each with its source brands in 11 mono under it.
+- **3D:** five stone plates stand in a half ring around the kernel, dark. Each press lights one plate and plays its scene:
+  1. "A claim carries its proof." A record slab rises, a seal glyph burns into it, and a thin proof line runs from the seal down into the floor. Sources: Trivium, Besbes, BesUp.
+  2. "A correction is added, never erased." The book opens. A page turns. The old page stays visible under the new one, slightly lower. Sources: Trivium, Tarbez, Besbes.
+  3. "Your identity is a key you hold." A crystal key forms in front of the camera, close, and turns once to show its cut. Sources: Dead Ark, CR3TV, Tarbez.
+  4. "The structure refuses abuse. Nobody has to promise." A gate of light stands across the floor. A malformed glyph flies at it and bounces off with a short danger flash. Sources: Dead Ark, the FXN grammar.
+  5. "Nothing is promised. Everything is checked." A receipt prints from a slot. A scan line sweeps it, and it lights trust green. Sources: Dead Ark, SAITRA, DedNews.
+- **The visitor:** presses each plate, in any order. Hovering a plate shows its law at 18 before the press.
+- **The answer:** each plate keeps its light after its scene, so the half ring fills as the visitor goes.
+
+#### Beat 3. FXN is the core (2 bars, then a drag)
+
+- **Words:** "A chain is where these rules become structure." (47). "One kernel. It holds structure only." (29, second bar).
+- **3D:** the five lit plates lift, turn edge-on and slide into the kernel tower. Each locks as one ring of its crown. The crown is complete when the fifth ring seats.
+- **The visitor:** drags across the kernel to turn it. It turns with a heavy spring and settles with each ring aligned.
+- **The answer:** on the last alignment a pulse runs out from the kernel along every rail in the floor. The hall's outer dark shows its first shapes.
+
+#### Beat 4. One family (a ring of districts)
+
+- **Words:** "One body of work. Each name is one side of it." (29).
+- **3D:** around the kernel, one monolith rises per brand, each in its own material from the 60-logo set: FXN in clear crystal, Dead Ark in black chrome, Trivium in white marble, CR3TV in ribbed copper, Tarbez in brushed bronze with a lit edge, AYTAR in rough stone, Besbes in plated gunmetal, BesUp in frosted glass, Isteda in pale travertine, SAITRA in cut sapphire, DedNews in printed steel, Subzero in ice, the micro AI in a small dark cube with one lamp. Each rises on its own beat (heavy spring, staggered by one beat).
+- **The visitor:** hovers a monolith. It lifts 4 percent of its height and turns to face the camera. Its name shows at 18 and its line at 11.
+- **Lines** (each from the brand's founding file): Dead Ark "A system, not a stage." Trivium "Coherence is engineered, not assumed." CR3TV "A network for making, not posting." Tarbez "Identity is structural, not graphic." AYTAR "Repetition is the method." Besbes "An operating network for honest systems." BesUp "Hold the long arc. Quietly." Isteda "A house for difficult questions." SAITRA "The trail is the proof." DedNews "The wire, not the page." Subzero "Show the idea working before explaining it." The micro AI "A refusal names what it needs." FXN "Fair by design, not by hope."
+- **The answer:** a press on a monolith runs a light from it to the kernel. The link stays lit.
+
+#### Beat 5. What is built (a status rail)
+
+- **Words:** "What exists today. Every number names its machine." (29).
+- **3D:** a rail of lamps runs out from the kernel across the floor. Each lamp is one claim. Its status sets its light: lit warm for Live, steady for Landed, pulsing slow for Measured, dark with a thin outline for Not built. A dark lamp is never shown as zero.
+- **The visitor:** scrolls (or swipes) along the rail. The camera rides it on one curve.
+- **The claims** (each from the claims table in "Direction and the claim check"):
+  - Every FXN ID keeps its own chain. Live.
+  - A payment is final on one keeper's receipt. No vote. Landed. Measured on 5 test nodes on one machine: 26,274 final payments a second, 1,000 in flight.
+  - A copy reaches a pinner in about 1.1 s. Same 5 test nodes on one machine.
+  - A keeper that cheats loses its bond. Landed. Not run on a real network.
+  - Names end in .fxn. Landed. Claims by the genesis key only for now.
+  - A 4-of-5 multisig guards the rules while the network is young. Tested 12 of 12, on one machine.
+  - Anyone can start a chain and launch a token. Partly built. Not run.
+- **The answer:** a press on a lamp opens its proof card in the world: the status word, the condition and the file it comes from.
+
+#### Beat 6. How it happens (a road of doors)
+
+- **Words:** "Your path through the new internet." (29).
+- **3D:** the rail turns into a road of 18 doors, one per step of the how. Each door is a thin frame of light. Its brightness is its status.
+- **The doors:** get an FXN ID, your own chain, pay and Final, a name, build and ship an app, start a chain and launch a token, get funded, an economy, govern, run a node and earn, store data, publish and talk, assets, swap, check claims, outside services with credits, enter the world, start a network.
+- **The visitor:** hovers a door to read its line and status. A press marks it as the first door of their path.
+- **The answer:** the marked door stays lit. Home opens on it.
+
+#### Beat 7. What comes next (the devnet road)
+
+- **Words:** "Devnet genesis is next." (47). "Up to 16 of our 20 machines. Test money. No date until the gate passes." (11 mono).
+- **3D:** at the end of the road stand 20 machine racks in two rows. A press lights 16, one per beat. 4 stay dark.
+- **The visitor:** presses "See the road".
+
+#### Beat 8. Who are you
+
+- **Words:** "Who are you?" (47).
+- **3D:** the camera pulls back to the whole hall. Role tags stand at the places each role will use: Just curious at the kernel, I build apps at the door "build and ship an app", I run computers at the racks, I check claims at the status rail, Just look around at the open floor.
+- **The visitor:** presses a role.
+- **The answer:** the role is kept. The camera flies to that role's place, and home opens there with the how.
+
+#### Footer
+
+"FXN Bundler" (11 mono), on every page.
+
+#### What this needs built
+
+- New objects: the shaft and service lights, five law plates, the gate of light, the receipt printer and scan line, the crystal key, thirteen brand monoliths, the status rail lamps, eighteen door frames. The kernel crown gains five rings. The book, racks and ID card exist as placeholders.
+- Studio features: placing a studio object in the site world, named states on an object's timeline, 3D letters for the 18 labels, and the logo materials in the world look.
+- Rule checks before any word ships: the three-step claim check, copy:check, BANNED-WORDS.
+
+## The punch-line journey (2026-11-08, supersedes "the intro, beat by beat" above)
+
+Owner, 2026-11-08: "We are planning to go to prod, so the copy is final and not limited to the state. This is no cinema at all: use the FXN world game, the world direction and FXN genesis. A concept with rich objects that animate, communicating the short punch lines we have. The entire journey is made of punch lines and interaction choices: 3 buttons next to each other at all times, each animates and takes you somewhere, and there is the portal where you can jump into other places."
+
+Layer: app (the defxn site). The world and its objects are fxn-3d. Sources for the world: `flux/fxn-3d/docs/design/direction/DIRECTION.md` (1b: DEFXN is the network grown into the rock under SUTUPA City, named once; 13: every product is a portal with its own real rule) and `flux/fxn-3d/docs/design/engine/WORLD-LORE.md` (the look). The game's characters and story beats are never used. The copy is production copy: it states rules the product keeps by design. A number appears only with its machine and condition.
+
+### The grammar of every screen
+
+- **One punch line.** One short sentence at 47, the screen's only idea. A second line at 18 only when the punch line needs its proof.
+- **One 3D moment.** A rich object answers the punch line: it builds, turns, opens, locks or lights. The camera arrives on it in one curve.
+- **Three choices, always.** Three buttons side by side at the foot of the screen, every screen, no exceptions. Each is a verb. Each one animates the world first (the object answers the press), then flies the camera to the next scene. The middle one carries the complement colour: it is the scene's main way forward.
+- **The portal, always.** A ring of light at the corner of every screen. Press it and the Hall of Portals opens: every place in the world, each a lit doorway. Press a doorway and the camera dives through it.
+- **No dead end.** Every choice and every doorway leads to a scene with its own three choices.
+
+### Show the why, never tell it unasked (owner, 2026-11-08)
+
+Owner: "You never show the why. You tell it without asking."
+
+- **The world acts first.** Every scene opens on something happening: the visitor sees the record seal, the cheat fail, the copy survive. No sentence explains it before it happens.
+- **The punch line comes after the act.** It names what the visitor just saw or did, in a few words. It is a caption of the event, never a lesson.
+- **The reason is a choice.** The why is given only when the visitor asks for it: one of the three buttons can be "Why?". Pressing it answers with one more thing happening in the world and one short line, never a paragraph.
+- **The visitor's own act is the proof.** Where a rule can be tried (stamp twice, push a bad name at the door, take a node away), the visitor tries it, and the world shows the result.
+- **Philosophy is shown through the world, not stated.** The family's ideas (a claim carries its proof, corrections are added, the structure refuses abuse) appear as what objects do, never as text the visitor did not ask for.
+
+The table below is a first draft written before this rule. Its "Why" and "Family" scenes tell before they show, and must be rebuilt by this rule.
+
+### The scenes, the punch lines and the three choices
+
+Each row: the punch line, the 3D moment, then the three buttons and where each goes.
+
+| Scene | Punch line (47) | 3D moment | Three choices: where each goes |
+|---|---|---|---|
+| Arrival | Welcome to the new internet. | The crystal mark falls through the void into the rock. Service lights wake in a ring. "DEFXN" lights once on the shaft wall. | Why it exists: Why. Make my key: Key. Show me everything: Hall of Portals |
+| Why | A claim carries its proof. | A record slab rises. A seal burns into it. Its proof line runs down into the floor. | Show me the proof: Proof. Who built this: Family. Make my key: Key |
+| Proof | Nothing is erased. Corrections are added. | The book opens. A page turns, and the old page stays under the new one. | Why it holds: Structure. Read the record: Explore portal. Back to the start: Arrival |
+| Structure | The structure refuses abuse. Nobody has to promise. | A gate of light stands across the floor. A malformed glyph flies at it and bounces off. | Try to cheat: Cheat. Who guards the rules: Multisig. Make my key: Key |
+| Family | One body of work. Each name is one side of it. | Thirteen brand monoliths rise around the kernel, each in its own material from the 60-logo set. Hover one: it turns to you with its line. | Enter a brand: that brand's portal. The core: Core. Make my key: Key |
+| Core | Every rule becomes structure on one chain. | The lit plates slide into the kernel and lock as rings of its crown. A pulse runs along every rail. | Make my key: Key. Start a chain: Start. Show me everything: Hall of Portals |
+| Key | Your key. Your chain. Your record. | A crystal key forms in front of you and turns once. A drum lights and opens its lid: your chain. | Pay someone: Final. Claim a name: Name. Build an app: Build |
+| Final | Final in one signature. | A keeper's desk. The stamp arm drops, the receipt rises, FINAL rises in 3D letters. No crowd, no wait. | Try to cheat: Cheat. Where the copies go: Copies. Run a keeper: Earn |
+| Cheat | Cheating costs the cheater. | You stamp the same receipt twice. The copy towers flash, the keeper's bond lamp goes dark, and its bond flows to the one it cheated. | Who keeps copies: Copies. Run a keeper: Earn. Back to my chain: Key |
+| Copies | One honest node keeps a chain alive. | A copy climbs each pinner tower. One tower stays lit when the others go dark, and the chain survives. | Run a node: Earn. Store data: Store. Show me everything: Hall of Portals |
+| Name | Put a name on your door. | A neon sign forms letter by letter over a door. A lookalike name tries the same door and is refused. | Build an app: Build. Start a chain: Start. Show me everything: Hall of Portals |
+| Build | Build it. Sign it. Ship it. | A crate packs itself from parts, your key seals it, and it rides a rail up through the upload door. | Start a chain: Start. Get funded: Fund. Claim a name: Name |
+| Start | Start a chain. Launch a world. | An empty plinth. A drum rises out of its slot, a world lights over it, and a coin mints on its rim. | Get funded: Fund. Make an economy: Economy. Who guards the rules: Multisig |
+| Fund | Funded by the people you serve. | A freight lift rises with value through the one path in, and fills a vault that opens only on its day. | Make an economy: Economy. Start a chain: Start. Show me everything: Hall of Portals |
+| Economy | Those who do the work get paid. | Pay windows open along a street. Keepers, pinners and nodes each receive their share as small lights. | Run a keeper: Earn. Govern it: Multisig. Back to my chain: Key |
+| Multisig | Four of five keys change the rules. | One page carried to five doors. Four stamps land, and the page moves. One alone does nothing. | Govern a network: DAO portal. Start a chain: Start. Show me everything: Hall of Portals |
+| Earn | Keep the network. Get paid for it. | A tower at night. You sign receipts as they arrive, and each signature lights a coin in your purse. | Run a node: Node portal. Store data: Store. Back to my chain: Key |
+| Store | Keep what you cannot open. | Sealed crates slide onto shelves. You hold them for others and never see inside. | Run a node: Earn. Build an app: Build. Show me everything: Hall of Portals |
+
+The Hall of Portals lists every product portal from `DIRECTION.md` section 13 (FXN ID, Keepers, Browser, Domains, Bundles, Packages, Deploy, Explore, Node, Storage, DAO, Treasury, Safes, Genesis, Repo, Code, Grammar atlas, Resolver Studio, DB Studio, Swaps, Launchpad, Bridge, Wallet, Inbox, Posts, Play, Radio, Market, Collections, Stats, and more), plus a doorway for each brand of the family. Each doorway shows its product's real rule in one line.
+
+### The footer
+
+"FXN Bundler" (11 mono), on every screen.
+
+### Open for the owner
+
+- The punch lines above are drafts. Every one must pass the claim check before it ships: each states a rule the product keeps by design.
+- The cinema of each scene (shot, lens, light, motion, timing) is to be directed with the world direction's author (the FXN world game session).
+
+## Design prompt for the owner's design tool (2026-11-08)
+
+Built from: the owner's direction in this file, the game session's art direction (2026-11-08, with Portal 101), the chain facts from FXN GENESIS (defxn-defi-rs main 618e237b), `SITE-FILM.md` and the page list in "5. THE BUILD-UP". Where the sources disagreed, the newer owner-side ruling wins: no sky and no rain on the site (machine light only), and no fixed number of copies (the chain's copy count varies per keeper lane).
+
+```text
+Design every screen of defxn.com, the home of FXN, a new internet. Production quality. Final copy.
+
+WHO IT IS FOR
+A newcomer who has never heard of FXN, a builder who wants to start a chain or ship an app, an operator who runs machines, and a person who checks claims.
+
+THE IDEA
+The site responds to you. Every object animates toward the visitor. The site shows the why and never tells it unasked: the world acts first, then a short punch line names what just happened. The reason appears only when the visitor asks for it.
+
+THE WORLD
+DEFXN is the network grown into the rock under a buried mountain city. The site lives below, in machine halls where rock and machine have fused. No sky, no rain, no people. Only machine light.
+
+ART DIRECTION: art + Apple precision + cyberpunk + Scandinavian minimalism + Japanese ma (the void).
+- Light: one key light, cool and low, plus one soft lit wall behind the hero object. The left of the frame stays darkest.
+- Colour: dark matte charcoal-green stone. Mint is the primary colour, and it appears only as light in grooves and tubes. Amber appears only as short crisp strips. One complement colour, spent once per screen, on the main choice.
+- Materials: matte stone and dark metal with chamfers and panel seams. Glow is a solid shape with a tight halo, never fog or bloom clouds. Living ivy and broad leaves grow where machine meets rock.
+- The DEFXN mark: a 3D emblem of four mirrored bracket pieces around an X-shaped gap, thick, with cut edges. Its material comes from a set of 60 looks: clear crystal, amethyst, sapphire, amber, frosted ice, opal, black chrome, white marble, gold, ribbed copper, cracked obsidian with gold veins, and more. These looks are used only on the mark.
+- Camera: slightly low three-quarter view, long lens (50 to 85 mm). The hero object sits off-centre to the right. A large empty void on the left holds the punch line.
+- Motion: slow pushes and orbits, never handheld. Everything eases out. Three tempos only: breathe (4 s), wake (1 to 2 s), act (under 1 s).
+- Type: three fonts only (display, sans, mono). One size scale only: 11, 18, 29, 47, 76 px. Signs in the world are small mono uppercase plates set into stone. No floating 3D headlines.
+- Never: fog, lens flare, depth blur, confetti, glitch noise, faces, religious imagery, chain words floating as captions, explanation before the act, ads, slogans, decoration for its own sake.
+
+EVERY SCREEN HAS THE SAME FOUR PARTS
+1. One punch line at 47 px in the void on the left. It is the screen's only idea. An optional proof line at 18 px.
+2. One rich 3D moment on the right: an object that builds, turns, opens, locks or lights.
+3. Three choice buttons side by side at the foot of the screen, on every screen. Each is a verb. The middle one carries the complement colour. A press animates the object first, then flies the camera to the next place.
+4. A portal ring in the bottom-right corner, 40 px: a ring of segmented stone with a mint glow groove and amber strips. It breathes slowly when idle. Pressing it opens the Hall of Portals.
+Footer on every screen, 11 px mono: "FXN Bundler".
+
+THE HALL OF PORTALS
+A long dark hall cut into the rock. Portals stand in two facing rows, receding to a vanishing point. The view walks the centre aisle. Each portal is the same build: a segmented stone ring with a cap carrying a sign, a mint glow groove, amber strips in the brand's own colour, walk-through legs, and a two-tier round dais with glowing rings. Product portals stand on the left. Brand portals stand on the right. Each doorway shows its product's real rule in one line. A dive: the camera pushes to one portal, the iris opens, the camera passes through, the plane closes behind, and the next place fades up from black.
+The family, one portal each: FXN, Dead Ark, Trivium, CR3TV, Tarbez, AYTAR, Besbes, BesUp, Isteda, SAITRA, DedNews, Subzero, the micro AI.
+
+THE JOURNEY (18 scenes: punch line, hero object, the three choices)
+1. Welcome to the new internet. The crystal mark falls through the dark into the rock, and service lights wake in a ring. Choices: Why it exists, Make my key, Show me everything.
+2. A claim carries its proof. A stone slab seals with a burning glyph. A forged slab cracks. Choices: Why?, Show me the proof, Make my key.
+3. Corrections are added. The record stays. A book's page turns, and the old page stays visible under it. Choices: Why it holds, Read the record, Back to the start.
+4. The structure refuses abuse. A gate of light across the floor. A malformed glyph flies at it and bounces off. Choices: Try to cheat, Who guards the rules, Make my key.
+5. One body of work. Each name is one side of it. One key lights thirteen brand monoliths around the kernel. Choices: Enter a brand, The core, Make my key.
+6. Every rule becomes structure on one chain. Lit plates slide into the kernel tower and lock as rings of its crown. Choices: Make my key, Start a chain, Show me everything.
+7. Your key. Your chain. Your record. A crystal key forms and turns. A drum opens its lid: your chain. Choices: Pay someone, Claim a name, Build an app.
+8. Final in one signature. A keeper's desk: the stamp arm drops, the receipt rises, FINAL rises in 3D letters. Nobody votes. No wait. Choices: Try to cheat, Where the copies go, Run a keeper.
+9. A keeper who signs twice pays the one it cheated. The visitor presses "Stamp it twice". The copy towers flash, the bond lamp goes dark, and its bond flows to the cheated purse. Choices: Who keeps copies, Run a keeper, Back to my chain.
+10. One honest node keeps a chain alive. Pinner towers hold copies. The visitor drags towers away, and the chain stays lit while one remains. Choices: Run a node, Store data, Show me everything.
+11. Put a name on your door. A lit name plate slides into a frame over a door. A lookalike name tries the same door and is refused. Choices: Build an app, Start a chain, Show me everything.
+12. Build it. Sign it. Ship it. A crate packs itself, a key seals it, and it rides a rail up through the upload door. Choices: Start a chain, Get funded, Claim a name.
+13. Start a chain. Launch a world. On a round launch pad a lit column rises: a new chain. A coin mints on its rim. Choices: Get funded, Make an economy, Who guards the rules.
+14. Value comes in by one path. A freight lift carries value up through one gate, and it fills a vault that opens only on its day. Choices: Make an economy, Start a chain, Show me everything.
+15. Those who do the work get paid. Pay windows open along a street, and keepers, pinners and nodes each receive their share as small lights. Choices: Run a keeper, Govern it, Back to my chain.
+16. Four of five keys change the rules. Five seal stones. A page is carried to five doors. Four stamps land, and the page moves. One alone does nothing. Choices: Govern a network, Start a chain, Show me everything.
+17. Sign receipts. Get paid for each. A tower at night: each signature lights a coin in the purse. Choices: Run a node, Store data, Back to my chain.
+18. Keep what you cannot open. Sealed crates slide onto shelves, held for others and never opened. Choices: Run a node, Build an app, Show me everything.
+
+THE PAGES (23: place in the world, hero object, mood, and the one true thing it shows)
+- /intro: the dark hall under the city, one lamp, the portal ring dormant. Stillness, then the first light. The journey begins here.
+- / (home): the rail through the hall with 18 lit plinths, one per step of the path, in one hero pose. Quiet overview.
+- /how-it-works: the keeper desk, the stamp arm and the receipt slab. Precise, mechanical. You sign your own list. One bonded keeper orders it and signs a receipt. Pinners keep copies and sign a hold. Nobody votes.
+- /identity: the card in a stone cradle, the key mark lit on it. Personal, close. One FXN ID. Your keys sign everything, and the network never holds them.
+- /chain: the drum with the book, pages turning forward, never back. Patient, archival. Every record carries its result: the balance after, who paid whom, the signer. A reader checks one record and never replays the rest.
+- /account: the card and its tray of receipts. Tidy, private, dim. Your balance is the head of your own list, read at your address.
+- /names: the sign over a gate, a lit name plate sliding into its frame. Clear, civic. Flat .fxn names, made only by signed name records in one name system.
+- /resolutions: lane markers, a row of small lit posts, one per product. A catalogue walk.
+- /resolvers: the launch pad, a chain rising as a lit column. Anticipation. A resolver reads records by its own grammar. The grammar is a file, and its hash is pinned.
+- /fund: the bridge to the far gate, light crossing the span. Distance. A deposit comes from your own account through the bridge. The sale is a deposit on the same path.
+- /economy: the treasury floor beside the seal stones, figures as engraved plates. Sober, weighty. Fees are paid per byte through one fee rule. A keeper posts a bond.
+- /ring: a district's sign, the ring of supply as a slow orbit of plates. Calm.
+- /govern: five seal stones, four lit, the fifth waiting. Deliberate. A multisig of named members changes network settings. Nodes never vote.
+- /earn: a copy tower, close, slots lighting as copies land. Busy but orderly.
+- /download: the copy tower's door opening toward you. An invitation.
+- /store: the tower's slots, segments sliding in. Storage made visible.
+- /publish: the social district, small doors with their own dimmed glow colours. Lively, held back.
+- /assets: the assets district, objects on plinths behind glass. A collector's calm.
+- /explore: the towers' lamps across the hall, each lamp a launched resolver. A night view. Everything shown is read from signed records and checked in the browser.
+- /stats/now: the readout on the anchor stone, plain lit numbers, each with its machine and date. Factual, no drama.
+- /learnings: the book open on a stone ledge, one page lit. Reflective.
+- /road: twenty road markers into the dark, unlit ahead. Honest, forward.
+- /auth: the gate, the card passing through the light plane. One clean pass.
+
+NEVER SHOW (it would misstate the chain)
+A crowd or a vote confirming a payment. Blocks, mining or a "longest chain". A fixed number of copies. Coins sitting inside a node. A slow wait for Final. "Free forever" storage. The word "Flux". A number without its machine and condition.
+
+DELIVER
+Desktop at 1440x900 and 1280x720, and phone at 390x844, for every journey scene and every page. Each screen fits without scrolling. On phone the 3D sits in the top part and the three choices sit in the thumb zone, 44 px tall. Show each hero object in its four states: idle, near (the pointer comes close), hover (a choice is hovered), press.
+```

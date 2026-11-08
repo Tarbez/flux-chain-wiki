@@ -177,8 +177,9 @@ async function one(browser, route) {
 async function main() {
   const routes = process.env.ROUTES_FILE ? readFileSync(process.env.ROUTES_FILE, 'utf8').split('\n').filter(Boolean) : process.argv.slice(2);   /* ROUTES_FILE: one route per line, so a shell never has to quote '?' */
   if (!routes.length) throw new Error('world-parity: no route given. Pass one or more site paths, for example: node scripts/world-parity.mjs /intro /chain');
-  const { webkit } = loadPlaywright();
-  const browser = await webkit.launch();
+  const { chromium } = loadPlaywright();
+  const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  const browser = await chromium.launch({ executablePath: CHROME, args: ['--use-angle=metal'] });
   try { for (const r of routes) console.log(await one(browser, r)); } finally { await browser.close(); }
 }
 

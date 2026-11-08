@@ -5,7 +5,7 @@
    every theme. It wins by cascade order and by specificity (`#scene` + the :is() list), never by
    !important: a page rule that out-ranks it is the page's defect, fixed in the page's sheet.
 
-   Variants (shade steps from css/flux-themes.css):
+   Variants (shade steps from css/themes.css):
      solid        main call to action, once per view
                   secondary-500 fill, -600 hover, -ink text
      soft         repeated main action

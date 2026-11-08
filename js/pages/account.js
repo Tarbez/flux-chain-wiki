@@ -1021,7 +1021,7 @@
           refs.fxnId = make({ block: 'actions', id: 'account-fxnid-open', props: fxnIdProps() }); remember('fxnId', fxnIdProps());
           fxnIdWrap.appendChild(refs.fxnId);
           side.appendChild(fxnIdWrap);
-          /* the frame the 3D world is fitted to (js/world/world-host.js frame()): your identity over the network, below the words */
+          /* the frame the 3D world is fitted to (js/world2/world2-host.mjs frame()): your identity over the network, below the words */
           var worldStage = el('div', 'account-stage'); worldStage.setAttribute('data-stage', ''); worldStage.setAttribute('aria-hidden', 'true');
           left.appendChild(worldStage);
           shell.appendChild(left);

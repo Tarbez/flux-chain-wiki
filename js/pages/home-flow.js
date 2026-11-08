@@ -110,7 +110,7 @@
      identity accent, and so do the marks that point at it: the head and, at
      the resolve step, the reference its resolution creates. A legend in the
      drawing says so. The accent's area follows --primary-scale (derived from
-     its luminance in css/flux-themes.css), so a bright accent stays compact.
+     its luminance in css/themes.css), so a bright accent stays compact.
 
      Your chain runs through the middle. Four other chains sit around it, each
      with its own length and starting point because none waits on another, and

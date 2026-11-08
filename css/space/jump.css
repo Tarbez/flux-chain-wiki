@@ -21,7 +21,7 @@
   overflow: hidden;
   font-family: var(--font-sans);
   color: hsl(var(--text));
-  animation: space-jump-in .14s ease-out;
+  animation: space-jump-in .14s var(--ease-ui);
 }
 @keyframes space-jump-in {
   from { opacity: 0; transform: translateX(-50%) scale(.97); }

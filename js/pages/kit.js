@@ -68,7 +68,7 @@
     if (status === 'off') return 'The 3D world is off on this device (it needs WebGL 2), so this object cannot be shown.';
     if (status === 'loading') return 'The 3D world is still loading.';
     if (status === 'notBuilt') return item.board === '05'
-      ? 'Not built. The Kit records hold no object for ' + item.id + ' (scripts/kit-encode.mjs reads js/world/object-kit.js).'
+      ? 'Not built. The Kit records hold no object for ' + item.id + ' (scripts/kit-encode.mjs reads scripts/lib/stage-src/object-kit.js).'
       : 'Not built. No renderer is registered for ' + item.id + ' yet (js/kit/board-' + item.board + '.js).';
     return '';
   }

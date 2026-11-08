@@ -12,8 +12,7 @@
    Draw on demand: step(now) says whether anything still moves, and the host asks for another frame only then. Nothing here runs between events. No JSON, no WASM, no Three.js. */
 import { decodeKit, decodeWords, TINT_SLOTS } from './kit-decode.mjs';
 import { createKitPose } from './kit-pose.mjs';
-import { sample } from '/fxn-3d/scripts/lib/anim-sample.mjs';
-import { readMesh, meshFloats } from '/fxn-3d/engine/formats/mesh.mjs';
+import { sample, readMesh, meshFloats } from './world2-gl.mjs';
 
 const clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const srgbOut = (v) => Math.pow(Math.max(0, Math.min(1, v)), 1 / 2.2);   /* a plate's canvas holds sRGB; the plate shader decodes it with the same 2.2 */

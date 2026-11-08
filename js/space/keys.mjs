@@ -117,6 +117,7 @@ export function mount(space, host) {
   const onKey = (ev) => {
     if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
     if (ev.key === 'Escape' && !pop.hidden) { setPop(false); legendBtn.focus(); ev.preventDefault(); return; }
+    if (ev.key === 'Escape' && window.ArkCinematicActive) return;
     if (keysBelongElsewhere(ev, filmPlaying)) return;
     const dir = ARROWS[ev.key];
     if (dir) {

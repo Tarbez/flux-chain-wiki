@@ -96,15 +96,9 @@ export function expandWriteLoaders(html, root) {
     /(<script src="js\/content\/manifests\/[a-z][a-z0-9]*\.js)/,
     `<script>var ArkManifestSearch = ${JSON.stringify(search)};</script>\n$1`
   );
-  const assets = expandWriteLoader(html1, root, {
-    tagRe: /<script src="js\/content\/assets\/index\.js(\?[^"]*)?"[^>]*><\/script>/,
-    sourceRelPath: 'js/content/assets/index.js',
-    idsRe: /var ArkAssetIds = (\[[^;]+\]);/,
-    idRe: /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/,
-    targetDir: 'js/content/assets/',
-    search,
-  });
-  const secrets = expandWriteLoader(assets.html, root, {
+  /* js/content/assets/index.js is NOT expanded: the public page writes no asset tags (only the editor and its
+     ?cms-preview canvas do, see that file), so the render loads none either; its tag stays and writes nothing. */
+  const secrets = expandWriteLoader(html1, root, {
     tagRe: /<script src="js\/content\/secrets\/index\.js(\?[^"]*)?"[^>]*><\/script>/,
     sourceRelPath: 'js/content/secrets/index.js',
     idsRe: /var ArkSecretIds = (\[[^;]+\]);/,

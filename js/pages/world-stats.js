@@ -13,7 +13,7 @@
    Behind each section's More: the tables (per connection, p95 and room left), run ids, ISO weeks, devices, what limits it, what is not built.
    First view (the HUD, 2026-11-05): the answer "{ok} of {total} nodes answering", three numbers on the right (throughput, nodes, operations),
    section tabs, and one action: the explorer. "Devnet" is said once, as the kicker. The 3D show is js/space/shows/stats-now.mjs.
-   The 3D: the ONE `stats` view (js/world/stats-stage.js); now -> 'now', throughput -> 'ceiling', operations -> 'capabilities'.
+   The 3D: the ONE `stats` view (js/world2/world2-stage.mjs); now -> 'now', throughput -> 'ceiling', operations -> 'capabilities'.
    Words: the worldstats manifest (WORLDSTATS.*). Numbers: the data files, never typed here. A reading that does not exist says "No reading" and why;
    nothing becomes 0.
 

@@ -6,7 +6,7 @@
   -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
   box-shadow: inset 0 0 0 1px hsl(var(--border-default)), inset 0 1px 0 hsl(var(--text-strong) / .06); }
 .fc[hidden] { display: none; }
-.fc-in { animation: fc-rise 200ms var(--glide, ease) both; }
+.fc-in { animation: fc-rise 200ms var(--ease-ui) both; }
 @keyframes fc-rise { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
 .fc-kind { display: flex; align-items: center; gap: 6px; margin: 0; font: 500 var(--fs-tertiary)/1 var(--font-mono);

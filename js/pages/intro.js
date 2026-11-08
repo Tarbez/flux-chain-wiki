@@ -1,27 +1,27 @@
-/* /intro: the first page of a fresh visit, standing on the 3D world (js/world/world-host.js).
+/* /intro: the first page of a fresh visit. It is the world and the intro part (js/space/intro.mjs); the page itself holds no words.
 
-   The whole network seen from above, as on the redesign's #/idvalue. Redesigned 2026-10-25 in home's voice (owner:
-   "far more attractive", "follow the rules from the home page"): the words stand bottom left with no box around
-   them -- eyebrow, display heading, lede, one cut-corner action -- and the counts stand bottom right as a ledger.
-   Arriving, the camera glides down and in onto the network (chains-scene.js WELCOME) and the words rise as it
-   settles. Leaving by the action, the camera dives into the network and the words grow toward you and close to
-   their centre (a scale and a clip, never a fade; ArkWorld.motion.cardZoom and cardZoomTime). A fresh load of "/"
-   opens here (the host redirects it); a link to "/" inside the site is home.
+   Rebuilt 2026-11-07 (docs/design/space/SPACE.md, "Intro: plan", lane 3). The old film chrome (caption, rail, Skip intro), the five doors,
+   the three counters, the hero words and the ledger left: home's plan places them. What stays is the world's stage, a "Replay intro" chip
+   at the dock and the hand-shake with the part. The part tells the page when it plays (event ark-intro-state, detail {playing, done}); the
+   page dims the nav while it plays (html[data-intro="playing"], css/world-pages.css) and hands the part a mount event
+   (ark-intro-mount, detail {page, wanted}) so the part knows whether this load plays the intro. "Replay intro" fires ark-intro-replay.
+   A fresh load of "/" or "/intro" plays the intro once (FILM_KEY rule: loadedOnIntro and not yet played); a move back to /intro inside
+   the site finds shot 5 standing, never a replay.
 
    REDUCTION TEST
-   1 About: the entrance to the network. 2 Dominant action: Explore the network (the one filled button).
-   3 Know now: every network chain runs on one kernel and every record is signed; how many network chains,
-   capabilities and resolvers there are. 4 Hidden until asked: everything else; home is one click on.
-   5 Repeated elsewhere: the counts come from the data files, never typed. 6 Only because the data has it: the counts.
-   7 Removable: the note and the lede's last line, on a short screen. 8 Leaving keeps state: none to keep. 9 Returning: the Back button comes here.
-   10 If WebGL is missing: the host never sends a visitor here; a direct link still shows the card.
-
-   Counts: network chains (js/content/network-data.js), capabilities and resolvers (their data files). The redesign also
-   counted products from its concept brief; the site has no such data file, so the card does not count them.
-   Words: the home manifest's HOME.LANDING.* (ArkCopy). Layout: css/world-pages.css. */
+   1 About: the first thirty seconds with one FXN ID: get, pay, see it spread, say who you are.
+   2 Dominant action: the press on the lit thing (the chip, the complement, once per state).
+   3 Know now: you get an FXN ID, a keeper signs the payment, copies reach pinners; it is a rehearsal and nothing is live.
+   4 Hidden until asked: roles, home, every other page (shot 5 and the nav, which returns at shot 5).
+   5 Repeated elsewhere: nothing; the words are the LANDING.* keys of the home manifest.
+   6 Only because the data has it: the one number, with its condition on the same screen.
+   7 Removable: the mono step numbers, on a short screen.
+   8 Leaving keeps state: the role, in defxn-quest-v1 (the part writes it).
+   9 Returning: the Back button finds shot 5.
+   10 If WebGL is missing: the host never sends a visitor here; a direct link shows the page name and the replay chip.
+   Words: HOME.LANDING.* (ArkCopy). Layout: css/world-pages.css. */
 (function () {
   'use strict';
-  var ARROW = '<svg viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M1 10h23M15 1l9 9-9 9"/></svg>';
   function copy(role) { return ArkCopy.text('HOME.LANDING.' + role); }
   function node(tag, className, text) {
     var el = document.createElement(tag);
@@ -29,135 +29,99 @@
     if (text != null) el.textContent = text;
     return el;
   }
-  /* The five doors (owner, 2026-10-25): compact cards, top right, beside the network. [copy key, page, icon].
-     The page keys are the catalog's; a card whose page is missing is left out. */
-  var DOORS = [['NETWORK', 'stats/now', 'network'], ['CHAINS', 'chain', 'chains'], ['RESOLVERS', 'resolvers', 'layers'], ['PRODUCTS', 'resolutions', 'box'], ['DOCS', 'reference', 'book']];
-  var DOOR_ICONS = {
-    network: '<circle cx="12" cy="12" r="2.6"/><circle cx="5" cy="5" r="1.8"/><circle cx="19" cy="5" r="1.8"/><circle cx="5" cy="19" r="1.8"/><circle cx="19" cy="19" r="1.8"/><path d="m6.4 6.4 3.7 3.7m7.5-3.7-3.7 3.7m-7.5 7.5 3.7-3.7m7.5 3.7-3.7-3.7"/>',
-    chains: '<path d="m12 3 4 2.3v4.6L12 12 8 9.9V5.3Z"/><path d="m7.5 12.5 4 2.3v4.6l-4 2.3-4-2.3v-4.6Z"/><path d="m16.5 12.5 4 2.3v4.6l-4 2.3-4-2.3v-4.6Z"/>',
-    layers: '<path d="m12 3 9 4.5-9 4.5-9-4.5Z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/>',
-    box: '<path d="m12 2.8 8.5 4.6v9.2L12 21.2l-8.5-4.6V7.4Z"/><path d="m3.5 7.4 8.5 4.6 8.5-4.6M12 12v9.2"/>',
-    book: '<path d="M3 5.5c3-1.3 6-1.3 9 .6 3-1.9 6-1.9 9-.6v13c-3-1.3-6-1.3-9 .6-3-1.9-6-1.9-9-.6Z"/><path d="M12 6.1v13"/>'
-  };
-  var DOOR_ARROW = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg>';
-  function doors() {
-    var nav = node('nav', 'intro-doors rise'); nav.setAttribute('data-ui', ''); nav.setAttribute('aria-label', 'Where to go'); nav.dataset.rise = 'side';
-    DOORS.forEach(function (d, i) {
-      var entry = ArkUI.pageCatalog[d[1]];
-      if (!entry) return;
-      var a = node('a', 'intro-door tp-panel' + (i === 0 ? ' is-lead' : ''));   /* tp-panel: the shared glass (css/cutouts.css) */
-      a.href = ArkUI.route.href(entry.path); a.dataset.sceneLink = d[1];
-      var mark = node('span', 'intro-door-mark');
-      mark.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">' + DOOR_ICONS[d[2]] + '</svg>';
-      var words = node('span', 'intro-door-words');
-      words.appendChild(node('b', null, copy('LINK.' + d[0] + '.NAME')));
-      words.appendChild(node('small', null, copy('LINK.' + d[0] + '.LINE')));
-      var go = node('span', 'intro-door-go'); go.innerHTML = DOOR_ARROW;
-      a.appendChild(mark); a.appendChild(words); a.appendChild(go);
-      nav.appendChild(a);
-    });
-    return nav;
+  /* Page responses (SPACE.md "interaction map", lane 3): a door, counter or stat lights the places it names in the world while
+     the pointer or focus is on it, and a counter or stat press flies to the first of them. Shared with js/pages/home.js
+     (ArkUI.placeResponse). Every ArkSpace call is guarded: with no world, nothing here does anything. */
+  function still() { return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  function places(kind) {
+    var S = window.ArkSpace, N = window.DEFXN_NETWORK || {}, list = S && S.targets ? S.targets() : [];
+    function kindOf(t) { return N.KIND ? N.KIND[String(t.id).split(':')[1]] : null; }
+    var ids = function (f) { return list.filter(f).map(function (t) { return t.id; }); };
+    if (kind === 'networks') return ['*'];
+    if (kind === 'network') return ids(function (t) { return t.kind === 'network'; }).slice(0, 1);
+    if (kind === 'chains') return ids(function (t) { return t.kind === 'chain'; });
+    if (kind === 'kernel') return ids(function (t) { return t.kind === 'kernel'; });
+    if (kind === 'resolver-chain') return ids(function (t) { return t.kind === 'chain' && kindOf(t) === 'resolver'; }).slice(0, 1);
+    return [];
   }
-  function counts() {
-    var N = window.DEFXN_NETWORK, C = window.DEFXN_CAPABILITIES, R = window.DEFXN_RESOLVERS;
-    var networks = N && N.NAMED ? Object.keys(N.NAMED).filter(function (i) { return N.KIND[i] === 'network'; }).length : 0;
-    var caps = C && C.capabilities ? C.capabilities.length : 0, resolvers = R && R.resolvers ? R.resolvers.length : 0;
-    return [['COUNT.NETWORKS', networks], ['COUNT.CAPABILITIES', caps], ['COUNT.RESOLVERS', resolvers]].filter(function (c) { return c[1] > 0; });
+  function lightOn(ids) {
+    var S = window.ArkSpace; if (!S || !ids.length) return;
+    if (S.light) S.light(ids); else if (S.hover && ids[0] !== '*') S.hover(ids[0]);
   }
-
-  /* The intro film (2026-11-05, owner: "redesign the entire intro", "like a true cinematic intro"). The world plays it
-     (js/world2/world2-objects.mjs: four chapters, the camera's path, the objects arriving); this page shows what it needs
-     while it plays: the chapter's words bottom left, the chapter rail along the foot (a step jumps there), and Skip. The page's
-     own words, doors and counts wait off stage and rise in when the film ends. Played on every fresh load of /intro;
-     never with reduced motion. "Replay intro" under the counts plays it again. If the world never says it started, the page
-     shows itself after FILM_WAIT ms. */
-  var FILM_KEY = 'defxn-intro-film-v1', FILM_WAIT = 6000, CHAPTERS = 4;
-  function film() { return window.ArkWorldHost && ArkWorldHost.film ? ArkWorldHost.film() : null; }
-  /* the film plays on every fresh load of /intro (owner, 2026-11-05); a move back to /intro inside the site finds it done */
+  function lightOff() {
+    var S = window.ArkSpace; if (!S) return;
+    if (S.light) S.light(null); else if (S.hover) S.hover(null);
+  }
+  /* kind is a places() name; press: true = a press flies to the first lit place instead of the element's own action */
+  function placeResponse(el, kind, press) {
+    el.dataset.place = kind;
+    var on = false;
+    function enter() { if (on) return; on = true; lightOn(places(kind)); }
+    function leave() { if (!on) return; on = false; lightOff(); }
+    el.addEventListener('pointerenter', enter); el.addEventListener('pointerleave', leave);
+    el.addEventListener('focusin', enter); el.addEventListener('focusout', leave);
+    if (press) el.addEventListener('click', function (e) {
+      var S = window.ArkSpace, ids = places(kind).filter(function (i) { return i !== '*'; });
+      if (!S || !S.focus) return;
+      if (kind === 'networks') ids = places('network');
+      if (!ids.length) return;
+      e.preventDefault(); e.stopPropagation(); leave(); S.focus(ids[0]);
+    }, true);
+  }
+  /* a number rolls to its value on the number spring (k 60, d 15.5) when it first comes into view; once, then stops. The
+     frame loop runs only while the roll runs. Reduced motion: the value stands. */
+  function rollIn(el) {
+    var target = parseInt(el.textContent, 10);
+    if (!(target > 0) || still() || !window.IntersectionObserver) return;
+    var io = new IntersectionObserver(function (es) {
+      if (!es.some(function (e) { return e.isIntersecting; })) return;
+      io.disconnect();
+      var x = 0, v = 0, last = performance.now(), K = 60, D = 15.5;
+      el.textContent = '0';
+      /* a settle loop (js/lib/frame.js): it asks for frames only until the spring rests, then sleeps for good */
+      ArkFrame.settleLoop(function (now) {
+        var dt = Math.min(0.033, (now - last) / 1000); last = now;
+        v += (K * (1 - x) - D * v) * dt; x += v * dt;
+        if (Math.abs(1 - x) < 0.002 && Math.abs(v) < 0.02) { el.textContent = String(target); return false; }
+        el.textContent = String(Math.min(target, Math.max(0, Math.round(target * x))));
+        return true;
+      }).wake();
+    }, { threshold: 0.6 });
+    io.observe(el);
+  }
+  ArkUI.placeResponse = placeResponse; ArkUI.rollIn = rollIn;
+  var FILM_KEY = 'defxn-intro-film-v1';
+  /* the intro plays on every fresh load of /intro or / (owner, 2026-11-05); a move back to /intro inside the site finds it done */
   var loadedOnIntro = /\/intro\/?$/.test(location.pathname) || location.pathname === '/';
-  function filmWanted() {
-    var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    return loadedOnIntro && !(window.ArkWorldHost && ArkWorldHost.filmState && ArkWorldHost.filmState.done) && !still;
+  var played = false;
+  function wanted() { return loadedOnIntro && !played; }
+  function playing(on) {
+    if (on) document.documentElement.setAttribute('data-intro', 'playing'); else document.documentElement.removeAttribute('data-intro');
   }
-  function filmChrome(page) {
-    var cap = node('div', 'intro-film'); cap.setAttribute('aria-live', 'polite');
-    var no = node('span', 'intro-film-no mono'), name = node('strong', 'intro-film-name'), line = node('p', 'intro-film-line');
-    cap.appendChild(no); cap.appendChild(name); cap.appendChild(line);
-    var rail = node('nav', 'intro-rail'); rail.setAttribute('aria-label', copy('FILM.RAIL'));
-    var steps = [];
-    for (var i = 0; i < CHAPTERS; i++) (function (i) {
-      var b = node('button', 'intro-rail-step'); b.type = 'button';
-      b.appendChild(node('i')); b.appendChild(node('span', 'mono', ('0' + (i + 1)) + ' ' + copy('FILM.C' + (i + 1) + '.NAME')));
-      b.addEventListener('click', function () { var f = film(); if (f) f.seek(i); });
-      rail.appendChild(b); steps.push(b);
-    })(i);
-    var skip = node('button', 'intro-skip mono', copy('FILM.SKIP')); skip.type = 'button';
-    skip.addEventListener('click', function () { var f = film(); if (f) f.skip(); else page.classList.remove('is-film'); });
-    page.appendChild(cap); page.appendChild(rail); page.appendChild(skip);
-    function show(d) {
-      if (!page.isConnected) { window.removeEventListener('ark-world-film', on); return; }
-      heard = true;
-      if (d.done || !d.playing) { page.classList.remove('is-film'); return; }
-      page.classList.add('is-film');
-      var c = Math.max(0, Math.min(CHAPTERS - 1, d.chapter));
-      no.textContent = ('0' + (c + 1)) + ' / 0' + CHAPTERS;
-      name.textContent = copy('FILM.C' + (c + 1) + '.NAME'); line.textContent = copy('FILM.C' + (c + 1) + '.LINE');
-      steps.forEach(function (b, j) { if (j === c) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); b.classList.toggle('done', j < c); });
-    }
-    var heard = false;
-    function on(e) { show(e.detail || {}); }
-    window.addEventListener('ark-world-film', on);
-    if (window.ArkWorldHost && ArkWorldHost.filmState) show(ArkWorldHost.filmState);
-    if (filmWanted() && !heard) { page.classList.add('is-film'); setTimeout(function () { if (!heard) page.classList.remove('is-film'); }, FILM_WAIT); }
-  }
+  window.addEventListener('ark-intro-state', function (e) {
+    var d = e.detail || {};
+    playing(!!d.playing);
+    if (d.done) played = true;
+  });
+  ArkUI.introPage = { key: FILM_KEY, wanted: wanted };
 
   ArkUI.pageModules.intro = {
+    unmount: function () { playing(false); },
     mount: function (host) {
       var page = node('section', 'world-page intro-world');
       page.setAttribute('aria-labelledby', 'intro-title');
       var stage = node('div', 'intro-stage'); stage.setAttribute('data-stage', '');
       /* no [data-panel]: the world draws its glass page slab behind that box, and the intro has no card any more (a
          full-width slab drew a hard line across the screen) */
-      var slot = node('div', 'intro-slot');
-      var card = node('div', 'intro-card rise'); card.setAttribute('data-ui', '');
-      var eyebrow = node('p', 'eyebrow mono');
-      eyebrow.appendChild(node('i')); eyebrow.appendChild(node('b', 'dash')); eyebrow.appendChild(document.createTextNode(copy('EYEBROW')));
-      card.appendChild(eyebrow);
-      var title = node('h1'); title.id = 'intro-title';
-      var rows = copy('TITLE').split('\n');
-      title.appendChild(node('b', null, rows[0]));
-      if (rows[1]) title.appendChild(node('span', null, rows[1]));
-      card.appendChild(title);
-      card.appendChild(node('p', 'intro-lede', copy('LEDE')));
-      var go = node('a', 'cta intro-go'); go.innerHTML = '<span class="say"></span>';
-      go.dataset.sceneLink = 'zero'; go.href = ArkUI.route.href(ArkUI.pageCatalog.zero.path);
-      go.firstChild.appendChild(document.createTextNode(copy('CTA') + ' ')); go.firstChild.insertAdjacentHTML('beforeend', ARROW);
-      card.appendChild(go);
-      slot.appendChild(card);
-      /* the counts, bottom right: a ledger of three figures read from the data files, and the note that says
-         where they come from. It slides in from the right, like home's rail (ArkUI.worldRise reads data-rise="side";
-         never the class .rail, which js/world/rail-capabilities.js fills with home's fleet on load). */
-      var list = counts();
-      if (list.length) {
-        var ledger = node('aside', 'intro-ledger rise'); ledger.setAttribute('data-ui', ''); ledger.dataset.rise = 'side';
-        ledger.setAttribute('aria-label', 'The network in numbers');
-        var strip = node('dl', 'intro-strip');
-        list.forEach(function (c) {
-          var cell = node('div'); cell.appendChild(node('dd', null, String(c[1]))); cell.appendChild(node('dt', null, copy(c[0]))); strip.appendChild(cell);
-        });
-        ledger.appendChild(strip);
-        ledger.appendChild(node('small', 'intro-note mono', copy('NOTE')));
-        var again = node('button', 'intro-replay mono', copy('FILM.REPLAY')); again.type = 'button';
-        again.addEventListener('click', function () { var f = film(); if (f) { page.classList.add('is-film'); f.replay(); } });
-        ledger.appendChild(again);
-        slot.appendChild(ledger);
-      }
-      /* no scrim under the words: the world's own edge fade darkens the rim the text sits on (js/content/world.js edgeFade, owner 2026-11-05) */
-      page.appendChild(stage); page.appendChild(doors()); page.appendChild(slot);
-      filmChrome(page);
+      var title = node('h1', 'intro-title'); title.id = 'intro-title'; title.textContent = copy('TITLE');
+      /* "Replay intro": an 11 mono chip at the dock. Not the complement: the lit thing's chip owns it */
+      var again = node('button', 'intro-replay mono', copy('REPLAY')); again.type = 'button'; again.setAttribute('data-ui', '');
+      again.addEventListener('click', function () { played = false; window.dispatchEvent(new CustomEvent('ark-intro-replay')); });
+      page.appendChild(stage); page.appendChild(title); page.appendChild(again);
       /* the CMS's insertion point for reusable blocks (js/content/components.js): empty, and out of the layout */
       var anchor = node('div', 'world-insert'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);
       host.appendChild(page);
+      window.dispatchEvent(new CustomEvent('ark-intro-mount', { detail: { page: page, wanted: wanted() } }));
       return page;
     }
   };

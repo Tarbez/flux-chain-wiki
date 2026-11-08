@@ -456,20 +456,23 @@ export const LABELS = [
 ];
 
 const RULES = {
-  "closed-set": (v, l) => l.values.includes(v),
-  "digits": v => /^[0-9]+$/.test(v),
-  "lowercase-alphanumeric": (v, l) => (l.pattern ? new RegExp(l.pattern) : /^[a-z0-9]+$/).test(v),
-  "lowercase-hex": (v, l) => /^[0-9a-f]+$/.test(v) && (!l.evenLength || v.length % 2 === 0),
+  "closed-set": (l) => { const set = new Set(l.values); return (v) => set.has(v); },
+  "digits": () => { const re = /^[0-9]+$/; return (v) => re.test(v); },
+  "lowercase-alphanumeric": (l) => { const re = l.pattern ? new RegExp(l.pattern) : /^[a-z0-9]+$/; return (v) => re.test(v); },
+  "lowercase-hex": (l) => { const re = /^[0-9a-f]+$/; return l.evenLength ? (v) => re.test(v) && v.length % 2 === 0 : (v) => re.test(v); },
 };
 
+// Each label with its check, compiled once when this module loads.
+const READ = LABELS.map((l) => ({ label: l.label, name: l.name, test: RULES[l.payload](l) }));
+
 // Longest label first: a box belongs to the longest label it starts with.
-const BY_LENGTH = [...LABELS].sort((a, b) => b.label.length - a.label.length);
+const BY_LENGTH = [...READ].sort((a, b) => b.label.length - a.label.length);
 
 export function readBox(box) {
   const label = BY_LENGTH.find((l) => box.startsWith(l.label));
   if (!label) throw new Error(`no label in the WORLD grammar starts "${box}"`);
   const value = box.slice(label.label.length);
-  if (!RULES[label.payload](value, label)) throw new Error(`${label.label}: "${value}" is not a valid ${label.name}`);
+  if (!label.test(value)) throw new Error(`${label.label}: "${value}" is not a valid ${label.name}`);
   return { label: label.label, name: label.name, value };
 }
 

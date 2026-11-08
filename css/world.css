@@ -23,7 +23,7 @@
   --net-cr3tv: 340 38% 64%;
   --ember: 24 96% 56%;
   --record: 38 22% 88%;
-  --glide: cubic-bezier(.22, .7, .18, 1);
+  --glide: var(--ease-ui);
 }
 
 /* the world's layer: the whole viewport, under the pages. It takes no pointer: the page above hears the

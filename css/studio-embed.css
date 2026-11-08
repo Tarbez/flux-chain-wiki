@@ -73,8 +73,8 @@
    dock covers the canvas while that view is chosen */
 @media (max-width: 860px) {
   #studioRoot .work, #studioRoot .themeview .work, #studioRoot .rail-closed .work { grid-template-columns: minmax(0, 1fr); }
-  #studioRoot .left, #studioRoot .rail-closed .left { display: block; position: fixed; z-index: var(--z-rail-drawer); top: var(--app-bar-h, 58px); bottom: 0; left: 0; width: min(320px, 86vw); border-right: 1px solid hsl(var(--border-default)); box-shadow: var(--shadow-pop); transform: translateX(-102%); visibility: hidden; transition: transform .18s ease, visibility 0s linear .18s; }
-  #studioRoot .drawer-open .left { transform: none; visibility: visible; transition: transform .18s ease; }
+  #studioRoot .left, #studioRoot .rail-closed .left { display: block; position: fixed; z-index: var(--z-rail-drawer); top: var(--app-bar-h, 58px); bottom: 0; left: 0; width: min(320px, 86vw); border-right: 1px solid hsl(var(--border-default)); box-shadow: var(--shadow-pop); transform: translateX(-102%); visibility: hidden; transition: transform .18s var(--ease-ui), visibility 0s linear .18s; }
+  #studioRoot .drawer-open .left { transform: none; visibility: visible; transition: transform .18s var(--ease-ui); }
   #studioRoot .live .left { display: none; }
   /* a view, under every docked sheet: Page settings opened while in Site style sits over it */
   #studioRoot .theme-dock { position: fixed; z-index: var(--z-theme-dock); top: var(--app-bar-h, 58px); right: 0; bottom: 0; left: 0; border-left: 0; }
@@ -102,7 +102,7 @@
 #studioRoot .list li .row-act { margin-left: auto; opacity: 0; }
 #studioRoot .list li:hover .row-act, #studioRoot .list li[aria-selected="true"] .row-act { opacity: 1; }
 #studioRoot .list li .layer-toggle { width: 16px; height: 16px; padding: 0; border: 0; background: transparent; color: hsl(var(--text-muted)); display: grid; place-items: center; flex: none; }
-#studioRoot .list li .layer-toggle::before { content: '›'; font: 700 var(--fs-secondary)/1 var(--sans); transform: rotate(90deg); transition: transform .12s ease; }
+#studioRoot .list li .layer-toggle::before { content: '›'; font: 700 var(--fs-secondary)/1 var(--sans); transform: rotate(90deg); transition: transform .12s var(--ease-ui); }
 #studioRoot .list li .layer-toggle[aria-expanded="false"]::before { transform: rotate(0); }
 #studioRoot .list li .layer-spacer { width: 16px; flex: none; }
 /* a Layers row: its name (derived from what the element is, or the one typed over it) reads as
@@ -274,7 +274,7 @@
 /* identity sections (what the selection IS: a states group, a component instance) */
 #studioRoot .tb-btn.identity { color: hsl(var(--primary)); }
 #studioRoot .tb-btn.identity::before { content: ""; position: absolute; top: 3px; right: 3px; width: 6px; height: 6px; border-radius: 50%; background: hsl(var(--primary)); box-shadow: 0 0 0 1.5px hsl(var(--overlay)); }
-#studioRoot .tb-count { position: absolute; right: 1px; bottom: 1px; min-width: 12px; height: 12px; padding: 0 var(--sp-2); border-radius: var(--radius-sm); background: hsl(var(--reference)); color: hsl(var(--text-inverse)); font: 700 var(--fs-micro)/1.41 var(--mono); text-align: center; }
+#studioRoot .tb-count { position: absolute; right: 1px; bottom: 1px; min-width: 12px; height: 12px; padding: 0 var(--sp-2); border-radius: var(--radius-sm); background: hsl(var(--reference)); color: hsl(var(--text-inverse)); font: 700 var(--fs-tertiary)/1.41 var(--mono); text-align: center; }
 #studioRoot .tb-group { display: flex; align-items: center; gap: var(--sp-1); flex: none; }
 #studioRoot .tb-sections { position: relative; padding-right: var(--sp-2); margin-right: var(--sp-2); }
 #studioRoot .tb-sections::after { content: ""; position: absolute; right: 0; top: 6px; bottom: 6px; width: 1px; background: hsl(var(--border-default)); }
@@ -354,7 +354,7 @@
 :is(#studioRoot, #sheet) .lib-group-head { margin: 0; display: block; }
 :is(#studioRoot, #sheet) .lib-group-trigger { display: flex; align-items: center; gap: var(--sp-3); width: 100%; min-height: 30px; margin: 0; padding: var(--sp-2) var(--sp-1); border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; text-align: left; }
 :is(#studioRoot, #sheet) .lib-group-trigger:hover { color: hsl(var(--text-strong)); background: hsl(var(--raised)); }
-:is(#studioRoot, #sheet) .lib-group-trigger::before { content: '›'; font: 700 var(--fs-secondary)/1 var(--sans); letter-spacing: 0; transform: rotate(90deg); transition: transform .12s ease; }
+:is(#studioRoot, #sheet) .lib-group-trigger::before { content: '›'; font: 700 var(--fs-secondary)/1 var(--sans); letter-spacing: 0; transform: rotate(90deg); transition: transform .12s var(--ease-ui); }
 :is(#studioRoot, #sheet) .lib-group-trigger[aria-expanded="false"]::before { transform: rotate(0); }
 :is(#studioRoot, #sheet) .lib-group-trigger > span { flex: 1 1 auto; min-width: 0; }
 :is(#studioRoot, #sheet) .lib-group-count { font: 500 var(--fs-tertiary)/1 var(--mono); letter-spacing: 0; color: hsl(var(--text-faint)); }

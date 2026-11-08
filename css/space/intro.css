@@ -1,0 +1,93 @@
+/* The intro's type, chip, drag track and role tags (js/space/intro.mjs, docs/design/space/SPACE.md "Intro: plan"). Layer: app.
+   Type on the one scale 11/18/29/47 (--fs-*); phone one step down, 11 stays. --primary and its ladder everywhere; the complement
+   (--secondary) only on the chip, the one dominant action of each state. Nothing fades: lifts, wipes and springs (drawn by the part). */
+.intro[hidden], .intro [hidden] { display: none !important; }
+.intro-card { position: fixed; left: 6vw; top: 58vh; z-index: 34; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; width: min(520px, 45vw); text-align: left; pointer-events: none; visibility: hidden; transition: left .6s var(--ease-ui), top .6s var(--ease-ui); }
+.intro-card.on { visibility: visible; }
+.intro-no, .intro-reh { font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--primary)); }
+.intro-text { margin: 0; font: 600 var(--fs-primary, 29px)/1.25 var(--font-sans, inherit); color: hsl(var(--text-strong)); }
+.intro-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; }
+.intro-wi { display: inline-block; will-change: transform; }
+.intro-who { position: fixed; left: 6vw; top: 12vh; z-index: 34; margin: 0; font: 700 var(--fs-hero, 47px)/1.05 var(--font-display, var(--font-sans, inherit)); letter-spacing: -.04em; color: hsl(var(--text-strong)); pointer-events: none; transform-origin: left top; }
+
+
+.intro-chip { position: fixed; z-index: 35; min-height: 44px; padding: 0 22px; cursor: pointer; pointer-events: auto; translate: 0 var(--rise, 0px);
+  font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .16em; text-transform: uppercase;
+  color: hsl(var(--secondary-ink, var(--canvas))); background: hsl(var(--secondary)); border: 1px solid hsl(var(--secondary)); border-radius: 999px; box-shadow: 0 4px 14px -6px hsl(var(--secondary-300, var(--secondary))); }
+.intro-chip:hover, .intro-chip:focus-visible { background: hsl(var(--secondary-600, var(--secondary))); outline: 2px solid hsl(var(--text-strong) / .7); outline-offset: 2px; }
+.intro-chip.nudge { animation: intro-nudge .4s var(--ease-ui) 1; }
+@keyframes intro-nudge { 50% { transform: translateY(-2px); } }
+.intro-chip.thumb, .intro-track { left: 16px; right: 16px; width: auto; top: auto; bottom: calc(22vh - 44px + env(safe-area-inset-bottom, 0px)); }
+.intro-tip { position: fixed; z-index: 35; font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono, monospace); color: hsl(var(--text-muted)); pointer-events: none; }
+
+.intro-track { position: fixed; z-index: 35; left: 50%; translate: -50% var(--rise, 0px); width: 320px; height: 44px; bottom: 14vh; border-radius: 999px; display: flex; align-items: center; justify-content: center; touch-action: none;
+  background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--primary-400, var(--primary))); pointer-events: auto; }
+.intro-track:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.intro-track-label { font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--primary)); pointer-events: none; }
+.intro-knob { position: absolute; left: 2px; top: 2px; width: 40px; height: 40px; border-radius: 50%; cursor: grab; background: hsl(var(--secondary)); touch-action: none; }
+.intro-knob:active { cursor: grabbing; }
+.intro-track.intro-track { translate: -50% var(--rise, 0px); }
+.intro-track:is(.thumb) { translate: 0 var(--rise, 0px); }
+
+.intro-skip { position: fixed; right: 24px; top: 80px; z-index: 36; min-height: 32px; padding: 0 16px; cursor: pointer; pointer-events: auto;
+  font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--primary)); background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--primary)); border-radius: 999px; }
+.intro-skip:hover, .intro-skip:focus-visible { background: hsl(var(--primary) / .18); outline: none; }
+
+.intro-tags { position: fixed; inset: 0; z-index: 34; pointer-events: none; }
+.intro-lead { position: absolute; height: 0; border-top: 1px solid hsl(var(--primary) / .7); transform-origin: 0 0; pointer-events: none; }
+.intro-tag { position: absolute; display: grid; gap: 4px; align-content: center; width: 220px; box-sizing: border-box; min-height: 44px; padding: 10px 16px; text-align: left; cursor: pointer; pointer-events: auto; translate: 0 var(--rise, 0px);
+  color: hsl(var(--text)); background: hsl(var(--surface) / .72); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid hsl(var(--primary-400, var(--primary))); border-radius: 8px;
+  transition: border-color .18s, background .18s, clip-path .5s var(--ease-ui), translate .5s var(--ease-ui); }
+.intro-tag strong { font: 600 var(--fs-secondary, 18px)/1.2 var(--font-sans, inherit); color: hsl(var(--text-strong)); }
+.intro-tag span { font: 500 var(--fs-tertiary, 11px)/1.4 var(--font-mono, monospace); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.intro-tag.lead { background: hsl(var(--primary) / .16); border-color: hsl(var(--primary)); }
+.intro-tag:hover, .intro-tag:focus-visible { border-color: hsl(var(--primary)); background: hsl(var(--primary) / .22); outline: none; }
+.intro-tag.wipe { clip-path: inset(0 0 100% 0); translate: 0 -12px; pointer-events: none; }
+.intro-tags.stacked { display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; padding: 0 16px calc(env(safe-area-inset-bottom, 0px) + 16px); }
+.intro-tags.stacked .intro-tag { position: relative; width: auto; flex: none; }
+
+@media (max-width: 639px) {
+  .intro-card { left: 16px; right: 16px; top: 16vh; width: auto; transition: none; }
+  .intro-text { font-size: var(--fs-secondary, 18px); }
+  .intro-who { left: 16px; top: 10vh; font-size: var(--fs-primary, 29px); }
+  .intro-skip { right: 16px; top: calc(env(safe-area-inset-top, 0px) + 72px); }
+  .intro-tag span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .intro-w { overflow: visible; } .intro-wi { transform: none !important; } .intro-chip.nudge { animation: none; } .intro-card, .intro-tag { transition: none; } }
+/* one guide while the intro plays: the other parts and the page's own words stand aside */
+html.intro-on .space-map, html.intro-on .space-keys-btn, html.intro-on .journey, html.intro-on .quest, html.intro-on .hud-dock, html.intro-on .space-label, html.intro-on .beacons,
+html.intro-picker .space-map, html.intro-picker .journey, html.intro-picker .quest, html.intro-picker .beacons, html.intro-picker .space-label, html.intro-picker .fc, html.intro-on .fc { display: none !important; }
+html.intro-on body::after { content: ''; position: fixed; inset: 0; z-index: 32; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, hsl(var(--canvas) / .75)); }
+
+/* the seven beats: the head at 47, the sub line at 18, the rehearsal line that stays, the lanes, the product panel and the road */
+.intro-text-big { font: 700 var(--fs-hero, 47px)/1.05 var(--font-display, var(--font-sans, inherit)); letter-spacing: -.04em; }
+.intro-sub { margin: 0; font: 500 var(--fs-secondary, 18px)/1.4 var(--font-sans, inherit); color: hsl(var(--text-muted)); }
+.intro-reh { position: fixed; left: 6vw; top: 80px; z-index: 34; pointer-events: none; }
+.intro-lanes { position: fixed; z-index: 34; left: 24px; top: 235px; width: 200px; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+.intro-lane { min-height: 40px; padding: 0 14px; text-align: left; cursor: pointer; pointer-events: auto; translate: 0 var(--rise, 0px); white-space: nowrap;
+  font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--primary));
+  background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--primary-400, var(--primary))); border-radius: 8px; transition: background .18s, border-color .18s; }
+.intro-lane:hover, .intro-lane:focus-visible, .intro-lane.on { background: hsl(var(--primary) / .22); border-color: hsl(var(--primary)); outline: none; }
+.intro-panel { position: fixed; z-index: 34; left: 244px; top: 235px; width: 260px; display: grid; gap: 6px; padding: 14px 16px; pointer-events: none;
+  background: hsl(var(--surface) / .72); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); border: 1px solid hsl(var(--primary-400, var(--primary))); border-radius: 8px; }
+.intro-panel-name { font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--primary)); }
+.intro-product { display: flex; justify-content: space-between; gap: 12px; font: 500 var(--fs-secondary, 18px)/1.3 var(--font-sans, inherit); color: hsl(var(--text-strong)); }
+.intro-product em { font: normal 500 var(--fs-tertiary, 11px)/1.8 var(--font-mono, monospace); letter-spacing: .12em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.intro-road { position: fixed; z-index: 34; left: 50%; bottom: 150px; translate: -50% 0; display: flex; gap: 8px; align-items: center; height: 44px; pointer-events: none; }
+.intro-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid hsl(var(--primary-400, var(--primary))); background: transparent; transition: background .2s, box-shadow .2s; }
+.intro-dot.on { background: hsl(var(--primary)); box-shadow: 0 0 10px hsl(var(--primary) / .7); }
+.intro-tag.quiet { width: auto; min-height: 44px; padding: 0 16px; background: transparent; border-color: hsl(var(--primary-400, var(--primary))); }
+.intro-tag.quiet strong { font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--primary)); }
+@media (max-width: 639px) {
+  .intro-text-big { font-size: var(--fs-primary, 29px); }
+  .intro-sub { font-size: var(--fs-secondary, 18px); }
+  .intro-reh { left: 16px; top: calc(env(safe-area-inset-top, 0px) + 72px); }
+  .intro-lanes { left: 16px; right: 16px; top: auto; width: auto; bottom: calc(22vh + 8px); display: grid; grid-template-columns: repeat(2, 1fr); }
+  .intro-lane { text-align: center; }
+  .intro-lane { min-height: 36px; font-size: var(--fs-tertiary, 11px); }
+  .intro-panel { left: 16px; right: 16px; top: 36vh; width: auto; }
+  .intro-lane { min-height: 36px; }
+  .intro-product { font-size: var(--fs-secondary, 18px); }
+  .intro-road { bottom: calc(22vh + 8px); gap: 4px; }
+  .intro-dot { width: 10px; height: 10px; }
+}

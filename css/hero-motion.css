@@ -10,7 +10,7 @@
 .hero-alive .ark-layer-persistent > canvas[role="presentation"]:not(.zero-webgl) {
   opacity: .12;
   translate: var(--hero-x, 0px) var(--hero-y, 0px);
-  transition: translate 1100ms cubic-bezier(.2,.65,.3,1);
+  transition: translate 1100ms var(--ease-ui);
   animation: zero-breathe 18s ease-in-out 1.4s infinite;
   will-change: transform, opacity;
 }
@@ -77,7 +77,7 @@
   letter-spacing: .12em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: color 220ms ease, letter-spacing 420ms cubic-bezier(.2,.7,.2,1);
+  transition: color 220ms var(--ease-ui), letter-spacing 420ms var(--ease-ui);
 }
 .hero-motion-toggle span { margin-right: var(--sp-3); color: hsl(var(--text-faint)); font-size: var(--fs-tertiary); }
 .hero-motion-toggle:hover { color: var(--field-accent); letter-spacing: .16em; }

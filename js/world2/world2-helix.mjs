@@ -13,9 +13,7 @@
    How it is drawn: as an INSET of the engine's world look (engine/render/world.mjs drawInset): its own camera, a viewport laid exactly on the box, a scissor on the part of the box the card's
    wipe has uncovered (as the Three.js file cut itself with four clip planes) and a fill of the card's glass colour (the file's plate). The helix is in its own units, a coil standing in front
    of a camera that looks straight at it; the form is tilted by TILT so the camera looks down on it, as the file's frame does. No plate part, no frame blob, no second canvas. */
-import { prism } from '/fxn-3d/js/render/world2-shapes.mjs';
-import { projection, view as viewMatrix, eyeOf } from '/fxn-3d/js/render/world2-math.mjs';
-import { TONE } from '/fxn-3d/js/render/world2-look.mjs';
+import { prism, projection, view as viewMatrix, eyeOf, TONE } from './world2-gl.mjs';
 
 const TAU = Math.PI * 2, PI = Math.PI, clamp01 = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 /* the kernel's eases (ring-kit.js k.ease) */

@@ -22,8 +22,7 @@
 
    LOAD. art3d.js imports this file by URL at load and waits for `ready` before it hands out a mark, so the first paint is
    synchronous like the old one. No frame loop runs here: a paint is one renderCard call. */
-import { createCardContext, projection, view as lookView } from '../world2/world2-gl.mjs';
-import { createCardProgram, uploadMesh, uploadInstances, disposeInstances, drawPieces, lightFrom, roundedBoxShape, sphereShape, fetchEnvironment, uploadEnvironment, worldPath } from '/fxn-3d/js/render/world2-mesh.mjs';
+import { createCardContext, projection, view as lookView, createCardProgram, uploadMesh, uploadInstances, disposeInstances, drawPieces, lightFrom, roundedBoxShape, sphereShape, fetchEnvironment, uploadEnvironment, worldPath } from '../world2/world2-gl.mjs';
 
 const W = 1000, H = 700, MX = 680, MY = 357;           // the card's size and where the mark's centre sits on it (art3d.js)
 const FOV = 32, DIST = 350 / Math.tan(FOV / 2 * Math.PI / 180);

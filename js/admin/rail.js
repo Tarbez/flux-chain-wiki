@@ -344,8 +344,9 @@
   }
   /* an edit anywhere changes a dirty dot: repaint the tree once per frame (js/admin/editor.js
      announces every draft edit as `ark-cms-drafts`) */
-  let pagesQueued = false;
-  document.addEventListener('ark-cms-drafts', () => { if (pagesQueued) return; pagesQueued = true; requestAnimationFrame(() => { pagesQueued = false; renderPages(); }); });
+  /* the frame scheduler is js/lib/frame.js */
+  const renderPagesNextFrame = ArkFrame.once(() => renderPages());
+  document.addEventListener('ark-cms-drafts', () => renderPagesNextFrame());
 
   /* ---- the tabs ---------------------------------------------------------------------------
      Which tab each lens opens is remembered (state.railTab, per browser): Pages in the Content

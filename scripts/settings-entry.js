@@ -34,7 +34,7 @@ let theme=ownTheme||publishedAny(SITE_DEFAULTS.theme)||'ember';
 // No pattern and no atmosphere (owner, 2026-11-05): the page paints two layers, its colour and the 3D world.
 // The mesh pattern, the Ark atmosphere and their controls (Pattern, cell size and spacing, structure, visibility,
 // wave delay) left with them. Old visitors' stored defxn-motif-v1 and defxn-pattern-config-v1 are read by nothing now.
-// Five relaxed families, each in a dark and a light palette (css/flux-themes.css).
+// Five relaxed families, each in a dark and a light palette (css/themes.css).
 const themeNames={'ember':'Ember','defxn-tide':'Tide','defxn-moss':'Moss','defxn-dune':'Dune','defxn-dusk':'Dusk','ember-light':'Ember','defxn-tide-light':'Tide','defxn-moss-light':'Moss','defxn-dune-light':'Dune','defxn-dusk-light':'Dusk'};
 const darkThemes=['ember','defxn-tide','defxn-moss','defxn-dune','defxn-dusk'],lightThemes=['ember-light','defxn-tide-light','defxn-moss-light','defxn-dune-light','defxn-dusk-light'];
 const title=value=>themeNames[value]||value[0].toUpperCase()+value.slice(1);

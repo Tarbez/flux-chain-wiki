@@ -15,7 +15,8 @@
    same bytes: every order comes from data order, every name from the content.
    Slice 1 was confirmed on screen 2026-10-29 ("we are good to go"); tests/world-grammar.cjs locks it (workspace law:
    tests lock a confirmed design). Nothing is committed. The Three.js world stays live beside this. No JSON is written
-   here except world-grammar.labels.json, which is the atlas designer's own input shape.
+   here. The atlas designer reads its labels from the generated reader module (READER_DOCS), the same text the site
+   reads; the old docs/design/world-grammar/world-grammar.labels.json stays on disk as written and is never rewritten.
    WORLD_OUT=<dir> in the environment writes every output under that directory instead of the site (the test runs the
    encoder twice into temp dirs and compares the bytes with what is checked in); the inputs are always read from the site. */
 import fs from 'node:fs';
@@ -735,7 +736,6 @@ async function main() {
   const readerText = GC.readerModule('WORLD', L, SAMPLE);
   fs.mkdirSync(path.dirname(READER_SITE), { recursive: true }); fs.mkdirSync(DOCS, { recursive: true }); fs.mkdirSync(WORLD, { recursive: true });
   fs.writeFileSync(READER_SITE, readerText); fs.writeFileSync(READER_DOCS, readerText);
-  fs.writeFileSync(path.join(DOCS, 'world-grammar.labels.json'), JSON.stringify(L, null, 2) + '\n');   /* the atlas designer's input shape */
 
   /* 2 the frame's blob and the files beside it */
   const sha = b => crypto.createHash('sha256').update(b).digest('hex');

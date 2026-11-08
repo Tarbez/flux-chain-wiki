@@ -11,7 +11,7 @@
 .story-drawing :is(.drawing-trace,.drawing-accent) {stroke:hsl(var(--primary));stroke-width:1.5;}
 .story-drawing .drawing-selection {fill:hsl(var(--primary-200));stroke:hsl(var(--primary));}
 .story-drawing text {fill:hsl(var(--text-muted));font:500 var(--fs-tertiary) var(--font-mono,monospace);letter-spacing:.04em;}
-.story-drawing .drawing-title {font-size:var(--fs-micro);letter-spacing:.045em;}
+.story-drawing .drawing-title {font-size:var(--fs-tertiary);letter-spacing:.045em;}
 /* The theory sheets' drawing and its numbered legend, inside Ark's figure frame (js/pages/sheet.js):
    choosing a legend entry opens that point. Every label is 12px or more: the drawing keeps its full
    width (no max-height, which letterboxed it and shrank its labels below the frame's 12px floor). */

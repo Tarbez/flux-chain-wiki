@@ -5,6 +5,19 @@ import { createWorldLook, WORLD_CONTEXT, WORLD, MODE, FLAT, projection, view, ey
 export { projection, view, eyeOf, MODE, FLAT, afterRestore, restoreCount };
 export const FOV = WORLD.fov;
 
+/* THE ONE SEAM to fxn-3d: this is the only file under js/ that names /fxn-3d/ (scripts/fxn3d-seam-gate.mjs fails on any other).
+   Every other site file imports the engine's names from here, so an engine path changes in one place. */
+export { TONE } from '/fxn-3d/js/render/world2-look.mjs';
+export { roundedBox, prism, torus, uvSphere } from '/fxn-3d/js/render/world2-shapes.mjs';
+export { sample, easeOf } from '/fxn-3d/engine/runtime/anim-sample.mjs';
+export { SP, SPRING, closed, stepped } from '/fxn-3d/engine/runtime/spring.mjs';
+export { turn as orbitTurn, coast as orbitCoast } from '/fxn-3d/engine/runtime/orbit-camera.mjs';
+export { now as clockNow, subscribe as clockSubscribe, BEAT } from '/fxn-3d/engine/runtime/motion-clock.mjs';
+export { readMesh, meshFloats } from '/fxn-3d/engine/formats/mesh.mjs';
+export { createCardProgram, uploadMesh, uploadInstances, disposeInstances, drawPieces, lightFrom, roundedBoxShape, sphereShape, fetchEnvironment, uploadEnvironment, worldPath } from '/fxn-3d/js/render/world2-mesh.mjs';
+/* a module of the engine loaded on demand, by its path under fxn-3d (e.g. 'js/render/world2-mesh.mjs'): for parts the first paint does not need */
+export const engine = (path) => import('/fxn-3d/' + path);
+
 /* the alpha masks of a mark, built as home-descent.js builds them: the image as a white mask on a w x h canvas (inset by
    pad), the mask worn away by `wear` pixels, their difference (the lit edge), and, when asked, the edge blurred wide (the
    glow that spills onto the floor). Canvases out; the engine uploads them. */

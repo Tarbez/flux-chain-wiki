@@ -42,17 +42,17 @@ ArkUI.storyScripts = ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/pages/
    before css/components.css (which decides interactive paint), as it did. A new sheet goes where it
    belongs in it; `--write` places an unlisted one before css/ark-blocks.css. */
 ArkUI.styleOrder = [
-  'css/themes.css', 'css/flux-themes.css', 'assets/kit/defxn-fonts.css', 'assets/kit/defxn-components.css',
+  'css/themes.css', 'assets/kit/defxn-fonts.css', 'assets/kit/defxn-components.css',
   'css/fallback.css', 'css/studio.css', 'css/hero-motion.css',
   'css/navigation.css', 'css/focus.css', 'css/settings.css', 'css/page-layout.css', 'css/home.css',
   'css/resolver-guide.css', 'css/site-direction.css', 'css/experience.css', 'css/explorer.css',
-  'css/economy-preview.css', 'css/home-drafting.css', 'css/lifecycle.css', 'css/reference.css',
-  'css/guided-page.css', 'css/about.css', 'css/resolutions.css', 'css/account.css',
-  'css/account-domains.css', 'css/resolver-math.css', 'css/icons.css',
-  'css/story-diagrams.css', 'css/color-system.css', 'css/brand-identity.css', 'css/home-flow.css',
+  'css/home-drafting.css', 'css/lifecycle.css', 'css/reference.css',
+  'css/guided-page.css', 'css/resolutions.css', 'css/account.css',
+  'css/resolver-math.css', 'css/icons.css',
+  'css/story-diagrams.css', 'css/color-system.css', 'css/brand-identity.css',
   'css/how-overview.css', 'css/explorer-observatory.css', 'css/explore-story.css', 'css/authorization-dialog.css',
-  'css/palette.css', 'css/resolver-lab.css', 'css/download.css', 'css/home-swiss.css',
-  'assets/kit/defxn-marks.data.css', 'css/world.css', 'css/world-pages.css', 'css/space-frame.css', 'css/world-chain.css', 'css/world-identity.css', 'css/world-measure.css', 'css/world-stats.css', 'css/world-works.css', 'css/world-minute.css', 'css/nft-card.css', 'css/skin-site.css', 'css/resolutions-one.css', 'css/notes-one.css', 'css/stats-one.css', 'css/cutouts.css', 'css/world-minute.css', 'css/auth.css', 'css/chain-one.css', 'css/lattice.css', 'css/space-home.css', 'css/works-one.css', 'css/zero-webgl.css', 'css/ark-blocks.css', 'css/block-page.css', 'css/components.css',
+  'css/download.css', 'css/home-swiss.css',
+  'assets/kit/defxn-marks.data.css', 'css/world.css', 'css/world-pages.css', 'css/space-frame.css', 'css/world-chain.css', 'css/world-identity.css', 'css/world-measure.css', 'css/world-stats.css', 'css/world-works.css', 'css/world-minute.css', 'css/nft-card.css', 'css/skin-site.css', 'css/resolutions-one.css', 'css/notes-one.css', 'css/stats-one.css', 'css/cutouts.css', 'css/world-minute.css', 'css/auth.css', 'css/chain-one.css', 'css/lattice.css', 'css/space-home.css', 'css/works-one.css', 'css/ark-blocks.css', 'css/block-page.css', 'css/components.css',
   /* the editor's Kit (cms-preview only): last, over the blocks it shows */
   'css/ark-blocks-groups.css', 'css/kit.css', 'css/kit-boards-a.css', 'css/kit-boards-b.css'
 ];
@@ -61,30 +61,30 @@ ArkUI.styleOrder = [
    change a page's scripts or a stylesheet's selectors and regenerate. shared = linked in index.html (every route
    needs it); modules = what a page module adds, in cascade order (ArkUI.styleOrder). The header of that script says how. */
 ArkUI.pageStyles = {
-  shared: ['css/themes.css', 'css/flux-themes.css', 'assets/kit/defxn-fonts.css', 'assets/kit/defxn-components.css', 'css/fallback.css', 'css/studio.css', 'css/hero-motion.css', 'css/navigation.css', 'css/focus.css', 'css/settings.css', 'css/page-layout.css', 'css/home.css', 'css/site-direction.css', 'css/experience.css', 'css/home-drafting.css', 'css/lifecycle.css', 'css/resolutions.css', 'css/icons.css', 'css/story-diagrams.css', 'css/color-system.css', 'css/brand-identity.css', 'css/how-overview.css', 'css/authorization-dialog.css', 'css/home-swiss.css', 'assets/kit/defxn-marks.data.css', 'css/world.css', 'css/world-pages.css', 'css/ark-blocks.css', 'css/components.css'],
+  shared: ['css/themes.css', 'assets/kit/defxn-fonts.css', 'assets/kit/defxn-components.css', 'css/fallback.css', 'css/studio.css', 'css/hero-motion.css', 'css/navigation.css', 'css/focus.css', 'css/settings.css', 'css/page-layout.css', 'css/home.css', 'css/site-direction.css', 'css/experience.css', 'css/home-drafting.css', 'css/lifecycle.css', 'css/resolutions.css', 'css/icons.css', 'css/story-diagrams.css', 'css/color-system.css', 'css/brand-identity.css', 'css/how-overview.css', 'css/authorization-dialog.css', 'css/home-swiss.css', 'assets/kit/defxn-marks.data.css', 'css/world.css', 'css/world-pages.css', 'css/space-frame.css', 'css/lattice.css', 'css/ark-blocks.css', 'css/components.css'],
   modules: {
-    zero: ['css/space-frame.css', 'css/space-home.css'],
-    intro: ['css/cutouts.css'],
-    worldMinuteMovie: ['css/space-frame.css', 'css/world-measure.css', 'css/world-works.css', 'css/world-minute.css', 'css/world-minute.css', 'css/works-one.css'],
-    resolutions: ['css/space-frame.css', 'css/resolutions-one.css'],
-    learnings: ['css/space-frame.css', 'css/notes-one.css'],
-    explorer: ['css/explorer.css', 'css/explorer-observatory.css', 'css/explore-story.css', 'css/space-frame.css', 'css/block-page.css'],
-    worldStatsNow: ['css/space-frame.css', 'css/world-measure.css', 'css/world-stats.css', 'css/world-works.css', 'css/stats-one.css'],
-    worldResolvers: ['css/space-frame.css', 'css/world-measure.css', 'css/world-works.css'],
-    auth: ['css/space-frame.css', 'css/cutouts.css', 'css/auth.css'],
-    account: ['css/account.css', 'css/space-frame.css', 'css/auth.css', 'css/block-page.css'],
-    worldChain: ['css/space-frame.css', 'css/world-chain.css', 'css/chain-one.css'],
-    worldIdentity: ['css/space-frame.css', 'css/world-chain.css', 'css/world-identity.css'],
-    worldRing: ['css/space-frame.css', 'css/world-measure.css', 'css/world-works.css'],
-    download: ['css/download.css', 'css/space-frame.css'],
-    reference: ['css/reference.css', 'css/guided-page.css', 'css/space-frame.css', 'css/notes-one.css'],
-    resolverMath: ['css/resolver-math.css', 'css/space-frame.css', 'css/notes-one.css'],
-    concept: ['css/space-frame.css', 'css/notes-one.css'],
-    dao: ['css/resolver-guide.css', 'css/space-frame.css', 'css/notes-one.css'],
+    zero: ['css/space-home.css'],
+    intro: [],
+    worldMinuteMovie: ['css/world-measure.css', 'css/world-works.css', 'css/world-minute.css', 'css/world-minute.css', 'css/works-one.css'],
+    resolutions: ['css/resolutions-one.css'],
+    learnings: ['css/notes-one.css'],
+    explorer: ['css/explorer.css', 'css/explorer-observatory.css', 'css/explore-story.css', 'css/block-page.css'],
+    worldStatsNow: ['css/world-measure.css', 'css/world-stats.css', 'css/world-works.css', 'css/stats-one.css'],
+    worldResolvers: ['css/world-measure.css', 'css/world-works.css'],
+    auth: ['css/cutouts.css', 'css/auth.css'],
+    account: ['css/account.css', 'css/auth.css', 'css/block-page.css'],
+    worldChain: ['css/world-chain.css', 'css/chain-one.css'],
+    worldIdentity: ['css/world-chain.css', 'css/world-identity.css'],
+    worldRing: ['css/world-measure.css', 'css/world-works.css'],
+    download: ['css/download.css'],
+    reference: ['css/reference.css', 'css/guided-page.css', 'css/notes-one.css'],
+    resolverMath: ['css/resolver-math.css', 'css/notes-one.css'],
+    concept: ['css/notes-one.css'],
+    dao: ['css/resolver-guide.css', 'css/notes-one.css'],
     notFound: ['css/block-page.css'],
     kit: ['css/kit.css', 'css/kit-boards-a.css', 'css/kit-boards-b.css'],
     article: ['css/block-page.css'],
-    theory: ['css/space-frame.css', 'css/notes-one.css']
+    theory: ['css/notes-one.css']
   }
 };
 /* END derived page styles */
@@ -100,11 +100,11 @@ function arkModuleStyles(module) { return ArkUI.pageStyles.modules[module]; }
    the one pulse client, the shared frame and the page file. js/content/stats-highlights.js is linked in index.html. */
 var STATS_SCRIPTS = ['js/content/network-data.js', 'js/content/capabilities-data.js', 'js/content/resolvers-data.js', 'js/content/stats-scale.js', 'js/ark/pulse-client.js', 'js/pages/world-sheet.js', 'js/pages/world-stats.js'];
 var arkPageModules = {
-  /* home and the intro stand on the 3D world (js/world/world-host.js), not on Ark blocks: they load the data files
+  /* home and the intro stand on the 3D world (js/world2/world2-host.mjs), not on Ark blocks: they load the data files
      their numbers come from (the world loads the same files for its own use, once) and the rail */
   zero: { module: 'zero', scripts: ['js/pages/home.js'] },   /* the home stands on the space (docs/design/space/SPACE.md); the Measured rail left it 2026-11-05 */
   intro: { module: 'intro', scripts: ['js/content/network-data.js', 'js/content/capabilities-data.js', 'js/content/resolvers-data.js', 'js/pages/intro.js'] },
-  /* the redesign's views, each on its own 3D view (js/world/world-host.js VIEW_OF). /chain and /resolvers move to theirs
+  /* the redesign's views, each on its own 3D view (js/world2/world2-host.mjs VIEW_OF). /chain and /resolvers move to theirs
      when their page files land (Pages A and B swap those two entries); every other old page stays. */
   identity: { module: 'worldIdentity', scripts: ['js/pages/world-chain.js', 'js/pages/world-identity.js'] },
   /* /measured is /stats/capabilities now (2026-10-24); the measured page in js/pages/world-measure.js is kept and unused */
@@ -117,7 +117,7 @@ var arkPageModules = {
   /* the story template (js/pages/story.js) since 2026-10-19: the lab builds its def, the guide mounts it */
   /* the explorer used to live at /explorer; /explore is its address now */
   explorer: { module: 'explorer', aliases: ['/explorer'], scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-popover.js', 'js/ark/page-kit.js', 'js/pages/explorer.js']) },
-  /* The stats section (2026-10-24, owner: "/measured is where we show capabilities, benchmarks, live data"): one 3D stage (js/world/stats-stage.js, the
+  /* The stats section (2026-10-24, owner: "/measured is where we show capabilities, benchmarks, live data"): one 3D stage (the Three.js stats stage, removed 2026-11-08; world2 has no stats 3D yet, the
      `stats` view) and one page file (js/pages/world-stats.js), so moving between its inner pages is one camera flight. /stats, /stats/gpu, /stats/ledger
      and /measured are retired: their page modules (js/pages/stats.js, stats-gpu.js, stats-ledger.js and world-measure.js's measured page) are no longer
      in the catalog and their files are kept; the old addresses open the new pages (aliases) and the old keys redirect (ArkUI.pageRedirects, below).
@@ -130,7 +130,7 @@ var arkPageModules = {
      js/pages/account.js import()s them on first use instead. */
   account: { module: 'account', scripts: ArkUI.blockScripts.concat([ArkUI.glossaryScript, 'js/ark/vendor/ark-kit-forms.js', 'js/ark/ml-dsa.js', 'js/ark/auth-kit-create-panel.js', 'js/admin/auth.js', 'js/ark/account-session.js', 'js/ark/directory-transport.js', 'js/ark/mesh-directory-client.js', 'js/ark/ed25519-pem-browser.js', 'js/admin/vendor/flux-elements.js', 'js/admin/authorization-view.js', 'js/ark/authorization-dialog.js', 'js/ark/local-domains.js', 'js/ark/profile-card.js', 'js/pages/account.js']) },
   /* /auth: signing in with your FXN ID file, split out of /account (owner, 2026-10-25). It stands on the 3D world
-     (js/world/auth-stage.js) and uses /account's one sign-in session (js/ark/account-session.js), with the same
+     (the Three.js auth stage, removed 2026-11-08; js/world2/world2-host.mjs draws /auth now) and uses /account's one sign-in session (js/ark/account-session.js), with the same
      scripts that session needs: the panel and signer, the mesh directory publish and its signing review. The create panel
      is here for its grades only (ArkAuthKitCreatePanel.grades): the wizard tells the FXN ID card the PIN and password
      grades by the panel's one rule (js/ark/fxn-id-card/fxn-id-card-stage.js). */
@@ -159,7 +159,7 @@ ArkSitePages.pages().forEach(function (row) {
   ArkUI.pageCatalog[row.key] = entry;
 });
 /* Retired routes keep their key, so a saved link (route:stats, route:measured) still resolves: the entry carries the new path and `redirect`, the key
-   the world host's navigate sends the visitor to before anything mounts (js/world/world-host.js). They come after the new entries so an address that
+   the world host's navigate sends the visitor to before anything mounts (js/world2/world2-host.mjs). They come after the new entries so an address that
    several keys name resolves to the new key first (js/ark/page-router.js resolve). Never listed, never indexed. */
 ArkUI.pageRedirects = { stats: 'stats/now', 'stats/gpu': 'stats/now', 'stats/ledger': 'stats/now', measured: 'stats/now',
   /* 2026-10-25, the stats section reduced to three steps: the batch is a fact of One node, the fleet is the network, and the week pages' runs are named on every card */

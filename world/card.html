@@ -19,7 +19,7 @@
 <script type="module">
 /* The card from the blob (docs/design/world-grammar/MESH.md), standalone: its own WebGL2 context, the grammar
    renderer's exported camera maths (projection, view, eyeOf, FOV), the card module's program for the card, the
-   kernel plate and the beam. The camera is the auth view's target (js/world/auth-stage.js): aim at CY x .55 over
+   kernel plate and the beam. The camera is the auth view's target (the Three.js auth stage, removed 2026-11-08; js/world2/world2-host.mjs draws /auth now): aim at CY x .55 over
    the kernel, fit(RH x 4.3, RH x 3.1, aspect, .96), elevation 22, yaw -14; every size comes from the PLACE
    record (height = RH x 1.32, centre = CY), so nothing of the stage is typed here. Draws on demand: a drag turns
    the card, a resize refits; no loop runs while nothing changes. Pixel ratio capped at 1.5. */

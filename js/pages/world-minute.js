@@ -11,7 +11,7 @@
 
    READER AND JOB. A visitor who has never seen DEFXN wants to know what it does. The page tells it in nine beats over
    60 seconds, one sentence each, while the camera flies through the real grid (the stage `movie` in
-   js/world/minute-experience.js lights what the sentence names). The visitor can pause, step back and forward, skip to
+   js/world2/world2-stage.mjs lights what the sentence names). The visitor can pause, step back and forward, skip to
    the end or leave at any time.
 
    WHAT THE WORLD IS TOLD  state { view:'movie', s:'1'..'9' } while mounting, select on every beat; DEFXNScene.refresh(ms)

@@ -15,8 +15,7 @@
                 blends (it is mounted when the camera first flies to one of them).
    The stage draws nothing and schedules nothing: step(now) answers whether anything still moves, and the host asks for another frame
    only then (workspace law: animations settle). No JSON; the words of the items are a tab separated text blob. */
-import { sample, easeOf } from '/fxn-3d/scripts/lib/anim-sample.mjs';
-import { projection, view as viewMatrix, eyeOf } from '/fxn-3d/js/render/world2-math.mjs';
+import { sample, easeOf, projection, view as viewMatrix, eyeOf } from './world2-gl.mjs';
 import { createDyn } from './world2-dyn.mjs';
 import { createRig } from './world2-rig.mjs';
 import { createIdRig } from './world2-idrig.mjs';

@@ -103,12 +103,13 @@ body.space-focused .hud-left, body.space-focused .hud-right { opacity: .35; poin
 
 /* Under 900px the world cannot share the width: both columns stack into one bottom sheet that scrolls inside. */
 @media (max-width: 899px) {
-  .hud { display: flex; flex-direction: column; justify-content: flex-end; padding: 0 16px 84px; }
+  /* the top 46vh is the world's strip: the column starts under it (.hud takes no pointer, only its panels do) */
+  .hud { display: flex; flex-direction: column; justify-content: flex-end; padding: 46vh 16px 84px; }
   .hud-left, .hud-right, .hud-dock { position: static; width: auto; max-width: none; transform: none;
     animation-name: hud-from-below-flat; }
-  .hud-left { flex: 0 1 auto; max-height: 52vh; overflow: auto; border-radius: 8px 8px 0 0; border-bottom-width: 0; }
+  .hud-left { flex: 0 1 auto; max-height: 24vh; overflow: auto; border-radius: 8px 8px 0 0; border-bottom-width: 0; }
   .hud-left .hud-body { overflow: visible; }
-  .hud-right { flex: 0 1 auto; max-height: 30vh; border-radius: 0; border-bottom-width: 0; }
+  .hud-right { flex: 0 1 auto; max-height: 20vh; border-radius: 0; border-bottom-width: 0; }
   .hud-dock { overflow-x: auto; border-radius: 0 0 8px 8px; }
 }
 @keyframes hud-from-below-flat { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
@@ -136,3 +137,11 @@ body:has(.quest-reopen:not([hidden])) .hud { --hud-top: 148px; }
 body:has(.journey:not(.hidden)) .hud-dock { max-width: calc(100vw - 2 * 340px); flex-wrap: wrap; justify-content: center; }
 /* the dock's ways on are chips, never underlined links (a page's link block keeps its own underline otherwise) */
 .hud-dock .hud-chip, .hud-dock .hud-go { text-decoration: none !important; }
+
+/* Stats answer the pointer (SPACE.md interaction map): a lift of 2 px and a light edge on the ui spring; they light what they count (js/pages/home.js) */
+.hud-stat[data-place] { cursor: pointer; transition: transform .37s cubic-bezier(.3, 1.1, .5, 1), box-shadow .18s ease; }
+.hud-stat[data-place]:hover, .hud-stat[data-place]:focus-visible { transform: translateY(-2px); box-shadow: 0 1px 0 hsl(var(--primary) / .7); outline: none; }
+@media (prefers-reduced-motion: reduce) { .hud-stat[data-place] { transition: none; } .hud-stat[data-place]:hover, .hud-stat[data-place]:focus-visible { transform: none; } }
+/* the mission's "Click here" answers the pointer instead of looping: it bobs three times on arrival, then stands */
+.beacon.is-target { animation-iteration-count: 3; }
+@media (prefers-reduced-motion: reduce) { .beacon.is-target { animation: none; } }

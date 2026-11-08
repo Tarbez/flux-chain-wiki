@@ -6,7 +6,11 @@ export { loadAtlas, audit } from '../../../fxn-3d/scripts/lib/atlas.mjs';
 /* the one sampler of an animation (fxn-3d docs/design/editor/ANIMATE.md): the stage records' tracks are sampled by it in the page and checked by it in the encoder */
 export { sample, easeOf } from '../../../fxn-3d/scripts/lib/anim-sample.mjs';
 export { NUM } from '../../../fxn-3d/scripts/lib/number-text.mjs';
-export { buildReader, report } from '../../../fxn-3d/scripts/lib/grammar-build.mjs';
+/* fxn-3d removed its reader generator (scripts/lib/grammar-build.mjs, commit f86926c "grammars move to .fxn files": one grammar engine reads
+   engine/grammar/*.fxn, no generated reader per grammar). Re-exporting the missing file broke every importer of this door, the world encoder
+   included. The two builders that still call it (card-grammar-build.mjs, kit-grammar-build.mjs) now get a refusal that names the remedy. */
+const gone = (name) => () => { throw new Error(name + ' failed: fxn-3d no longer has scripts/lib/grammar-build.mjs (commit f86926c). Missing: a reader builder. To fix: move this grammar to an engine/grammar/*.fxn file read by fxn-3d engine/grammar/grammars.mjs'); };
+export const buildReader = gone('buildReader'), report = gone('report');
 export { readGlb, primitives, primArea, imageOf, factorsOf, linearMean, channelMean, toSrgbByte, bmpPixels } from '../../../fxn-3d/scripts/lib/mesh/gltf.mjs';
 export { WELD, weld, clean } from '../../../fxn-3d/scripts/lib/mesh/weld.mjs';
 export { stats, statsLine } from '../../../fxn-3d/scripts/lib/mesh/stats.mjs';

@@ -74,6 +74,9 @@
       ArkCopy.text = function (key) { (cmsCopyRead || (cmsCopyRead = Object.create(null)))[key] = true; return arkCopyText(key); };
     }
     var scene = ArkUI.render(F_SCENE_RZERO_V0, host);
+    /* The shell (header, page, fallback) is in the DOM now: the black loader in index.html steps aside so a
+       visitor reads the page while the 3D world is still loading, instead of a black screen for up to 8 s. */
+    document.documentElement.classList.add('shell-ready');
     /* The scope a mounted page's saved edits are stored under: its catalog route, or the finer scope
        the page declares (/reference: one per document). One helper, ArkLayout.scopeFor
        (js/content/layout.js); every pass below and the editor (cmsLayoutScope) ask it. The settle
@@ -268,7 +271,9 @@
      Text no field holds is refused with the code that writes it (cmsTextSource): a refusal
      names what it needs. Regression: tests/cms-content-lens.cjs (derivation) and
      tests/browser/inline-content.mjs (the round trip to the public page). */
-  var cmsPreviewLens = 'design', cmsInline = null, cmsHoverBox = null, cmsHoverFrame = 0;
+  var cmsPreviewLens = 'design', cmsInline = null, cmsHoverBox = null;
+  /* one hover pass per frame, on the latest target the pointer crossed (js/lib/frame.js) */
+  var cmsHoverNextFrame = ArkFrame.once(function (target) { cmsHover(target); });
   /* copy keys code read by name (ArkCopy.text, wrapped at boot in the preview); declared with var,
      so the wrapper at the top of this file can write it before this line runs */
   var cmsCopyRead = cmsCopyRead || Object.create(null);
@@ -697,8 +702,7 @@
     document.addEventListener('mousemove', function (event) {
       if (cmsPreviewLens !== 'content') return;
       var target = event.target;
-      if (cmsHoverFrame) return;
-      cmsHoverFrame = requestAnimationFrame(function () { cmsHoverFrame = 0; cmsHover(target); });
+      cmsHoverNextFrame(target);
     }, true);
     document.addEventListener('mouseleave', function () { cmsHover(null); });
     /* the words being typed are part of what Ctrl/Cmd+S saves: commit them before the save is

@@ -1,0 +1,33 @@
+/* The cinematic's type and Skip (js/space/cinematic.mjs). Sizes 11, 29 and 47 from the one scale; --primary only, never the complement.
+   Albert Sans and IBM Plex Mono through the SDK font variables. No letterbox bars, no title card; the vignette stays. */
+.cine[hidden] { display: none; }
+.cine-card { position: fixed; left: 6vw; top: 58vh; z-index: 34; display: flex; flex-direction: column; align-items: flex-start; gap: 12px; width: min(520px, 45vw);
+  text-align: left; opacity: 0; pointer-events: none; }
+.cine-card.on { opacity: 1; }
+.cine-no { font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .28em; text-transform: uppercase; color: hsl(var(--primary)); }
+.cine-no[hidden], .cine-num[hidden] { display: none; }
+.cine-text { margin: 0; font: 600 var(--fs-primary, 29px)/1.25 var(--font-sans, inherit); letter-spacing: 0; color: hsl(var(--text-strong)); }
+.cine-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; }
+.cine-wi { display: inline-block; will-change: transform; }
+.cine-num { font: 700 var(--fs-hero, 47px)/1 var(--font-display, var(--font-sans, inherit)); letter-spacing: -.04em; font-variant-numeric: tabular-nums; color: hsl(var(--primary)); }
+.cine-card.cine-end { left: 50%; top: auto; bottom: 30vh; translate: -50% 0; align-items: center; width: min(720px, calc(100vw - 32px)); text-align: center; }
+.cine-card.cine-end .cine-text { font: 700 var(--fs-hero, 47px)/1.1 var(--font-display, var(--font-sans, inherit)); letter-spacing: -.04em; }
+.cine-go, .cine-skip { font: 600 var(--fs-tertiary, 11px)/1 var(--font-mono, monospace); letter-spacing: .16em; text-transform: uppercase; cursor: pointer; pointer-events: auto;
+  color: hsl(var(--primary)); background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--primary)); border-radius: 999px; padding: 10px 16px; }
+.cine-go[hidden] { display: none; }
+.cine-skip { position: fixed; right: 24px; bottom: 72px; z-index: 34; }
+.cine-go:hover, .cine-skip:hover, .cine-go:focus-visible, .cine-skip:focus-visible { background: hsl(var(--primary) / .18); outline: none; }
+@media (max-width: 639px) {
+  .cine-card { left: 16px; right: 16px; top: auto; bottom: 14vh; width: auto; }
+  .cine-text { font-size: var(--fs-secondary, 18px); }
+  .cine-num, .cine-card.cine-end .cine-text { font-size: var(--fs-primary, 29px); }
+  .cine-card.cine-end { left: 16px; right: 16px; translate: none; width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .cine-w { overflow: visible; } .cine-wi { transform: none !important; } .cine-no { letter-spacing: .16em !important; } }
+/* one guide while a trip plays: nothing else overlaps the card or Skip */
+html.cinematic-on .space-map, html.cinematic-on .space-keys-btn, html.cinematic-on .journey, html.cinematic-on .quest, html.cinematic-on .hud-dock, html.cinematic-on .space-label { display: none !important; }
+/* the page's own parts and the nav dim to 0 over one bar and return when the trip ends */
+html.cinematic-on .intro-slot, html.cinematic-on .intro-doors, html.cinematic-on .intro-ledger, html.cinematic-on .intro-strip, html.cinematic-on .beacons, html.cinematic-on .beacon-ripples,
+html.cinematic-on .ark-header, html.cinematic-on .dx-foot { opacity: 0; pointer-events: none; transition: opacity 2s; }
+html.cinematic-on body::after { content: ''; position: fixed; inset: 0; z-index: 32; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, transparent 55%, hsl(var(--canvas) / .75)); }
+html.cinematic-end canvas { filter: brightness(.4); transition: filter 1s; }

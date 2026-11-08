@@ -23,7 +23,7 @@
   color:hsl(var(--text));
   text-decoration:none;
   overflow:hidden;
-  transition:transform 240ms cubic-bezier(.22,.72,.22,1),border-color 180ms,background-color 180ms;
+  transition:transform 240ms var(--ease-ui),border-color 180ms,background-color 180ms;
 }
 #scene .how-work-card::before {
   content:"";

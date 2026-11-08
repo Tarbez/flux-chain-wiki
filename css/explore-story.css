@@ -13,7 +13,7 @@
 #scene .explore-page .content-layer-path > button {
   display:inline-flex; align-items:center; min-height:26px; margin:0; padding:0 var(--sp-4); border:0; border-radius:3px; cursor:pointer;
   background:hsl(var(--reference-100)); color:var(--signal-reference); font:550 var(--fs-tertiary)/1 var(--font-mono,ui-monospace,monospace); letter-spacing:.075em; text-transform:uppercase;
-  transition:color 160ms ease,background-color 160ms ease;
+  transition:color 160ms var(--ease-ui),background-color 160ms var(--ease-ui);
 }
 #scene .explore-page .content-layer-path > button:is(:hover,:focus-visible) { background:hsl(var(--reference-200)); color:hsl(var(--text-strong)); }
 /* a record's fields are Ark facts (js/pages/explorer.js factsEl); the wrapper only holds them or the note */
@@ -36,7 +36,7 @@
 #scene .explore-page .explore-live-card:has([data-state="browse"]) :is(#explore-live-title,.explore-private) { display:none; }
 #scene .explore-page .explore-browse:has([data-view="record"]) .explore-browse-tabs { display:none; }
 #scene .explore-page .explore-browse:has([data-view="record"]) { grid-template-rows:auto minmax(0,1fr); }
-#scene .explore-page .explore-cards h2 { animation:ex-in .28s cubic-bezier(.2,.65,.2,1); }
+#scene .explore-page .explore-cards h2 { animation:ex-in .28s var(--ease-ui); }
 
 /* Steps: Ark tabs (the numbered stops are the tab strip; each panel is a step's heading and sentence). The mesh drawing
    above them is shared. Panels keep one height so the card does not jump between steps. */
@@ -68,7 +68,7 @@
 #scene .explore-page .explore-private { margin:0; font:400 var(--fs-tertiary)/1.45 var(--font-sans,"Albert Sans",sans-serif); color:hsl(var(--text-faint)); }
 
 /* A kind, opened over the list */
-#scene .explore-page .explore-browse { height:100%; display:grid; grid-template-rows:auto auto minmax(0,1fr); align-content:start; gap:var(--sp-4); animation:ex-in .22s cubic-bezier(.2,.65,.2,1); }
+#scene .explore-page .explore-browse { height:100%; display:grid; grid-template-rows:auto auto minmax(0,1fr); align-content:start; gap:var(--sp-4); animation:ex-in .22s var(--ease-ui); }
 #scene .explore-page .explore-browse-head { display:grid; grid-template-columns:auto auto minmax(0,1fr); align-items:center; gap:var(--sp-4); }
 #scene .explore-page .explore-browse-title h3 { margin:0; font:500 var(--fs-secondary)/1.2 var(--font-sans,"Albert Sans",sans-serif); letter-spacing:-.015em; color:hsl(var(--text-strong)); }
 #scene .explore-page .explore-browse-title p { margin:var(--sp-1) 0 0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:var(--fs-tertiary); color:hsl(var(--text-muted)); }
@@ -108,7 +108,7 @@
 #scene .explore-page .explore-browse-raw::after { content:" \2192"; }
 #scene .explore-page .explore-record-open {
   min-height:0; overflow:hidden; padding:var(--sp-5); border:1px solid hsl(var(--border-default)); border-radius:6px; background:hsl(var(--surface) / .16);
-  display:grid; align-content:start; gap:var(--sp-3); animation:ex-in .22s cubic-bezier(.2,.65,.2,1);
+  display:grid; align-content:start; gap:var(--sp-3); animation:ex-in .22s var(--ease-ui);
 }
 #scene .explore-page .explore-record-open::before { content:""; width:44px; height:2px; margin:calc(var(--sp-5) * -1) 0 var(--sp-3); background:hsl(var(--primary)); opacity:.82; }
 #scene .explore-page .explore-record-open .explore-record-top { justify-content:flex-start; }

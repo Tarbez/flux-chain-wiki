@@ -12,13 +12,8 @@
 /* Route components own action, reference and caution colors. Theme switching
    supplies their semantic values rather than overriding every link/button. */
 
-/* Atmosphere follows the same semantic palette as the page and settings. */
-:root:not([data-theme]),:root[data-theme="original"] {
- --canvas:180 9% 2%; --surface:140 12% 8%; --overlay:140 12% 7%; --raised:140 10% 12%;
- --primary:142 15% 64%; --complement:150 9% 48%; --text-strong:140 18% 89%; --text:140 12% 80%; --text-muted:140 9% 65%;
-}
 .ark-background-host { opacity:1; }
-.ark-studio-label { color:hsl(var(--text-muted)); font:400 var(--fs-micro) var(--ark-font); letter-spacing:.12em; }
+.ark-studio-label { color:hsl(var(--text-muted)); font:400 var(--fs-tertiary) var(--ark-font); letter-spacing:.12em; }
 .ark-background-host { position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
 :root[data-background]:not([data-background="original"]) .hero-atmosphere { display:none; }
 .site-settings { position:absolute; left:20px; bottom:14px; z-index:15; }

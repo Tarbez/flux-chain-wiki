@@ -7,7 +7,7 @@
    nearest samples) less the base. The channels (lift tip glow orbit gather broken loose bad, and the stage's own present) are the stage's, played by the one sampler.
    A part written in the card's own units (WATTACH: the glow, the loose pieces) is laid on the card as it stands: its lift, its lean and its size (the host's cardFrame()). The beads are
    a frame per state; the words of the panels are painted from the state's own lines, once per state, and handed to the renderer by id. Nothing here schedules a frame. No JSON. */
-import { torus } from '/fxn-3d/js/render/world2-shapes.mjs';
+import { torus } from './world2-gl.mjs';
 import { loadPart, resolveRow } from './world2-rows.mjs';
 import { CUBE, PANEL, fontOf, inkOf, paintLabel } from './world2-cardlook.mjs';   /* the card's surfaces and type (docs/design/auth/FXN-ID-CARD.md) */
 

@@ -48,7 +48,7 @@
  display:inline-flex; align-items:center; gap:var(--sp-4); height:36px; min-width:0; padding:0 var(--sp-4) 0 var(--sp-2);
  border:1px solid var(--dx-edge,hsl(var(--border-control))); border-radius:var(--dx-radius,8px);
  background:hsl(var(--surface)); color:hsl(var(--text-strong)); cursor:pointer; text-align:left;
- transition:background-color .15s ease,border-color .15s ease;
+ transition:background-color .15s var(--ease-ui),border-color .15s var(--ease-ui);
 }
 #scene .ark-header .header-you:hover,
 #scene .ark-header.nav-open .header-you { background:hsl(var(--raised)); border-color:hsl(var(--border-strong)); }
@@ -62,7 +62,7 @@
 .header-you-name { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:600 var(--fs-tertiary, 11px)/1.1 var(--dx-font-sans,var(--font-sans,sans-serif)); }
 .header-you-net { display:flex; align-items:center; gap:var(--sp-2); font:500 var(--fs-tertiary, 11px)/1.1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-muted)); white-space:nowrap; }
 .header-chain-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:hsl(var(--trust,var(--success))); flex:0 0 auto; }
-.header-you-chev { width:12px; height:12px; flex:0 0 auto; color:hsl(var(--text-muted)); transition:transform .15s ease; }
+.header-you-chev { width:12px; height:12px; flex:0 0 auto; color:hsl(var(--text-muted)); transition:transform .15s var(--ease-ui); }
 #scene .ark-header.nav-open .header-you-chev { transform:rotate(180deg); }
 
 /* an open panel lifts the bar over the page's layers (was .products-open) */
@@ -82,7 +82,7 @@
 #scene .ark-header #primary-navigation[hidden] { display:none; }
 #primary-navigation .nav-layer { display:grid; gap:var(--sp-2); padding:var(--sp-4); }
 #primary-navigation .nav-layer[hidden] { display:none; }
-#primary-navigation .nav-layer-in { animation:you-layer-in .18s cubic-bezier(.22,.7,.18,1) both; }
+#primary-navigation .nav-layer-in { animation:you-layer-in .18s var(--ease-ui) both; }
 @keyframes you-layer-in { from { transform:translateX(10px); clip-path:inset(0 0 0 10px); } to { transform:none; clip-path:inset(0); } }
 @media(prefers-reduced-motion:reduce) { #primary-navigation .nav-layer-in { animation:none; } }
 
@@ -110,7 +110,7 @@
 .header-you-netrow {
  display:flex; align-items:center; gap:var(--sp-4); width:100%; height:40px; padding:0 var(--sp-4); margin-top:var(--sp-1);
  border:0; border-radius:8px; background:transparent; color:hsl(var(--text)); cursor:pointer; text-align:left;
- font:500 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif)); transition:background-color .15s ease;
+ font:500 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif)); transition:background-color .15s var(--ease-ui);
 }
 .header-you-netrow:hover { background:hsl(var(--text-strong) / .06); }
 .header-you-netrow-label { font:600 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); }
@@ -122,7 +122,7 @@
 .header-you-pages { display:grid; gap:1px; margin:0; padding:0; list-style:none; }
 #scene .ark-header .header-you-page {
  display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:var(--sp-4); min-height:40px; padding:var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-3);
- border-radius:8px; background:none; color:hsl(var(--text)); text-decoration:none; transition:background-color .15s ease,color .15s ease;
+ border-radius:8px; background:none; color:hsl(var(--text)); text-decoration:none; transition:background-color .15s var(--ease-ui),color .15s var(--ease-ui);
 }
 #scene .ark-header .header-you-page:hover { background:hsl(var(--text-strong) / .06); color:hsl(var(--text-strong)); }
 #scene .ark-header .header-you-page[aria-current="page"] { background:hsl(var(--text-strong) / .08); color:hsl(var(--text-strong)); box-shadow:inset 2px 0 0 hsl(var(--primary)); }
@@ -152,7 +152,7 @@
  display:flex; align-items:center; gap:var(--sp-3); width:100%; height:36px; padding:0 var(--sp-4);
  border:0; border-radius:6px; background:transparent; color:hsl(var(--text-muted));
  font:500 var(--fs-tertiary)/1.2 var(--font-sans,"Albert Sans",sans-serif); text-align:left; cursor:pointer;
- transition:background-color 150ms ease,color 150ms ease;
+ transition:background-color 150ms var(--ease-ui),color 150ms var(--ease-ui);
 }
 .network-option::before { content:""; width:6px; height:6px; border-radius:50%; background:transparent; flex:0 0 auto; border:1px solid hsl(var(--text-faint)); }
 .network-option:hover { background:hsl(var(--raised)); color:hsl(var(--text-strong)); }
@@ -205,7 +205,7 @@
 #scene .site-footer-strip nav a {
  position:relative; display:inline-flex; align-items:center; height:32px; min-height:32px; padding:0 var(--sp-4); border-radius:8px;
  font:500 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif)); letter-spacing:0; text-transform:none;
- color:hsl(var(--text-muted)); background:none; text-decoration:none; transition:color .15s ease, background-color .15s ease;
+ color:hsl(var(--text-muted)); background:none; text-decoration:none; transition:color .15s var(--ease-ui), background-color .15s var(--ease-ui);
 }
 #scene .site-footer-strip nav a:hover { color:hsl(var(--text-strong)); background:hsl(var(--text-strong) / .06); }
 #scene .site-footer-strip nav a[aria-current="page"] { color:hsl(var(--text-strong)); }
@@ -216,7 +216,7 @@
 #scene .site-footer-strip .hero-motion-toggle {
  position:static; display:inline-flex; align-items:center; height:30px; min-height:30px; padding:0 var(--sp-4); border:1px solid hsl(var(--border-default)); border-radius:8px;
  background:hsl(var(--surface) / .6); color:hsl(var(--text)); font:600 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.08em;
- text-transform:uppercase; white-space:nowrap; cursor:pointer; transition:color .15s ease, border-color .15s ease, background-color .15s ease;
+ text-transform:uppercase; white-space:nowrap; cursor:pointer; transition:color .15s var(--ease-ui), border-color .15s var(--ease-ui), background-color .15s var(--ease-ui);
 }
 #scene .site-footer-strip .hero-motion-toggle:hover { color:hsl(var(--text-strong)); border-color:hsl(var(--border-strong)); background:hsl(var(--raised)); letter-spacing:.08em; }
 /* the settings gear stands inside the bar's left end (css/settings.css owns the control; this only places and sizes it) */

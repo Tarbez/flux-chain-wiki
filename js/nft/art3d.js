@@ -6,7 +6,7 @@
    again only while a hover tilts it. Nothing here runs an idle frame loop.
 
    SEPARATE ON PURPOSE. This is the NFT's own 3D, with its own card context, light and look. It does not
-   run on the home's ring kit (js/world/ring-kit.js): the cards are the owner's brand, not a part of the
+   run on the home's ring kit (the ring view of js/world2/world2-host.mjs): the cards are the owner's brand, not a part of the
    site's world (owner decision, 2026-10-24). It borrows only the kit's speed rules: no shadow pass on
    a moving frame, and a cap near 2.6 million drawn pixels (card.js).
 

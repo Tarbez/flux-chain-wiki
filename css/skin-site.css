@@ -9,7 +9,7 @@
    The clip only opens once the art has painted. */
 #scene .card-world { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; background: hsl(var(--canvas)); clip-path: inset(100% 0 0 0); }
 #scene .card-world[data-shown="true"] { clip-path: inset(0); }
-#scene .card-world .nft-world { transition: transform .6s cubic-bezier(.2, .7, .2, 1); }
+#scene .card-world .nft-world { transition: transform .6s var(--ease-ui); }
 #scene .card-world .nft-world.is-drawn { opacity: var(--nft-world-a, .62); }
 /* home's labels name the rings the card's world now covers: they wait under it with the rings */
 #scene:has(.card-world[data-shown="true"]) .world-tags { visibility: hidden; }

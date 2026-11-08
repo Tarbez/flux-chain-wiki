@@ -11,7 +11,7 @@
 
    The shapes are the mesh pass's own generator (world2-shapes.mjs roundedBox) with the box's size and corner radius applied
    to the unit box's core, as the Three.js card's vertex shader does: a rounded corner keeps its radius at any size. No JSON, no WASM. */
-import { roundedBox, prism } from '/fxn-3d/js/render/world2-shapes.mjs';
+import { roundedBox, prism } from './world2-gl.mjs';
 
 /* a hexagon with a corner on +z, radius 1, from y -.5 to +.5: your key's disc (CylinderGeometry radial 6) */
 const HEX = [0, 1, 2, 3, 4, 5].map((i) => [Math.sin(i * Math.PI / 3), Math.cos(i * Math.PI / 3)]);
