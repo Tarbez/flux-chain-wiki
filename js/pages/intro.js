@@ -289,9 +289,16 @@
     function slot(sg) { var ang = sg.at != null ? sg.at : sg.angle; return ((Math.round(ang / 30) % 12) + 12) % 12; }
     /* the stone itself answers: SELECT[n] slides it out and lights it (fxn-3d portal101); leaving returns the held ring frame */
     var opening = false;
+    /* the object that came to the centre stays there while the pointer travels from its stone into the centre, so it can be
+       clicked there (owner, 2026-11-09: "I hover, it shows, I go down to click, it goes out again"). Leaving waits a moment; the
+       centre or another stone cancels the wait. */
+    var releaseTimer = 0, current = null;
+    function release(sg) { clearTimeout(releaseTimer); releaseTimer = setTimeout(function () { if (current === sg) { current = null; select(sg, false); } }, 220); }
+    function keep() { clearTimeout(releaseTimer); }
     function select(sg, on) {
       var n = sg.n;
       if (opening) return;   /* a click is transforming the object: no hover answer may run over it */
+      if (on) { keep(); if (current && current !== sg) { var was = current; current = null; select(was, false); } current = sg; }
       if (on) {
         hovered = n; var k = slot(sg), ang = (sg.at != null ? sg.at : sg.angle);
         tag.textContent = copy('RING.S' + (k + 1));
@@ -321,19 +328,26 @@
         g.appendChild(word);
         /* its micro object (SEGMENTS micro: screen centre and radius, 0 to 1 of the frame) is the same door */
         if (sg.micro) { var c = document.createElementNS(SVGNS, 'circle'); c.setAttribute('cx', (sg.micro.x * innerWidth).toFixed(1)); c.setAttribute('cy', (sg.micro.y * innerHeight).toFixed(1)); c.setAttribute('r', Math.max(18, sg.micro.r * innerHeight * 1.2).toFixed(1)); g.appendChild(c); }
-        g.addEventListener('pointerenter', function () { select(sg, true); });
-        g.addEventListener('pointerleave', function () { select(sg, false); });
-        g.addEventListener('focus', function () { select(sg, true); });
-        g.addEventListener('blur', function () { select(sg, false); });
-        g.addEventListener('click', function (e) {
-          e.preventDefault();
+        g.addEventListener('pointerenter', function () { if (current !== sg) select(sg, true); else keep(); });
+        g.addEventListener('pointerleave', function () { release(sg); });
+        g.addEventListener('focus', function () { if (current !== sg) select(sg, true); });
+        g.addEventListener('blur', function () { release(sg); });
+        sg._open = function () {
           if (!TOPIC[k]) { page.classList.add('topic-soon'); setTimeout(function () { page.classList.remove('topic-soon'); }, 1600); return; }
           page.classList.remove('tag-on');
           if (ringOpen && ringOpen[sg.n] && !still()) { opening = true; if (menu) menu.style.pointerEvents = 'none'; post({ range: ringOpen[sg.n], tag: 'open:' + k }); }
           else openTopic(k);
-        });
+        };
+        g.addEventListener('click', function (e) { e.preventDefault(); sg._open(); });
         menu.appendChild(g);
       });
+      /* the centre: the object that came in is clicked here */
+      var mid = document.createElementNS(SVGNS, 'circle'); mid.setAttribute('class', 'centre');
+      mid.setAttribute('cx', at.x); mid.setAttribute('cy', at.y); mid.setAttribute('r', (at.r * .66).toFixed(1));
+      mid.addEventListener('pointerenter', function () { if (current) keep(); });
+      mid.addEventListener('pointerleave', function () { if (current) release(current); });
+      mid.addEventListener('click', function (e) { e.preventDefault(); if (current && current._open) current._open(); });
+      menu.appendChild(mid);
       page.appendChild(menu); page.classList.add('menu-on');
     }
     var pending = null;

@@ -288,3 +288,5 @@ html[data-portal-ring] #scene .ark-header, html[data-portal-ring] .dx-foot { opa
 .intro-ring-menu text { font: 500 var(--fs-tertiary, 11px)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; fill: hsl(var(--text-faint)); transition: fill .12s ease-out; pointer-events: none; }
 .intro-ring-menu a:hover text, .intro-ring-menu a:focus-visible text { fill: hsl(var(--text-strong)); }
 .intro-world.menu-on .intro-ring-tag { display: none; }
+/* the centre is the click target of the object that came in (js/pages/intro.js showMenu) */
+.intro-ring-menu circle.centre { pointer-events: auto; cursor: pointer; }
