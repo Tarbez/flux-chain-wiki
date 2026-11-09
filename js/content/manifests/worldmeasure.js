@@ -448,7 +448,7 @@ ArkManifest.define({
       "label": "FXN supply page: button",
       "kind": "line",
       "section": "FXN supply",
-      "value": "Create your identity"
+      "value": "Initiate FXN ID"
     },
     "FXN.CTA.HREF": {
       "label": "FXN supply page: button, link target",
@@ -736,13 +736,13 @@ ArkManifest.define({
       "label": "Network ring page: identity chain, more about it",
       "kind": "line",
       "section": "A chain of the network",
-      "value": "A new record links to the one before it. Nothing is rewritten."
+      "value": "A new record names the one before it. A mistake is fixed by a new record."
     },
     "RING.IDENTITY.CTA": {
       "label": "Network ring page: identity chain, button",
       "kind": "line",
       "section": "A chain of the network",
-      "value": "Create your identity"
+      "value": "Initiate FXN ID"
     },
     "RING.IDENTITY.CTA.HREF": {
       "label": "Network ring page: identity chain, button, link target",
@@ -886,7 +886,7 @@ ArkManifest.define({
       "label": "Network ring page: resolver chain, line under the heading",
       "kind": "line",
       "section": "A chain of the network",
-      "value": "A rulebook."
+      "value": "A rule set."
     },
     "RING.RESOLVER.WHAT": {
       "label": "Network ring page: resolver chain, what it is",
@@ -1042,7 +1042,7 @@ ArkManifest.define({
       "label": "Network ring page: coin ledger, what it is",
       "kind": "line",
       "section": "A chain of the network",
-      "value": "Balances of the network's own coin, worked out from the chain's events."
+      "value": "Balances of the network's own coin. Each balance is the head of its key's list."
     },
     "RING.LEDGER.ALSO": {
       "label": "Network ring page: coin ledger, more about it",
@@ -1084,7 +1084,7 @@ ArkManifest.define({
       "label": "Resolvers page: what a resolver is (10 words at most)",
       "kind": "line",
       "section": "Resolvers",
-      "value": "A resolver is a rulebook that runs as its own chain."
+      "value": "A resolver is a rule set that runs as its own chain."
     },
     "RESOLVERS.WHAT": {
       "label": "Resolvers page: \"what is a resolver\" disclosure",

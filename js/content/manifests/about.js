@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "DEFXN is the kernel of the grid. FXN is its first chain and that chain’s coin. A resolver turns signed records into a result that anyone can check. Everything here runs on a development network, and nothing is live."
+      "value": "What it is: DEFXN is the kernel. FXN is its first chain and that chain's coin. A resolver turns signed records into a result anyone can check. What you do: Initiate FXN ID, sign records, use resolvers. What you get back: signed receipts and results you can check. Status: the FXN ID gate, the name gateway, the DNS gateway and the bundle upload door are live on the old infra. The new devnet is not deployed."
     },
     "CONTEXT": {
       "label": "Supporting explanation disclosure",
@@ -42,7 +42,7 @@ ArkManifest.define({
       "label": "Model summary",
       "kind": "line",
       "section": "Page",
-      "value": "Discovery finds the network. The chain admits signed records. Authority stays bounded."
+      "value": "The directory finds the network. The chain admits signed records. Each group can change only its own scope."
     },
     "ACTION": {
       "label": "Primary action",
@@ -102,7 +102,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Authority stays bound to a named scope and threshold. Network governance cannot silently take over the mesh, and mesh policy cannot take over a network."
+      "value": "Authority is tied to a named scope and threshold. Network governance cannot take over the shared base, and base policy cannot take over a network."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -210,7 +210,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Promise",
-      "value": "Data is written as signed records on a chain per identity, and other computers keep copies. You do not run a database server for it."
+      "value": "Data is written as signed records on a list per identity, and pinners on other machines keep copies. You do not run a database server for it."
     },
     "NO2.TITLE": {
       "label": "Heading",
@@ -378,7 +378,7 @@ ArkManifest.define({
       "label": "Heading: how a resolution works",
       "kind": "line",
       "section": "Page",
-      "value": "State it. Resolve it. Check it."
+      "value": "Send a record. Get a signed result. Check it."
     },
     "PILLARS.TITLE": {
       "label": "Heading: what DEFXN is",

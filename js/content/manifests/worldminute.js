@@ -52,7 +52,7 @@ ArkManifest.define({
       "label": "Beat 2: the sentence",
       "kind": "text",
       "section": "Beat 2",
-      "value": "Each record links to the one before it. Nothing is rewritten."
+      "value": "Each record names the one before it. A mistake is fixed by a new record."
     },
     "BEAT2.TAG.NAME": {
       "label": "Beat 2: 3D label",
@@ -112,31 +112,31 @@ ArkManifest.define({
       "label": "Beat 4: 3D label, second line",
       "kind": "line",
       "section": "Beat 4",
-      "value": "Rulebook"
+      "value": "Rule set"
     },
     "BEAT5.NAME": {
       "label": "Beat 5: short name (the tick and the label)",
       "kind": "line",
       "section": "Beat 5",
-      "value": "The mesh"
+      "value": "Keepers"
     },
     "BEAT5.SAY": {
       "label": "Beat 5: the sentence",
       "kind": "text",
       "section": "Beat 5",
-      "value": "The kernel copies each record to several computers. Sites will ship to the mesh as signed bundles, not to a server you rent."
+      "value": "A keeper orders each record and returns a signed receipt. The receipt makes it final. Pinners on our own nodes hold copies."
     },
     "BEAT5.TAG.NAME": {
       "label": "Beat 5: 3D label",
       "kind": "line",
       "section": "Beat 5",
-      "value": "Mesh"
+      "value": "Keeper"
     },
     "BEAT5.TAG.SUB": {
       "label": "Beat 5: 3D label, second line",
       "kind": "line",
       "section": "Beat 5",
-      "value": "Planned for sites"
+      "value": "Built, not live"
     },
     "BEAT6.NAME": {
       "label": "Beat 6: short name (the tick and the label)",
@@ -196,7 +196,7 @@ ArkManifest.define({
       "label": "Beat 8: the sentence",
       "kind": "text",
       "section": "Beat 8",
-      "value": "Visit a site and it can wear your card. The grid keeps its own look."
+      "value": "A site you visit can show your card. The site keeps its own layout."
     },
     "BEAT8.TAG.NAME": {
       "label": "Beat 8: 3D label",
@@ -280,7 +280,7 @@ ArkManifest.define({
       "label": "End: the one action",
       "kind": "line",
       "section": "End",
-      "value": "Create your identity"
+      "value": "Initiate FXN ID"
     },
     "END.CTA.HREF": {
       "label": "End: button link target",
@@ -370,7 +370,7 @@ ArkManifest.define({
       "label": "Tab: a result, one line",
       "kind": "line",
       "section": "One page",
-      "value": "Two people sign. A resolver, a signed rulebook, answers."
+      "value": "Two people sign. A resolver checks both and signs the result."
     },
     "PART.LAYERS.NAME": {
       "label": "Tab: layers",
@@ -400,7 +400,7 @@ ArkManifest.define({
       "label": "Layer 3, short",
       "kind": "line",
       "section": "One page",
-      "value": "Resolvers: signed rulebooks. Each names its blocks."
+      "value": "Resolvers: signed rule sets. Each names its blocks."
     },
     "PART.LIFE.NAME": {
       "label": "Tab: life",

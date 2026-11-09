@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <!-- The CSP below also lets this page call the local FXN ID gate (http://127.0.0.1:4571 to 4575, flux/fxn-auth/scripts/fxn-id-gate-local.mjs), so the sign-in panel can ask it for a v10 Secret Key. Exact origins, no range. The devnet gate committee (https://gate.defxn.com, assets/gate.committee) is allowed too, so /auth can make and open v10 FXN IDs. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'self' https://gate.defxn.com http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com wss://big1.devnet.defxn.com wss://lax24.devnet.defxn.com ws://127.0.0.1:19501 ws://localhost:19501; object-src 'none'; base-uri 'none'; form-action 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'self' https://gate.defxn.com http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com wss://big1.devnet.defxn.com wss://lax24.devnet.defxn.com ws://127.0.0.1:19501 ws://localhost:19501; object-src 'none'; frame-src http://127.0.0.1:3440; base-uri 'none'; form-action 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- The family tab icon: the DEFXN mark in Ember, built by flux/defxn-product-kit (deriveIcon) and
@@ -71,18 +71,26 @@
      alone. js/main.js takes it away as soon as the shell renders (html.shell-ready), so the page shows while the world still loads;
      js/world2/world2-host.mjs also takes it away (html.world-ready); if neither comes it fades at 8 s and its breathe stops by itself (four turns, 9.6 s); the page's CSP allows no inline script. -->
 <style>
-#world-loader{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;background:#000;pointer-events:none;transition:opacity .3s ease-out;animation:world-loader-out .3s ease-out 8s forwards}
+#world-loader{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;align-content:center;gap:22px;background:hsl(var(--canvas,0 0% 0%));pointer-events:none;transition:opacity .4s ease-out;animation:world-loader-out .3s ease-out 8s forwards}
 @keyframes world-loader-out{to{opacity:0;visibility:hidden}}
-#world-loader img{width:min(160px,36vw);height:auto;-webkit-mask-image:radial-gradient(closest-side,#000 72%,transparent);mask-image:radial-gradient(closest-side,#000 72%,transparent);animation:world-loader-breathe 2.4s ease-in-out 4}
-@keyframes world-loader-breathe{0%,100%{transform:scale(1);opacity:.82}50%{transform:scale(1.04);opacity:1}}
-html.world-ready #world-loader,html.shell-ready #world-loader{opacity:0;visibility:hidden;transition:opacity .3s ease-out,visibility 0s linear .3s}
-html.world-ready #world-loader img,html.shell-ready #world-loader img,html.world-gone #world-loader img{animation:none}
+/* LOADER (owner, 2026-11-09): the DEFXN mark in white glass (docs/design/marks-3d A01, traced), bigger, revealing itself, a welcome in
+   FXN Basalt and a quick loading bar. The render's black ground vanishes on the dark canvas (screen). It stays until its reveal ends. */
+#world-loader .mark{display:block;width:min(320px,58vw);aspect-ratio:1;background:url(assets/marks/loading-white.jpg) center/contain no-repeat;mix-blend-mode:screen;-webkit-mask-image:radial-gradient(closest-side,#000 70%,transparent);mask-image:radial-gradient(closest-side,#000 70%,transparent);clip-path:inset(100% 0 0 0);filter:blur(10px) brightness(2.2);transform:translateY(18px) scale(.94);animation:loader-reveal 1s cubic-bezier(.2,0,0,1) .1s forwards,world-loader-breathe 2.4s ease-in-out 1.2s 3}
+@keyframes loader-reveal{60%{filter:blur(0) brightness(1.6)}to{clip-path:inset(0);filter:blur(0) brightness(1);transform:none}}
+@keyframes world-loader-breathe{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.03);opacity:1}}
+#world-loader .welcome{margin:0;font:900 var(--fs-primary,29px)/1.1 var(--font-display,system-ui);letter-spacing:.02em;color:hsl(var(--text-strong,0 0% 100%));opacity:0;transform:translateY(8px);animation:loader-in .5s cubic-bezier(.2,0,0,1) .7s forwards}
+#world-loader .bar{width:min(240px,60vw);height:2px;background:hsl(var(--text-strong,0 0% 100%)/.14);overflow:hidden;opacity:0;animation:loader-in .3s ease-out .5s forwards}
+#world-loader .bar i{display:block;height:100%;width:100%;background:hsl(var(--primary,160 80% 65%));transform-origin:left;transform:scaleX(0);animation:loader-fill 1.2s cubic-bezier(.3,0,.2,1) .5s forwards}
+@keyframes loader-in{to{opacity:1;transform:none}}
+@keyframes loader-fill{to{transform:scaleX(.88)}}
+html.world-ready #world-loader .bar i,html.shell-ready #world-loader .bar i{transform:scaleX(1);transition:transform .25s ease-out}
+html.world-ready #world-loader,html.shell-ready #world-loader{opacity:0;visibility:hidden;transition:opacity .4s ease-out 1.5s,visibility 0s linear 1.9s}
 html.world-gone #world-loader{display:none}
-@media (prefers-reduced-motion:reduce){#world-loader img{animation:none}}
+@media (prefers-reduced-motion:reduce){#world-loader .mark,#world-loader .welcome,#world-loader .bar,#world-loader .bar i{animation:none;clip-path:none;filter:none;transform:none;opacity:1}}
 </style>
 </head>
 <body>
-<div id="world-loader" aria-hidden="true"><img src="assets/marks/loading.png" alt="" decoding="async" fetchpriority="low" width="160" height="160"></div>
+<div id="world-loader" aria-hidden="true"><span class="mark"></span><p class="welcome">Welcome to FXN.</p><span class="bar"><i></i></span></div>
 
 <!-- The scene host. Empty on purpose: the Ark UI runtime fills it from the
      single F-SCENE-RZERO_V0 pattern in js/scene.flux.js. No scene markup is
@@ -182,7 +190,7 @@ html.world-gone #world-loader{display:none}
 <script src="js/pages/catalog.js?v=20261026-kit" defer></script>
 <script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/min/manifest.js?v=371fb4dc" defer></script>
+<script src="js/min/manifest.js?v=2853544b" defer></script>
 <script src="js/ark/page-loader.js?v=20261025-ac1" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
 <script src="js/ark/panel-continuity.js?v=20261024-world1" defer></script>

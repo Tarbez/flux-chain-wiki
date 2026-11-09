@@ -10,25 +10,25 @@ ArkManifest.define({
       "label": "Promise",
       "kind": "line",
       "section": "Hero",
-      "value": "Identity chains, bound into one chain of chains"
+      "value": "Each key keeps its own list of signed records"
     },
     "EYEBROW": {
       "label": "Eyebrow",
       "kind": "line",
       "section": "Hero",
-      "value": "DEFXN / A chain of chains"
+      "value": "DEFXN / One chain per signer"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "text",
       "section": "Hero",
-      "value": "Not one chain.\nA world\nof them."
+      "value": "Not one chain.\nOne for\neach key."
     },
     "INTRO": {
       "label": "Intro",
       "kind": "text",
       "section": "Hero",
-      "value": "Your own history. A network of possibilities. DEFXN connects independent identity chains through applications and signed results you can inspect."
+      "value": "What it is: each FXN ID and each resolver keeps its own chain of signed records. What you do: sign a record. What you get back: a keeper's signed receipt, which makes it final, and a result anyone can check. Status: built, not live."
     },
     "STEP": {
       "label": "Label on the ring pill",
@@ -52,7 +52,7 @@ ArkManifest.define({
       "label": "Pressure-test pill",
       "kind": "line",
       "section": "Hero",
-      "value": "Ask the mesh. Get a claim you can check."
+      "value": "Send a record. Get a result you can check."
     },
     "SECONDARY": {
       "label": "Secondary button (unused on the current hero, kept for admin history)",
@@ -136,7 +136,7 @@ ArkManifest.define({
       "label": "Card label",
       "kind": "line",
       "section": "Theory card",
-      "value": "One substrate"
+      "value": "One kernel"
     },
     "INVITE.TITLE": {
       "label": "Card heading",
@@ -226,25 +226,25 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Home (3D world)",
-      "value": "An open world"
+      "value": "The kernel"
     },
     "WORLD.TITLE": {
       "label": "Heading, one row per line (the last row is the accent)",
       "kind": "text",
       "section": "Home (3D world)",
-      "value": "DEFXN is\nthe grid.\nRun your own."
+      "value": "DEFXN is\nthe kernel.\nChains run on it."
     },
     "WORLD.LEDE1": {
       "label": "Lede, first sentence",
       "kind": "text",
       "section": "Home (3D world)",
-      "value": "An open world of networks and chains, joined by one shared set of rules. Every record is signed, so anyone can check it."
+      "value": "Networks and chains that share one set of rules. Every record is signed, so anyone can check it."
     },
     "WORLD.LEDE2": {
       "label": "Lede, second sentence",
       "kind": "text",
       "section": "Home (3D world)",
-      "value": "Anyone can run a node from source. The download page shows how."
+      "value": "Running your own node is not open yet. At genesis the keepers are the foundation's nodes."
     },
     "WORLD.CTA": {
       "label": "Main action",
@@ -456,6 +456,318 @@ ArkManifest.define({
       "section": "Intro (in-world, 2026-11-07)",
       "value": "Intro"
     },
+    "LANDING.PORTAL.EYEBROW": {
+      "label": "Portal intro: the line above the headline",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "FXN network"
+    },
+    "LANDING.PORTAL.HEADLINE": {
+      "label": "Portal intro: headline",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "A new internet, built in the open."
+    },
+    "LANDING.PORTAL.LINE": {
+      "label": "Portal intro: the line under the headline",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "Build apps, start chains, run the machines that keep them. Today it runs as our development network. Genesis is next."
+    },
+    "LANDING.PORTAL.ENTER": {
+      "label": "Portal intro: the one action",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "Enter FXN"
+    },
+    "LANDING.CINE.FXNID.NAME": {
+      "label": "Intro cinema, FXN ID card: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "FXN ID"
+    },
+    "LANDING.CINE.FXNID.LINE": {
+      "label": "Intro cinema, FXN ID card: the line after the card builds",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Initiated on your device. The key file is never uploaded."
+    },
+    "LANDING.CINE.GARAGE.NAME": {
+      "label": "Intro cinema, archive (shot id garage): beat name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Your archive"
+    },
+    "LANDING.CINE.GARAGE.LINE": {
+      "label": "Intro cinema, archive (shot id garage): the line after the lights wake",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "This is your archive. The network runs under it."
+    },
+    "LANDING.CINE.KERNEL.NAME": {
+      "label": "Intro cinema, kernel: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "DEFXN Kernel"
+    },
+    "LANDING.CINE.KERNEL.LINE": {
+      "label": "Intro cinema, kernel: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "The kernel puts every record in order."
+    },
+    "LANDING.CINE.RECORDLINE.NAME": {
+      "label": "Intro cinema, recordline: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Ledger Line"
+    },
+    "LANDING.CINE.RECORDLINE.LINE": {
+      "label": "Intro cinema, recordline: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "A record enters. A receipt returns."
+    },
+    "LANDING.CINE.KEEPERRING.NAME": {
+      "label": "Intro cinema, keeperring: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Keeper Ring"
+    },
+    "LANDING.CINE.KEEPERRING.LINE": {
+      "label": "Intro cinema, keeperring: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "The receipt is the first copy. Pinners on other machines hold the rest."
+    },
+    "LANDING.CINE.KEEPERTOWER.NAME": {
+      "label": "Intro cinema, keepertower: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Keeper Tower"
+    },
+    "LANDING.CINE.KEEPERTOWER.LINE": {
+      "label": "Intro cinema, keepertower: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Machines like yours will keep it running. Ours run it today."
+    },
+    "LANDING.CINE.RULEBOOK.NAME": {
+      "label": "Intro cinema, rulebook: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Rule Book"
+    },
+    "LANDING.CINE.RULEBOOK.LINE": {
+      "label": "Intro cinema, rulebook: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Read the rule that runs the machine."
+    },
+    "LANDING.CINE.CHAINDRUM.NAME": {
+      "label": "Intro cinema, chaindrum: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Chain Drum"
+    },
+    "LANDING.CINE.CHAINDRUM.LINE": {
+      "label": "Intro cinema, chaindrum: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Start a chain with one signed record. Its rules are read before anyone trusts it."
+    },
+    "LANDING.CINE.BUNDLEPRESS.NAME": {
+      "label": "Intro cinema, bundlepress: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "App Bundler"
+    },
+    "LANDING.CINE.BUNDLEPRESS.LINE": {
+      "label": "Intro cinema, bundlepress: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Your app is stamped into one bundle."
+    },
+    "LANDING.CINE.APPBUNDLE.NAME": {
+      "label": "Intro cinema, appbundle: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "App Bundle"
+    },
+    "LANDING.CINE.APPBUNDLE.LINE": {
+      "label": "Intro cinema, appbundle: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "The app ships with its rules inside."
+    },
+    "LANDING.CINE.MARKGATE.NAME": {
+      "label": "Intro cinema, markgate: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Release Gate"
+    },
+    "LANDING.CINE.MARKGATE.LINE": {
+      "label": "Intro cinema, markgate: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "A signed release passes the door."
+    },
+    "LANDING.CINE.MULTISIGLOCK.NAME": {
+      "label": "Intro cinema, multisiglock: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Multisig Lock"
+    },
+    "LANDING.CINE.MULTISIGLOCK.LINE": {
+      "label": "Intro cinema, multisiglock: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "A rule changes only when 4 of 5 keys sign."
+    },
+    "LANDING.CINE.BRIDGESPAN.NAME": {
+      "label": "Intro cinema, bridgespan: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Bridge Span"
+    },
+    "LANDING.CINE.BRIDGESPAN.LINE": {
+      "label": "Intro cinema, bridgespan: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "A deposit crosses with its own proof."
+    },
+    "LANDING.CINE.NETWORKWALL.NAME": {
+      "label": "Intro cinema, networkwall: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Network Wall"
+    },
+    "LANDING.CINE.NETWORKWALL.LINE": {
+      "label": "Intro cinema, networkwall: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "The network runs on machines people choose to run. Yours can be one."
+    },
+    "LANDING.CINE.NETWORKPORTAL.NAME": {
+      "label": "Intro cinema, networkportal: object name",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "Network Portal"
+    },
+    "LANDING.CINE.NETWORKPORTAL.LINE": {
+      "label": "Intro cinema, networkportal: the line that names what the object just did",
+      "kind": "line",
+      "section": "Intro cinema (2026-11-09)",
+      "value": "A new internet, built in the open."
+    },
+    "LANDING.PORTAL.ASK": {
+      "label": "Portal intro: the question after the cinema",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "Initiate your FXN ID?"
+    },
+    "LANDING.PORTAL.ASK.YES": {
+      "label": "Portal intro: the yes answer: opens /auth",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "Initiate FXN ID"
+    },
+    "LANDING.PORTAL.ASK.NO": {
+      "label": "Portal intro: the no answer: opens home",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "Not now"
+    },
+    "LANDING.RING.S1": {
+      "label": "Ring menu, stone 1 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "FXN ID"
+    },
+    "LANDING.RING.S2": {
+      "label": "Ring menu, stone 2 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Records"
+    },
+    "LANDING.RING.S3": {
+      "label": "Ring menu, stone 3 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Keepers"
+    },
+    "LANDING.RING.S4": {
+      "label": "Ring menu, stone 4 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Capacity"
+    },
+    "LANDING.RING.S5": {
+      "label": "Ring menu, stone 5 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Chains"
+    },
+    "LANDING.RING.S6": {
+      "label": "Ring menu, stone 6 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Names"
+    },
+    "LANDING.RING.S7": {
+      "label": "Ring menu, stone 7 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "The game"
+    },
+    "LANDING.RING.S8": {
+      "label": "Ring menu, stone 8 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Releases"
+    },
+    "LANDING.RING.S9": {
+      "label": "Ring menu, stone 9 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Apps"
+    },
+    "LANDING.RING.S10": {
+      "label": "Ring menu, stone 10 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Rules"
+    },
+    "LANDING.RING.S11": {
+      "label": "Ring menu, stone 11 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Deposits"
+    },
+    "LANDING.RING.S12": {
+      "label": "Ring menu, stone 12 (clockwise from the top)",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "Network"
+    },
+    "LANDING.RING.SOON": {
+      "label": "Ring menu: shown when a segment has no film yet",
+      "kind": "line",
+      "section": "Intro ring menu (2026-11-09)",
+      "value": "This one opens when its object is built."
+    },
+    "LANDING.PORTAL.DIVE": {
+      "label": "Portal intro: the ring's name for screen readers (pressing it dives into the network)",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "Go through the portal"
+    },
+    "LANDING.PORTAL.SCROLL": {
+      "label": "Portal intro: the scroll hint",
+      "kind": "line",
+      "section": "Intro portal (board 40, 2026-11-09)",
+      "value": "Scroll to enter"
+    },
     "LANDING.S1.LINE": {
       "label": "Shot 1: caption",
       "kind": "line",
@@ -550,13 +862,13 @@ ArkManifest.define({
       "label": "Shot 4: the one number, after the copies land",
       "kind": "line",
       "section": "Intro (in-world, 2026-11-07)",
-      "value": "A copy reached each pinner in about 1.1 s."
+      "value": "Copies reach the pinners in about 1.4 to 1.7 s."
     },
     "LANDING.S4.CONDITION": {
       "label": "Shot 4: the number's condition, on the same screen",
       "kind": "line",
       "section": "Intro (in-world, 2026-11-07)",
-      "value": "Measured on 5 test nodes on one machine. Nothing live."
+      "value": "The receipt is final at once. Measured across three regions. Not live."
     },
     "LANDING.S5.LINE": {
       "label": "Shot 5: the picker's heading",
@@ -730,7 +1042,7 @@ ArkManifest.define({
       "label": "Beat 5: mono line, the number with its condition",
       "kind": "line",
       "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
-      "value": "26,274 final payments a second. 5 test nodes on one machine. 1,000 in flight."
+      "value": "80,269 final payments a second on one keeper. 32 vCPU, 7,000 in flight, every signature checked."
     },
     "LANDING.B5.CHIP": {
       "label": "Beat 5: chip, desktop",
@@ -754,13 +1066,13 @@ ArkManifest.define({
       "label": "Beat 5: after the copies land",
       "kind": "line",
       "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
-      "value": "A copy reached each pinner in about 1.1 s."
+      "value": "Copies reach the pinners in about 1.4 to 1.7 s."
     },
     "LANDING.B5.CONDITION": {
       "label": "Beat 5: the number's condition, same screen",
       "kind": "line",
       "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
-      "value": "Measured on 5 test nodes on one machine. Nothing live."
+      "value": "The receipt is final at once. Measured across three regions. Not live."
     },
     "LANDING.B6.LINE": {
       "label": "Beat 6 What comes next: 29 line",

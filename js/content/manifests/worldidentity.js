@@ -106,7 +106,7 @@ ArkManifest.define({
       "label": "Label: your chain, second line",
       "kind": "line",
       "section": "The page (/identity)",
-      "value": "One for each identity"
+      "value": "One list for each identity"
     },
     "START.TAG.RESOLVERS": {
       "label": "Label: resolvers",
@@ -148,13 +148,13 @@ ArkManifest.define({
       "label": "The answer, one line",
       "kind": "line",
       "section": "The page (/identity)",
-      "value": "A key file on your device that signs you into every network."
+      "value": "A key file made on your device. It signs your sign-ins and your records."
     },
     "NOTE": {
       "label": "Note under the 3D",
       "kind": "line",
       "section": "The page (/identity)",
-      "value": "An illustration. It shows no live state."
+      "value": "Illustration. The FXN ID gate is live on the old devnet."
     },
     "TABS": {
       "label": "Name of the section tabs",
@@ -232,7 +232,7 @@ ArkManifest.define({
       "label": "Safeguard 1, what it does",
       "kind": "line",
       "section": "Keep it safe",
-      "value": "It opens only with your PIN, on your device. Nobody else ever needs your PIN."
+      "value": "It opens with your PIN, password, key word and icon, on your device. Nobody else needs them."
     },
     "SAFE.R1": {
       "label": "Safeguard 2",
@@ -244,7 +244,7 @@ ArkManifest.define({
       "label": "Safeguard 2, what it does",
       "kind": "line",
       "section": "Keep it safe",
-      "value": "Servers that hold parts of your key. Any 3 of 5 release it. 3 wrong tries lock it for 24 hours."
+      "value": "Servers that hold parts of your key. Any 2 of 3 release it on the devnet. 3 of 5 on mainnet. 3 wrong tries lock it for 24 hours."
     },
     "SAFE.R2": {
       "label": "Safeguard 3",
@@ -256,7 +256,7 @@ ArkManifest.define({
       "label": "Safeguard 3, what it does",
       "kind": "line",
       "section": "Keep it safe",
-      "value": "Move your identity to a new key if the old one is lost."
+      "value": "Move your identity to a new key if the old one is lost. Planned, not built."
     },
     "YOU.CELL.NAME": {
       "label": "Cell: name",

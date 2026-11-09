@@ -1026,3 +1026,22 @@ A crowd or a vote confirming a payment. Blocks, mining or a "longest chain". A f
 DELIVER
 Desktop at 1440x900 and 1280x720, and phone at 390x844, for every journey scene and every page. Each screen fits without scrolling. On phone the 3D sits in the top part and the three choices sit in the thumb zone, 44 px tall. Show each hero object in its four states: idle, near (the pointer comes close), hover (a choice is hovered), press.
 ```
+
+## Feature pages: say what it does (owner, 2026-11-09)
+
+Owner, 2026-11-09: "I need self-explanatory features, not some poetic fantasy." Every feature on the site is explained in four plain parts. No metaphor and no mood lines.
+
+| Part | What it says |
+|---|---|
+| What it is | The feature in one or two plain sentences. |
+| What you do | The steps a person takes to use it. |
+| What you get back | The result the person receives. |
+| Status | Live, built but not live, or design only. Use the facts from the genesis session (flux/defxn/docs/design/space/intro-story/00-facts-genesis.md). |
+
+Example, keeper pay:
+- **What it is:** keepers are the machines that put records in order and return receipts. They are paid from the fee box. Part of each fee goes to the keeper that did the work.
+- **What you do:** run a keeper. Today the keepers are the foundation's own nodes. Running your own is not open yet.
+- **What you get back:** a share of the fees for the records your keeper ordered. Mining pay adds up to 30% for measured work.
+- **Status:** built, not live. Nothing has been paid out yet.
+
+What a record is, in plain facts, is in flux/defxn/docs/design/space/intro-story/10-direction.md section 5. Use its facts, not its tone.

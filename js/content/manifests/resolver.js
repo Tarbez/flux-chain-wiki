@@ -79,13 +79,13 @@ ArkManifest.define({
       "label": "Display heading",
       "kind": "line",
       "section": "Page",
-      "value": "Ask the mesh. Get an answer you can check."
+      "value": "Send a record. Get a signed result you can check."
     },
     "DISPLAY.LEDE": {
       "label": "Display introduction",
       "kind": "text",
       "section": "Page",
-      "value": "A resolver is launched with one signed record. It gets its own chain, it is built from shared capabilities anyone can check, and it refuses any record that does not fit its grammar."
+      "value": "What it is: a rule set that runs as its own chain, launched by one signed record. What you do: send a record in its grammar. What you get back: its signed result, or a refusal with the reason. Status: built. Explore and Deploy run on the development network. Public hosting is not open."
     },
     "BODY1": {
       "label": "First paragraph",
@@ -97,7 +97,7 @@ ArkManifest.define({
       "label": "Second paragraph",
       "kind": "text",
       "section": "Page",
-      "value": "Capabilities are the shared mechanisms: N-of-M signatures, custody, a ledger, escrow, a signer. Each is published once, with test vectors anyone can run. A resolver composes them and adds its own grammar; it never carries its own copy. So two resolvers that both hold funds hold them the same, checked way."
+      "value": "Capabilities are the shared mechanisms: N-of-M signatures, custody, a ledger, escrow, a signer. Each is published once, with test vectors anyone can run. A resolver names the ones it uses and adds its own grammar. It never carries its own copy. So two resolvers that both hold funds hold them the same, checked way."
     },
     "BODY3": {
       "label": "Closing paragraph",
@@ -151,13 +151,13 @@ ArkManifest.define({
       "label": "Why label",
       "kind": "line",
       "section": "Page",
-      "value": "Why it matters"
+      "value": "Before you rely on it"
     },
     "WHY": {
       "label": "Why text",
       "kind": "text",
       "section": "Page",
-      "value": "Anyone can read the rulebook before relying on it: its grammar, its capabilities and who can change it. Nothing about it can change quietly underneath you."
+      "value": "You can read the rule set before you send: its grammar, its capabilities and the key that can change it. A change adds a new version that anyone can see."
     },
     "BOUNDARY.LABEL": {
       "label": "Boundary label",
@@ -217,7 +217,7 @@ ArkManifest.define({
       "label": "Ask step text",
       "kind": "text",
       "section": "Flow",
-      "value": "A resolver only accepts records in its own grammar; anything else is refused before it reaches a peer. This example takes a document identifier and checks it against a named size rule."
+      "value": "A resolver accepts only records in its own grammar. Anything else is refused before it reaches a peer. This example takes a document identifier and checks it against a named size rule."
     },
     "RESOLVE.BODY": {
       "label": "Resolve step text",
@@ -283,13 +283,13 @@ ArkManifest.define({
       "label": "Law 4",
       "kind": "line",
       "section": "Laws",
-      "value": "Fixed unless you said otherwise."
+      "value": "Fixed unless it has a control key."
     },
     "LAW4.TEXT": {
       "label": "Law 4 detail",
       "kind": "text",
       "section": "Laws",
-      "value": "A resolver is immutable by default. Only the control key named at launch can upgrade it, and an upgrade adds a new declaration; it never rewrites the old one."
+      "value": "A resolver is immutable by default. Only the control key named at launch can upgrade it. An upgrade adds a new declaration and never rewrites the old one."
     },
     "VERIFIED.TITLE": {
       "label": "Verified-on-chain heading",
@@ -373,13 +373,13 @@ ArkManifest.define({
       "label": "Hub note: product hosting",
       "kind": "text",
       "section": "Hub",
-      "value": "Explore and Deploy run on the development network; public hosting is not established yet."
+      "value": "Explore and Deploy run on the development network. Public hosting is not open yet."
     },
     "MATH.LINK": {
       "label": "Hub link: resolver math",
       "kind": "line",
       "section": "Hub",
-      "value": "Why your resolver’s limits are yours"
+      "value": "How a resolver's limits are set"
     },
     "MATH.HREF": {
       "label": "Hub link target: resolver math",
@@ -409,7 +409,7 @@ ArkManifest.define({
       "label": "Registry page: boundary",
       "kind": "text",
       "section": "Registry page",
-      "value": "A snapshot, not a live read. Every count here comes from the commit and the dated development-network observation named above; what a node holds right now is in Explore."
+      "value": "A snapshot, not a live read. Every count here comes from the commit and the dated development-network reading named above. What a node holds right now is in Explore."
     },
     "REGISTRY.CHAINS.LABEL": {
       "label": "Registry page: resolver chains label",
@@ -439,7 +439,7 @@ ArkManifest.define({
       "label": "Registry page: no capability launched",
       "kind": "text",
       "section": "Registry page",
-      "value": "Launched on the development network at its last recorded restart: none. That is a measured zero, not a missing feature; the manifests below are ready to launch."
+      "value": "Launched on the development network at its last recorded restart: none. That is a measured zero, not a missing feature. The manifests below are ready to launch."
     },
     "REGISTRY.BRIDGES.LABEL": {
       "label": "Registry page: bridge chains label",
@@ -487,7 +487,7 @@ ArkManifest.define({
       "label": "Registry page: applications text",
       "kind": "text",
       "section": "Registry page",
-      "value": "Listed on this page before resolver chains existed. None of them is launched as a resolver chain; each keeps its own figures and open issues, dated where they were measured."
+      "value": "Listed on this page before resolver chains existed. None of them is launched as a resolver chain. Each keeps its own figures and open issues, dated where they were measured."
     }
   }
 });

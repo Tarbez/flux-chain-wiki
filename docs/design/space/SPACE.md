@@ -1118,3 +1118,60 @@ in the earlier sections (the owner's quoted "journey" twice, "level up" in the `
 - **Chains:** the chain drum stays, with pages under its lid.
 - **Book object:** also create a book object (a key's records as numbered pages), as its own shape beside the drum. The shape list gains "book"; it is built in the phase with the drum, page and glass card.
 - **3D slot:** phase 1 starts when the 10 logos (A01-A10) are done; one 3D builder at a time.
+
+## Intro: the portal, your archive and its story (owner, 2026-11-09)
+
+Layer: app (the site's intro page, js/pages/intro.js, over the fxn-3d site objects). Reader: the site builders and the object builders.
+
+The flow, in order:
+1. The white glass mark loads and says "Welcome to FXN."
+2. Portal 101 builds itself.
+3. A click tears the portal's picture. The Loopforge glitch film plays.
+4. The camera goes through into **your archive**, the player's room under the city (fxn-3d world/underground; owner 2026-11-09: "Your archive", it was called the garage).
+5. The garage plays a film in four acts. The world acts first. The words then name what was just seen.
+
+Owner rulings, 2026-11-09:
+- "It has no story and it is too fast."
+- The kernel does not stand in the middle. It lives in **a big room where the player has a screen**, and it is animated there.
+- The kernel's design is upgraded to fit the archive.
+- Every object **builds in real staged motion**, never in one jump.
+- Release Gate is the door to the game. The owner links it later.
+- One building agent at most.
+
+| Act | Seconds | What happens (the world acts) | The words after it |
+|---|---|---|---|
+| 1 Arrival | 0-10 | The camera comes through the portal into the dark archive. The lights wake bay by bay. The camera reaches the screen room. The big screen switches on, and the kernel builds itself on it, part by part. | "This is your archive. The network runs under it." / "The kernel puts every record in order." |
+| 2 A record moves | 10-30 | A record leaves the screen. Ledger Line takes it in, and a receipt returns. Keeper Ring sends copies to its pods. Keeper Tower takes the envelope. Rule Book opens on the rule it followed. | the object lines (HOME.LANDING.CINE.*) |
+| 3 What you build | 30-52 | Chain Drum turns. App Bundler stamps. App Bundle ships. Multisig Lock takes four of five keys. Bridge Span carries a deposit. Network Wall lights. Network Portal opens. | the object lines |
+| 4 The door | 52-60 | Release Gate opens on its key. Light runs through it toward the game. The view holds wide. | "Your key opens the gate." |
+
+Pacing is a target to check on screen, not a measured number. Each object gets about 4 s. Its build takes 1.5 to 2 s in steps. Parts travel in on rails and lock with a small overshoot. Then the strips light. Its words come after the action, never before. The words live in HOME.LANDING.CINE.* in js/content/manifests/home.js.
+
+### Your archive: every part of FXN, and its object (draft, 2026-11-09)
+
+Owner, 2026-11-09: the film must show every part of FXN: worlds, chains, games, the tech, the products, that we all earn, that we
+all add compute, and that it gets faster with each keeper. Each line in the film stays true. The facts and numbers come from the
+genesis session and the game session (asked 2026-11-09). Objects are built one at a time, in this order, after the owner confirms the list.
+
+| # | Part of FXN | Object that shows it | State |
+|---|---|---|---|
+| 1 | The chain: records in order, a receipt for each | DEFXN Kernel (screen room), Ledger Line | built, kernel redesign in progress |
+| 2 | Keepers hold copies | Keeper Ring | built |
+| 3 | Run a machine that keeps the network | Keeper Tower | built |
+| 4 | It gets faster with each keeper | **Keeper Array**: racks join one by one. A speed gauge rises with each | missing, number pending |
+| 5 | We all add compute | **Home Node**: your own machine plugs into the network and lights | missing, status pending |
+| 6 | We all earn | **Reward Flow**: credits run back along the lines to each contributor | missing, rules pending |
+| 7 | The data store | **Record Vault**: stacked records and media, each kept in copies | missing, status pending |
+| 8 | Streaming and live rooms | **Live Room**: a stream screen with people in it at once | missing, status pending |
+| 9 | Worlds = chains = games, the game engine | **World Forge**: a world builds itself and becomes its own chain | missing, facts pending |
+| 10 | Start your own chain | Chain Drum | built |
+| 11 | The rules that run the machine | Rule Book | built |
+| 12 | Apps and their rules | App Bundler, App Bundle | built |
+| 13 | Changes need four of five keys | Multisig Lock | built |
+| 14 | Deposits cross with their proof | Bridge Span | built |
+| 15 | The network runs where you do | Network Wall | built |
+| 16 | A new internet, in the open | Network Portal | built |
+| 17 | Names | Name Gate | built, parked by the owner |
+| 18 | The door to the game | Release Gate | built (the game link comes later) |
+
+The names of the six missing objects are drafts for the owner.

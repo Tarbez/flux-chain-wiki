@@ -15,13 +15,13 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "FLUX PROTOCOL / NETWORK EVIDENCE"
+      "value": "DEFXN / NETWORK EVIDENCE"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "How do you verify a named network?"
+      "value": "How do you check a named network?"
     },
     "DECK": {
       "label": "Intro",

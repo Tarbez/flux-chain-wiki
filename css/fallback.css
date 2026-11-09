@@ -17,8 +17,8 @@ html, body { margin: 0; padding: 0; background: hsl(var(--canvas)); }
   display: block;
   background: hsl(var(--canvas));
   color: hsl(var(--text-muted));
-  font-family: "Albert Sans", "Avenir Next", "Helvetica Neue", -apple-system,
-               BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: var(--font-sans, "FXN Basalt Text", "Albert Sans", "Avenir Next", "Helvetica Neue", -apple-system,
+               BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif);   /* LAW 2026-11-09: the theme's text slot, FXN Basalt Text */
   font-size: var(--fs-secondary);
   line-height: 1.7;
   padding: var(--sp-8) var(--sp-6) var(--sp-9);

@@ -28,19 +28,19 @@ ArkManifest.define({
       "label": "Eyebrow",
       "kind": "line",
       "section": "Page",
-      "value": "FLUX PROTOCOL / THE CHAIN OF CHAINS"
+      "value": "DEFXN / ONE CHAIN PER SIGNER"
     },
     "TITLE": {
       "label": "Heading",
       "kind": "line",
       "section": "Page",
-      "value": "Not one chain. A chain of chains."
+      "value": "Each key keeps its own chain."
     },
     "LEDE": {
       "label": "Introduction",
       "kind": "text",
       "section": "Page",
-      "value": "Every identity signs its own chain. Every resolver runs its own chain. One base chain records which resolvers and capabilities exist. No record waits on anyone else’s. Watch one record join, from signature to the resolver that gives it meaning."
+      "value": "What it is: every FXN ID signs records onto its own list, and every resolver runs its own chain. One base chain lists which resolvers and capabilities exist. What you do: sign a record. What you get back: a keeper's signed receipt, which makes it final. No record waits on another key's list. Status: built, not live. The new devnet is not deployed."
     },
     "NEXT": {
       "label": "Next-step link",

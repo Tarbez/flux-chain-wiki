@@ -154,7 +154,7 @@ ArkManifest.define({
       "label": "Chain page: heading",
       "kind": "line",
       "section": "Your chain (/chain)",
-      "value": "Sample chain."
+      "value": "Sample chain. Not live."
     },
     "ONE.ANSWER.ALL": {
       "label": "Chain page: answer line, when every record is signed",
@@ -202,7 +202,7 @@ ArkManifest.define({
       "label": "Chain page: drum control: group name",
       "kind": "line",
       "section": "Your chain (/chain)",
-      "value": "Turn the chain"
+      "value": "Move through the list"
     },
     "ONE.TURN.NEWER": {
       "label": "Chain page: drum control: newer",
@@ -364,7 +364,7 @@ ArkManifest.define({
       "label": "Chain page: signature: unsigned",
       "kind": "line",
       "section": "Your chain (/chain)",
-      "value": "Not signed. A record counts once its key signs it."
+      "value": "Not signed. A record counts only once its key signs it."
     },
     "ONE.LINKS.G.LINKSTO": {
       "label": "Chain page: links: group, links to",
@@ -460,7 +460,7 @@ ArkManifest.define({
       "label": "Chain page: label drawn in the 3D scene: newest",
       "kind": "line",
       "section": "Your chain (/chain)",
-      "value": "Newest"
+      "value": "Newest (the head)"
     },
     "ONE.STAT.RECORDS": {
       "label": "Number label: records",

@@ -49,7 +49,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Mesh operations, a named group of operators, decides changes to the shared base that every network runs on. Each network’s DAO (a group of named signers who vote) decides changes to that one network. Neither group can act for the other."
+      "value": "What it is: the rules for who can change what. What you do: sign a proposal with your FXN ID if you are on a roster. What you get back: a signed decision record. On the devnet, a multisig of five FXN IDs changes fees, budget and parameters when 4 of 5 sign, until attesters are filed. Each launched chain gets its own DAO. Status: built, not live."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -85,7 +85,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 3",
-      "value": "Mesh operations cannot decide a network's internal proposal. A network DAO cannot change the shared substrate. Saying only \"Flux governance\" is not precise enough to identify authority."
+      "value": "Mesh operations cannot decide a network's internal proposal. A network DAO cannot change the shared base. The word \"governance\" alone does not say who holds authority."
     },
     "POINT4.TITLE": {
       "label": "Heading",
@@ -145,7 +145,7 @@ ArkManifest.define({
       "label": "Status text",
       "kind": "text",
       "section": "Evidence",
-      "value": "The substrate policy structure and threshold rules exist in source, and the DAO runs as a resolver chain on the development network. A public governance interface and independent production activation are not established."
+      "value": "The base policy and threshold rules exist in source, and the DAO runs as a resolver chain on the development network. A public governance page and a production activation do not exist yet."
     },
     "LIMIT.TITLE": {
       "label": "Limitation heading",
@@ -157,7 +157,7 @@ ArkManifest.define({
       "label": "Limitation text",
       "kind": "text",
       "section": "Evidence",
-      "value": "Policy text is not activation evidence. Named network DAOs require their own inspectable roster, decision, and activation records."
+      "value": "Policy text is not activation evidence. Each named network DAO needs its own roster record, decision records and activation records that anyone can inspect."
     },
     "EVIDENCE": {
       "label": "Canonical evidence link",

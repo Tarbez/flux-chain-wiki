@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Pick a job. See its three steps in the space."
+      "value": "Pick a job. See its three steps."
     },
     "PROMISE": {
       "label": "Promise line",
@@ -60,7 +60,7 @@ ArkManifest.define({
       "label": "Menu heading over the resolutions you can use today",
       "kind": "line",
       "section": "Products menu",
-      "value": "Works on devnet"
+      "value": "Runs on the devnet"
     },
     "MEGA.MORE": {
       "label": "Menu heading over every other resolver",

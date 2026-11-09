@@ -148,19 +148,19 @@ ArkManifest.define({
       "label": "Primary answer",
       "kind": "text",
       "section": "Story",
-      "value": "You deploy a resolver by signing one launch record. It gives your resolver its own chain, names the capabilities it uses, and publishes the grammar every record must follow. Then a provider serves it."
+      "value": "What it is: one signed launch record that gives your resolver its own chain, names its capabilities and publishes its grammar. What you do: write the grammar, name the capabilities, choose who can change it, read the record and sign it. What you get back: the record's ID and a chain for your resolver. A provider then serves it. Status: built, on the development network only."
     },
     "BOUNDARY": {
       "label": "Essential boundary",
       "kind": "text",
       "section": "Story",
-      "value": "Launched is not served: a resolver with no announcing provider answers nothing. The explorer and deployer run on the development network today; public hosting is not established."
+      "value": "Launched is not served. A resolver with no announcing provider answers nothing. The explorer and deployer run on the development network today. Public hosting is not open."
     },
     "FABRIC.NETWORK": {
       "label": "Network fabric explanation",
       "kind": "line",
       "section": "Story",
-      "value": "A name for miner presence; not a resolver chain."
+      "value": "A name for miner presence. It is not a resolver chain."
     },
     "FABRIC.LOGIC": {
       "label": "Logic fabric explanation",
@@ -250,7 +250,7 @@ ArkManifest.define({
       "label": "Card 3 text",
       "kind": "text",
       "section": "Deploy cards",
-      "value": "A provider proves and announces it; every record it admits shows in the explorer."
+      "value": "A provider proves and announces it. Every record it admits shows in the explorer."
     },
     "SIMPLE.CAUTION.TITLE": {
       "label": "Caution disclosure title",
@@ -274,7 +274,7 @@ ArkManifest.define({
       "label": "Planned disclosure text",
       "kind": "text",
       "section": "Deploy cards",
-      "value": "One deployer for sites, apps, databases, packages, modules and code repositories, each as records on its own resolver chain. Audits and bounties for capabilities. Service pools. None of these is built yet."
+      "value": "One deployer for sites, apps, databases, packages, modules and code. Each lands as records on its own resolver chain. Also planned: audits and bounties for capabilities, and service pools. None of these is built yet."
     },
     "SIMPLE.DEPLOYER.LINK": {
       "label": "Action: Deploy product",
@@ -400,7 +400,7 @@ ArkManifest.define({
       "label": "Boundary",
       "kind": "text",
       "section": "Simple story",
-      "value": "Launched is not served: a resolver with no announcing provider answers nothing. Explore and Deploy run on the development network today; public hosting is not established."
+      "value": "Launched is not served. A resolver with no announcing provider answers nothing. Explore and Deploy run on the development network today. Public hosting is not open."
     },
     "SIMPLE.CONTEXT": {
       "label": "Context disclosure",
@@ -412,7 +412,7 @@ ArkManifest.define({
       "label": "Lifecycle context",
       "kind": "text",
       "section": "Simple story",
-      "value": "The full path records intent, offer, agreement, fulfillment, and receipt."
+      "value": "The full path records the intent, the offer, the agreement, the fulfillment and the receipt."
     },
     "SIMPLE.HOME.HREF": {
       "label": "Breadcrumb home link",
@@ -502,7 +502,7 @@ ArkManifest.define({
       "label": "Work Title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Make the same promise."
+      "value": "Agree on the same terms."
     },
     "CHAPTER.WORK.INTRO": {
       "label": "Work Intro",
@@ -544,7 +544,7 @@ ArkManifest.define({
       "label": "Check Title",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "Look at what came back."
+      "value": "Check the result."
     },
     "CHAPTER.CHECK.INTRO": {
       "label": "Check Intro",
@@ -676,7 +676,7 @@ ArkManifest.define({
       "label": "Ask why 1 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "DEFXN refers to data by what it is, not where it is stored. A server link can change or disappear; a content ID always means the same bytes."
+      "value": "DEFXN refers to data by what it is, not where it is stored. A server link can change or disappear. A content ID always means the same bytes."
     },
     "CHAPTER.ASK.WHY2.TITLE": {
       "label": "Ask why 2 title",
@@ -748,7 +748,7 @@ ArkManifest.define({
       "label": "Work why 3 text",
       "kind": "text",
       "section": "How it works chapters",
-      "value": "An agreement fixes what the result will be checked against. It does not prove the work happened or that anyone has been paid; that is the next step."
+      "value": "An agreement fixes what the result will be checked against. It does not prove the work happened or that anyone has been paid. That is the next step."
     },
     "CHAPTER.CHECK.WHY1.TITLE": {
       "label": "Check why 1 title",

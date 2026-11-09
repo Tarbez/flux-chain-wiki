@@ -148,6 +148,23 @@
   background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 4px;
   -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: color .18s ease, opacity .6s var(--glide); }
 .intro-replay:hover { color: hsl(var(--text-strong)); }
+/* ---------- intro portal (board 40, owner 2026-11-09; js/pages/intro.js addPortal) ----------
+   Network Portal fills the page behind the words and fades in once the studio has drawn it; the words stand in the left 40%,
+   which the object's camera keeps quiet. Type on the scale: 11 mono eyebrow, hint and action; 18 mono line; 47 headline.
+   One action, on the complement. Fits 1280x720 and 1440x900 with no scroll: the page never scrolls, the wheel plays the beats. */
+.intro-world .intro-portal-stage { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; opacity: 0; visibility: hidden; transition: opacity .6s ease-out, visibility 0s linear .6s; }
+.intro-world.portal-drawn .intro-portal-stage { opacity: 1; visibility: visible; transition: opacity .6s ease-out; }
+.intro-portal-words { position: absolute; z-index: 2; left: 64px; top: 50%; transform: translateY(-50%); width: min(40vw, 560px); display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-4, 16px); pointer-events: auto; }
+.intro-portal-words p { margin: 0; }
+.intro-portal-eyebrow { display: flex; align-items: center; gap: var(--sp-3, 12px); width: 100%; font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--text)); }
+.intro-portal-eyebrow::before { content: '///'; color: hsl(var(--primary)); letter-spacing: .08em; }
+.intro-portal-eyebrow::after { content: ''; flex: 1; height: 1px; background: hsl(var(--primary) / .7); }
+.intro-portal-headline { font: 900 var(--fs-hero, 47px)/1.05 var(--font-display); letter-spacing: .01em; text-transform: uppercase; color: hsl(var(--text-strong)); }
+.intro-portal-line { font: 400 var(--fs-secondary)/1.5 var(--font-sans); letter-spacing: 0; text-transform: none; color: hsl(var(--text-muted)); max-width: 32em; }
+.intro-portal-enter { margin-top: var(--sp-2, 8px); display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--sp-6, 24px); text-decoration: none;
+  font: 600 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--text-inverse)); background: hsl(var(--secondary));
+  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%); }
+.intro-portal-enter:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
 .intro-replay:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
 /* while it plays: no nav (its filled button would be a second action), no replay chip */
 html[data-intro="playing"] #scene .ark-header { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; transition: opacity .4s var(--glide), visibility 0s linear .4s; }
@@ -191,3 +208,83 @@ body.picking { cursor: pointer; }
 .rx-unverified { margin: var(--sp-3) 0 0; font: 500 var(--fs-tertiary)/1.4 var(--font-mono); letter-spacing: .08em; color: hsl(var(--text-muted)); }
 
 }
+/* while the intro portal stands alone (js/pages/intro.js hold), the world behind it is hidden: the page shows its own background only */
+html[data-world-held] .world-layer { visibility: hidden; }
+/* the dive (js/pages/intro.js dive): the ring is the button, placed on the ring by the studio's report; the words flicker at the
+   ring's centre in mono at the 76 step, mint with a split amber edge; one mint flash covers the cut to the world */
+.intro-portal-ring { position: absolute; z-index: 1; border: 0; border-radius: 50%; background: none; padding: 0; cursor: pointer; pointer-events: auto; }
+.intro-portal-ring:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 8px; }
+.intro-portal-ring[hidden] { display: none; }
+.intro-portal-glitch { position: absolute; z-index: 3; pointer-events: none; white-space: nowrap; transform: translate(-50%, -50%);
+  font: 900 var(--fs-display, 76px)/1 var(--font-display); letter-spacing: .02em; color: hsl(var(--primary));
+  text-shadow: 3px 0 hsl(var(--secondary) / .85), -3px 0 hsl(var(--primary) / .6); }
+.intro-portal-flash { position: absolute; inset: 0; z-index: 4; pointer-events: none; background: hsl(var(--primary)); opacity: 0; transition: opacity .3s ease-out; }
+.intro-world.portal-flash .intro-portal-flash { opacity: .85; transition: opacity .12s ease-in; }
+.intro-world.portal-diving .intro-portal-words { opacity: 0; transition: opacity .25s ease-out; }
+.intro-world.portal-gone .intro-portal-words, .intro-world.portal-gone .intro-portal-stage { display: none; }
+/* while the portal stands, the world film (js/space/intro.mjs, all of it inside .intro) waits and is not shown; the dive starts it */
+html[data-portal-up] .intro { display: none !important; }
+/* the portal intro has no old world, so nothing to replay (owner, 2026-11-09: the old world is deprecated) */
+.intro-world.has-portal .intro-replay { display: none; }
+.intro-world.portal-missing .intro-portal-words { display: flex; }
+/* inside: the same frame now holds the underground DEFXN world (js/pages/intro.js arrive), full screen, words gone */
+.intro-world.portal-gone.in-underground .intro-portal-stage { display: block; opacity: 1; visibility: visible; transition: none; }
+/* the ring's outline while the studio loads (js/pages/intro.js ghost): it draws itself in mint, breathes, and fades once the 3D is drawn */
+.intro-portal-ghost { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; transition: opacity .8s ease-out; }
+.intro-portal-ghost circle { fill: none; stroke: hsl(var(--primary)); stroke-dasharray: 1; stroke-dashoffset: 1; animation: ghost-draw 1.4s cubic-bezier(.2,0,0,1) forwards, ghost-breathe 2.4s ease-in-out 1.4s infinite; }
+.intro-portal-ghost .outer { stroke-width: 2; }
+.intro-portal-ghost .inner { stroke-width: 1; opacity: .5; animation-delay: .25s, 1.65s; }
+@keyframes ghost-draw { to { stroke-dashoffset: 0; } }
+@keyframes ghost-breathe { 0%, 100% { stroke-opacity: 1; } 50% { stroke-opacity: .45; } }
+.intro-world.portal-drawn .intro-portal-ghost, .intro-world.portal-gone .intro-portal-ghost { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .intro-portal-ghost circle { animation: none; stroke-dashoffset: 0; } }
+/* the cinema words (js/pages/intro.js cine): the object's name in 11 mono with the /// rule, the line in FXN Basalt at 47 (the headline
+   slot), letters springing in on --ease-letter, 14 ms apart, and cut out in 180 ms with the camera */
+.intro-cine { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.intro-cine-shot { position: absolute; display: flex; flex-direction: column; gap: var(--sp-3, 12px); transition: left .5s var(--ease-ui, ease-out), top .5s var(--ease-ui, ease-out); }
+.intro-cine-name { margin: 0; display: flex; align-items: center; gap: var(--sp-3, 12px); font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--primary)); }
+.intro-cine-name::before { content: '///'; letter-spacing: .08em; }
+.intro-cine-line { margin: 0; font: 900 var(--fs-hero, 47px)/1.08 var(--font-display); color: hsl(var(--text-strong)); text-shadow: 0 2px 24px hsl(0 0% 0% / .6); }
+.intro-cine-line .w { display: inline-block; white-space: nowrap; }
+.intro-cine-line .c { display: inline-block; opacity: 0; transform: translate3d(0, .55em, 0) skewX(-14deg); animation: cine-in .62s var(--ease-letter, cubic-bezier(.2,0,0,1)) forwards; animation-delay: calc(var(--i) * 14ms); }
+.intro-cine-shot.out .c { animation: cine-out .18s ease-in forwards; animation-delay: calc(var(--i) * 4ms); }
+.intro-cine-shot.out .intro-cine-name { opacity: 0; transition: opacity .12s ease-in; }
+@keyframes cine-in { 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+@keyframes cine-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translate3d(0, -.35em, 0) skewX(10deg); } }
+@media (prefers-reduced-motion: reduce) { .intro-cine-line .c { animation: none; opacity: 1; transform: none; } .intro-cine-shot { transition: none; } }
+/* the portal glitch film (js/pages/intro.js playFilm): full screen over the tearing 3D, transparent where it draws nothing. Its words
+   name their font by the content id of fxn-basalt.woff2 (the FXN Motion words box is a content id); this face maps that id to the
+   kit's file. If the font file changes, the film is rebuilt (fxn-3d world/site-films/portal-glitch.make.mjs) and this id with it. */
+@font-face { font-family: 'd231b173b6178911559199ee1ad6a4604864d7de56bcca88ce930ccdea1f074d'; src: url('../assets/kit/fxn-basalt.woff2') format('woff2'); font-weight: 100 900; font-display: block; }
+.intro-film { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; visibility: hidden; }
+.intro-world.film-on .intro-film { visibility: visible; }
+.intro-film-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* the question after the cinema (js/pages/intro.js question): a hard cut to one plain question and its two answers. The yes is the
+   one dominant action on the complement; the no is an outline. Type: 47 headline, 11 mono answers. */
+.intro-ask { position: absolute; inset: 0; z-index: 6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-6, 24px); background: hsl(var(--canvas)); pointer-events: auto; }
+.intro-ask[hidden] { display: none; }
+.intro-ask-q { margin: 0; font: 900 var(--fs-hero, 47px)/1.1 var(--font-display); color: hsl(var(--text-strong)); text-align: center; }
+.intro-ask-row { display: flex; gap: var(--sp-4, 16px); }
+.intro-ask-yes, .intro-ask-no { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--sp-6, 24px); text-decoration: none; font: 600 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; }
+.intro-ask-yes { background: hsl(var(--secondary)); color: hsl(var(--text-inverse)); }
+.intro-ask-no { border: 1px solid hsl(var(--border-default, var(--border))); color: hsl(var(--text)); }
+:is(.intro-ask-yes, .intro-ask-no):focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
+.intro-world.asking .intro-cine { display: none; }
+/* the ring menu (js/pages/intro.js showMenu): invisible click areas over the 3D stones. The stone itself answers in 3D (SELECT slides
+   it out and lights it); the page adds only the stone's name, in 11 mono, beside it. */
+.intro-world.ring-view .intro-portal-words { opacity: 0; pointer-events: none; transition: opacity .25s ease-out; }
+.intro-ring-menu { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
+.intro-ring-menu a { pointer-events: auto; cursor: pointer; outline: none; }
+.intro-ring-menu path, .intro-ring-menu circle { fill: transparent; stroke: none; }
+.intro-ring-tag { position: absolute; z-index: 5; margin: 0; transform: translate(-50%, -50%); font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--text-strong)); opacity: 0; transition: opacity .12s ease-out; pointer-events: none; white-space: nowrap; }
+.intro-world.tag-on .intro-ring-tag { opacity: 1; }
+.intro-ring-soon { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 5; margin: 0; font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; color: hsl(var(--text-muted)); opacity: 0; transition: opacity .2s ease-out; pointer-events: none; }
+.intro-world.topic-soon .intro-ring-soon { opacity: 1; }
+/* the next 3D frame loads behind the current one (js/pages/intro.js swapTo): nearly invisible but rendering, so it is ready the moment it swaps in */
+.intro-world .intro-portal-stage.intro-portal-next { opacity: .001 !important; visibility: visible !important; transition: none !important; }
+/* the ring view owns the screen (audit fix 4): the site's header and footer step out while it shows, and come back on any other page */
+html[data-portal-ring] #scene .ark-header, html[data-portal-ring] .dx-foot { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+/* each stone's word (audit fix 6): faint at rest, bright on the stone you point at */
+.intro-ring-menu text { font: 500 var(--fs-tertiary, 11px)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; fill: hsl(var(--text-faint)); transition: fill .12s ease-out; pointer-events: none; }
+.intro-ring-menu a:hover text, .intro-ring-menu a:focus-visible text { fill: hsl(var(--text-strong)); }
+.intro-world.menu-on .intro-ring-tag { display: none; }

@@ -24,7 +24,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "Not released yet. When it is, you deploy from your own machine. You review what becomes public, then publish with your identity."
+      "value": "What it is: a command-line tool that publishes a site bundle from your own machine. What you do: prepare the bundle, review what becomes public, sign it with your FXN ID. What you get back: a signed ownership record for your site. Status: the CLI is not released. The bundle upload door is live on the old infra."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -48,7 +48,7 @@ ArkManifest.define({
       "label": "Text",
       "kind": "text",
       "section": "Point 2",
-      "value": "Review the content and assets you intend to share before sending your bundle to the mesh."
+      "value": "Review the content and assets you intend to share before you send your bundle out."
     },
     "POINT3.TITLE": {
       "label": "Heading",
@@ -114,7 +114,7 @@ ArkManifest.define({
       "label": "Flow / Mesh",
       "kind": "text",
       "section": "Deployer layout",
-      "value": "Public mesh"
+      "value": "Public network"
     },
     "FLOW.NOTE": {
       "label": "Flow / Note",
@@ -186,7 +186,7 @@ ArkManifest.define({
       "label": "Boundary / Note",
       "kind": "text",
       "section": "Deployer layout",
-      "value": "Review this boundary before publishing. A public bundle is intended to be shared."
+      "value": "Review this boundary before you publish. Anyone can read a public bundle."
     },
     "RELEASE.NOTE": {
       "label": "Release / Note",

@@ -37,7 +37,7 @@ const HOST = process.env.HOST || '127.0.0.1';
 const ADMIN_ORIGIN = process.env.DEFXN_ADMIN_ORIGIN || 'http://127.0.0.1:3437';
 const PRIVATE = /^\/(admin\.html|admin-app\.html|scripts|tests|\.git|\.vercel|node_modules|Flux Chain Admin\.command|README\.md)(\/|$)/;
 const TYPES = {
-  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.cjs': 'text/javascript; charset=utf-8', '.fxn': 'text/plain; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
   '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.txt': 'text/plain; charset=utf-8',
   '.md': 'text/markdown; charset=utf-8', '.ico': 'image/x-icon',
@@ -48,7 +48,7 @@ const TYPES = {
    packed and would cost CPU for ~0 bytes. Brotli beats gzip, gzip beats nothing, chosen from Accept-Encoding.
    Each compressed body is computed once per (path, mtime, size) and kept in memory up to CACHE_MAX bytes, oldest first
    out (a Map iterates in insertion order), so a repeat request costs a lookup, not a compression. */
-const COMPRESSIBLE = new Set(['.js', '.mjs', '.css', '.html', '.svg', '.txt', '.flx', '.bin', '.json', '.md']);
+const COMPRESSIBLE = new Set(['.js', '.mjs', '.cjs', '.fxn', '.css', '.html', '.svg', '.txt', '.flx', '.bin', '.json', '.md']);
 const CACHE_MAX = 64 * 1024 * 1024;
 const zbr = promisify(brotliCompress), zgz = promisify(gzip);
 const zcache = new Map(), zpending = new Map();

@@ -17,6 +17,10 @@ export { readMesh, meshFloats } from '/fxn-3d/engine/formats/mesh.mjs';
 export { createCardProgram, uploadMesh, uploadInstances, disposeInstances, drawPieces, lightFrom, roundedBoxShape, sphereShape, fetchEnvironment, uploadEnvironment, worldPath } from '/fxn-3d/js/render/world2-mesh.mjs';
 /* a module of the engine loaded on demand, by its path under fxn-3d (e.g. 'js/render/world2-mesh.mjs'): for parts the first paint does not need */
 export const engine = (path) => import('/fxn-3d/' + path);
+/* FXN Motion (fxn-3d apps/motion, merged 2026-11-09): the player and the films the site plays. Named here so the server's derived
+   closure serves them (scripts/lib/fxn-3d-closure.mjs reads this file); loaded on demand only. */
+export const motionPlayer = () => import('/fxn-3d/apps/motion/player.mjs');
+export const FILMS = { portalGlitch: '/fxn-3d/world/site-films/portal-glitch.motion.fxn' };
 
 /* the alpha masks of a mark, built as home-descent.js builds them: the image as a white mask on a w x h canvas (inset by
    pad), the mask worn away by `wear` pixels, their difference (the lit edge), and, when asked, the edge blurred wide (the

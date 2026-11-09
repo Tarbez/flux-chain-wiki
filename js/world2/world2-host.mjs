@@ -74,8 +74,12 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   function owns() { return wanted && !host.failed; }
   function whenReady(fn) { if (host.ready) fn(); else readyHooks.push(fn); }
   host.whenReady = whenReady;   /* a page that must act once the world has loaded (the design board warms the view groups) */
+  /* The portal intro (owner, 2026-11-09: "the old world is deprecated, only the portal now"): where the intro is the portal
+     (the site served from this machine, js/pages/intro.js portalHere) a fresh load of "/" or "/intro" loads no world at all. */
+  function portalIntro() { return /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && /^\/(intro\/?)?$/.test(location.pathname); }
   function wantWorld() {
     if (/[?&]world=off(&|$)/.test(location.search)) return false;
+    if (portalIntro()) return false;
     try {
       var gl = document.createElement('canvas').getContext('webgl2');
       if (!gl) return false;
@@ -129,7 +133,7 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   /* ---------- a fresh load of "/" opens the intro; "/" inside the site is home (as the Three.js host) ---------- */
   var arrived = false, toIntro = false, navigate = router.navigate, preview = /[?&](cms-)?preview(=|&|$)/.test(location.search);
   router.navigate = function (page, settings) {
-    if (!arrived && wanted && !preview && page === 'zero' && ArkUI.pageCatalog.intro) { page = 'intro'; toIntro = true; settings = Object.assign({}, settings, { history: 'replace' }); }
+    if (!arrived && (wanted || portalIntro()) && !preview && page === 'zero' && ArkUI.pageCatalog.intro) { page = 'intro'; toIntro = true; settings = Object.assign({}, settings, { history: 'replace' }); }
     arrived = true;
     return navigate.call(router, page, settings);
   };
@@ -342,11 +346,15 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   function leanOf() { var k = objects && spaceView() ? (objects.focused() ? LEAN.focus : LEAN.grid) : [cam.tilt, cam.tilt * .6]; return k; }
   function motion() { var m = world.knobs.motion; return { flight: m && m.flight ? m.flight / 1750 : 1 }; }
   function wake() { if (!raf) raf = requestAnimationFrame(tick); }
+  window.addEventListener('ark-world-release', wake);
   /* one frame: the stage plays its channels and the camera's flight through the one sampler (world2-stage.mjs), plus the pointer's lean;
      draws, and asks for the next frame only while a channel, the flight or the lean still moves */
   function tick(now) {
     raf = 0;
     if (!cam || !R) return;
+    /* held: a page covers the world with its own 3D (the intro's portal, js/pages/intro.js), so the world draws nothing and the
+       GPU carries one scene, not two; ark-world-release wakes it */
+    if (document.documentElement.hasAttribute('data-world-held')) return;
     var moving = false;
     if (stage) {
       var c = stage.cameraAt(now);

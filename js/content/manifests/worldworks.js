@@ -58,7 +58,7 @@ ArkManifest.define({
       "label": "How a result is made: note",
       "kind": "line",
       "section": "How a result is made",
-      "value": "Illustration. It shows no live state."
+      "value": "Illustration. Built, not live: the new devnet is not deployed."
     },
     "RESOLVE.SEGS": {
       "label": "How a result is made: steps group name",
@@ -76,7 +76,7 @@ ArkManifest.define({
       "label": "How a result is made: side note",
       "kind": "text",
       "section": "How a result is made",
-      "value": "You choose whom to trust before you send. Each resolver shows its grammar, its capabilities and who can change it."
+      "value": "What you do: pick a resolver before you send. Each resolver page shows its grammar, its capabilities and the key that can change it."
     },
     "RESOLVE.ASIDE.LINK": {
       "label": "How a result is made: side note, link text",
@@ -100,7 +100,7 @@ ArkManifest.define({
       "label": "How a result is made: button, last line",
       "kind": "line",
       "section": "How a result is made",
-      "value": "Create your identity"
+      "value": "Initiate FXN ID"
     },
     "RESOLVE.CTA.LAST.HREF": {
       "label": "How a result is made: button, last line, link target",
@@ -166,7 +166,7 @@ ArkManifest.define({
       "label": "How a result is made: label drawn in the 3D scene, copies, name",
       "kind": "line",
       "section": "How a result is made",
-      "value": "Other computers"
+      "value": "Other machines"
     },
     "RESOLVE.TAG.COPIES.SUB": {
       "label": "How a result is made: label drawn in the 3D scene, copies, line under the heading",
@@ -244,7 +244,7 @@ ArkManifest.define({
       "label": "How a result is made: step 3, text",
       "kind": "line",
       "section": "How a result is made",
-      "value": "That signature is the result. Nothing has to happen afterwards to make it count."
+      "value": "The resolver signs the result. That signature makes it final. Nothing else has to happen."
     },
     "RESOLVE.STEP4.NAME": {
       "label": "How a result is made: step 4, name",
@@ -256,7 +256,7 @@ ArkManifest.define({
       "label": "How a result is made: step 4, text",
       "kind": "text",
       "section": "How a result is made",
-      "value": "Other computers keep the signed result as it is. They do not check it again or redo the work."
+      "value": "Other machines store the signed result as it is. They do not check it again or redo the work."
     },
     "RESOLVE.STEP5.NAME": {
       "label": "How a result is made: step 5, name",
@@ -268,7 +268,7 @@ ArkManifest.define({
       "label": "How a result is made: step 5, text",
       "kind": "line",
       "section": "How a result is made",
-      "value": "Follow the signatures back to the start. For a swap that takes three signature checks."
+      "value": "What you get back: a result anyone can check. For a swap that is three signature checks."
     },
     "LAYERS.KICKER": {
       "label": "Three layers: small heading above",
@@ -292,7 +292,7 @@ ArkManifest.define({
       "label": "Three layers: note",
       "kind": "line",
       "section": "Three layers",
-      "value": "An illustration of the three layers. It shows no live state."
+      "value": "Illustration of the three layers. It shows no live state."
     },
     "LAYERS.LEDE": {
       "label": "Three layers: intro",
@@ -400,13 +400,13 @@ ArkManifest.define({
       "label": "Life of a resolver: note",
       "kind": "line",
       "section": "Life of a resolver",
-      "value": "An illustration of one resolver. It shows no live state."
+      "value": "Illustration of one resolver. Built, not live."
     },
     "LIFE.LEDE": {
       "label": "Life of a resolver: intro",
       "kind": "line",
       "section": "Life of a resolver",
-      "value": "This is the builder's path, from building a resolver to anyone inspecting it."
+      "value": "What you do to ship a resolver, in five steps: build, launch, choose who can change it, serve, inspect."
     },
     "LIFE.ASIDE": {
       "label": "Life of a resolver: side note",
@@ -550,7 +550,7 @@ ArkManifest.define({
       "label": "Life of a resolver: step 3, rest of the explanation",
       "kind": "text",
       "section": "Life of a resolver",
-      "value": "With no control key the resolver can never change. With a control key, only that key can sign an upgrade. An upgrade adds a new version. The old one stays on the line."
+      "value": "With no control key the resolver can never change. With a control key, only that key can sign an upgrade. An upgrade adds a new version. The old one stays on the list."
     },
     "LIFE.STEP4.LEAD": {
       "label": "Life of a resolver: step 4, first sentence",
@@ -574,7 +574,7 @@ ArkManifest.define({
       "label": "Life of a resolver: step 5, rest of the explanation",
       "kind": "text",
       "section": "Life of a resolver",
-      "value": "Explore, on the development network, shows each resolver’s grammar, parts, providers and history. It re-checks hashes and signatures in your browser."
+      "value": "Explore shows each resolver's grammar, parts, providers and history. It checks hashes and signatures again in your browser. Status: on the development network only."
     },
     "TRACE.HERE": {
       "label": "Trace a record: breadcrumb for this page",
@@ -592,13 +592,13 @@ ArkManifest.define({
       "label": "Trace a record: heading",
       "kind": "line",
       "section": "Trace a record",
-      "value": "Every record leads somewhere."
+      "value": "Each record names the one before it."
     },
     "TRACE.TITLE2": {
       "label": "Trace a record: second heading line",
       "kind": "line",
       "section": "Trace a record",
-      "value": "See for yourself."
+      "value": "Follow the links back."
     },
     "TRACE.NOTE": {
       "label": "Trace a record: note",

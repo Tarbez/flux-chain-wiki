@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FXN Intro Film</title>
+<style>
+  /* The owner's reading copy of FINAL.md (made from it by a script, so the two cannot drift). Local only. */
+  @font-face { font-family: "FXN Basalt"; src: url("../../../../assets/kit/fxn-basalt.woff2") format("woff2"); font-weight: 900; }
+  @font-face { font-family: "FXN Basalt Text"; src: url("../../../../assets/kit/fxn-basalt-text.woff2") format("woff2"); font-weight: 400; }
+  :root {
+    --bg: #0b0a09; --surface: #141311; --raised: #1c1a17; --line: #2a2723;
+    --text: #e9e5df; --muted: #a39d94; --faint: #6f6a62;
+    --mint: #5ef0c0; --amber: #ffb347; --red: #ff8a8a;
+    --display: "FXN Basalt", "Albert Sans", system-ui, sans-serif;
+    --sans: "FXN Basalt Text", "Albert Sans", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) { --bg: #f6f4f0; --surface: #ffffff; --raised: #efece6; --line: #dedad2; --text: #191714; --muted: #5d5850; --faint: #8b857b; --mint: #0f8a66; --amber: #b8650a; --red: #b3261e; }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 18px/1.6 var(--sans); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 16px 96px; }
+  nav.top { position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+  nav.top .wrap { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 16px; align-items: center; }
+  nav.top a { font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); text-decoration: none; padding: 8px 10px; border: 1px solid var(--line); border-radius: 4px; }
+  nav.top a:hover { color: var(--text); border-color: var(--mint); }
+  nav.top .brand { font: 900 18px/1 var(--display); color: var(--text); border: 0; padding-left: 0; letter-spacing: .02em; text-transform: none; margin-right: auto; }
+  header.hero { padding: 64px 0 24px; }
+  .eyebrow { font: 500 11px/1 var(--mono); letter-spacing: .24em; text-transform: uppercase; color: var(--mint); margin: 0 0 18px; }
+  .eyebrow::before { content: "/// "; }
+  h1 { font: 900 47px/1.08 var(--display); margin: 0 0 18px; letter-spacing: .01em; }
+  h2 { font: 900 29px/1.15 var(--display); margin: 72px 0 18px; }
+  h3 { font: 900 29px/1.2 var(--display); margin: 40px 0 16px; display: flex; gap: 14px; align-items: baseline; }
+  .actn { font: 500 11px/1 var(--mono); letter-spacing: .2em; text-transform: uppercase; color: var(--amber); }
+  p { margin: 0 0 14px; }
+  .lede { font-size: 18px; color: var(--muted); max-width: 760px; }
+  .facts { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0 0; }
+  .facts span { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; padding: 9px 12px; border: 1px solid var(--line); border-radius: 4px; color: var(--muted); }
+  .one { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--mint); padding: 24px 28px; border-radius: 6px; font-size: 18px; }
+  ol.know { counter-reset: k; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  ol.know li { counter-increment: k; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px 16px 60px; position: relative; }
+  ol.know li::before { content: counter(k); position: absolute; left: 18px; top: 13px; font: 900 29px/1 var(--display); color: var(--mint); }
+  .decisions { display: grid; gap: 14px; }
+  .dec { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 20px 22px; }
+  .dec h4 { margin: 0 0 6px; font: 900 18px/1.3 var(--display); }
+  .dec .why { color: var(--muted); font-size: 16px; }
+  .opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .opt { border: 1px solid var(--line); border-radius: 4px; padding: 12px 14px; font-size: 16px; }
+  .opt b { font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; display: block; margin-bottom: 6px; color: var(--muted); }
+  .opt.pick { border-color: var(--mint); }
+  .opt.pick b { color: var(--mint); }
+  .opt.pick b::after { content: " · producer's pick"; }
+  .dec.open { border-color: var(--amber); }
+  .dec.open .tag { color: var(--amber); }
+  .tag { font: 500 11px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+  .legend { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 8px; }
+  .chip { display: inline-block; font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 6px 8px; border-radius: 3px; margin: 0 6px 6px 0; }
+  .chip.live { background: var(--mint); color: #06140f; }
+  .chip.built { border: 1px solid var(--mint); color: var(--mint); }
+  .chip.proto { border: 1px solid var(--amber); color: var(--amber); }
+  .chip.local { border: 1px solid var(--muted); color: var(--muted); }
+  .chip.design { border: 1px dashed var(--faint); color: var(--faint); }
+  .act { margin-bottom: 8px; }
+  .shot { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; margin: 0 0 12px; }
+  .shead { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: baseline; margin-bottom: 10px; }
+  .num { font: 900 29px/1 var(--display); color: var(--mint); min-width: 36px; }
+  .sec, .cam { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+  .obj { font: 900 18px/1.2 var(--display); }
+  .cam { margin-left: auto; }
+  .see { color: var(--muted); font-size: 16px; }
+  .line { font-size: 18px; border-left: 2px solid var(--amber); padding-left: 12px; }
+  q { quotes: none; color: var(--text); font-weight: 600; }
+  q::before { content: "\201C"; } q::after { content: "\201D"; }
+  .see q { color: var(--muted); font-family: var(--mono); font-size: 13px; letter-spacing: .04em; font-weight: 400; }
+  .sfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin-top: 8px; }
+  .srcs { font: 400 11px/1.4 var(--mono); color: var(--faint); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px 20px; }
+  .card h4 { margin: 0 0 8px; font: 900 18px/1.3 var(--display); }
+  .card p { font-size: 16px; color: var(--muted); margin: 0 0 8px; }
+  .card .t { color: var(--text); }
+  ul.plain { margin: 0; padding-left: 20px; } ul.plain li { margin: 0 0 8px; font-size: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 16px; }
+  th, td { text-align: left; vertical-align: top; padding: 12px 10px; border-bottom: 1px solid var(--line); }
+  th { font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+  td:first-child { font-family: var(--mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .build { counter-reset: b; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .build li { counter-increment: b; background: var(--surface); border: 1px solid var(--amber); border-radius: 6px; padding: 16px 18px 16px 60px; position: relative; font-size: 16px; }
+  .build li::before { content: counter(b); position: absolute; left: 18px; top: 12px; font: 900 29px/1 var(--display); color: var(--amber); }
+  footer { margin-top: 72px; color: var(--faint); font: 400 11px/1.6 var(--mono); }
+  @media (max-width: 720px) { h1 { font-size: 29px; } .opts, .grid2 { grid-template-columns: 1fr; } .cam { margin-left: 0; } }
+</style>
+</head>
+<body>
+<nav class="top"><div class="wrap">
+  <span class="brand">FXN intro film</span>
+  <a href="#decide">Decide</a><a href="#story">Story</a><a href="#act1">Act 1</a><a href="#act2">Act 2</a><a href="#act3">Act 3</a><a href="#act4">Act 4</a><a href="#identity">Identity</a><a href="#objects">Objects</a><a href="#fix">Fix today</a>
+</div></nav>
+<div class="wrap">
+
+<header class="hero">
+  <p class="eyebrow">For the owner's approval · 2026-11-09</p>
+  <h1>The intro film: one true story, in four acts.</h1>
+  <p class="lede">Written by a team of ten: two art directors, two series writers, a product designer, two storytellers, a story editor, a copywriter and a producer. Every line is checked against the facts that four other sessions sent in. No metaphors. Nothing is built yet.</p>
+  <div class="facts"><span>128 s of film</span><span>4 acts</span><span>21 shots</span><span>1 choice for the visitor</span><span>3 new objects</span><span>5 decisions for you</span></div>
+</header>
+
+<h2 id="story">The story in one sentence</h2>
+<div class="one">A visitor walks through the portal into their archive, initiates an FXN ID on their device, signs a record that joins the ID's own chain and comes back with a final receipt copied to our nodes, decides Share or Don't share when a site asks, keeps the key when a site asks for it, opens the same file on a second device, and then sees that key start a chain, ship an app and open the gate to the game, with every claim carrying its status.</div>
+
+<h2>What every visitor knows at the end</h2>
+<ol class="know">
+  <li>This room is my archive. Records I sign land here, and the network under it keeps them in copies.</li>
+  <li>I initiated my FXN ID on my device. It is a key file, and no server holds it. I name it and seal it with a PIN.</li>
+  <li>Each record I sign joins my own chain. A receipt comes back, and that receipt is final. Nothing is rewritten.</li>
+  <li>When a site asks, I see the exact site and bytes, then I say Share or Don't share. A site gets my signature, never my key.</li>
+  <li>The same key starts a chain, ships an app and opens the gate. Keepers hold the copies. The pay rule has paid nobody yet. This runs on our development network today. Genesis is next.</li>
+</ol>
+
+<h2 id="decide">Your decisions</h2>
+<div class="decisions">
+  <div class="dec open"><span class="tag">Decision 1 · yours alone</span><h4>The headline: "A new internet, built in the open."</h4><p class="why">The core code is private today, so "built in the open" is not yet true.</p>
+    <div class="opts"><div class="opt"><b>Option A</b>Keep it, and publish a plan to open the core.</div><div class="opt"><b>Option B</b>Change it now to "A new internet. Anyone can check every record it keeps."</div></div></div>
+  <div class="dec"><span class="tag">Decision 2</span><h4>Length</h4><p class="why">You said 4 s per object was too fast. One object now gets an 8 s cell.</p>
+    <div class="opts"><div class="opt pick"><b>Option A</b>128 s, as written.</div><div class="opt"><b>Option B</b>A 90 s cut that drops shots 13, 14, 17 and 18.</div></div></div>
+  <div class="dec"><span class="tag">Decision 3</span><h4>The visitor's choice at shot 10</h4><p class="why">A press the visitor makes is understood better than one they watch.</p>
+    <div class="opts"><div class="opt pick"><b>Option A</b>The film waits for Share or Don't share. After four bars it plays Don't share.</div><div class="opt"><b>Option B</b>Both outcomes play, one after the other.</div></div></div>
+  <div class="dec"><span class="tag">Decision 4</span><h4>Earning in the film</h4><p class="why">Nothing has paid out yet. Unlit lines show the rule without showing a payout.</p>
+    <div class="opts"><div class="opt pick"><b>Option A</b>Rule Book's pay page, with dashed lines that never light.</div><div class="opt"><b>Option B</b>A "Why?" sheet only.</div></div></div>
+  <div class="dec"><span class="tag">Decision 5</span><h4>Release Gate's refusal words</h4><p class="why">The direction session drafted them. They are not confirmed.</p>
+    <div class="opts"><div class="opt pick"><b>Option A</b>Use the direction session's words.</div><div class="opt"><b>Option B</b>You write your own.</div></div></div>
+</div>
+
+<h2>The film, shot by shot</h2>
+<p class="lede">Each shot: what we see (the world acts first), then the words that name it, then its status and its source. A small plate stays lower left from shot 3 to 20: "Our development network. Genesis is next."</p>
+<div class="legend"><span class="chip live">Live</span><span class="chip built">Built, not live</span><span class="chip proto">Measured on a prototype</span><span class="chip local">Local only</span><span class="chip design">Design only</span></div>
+<section class="act" id="act1"><h3><span class="actn">Act 1</span>Arrival</h3><article class="shot"><div class="shead"><span class="num">1</span><span class="sec">0-8 s</span><span class="obj">Portal 101</span><span class="cam">Wide, still</span></div>
+<p class="see">The mark draws itself. Portal 101 builds, ring last. The amber ring holds for the press.</p><p class="line">76 <q>Welcome to FXN.</q> The headline (decision 1). <q>Initiate your FXN ID. Build on it. Run a machine that keeps it.</q> Mono <q>Our development network runs today. Genesis is next.</q></p><div class="sfoot"><span class="chip live">LIVE (the page)</span><span class="srcs">Source: SPACE.md. Row 33</span></div></article><article class="shot"><div class="shead"><span class="num">2</span><span class="sec">8-12 s</span><span class="obj">Portal 101</span><span class="cam">Push in</span></div>
+<p class="see">The press tears the picture. The Loopforge glitch film, 1.6 s. One dark bar.</p><p class="line">none</p><div class="sfoot"><span class="chip live">LIVE</span><span class="srcs">Source: SPACE.md</span></div></article><article class="shot"><div class="shead"><span class="num">3</span><span class="sec">12-18 s</span><span class="obj">The archive</span><span class="cam">Wide, slow dolly</span></div>
+<p class="see">Floor strips light from one point. Empty bays wake one per beat.</p><p class="line"><q>This is your archive. The network runs under it.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: SPACE.md</span></div></article><article class="shot"><div class="shead"><span class="num">4</span><span class="sec">18-26 s</span><span class="obj">Kernel (screen)</span><span class="cam">Wide, tilt up</span></div>
+<p class="see">The big screen switches on. The kernel builds on it part by part. Mono <q>DEFXN KERNEL</q>, the one time the name is said.</p><p class="line"><q>The kernel puts every record in order.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Row 26. Direction §1</span></div></article></section><section class="act" id="act2"><h3><span class="actn">Act 2</span>Your identity signs</h3><article class="shot"><div class="shead"><span class="num">5</span><span class="sec">26-32 s</span><span class="obj">FXN ID card (new)</span><span class="cam">Close, 85 mm</span></div>
+<p class="see">On the desk the FXN ID card builds. The key locks on its edge, amber. Nothing leaves the frame.</p><p class="line"><q>Your FXN ID, initiated on your device. A key file that is never uploaded.</q></p><div class="sfoot"><span class="chip live">LIVE (`/auth`)</span><span class="srcs">Source: Direction §4. Row 6</span></div></article><article class="shot"><div class="shead"><span class="num">6</span><span class="sec">32-36 s</span><span class="obj">FXN ID card</span><span class="cam">Close</span></div>
+<p class="see">A name types onto the card, a PIN plate locks in, the icon stamps. The <q>.fxn</q> slot stays blank, mono <q>.FXN NAMES OPEN AFTER GENESIS.</q></p><p class="line"><q>Name it. Seal it with your PIN. Only you open it.</q></p><div class="sfoot"><span class="chip live">LIVE</span><span class="srcs">Source: Rows 6, 8</span></div></article><article class="shot"><div class="shead"><span class="num">7</span><span class="sec">36-42 s</span><span class="obj">FXN ID card</span><span class="cam">Close</span></div>
+<p class="see">A dark record plate slides from the screen to the card. The key tips, one amber line runs in, the plate lights mint and locks on the card&#x27;s own rail.</p><p class="line"><q>Your key signs. The record joins your own chain.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Row 1 (<q>chain.js:43</q>)</span></div></article><article class="shot"><div class="shead"><span class="num">8</span><span class="sec">42-50 s</span><span class="obj">Ledger Line</span><span class="cam">Medium, orbit</span></div>
+<p class="see">The record runs to Ledger Line. The arm stamps. A receipt runs back and locks beside it.</p><p class="line"><q>A record enters. A receipt returns. That receipt is final.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Rows 10, 11</span></div></article><article class="shot"><div class="shead"><span class="num">9</span><span class="sec">50-56 s</span><span class="obj">Keeper Ring</span><span class="cam">Medium, pull back</span></div>
+<p class="see">The receipt stays lit. Copies run out to the pods, which light in turn.</p><p class="line"><q>Copies go to our own nodes. Final did not wait for them.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Rows 15, 20</span></div></article><article class="shot"><div class="shead"><span class="num">10</span><span class="sec">56-64 + hold s</span><span class="obj">Access Pane (new)</span><span class="cam">Close, then medium</span></div>
+<p class="see">A door-shaped frame slides to the card. The Access Pane opens between them: the exact site, the exact bytes. Chips <q>Share</q> and <q>Don&#x27;t share</q>. Share: the key tips, an amber line crosses, the frame lights, the pane dims as the frame leaves. Don&#x27;t share: the pane cracks and drops.</p><p class="line">After Share <q>You chose. A yes lasts for that tab only.</q> After Don&#x27;t share <q>Nothing moved.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Row 3 (<q>worldidentity.js:199</q>)</span></div></article><article class="shot"><div class="shead"><span class="num">11</span><span class="sec">64-70 s</span><span class="obj">Access Pane</span><span class="cam">Close</span></div>
+<p class="see">A second frame comes. Its slot has the key&#x27;s shape. The key does not move. A signature line goes instead and the frame lights.</p><p class="line"><q>Nobody gets your key. A site gets your signature.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Row 2</span></div></article><article class="shot"><div class="shead"><span class="num">12</span><span class="sec">70-74 s</span><span class="obj">FXN ID card</span><span class="cam">Medium</span></div>
+<p class="see">A phone-shaped plate rises beside the desk. The same card opens on it.</p><p class="line"><q>The same file opens on another device.</q></p><div class="sfoot"><span class="chip live">LIVE (`/auth`, Choose your file)</span><span class="srcs">Source: 05. Facts browser §3</span></div></article></section><section class="act" id="act3"><h3><span class="actn">Act 3</span>What the key opens</h3><article class="shot"><div class="shead"><span class="num">13</span><span class="sec">74-80 s</span><span class="obj">Rule Book</span><span class="cam">Medium</span></div>
+<p class="see">Rule Book opens on the rule Ledger Line followed, then on the pay rule. Dashed lines draw to the keepers and never light.</p><p class="line"><q>Read the rule that runs the machine.</q> Then <q>Keepers are paid from the fee box. Nothing has paid out yet.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Rows 17, 26</span></div></article><article class="shot"><div class="shead"><span class="num">14</span><span class="sec">80-88 s</span><span class="obj">Keeper Tower, Keeper Array (new)</span><span class="cam">Wide, track</span></div>
+<p class="see">Keeper Tower rises. Racks light 3, 6, 9, 16 and a gauge climbs a step per group. The last rack is desk-sized. Mono <q>PROTOTYPE 8FB74F5. NOT THE CURRENT BUILD.</q> and <q>ROLES IN CODE. NOT ON THE DEVNET TODAY.</q></p><p class="line"><q>More keepers, more capacity.</q> Then <q>Your own machine can join.</q></p><div class="sfoot"><span class="chip proto">MEASURED ON A PROTOTYPE</span><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Rows 13, 18</span></div></article><article class="shot"><div class="shead"><span class="num">15</span><span class="sec">88-94 s</span><span class="obj">Chain Drum</span><span class="cam">Medium</span></div>
+<p class="see">The key tips. Chain Drum turns. A new spine of records starts on the floor, apart from the card&#x27;s rail.</p><p class="line"><q>Start a chain with one signed record. It is its own line of records.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Rows 24, 26</span></div></article><article class="shot"><div class="shead"><span class="num">16</span><span class="sec">94-100 s</span><span class="obj">App Bundler, App Bundle</span><span class="cam">Wide, dolly</span></div>
+<p class="see">The key tips. App Bundler stamps. The bundle slides out sealed.</p><p class="line"><q>Your app ships as one bundle, its rules inside.</q></p><div class="sfoot"><span class="chip live">LIVE (the upload door)</span><span class="srcs">Source: Row 25</span></div></article><article class="shot"><div class="shead"><span class="num">17</span><span class="sec">100-108 s</span><span class="obj">Multisig Lock, Bridge Span</span><span class="cam">Medium, pan</span></div>
+<p class="see">One key turns in Multisig Lock and nothing moves. Four turn and it opens. Mono <q>ON THE DEVNET, UNTIL ATTESTERS ARE FILED.</q> A deposit plate crosses Bridge Span with its proof tag. Mono <q>NO DEPOSIT HAS CROSSED A PUBLIC TEST NETWORK YET.</q></p><p class="line"><q>A rule changes only when 4 of 5 keys sign.</q> Then <q>A deposit crosses with its own proof.</q></p><div class="sfoot"><span class="chip built">BUILT, NOT LIVE</span><span class="srcs">Source: Rows 27, 28</span></div></article><article class="shot"><div class="shead"><span class="num">18</span><span class="sec">108-114 s</span><span class="obj">Kernel (screen)</span><span class="cam">Wide, behind the card</span></div>
+<p class="see">The screen draws a studio scene at edge light and a stream room outline that never lights, mono <q>DESIGN ONLY. NOT BUILT.</q></p><p class="line"><q>A world is a studio document. It runs on one Mac today.</q> Then <q>Live rooms are a design. Nothing is built.</q></p><div class="sfoot"><span class="chip local">LOCAL ONLY</span><span class="chip design">DESIGN ONLY</span><span class="srcs">Source: Facts game. Rows 21, 23</span></div></article><article class="shot"><div class="shead"><span class="num">19</span><span class="sec">114-120 s</span><span class="obj">Network Wall, Network Portal</span><span class="cam">Wide, pull back</span></div>
+<p class="see">Network Wall&#x27;s tiles light, four filled, the rest edge-lit. Network Portal&#x27;s ring opens on the web beyond.</p><p class="line">The headline (decision 1). Mono <q>LIVE TODAY: NAMES, DNS, THE BUNDLE DOOR, THE FXN ID GATE.</q></p><div class="sfoot"><span class="chip live">LIVE (four pieces)</span><span class="chip built">BUILT, NOT LIVE (the rest)</span><span class="srcs">Source: Facts genesis §8. Row 33</span></div></article></section><section class="act" id="act4"><h3><span class="actn">Act 4</span>The door</h3><article class="shot"><div class="shead"><span class="num">20</span><span class="sec">120-128 s</span><span class="obj">Release Gate</span><span class="cam">Wide, slow push, hold</span></div>
+<p class="see">Release Gate. The key tips, the strips light, the six mark pieces open, light runs through toward the game.</p><p class="line"><q>Your key opens the gate.</q> Mono <q>THE GAME RUNS ON ONE MAC TODAY. THIS DOOR OPENS WHEN IT HAS A PUBLIC BUILD.</q></p><div class="sfoot"><span class="chip local">LOCAL ONLY (the game)</span><span class="srcs">Source: Facts game. Direction §2</span></div></article><article class="shot"><div class="shead"><span class="num">21</span><span class="sec">holds s</span><span class="obj">none</span><span class="cam">Wide, still</span></div>
+<p class="see">47 <q>Your key is an FXN ID.</q> 18 <q>One file on your device. It signs you in. No server holds it.</q> Complement action <q>Initiate FXN ID</q>. Outline <q>I have one. Sign in.</q> Mono <q>REAL TODAY. IT SIGNS INTO OUR DEVELOPMENT NETWORK.</q></p><p class="line">as shown</p><div class="sfoot"><span class="chip live">LIVE (`/auth`)</span><span class="srcs">Source: 05 S7. Facts genesis §8</span></div></article></section>
+
+<h2 id="identity">The identity, in five acts</h2>
+<p class="lede">By the gate, the card's rail is the visitor's own chain. That is a fact: every identity signs its own chain (built, not live).</p>
+<div class="grid2">
+  <div class="card"><h4>Initiate FXN ID · shot 5</h4><p><span class="t">Shown:</span> the card builds, the key locks on it, nothing leaves the frame.</p><p><span class="t">True today:</span> the key file is initiated at /auth and never uploaded. That gate is live on the old system.</p></div>
+  <div class="card"><h4>Shape · shot 6</h4><p><span class="t">Shown:</span> a name, a PIN and an icon go onto the card.</p><p><span class="t">True today:</span> the live wizard. .fxn names open after genesis. A new key and trustee recovery are planned.</p></div>
+  <div class="card"><h4>Carry · shots 7 to 17</h4><p><span class="t">Shown:</span> the same key signs a record, a chain launch and a bundle, and the same file opens on a phone.</p><p><span class="t">True today:</span> the file opens on another device at /auth. Carrying it across worlds is built, not released.</p></div>
+  <div class="card"><h4>Grant · shot 10</h4><p><span class="t">Shown:</span> a site asks, the pane shows the exact site and bytes, Share or Don't share.</p><p><span class="t">True today:</span> a yes lasts for that tab only on the web. Stored grants with revoke exist in the browser's dev build.</p></div>
+  <div class="card"><h4>Refuse · shot 11</h4><p><span class="t">Shown:</span> a frame asks for the key itself. The key does not move. A signature goes instead.</p><p><span class="t">True today:</span> the key never leaves the device. The server checks a signature and never holds the key.</p></div>
+  <div class="card"><h4>The end action</h4><p><span class="t">On screen:</span> "Your key is an FXN ID." and the button <b>Initiate FXN ID</b>, plus "I have one. Sign in."</p><p><span class="t">Why it is honest:</span> it opens the live /auth flow. Never "Download", "Play now" or "Earn".</p></div>
+</div>
+
+<h2>Controls and rules</h2>
+<div class="grid2">
+  <div class="card"><h4>Always on screen</h4><ul class="plain"><li>Skip (Esc), Pause and Play (Space)</li><li>Four act dots (keys 1 to 4)</li><li>"Why?": one panel with the reason and every number with its conditions</li><li>The object's name and line, after it acts</li></ul></div>
+  <div class="card"><h4>Light means status</h4><ul class="plain"><li>Filled mint: live now</li><li>Edge light: built, not live</li><li>Dark outline: design only</li><li>Amber is only the visitor's act: the key, a press, a signature</li></ul></div>
+  <div class="card"><h4>Rhythm</h4><ul class="plain"><li>One object per 8 s cell: build 4 s, words 2 s, rest 2 s</li><li>Parts build in steps on rails and lock</li><li>Five big moments, each followed by a hold</li></ul></div>
+  <div class="card"><h4>Type</h4><ul class="plain"><li>FXN Basalt at 76, 47 and 29 px</li><li>IBM Plex Mono at 11 px for labels and conditions</li><li>Words never fade. A number never stands without its condition.</li></ul></div>
+</div>
+
+<h2 id="objects">Objects</h2>
+<div class="grid2">
+  <div class="card"><h4>Used as they are</h4><p>Every site object except Name Gate (parked, its key part reused), plus the archive.</p></div>
+  <div class="card"><h4>Cut, with the reason</h4><p>Reward Flow (nothing has paid out). World Forge (a world is not a chain). Record Vault and Live Room (the screen draws them as plans).</p></div>
+  <div class="card"><h4>Small changes</h4><p>Kernel screen draws the two plans. Keeper Tower gets a four-step gauge. Rule Book gets the pay page. Chain Drum starts a floor spine. Network Wall fills four tiles. Ledger Line returns the receipt to the card.</p></div>
+</div>
+<h3>New objects, built one at a time</h3>
+<ol class="build">
+  <li><b>FXN ID card:</b> a card plate, the key on its edge, a seal, the name and icon faces, its own rail for signed records, and a phone plate.</li>
+  <li><b>Access Pane:</b> a card-sized mint pane with the site and the bytes, a crack-and-drop state, and a key-shaped slot the key does not fit.</li>
+  <li><b>Keeper Array:</b> sixteen racks from Keeper Tower's parts, the last one desk-sized (your own machine), plus the gauge plate.</li>
+</ol>
+
+<h2 id="fix">Words to fix on the site today</h2>
+<p class="lede">The story editor found these lines on the live site words. Each one claims more than is true today.</p>
+<table><thead><tr><th>Where</th><th>True rewrite</th></tr></thead><tbody><tr><td>469, 649</td><td>Decision 1. The true option: &quot;A new internet. Anyone can check every record it keeps.&quot;</td></tr><tr><td>475</td><td>&quot;Today it runs as our development network. Genesis is next.&quot;</td></tr><tr><td>541</td><td>&quot;Machines like yours will keep it running. Ours run it today.&quot;</td></tr><tr><td>565</td><td>&quot;Start a chain with one signed record. Its rules are read before anyone trusts it.&quot;</td></tr><tr><td>601</td><td>Identity: &quot;Your key opens. Nobody holds it for you.&quot; Apps: &quot;A signed release passes the door.&quot;</td></tr><tr><td>613, 625</td><td>Keep both. Add mono &quot;On the devnet, until attesters are filed.&quot; and &quot;Built. No deposit has crossed a public test network yet.&quot;</td></tr><tr><td>637</td><td>&quot;The network runs on machines people choose to run. Yours can be one.&quot;</td></tr><tr><td>95-101, 299-305</td><td>&quot;The receipt is final at once. Copies reach the pinners in about 1.4 to 1.7 s, measured across three regions.&quot;</td></tr><tr><td>275</td><td>&quot;80,269 final payments a second on one keeper. 32 vCPU, 7,000 in flight, every signature checked.&quot;</td></tr><tr><td>529</td><td>&quot;The receipt is the first copy. Pinners on other machines hold the rest.&quot;</td></tr><tr><td>worldidentity.js 247</td><td>&quot;Any 2 of 3 release it on the devnet. 3 of 5 on mainnet.&quot;</td></tr><tr><td>the game&#x27;s door</td><td>Stupa, not DEFXN City. The site never names the city.</td></tr></tbody></table>
+
+<h2>Facts still open</h2>
+<ul class="plain"><li>The source of the "1.1 s" pin lag in the genesis facts.</li><li>The wording of the Access Pane's bytes field.</li></ul>
+
+<footer>Made from flux/defxn/docs/design/space/intro-story/FINAL.md. The specialists' drafts and the fact files sit in the same folder. Local only.</footer>
+</div>
+</body>
+</html>
