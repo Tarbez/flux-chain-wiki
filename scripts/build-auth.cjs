@@ -1,7 +1,7 @@
 // Bundle the shared Auth Kit sign-in into a classic script for admin.html (js/admin/auth.js).
 // It writes into THIS repo only. Other sites that carry the bundle are listed when stale, never written.
 //
-// Ark UI parts (@deadark/ark-ui/flux-auth, -flux-auth-ui) resolve from node_modules/@deadark/*,
+// Ark UI parts (@fxn/ui/flux-auth, -flux-auth-ui) resolve from node_modules/@fxn/*,
 // the packages `npm run sync:ark` delivers; nothing here names a hub path. The fxn-auth,
 // fxn-auth-client and deadark-identity-core parts are NOT Ark UI packages and are not delivered
 // by sync-consumer yet, so they still come from the sibling repos' sources in this site's own
@@ -117,8 +117,10 @@ const ALIASES = [
   '--alias:fxn-auth/auth-kit-create=' + fluxRoot + '/fxn-auth/src/authKitCreate.mjs',
   '--alias:fxn-auth/fxn-id-gate=' + fluxRoot + '/fxn-auth/src/fxnIdGate.mjs',
   // one ark-ui in the bundle: fxn-auth's own modules import it too, and its node_modules links the source tree, not
-  // this site's delivered package, so both resolve to the copy the entry uses
-  '--alias:@deadark/ark-ui/flux-auth=' + path.join(site, 'node_modules/@deadark/ark-ui/dist/ark-ui.flux-auth.js'),
+  // this site's delivered package, so both resolve to the copy the entry uses. fxn-auth still imports the
+  // permanent alias name @deadark/ark-ui, which this site no longer installs, so that name points at the same file.
+  '--alias:@fxn/ui/flux-auth=' + path.join(site, 'node_modules/@fxn/ui/dist/ark-ui.flux-auth.js'),
+  '--alias:@deadark/ark-ui/flux-auth=' + path.join(site, 'node_modules/@fxn/ui/dist/ark-ui.flux-auth.js'),
   '--alias:fxn-auth-client/wallet-mesh=' + fluxRoot + '/fxn-auth-client/src/wallet-mesh.mjs',
   '--alias:deadark-identity-core/root-signing-handle=' + fluxRoot + '/deadark-identity-core/dist/identity/root-signing-handle.js',
 ];

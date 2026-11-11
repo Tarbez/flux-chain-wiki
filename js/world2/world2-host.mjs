@@ -27,18 +27,40 @@
    view takes it off (the mount stays for the next visit). Since 2026-10-31 /auth draws none (NO_MESH_CARD below): the
    fxn-3d FXN ID card replaced it.
    ===================================================================== */
-import { fetchWorld, fetchBlob, fetchNames, fetchGroup, fetchLines, firstInstance, worldPath, PICTURE } from './world2-decode.mjs';
-import { createRenderer, FOV, afterRestore, engine as engineMod, orbitCoast } from './world2-gl.mjs';
-import { readPalette as readThemePalette } from './world2-palette.mjs';
-import { createStage } from './world2-stage.mjs';
-import { createSites } from './world2-sites.mjs';
-import { createHelix } from './world2-helix.mjs';
-import { mountHubMark } from './world2-hubmark.mjs';
-import { createTags } from './world2-tags.mjs';
-import { mountDrums } from './world2-drums.mjs';
-import { mountObjects, FILM_KEY } from './world2-objects.mjs';
-import { attachSpace } from './world2-space.mjs';   /* window.ArkSpace: places, focus, the visitor's movement (docs/design/space/SPACE.md) */   /* the built objects (fxn-3d's kernel, node cube, drum, card) in place of the drums and the plate (2026-11-05) */   /* the rings as solid drums in the card's metal (2026-10-31) */
-import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './world2-cardlook.mjs';   /* the FXN ID card's surface on the network's parts, and the light along the links (docs/design/auth/FXN-ID-CARD.md) */
+/* NO WORLD, NO WORLD CODE (owner 2026-11-11: "do lazy load for insane smooth UX"). Where this document will never draw the world (worldOffHere:
+   ?world=off, the portal intro, a stage page on this machine), the host below stops at `if (!wanted) return` and uses none of the twelve modules
+   it used to import statically; yet their whole graph (measured 2026-11-11 on a home load from this Mac's local server: about 60 module requests)
+   was fetched, compiled and run before the hero for nothing. So the modules are asked for only where the world can be wanted, and awaited before the
+   host runs, which is the order a static import gave. Where they are not loaded their names are undefined, and nothing before that return reads
+   one except TAN (never used without a world). The place test is the one wantWorld() uses below: one function, not two copies. */
+/* The portal intro (owner, 2026-11-09: "the old world is deprecated, only the portal now"): where the intro is the portal
+   (the site served from this machine, js/pages/intro.js portalHere) a fresh load of "/" or "/intro" loads no world at all. */
+function portalIntro() { return /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && /^\/(intro\/?)?$/.test(location.pathname); }
+/* the P05 world pages (the portal, the 12 topics, Learn) draw through the stage (js/ark/stage.js); the old world must not
+   render behind them. On a direct load of /fxn/names it showed through under the navbar (2026-11-09). */
+function stagePage() { return /^\/(intro\/?|fxn\/[a-z]+\/?|learn\/?)?$/.test(location.pathname); }
+function worldOffHere() {
+  if (/[?&]world=off(&|$)/.test(location.search)) return true;
+  return portalIntro() || (/^(127\.0\.0\.1|localhost)$/.test(location.hostname) && stagePage());
+}
+const WORLD_MODULES = worldOffHere() ? [] : await Promise.all([
+  import('./world2-decode.mjs'), import('./world2-gl.mjs'), import('./world2-palette.mjs'), import('./world2-stage.mjs'), import('./world2-sites.mjs'), import('./world2-helix.mjs'),
+  import('./world2-hubmark.mjs'), import('./world2-tags.mjs'), import('./world2-drums.mjs'), import('./world2-objects.mjs'),
+  import('./world2-space.mjs'),   /* window.ArkSpace: places, focus, the visitor's movement (docs/design/space/SPACE.md) */   /* the built objects (fxn-3d's kernel, node cube, drum, card) in place of the drums and the plate (2026-11-05) */   /* the rings as solid drums in the card's metal (2026-10-31) */
+  import('./world2-cardlook.mjs')   /* the FXN ID card's surface on the network's parts, and the light along the links (docs/design/auth/FXN-ID-CARD.md) */
+]);
+const { fetchWorld, fetchBlob, fetchNames, fetchGroup, fetchLines, firstInstance, worldPath, PICTURE } = WORLD_MODULES[0] || {};
+const { createRenderer, FOV, afterRestore, engine: engineMod, orbitCoast } = WORLD_MODULES[1] || {};
+const { readPalette: readThemePalette } = WORLD_MODULES[2] || {};
+const { createStage } = WORLD_MODULES[3] || {};
+const { createSites } = WORLD_MODULES[4] || {};
+const { createHelix } = WORLD_MODULES[5] || {};
+const { mountHubMark } = WORLD_MODULES[6] || {};
+const { createTags } = WORLD_MODULES[7] || {};
+const { mountDrums } = WORLD_MODULES[8] || {};
+const { mountObjects, FILM_KEY } = WORLD_MODULES[9] || {};
+const { attachSpace } = WORLD_MODULES[10] || {};
+const { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } = WORLD_MODULES[11] || {};
 
 (function () {
   'use strict';
@@ -74,12 +96,9 @@ import { FRAME, FLOW_MS, FLOW_IN, FLOW_OUT, EDGE_OF_VIEW, HUB_OF_VIEW } from './
   function owns() { return wanted && !host.failed; }
   function whenReady(fn) { if (host.ready) fn(); else readyHooks.push(fn); }
   host.whenReady = whenReady;   /* a page that must act once the world has loaded (the design board warms the view groups) */
-  /* The portal intro (owner, 2026-11-09: "the old world is deprecated, only the portal now"): where the intro is the portal
-     (the site served from this machine, js/pages/intro.js portalHere) a fresh load of "/" or "/intro" loads no world at all. */
-  function portalIntro() { return /^(127\.0\.0\.1|localhost)$/.test(location.hostname) && /^\/(intro\/?)?$/.test(location.pathname); }
+  /* portalIntro, stagePage and worldOffHere stand at the top of this file: the same test decides there whether the world's modules load at all */
   function wantWorld() {
-    if (/[?&]world=off(&|$)/.test(location.search)) return false;
-    if (portalIntro()) return false;
+    if (worldOffHere()) return false;
     try {
       var gl = document.createElement('canvas').getContext('webgl2');
       if (!gl) return false;

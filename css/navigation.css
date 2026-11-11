@@ -1,192 +1,141 @@
 /* =====================================================================
-   The family bar and footer on defxn.com
+   The navbar and the footer on defxn.com
    ---------------------------------------------------------------------
-   Since 2026-10-19 (owner: defxn.com is the DEFXN family HOME, docs/ux-audit/plan.md) the
-   header is the kit bar every DEFXN product wears (assets/kit/defxn-components.css, .dx-bar*,
-   mounted by js/resolvers/header.js with DefxnKit.mountShell mode 'home'), and the footer is
-   the kit footer (.dx-foot, DefxnKit.renderFooter, js/hero-motion.js). This file only DRESSES
-   them for the scene: the bar lives inside the poster (#scene, absolutely placed, pages scroll
-   under it in their own scrollers), and this site keeps its own controls in the bar -- the
-   Resolutions menu, Account, Run DEFXN, the network pill and the all-pages MENU.
+   The navbar (owner, 2026-11-09: "update the navbar ... make sure it shows in every page") is static markup
+   in index.html (#fxn-nav), so it paints with the first paint, before any script. js/resolvers/header.js
+   (RHEADER_V1) adopts that same element into the scene once the shell renders and keeps it current. One
+   bar on every route, the portal ring included: it stands in the top 52px, above the ring (the ring's top
+   edge is at 11% of the height, 79px at 720) and clear of the hover panel at the left (x 48-240, vertically
+   centred). Only its controls take the pointer, so nothing under its empty middle is blocked.
 
-   Rules that read like overrides restate the kit against older site sheets that still style
-   .ark-header with !important (css/settings.css, site-direction.css, components.css,
-   focus.css, color-system.css, home-drafting.css, icons.css, resolutions.css); they go when
-   those rules are deleted.
+   Items, in order: the DEFXN mark and wordmark (home), Portal, Learn, then Sign in (Account once signed in) and
+   Get FXN Browser, a mint outlined button, at the right. A hairline closes the bar's foot. No Products switcher
+   (ART-DIRECTOR.md "Navbar wishes": the ring is the navigation). The landing hero reference (owner, 2026-11-11)
+   set this finish; its search button and its amber button are not here: the site has no search, and the amber
+   is the hero's to spend.
 
-   Palette: tokens only, so the bar follows whichever of the five theme families is active
-   (html[data-theme]); nothing here names a colour.
+   Type: the nav role is the scale's 11 (--fs-tertiary, law 79), set in FXN Basalt Text through
+   var(--font-sans); nothing here names a family or a raw size. Colour: the base (--primary, mint) marks the
+   current route and tints the one soft action; the complement (--secondary, amber) is the page's to spend
+   once (law 73), so it never appears in the bar. Every colour is a token, so the bar follows the theme.
+
+   The network listbox rules at the end are shared with the account page's Wallet tab
+   (js/ark/dense-wire-wallet.mjs mountNetworkSelect), so they stay here.
    ===================================================================== */
 
-/* ---- The bar --------------------------------------------------------------
-   Placement only: the bar's look and its home-mode behaviour (no part shrinks, one row on a
-   phone, the nav in the MENU from 1040px down, the switcher panel hanging from the bar) are the
-   kit's own rules ([data-dx-mode="home"] in assets/kit/defxn-components.css). Here it is placed
-   in the scene, under the device's safe area. */
-#scene .ark-header {
- position:absolute; top:0; left:0; right:0; z-index:20;
- height:calc(var(--dx-bar-h) + env(safe-area-inset-top,0px));
- padding-top:env(safe-area-inset-top,0px);
- padding-left:max(var(--dx-gutter),env(safe-area-inset-left,0px));
- padding-right:max(var(--dx-gutter),env(safe-area-inset-right,0px));
- box-sizing:border-box; pointer-events:auto;
+/* ---- The bar ------------------------------------------------------------------------------ */
+.fxn-nav {
+ position:fixed; top:0; left:0; right:0; z-index:20;
+ height:calc(var(--dx-bar-h,52px) + env(safe-area-inset-top,0px));
+ padding:env(safe-area-inset-top,0px) max(var(--dx-gutter,24px),env(safe-area-inset-right,0px)) 0 max(var(--dx-gutter,24px),env(safe-area-inset-left,0px));
+ box-sizing:border-box; display:flex; align-items:center; gap:var(--sp-5,20px);
+ font-family:var(--font-sans); pointer-events:none;
+ /* the hairline under the bar (landing hero reference, owner 2026-11-11) */
+ border-bottom:1px solid hsl(var(--border-subtle));
 }
+/* a wide view: the bar's edges stand on the hero's own margin (css/world-pages.css .intro-portal-words: 4% of the width),
+   so the mark sits over the headline's first letter and the action ends on the page's right margin */
+@media (min-width:900px) {
+ .fxn-nav { padding-left:max(40px,4vw,env(safe-area-inset-left,0px)); padding-right:max(40px,4vw,env(safe-area-inset-right,0px)); gap:var(--sp-6,29px); }
+}
+/* adopted into the scene (js/resolvers/header.js): the scene is the viewport, so the place is the same */
+#scene .fxn-nav { position:absolute; }
+.fxn-nav > * { pointer-events:auto; }
+/* the canvas behind the bar, fading out at its foot: the pages start under the bar and the 3D world would otherwise show
+   through the band (seen on /learn and the topic pages); the ring view keeps the bar bare */
+.fxn-nav::before { content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+ background:linear-gradient(hsl(var(--canvas)) 0 72%, hsl(var(--canvas) / 0)); }
+html[data-portal-ring] .fxn-nav::before { background:none; }
 .ark-header::after { content:none; }
-/* The brand is the bare mark: css/focus.css leaves it (.header-mark, js/resolvers/header.js) and the nav's links
-   (the kit's raised segment) out of the fill it gives current and focused header links. */
-/* a control the row fit moved out (a nav link, or Get FXN Browser) */
-#scene .ark-header .header-collapsed { display:none; }
-#scene .ark-header .native-icon { width:16px; height:16px; flex-basis:16px; }
-#scene .ark-header .header-core-links .native-icon { opacity:.75; }
 
-/* ---- The "you" control: Account + network + MENU in one (owner, 2026-10-25) --------------------
-   One button: the avatar, your name over the network you are on, a chevron. It opens one panel in
-   layers (js/resolvers/header.js onMount): you and your one next step, your network (its own
-   layer), then the critical pages. The panel wears the Products switcher's dress -- the 2px
-   primary top, the 12px radius, mono hairline labels -- so the bar's two panels are one family. */
-#scene .ark-header .nav-toggle.header-you {
- display:inline-flex; align-items:center; gap:var(--sp-4); height:36px; min-width:0; padding:0 var(--sp-4) 0 var(--sp-2);
- border:1px solid var(--dx-edge,hsl(var(--border-control))); border-radius:var(--dx-radius,8px);
- background:hsl(var(--surface)); color:hsl(var(--text-strong)); cursor:pointer; text-align:left;
- transition:background-color .15s var(--ease-ui),border-color .15s var(--ease-ui);
+/* ---- The controls ------------------------------------------------------------------------- */
+.fxn-nav a {
+ position:relative; display:inline-flex; align-items:center; min-height:36px; padding:0 var(--sp-3,12px); border-radius:var(--dx-radius,8px);
+ color:hsl(var(--text)); text-decoration:none; white-space:nowrap;
+ font:600 var(--fs-tertiary)/1 var(--font-sans); letter-spacing:.14em; text-transform:uppercase;
+ transition:color .15s var(--ease-ui,ease), background-color .15s var(--ease-ui,ease), border-color .15s var(--ease-ui,ease);
 }
-#scene .ark-header .header-you:hover,
-#scene .ark-header.nav-open .header-you { background:hsl(var(--raised)); border-color:hsl(var(--border-strong)); }
-.header-you-avatar {
- display:inline-grid; place-items:center; flex:0 0 auto; width:28px; height:28px; border-radius:6px;
- background:hsl(var(--nested)); color:hsl(var(--text-muted)); box-shadow:inset 0 0 0 1px hsl(var(--border-subtle));
+.fxn-nav a:hover { color:hsl(var(--text-strong)); }
+.fxn-nav a:focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:2px; }
+/* the current route: the base colour and a 2px line under the word */
+.fxn-nav a[aria-current="page"] { color:hsl(var(--primary)); }
+.fxn-nav a[aria-current="page"]::after { content:""; position:absolute; left:var(--sp-3,12px); right:var(--sp-3,12px); bottom:4px; height:2px; border-radius:2px; background:hsl(var(--primary)); }
+.fxn-nav-links { display:flex; align-items:center; gap:var(--sp-3,12px); }
+/* the mark and the wordmark: one link, the way home. The mark stands on the bar's left edge (no inset), a 44px target high.
+   The wordmark is the brand's name (NAV.BRAND.NAME) in FXN Basalt at the scale's 18, widely tracked; a phone keeps the mark alone */
+.fxn-nav-mark { min-height:44px; padding:0; gap:var(--sp-3,12px); justify-content:flex-start; color:hsl(var(--text-strong)); }
+.fxn-nav-mark .dx-mark { background:currentColor; flex:0 0 auto; }
+.fxn-nav a.fxn-nav-mark .fxn-nav-word { font:800 var(--fs-secondary)/1 var(--font-display); letter-spacing:.3em; margin-right:-.3em; text-transform:uppercase; }
+.fxn-nav-mark[aria-current="page"]::after { content:none; }
+@media (max-width:639.98px) { .fxn-nav-mark { min-width:44px; justify-content:center; } .fxn-nav-mark .fxn-nav-word { display:none; } }
+/* ---- The four menus (js/resolvers/header.js buildHeaderMenus) ---------------------------------
+   A button with a drawn chevron opens a panel of links under it. The button wears the links' own type; the panel is the overlay surface with a
+   hairline edge and the kit radius. Mint marks the current page and the button that holds it; no amber. */
+.fxn-nav-item { position:relative; display:flex; align-items:center; }
+.fxn-nav .fxn-nav-trigger {
+ position:relative; display:inline-flex; align-items:center; gap:var(--sp-2,8px); min-height:36px; padding:0 var(--sp-3,12px); border:0; border-radius:var(--dx-radius,8px);
+ background:none; color:hsl(var(--text)); cursor:pointer; white-space:nowrap;
+ font:600 var(--fs-tertiary)/1 var(--font-sans); letter-spacing:.14em; text-transform:uppercase;
+ transition:color .15s var(--ease-ui,ease), background-color .15s var(--ease-ui,ease);
 }
-.header-you-avatar svg, .header-you-avatar .native-icon { width:15px; height:15px; }
-[data-you="in"] .header-you-avatar { color:hsl(var(--trust,var(--success))); box-shadow:inset 0 0 0 1px hsl(var(--trust,var(--success)) / .55); }
-.header-you-words { display:flex; flex-direction:column; gap:var(--sp-2); min-width:0; }
-.header-you-name { max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:600 var(--fs-tertiary, 11px)/1.1 var(--dx-font-sans,var(--font-sans,sans-serif)); }
-.header-you-net { display:flex; align-items:center; gap:var(--sp-2); font:500 var(--fs-tertiary, 11px)/1.1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-muted)); white-space:nowrap; }
-.header-chain-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:hsl(var(--trust,var(--success))); flex:0 0 auto; }
-.header-you-chev { width:12px; height:12px; flex:0 0 auto; color:hsl(var(--text-muted)); transition:transform .15s var(--ease-ui); }
-#scene .ark-header.nav-open .header-you-chev { transform:rotate(180deg); }
-
-/* an open panel lifts the bar over the page's layers (was .products-open) */
-#scene .ark-header:has(.ark-popover[data-state="open"]) { z-index:60; }
-
-/* The panel. Once pressed it is Ark's popover block, which places it under the button; top/right are
-   where the plain panel opens before that, or if the chunk fails. */
-#scene .ark-header #primary-navigation {
- position:fixed; top:calc(var(--dx-bar-h) + env(safe-area-inset-top,0px) + 6px); right:max(var(--dx-gutter),env(safe-area-inset-right,0px)); left:auto; z-index:44;
- width:min(360px,calc(100vw - 16px)); max-width:none; min-width:0; max-height:calc(100dvh - var(--dx-bar-h) - 24px);
- overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:hsl(var(--border-strong)) transparent;
- display:block; padding:0; color:hsl(var(--text)); font:inherit;
- border:1px solid hsl(var(--border-default)); border-top:2px solid hsl(var(--primary-400)); border-radius:12px;
- background:linear-gradient(hsl(var(--text-strong) / .04),hsl(var(--text-strong) / .04)),hsl(var(--overlay));
- box-shadow:0 24px 60px hsl(0 0% 0% / .45);
+.fxn-nav .fxn-nav-trigger:hover, .fxn-nav .fxn-nav-trigger[aria-expanded="true"] { color:hsl(var(--text-strong)); }
+.fxn-nav .fxn-nav-trigger:focus-visible { outline:2px solid hsl(var(--primary)); outline-offset:2px; }
+.fxn-nav .fxn-nav-trigger[data-here] { color:hsl(var(--primary)); }
+.fxn-nav .fxn-nav-trigger[data-here]::after { content:""; position:absolute; left:var(--sp-3,12px); right:var(--sp-3,12px); bottom:4px; height:2px; border-radius:2px; background:hsl(var(--primary)); }
+.fxn-nav-chev { flex:0 0 auto; width:6px; height:6px; margin-top:-3px; border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor; transform:rotate(45deg); transition:transform .15s var(--ease-ui,ease); }
+.fxn-nav-trigger[aria-expanded="true"] .fxn-nav-chev { transform:rotate(-135deg); margin-top:3px; }
+.fxn-nav-panel {
+ position:absolute; top:calc(100% + 8px); left:0; z-index:30; min-width:220px; padding:var(--sp-2,8px); box-sizing:border-box;
+ display:flex; flex-direction:column; gap:2px; background:hsl(var(--overlay)); border:1px solid hsl(var(--border-subtle)); border-radius:8px;
+ box-shadow:0 18px 47px -18px hsl(var(--canvas) / .8);
 }
-#scene .ark-header #primary-navigation[hidden] { display:none; }
-#primary-navigation .nav-layer { display:grid; gap:var(--sp-2); padding:var(--sp-4); }
-#primary-navigation .nav-layer[hidden] { display:none; }
-#primary-navigation .nav-layer-in { animation:you-layer-in .18s var(--ease-ui) both; }
-@keyframes you-layer-in { from { transform:translateX(10px); clip-path:inset(0 0 0 10px); } to { transform:none; clip-path:inset(0); } }
-@media(prefers-reduced-motion:reduce) { #primary-navigation .nav-layer-in { animation:none; } }
-
-/* layer 1, head: who you are, one sentence for your state, its one action */
-.header-you-head {
- display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:var(--sp-4) var(--sp-4); padding:var(--sp-4);
- border-radius:8px; background:hsl(var(--text-strong) / .04); box-shadow:inset 0 0 0 1px hsl(var(--border-subtle));
+.fxn-nav-panel[hidden] { display:none; }
+.fxn-nav .fxn-nav-panel a { display:flex; width:100%; box-sizing:border-box; min-height:36px; padding:0 var(--sp-3,12px); border-radius:6px; font:500 var(--fs-tertiary)/1 var(--font-sans); letter-spacing:.04em; text-transform:none; color:hsl(var(--text)); }
+.fxn-nav .fxn-nav-panel a:hover, .fxn-nav .fxn-nav-panel a:focus-visible { color:hsl(var(--text-strong)); background:hsl(var(--text-strong) / .06); }
+.fxn-nav .fxn-nav-panel a[aria-current="page"] { color:hsl(var(--primary)); }
+.fxn-nav .fxn-nav-panel a[aria-current="page"]::after { content:none; }
+@media (min-width:1280px) { .fxn-nav .fxn-nav-trigger { font:500 var(--fs-secondary)/1 var(--font-sans); letter-spacing:0; text-transform:none; } .fxn-nav .fxn-nav-panel a { font-size:var(--fs-secondary); } }
+/* a phone: the panel is a stacked sheet under the bar, the width of the screen less the gutters */
+@media (max-width:639.98px) {
+ .fxn-nav-item { position:static; }
+ .fxn-nav .fxn-nav-trigger { letter-spacing:.08em; padding:0 var(--sp-2,8px); }
+ .fxn-nav-panel { position:fixed; top:calc(var(--dx-bar-h,52px) + env(safe-area-inset-top,0px) + 8px); left:16px; right:16px; min-width:0; }
 }
-.header-you-head .header-you-avatar { width:40px; height:40px; border-radius:8px; }
-.header-you-head .header-you-avatar svg, .header-you-head .header-you-avatar .native-icon { width:20px; height:20px; }
-.header-you-who { display:grid; gap:var(--sp-2); min-width:0; }
-.header-you-who .header-account-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:600 var(--fs-secondary)/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-strong)); letter-spacing:-.01em; }
-.header-you-who .header-account-status { display:flex; align-items:center; gap:var(--sp-3); font:500 var(--fs-tertiary)/1.2 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.1em; text-transform:uppercase; color:hsl(var(--text-muted)); }
-.header-you-who .header-account-status::before { content:""; width:5px; height:5px; border-radius:50%; background:currentColor; }
-[data-you="in"] .header-account-status { color:hsl(var(--trust,var(--success))); }
-.header-you-line { grid-column:1 / -1; margin:0; font:400 var(--fs-tertiary)/1.45 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-muted)); }
-#scene .ark-header .header-you-go {
- grid-column:1 / -1; display:flex; align-items:center; justify-content:center; height:36px; border-radius:8px;
- background:hsl(var(--primary)); color:hsl(var(--text-inverse)); font:600 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif)); text-decoration:none;
+@media (prefers-reduced-motion:reduce) { .fxn-nav .fxn-nav-trigger, .fxn-nav-chev { transition:none; } }
+/* who you are: Sign in, or Account once signed in (js/resolvers/header.js); it opens the right-hand cluster */
+/* No search button (audit F08, 2026-11-11): the site has no search, and the lens opened an unrelated page. Sign In now leads the right-hand cluster */
+.fxn-nav-you { margin-left:auto; }
+/* Initiate FXN ID: the bar's filled button, in the complement, as the owner's picture has it. On the home it stands beside
+   the hero's own amber button: a known second spend of the complement (law 73), the owner's call of 2026-11-11 */
+.fxn-nav a.fxn-nav-id { min-height:40px; padding:0 var(--sp-5,20px); font-weight:700; color:hsl(var(--secondary-ink,var(--text-inverse))); background:hsl(var(--secondary)); }
+.fxn-nav a.fxn-nav-id:hover { color:hsl(var(--secondary-ink,var(--text-inverse))); background:hsl(var(--secondary-600,var(--secondary))); }
+.fxn-nav-id[aria-current="page"]::after { content:none; }
+.fxn-nav-id[hidden] { display:none; }
+/* from 1280px the bar's words are the scale's 18 in sentence case, as the picture has them at every size (audit F09: they
+   turned to 11px capitals below 1400). The 1440 row is kept as it is at 1280: measured at 1280x720 on 2026-11-11 with tighter
+   gaps, the row ended 216px short of the room, and the full gaps and paddings add 149px. Below 1280 the words keep the
+   scale's 11 in tracked capitals */
+@media (min-width:1280px) {
+ .fxn-nav a { font:500 var(--fs-secondary)/1 var(--font-sans); letter-spacing:0; text-transform:none; }
+ .fxn-nav a.fxn-nav-action { font-weight:600; }
+ .fxn-nav a.fxn-nav-id { font-weight:700; }
 }
-#scene .ark-header .header-you-go:is(:hover,:focus-visible) { background:hsl(var(--primary-600,var(--primary))); color:hsl(var(--text-inverse)) !important; }
-#scene .ark-header .header-you-head[data-you="in"] .header-you-go { background:hsl(var(--text-strong) / .08); color:hsl(var(--text-strong)); }
-
-/* layer 1, the network row: what you are on, and the way into its layer */
-.header-you-netrow {
- display:flex; align-items:center; gap:var(--sp-4); width:100%; height:40px; padding:0 var(--sp-4); margin-top:var(--sp-1);
- border:0; border-radius:8px; background:transparent; color:hsl(var(--text)); cursor:pointer; text-align:left;
- font:500 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif)); transition:background-color .15s var(--ease-ui);
+/* the one soft action: a mint outlined button, 40 high. The page keeps the complement for its own dominant action */
+.fxn-nav a.fxn-nav-action { min-height:40px; border:1px solid hsl(var(--primary) / .55); color:hsl(var(--primary)); padding:0 var(--sp-5,20px); }
+.fxn-nav-action:hover { color:hsl(var(--primary)); background:hsl(var(--primary) / .12); border-color:hsl(var(--primary)); }
+.fxn-nav-action[aria-current="page"]::after { content:none; }
+.fxn-nav-action[aria-current="page"] { background:hsl(var(--primary) / .12); }
+/* a control the row fit moved out (kept for the drivers; nothing folds today) */
+.fxn-nav .header-collapsed { display:none; }
+/* the scene pattern's legacy nav child, until js/resolvers/header.js removes it on mount */
+.fxn-nav > #primary-navigation { display:none; }
+@media (max-width:639.98px) {
+ .fxn-nav { gap:var(--sp-2,8px); }
+ .fxn-nav a { letter-spacing:.08em; padding:0 var(--sp-2,8px); }
+ .fxn-nav a.fxn-nav-action { padding:0 var(--sp-3,12px); min-height:36px; }
+ .fxn-nav a.fxn-nav-mark { padding:0; }
 }
-.header-you-netrow:hover { background:hsl(var(--text-strong) / .06); }
-.header-you-netrow-label { font:600 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); }
-.header-you-netrow-value { display:flex; align-items:center; gap:var(--sp-3); margin-left:auto; color:hsl(var(--text-strong)); font-family:var(--dx-font-mono,var(--font-mono,monospace)); font-size:var(--fs-tertiary); }
-.header-you-netrow-go { color:hsl(var(--text-muted)); font-size:var(--fs-secondary); line-height:1; }
-
-/* layer 1, the pages: icon, name, the journey it starts */
-#primary-navigation .nav-layer-heading { margin:var(--sp-3) var(--sp-4) var(--sp-1); font:600 var(--fs-tertiary)/1.4 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-muted)); }
-.header-you-pages { display:grid; gap:1px; margin:0; padding:0; list-style:none; }
-#scene .ark-header .header-you-page {
- display:grid; grid-template-columns:28px minmax(0,1fr) auto; align-items:center; gap:var(--sp-4); min-height:40px; padding:var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-3);
- border-radius:8px; background:none; color:hsl(var(--text)); text-decoration:none; transition:background-color .15s var(--ease-ui),color .15s var(--ease-ui);
-}
-#scene .ark-header .header-you-page:hover { background:hsl(var(--text-strong) / .06); color:hsl(var(--text-strong)); }
-#scene .ark-header .header-you-page[aria-current="page"] { background:hsl(var(--text-strong) / .08); color:hsl(var(--text-strong)); box-shadow:inset 2px 0 0 hsl(var(--primary)); }
-.header-you-page-mark { display:inline-grid; place-items:center; width:28px; height:28px; border-radius:6px; background:hsl(var(--text-strong) / .05); color:hsl(var(--text-muted)); }
-.header-you-page-mark svg, .header-you-page-mark .native-icon { width:14px; height:14px; }
-.header-you-page-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font:500 var(--fs-tertiary)/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); }
-.header-you-page-meta { font:500 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.1em; text-transform:uppercase; color:hsl(var(--text-faint)); }
-
-/* layer 2, the network */
-#primary-navigation .nav-layer-top { display:flex; align-items:center; justify-content:space-between; gap:var(--sp-3); padding:0 var(--sp-1) var(--sp-2); }
-#primary-navigation .nav-layer-back {
- height:32px; padding:0 var(--sp-4); border:0; border-radius:6px; background:transparent; color:hsl(var(--text-muted)); cursor:pointer;
- font:600 var(--fs-tertiary)/1 var(--dx-font-sans,var(--font-sans,sans-serif));
-}
-#primary-navigation .nav-layer-back:hover { background:hsl(var(--text-strong) / .06); color:hsl(var(--text-strong)); }
-#primary-navigation .nav-layer-depth { font:600 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.12em; text-transform:uppercase; color:hsl(var(--text-faint)); padding-right:var(--sp-3); }
-#primary-navigation .nav-layer-title { margin:var(--sp-2) var(--sp-4) 0; font:600 var(--fs-secondary)/1.2 var(--dx-font-sans,var(--font-sans,sans-serif)); letter-spacing:-.01em; color:hsl(var(--text-strong)); }
-#primary-navigation .nav-layer-note { margin:0 var(--sp-4) var(--sp-3); font:400 var(--fs-tertiary)/1.45 var(--dx-font-sans,var(--font-sans,sans-serif)); color:hsl(var(--text-muted)); }
-#primary-navigation .network-options { padding:0 var(--sp-1) var(--sp-1); }
-#primary-navigation .network-option { height:40px; padding:0 var(--sp-4); border-radius:8px; font-size:var(--fs-tertiary); }
-
-/* The real network listbox (js/ark/dense-wire-wallet.mjs::mountNetworkSelect) -- never a native
-   <select>: its open state is unstyleable OS chrome. Shared by every mount of this control (the
-   "you" panel, the account page's Wallet tab), so there is one styled option list, not a patched select. */
-.network-options { display:flex; flex-direction:column; gap:var(--sp-2); }
-.network-option {
- display:flex; align-items:center; gap:var(--sp-3); width:100%; height:36px; padding:0 var(--sp-4);
- border:0; border-radius:6px; background:transparent; color:hsl(var(--text-muted));
- font:500 var(--fs-tertiary)/1.2 var(--font-sans,"Albert Sans",sans-serif); text-align:left; cursor:pointer;
- transition:background-color 150ms var(--ease-ui),color 150ms var(--ease-ui);
-}
-.network-option::before { content:""; width:6px; height:6px; border-radius:50%; background:transparent; flex:0 0 auto; border:1px solid hsl(var(--text-faint)); }
-.network-option:hover { background:hsl(var(--raised)); color:hsl(var(--text-strong)); }
-.network-option.is-selected { color:hsl(var(--text-strong)); background:hsl(var(--reference-100)); }
-.network-option.is-selected::before { background:hsl(var(--trust,var(--success))); border-color:hsl(var(--trust,var(--success))); }
-.network-option:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:-2px; }
-
-/* ---- One row: the mark alone on the left, every control on the right (owner, 2026-10-25) ----
-   The bar's own dress in home mode is the kit's (assets/kit/defxn-components.css, from
-   flux/defxn-product-kit; moved there from this file 2026-10-28): the mark only, set in the bar's
-   LEFT PADDING; the controls 36px tall in one cluster on the right; from 1040.02px the Products
-   trigger and the nav as one segmented control, then a hairline; the Products panel dressed like
-   the "you" panel, 1200x700 at most, its role tokens inherited so a worn NFT skin reaches it.
-   What stays here is this site's own share of that row. The padding gains the mark's room, so the
-   row fit in js/resolvers/header.js, which subtracts the padding from the room, still counts the
-   mark's space exactly; margins are not counted, so the cluster is pushed right with a margin. */
-#scene .ark-header[data-dx-mode] {
- --hdr-mark-room:var(--sp-7);   /* the 24px mark + 16px before the cluster could ever reach it */
- padding-left:calc(max(var(--dx-gutter),env(safe-area-inset-left,0px)) + var(--hdr-mark-room));
-}
-/* a phone keeps the 30px the in-row mark took (24px + the 6px gap): 360px had no spare 10px */
-@media(max-width:640px) { #scene .ark-header[data-dx-mode] { --hdr-mark-room:var(--sp-6); } }
-/* Get FXN Browser leads the cluster (a bar child just before the family, js/resolvers/header.js):
-   it carries the push to the right, so the part after it does not; when the row fit folds it
-   away, the kit's push (on the family) returns. */
-#scene .ark-header[data-dx-mode] .header-run-link { margin-left:auto; flex:0 0 auto; }
-#scene .ark-header[data-dx-mode] .header-run-link:not(.header-collapsed) + * { margin-left:0; }
-
-/* One control shape across the cluster: 36px tall, the kit radius, the kit edge. Get FXN Browser
-   was a 999px pill beside 8px squares; it keeps its soft tint: it is the bar's one action. */
-#scene .ark-header .header-run-link { border-radius:var(--dx-radius,8px); }
-#scene .ark-header .header-core-links .native-icon { width:14px; height:14px; flex-basis:14px; }
-#scene .ark-header .header-run-link { min-height:36px; padding:0 var(--sp-4); gap:var(--sp-3); font:600 var(--fs-tertiary)/1 var(--dx-font-sans); }   /* the bar's words are the scale's 11 (owner, 2026-10-25: 12px was off the scale) */
-
+@media (prefers-reduced-motion:reduce) { .fxn-nav a { transition:none; } }
 /* ---- The footer: one quiet glass bar in the scene's bottom band (redesigned 2026-10-25, owner: "a disaster") ----
    It was four type styles in one row (16px mono links, a 12px mono copyright, a mono-serif name, an all-caps Back) with
    the settings gear floating outside it. Now it is one bar, dressed like the header: canvas glass, a hairline edge, the
@@ -211,7 +160,7 @@
 #scene .site-footer-strip nav a[aria-current="page"] { color:hsl(var(--text-strong)); }
 #scene .site-footer-strip nav a[aria-current="page"]::after { content:""; position:absolute; left:10px; right:10px; bottom:3px; height:2px; border-radius:2px; background:hsl(var(--primary)); }
 /* the credit and rights line join the row (css/settings.css still places them on their own) */
-#scene .site-footer-strip :is(.site-credit,.site-copyright,.site-price) { position:static; font:500 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-faint)); }
+#scene .site-footer-strip :is(.site-credit,.site-copyright,.site-price) { position:static; font:500 var(--fs-tertiary)/1 var(--dx-font-mono,var(--font-mono,monospace)); letter-spacing:.04em; color:hsl(var(--text-faint)); white-space:nowrap; }
 /* Back (js/hero-motion.js) closes the row: a small outlined control, the header's shape at its smaller size */
 #scene .site-footer-strip .hero-motion-toggle {
  position:static; display:inline-flex; align-items:center; height:30px; min-height:30px; padding:0 var(--sp-4); border:1px solid hsl(var(--border-default)); border-radius:8px;
@@ -241,19 +190,18 @@
 }
 @media(max-width:480px) { .ark-studio-label { max-width:85px; line-height:1.5; } }
 
-/* ---- Widths: this site's own controls ----------------------------------------
-   The bar's own widths (its nav from 1040px down, one row on a phone, the sub-brand below
-   1440px) are the kit's home mode. What stays here is this site's controls at phone sizes. */
-/* A phone: the "you" control is its avatar, with the network dot on its corner and the chevron;
-   its name and title still say who, the state and the network (js/resolvers/header.js). */
-@media(max-width:440px) {
- #scene .ark-header .nav-toggle.header-you { gap:var(--sp-3); padding:0 var(--sp-3) 0 var(--sp-2); }
- #scene .ark-header .header-you-words { display:none; }
- #scene .ark-header .header-you > .header-you-avatar { position:relative; }
- #scene .ark-header .header-you > .header-you-avatar::after { content:""; position:absolute; right:-2px; bottom:-2px; width:7px; height:7px; border-radius:50%; background:hsl(var(--trust,var(--success))); box-shadow:0 0 0 2px hsl(var(--surface)); }
+/* ---- The network listbox (js/ark/dense-wire-wallet.mjs::mountNetworkSelect) -- never a native <select>: its open
+   state is unstyleable OS chrome. Shared by every mount of this control (the account page's Wallet tab), so there is
+   one styled option list, not a patched select. */
+.network-options { display:flex; flex-direction:column; gap:var(--sp-2); }
+.network-option {
+ display:flex; align-items:center; gap:var(--sp-3); width:100%; height:36px; padding:0 var(--sp-4);
+ border:0; border-radius:6px; background:transparent; color:hsl(var(--text-muted));
+ font:500 var(--fs-tertiary)/1.2 var(--font-sans,sans-serif); text-align:left; cursor:pointer;
+ transition:background-color 150ms var(--ease-ui),color 150ms var(--ease-ui);
 }
-/* The current header link, but not the brand, and not a nav link: a current nav segment is the kit's raised
-   segment (assets/kit/defxn-components.css), not a second fill. :where() keeps the rule's weight where it was.
-   Moved here from css/focus.css on 2026-10-28: the header's own sheet holds the header's classes. This sheet
-   loads just before focus.css, so the cascade order is unchanged. */
-#scene .ark-header a[aria-current="page"]:not(.header-mark):not(:where(.header-core-links a)) { color:hsl(var(--text-strong)) !important; background-color:hsl(var(--nested)); }
+.network-option::before { content:""; width:6px; height:6px; border-radius:50%; background:transparent; flex:0 0 auto; border:1px solid hsl(var(--text-faint)); }
+.network-option:hover { background:hsl(var(--raised)); color:hsl(var(--text-strong)); }
+.network-option.is-selected { color:hsl(var(--text-strong)); background:hsl(var(--reference-100)); }
+.network-option.is-selected::before { background:hsl(var(--trust,var(--success))); border-color:hsl(var(--trust,var(--success))); }
+.network-option:focus-visible { outline:2px solid hsl(var(--reference)); outline-offset:-2px; }

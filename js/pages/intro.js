@@ -1,24 +1,18 @@
-/* /intro: the first page of a fresh visit. It is the world and the intro part (js/space/intro.mjs); the page itself holds no words.
+/* / and /intro: the home. Layer: app. It is the hero (addPortal below): the words and two buttons on the left, the closed portal on the right, the
+   status bar and the explore row at the foot, one link on each of the portal's twelve stones. The old intro film and its page chrome (the hidden
+   page name, the "Replay intro" chip, the dimmed bar, the mount hand-shake) left on 2026-11-11 with audit findings F01, F12 and F33.
 
-   Rebuilt 2026-11-07 (docs/design/space/SPACE.md, "Intro: plan", lane 3). The old film chrome (caption, rail, Skip intro), the five doors,
-   the three counters, the hero words and the ledger left: home's plan places them. What stays is the world's stage, a "Replay intro" chip
-   at the dock and the hand-shake with the part. The part tells the page when it plays (event ark-intro-state, detail {playing, done}); the
-   page dims the nav while it plays (html[data-intro="playing"], css/world-pages.css) and hands the part a mount event
-   (ark-intro-mount, detail {page, wanted}) so the part knows whether this load plays the intro. "Replay intro" fires ark-intro-replay.
-   A fresh load of "/" or "/intro" plays the intro once (FILM_KEY rule: loadedOnIntro and not yet played); a move back to /intro inside
-   the site finds shot 5 standing, never a replay.
-
-   REDUCTION TEST
-   1 About: the first thirty seconds with one FXN ID: get, pay, see it spread, say who you are.
-   2 Dominant action: the press on the lit thing (the chip, the complement, once per state).
-   3 Know now: you get an FXN ID, a keeper signs the payment, copies reach pinners; it is a rehearsal and nothing is live.
-   4 Hidden until asked: roles, home, every other page (shot 5 and the nav, which returns at shot 5).
-   5 Repeated elsewhere: nothing; the words are the LANDING.* keys of the home manifest.
-   6 Only because the data has it: the one number, with its condition on the same screen.
-   7 Removable: the mono step numbers, on a short screen.
-   8 Leaving keeps state: the role, in defxn-quest-v1 (the part writes it).
-   9 Returning: the Back button finds shot 5.
-   10 If WebGL is missing: the host never sends a visitor here; a direct link shows the page name and the replay chip.
+   REDUCTION TEST (the home, 2026-11-11; the audit's answers, updated for what this file now does)
+   1 About: FXN, a new network to build on. The headline says it, and it is the page's h1 and the tab's title.
+   2 Dominant action: Enter FXN. The bar's Initiate FXN ID is a second amber button, the owner's open call (D2).
+   3 Know now: what FXN is, and that devnet genesis is next. Both read at once: no word waits for the 3D.
+   4 Hidden until asked: the twelve topics' own pages, behind the bar's menus and the stone links.
+   5 Repeated elsewhere: both hero buttons open Learn; the stone links repeat the menus' items (owner's picture, D8).
+   6 Only because the data has it: nothing. A figure with no source reads TBA, never 0.
+   7 Removable: the status bar's five TBA figures and the second button (owner's call, D8).
+   8 Leaving keeps state: yes. The portal frame is kept by the stage.
+   9 Returning: the hero stands again on its rest frame, by the mark, the Home link or Back.
+   10 If the 3D is missing: the words, the bar and the dock stay; the portal and the stone links step out.
    Words: HOME.LANDING.* (ArkCopy). Layout: css/world-pages.css. */
 (function () {
   'use strict';
@@ -90,96 +84,285 @@
     io.observe(el);
   }
   ArkUI.placeResponse = placeResponse; ArkUI.rollIn = rollIn;
-  var FILM_KEY = 'defxn-intro-film-v1';
-  /* the intro plays on every fresh load of /intro or / (owner, 2026-11-05); a move back to /intro inside the site finds it done */
-  var loadedOnIntro = /\/intro\/?$/.test(location.pathname) || location.pathname === '/';
-  var played = false;
-  function wanted() { return loadedOnIntro && !played && !document.documentElement.hasAttribute('data-portal-up'); }   /* the portal stands first: the film waits for the dive */
-  function playing(on) {
-    if (on) document.documentElement.setAttribute('data-intro', 'playing'); else document.documentElement.removeAttribute('data-intro');
-  }
-  window.addEventListener('ark-intro-state', function (e) {
-    var d = e.detail || {};
-    playing(!!d.playing);
-    if (d.done) played = true;
-  });
-  ArkUI.introPage = { key: FILM_KEY, wanted: wanted };
+  /* THE OLD INTRO FILM NEVER PLAYS (owner ruling 2026-11-11, audit F01 and F33: the home is the hero on every host). The world part that held it
+     (js/space/intro.mjs: "Welcome to FXN.", "Switch on the kernel", "A rehearsal. Nothing is live.") asks this page whether a load wants the film;
+     the answer is always no. The part itself stays loaded because the role picker (ark-quest-open) lives in the same file */
+  ArkUI.introPage = { key: 'defxn-intro-film-v1', wanted: function () { return false; } };
 
-  /* THE PORTAL (owner, 2026-11-09; board 40 in flux/fxn-3d/docs/design/direction/owner-boards-2026-11-08/). Layer: app.
-     The intro gains the site object Portal 101 on the right and the board's words on the left; the nav, the world and
-     the Replay chip stay. Scroll plays the board's three beats: the ring's edge lights, a record flies in, the ring opens
-     on the city. The object is drawn live by the fxn-3d studio on this Mac (flux/fxn-3d/world/site-view/index.html), because
-     no export is allowed yet; so the portal is added only when the site itself runs on this machine, and a visitor sees the
-     intro as before. The beat frame ranges are the object's own (its geometry.mjs INTRO); this page sends a progress from
-     0 to 3 and never a frame number. Words: HOME.LANDING.PORTAL.*. Layout: css/world-pages.css "intro portal". */
-  /* Portal 101 alone (owner, 2026-11-09: "use Portal 101, 3D and no background, just that object"): the studio leaves out the
-     object's floor and backdrop and clears to this page's own background colour, read from the page, never written here */
-  function portalView() {
-    var m = (getComputedStyle(document.body).backgroundColor || '').match(/\d+/g), bg = m && m.length >= 3 ? m.slice(0, 3).join(',') : '';
-    return 'http://127.0.0.1:3440/world/site-view/index.html?o=portal101&alone=1' + (bg ? '&bg=' + bg : '');
-  }
-  /* the underground DEFXN world the dive enters (fxn-3d world/underground: the site objects arrive, then animate) */
-  var UNDERGROUND_VIEW = 'http://127.0.0.1:3440/world/site-view/index.html?o=underground';
-  var portalHere = /^(127\.0\.0\.1|localhost)$/.test(location.hostname);
-  function addPortal(page) {
-    var frame = node('iframe', 'intro-portal-stage'); frame.title = ''; frame.setAttribute('aria-hidden', 'true'); frame.tabIndex = -1;
-    var words = node('div', 'intro-portal-words');
-    var eyebrow = node('p', 'intro-portal-eyebrow mono', copy('PORTAL.EYEBROW'));
-    var head = node('p', 'intro-portal-headline', copy('PORTAL.HEADLINE'));
-    var line = node('p', 'intro-portal-line', copy('PORTAL.LINE'));
-    var enter = node('a', 'intro-portal-enter mono', copy('PORTAL.ENTER')); enter.href = '/'; enter.setAttribute('data-scene-link', 'zero');
-    words.append(eyebrow, head, line, enter);
-    page.insertBefore(frame, page.firstChild); page.appendChild(words);
-    page.classList.add('has-portal'); document.documentElement.setAttribute('data-portal-up', '');
+  /* THE HERO (owner, 2026-11-11: the ring menu left the site; navigation is the top bar's menus, js/resolvers/header.js). Layer: app.
+     The home is the load, then the hero, and it ends there: the words on the left (tag, headline, line, the Enter FXN link) and the
+     closed Portal 101 on the right, still. The portal is a picture: nothing lies over it, so it takes no click and no hover. Enter FXN is
+     a plain link to /learn. The 3D is on THE STAGE (js/ark/stage.js, ArkUI.stage), one surface above the routes. The hero's words, the dock and
+     the stone links are built on every host; the portal shows wherever the stage finds its 3D frame (ArkUI.stage.ready: the site's bundled view,
+     or the studio in local development), and where it finds none the words stand alone. Words: HOME.LANDING.PORTAL.*. Layout:
+     css/world-pages.css "intro portal". The ring menu, its twelve stones, the emblem flight into a topic page and the way back are in
+     /Volumes/PortableSSD/archive/site-ring-menu-2026-11-11/. */
 
-    /* The frame shows only once the studio has drawn the object (no white flash while the studio page loads). While it shows and
-       this page is the one on screen, the world behind it is held (js/world2/world2-host.mjs), so the GPU draws one scene. If the
-       GPU drops the studio's context, the portal fades out, the world comes back, and the frame loads once more. */
-    var drawn = false, retried = false, root = document.documentElement;
-    function hold() {
-      if (page.hidden) document.documentElement.removeAttribute('data-portal-ring');   /* the site's header and footer come back on any other page */
-      var on = drawn && !page.hidden;
-      if (on === root.hasAttribute('data-world-held')) return;
-      if (on) root.setAttribute('data-world-held', ''); else { root.removeAttribute('data-world-held'); dispatchEvent(new CustomEvent('ark-world-release')); }
-    }
-    new MutationObserver(hold).observe(page, { attributes: true, attributeFilter: ['hidden'] });
-    addEventListener('message', function (e) {
-      /* the next frame loads hidden behind the current one; it takes over only once it has drawn (no black gap, so the clicked
-         stone and the film's first frame meet in a match cut) */
-      if (pending && e.source === pending.contentWindow && e.data) {
-        if (e.data.ring) { ringAt(e.data.ring); return; }
-        if (e.data.segments) { segs = e.data.segments; ringSel = e.data.select; ringOpen = e.data.open; ringView = e.data.ringview; ringSpawn = e.data.spawn; return; }
-        if (!e.data.drawn) return;
-        var old = frame, then = pending._then; frame = pending; pending = null; frame.classList.remove('intro-portal-next'); old.remove();
-        if (then) then();
-        return;
-      }
-      if (e.source !== frame.contentWindow || !e.data) return;
-      if (e.data.lost) {
-        drawn = false; page.classList.remove('portal-drawn'); hold();
-        if (!retried && !gone) { retried = true; setTimeout(function () { frame.src = portalView(); }, 1000); }
-        else if (below === 'in' && !retriedBelow) { retriedBelow = true; below = 'loading'; page.classList.remove('in-underground'); setTimeout(function () { frame.src = UNDERGROUND_VIEW; }, 1000); }
-        return;
-      }
-      if (e.data.segments) { segs = e.data.segments; ringSel = e.data.select; ringOpen = e.data.open; ringView = e.data.ringview; ringSpawn = e.data.spawn; return; }
-      if (e.data.held && /^open:/.test(e.data.held)) { openTopic(+e.data.held.slice(5)); return; }
-      if (e.data.held === 'RINGVIEW' && ringSpawn) { page.classList.add('portal-drawn'); drawn = true; post({ play: 'SPAWN' }); return; }
-      if (e.data.held === 'RINGVIEW' || e.data.held === 'SPAWN') { page.classList.add('portal-drawn'); drawn = true; showMenu(); return; }
-      if (e.data.shotDone) { backToRing(); return; }
-      if (e.data.cinemaEnd) { if (!topic) question(); return; }
-      if (e.data.shot) { cine(e.data.shot); return; }
-      if (e.data.ring) { ringAt(e.data.ring); try { localStorage.setItem('defxn-portal-ring', JSON.stringify({ x: e.data.ring.x, y: e.data.ring.y, r: e.data.ring.r, w: innerWidth, h: innerHeight })); } catch (x) { /* only a convenience */ } return; }
-      if (!e.data.drawn) return;
-      if (below === 'loading') { arrive(); return; }
-      if (gone) return;
-      drawn = true; page.classList.add('portal-drawn'); hold();
+  /* THE HOME'S PARTS ARE SHARED (2026-11-11): the line icons, the feature items and the rounded bar are built by js/content/topics.js
+     (ArkTopics.lineIcon, .features, .statusBar, .networkFigures), which this page loads first (js/pages/catalog.js), so the home, the topic
+     pages and Learn draw them from one place. The figures' one source is ArkUI.homeStatus (js/pages/catalog.js, a file every page loads). */
+
+  /* THE DOCK (owner reference, 2026-11-11): the status bar and, under it, the explore row, at the foot of the home hero. Layer: app.
+     The status bar leads with the network's state (its dot is not lit: the chain is not live), then five figures, each from ArkUI.homeStatus:
+     the price first, then the four network figures every inner page's bar shows too.
+     The explore row's chips are never typed: one product for each lane of the product kit (DefxnKit.LANES), the lane's first product that has
+     a public page (its `site`), drawn with its own mark (DefxnKit.productMark) and linked to that page (DefxnKit.productHref). A lane with no
+     public page shows no chip: on 2026-11-11 that is DeFi, whose one product has no page yet. Words: HOME.LANDING.STATUS.* and HOME.LANDING.EXPLORE.*. Layout: css/world-pages.css "home dock". */
+  function homeDock() {
+    var dock = node('div', 'intro-dock');
+    var bar = ArkTopics.statusBar(copy('STATUS.LABEL'), { text: copy('STATUS.STATE'), lit: false },
+      [{ id: 'price', name: copy('STATUS.PRICE'), value: ArkUI.homeStatus.read('price') }].concat(ArkTopics.networkFigures()), copy('STATUS.TBA'));
+    var row = node('div', 'intro-explore'), say = node('div', 'intro-explore-words');
+    say.append(node('p', 'intro-explore-caption mono', copy('EXPLORE.CAPTION')), node('p', 'intro-explore-line', copy('EXPLORE.LINE')));
+    var chips = node('ul', 'intro-chips'); chips.setAttribute('aria-label', copy('EXPLORE.LABEL'));
+    var K = window.DefxnKit;
+    if (K && K.LANES && K.PRODUCTS && K.productMark) K.LANES.forEach(function (lane) {
+      var p = K.PRODUCTS.filter(function (x) { return x.lane === lane.id && !!x.site; })[0];
+      if (!p) return;
+      var chip = node('a', 'intro-chip'); chip.href = (K.productHref && K.productHref(p)) || p.site;
+      chip.append(K.productMark(p.id, { size: 18, className: 'intro-chip-mark' }), node('span', '', p.name));
+      var li = node('li'); li.appendChild(chip); chips.appendChild(li);
     });
-    frame.src = portalView();
+    row.append(say, chips); dock.append(bar, row);
+    return dock;
+  }
+  function addPortal(page) {
+    var stage = ArkUI.stage, root = document.documentElement, subs = [];
+    /* THE WORDS (the pill tag, the headline, the line, the two buttons, the three feature items) are written by one writer, ArkTopics.heroWords
+       (js/content/topics.js): the page's one h1 is the headline (audit F12; the section is named by it, aria-labelledby in mount); the filled
+       button (owner 2026-11-11) is a plain link to Learn, the site's start page, and the outlined one opens the same page, said as what the
+       visitor finds there (neither is .mono: the buttons are set in the sans, and `.world-page .mono` would outrank the shared button class);
+       the feature items are a line icon, a name and one short line (HOME.LANDING.HERO.F1-F3).
+       THE WORDS THE VISITOR ALREADY READS ARE TAKEN, NOT BUILT AGAIN (2026-11-11, speed lane 1C). On a fresh load index.html carries the same
+       words as markup (#hero-first, written by the build with the same writer, shown by js/loader-plaza.js at the first paint). This page takes
+       that node: it is moved in when the router shows the page (taking, below), so the words a visitor is reading never blink. The markup is
+       checked against what this page would write and replaced when it differs (a word changed and the shell not built again, or an address in
+       hash form), so the manifest stays the one source. With no such node (a visit inside the site after the first) the words are built here */
+    var learnHref = ArkUI.route.href(ArkUI.pageCatalog && ArkUI.pageCatalog.learn ? ArkUI.pageCatalog.learn.path : '/learn');
+    var wordsHTML = ArkTopics.heroWords(ArkTopics.heroSpec(copy, learnHref));
+    var first = document.getElementById('hero-first'), words = first && first.querySelector('.intro-portal-words');
+    if (words) { if (words.innerHTML !== wordsHTML) words.innerHTML = wordsHTML; }
+    else { first = null; words = node('div', 'intro-portal-words'); words.innerHTML = wordsHTML; }
+    /* the page behind a button loads while the pointer or focus rests on it */
+    Array.prototype.forEach.call(words.querySelectorAll('.intro-portal-enter, .intro-portal-second'), function (a) {
+      ['pointerenter', 'focus'].forEach(function (type) { a.addEventListener(type, function () { if (ArkUI.warmPage) ArkUI.warmPage('learn'); }); });
+    });
+    var edge = node('div', 'intro-hero-edge'); edge.setAttribute('aria-hidden', 'true');
+    var veil = node('div', 'intro-load-veil'); veil.setAttribute('aria-hidden', 'true');
+    var dock = homeDock(), stones = node('div', 'intro-stones');
+    /* where the taken words go: a mark that holds their place in the page until the page shows */
+    var wordsAt = first ? document.createComment('the hero words') : words;
+    /* the document order is the tab order (audit F11): the hero's buttons, then the stone links, then the dock's chips. The bar comes before the
+       page (js/resolvers/header.js onMount) */
+    page.appendChild(edge); page.appendChild(veil); page.appendChild(wordsAt); page.appendChild(stones); page.appendChild(dock);
+    /* THE WORDS MOVE IN WHEN THE PAGE SHOWS, NOT WHEN IT IS MOUNTED. The router mounts a page hidden (js/ark/page-router.js: el.hidden = true,
+       and css/world-pages.css .world-page[hidden] is display: none) and shows it a moment later. Moved in at the mount, the words stood in a box
+       that was not drawn, so their entrance started again from nothing (seen 2026-11-11 in the FXN Browser: the headline's animation went from
+       183 ms back to 0). Until the page shows they stay where the visitor reads them, over the load screen, on the same pixels.
+       moveBefore keeps the entrance running where it is; a plain insert would start it again, so there the words stand as they are
+       (.is-taken, css/loader-plaza.css) when the visitor could already see them */
+    if (first) {
+      var taking = new MutationObserver(function () {
+        if (page.hidden || !page.isConnected) return;
+        taking.disconnect();
+        var seen = first.classList.contains('is-on');
+        try { page.moveBefore(words, wordsAt); } catch (e) { if (seen) words.classList.add('is-taken'); page.insertBefore(words, wordsAt); }
+        wordsAt.remove(); first.remove(); first = null;
+      });
+      taking.observe(page, { attributes: true, attributeFilter: ['hidden'] });
+    }
+    /* THE WORDS NEVER WAIT FOR THE 3D (audit F05, 2026-11-11: every word stayed hidden 10 to 15 s). .hero-words shows the words and the dock at once;
+       html.hero-up tells the load screen to go see-through and lets the bar in (css/loader-plaza.css). Only the stone links wait for the portal */
+    page.classList.add('has-portal', 'hero-words'); root.setAttribute('data-portal-up', ''); root.classList.add('hero-up');
+
+    /* The stage's messages, routed here while this page lives (the router removes the page after a navigation, so every listener is
+       dropped with it: arkDispose). The world behind is held by the stage. */
+    function sub(type, fn) { subs.push(stage.on(type, fn)); }
+    page.arkDispose = function () {
+      subs.forEach(function (off) { off(); }); subs = []; gone = true; heroSet(false, 0); root.classList.remove('hero-up'); root.removeAttribute('data-hero-wait');
+      /* a page that goes before it ever showed leaves the first paint's words where they were: they step out with it */
+      if (first) { taking.disconnect(); first.classList.remove('is-on'); }
+      /* the visitor left during the load (the bar is up, so they can): the load screen ends now and the next page shows */
+      if (root.classList.contains('plaza-hold')) dispatchEvent(new Event('plaza-assembled'));
+    };
+    /* the hero owns the screen: the footer steps out while it shows and comes back on any other page (css world-pages.css) */
+    function chrome() { if (gone || page.hidden || page.classList.contains('portal-gone')) root.removeAttribute('data-portal-ring'); else root.setAttribute('data-portal-ring', ''); }
+    new MutationObserver(chrome).observe(page, { attributes: true, attributeFilter: ['hidden'] }); chrome();
+    var drawn = false, gone = false;
+    sub('segments', function (d, from) {
+      if (from !== 'portal') return;
+      /* a document with the hero camera says where it draws the portal; one before it (no HEROIN) holds the portal on the centre */
+      PORTAL_AT = d.portalAt || (d.heroIn ? PH.NOW : { x: .5, y: .4765, R: .3228 });
+      loadStops = Array.isArray(d.stops) && d.loadStart && d.heroIn ? d.stops : null; loadStart = d.loadStart || null;
+      if (heroOn) heroSet(true, 0, loading);
+    });
+    /* where the ring stands on screen is kept per viewer, so the next visit's outline (the ghost below) starts on the right place */
+    sub('ring', function (r, from) { if (from !== 'portal') return; try { localStorage.setItem('defxn-portal-ring', JSON.stringify({ x: r.x, y: r.y, r: r.r, w: innerWidth, h: innerHeight })); } catch (x) { /* only a convenience */ } });
+    /* a frame that has drawn can take asks: a rest that is wanted (a fresh rest frame, or a load nobody watched) is asked for now, twice */
+    sub('drawn', function (d, from) { if (from !== 'portal') return; drawn = true; page.classList.add('portal-drawn'); if (wantRest) askRest(3); });
+    sub('held', function (h, from) {
+      if (from !== 'portal') return;
+      /* HEROIN held (after the load's last stop), PORTALIN held (a document with no stops) or PORTALREST held (a move inside the site, reduced motion): the
+         portal stands closed and still as the hero. Nothing plays after this. */
+      /* (with reduced motion HEROIN is the answer to ?hold=, and the loader ends by its own cross-fade once the frame has drawn) */
+      if (h === 'PORTALIN' || (h === 'HEROIN' && playedIn)) { if (!still()) dispatchEvent(new Event('plaza-assembled')); portalReady(); return; }
+      /* THE ?hold= FRAME IS NOT RELIED ON (seen 2026-11-11 in the FXN Browser, three times: a fresh frame asked ?hold=HEROIN showed the plaza, once
+         with the mark and once without, and once answered `drawn` with no `held` at all; the same frame asked for frame 2763 by range a minute
+         later showed the hero). site-view checks the held name against the document before the document has finished loading, so the hold can
+         be dropped. And with motion on, an ask sent in the same moment as that answer got no reply at all (seen twice: the frame stayed hidden for
+         good, while the same ask a minute later was answered at once), so something in the frame takes the player's turn just after it draws.
+         So the hero's rest is asked for by name once the frame has drawn (askRest, from the `drawn` listener above), three times, 600 ms apart,
+         each on its own clock and never waiting for the answer before it; the frame stays out of sight meanwhile (html[data-hero-wait]) and
+         the stone links wait for the answer to the LAST ask. ASK FOR THE 3D LANE: make ?hold= wait for the loaded document and hold; then one ask is enough */
+      if (h === 'HEROIN' || h === 'PORTALREST') { if (!wantRest) holdHero(3); return; }
+      /* the hero's rest frame, the answer to the last ask of askRest(): drawn, so the stone links may show */
+      if (/^HEROREST/.test(h)) { if (wantRest && h === restFinal) { wantRest = false; portalReady(); } return; }
+      /* the frame opened on the empty ground itself (?hold=LOADSTART, a document with the load stops): once the studio has drawn it the loader may go
+         live onto it. Nothing else has been drawn, so no plaza shows under the see-through loader first.
+         THE 150 ms IS NEEDED BY THE FRAME, NOT BY THE PICTURE (2026-11-11, speed lane 1, measured in the FXN Browser). With two animation frames
+         in its place the loader went live 29 ms after this answer and asked for stop 0 at once: the frame never answered `held stop:0`, the
+         loader's 3 s ceiling ran out, and the film stood on the empty ground for 3.2 s (stops 1 to 14 then played on the clock). With 150 ms the
+         first ask is answered (the build node's five loads, and the walk after this was put back). It is the defect named above ("an ask sent in
+         the same moment as that answer got no reply at all"). ASK FOR THE 3D LANE: site-view must answer a range asked right after `held` with
+         `drawn`; then this wait can be two animation frames (about 120 ms sooner into the film).
+         THE FRAME WAS FIXED, SO THE WAIT IS TWO ANIMATION FRAMES (2026-11-11, speed lane 2C). Cause of the lost answer: the studio's load counts
+         reached site-view's ask listener and ended the range that was playing (fxn-3d world/site-view/index.html, "ONLY THE PAGE THAT FRAMES THIS
+         VIEW ASKS"). With that fixed a range asked one frame after `held` is answered every time (20 of 20 cold loads on the build node). Two
+         frames, so the frame's picture is on screen before the loader goes see-through onto it. A page that gets no animation frames (a tab
+         opened in the background) starts by the old 150 ms clock instead, whichever comes first, once */
+      if (h === 'LOADSTART') {
+        var begun = false, begin = function () { if (begun) return; begun = true; if (rested || gone) return; dispatchEvent(new Event('plaza-drawn')); if (!window.ArkPlazaStops && loadStops) post({ range: loadStops[0], tag: 'stop:0' }); };
+        requestAnimationFrame(function () { requestAnimationFrame(begin); }); setTimeout(begin, 150); return; }
+      /* THE LOAD AS STOPS (portal101r110; fxn-3d geometry.mjs PLAZASTOPS): a document that has them opens on the empty ground (LOADSTART) and each stop
+         is played alone when its load has landed. The loader owns that (window.ArkPlazaStops true: it posts { range: stops[n], tag: 'stop:' + n }
+         itself). With no owner the stops play here, one after another, never two at once. Enter waits for the last one (stopsDone) */
+      if (/^stop:/.test(h)) { stopAt = +h.slice(5) + 1; if (stopAt >= loadStops.length) { if (enterWaits) { enterWaits = false; heroIn(); } } else if (!window.ArkPlazaStops) post({ range: loadStops[stopAt], tag: 'stop:' + stopAt }); return; }
+      if (h === 'PLAZAREST' && loadStops && !still()) {
+        /* the frame steps to the empty ground, and 150 ms later (the studio has drawn it) the loader may go see-through onto it */
+        post({ frame: loadStart[0] }); setTimeout(function () { dispatchEvent(new Event('plaza-drawn')); if (!window.ArkPlazaStops) post({ range: loadStops[0], tag: 'stop:0' }); }, 150); return; }
+      /* r2 (never blank): the loader's own still reveals the plaza from the first paint while the studio loads, so the portal frame opens on
+         PLAZAREST, the frame that still ends on, and the loader goes see-through onto it with no jump */
+      if (h === 'PLAZAREST') { dispatchEvent(new Event('plaza-drawn')); return; }
+    });
+    /* the GPU dropped the portal's context: the stage loads the hero's portal once more */
+    sub('lost', function (d, from) { if (from !== 'portal') return; drawn = false; page.classList.remove('portal-drawn'); setTimeout(function () { if (!page.hidden && !gone) freshRest(true); }, 1000); });
+
+    /* THE HOME HERO (owner 2026-11-11; fxn-3d docs/design/direction/portal-101/NOTES.md "The load board and the home hero"). The portal holds on the right
+       (its centre at HERO.x of the width) and the words stand on the left; on a 4:3 or narrow view the portal stands above and the words below. The
+       portal frame is moved by one CSS transform (css/world-pages.css --hero-t), eased over the film that plays under it (PORTALIN in),
+       so the camera's move and the frame's move read as one. PORTAL_AT is where the document's own portal hold stands in the drawn frame: its centre
+       as shares of the frame's width and height, and its outer radius as a share of the frame's height (measured on portal101r109 at 1440 x 900; a
+       document whose camera already aims the portal to the right posts its own, and the shift it needs is then zero). The frame is drawn no narrower
+       than 1.6:1 and scaled to the width (fxn-3d portal101 MIN_ASPECT) */
+    /* the arithmetic of both places (the hero's, and the load's in the portal's place) is js/loader-plaza.js ArkPlazaHero, shared with the first paint */
+    var PH = window.ArkPlazaHero, HERO = PH.HERO, PORTAL_AT = PH.NOW, heroOn = false, loading = false;
+    var loadStops = null, loadStart = null, stopAt = 0, enterWaits = false, rested = false, wantRest = false, restSeq = 0, restFinal = '', playedIn = false;
+    /* asks the frame for the hero's rest by the range's NAME, so the site holds no frame number: HEROIN at a rate that reaches its last frame on the
+       first step, answered by `held HEROREST<n>` (a document without HEROIN answers the same tag with missing, and the frame it holds is its rest).
+       times: how many asks, 600 ms apart, each sent on the clock; only the answer to the last one (restFinal) counts */
+    function askRest(times) {
+      var tag = 'HEROREST' + (++restSeq); restFinal = times > 1 ? '' : tag;
+      post({ play: 'HEROIN', tag: tag, rate: 9600 });
+      if (times > 1) setTimeout(function () { if (!gone && wantRest) askRest(times - 1); }, 600);
+    }
+    /* a fresh frame asked to hold the rest stays out of sight until the rest frame has really been drawn (css/world-pages.css html[data-hero-wait]);
+       the ask itself goes out when the frame says it has drawn */
+    function freshRest(reload) { wantRest = true; rested = true; root.setAttribute('data-hero-wait', ''); heroSet(true, 0); page.classList.remove('hero-veil'); return stage.showPortal({ hold: REST, reload: !!reload }); }
+    /* THE HERO'S REST (audit F02, 2026-11-11: an empty ground with no portal). The hero-only document (portal101r112h3) has no PORTALREST: its rest is
+       the LAST frame of HEROIN. REST asks site-view for that frame and falls back to PORTALREST on a document before it (?hold=A.B holds the first
+       name the document has). Every path that shows the hero without the load holds it: reduced motion, a visit inside the site, a restored page,
+       a load nobody watched */
+    var REST = 'HEROIN.PORTALREST';
+    /* Enter at the loader: the plaza's stones lift into the portal (HEROIN from the load's last stop) while the frame moves from the load's place to
+       the hero's. A document with no load stops has no film to play, so the hero stands at once */
+    function heroIn() { if (gone || page.hidden) return; if (loadStops) { playedIn = true; heroSet(true, 2250); post({ play: 'HEROIN' }); } else portalReady(); }
+    /* the hero with no film: the frame takes its hero place at once and is asked for the rest frame; `held HEROREST` then shows the stone links.
+       A frame that has not drawn yet cannot hear the ask: it is asked again when it draws (the `drawn` listener) */
+    function holdHero(asks) {
+      if (gone) return;
+      rested = true; enterWaits = false; wantRest = true; heroSet(true, 0); page.classList.remove('hero-veil');
+      askRest(asks || 1);
+    }
+    function stacked() { return PH.stacked(); }
+    function heroWant() { return PH.hero(PORTAL_AT, words.offsetHeight); }
+    /* load: true = the load's place (the plaza small, in the portal's place); the same call without it is the hero's place */
+    function heroSet(on, ms, load) {
+      heroOn = on; loading = !!(on && load); root.style.setProperty('--hero-ms', (ms || 0) + 'ms');
+      if (!on) { root.removeAttribute('data-hero'); return; }
+      page.classList.toggle('hero-stack', stacked());   /* first, so the words' own height is the stacked one */
+      var w = heroWant(), t = loading ? PH.load(PORTAL_AT, words.offsetHeight) : w; page.classList.toggle('hero-stack', w.stack);
+      if (loading) { page.style.setProperty('--veil-solid', t.solid + 'px'); if (PH.placeLoad) PH.placeLoad(PORTAL_AT, words.offsetHeight); }   /* the veil over the frame and the drawn ground of the load screen fade over the same pixels */
+      root.style.setProperty('--hero-t', 'translate(' + t.dx + 'px, ' + t.dy + 'px) scale(' + t.k + ')'); root.setAttribute('data-hero', loading ? 'load' : '');
+      /* the cut edge of the moved frame: its left edge when the portal stands right, its lower edge (under the words) when stacked */
+      if (w.stack) Object.assign(edge.style, { left: '0', right: '0', top: (w.low - 96) + 'px', bottom: '0', width: '' });
+      else Object.assign(edge.style, { left: '0', top: '0', bottom: '0', right: '', width: (w.dx + 96) + 'px' });
+    }
+    /* THE STONE WORDS (owner reference, 2026-11-11): one HTML word over each of the portal's twelve stones, a plain link to that topic's page.
+       The hero document posts no place for a stone, so each word stands on fixed shares of the drawn frame, measured on the held hero at
+       1440 x 900: the stones' ring is a circle on screen, its centre STONE.cx of the frame height right of HERO.x and STONE.cy of it above the
+       middle, the words STONE.R of it from that centre, one every 30 degrees clockwise from the top. The topics and their order are
+       ArkSitePages.topics(), the words the ring's own copy (HOME.LANDING.RING.S<n>). Placed once the hero has settled and again on a
+       resize, never per frame, so a word cannot jitter. Hidden when stacked (css) */
+    var STONE = { R: .24, cx: .0096, cy: -.07 }, stoneLinks = null;
+    function stonesBuild() {
+      if (stoneLinks || typeof ArkSitePages === 'undefined') return;
+      stoneLinks = ArkSitePages.topics().slice(0, 12).map(function (t, i) {
+        var name = copy('RING.S' + (i + 1)), a = node('a', 'intro-stone mono', name);
+        a.href = ArkUI.route.href(t.path); a.setAttribute('aria-label', name); a.setAttribute('data-scene-link', t.key);
+        stones.appendChild(a); return a;
+      });
+    }
+    function stonesPlace() {
+      if (!stoneLinks) return;
+      var W = innerWidth, H = innerHeight, Hd = Math.min(H, W / 1.6), cx = HERO.x * W + STONE.cx * Hd, cy = H / 2 + STONE.cy * Hd;
+      stoneLinks.forEach(function (a, i) {
+        var t = i * Math.PI / 6;
+        a.style.left = Math.round(cx + STONE.R * Hd * Math.sin(t)) + 'px'; a.style.top = Math.round(cy - STONE.R * Hd * Math.cos(t)) + 'px';
+      });
+    }
+    addEventListener('resize', function () { if (heroOn && !gone && !page.hidden) { heroSet(true, 0, loading); stonesPlace(); } });
+    /* a page restored from the browser's back-forward cache stands as it was left: the hero is asked to hold its rest frame again */
+    addEventListener('pageshow', function (e) { if (e.persisted && !gone && !page.hidden && !root.classList.contains('plaza-hold')) holdHero(1); });
+    /* the hero stands: the words are placed from their measured height, the portal is drawn, and the lazy loads that wait for the hero (js/lib/frame.js ArkFrame.afterHero) may start */
+    function portalReady() {
+      if (gone || absent) return;
+      root.removeAttribute('data-hero-wait');
+      heroSet(true, 0);   /* the same place again, now with the words' measured height */
+      page.classList.add('portal-view', 'portal-drawn'); page.classList.remove('opening', 'hero-veil'); chrome(); drawn = true;
+      stonesBuild(); stonesPlace(); page.classList.add('stones-on');
+      window.dispatchEvent(new Event('ark-hero-settled'));
+    }
+    /* the first show (owner 2026-11-10, "stop the auto animate"): under the loading screen (js/loader-plaza.js, html.plaza-hold) the portal frame opens
+       on the empty ground (LOADSTART, or the plaza at rest on a document without the load stops), in the load's place, with the veil over its edges;
+       the loader plays the stops and its plaza-open lifts the stones into the portal (HEROIN), which then holds as the hero. With reduced motion, or
+       with no loading screen, the page opens on the hero's rest frame (REST), already in its hero place. The 20 s missing check starts with it */
+    function showFirst() {
+      var plaza = root.classList.contains('plaza-hold') && !still();
+      if (plaza) { heroSet(true, 0, true); page.classList.add('hero-veil'); stage.showPortal({ hold: PH.LOAD_HOLD }); } else freshRest();
+      setTimeout(missing, 20000);
+      /* HEROIN's camera eases over its first 54 frames (2.25 s at 24 a second); the frame's move takes the same time on the same curve (heroIn).
+         A load that was not played (a tab nobody looked at, a studio that answered late: the loader says ArkPlazaSkipped) has no lift to show:
+         the hero holds its rest frame */
+      if (plaza) addEventListener('plaza-open', function () {
+        if (gone) return;
+        if (window.ArkPlazaSkipped || document.hidden) { holdHero(2); return; }
+        if (loadStops && stopAt < loadStops.length) { enterWaits = true; if (window.ArkPlazaStops) return; } else heroIn();
+      }, { once: true });
+    }
+    /* a visit inside the site (the mark, the Home link, the browser's Back from a page): a frame the stage kept is asked for the hero's rest frame, whatever
+       it showed when the visitor left (it may have been mid-load); a frame the stage lost or never had is loaded again on that frame. The words stand
+       at once; the stone links wait for the frame's answer */
+    var returning = stage.portal().exists || stage.current === 'topic';
+    if (!returning) showFirst();
+    else {
+      if (stage.portal().alive) { heroSet(true, 0); stage.showPortal({ hold: REST }); drawn = true; Promise.resolve().then(function () { holdHero(1); }); }
+      else { freshRest(true); setTimeout(missing, 20000); }
+    }
 
     /* NEVER BLANK (owner, 2026-11-09: "first it is blank and then the object shows up"). While the studio loads, a mint outline of
        the ring draws itself at once where the ring will stand: the last place the studio reported (kept per viewer), else its usual
        place at this aspect (measured at 1440x900: centre .788, .447 of the view, radius .1417 of its width). When the studio has drawn,
-       the outline fades and the 3D portal builds itself (fxn-3d portal101 BUILD, played by site-view). */
+       the outline fades. */
     var NS = 'http://www.w3.org/2000/svg', ghost = document.createElementNS(NS, 'svg'), gc = document.createElementNS(NS, 'circle'), gi = document.createElementNS(NS, 'circle');
     ghost.setAttribute('class', 'intro-portal-ghost'); ghost.setAttribute('aria-hidden', 'true');
     gc.setAttribute('class', 'outer'); gi.setAttribute('class', 'inner'); ghost.append(gc, gi); page.appendChild(ghost);
@@ -190,232 +373,34 @@
     var kept = null; try { kept = JSON.parse(localStorage.getItem('defxn-portal-ring') || 'null'); } catch (e) { kept = null; }
     ghostAt(kept && kept.w === innerWidth && kept.h === innerHeight ? kept : { x: innerWidth * .788, y: innerHeight * .447, r: innerWidth * .1417 });
 
-    /* THE DIVE (owner, 2026-11-09: "clicking on the portal and it zooms in like your camera goes inside of it as it glitches
-       different words insanely fast, then it shows the underground DEFXN world"). The ring is a button over the ring's own place on
-       screen (the studio reports it, js: site-view ring). A press: the view pushes into the ring's centre, words flicker over it
-       every 40 ms, a mint flash, and the portal is gone: the frame is emptied (its GPU context goes), the world is released and
-       its intro film plays. That world is the network under the city, DEFXN. The words are the site's own journeys and pages
-       (js/content/site-pages.js), never a list written here. Reduced motion: no push and no flicker, a cross-fade only. */
-    var ring = node('button', 'intro-portal-ring'); ring.type = 'button'; ring.hidden = true;
-    ring.setAttribute('aria-label', copy('PORTAL.DIVE'));
-    var glitch = node('div', 'intro-portal-glitch'); glitch.setAttribute('aria-hidden', 'true');
-    var flash = node('div', 'intro-portal-flash'); flash.setAttribute('aria-hidden', 'true');
-    page.append(ring, glitch, flash);
-    var at = null, gone = false, below = '', retriedBelow = false, timer = 0;
-    function ringAt(r) {
-      at = r; ring.hidden = gone;
-      Object.assign(ring.style, { left: (r.x - r.r) + 'px', top: (r.y - r.r) + 'px', width: 2 * r.r + 'px', height: 2 * r.r + 'px' });
+    function post(msg) { stage.post(msg, 'portal'); }
+    /* this host has no 3D frame at all (ArkUI.stage.ready answered false): the portal steps aside at once and the words stay. No stone links: they
+       name places on a portal that is not drawn; the bar's menus reach the same twelve pages */
+    var absent = false;
+    stage.ready.then(function (ok) { if (!ok) { absent = true; missing(); } });
+    /* the 3D source is there but never draws: after 20 s the portal steps aside and the words stay */
+    function missing() {
+      if (drawn || gone || page.hidden) return;
+      page.classList.add('portal-gone', 'portal-missing'); page.classList.remove('hero-veil'); root.removeAttribute('data-hero-wait'); stage.off(); chrome();
+      window.dispatchEvent(new Event('ark-hero-settled'));
     }
-    function wordsOf() {
-      var P = window.ArkSitePages, list = [];
-      if (P) { P.journeys().forEach(function (j) { list.push(j.title); }); P.pages().forEach(function (p) { list.push(p.short || p.label); }); }
-      String(copy('PORTAL.HEADLINE')).split(/[\s,.]+/).forEach(function (w) { if (w.length > 2) list.push(w); });
-      return list.map(function (w) { return String(w).toUpperCase(); });
-    }
-    /* THE CUT (owner, 2026-11-09: "the portal motion glitch is lame, it doesn't fit with the 3D at all... do hard cuts"). A press
-       pushes into the ring for 0.45 s, then a hard cut to black. The same frame loads the cinema behind the black (one studio context
-       at a time), and a hard cut shows it when it has drawn. No glitch film, no tear, no flickering words. */
-    function dive() {
-      if (gone || !drawn) return;
-      if (segs && frame.contentWindow) {   /* the ring view: the portal itself becomes the menu */
-        gone = true; ring.hidden = true; page.classList.add('ring-view'); document.documentElement.setAttribute('data-portal-ring', '');
-        frame.contentWindow.postMessage({ play: 'RINGVIEW' }, 'http://127.0.0.1:3440');
-        return;
-      }
-      gone = true; ring.hidden = true; page.classList.add('portal-diving');
-      var still0 = still(), cx = at ? at.x : innerWidth * .7, cy = at ? at.y : innerHeight * .45;
-      frame.style.transformOrigin = cx + 'px ' + cy + 'px';
-      var push = still0 ? null : frame.animate([{ transform: 'scale(1)' }, { transform: 'scale(2.4)' }], { duration: 450, easing: 'cubic-bezier(.6,0,1,.4)', fill: 'forwards' });
-      setTimeout(function () {
-        if (push) push.cancel();
-        drawn = false; page.classList.remove('portal-drawn', 'portal-diving'); page.classList.add('portal-gone'); hold();
-        below = 'loading'; frame.style.transformOrigin = ''; frame.src = UNDERGROUND_VIEW;
-      }, still0 ? 0 : 450);
-    }
-    /* THE CINEMA WORDS (owner, 2026-11-09: "fast kinetic FXN Motion aligned with the object"). The underground plays one shot per
-       object (fxn-3d world/underground SHOTS); site-view passes the shot on screen and the object's anchor. Each shot gets the object's
-       name and one line that names what it just did (HOME.LANDING.CINE.<ID>.NAME and .LINE), pinned beside the object. The letters
-       spring in one by one on the letter spring (--ease-letter) and cut out with the camera's cut. Reduced motion: no letter motion. */
-    var cineBox = node('div', 'intro-cine'); cineBox.setAttribute('aria-live', 'polite'); page.appendChild(cineBox);
-    var cineId = null, cineEl = null;
-    function letters(text) {
-      var line = node('p', 'intro-cine-line'), i = 0;
-      String(text).split(' ').forEach(function (word, w) {
-        var wd = node('span', 'w');
-        Array.prototype.forEach.call(word, function (ch) { var c = node('span', 'c', ch); c.style.setProperty('--i', i++); wd.appendChild(c); });
-        line.appendChild(wd); if (w) line.insertBefore(document.createTextNode(' '), wd);
-      });
-      return line;
-    }
-    function cine(shot) {
-      if (shot.id !== cineId) {
-        if (cineEl) { var old = cineEl; old.classList.add('out'); setTimeout(function () { old.remove(); }, 240); }
-        cineId = shot.id; cineEl = null;
-        if (!shot.id) return;
-      }
-      /* the words come after the object acts (site-view reports acted), never before it */
-      if (shot.id && !cineEl && shot.acted && shot.id === cineId) {
-        var key = 'CINE.' + String(shot.id).toUpperCase(), name = copy(key + '.NAME'), text = copy(key + '.LINE');
-        if (!text || text.indexOf('CINE.') >= 0) return;
-        cineEl = node('div', 'intro-cine-shot');
-        cineEl.append(node('p', 'intro-cine-name mono', name), letters(text));
-        cineBox.appendChild(cineEl);
-      }
-      if (!cineEl) return;
-      /* beside the object: the words end left of it, on its height; when the object stands too far left, they sit under it */
-      var w = Math.min(560, innerWidth * .4), gap = Math.min(shot.r, 260) + 32, right = shot.x - gap, left = right - w;
-      if (left < 48) { left = Math.max(48, Math.min(innerWidth - w - 48, shot.x - w / 2)); cineEl.style.top = Math.min(innerHeight - 220, shot.y + Math.min(shot.r, 260) + 24) + 'px'; }
-      else cineEl.style.top = Math.max(96, shot.y - 60) + 'px';
-      cineEl.style.left = left + 'px'; cineEl.style.width = w + 'px';
-    }
-    /* THE RING MENU (owner, 2026-11-09: "when you click the portal everything animates, then only the portal is visible as a full
-       circle, and each part of that portal is a click that takes you to a cinematic intro to the objects"). Portal 101's RINGVIEW
-       holds the ring square-on; its SEGMENTS (fxn-3d portal101 geometry.mjs: centre angle on screen, 0 = top, clockwise, and width)
-       place one click area over each stone. TOPIC maps a segment to the film shot that explains it (world/underground SHOTS id); the
-       FXN ID has no object yet. Names: HOME.LANDING.RING.<n>. A click opens that one shot, and its end returns to the held ring. */
-    /* 12 stones once the ring has closed; a stone's place on the ring (its screen angle / 30) picks its topic. The bottom stone is
-       the game. TOPIC gives the film shot that explains it (world/underground SHOTS id); null = no film yet. */
-    var TOPIC = ['fxnid', 'recordline', 'keeperring', 'keepertower', 'chaindrum', null, null, 'markgate', 'bundlepress', 'multisiglock', 'bridgespan', 'networkwall'];
-    var segs = null, menu = null, topic = null, ringSel = null, ringOpen = null, ringView = null, ringSpawn = null, hovered = -1;
-    var soon = node('p', 'intro-ring-soon mono', copy('RING.SOON')); page.appendChild(soon);
-    var tag = node('p', 'intro-ring-tag mono'); page.appendChild(tag);
-    var SVGNS = 'http://www.w3.org/2000/svg';
-    function arcPath(cx, cy, r0, r1, a, w) {
-      var p = function (r, deg) { var t = (deg - 90) * Math.PI / 180; return (cx + r * Math.cos(t)).toFixed(1) + ' ' + (cy + r * Math.sin(t)).toFixed(1); };
-      var a0 = a - w / 2, a1 = a + w / 2, big = w > 180 ? 1 : 0;
-      return 'M' + p(r1, a0) + ' A' + r1 + ' ' + r1 + ' 0 ' + big + ' 1 ' + p(r1, a1) + ' L' + p(r0, a1) + ' A' + r0 + ' ' + r0 + ' 0 ' + big + ' 0 ' + p(r0, a0) + ' Z';
-    }
-    function post(msg) { if (frame.contentWindow) frame.contentWindow.postMessage(msg, 'http://127.0.0.1:3440'); }
-    function slot(sg) { var ang = sg.at != null ? sg.at : sg.angle; return ((Math.round(ang / 30) % 12) + 12) % 12; }
-    /* the stone itself answers: SELECT[n] slides it out and lights it (fxn-3d portal101); leaving returns the held ring frame */
-    var opening = false;
-    /* the object that came to the centre stays there while the pointer travels from its stone into the centre, so it can be
-       clicked there (owner, 2026-11-09: "I hover, it shows, I go down to click, it goes out again"). Leaving waits a moment; the
-       centre or another stone cancels the wait. */
-    var releaseTimer = 0, current = null;
-    function release(sg) { clearTimeout(releaseTimer); releaseTimer = setTimeout(function () { if (current === sg) { current = null; select(sg, false); } }, 220); }
-    function keep() { clearTimeout(releaseTimer); }
-    function select(sg, on) {
-      var n = sg.n;
-      if (opening) return;   /* a click is transforming the object: no hover answer may run over it */
-      if (on) { keep(); if (current && current !== sg) { var was = current; current = null; select(was, false); } current = sg; }
-      if (on) {
-        hovered = n; var k = slot(sg), ang = (sg.at != null ? sg.at : sg.angle);
-        tag.textContent = copy('RING.S' + (k + 1));
-        var t = (ang - 90) * Math.PI / 180, lr = at.r * 1.5; tag.style.left = (at.x + lr * Math.cos(t)) + 'px'; tag.style.top = (at.y + lr * Math.sin(t)) + 'px';
-        if (ringSel && ringSel[n]) post({ range: ringSel[n], tag: 'sel:' + n });
-      } else if (hovered === n) {
-        hovered = -1; page.classList.remove('tag-on');
-        /* the object goes back to its stone: SELECT played in reverse; with no SELECT, the held frame */
-        if (ringSel && ringSel[n]) post({ range: [ringSel[n][1], ringSel[n][0]], tag: 'unsel:' + n });
-        else if (ringSpawn) post({ frame: ringSpawn[1] }); else if (ringView) post({ frame: ringView[1] });
-      }
-    }
-    function showMenu() {
-      if (!segs || !at) return;
-      if (menu) menu.remove();
-      menu = document.createElementNS(SVGNS, 'svg'); menu.setAttribute('class', 'intro-ring-menu');
-      menu.setAttribute('viewBox', '0 0 ' + innerWidth + ' ' + innerHeight);
-      segs.forEach(function (sg) {
-        var k = slot(sg), ang = sg.at != null ? sg.at : sg.angle;
-        var g = document.createElementNS(SVGNS, 'a'); g.setAttribute('href', '#'); g.setAttribute('aria-label', copy('RING.S' + (k + 1)));
-        var path = document.createElementNS(SVGNS, 'path'); path.setAttribute('d', arcPath(at.x, at.y, at.r * .68, at.r * 1.75, ang, (sg.width || 30) - 1));   /* the word inside the ring, the stone and its object pushed out past it: one door (owner, 2026-11-09: hovering the name brings the object in too) */
-        g.appendChild(path);
-        /* the topic's word on its stone at rest, just inside the ring (audit fix 6): every door says what it opens */
-        var tr = (ang - 90) * Math.PI / 180, word = document.createElementNS(SVGNS, 'text');
-        word.setAttribute('x', (at.x + at.r * .8 * Math.cos(tr)).toFixed(1)); word.setAttribute('y', (at.y + at.r * .8 * Math.sin(tr)).toFixed(1));
-        word.setAttribute('text-anchor', 'middle'); word.setAttribute('dominant-baseline', 'middle'); word.textContent = copy('RING.S' + (k + 1));
-        g.appendChild(word);
-        /* its micro object (SEGMENTS micro: screen centre and radius, 0 to 1 of the frame) is the same door */
-        if (sg.micro) { var c = document.createElementNS(SVGNS, 'circle'); c.setAttribute('cx', (sg.micro.x * innerWidth).toFixed(1)); c.setAttribute('cy', (sg.micro.y * innerHeight).toFixed(1)); c.setAttribute('r', Math.max(18, sg.micro.r * innerHeight * 1.2).toFixed(1)); g.appendChild(c); }
-        g.addEventListener('pointerenter', function () { if (current !== sg) select(sg, true); else keep(); });
-        g.addEventListener('pointerleave', function () { release(sg); });
-        g.addEventListener('focus', function () { if (current !== sg) select(sg, true); });
-        g.addEventListener('blur', function () { release(sg); });
-        sg._open = function () {
-          if (!TOPIC[k]) { page.classList.add('topic-soon'); setTimeout(function () { page.classList.remove('topic-soon'); }, 1600); return; }
-          page.classList.remove('tag-on');
-          if (ringOpen && ringOpen[sg.n] && !still()) { opening = true; if (menu) menu.style.pointerEvents = 'none'; post({ range: ringOpen[sg.n], tag: 'open:' + k }); }
-          else openTopic(k);
-        };
-        g.addEventListener('click', function (e) { e.preventDefault(); sg._open(); });
-        menu.appendChild(g);
-      });
-      /* the centre: the object that came in is clicked here */
-      var mid = document.createElementNS(SVGNS, 'circle'); mid.setAttribute('class', 'centre');
-      mid.setAttribute('cx', at.x); mid.setAttribute('cy', at.y); mid.setAttribute('r', (at.r * .66).toFixed(1));
-      mid.addEventListener('pointerenter', function () { if (current) keep(); });
-      mid.addEventListener('pointerleave', function () { if (current) release(current); });
-      mid.addEventListener('click', function (e) { e.preventDefault(); if (current && current._open) current._open(); });
-      menu.appendChild(mid);
-      page.appendChild(menu); page.classList.add('menu-on');
-    }
-    var pending = null;
-    function swapTo(src, then) {
-      if (pending) pending.remove();
-      pending = node('iframe', 'intro-portal-stage intro-portal-next'); pending.title = ''; pending.setAttribute('aria-hidden', 'true'); pending.tabIndex = -1;
-      pending._then = then; page.insertBefore(pending, frame); pending.src = src;
-    }
-    function openTopic(i) {
-      var id = TOPIC[i];
-      if (!id) { page.classList.add('topic-soon'); setTimeout(function () { page.classList.remove('topic-soon'); }, 1600); return; }
-      topic = id; page.classList.remove('menu-on', 'tag-on'); if (menu) menu.remove(); menu = null;
-      swapTo('http://127.0.0.1:3440/world/site-view/index.html?o=underground&shot=' + id, function () {
-        drawn = false; below = 'in'; page.classList.add('portal-gone', 'in-underground');
-      });
-    }
-    function backToRing() {
-      topic = null; opening = false;
-      if (cineEl) { cineEl.remove(); cineEl = null; } cineId = null;
-      swapTo(portalView() + '&hold=' + (ringSpawn ? 'SPAWN' : 'RINGVIEW'), function () {
-        below = ''; page.classList.remove('in-underground', 'portal-gone'); page.classList.add('portal-drawn'); drawn = true; showMenu();
-      });
-    }
-    function arrive() {
-      below = 'in';
-      page.classList.add('in-underground');   /* a hard cut: no flash, no fade */
-      dispatchEvent(new CustomEvent('ark-portal-entered'));
-    }
-    /* THE QUESTION (owner, 2026-11-09: "you just get the cinematic run quickly and then you get a question to answer"). When the
-       cinema ends (site-view reports cinemaEnd from the scene's own CINEMA range), a hard cut to the question. Words:
-       HOME.LANDING.PORTAL.ASK*. The owner shapes what follows it. */
-    var ask = node('div', 'intro-ask'); ask.hidden = true;
-    var askQ = node('p', 'intro-ask-q', copy('PORTAL.ASK'));
-    var askYes = node('a', 'intro-ask-yes mono', copy('PORTAL.ASK.YES')); askYes.href = '/auth'; askYes.setAttribute('data-scene-link', 'auth');
-    var askNo = node('a', 'intro-ask-no mono', copy('PORTAL.ASK.NO')); askNo.href = '/'; askNo.setAttribute('data-scene-link', 'zero');
-    var askRow = node('div', 'intro-ask-row'); askRow.append(askYes, askNo); ask.append(askQ, askRow); page.appendChild(ask);
-    function question() {
-      if (!ask.hidden) return;
-      ask.hidden = false; page.classList.add('asking');
-      frame.src = 'about:blank';   /* the cinema's GPU context goes */
-      try { askYes.focus({ preventScroll: true }); } catch (e) { /* focus is a convenience */ }
-    }
-    ring.addEventListener('click', dive);
-    /* no studio on 3440, or it never draws: after 20 s the portal steps aside and the words stay */
-    setTimeout(function () {
-      if (drawn || gone) return;
-      gone = true; ring.hidden = true; page.classList.add('portal-gone', 'portal-missing'); frame.src = 'about:blank';
-    }, 20000);
   }
 
+
   ArkUI.pageModules.intro = {
-    unmount: function () { playing(false); },
+    unmount: function () { document.documentElement.removeAttribute('data-intro'); },
     mount: function (host) {
       var page = node('section', 'world-page intro-world');
+      /* the section is named by the headline, the page's one h1 (addPortal; audit F12: the h1 was a hidden word) */
       page.setAttribute('aria-labelledby', 'intro-title');
       var stage = node('div', 'intro-stage'); stage.setAttribute('data-stage', '');
       /* no [data-panel]: the world draws its glass page slab behind that box, and the intro has no card any more (a
          full-width slab drew a hard line across the screen) */
-      var title = node('h1', 'intro-title'); title.id = 'intro-title'; title.textContent = copy('TITLE');
-      /* "Replay intro": an 11 mono chip at the dock. Not the complement: the lit thing's chip owns it */
-      var again = node('button', 'intro-replay mono', copy('REPLAY')); again.type = 'button'; again.setAttribute('data-ui', '');
-      again.addEventListener('click', function () { played = false; window.dispatchEvent(new CustomEvent('ark-intro-replay')); });
-      page.appendChild(stage); page.appendChild(title); page.appendChild(again);
-      if (portalHere) addPortal(page);
+      page.appendChild(stage);
+      addPortal(page);
       /* the CMS's insertion point for reusable blocks (js/content/components.js): empty, and out of the layout */
       var anchor = node('div', 'world-insert'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);
       host.appendChild(page);
-      window.dispatchEvent(new CustomEvent('ark-intro-mount', { detail: { page: page, wanted: wanted() } }));
       return page;
     }
   };

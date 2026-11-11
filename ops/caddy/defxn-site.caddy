@@ -43,13 +43,125 @@ defxn.com, www.defxn.com {
 	# could be framed. The CSP is the pages' own (index.html's <meta>, the widest of them) less `file:`, plus
 	# frame-src 'self' for the CMS pages and frame-ancestors 'none'. The broker opens as a popup, never in a frame.
 	# FXN_WITNESS_CONNECT (empty by default) names the witness nodes the signing guard reads HEAD from.
+	#
+	# 2026-11-11: the CSP gained what index.html's <meta> has gained since: media-src 'self' and the two seats
+	# (wss://big1.devnet.defxn.com, wss://lax24.devnet.defxn.com). A browser enforces the header and the <meta>
+	# together, so a source missing here is blocked even when the page allows it.
+	# TO CONFIRM (owner): the loopback sources (http://127.0.0.1:4571 to 4575, :8766) are still served here. The four
+	# signing sites dropped theirs on 2026-11-05. Should defxn.com drop them at launch too?
+	# This block stays the first `header {` of the file, whole: ark-miner-cli ops/caddy/signing-site-headers.test.mjs
+	# reads it and requires HSTS, script-src 'self', frame-ancestors 'none', DENY and nosniff of every signing root.
 	header {
 		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-		Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; frame-src 'self'; connect-src 'self' https://gate.defxn.com http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com {$FXN_WITNESS_CONNECT:}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; media-src 'self'; frame-src 'self'; connect-src 'self' https://gate.defxn.com http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com wss://big1.devnet.defxn.com wss://lax24.devnet.defxn.com {$FXN_WITNESS_CONNECT:}; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 		X-Frame-Options "DENY"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "no-referrer"
 	}
+
+	# Site cut and launch deploy (2026-11-11). The root is now a cut's stage folder (scripts/cut-site.mjs, sent by
+	# ops/deploy-defxn-site.sh), which holds the 3D view at /fxn-3d/view/. The site frames that view from its own
+	# origin (js/ark/stage.js, BUNDLE_VIEW), and the block above refuses every frame. So the view's paths, and only
+	# they, get their own two headers. `defer` writes them when the answer is sent, after the block above has set
+	# its own, so the view's values are the ones that leave. The signing pages (/account, /broker.html) are not
+	# under /fxn-3d/view/ and keep the block above unchanged.
+	#
+	# @view: the 3D view's pages. The view is three pages deep, all under /fxn-3d/view/, so all three get these
+	# headers: the site frames view/index.html, which frames an object page (view/world/<object>/index.html), which
+	# frames the studio's canvas page (view/world/editor.html).
+	#
+	# 2026-11-11, launch blocker found by a rehearsal behind a real Caddy: this CSP had no frame-src, so the browser
+	# refused the object page's frame and no 3D drew. It also named ONE inline script by hash
+	# (DEFXN_VIEW_INLINE_SCRIPT), and each of the 13 object pages held its own inline module. That variable is gone:
+	# the export (fxn-3d scripts/site-view-export.mjs, "NO INLINE CODE IN A BUILT PAGE") now moves every inline
+	# script and handler of every view page into a file next to the page, so no hash is needed and a rebuild cannot
+	# break the 3D. scripts/cut-site.mjs (check view-csp) reads this block and refuses a cut whose view pages hold
+	# inline code or frame an address this CSP refuses.
+	#
+	# Each directive, with what the view's code does (read from the built view, not guessed):
+	#   default-src 'none'      nothing is allowed unless a line below names it. Workers, sockets, media, objects and
+	#                           manifests are used nowhere in the view, so none is named and each stays refused.
+	#   script-src 'self'       every script and module is a file of this site. No inline script, no handler
+	#                           attribute, no eval and no blob: or data: script is used.
+	#   style-src 'self' 'unsafe-inline'
+	#                           the pages hold <style> blocks and style attributes, and the view page adds <style>
+	#                           elements to the object page (hides its panel, feathers its edge). css/themes.css,
+	#                           css/page-layout.css and assets/kit/defxn-marks.data.css are files.
+	#   font-src 'self'         no view page loads a font file today: its three style sheets hold no @font-face.
+	#                           'self' stays so a face added as a file of this site loads. Page type's fonts are
+	#                           built from fetched bytes (engine/adapters/web-page-text.mjs, FontFace), which is a
+	#                           connect-src fetch.
+	#   img-src 'self' data: blob:
+	#                           data: for the pages' empty icon (href="data:,") and the two marks in
+	#                           defxn-marks.data.css. blob: for a picture decoded through an object URL when
+	#                           createImageBitmap is refused (js/render/world2-mesh.mjs imageOf). The engine's own
+	#                           pictures are fetched bytes turned into bitmaps, which is a connect-src fetch.
+	#   connect-src 'self'      every fetch is this site's own file: documents (edit/<doc>.<hash>.fxn.gz), mesh
+	#                           packs and stored files (edit/blob/), parts/parts.fxn, parts/index.fxn, engine data.
+	#   frame-src 'self'        the view page frames the object page, and the object page frames world/editor.html.
+	#   object-src 'none', base-uri 'none', form-action 'none'
+	#                           none is used. editor.html holds forms that never submit.
+	#   frame-ancestors 'self'  only this site frames the three pages. X-Frame-Options SAMEORIGIN says the same to a
+	#                           browser that reads the older header. The site's own CSP (first block) has
+	#                           frame-src 'self', which allows the outer frame.
+	# TO CONFIRM (owner): the signing-site header test reads the first block only and does not see this one.
+	@view path /fxn-3d/view/*
+	header @view {
+		Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+		X-Frame-Options "SAMEORIGIN"
+		defer
+	}
+
+	# Types (2026-11-11). With nosniff a browser runs a script or a module only when its type says JavaScript.
+	# Caddy types a file by its extension from Go's table and the node's /etc/mime.types, and sends NO Content-Type
+	# for an extension neither knows. .cjs is in neither, and the 3D view imports
+	# /fxn-3d/engine/grammar/flx-grammar-engine.cjs as a module. .mjs is in Go's table and is stated here so no
+	# node's mime file can change it. file_server keeps a Content-Type that is already set.
+	# The other kinds are fetched as bytes or text, where any type works. They are stated so every node answers the
+	# same. Nothing here sets Content-Encoding: the view fetches <doc>.fxn.gz and unpacks it itself, and `encode`
+	# leaves application/octet-stream alone. Never add `precompressed` to this block.
+	@moduleFiles {
+		path *.mjs *.cjs
+		not path /api/* /admin*
+	}
+	header @moduleFiles Content-Type "text/javascript; charset=utf-8"
+	@recordText {
+		path *.fxn *.flx
+		not path /api/* /admin*
+	}
+	header @recordText Content-Type "text/plain; charset=utf-8"
+	@rawBytes {
+		path *.fxn.gz *.pack *.hdr *.bin *.font *.skel *.clip *.mesh
+		not path /api/* /admin*
+	}
+	header @rawBytes Content-Type "application/octet-stream"
+
+	# Caching (2026-11-11). A path named by its content never changes, so a browser keeps it for a year: the view's
+	# stored files (edit/blob/<64 hex>.<ext>), its documents (edit/<doc>.<16 hex>.fxn.gz), and a built script asked
+	# for with its hash (js/bundle/shell-<n>.js?v=<hash>, js/min/<page>.js?v=<hash>; the cut checks each stamp
+	# against the bytes). Everything else, every page first, answers "no-cache": the browser asks each time and gets
+	# a 304 when nothing changed. So a new cut shows on the next visit, and no page mixes two cuts.
+	# TO CONFIRM (owner): the ?v= stamps typed by hand (css/themes.css?v=20261006-system1) stay on "no-cache". A long
+	# cache for them is faster and shows a stale file whenever someone forgets to change the stamp.
+	@contentNamed path_regexp contentNamed ^/fxn-3d/view/edit/(blob/[0-9a-f]{64}\.[a-z0-9]+|[a-z0-9]+\.[0-9a-f]{16}\.fxn\.gz)$
+	header @contentNamed Cache-Control "public, max-age=31536000, immutable"
+	# Speed (2026-11-11), two more kinds named by their content. Measured on flx-nyc1 behind this block: a repeat visit of the home
+	# asked the server about 228 of its 257 files again (one 304 each), because only 24 were content-named.
+	#   @viewBuilt   the view's built code: every module, style and page part under built/<16 hex>/ (the folder's name is the hash
+	#                of the build, fxn-3d scripts/site-view-export.mjs) and the view page's own module, index.<16 hex>.mjs.
+	#                /fxn-3d/view/index.html is not matched and stays "no-cache": it names the build, so a new cut shows on the
+	#                next visit.
+	#   css/bundle   the shell's style chunks (scripts/build-shell.cjs, css/bundle/shell-<n>.css?v=<hash of the bytes>), the same
+	#                rule as js/bundle. scripts/cut-site.mjs (check cache-stamps) refuses a cut whose stamp is not its bytes' hash.
+	# Do not give a long cache by path to a file whose name does not change: a visitor would get two cuts at once.
+	@viewBuilt path_regexp viewBuilt ^/fxn-3d/view/(built/[0-9a-f]{16}/.+|index\.[0-9a-f]{16}\.mjs)$
+	header @viewBuilt Cache-Control "public, max-age=31536000, immutable"
+	@hashStamped {
+		path /js/bundle/* /js/min/* /css/bundle/*
+		query v=*
+	}
+	header @hashStamped Cache-Control "public, max-age=31536000, immutable"
+	header ?Cache-Control "no-cache"
 
 
 	# These three live under js/admin/ (where the build scripts emit them) but
@@ -125,18 +237,42 @@ defxn.com, www.defxn.com {
 		}
 	}
 
+	# /_headers is the pack's own header file (the name site server reads it). It is in the stage and is not a page.
+	# /served-files.sha256 (2026-11-11) is the deploy's own list. The deploy checks it on the node's disk, and
+	# `--checks` compares served pages with the cut's copy of the list, so nothing asks for it over HTTP. Before, it
+	# was served with no Content-Type.
 	@private {
-		path /README.md /scripts/* /tests/* /.git/* /.vercel/* /node_modules/*
+		path /README.md /scripts/* /tests/* /.git/* /.vercel/* /node_modules/* /_headers /served-files.sha256
 		path "/Flux Chain Admin.command"
 	}
 	handle @private {
 		respond "Not found" 404
 	}
 
-	@assetUnderRoute path_regexp assetUnderRoute ^/.+/((?:js|css|assets|docs|legacy)/.*)$
+	# 2026-11-11: the rewrite now fires only when the asked path is not a file. Before, it took every path with
+	# /js/, /css/ or /assets/ below the first folder, so /fxn-3d/view/js/editor/view-source.mjs was answered from
+	# /js/editor/view-source.mjs (404) and the 3D view could not load one module. A cut's pages name their files
+	# from the root, so the rewrite only serves old links.
+	@assetUnderRoute {
+		path_regexp assetUnderRoute ^/.+/((?:js|css|assets|docs|legacy)/.*)$
+		not path /fxn-3d/*
+		not file
+	}
 	handle @assetUnderRoute {
 		rewrite * /{re.assetUnderRoute.1}
 		file_server
+	}
+
+	# 2026-11-11: a path that ends in an extension and is no file answers 404. Before, the last block answered it
+	# with the app shell and status 200, so a missing module arrived as HTML and the browser reported a type error
+	# in place of a missing file. A page address is safe: each one is a file (<route>.html) in the cut, and the
+	# matcher looks for that file too.
+	@missingFile {
+		path_regexp missingFile \.[A-Za-z0-9]{1,5}$
+		not file {path} {path}.html
+	}
+	handle @missingFile {
+		respond "Not found" 404
 	}
 
 	# {path}.html is what makes a standalone page answer on its clean path

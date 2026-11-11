@@ -50,31 +50,36 @@
         return { key: key, name: words('APP.' + key + '.NAME'), platforms: words('APP.' + key + '.PLATFORMS'), url: /^https:\/\//.test(url) ? url : '' };
       });
 
-      var page = node('section', 'hud download-page');
+      /* 2026-11-11 (owner: "follow the same UI as the new home page"): the page wears the home (.home-wear, css/world-pages.css "the remaining
+         pages"). Its kicker, title, lede and one button carry the home's own classes beside the HUD's, so the home's rules draw them */
+      var page = node('section', 'hud download-page home-wear');
       page.setAttribute('aria-labelledby', 'download-title');
 
       var left = node('div', 'hud-left');
-      left.appendChild(node('p', 'hud-kicker', 'Download'));
-      var title = node('h1', 'hud-title', words('TITLE')); title.id = 'download-title';
+      left.appendChild(node('p', 'hud-kicker intro-portal-eyebrow', 'Download'));
+      var title = node('h1', 'hud-title intro-portal-headline', words('TITLE')); title.id = 'download-title';
       left.appendChild(title);
-      left.appendChild(node('p', 'hud-answer', words('LEDE')));
+      left.appendChild(node('p', 'hud-answer intro-portal-line', words('LEDE')));
       var tabs = node('div', 'hud-tabs'); tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', 'Sections');
       var body = node('div', 'hud-body'); body.setAttribute('role', 'tabpanel'); body.setAttribute('aria-live', 'polite');
       left.appendChild(tabs); left.appendChild(body);
       var tabFor = {};
-      [['apps', words('APPS.TITLE')], ['node', 'Run a node']].forEach(function (t) {
+      /* 2026-11-10 (owner, CLAIMS-AUDIT-2026-11-10): the "Run a node" tab, its five steps, its count and the operator guide link left.
+         They ran the old ark-miner-cli, not the devnet release node. TERMINAL stays for the release operator guide to replace. */
+      [['apps', words('APPS.TITLE')]].forEach(function (t) {
         var b = node('button', 'hud-chip', t[1]); b.type = 'button'; b.setAttribute('role', 'tab');
         b.addEventListener('click', function () { show(t[0]); });
         tabs.appendChild(b); tabFor[t[0]] = b;
       });
 
-      /* three counts, each read from the lists above: none is typed */
-      var right = node('div', 'hud-right'), stats = node('div', 'hud-stats');
-      [[apps.length, 'Apps'], [apps.filter(function (a) { return a.url; }).length, 'Published'], [count, 'Steps to a node']].forEach(function (c) {
-        var stat = node('div', 'hud-stat'); stat.appendChild(node('b', null, String(c[0]))); stat.appendChild(node('span', null, c[1])); stats.appendChild(stat);
+      /* the counts, read from the list above: none is typed; no published app reads "Not published yet", never 0 */
+      var right = node('div', 'hud-right'), stats = node('div', 'hud-stats'), published = apps.filter(function (a) { return a.url; }).length;
+      [[String(apps.length), 'Apps'], published ? [String(published), 'Published'] : ['', 'Not published yet']].forEach(function (c) {
+        var stat = node('div', 'hud-stat'); if (c[0]) stat.appendChild(node('b', null, c[0])); stat.appendChild(node('span', null, c[1])); stats.appendChild(stat);
       });
       var actions = node('nav', 'hud-actions'); actions.setAttribute('aria-label', 'Go further');
-      [['Create your FXN ID', 'route:account'], [ArkUI.sentenceCase(words('GUIDE')), words('GUIDE.HREF')],
+      /* word law (owner, 2026-11-09): "Initiate FXN ID", the bar's own words (NAV.BAR.INITIATE), never "create" */
+      [[ArkCopy.text('NAV.BAR.INITIATE'), 'route:account'],
         ['Deploy a site with the Bundle Deployer', words('ASIDE.HREF')], [ArkUI.sentenceCase(words('NEXT')), 'route:' + manifest.meta.next]].forEach(function (l) {
         var a = node('a', 'hud-chip', l[0]); a.href = hrefOf(l[1], manifest.route);
         var tagged = /^route:(\S+)$/.exec(l[1]); if (tagged) a.dataset.sceneLink = tagged[1];
@@ -82,16 +87,10 @@
       });
       right.appendChild(stats); right.appendChild(actions);
 
-      /* the dock: one chip per step, and the one action */
+      /* the dock: the one action (the step chips left with the "Run a node" tab) */
       var dock = node('div', 'hud-dock'), chips = [];
-      for (var d = 0; d < count; d++) (function (n) {
-        var chip = node('button', 'hud-chip', String(n + 1).padStart(2, '0')); chip.type = 'button';
-        chip.setAttribute('aria-label', 'Step ' + (n + 1) + ': ' + stepTitle(n)); chip.title = stepTitle(n);
-        chip.addEventListener('click', function () { select(n, true); });
-        dock.appendChild(chip); chips.push(chip);
-      })(d);
       var browser = apps.filter(function (a) { return a.key === 'BROWSER'; })[0];
-      var go = node(browser && browser.url ? 'a' : 'button', 'hud-go', 'Get FXN Browser');
+      var go = node(browser && browser.url ? 'a' : 'button', 'hud-go intro-portal-enter', 'Get FXN Browser');
       if (browser && browser.url) go.href = browser.url;
       else { go.type = 'button'; go.addEventListener('click', function () { show('apps'); }); }
       dock.appendChild(go);
@@ -147,12 +146,14 @@
         if (write) ArkUI.route.write(ArkUI.pageCatalog.download.path, 'step=' + active, 'push');
       }
 
-      [left, right, dock].forEach(function (el) { page.appendChild(el); });
+      /* the dock stands inside the words column (2026-11-11), so the one button comes under the lede, as on the home and on /auth. Placement
+         only: the same node with the same listener */
+      left.appendChild(dock);
+      [left, right].forEach(function (el) { page.appendChild(el); });
       var anchor = node('div'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);
       host.appendChild(page);
 
-      var asked = new URLSearchParams(ArkUI.route.search()).get('step');
-      if (asked != null && asked !== '') select(Number(asked) || 0, false); else show('apps');
+      show('apps');   /* an old ?step= link opens the apps */
       page.downloadSelect = select;
       return page;
     }

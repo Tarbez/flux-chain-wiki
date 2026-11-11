@@ -20,12 +20,15 @@
     if (served && Object.prototype.hasOwnProperty.call(served, key) && !readsSource()) return 'js/min/' + key + '.js?v=' + served[key];
     return url + '?v=' + pageAssetVersion;
   }
-  function loadScript(url) {
+  /* ordered: fetched at once with the others, run in the order they were added (async=false on an
+     inserted script). A page's own scripts load this way: fetched one by one they cost one round
+     trip each, and the words waited on the last of them (navbar and page frame audit, 2026-11-09). */
+  function loadScript(url, ordered) {
     if (!/^js\/(?:[a-z0-9-]+\/)*[a-z0-9-]+\.js$/.test(url)) return Promise.reject(new Error('Invalid page asset'));
     if (scripts.has(url)) return scripts.get(url);
     var promise = new Promise(function (resolve, reject) {
       var script = document.createElement('script');
-      script.src = (location.protocol === 'file:' ? '' : '/') + scriptPath(url); script.async = true;
+      script.src = (location.protocol === 'file:' ? '' : '/') + scriptPath(url); script.async = !ordered;
       script.onload = function () { resolve(); };
       script.onerror = function () { scripts.delete(url); script.remove(); reject(new Error('Could not load ' + url)); };
       document.head.appendChild(script);
@@ -89,7 +92,12 @@
   function sheetFile(href) { return String(href || '').split('?')[0].split('#')[0].replace(/^(?:\.?\/)+/, ''); }
   function linkedSheet(file) {
     var links = document.querySelectorAll('link[rel~="stylesheet"]');
-    for (var i = 0; i < links.length; i++) if (sheetFile(links[i].getAttribute('href')) === file) return links[i];
+    for (var i = 0; i < links.length; i++) {
+      if (sheetFile(links[i].getAttribute('href')) === file) return links[i];
+      /* a shell chunk (css/bundle/shell-<n>.css, scripts/build-shell.cjs) carries several sheets and names them */
+      var carried = links[i].getAttribute('data-ark-sheets');
+      if (carried && (' ' + carried + ' ').indexOf(' ' + file + ' ') >= 0) return links[i];
+    }
     return null;
   }
   function placeSheet(link, file) {
@@ -139,12 +147,24 @@
     for (var block of blocks) await loadScript(block);
     if (blocks.length) for (var chunk of OPTIONAL_CHUNKS) if (inPreview() || unknownSaved(definition)) await loadScript(chunk);
     var urls = definition.scripts;
-    for (var url of urls) await loadScript(url);
+    await Promise.all(urls.map(function (url) { return loadScript(url, true); }));
     await styles;
     var module = ArkUI.pageModules[definition.module];
     if (!module) throw new Error('Page module missing: ' + page);
     return module;
   }
+  /* WARM A PAGE BEFORE ITS CLICK: the one place a route's scripts and sheets are fetched ahead of a navigation, through this loader's own caches,
+     so the click that follows mounts from memory. Page scripts only define their module, so loading one early changes nothing on screen. Once per
+     route; a failed load lets the click load again and report. Callers: a link or menu item under the pointer or the focus (js/resolvers/header.js, owner
+     2026-11-09) and the hero's Enter link (js/pages/intro.js). The next-pages warm after a page loads was removed 2026-11-11 with the ring menu. */
+  var warmed = {};
+  function warmPage(key) {
+    var entry = ArkUI.pageCatalog && ArkUI.pageCatalog[key];
+    if (!entry || warmed[key]) return;
+    warmed[key] = true;
+    try { loadPage(key, entry).catch(function () { warmed[key] = false; }); } catch (e) { warmed[key] = false; }
+  }
+  ArkUI.warmPage = warmPage;
   ArkUI.loadPage = loadPage;
   ArkUI.loadStyles = loadStyles;
   ArkUI.pageNeedsBlocks = needsBlocks;

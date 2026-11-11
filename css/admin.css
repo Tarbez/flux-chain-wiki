@@ -505,7 +505,7 @@ fieldset.mesh-security strong { color: hsl(var(--text-strong)); }
    is plain CSS standing in for it, at the same scale and screen position
    as the real scene so the page reads as the same place, at zero script cost.
 
-   The Auth Kit panel (`@deadark/ark-ui/flux-auth-ui`) ships no stylesheet
+   The Auth Kit panel (`@fxn/ui/flux-auth-ui`) ships no stylesheet
    here (scripts/auth-entry.js drops its default one on purpose): every
    rule below styles its own `data-ark-auth` hooks directly, so there is
    one design, not two stylesheets negotiating a cascade.

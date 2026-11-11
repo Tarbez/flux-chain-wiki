@@ -1,2 +1,4 @@
 .vercel
 node_modules
+# Site cuts (scripts/cut-site.mjs): built folders, each named by its pack's content ID. Never source.
+.release

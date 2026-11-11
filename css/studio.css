@@ -1,6 +1,6 @@
 /* Additions below the original Ark scene. The zero, veil, logo and poster
    composition continue to use their original resolvers and tokens. */
 html { scroll-behavior: smooth; scroll-padding-top: 24px; }
-.skip { position: fixed; top: -100px; left: 20px; z-index: 100; padding: var(--sp-4) var(--sp-5); background: hsl(var(--text-strong)); color: hsl(var(--canvas)); font: var(--fs-tertiary) "Albert Sans", sans-serif; }
+.skip { position: fixed; top: -100px; left: 20px; z-index: 100; padding: var(--sp-4) var(--sp-5); background: hsl(var(--text-strong)); color: hsl(var(--canvas)); font: var(--fs-tertiary) var(--font-sans); }   /* the theme's sans (FXN Basalt Text): the old family name here made every page fetch albert-sans.woff2 for this one link */
 .skip:focus { top: 16px; }
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior: auto; } }

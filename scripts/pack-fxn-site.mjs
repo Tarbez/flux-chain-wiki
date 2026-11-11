@@ -42,18 +42,22 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readPageCatalog, readSiteRoutes } from './lib/site-routes.mjs';
 import { engineDir, engineBrowserFiles } from './lib/fxn-3d-closure.mjs';
+import { pruneNotReached } from './lib/stage-graph.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const BUNDLE_DEPLOY = path.resolve(ROOT, '..', 'bundle-deploy');
+/* beside this repo by default; BUNDLE_DEPLOY_DIR names it elsewhere (a node's checkout: scripts/cut-site.mjs sets it, as FXN_3D_DIR names fxn-3d) */
+const BUNDLE_DEPLOY = path.resolve(process.env.BUNDLE_DEPLOY_DIR || path.join(ROOT, '..', 'bundle-deploy'));
 
 /* What the public site is made of. Folders ship whole, less what EXCLUDED_INSIDE takes out. */
 const SHIP_FOLDERS = ['js', 'css', 'assets', 'gateway'];
 const SHIP_FILES = ['robots.txt', 'sitemap.xml', 'llms.txt'];
 const ADMIN_FOLDER = 'js/admin';
+/* The old 3D world's code, parked 2026-11-11 (js/ark/world-parked.js): in the repo, loaded by no page, so not shipped */
+const PARKED_FOLDERS = ['js/world2', 'js/space', 'css/space'];
 
 /* Why each other top-level entry stays out. An entry not named here is left out and reported as unknown. */
 const LEFT_OUT = {
-  'world': 'shipped by stageSite from its records: world.flx, card.flx and the content-addressed files they name; the test pages and unnamed blobs stay out',
+  'world': 'the old 3D world\'s records and blobs; parked 2026-11-11 (js/ark/world-parked.js), read by no page',
   'admin.html':'the editor door, loopback only (.vercelignore)',
   'admin-app.html': 'the editor, loopback only (.vercelignore)',
   'broker.html': 'the identity broker is pinned to https://defxn.com/broker.html (js/ark/broker-client.js); a copy here would be a second broker origin nothing calls',
@@ -130,25 +134,20 @@ function walkFiles(dir, visit) {
   }
 }
 
-function stageSite(stage) {
+function stageSite(stage, opts = {}) {
   const catalog = Object.values(readPageCatalog(ROOT));
   const routes = [...readSiteRoutes(ROOT)].filter((route) => route !== '/').sort();
   const adminFiles = [...new Set(catalog.flatMap((entry) => entry.scripts || []).filter((file) => file.startsWith(`${ADMIN_FOLDER}/`)))].sort();
 
-  for (const folder of SHIP_FOLDERS) copyTree(path.join(ROOT, folder), path.join(stage, folder), (relative) => relative === ADMIN_FOLDER);
+  for (const folder of SHIP_FOLDERS) copyTree(path.join(ROOT, folder), path.join(stage, folder), (relative) => relative === ADMIN_FOLDER || PARKED_FOLDERS.includes(relative));
   /* the 3D engine's browser modules live in the sibling repo flux/fxn-3d (moved 2026-10-29); the world host imports
      them as /fxn-3d/<path>. The pack ships exactly the files serve-site.mjs mounts: the derived closure of the renderer
      and the sampler (scripts/lib/fxn-3d-closure.mjs), read from the one copy in fxn-3d, at the same paths. */
   const engine = engineDir(ROOT);
   for (const rel of engineBrowserFiles(engine)) { const to = path.join(stage, 'fxn-3d', rel); fs.mkdirSync(path.dirname(to), { recursive: true }); fs.copyFileSync(path.join(engine, rel), to); }
-  /* world/: the ?world=2 world's records and the content-addressed files they name, derived from the records (never a
-     folder copy: world/ also holds test pages and blobs no record names any more) */
-  const worldDir = path.join(ROOT, 'world'), shipWorld = ['world.flx', 'card.flx', 'kit.flx'].filter((f) => fs.existsSync(path.join(worldDir, f)));
-  const named = new Set();
-  for (const f of shipWorld) for (const m of fs.readFileSync(path.join(worldDir, f), 'latin1').matchAll(/-C([0-9a-f]{64})/g)) named.add(m[1]);
-  for (const f of fs.readdirSync(worldDir)) { const cid = f.slice(0, 64); if (named.has(cid) && /^[0-9a-f]{64}\.[a-z]+$/.test(f)) shipWorld.push(f); }
-  fs.mkdirSync(path.join(stage, 'world'), { recursive: true });
-  for (const f of shipWorld) fs.copyFileSync(path.join(worldDir, f), path.join(stage, 'world', f));
+  /* world/ IS NOT SHIPPED (owner, 2026-11-11: the old 3D world is parked, js/ark/world-parked.js). Until then the pack shipped world.flx,
+     card.flx, kit.flx and every content-addressed file those records name. No page reads them now, so none of it goes into the pack. The
+     folder stays in the repo. To ship it again, restore this block from git history together with the world host's script tag. */
   for (const file of adminFiles) {
     fs.mkdirSync(path.dirname(path.join(stage, file)), { recursive: true });
     fs.copyFileSync(path.join(ROOT, file), path.join(stage, file));
@@ -162,7 +161,29 @@ function stageSite(stage) {
     if (next !== null) { fs.writeFileSync(full, next); loaders.push(path.relative(stage, full)); }
   });
 
-  const shell = absoluteAssetUrls(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'));
+  /* THE 3D VIEW (owner ruling 2026-11-11: "We have to have 3D ... deployed as a bundle"; audit F01). The home's portal and the twelve topic objects
+     are drawn in one frame, the site view, which js/ark/stage.js asks for at /fxn-3d/view/index.html on the site's own origin. The view is built in
+     the 3D repo, not here: a folder with index.html (the view page, speaking site-view's messages), the player it loads, and the packs of the hero
+     document and the topic objects. This step ships that folder as it is and never lists its files. The folder is FXN_3D_VIEW_DIR, or
+     <fxn-3d>/dist/site-view. With no built view the pack is refused, because a site packed without it shows no portal and no topic object;
+     --without-3d packs it anyway and says so. */
+  const viewDir = path.resolve(process.env.FXN_3D_VIEW_DIR || path.join(engine, 'dist', 'site-view'));
+  const hasView = fs.existsSync(path.join(viewDir, 'index.html'));
+  if (hasView) copyTree(viewDir, path.join(stage, 'fxn-3d', 'view'), () => false);
+  else if (!opts.without3d) throw refuse(`The site's 3D view is not built: ${path.join(viewDir, 'index.html')} does not exist.`, 'the built site view (the view page, its player and the packs of the hero document and the twelve topic objects).', 'build it in flux/fxn-3d and pass its folder as FXN_3D_VIEW_DIR, or pass --without-3d to pack a site that shows no 3D.');
+
+  /* the deployed shell frames only its own origin: the studio on 127.0.0.1:3440 is a local development source and leaves the CSP here, so
+     js/ark/stage.js can never choose it on a deployed site (it reads this same CSP) */
+  const source = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'), deployed = source.replace(/(frame-src 'self') http:\/\/127\.0\.0\.1:3440;/, '$1;');
+  if (deployed === source) throw refuse("index.html's CSP does not read \"frame-src 'self' http://127.0.0.1:3440;\".", 'that exact frame-src, which this step rewrites to the site\'s own origin.', 'restore it in index.html, or change the pattern here and in js/ark/stage.js (studioAllowed) together.');
+  /* the packed shell names its host as static, so js/ark/cms-session.js asks no /api/session: nothing on a static host answers it, and the .fxn
+     site server would send the whole 404.html with status 404 on every page load */
+  /* and, when this pack ships the 3D view, it says so (defxn-view): js/ark/stage.js then takes the bundle as its source at once and asks no HEAD for
+     /fxn-3d/view/index.html (a round trip before the home's 3D frame could start: 355 to 425 ms on the build node, 2026-11-11). A pack made with
+     --without-3d writes no such mark, so the stage still asks */
+  const CSP_META = '<meta http-equiv="Content-Security-Policy"', named = deployed.replace(CSP_META, '<meta name="defxn-host" content="static" />\n' + (hasView ? '<meta name="defxn-view" content="bundle" />\n' : '') + CSP_META);
+  if (named === deployed) throw refuse('index.html has no ' + CSP_META + ' tag.', 'the tag this step writes the static host mark before.', 'restore the tag in index.html, or change the anchor here.');
+  const shell = absoluteAssetUrls(named);
   fs.writeFileSync(path.join(stage, 'index.html'), shell);
   fs.writeFileSync(path.join(stage, '404.html'), shell);
   const clashes = [];
@@ -177,12 +198,18 @@ function stageSite(stage) {
   if (clashes.length) throw refuse(`The routes ${clashes.join(', ')} have the same address as a shipped file or folder.`, 'one address per page.', 'rename the page in js/content/site-pages.js, or move the file.');
   fs.writeFileSync(path.join(stage, '_headers'), HEADERS_FILE);
 
+  /* WHAT NO PAGE REACHES LEAVES THE STAGE (--prune; speed lane 1, 2026-11-11). js/, css/ and assets/ are staged whole, so files only the
+     editor or a retired page loads were shipped too. The list is derived (scripts/lib/stage-graph.mjs reads the staged folder; its header
+     says what the reading cannot see), never typed here. broker.html is served beside the stage on defxn.com, so it is a root as well.
+     Off unless --prune is passed, until one pruned cut has been walked; every removed file is printed with its bytes. */
+  const pruned = opts.prune ? pruneNotReached(stage, ['js', 'css', 'assets'], { documents: fs.existsSync(path.join(ROOT, 'broker.html')) ? [{ name: 'broker.html', text: fs.readFileSync(path.join(ROOT, 'broker.html'), 'utf8') }] : [] }) : null;
+
   const shipped = new Set([...SHIP_FOLDERS, ...SHIP_FILES, 'index.html']);
   const leftOut = fs.readdirSync(ROOT).filter((name) => !shipped.has(name)).map((name) => {
     const reason = LEFT_OUT[name] || (STRAY_IMAGE.test(name) ? 'a review screenshot' : null);
     return { name, reason: reason || 'UNKNOWN: not in this script\'s list. Add it to SHIP_FOLDERS/SHIP_FILES if a page needs it, or to LEFT_OUT with its reason' };
   });
-  return { routes: routes.length + 1, adminFiles, loaders, leftOut };
+  return { routes: routes.length + 1, adminFiles, loaders, leftOut, pruned, view: hasView ? viewDir : null };
 }
 
 async function main() {
@@ -192,7 +219,7 @@ async function main() {
     throw refuse(`${stage} is not empty.`, 'an empty or new folder to stage the site in.', 'pass --stage <new folder>, or leave --stage out for a fresh temporary folder.');
   }
   fs.mkdirSync(stage, { recursive: true });
-  const staged = stageSite(stage);
+  const staged = stageSite(stage, { without3d: args['without-3d'] === true, prune: args.prune === true });
 
   const { packSite } = await import(pathToFileURL(path.join(BUNDLE_DEPLOY, 'src', 'folder-archive.js')).href);
   const packed = await packSite(stage, { format: typeof args.format === 'string' ? args.format : 'auto' });
@@ -208,6 +235,10 @@ async function main() {
       : `Packed as flux-folder-site/1: ${packed.bytes.length} bytes in ${out}.`,
     `js/admin files shipped because a public page loads them: ${staged.adminFiles.join(', ') || 'none'}.`,
     `document.write loaders made root-absolute: ${staged.loaders.join(', ') || 'none'}.`,
+    staged.view ? `3D view shipped at /fxn-3d/view/ from ${staged.view}.` : 'NO 3D VIEW SHIPPED (--without-3d): the home shows no portal and the topic pages show no object.',
+    staged.pruned
+      ? `Removed from the stage, reached by no page (--prune): ${staged.pruned.length} files, ${staged.pruned.reduce((sum, row) => sum + row.bytes, 0)} bytes.\n${staged.pruned.map((row) => `  ${row.bytes} ${row.file}`).join('\n')}`
+      : 'Files no page reaches were NOT removed (pass --prune; scripts/lib/stage-graph.mjs derives the list).',
     'Left out:',
     ...staged.leftOut.map(({ name, reason }) => `  ${name}: ${reason}`),
     `Next: point de.fxn's blake3_cid at ${packed.cid} after publishing with`,

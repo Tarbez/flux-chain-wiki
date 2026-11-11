@@ -57,7 +57,16 @@ const OTHER_DOCUMENTS = ['admin.html', 'admin-app.html', 'broker.html'];
 function read(rel) { return fs.readFileSync(path.join(ROOT, rel), 'utf8'); }
 
 /* Sheets in index.html, in link order. */
+/* The shared list stands in <template id="shell-styles"> (2026-11-11): scripts/build-shell.cjs writes the live links, the
+   chunks css/bundle/shell-<n>.css, from it. This script reads and writes the list only, never the chunk links or a link
+   elsewhere in the document (css/loader-plaza.css after the loader). A document without the template is read whole, as before. */
+function styleTemplate(html) {
+  const m = /<template id="shell-styles"[^>]*>[\s\S]*?<\/template>/.exec(html);
+  return m ? { start: m.index, end: m.index + m[0].length, text: m[0] } : null;
+}
 export function indexSheets(html = read('index.html')) {
+  const template = styleTemplate(html);
+  if (template) html = template.text;
   return [...html.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*>/g)].map((m) => {
     const href = /href="([^"?]+)(?:\?([^"]*))?"/.exec(m[0]);
     return { file: href[1], version: href[2] || '', tag: m[0] };
@@ -459,13 +468,18 @@ export function blockIn(catalogText) {
 /* index.html with its stylesheet links set to `shared`: links that stay keep their line (and ?v=), links
    that leave go, a sheet that arrived is added in cascade order with `version`. */
 export function renderIndex(html, result, version) {
+  const template = styleTemplate(html);
+  if (template) return html.slice(0, template.start) + renderList(template.text, result, version, '</template>') + html.slice(template.end);
+  return renderList(html, result, version, '</head>');
+}
+function renderList(html, result, version, closing) {
   const href = (line) => (/<link\b[^>]*\brel="stylesheet"[^>]*\bhref="([^"?]+)/.exec(line) || /<link\b[^>]*\bhref="([^"?]+)[^>]*\brel="stylesheet"/.exec(line) || [])[1];
   const lines = html.split('\n').filter((line) => { const file = href(line); return !file || result.shared.includes(file); });
   const linked = new Set(lines.map(href).filter(Boolean));
   for (const file of result.shared) {
     if (linked.has(file)) continue;
     const later = result.shared.slice(result.shared.indexOf(file) + 1).find((f) => linked.has(f));
-    const at = later ? lines.findIndex((line) => href(line) === later) : lines.findIndex((line) => line.includes('</head>'));
+    const at = later ? lines.findIndex((line) => href(line) === later) : lines.findIndex((line) => line.includes(closing));
     lines.splice(at, 0, `<link rel="stylesheet" href="${file}?v=${version}" />`);
     linked.add(file);
   }

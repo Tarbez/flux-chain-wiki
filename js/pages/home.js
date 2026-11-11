@@ -7,11 +7,11 @@
    1 About: DEFXN is a grid of networks you can move through.
    2 Dominant action: the one .hud-go ("See the networks") flies to the first network (ArkSpace.focus); with no space it
      follows its route (HOME.WORLD.CTA.HREF).
-   3 Know now: what DEFXN is in one heading and one line, and how many networks, chains and resolvers stand in it.
+   3 Know now: what DEFXN is in one heading and one line, and how many resolvers a node reports (or "No node answered").
    4 Hidden until asked: everything about a place. The space's focus card shows it once the visitor picks one.
    5 Repeated elsewhere: nothing. The map, the path and the hover label are the space's parts.
-   6 Only because the data has it: the network chips are ArkSpace.targets() of kind 'network'; the counts are read from
-     js/content/network-data.js and resolvers-data.js, the files the intro counts from. None are typed here.
+   6 Only because the data has it: the network chips are ArkSpace.targets() of kind 'network'; the one count is read live
+     from /api/fleet-resolvers (STATS_LIVE). None is typed here.
    7 Removable without changing the decision: nothing further.
    8 Leaving keeps state: the address is the page; the space keeps its own focus.
    9 Returning: the space is already standing; the chips fill at once.
@@ -22,8 +22,6 @@
    became the HUD. Styles: css/space-home.css (a page sheet: the page loader takes css/<name>.css only). */
 (function () {
   'use strict';
-  /* the files the intro counts from (js/pages/catalog.js 'intro'); loaded here because the home's route lists only this file */
-  var DATA = ['js/content/network-data.js', 'js/content/resolvers-data.js'];
   function copy(role) { return ArkCopy.text('HOME.WORLD.' + role); }
   function node(tag, className, text) {
     var el = document.createElement(tag);
@@ -41,31 +39,38 @@
   function networks(space) {
     return space.targets().filter(function (t) { return t.kind === 'network'; }).slice(0, 3);
   }
-  /* networks, chains (every ring but the kernel, inner chains included) and resolvers; a count with no data is left out,
-     never drawn as 0 */
-  function counts() {
-    var N = window.DEFXN_NETWORK, R = window.DEFXN_RESOLVERS, kinds = N && N.KIND ? N.KIND : [];
-    return [
-      ['Networks', kinds.filter(function (k) { return k === 'network'; }).length],
-      ['Chains', kinds.filter(function (k) { return k !== 'hub'; }).length],
-      ['Resolvers', R && R.resolvers ? R.resolvers.length : 0]
-    ].filter(function (c) { return c[1] > 0; });
+  /* 2026-11-10 (owner, docs/design/space/CLAIMS-AUDIT-2026-11-10.md): no count is typed or drawn from a picture. The
+     Networks and Chains counts were the rings of the network picture (kinds, not chains), so they left. The one count is
+     Resolvers, read live: the resolvers a node reported in its STATS_LIVE window, through /api/fleet-resolvers
+     (scripts/lib/fleet-stats.mjs; docs/stats/LIVE-DATA-CONTRACT.md). No answer, or no resolver in the window, shows
+     "No node answered", never 0 and never a typed number. */
+  function liveResolvers() {
+    if (typeof fetch !== 'function') return Promise.resolve(null);
+    return fetch('/api/fleet-resolvers', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (body) {
+      var R = body && body.ok !== false && body.resolvers && typeof body.resolvers === 'object' ? body.resolvers : null;
+      return R && Object.keys(R).length ? Object.keys(R).length : null;
+    }, function () { return null; });
   }
   /* what each stat counts, as a name ArkUI.placeResponse (js/pages/intro.js) turns into places */
-  var STAT_PLACE = { Networks: 'networks', Chains: 'chains', Resolvers: 'kernel' };
+  var STAT_PLACE = { Resolvers: 'kernel' };
   /* the shared response lives in intro.js; load it if the home was reached first */
   function withResponse(fn) {
     if (ArkUI.placeResponse) return fn();
     if (ArkUI.loadScript) ArkUI.loadScript('js/pages/intro.js').then(function () { if (ArkUI.placeResponse) fn(); }, function () {});
   }
   function fillStats(box) {
-    counts().forEach(function (c) {
-      var stat = node('div', 'hud-stat'), b = node('b', null, String(c[1]));
-      stat.appendChild(b);
-      stat.appendChild(node('span', null, c[0]));
+    liveResolvers().then(function (n) {
+      var stat = node('div', 'hud-stat');
+      if (n) {
+        var b = node('b', null, String(n));
+        stat.append(b, node('span', null, 'Resolvers'));
+        stat.tabIndex = 0;
+        withResponse(function () { ArkUI.placeResponse(stat, STAT_PLACE.Resolvers, true); ArkUI.rollIn(b); });
+      } else {
+        stat.classList.add('is-absent');
+        stat.append(node('span', null, 'Resolvers: No node answered'));
+      }
       box.appendChild(stat);
-      stat.tabIndex = 0;
-      withResponse(function () { ArkUI.placeResponse(stat, STAT_PLACE[c[0]], true); ArkUI.rollIn(b); });
     });
   }
 
@@ -95,12 +100,7 @@
       var anchor = node('div', 'world-insert'); anchor.setAttribute('data-ark-insert', 'main'); page.appendChild(anchor);
       host.appendChild(page);
 
-      var have = counts().length === 3;
-      if (have || !ArkUI.loadScript) fillStats(stats);
-      else Promise.all(DATA.map(function (u) { return ArkUI.loadScript(u); })).then(function () { fillStats(stats); }, function (error) {
-        /* the counts are the only thing lost; say which file and why in the console, keep the page standing */
-        console.error('Home counts not shown: ' + DATA.join(', ') + ' did not load (' + String(error && error.message || error) + '). Reload the page.');
-      });
+      fillStats(stats);
 
       var space = window.ArkSpace;
       if (space && space.whenReady) space.whenReady(function (s) {

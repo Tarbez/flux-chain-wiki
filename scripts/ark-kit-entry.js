@@ -1,7 +1,7 @@
 /* ArkKit: the classic-script bridge from the synced Ark UI packages to the public site.
 
    Built by scripts/build-ark-vendor.cjs -> js/ark/vendor/ark-kit.js (global `ArkKit`).
-   Every import below resolves inside node_modules/@deadark/*, which only
+   Every import below resolves inside node_modules/@fxn/*, which only
    `npm run sync:ark` (deadark-theme sync-consumer) fills, from sha256-recorded
    .vendor/ tarballs. Nothing here may import a hub path.
 
@@ -20,31 +20,31 @@
      js/ark/vendor/ark-kit-forms.js   scripts/ark-kit-forms-entry.js: the form blocks (field, form, list,
                                       status-line, choice), registered into the public kit's registry
                                       by a page that takes input. The public kit imports ark-ui's
-                                      @deadark/ark-ui/blocks/core, which has none of them (they cost +3.8 KB gz
+                                      @fxn/ui/blocks/core, which has none of them (they cost +3.8 KB gz
                                       on every block route; docs/cms-architecture.md Budget)
    Wave 0 shipped the four behaviour primitives that §5 line 8 names as the wrappers for
    interactive blocks; Wave 1 adds the
-   `@deadark/ark-ui/blocks` registry and renderers (styled by css/ark-blocks.css,
+   `@fxn/ui/blocks` registry and renderers (styled by css/ark-blocks.css,
    which build-ark-vendor copies from the same synced package).
 
-   @deadark/ark-a11y/element-style is aliased to scripts/ark-style-bridge.js by the
+   @fxn/ui-a11y/element-style is aliased to scripts/ark-style-bridge.js by the
    build, exactly as for the settings panel: the page already has one style
    registry (ArkEngines, js/ark/vendor/engines.js), and a second bundled copy would
    hand out colliding dynamic ids. */
-export { createArkTabs } from '@deadark/ark-primitives/tabs';
-export { createArkAccordion } from '@deadark/ark-primitives/accordion';
-export { createArkToggleGroup } from '@deadark/ark-primitives/toggle';
-export { createArkPopover } from '@deadark/ark-primitives/dialog';
-export { ARK_BLOCKS, ARK_BLOCK_NAMES, renderArkBlock, renderArkBlocks, validateArkBlock, describeArkBlocks, ArkBlockPropError, createArkDomHost, registerArkBlocks } from '@deadark/ark-ui/blocks';
+export { createArkTabs } from '@fxn/ui-primitives/tabs';
+export { createArkAccordion } from '@fxn/ui-primitives/accordion';
+export { createArkToggleGroup } from '@fxn/ui-primitives/toggle';
+export { createArkPopover } from '@fxn/ui-primitives/dialog';
+export { ARK_BLOCKS, ARK_BLOCK_NAMES, renderArkBlock, renderArkBlocks, validateArkBlock, describeArkBlocks, ArkBlockPropError, createArkDomHost, registerArkBlocks } from '@fxn/ui/blocks';
 /* A live block patched in place -- ArkUI.blocks.update (js/ark/blocks.js) renders through the
    adapter (copy keys, scene links) and patches with this; updateArkBlock, Ark's own
    render-and-patch, has no caller here and stays out (R2). ark-ui 0.2.7 keeps the morph in its
    own module (blocks/patch, `patchArkBlockIn(registry, ...)`) so the PUBLIC build can leave it
-   out: there `@deadark/ark-ui/blocks/patch` is aliased to scripts/ark-kit-public-refused.js and
+   out: there `@fxn/ui/blocks/patch` is aliased to scripts/ark-kit-public-refused.js and
    this is a refusal naming js/ark/vendor/ark-kit-live.js (scripts/ark-kit-live-entry.js), the
    chunk js/ark/blocks.js loads on a page's first live update. The full kit has the real one. */
-import { ARK_BLOCKS as BLOCK_REGISTRY } from '@deadark/ark-ui/blocks';
-import { patchArkBlockIn } from '@deadark/ark-ui/blocks/patch';
+import { ARK_BLOCKS as BLOCK_REGISTRY } from '@fxn/ui/blocks';
+import { patchArkBlockIn } from '@fxn/ui/blocks/patch';
 export function patchArkBlock(target, next, options) { return patchArkBlockIn(BLOCK_REGISTRY, target, next, options); }
 /* Which build this is: the build sets __ARK_KIT_PUBLIC__ (esbuild define) -- true in
    ark-kit-public.js, false in ark-kit.js. js/ark/blocks.js reads it to know whether patchArkBlock
@@ -58,10 +58,10 @@ export const PUBLIC_KIT = __ARK_KIT_PUBLIC__;
    and the popover and toggle group, which no block uses -- to scripts/ark-kit-public-refused.js:
    one export list, two weights, and a page that needs one gets a refusal naming the file to
    load instead of a missing function. */
-export { createArkUI } from '@deadark/ark-ui/runtime';
+export { createArkUI } from '@fxn/ui/runtime';
 /* W4-ARK (2026-10-20): the CMS's window.confirm() replacement. arkConfirm({ title, message, confirmLabel,
    cancelLabel, tone }) -> Promise<boolean>: Ark's createArkAlertDialog (modal, Esc cancels, an outside press
    does not, focus on the safe choice) on the modal host (createArkModalHost: the light-DOM host plus a focus
    trap and an inert page behind it), over elements it builds; styled by css/ark-blocks.css (.ark-alert-dialog).
    Editor-only: the public kit refuses all three (scripts/ark-kit-public-refused.js) -- it never traps focus. */
-export { arkConfirm, createArkAlertDialog, createArkModalHost } from '@deadark/ark-ui/blocks/confirm';
+export { arkConfirm, createArkAlertDialog, createArkModalHost } from '@fxn/ui/blocks/confirm';

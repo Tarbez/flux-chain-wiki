@@ -1,0 +1,38 @@
+/* LOADER PICK (owner, 2026-11-09): every 3D logo in the first loading screen so the owner can pick one; js/loader-pick.js
+   sets html.marks-pick, and html.marks-full while one logo shows in the real loader layout. Sizes stay on the laws scale
+   (11/18/29). Pick mode keeps the loader up: the 8 s fade and the shell/world fade are both held while it is on. */
+html.marks-pick #world-loader,html.marks-pick.world-ready #world-loader,html.marks-pick.shell-ready #world-loader{display:grid;animation:none;opacity:1;visibility:visible;pointer-events:auto;transition:none;grid-template-rows:auto 1fr;align-content:stretch;place-items:stretch;gap:12px;padding:18px;box-sizing:border-box;background:#061212}
+html.marks-pick:not(.marks-full) #world-loader>.mark,html.marks-pick:not(.marks-full) #world-loader>.welcome,html.marks-pick:not(.marks-full) #world-loader>.bar{display:none}
+.pick-head{display:flex;align-items:baseline;gap:18px}
+.pick-head h2{margin:0;font:700 var(--fs-secondary,18px)/1.2 var(--font-display,system-ui);color:hsl(var(--text-strong,0 0% 100%))}
+.pick-head p,.pick-cap,.pick-label,.pick-back{font:400 11px/1.3 var(--font-mono,'IBM Plex Mono',monospace);letter-spacing:.04em;text-transform:uppercase;color:hsl(var(--text-muted,0 0% 70%))}
+.pick-head p{margin:0}
+/* 17 tiles in 6 columns and 3 rows; the rows share the height left, so 1280x720 and 1440x900 both fit with no scroll */
+.pick-grid{display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:1fr;gap:8px;min-height:0}
+.pick-tile{display:grid;grid-template-rows:1fr auto;min-height:0;padding:6px;border:1px solid hsl(var(--text-strong,0 0% 100%)/.08);border-radius:8px;background:transparent;cursor:pointer;text-align:left}
+.pick-tile:hover,.pick-tile:focus-visible{border-color:hsl(var(--primary,160 80% 65%)/.7);outline:none}
+.pick-tile video{width:100%;height:100%;min-height:0;object-fit:contain;display:block}
+.pick-cap{padding-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick-back,.pick-label{display:none}
+.pick-skip{margin-left:auto;background:none;border:0;cursor:pointer;font:400 11px/1.3 var(--font-mono,'IBM Plex Mono',monospace);letter-spacing:.04em;text-transform:uppercase;color:hsl(var(--primary,160 80% 65%))}
+/* dismissed: the loader is gone and takes no clicks; the page under it was loading the whole time */
+html.marks-done #world-loader{display:none;pointer-events:none}
+/* one logo full size, in the loader's own layout */
+html.marks-pick.marks-full.marks-full #world-loader{grid-template-rows:none;justify-items:center;place-items:center;align-content:center;gap:22px}
+html.marks-full .pick-grid,html.marks-full .pick-head h2,html.marks-full .pick-head p{display:none}
+html.marks-full .pick-head{position:fixed;top:18px;right:18px}
+html.marks-full .pick-back{display:block;position:fixed;top:18px;left:18px;background:none;border:0;cursor:pointer;color:hsl(var(--primary,160 80% 65%))}
+html.marks-full .pick-label{display:block;position:fixed;bottom:18px;left:18px}
+#world-loader .mark.is-loop{background:none;mix-blend-mode:normal;-webkit-mask-image:none;mask-image:none;
+  /* the flat mark's reveal runs blur + brightness(2.2), which turned the champagne glass pure white for its first frames
+     (owner pick A07, 2026-11-09): the glass loop reveals by wipe, lift and fade only, so its colour is true from frame one */
+  filter:none;animation:loader-reveal-loop 1s cubic-bezier(.2,0,0,1) .1s forwards,world-loader-breathe 2.4s ease-in-out 1.2s 3}
+@keyframes loader-reveal-loop{to{clip-path:inset(0);transform:none}}
+#world-loader .mark.is-loop{position:relative}
+#world-loader .mark.is-loop video,#world-loader .mark.is-loop .loop-poster{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block}
+/* the first-load hold (js/loader-pick.js): shell-ready and world-ready do not hide the loader until the reveal has played */
+html.loader-hold #world-loader{display:grid!important;opacity:1!important;visibility:visible!important;transition:none!important;animation:none!important}
+html.marks-full #world-loader.replay .mark{animation:loader-reveal 1s cubic-bezier(.2,0,0,1) .1s both}
+html.marks-full #world-loader.replay .welcome{animation:loader-in .5s cubic-bezier(.2,0,0,1) .7s both}
+html.marks-full #world-loader.replay .bar{animation:loader-in .3s ease-out .5s both}
+html.marks-full #world-loader.replay .bar i{transition:none;animation:loader-fill 1.2s cubic-bezier(.3,0,.2,1) .5s both}

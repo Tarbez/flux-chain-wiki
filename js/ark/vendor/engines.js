@@ -533,13 +533,13 @@ class FluxMemoryStore {
   }
 }
 
-// Source: @deadark/ark-a11y/src/element-style.js
-// SHA256: d53b7a9e4acb5b9d647495863ff98834179e83396e47fff008f83be7f447cce6
+// Source: @fxn/ui-a11y/src/element-style.js
+// SHA256: 15e3dc8d4fb96bbf18b52d582f149c1e54605092f887448217538b6f89c39c19
 /**
  * CSP-safe element style and visibility writing, moved verbatim (same logic,
  * same fallbacks, same single registry) out of `ark-ui.csp.ts` so primitive
- * factories extracted into `@deadark/ark-primitives` can reach it without
- * importing back into `@deadark/ark-ui` — the dependency direction the
+ * factories extracted into `@fxn/ui-primitives` can reach it without
+ * importing back into `@fxn/ui` — the dependency direction the
  * evolution plan requires (`ark-primitives -> ark-a11y`, never the reverse).
  * `createArkAccordion`'s panel-height measurement is the first such caller.
  *
@@ -674,7 +674,7 @@ function setArkElementHidden(el, hidden) {
   setArkElementStyle(el, "display", hidden ? "none" : "");
 }
 
-// Source: @deadark/ark-ui/dist/ark-ui.animate.js
+// Source: @fxn/ui/dist/ark-ui.animate.js
 // SHA256: be55e64a06576b4b176554aaf8c680604df940b832fb2b9a152e627631e55c5e
 function normalizeStorePath(path) {
     return path.startsWith("$") ? path.slice(1) : path;

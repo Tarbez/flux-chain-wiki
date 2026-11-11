@@ -19,7 +19,7 @@
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
   /* A fixed, full-viewport layer behind everything else, for an optional admin-picked
-     background style (js/ark/vendor/backgrounds.js -- @deadark/ark-ui's generators, see
+     background style (js/ark/vendor/backgrounds.js -- @fxn/ui's generators, see
      scripts/build-ark-vendor.cjs). Created once; style 'none' just leaves it empty,
      which is the site's original flat-canvas look, so this never runs when unused. */
   var backgroundHost = null, backgroundHandle = null;
@@ -77,6 +77,9 @@
     /* The shell (header, page, fallback) is in the DOM now: the black loader in index.html steps aside so a
        visitor reads the page while the 3D world is still loading, instead of a black screen for up to 8 s. */
     document.documentElement.classList.add('shell-ready');
+    /* The shell's scripts are all in and the scene is drawn: now, and no sooner, the stage may make the home's 3D frame (js/ark/stage.js
+       "THE WARM START"). Words first, then the shell, then the 3D: the frame's files never go down the line ahead of a shell script. */
+    if (window.ArkStage && ArkStage.warm) ArkStage.warm();
     /* The scope a mounted page's saved edits are stored under: its catalog route, or the finer scope
        the page declares (/reference: one per document). One helper, ArkLayout.scopeFor
        (js/content/layout.js); every pass below and the editor (cmsLayoutScope) ask it. The settle

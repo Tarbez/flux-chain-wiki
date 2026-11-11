@@ -6,7 +6,7 @@
      the recipe   js/nft/skin-recipe.js (DefxnSkin.recipe, DefxnSkin.arkSkin): card -> tokens,
                   chrome, per-part rules. The NFT session owns it; loaded by path, never copied.
      the parts    js/ark/skin-parts.js: which Ark UI part each hand-built piece is (the navbar, its mega dropdown).
-     the skin     js/ark/vendor/ark-kit-skin.js (@deadark/ark-ui/skin): tokens, theme-resolved part colours,
+     the skin     js/ark/vendor/ark-kit-skin.js (@fxn/ui/skin): tokens, theme-resolved part colours,
                   chrome, rules, exact undo. Loaded only when a skin is applied.
      the grid     the ring view of js/world2/world2-host.mjs never takes a skin's colours (the owner, 2026-10-24); it keeps the site's theme.
      the art      js/nft/scene.js (DefxnScene), the NFT session's: the card's world, which never covers the ring world
@@ -458,14 +458,22 @@ var DefxnSkinSite = (function () {
      no identity or no PVA yet; rejects naming what failed. Read once per page. A visitor who is not signed in loads
      none of it. */
   var cardsRead = null;
+  /* A NODE THAT DOES NOT ANSWER (2026-11-11). This read runs by itself each time the wearer's menu is drawn (every page, every
+     route and wear change), and a failed read is tried again on the next draw, so a network that is down was dialled once per draw
+     with no limit. A dial that fails is now kept for the tab, and for 5 minutes this read does not dial that address again
+     (js/ark/dense-wire-wallet.mjs wireFailed and wireQuiet, the one rule the footer's price follows too). Minting, a trade and the
+     Account wallet still dial when the person asks. */
   function at(path) { return new URL((location.protocol === 'file:' ? '' : '/') + path, document.baseURI).href; }
   function chainCards() {
     var who = window.ArkUI && ArkUI.localIdentity && ArkUI.localIdentity.current();
     if (!who) return Promise.resolve(null);
     if (cardsRead) return cardsRead;
     cardsRead = Promise.all([import(at('js/ark/chain-cards.mjs')), import(at('js/ark/dense-wire-wallet.mjs'))]).then(function (m) {
-      var key = m[0].identityKeyHex(who);
-      return key ? m[0].readChainCards({ url: m[1].resolveWireUrl(), key: key }) : null;
+      var key = m[0].identityKeyHex(who), url = m[1].resolveWireUrl();
+      if (!key) return null;
+      var kept = m[1].wireQuiet(url);
+      if (kept) return { kind: 'unreachable', detail: kept };
+      return m[0].readChainCards({ url: url, key: key }).then(function (read) { if (read && read.kind === 'unreachable') m[1].wireFailed(url); return read; });
     }).then(function (read) {
       if (!read) return null;
       if (read.kind !== 'cards') throw new Error(read.kind === 'unreachable' ? 'no node answered (' + read.detail + ')' : read.reason);
@@ -561,7 +569,8 @@ var DefxnSkinSite = (function () {
 if (typeof module === 'object' && module.exports) module.exports = DefxnSkinSite;
 else if (typeof document !== 'undefined') document.addEventListener('DOMContentLoaded', function () { DefxnSkinSite.fromAddress() || DefxnSkinSite.restoreHeld(); });
 /* The local skin test in the settings panel (js/settings/skin-test.js), on this computer's own addresses only: the public
-   site never loads it. */
+   site never loads it. The address starts at the site's root, as the page loader's do (js/ark/page-loader.js loadScript): a
+   relative one was asked for under /fxn/ on every topic page and answered 404 (2026-11-11, the packed site's request list). */
 if (typeof document !== 'undefined' && /^(localhost|127\.0\.0\.1|\[::1\])$|\.localhost$/.test(location.hostname)) {
-  (function () { var s = document.createElement('script'); s.src = 'js/settings/skin-test.js'; s.defer = true; document.head.appendChild(s); })();
+  (function () { var s = document.createElement('script'); s.src = (location.protocol === 'file:' ? '' : '/') + 'js/settings/skin-test.js'; s.defer = true; document.head.appendChild(s); })();
 }

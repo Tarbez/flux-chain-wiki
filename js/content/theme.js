@@ -5,7 +5,7 @@
    fixed. This module holds an OVERRIDE on top of it: colour values,
    defaulting to Tokens.colors so nothing changes until someone edits it
    in the admin, plus a background style choice (js/ark/vendor/backgrounds.js,
-   generated from @deadark/ark-ui's background generators -- see
+   generated from @fxn/ui's background generators -- see
    scripts/build-ark-vendor.cjs). js/main.js applies Tokens.css() first,
    then ArkTheme.css() right after -- later :root rules win by cascade
    order, so this file never has to touch tokens.js or the atomizer.

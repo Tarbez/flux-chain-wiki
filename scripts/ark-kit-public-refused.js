@@ -1,11 +1,11 @@
 /* Stands in for the parts of scripts/ark-kit-entry.js the PUBLIC build leaves out
    (js/ark/vendor/ark-kit-public.js; scripts/build-ark-vendor.cjs aliases these imports here):
-     @deadark/ark-ui/runtime          createArkUI           ~18 KB gz on its own
-     @deadark/ark-primitives/dialog   createArkPopover      the editor's overlays
-     @deadark/ark-primitives/toggle   createArkToggleGroup  the editor's pickers
-     @deadark/ark-ui/blocks/confirm   arkConfirm, createArkAlertDialog, createArkModalHost
+     @fxn/ui/runtime                  createArkUI           ~18 KB gz on its own
+     @fxn/ui-primitives/dialog        createArkPopover      the editor's overlays
+     @fxn/ui-primitives/toggle        createArkToggleGroup  the editor's pickers
+     @fxn/ui/blocks/confirm           arkConfirm, createArkAlertDialog, createArkModalHost
                                                             the editor's modal confirm (a focus trap)
-     @deadark/ark-ui/blocks/patch     patchArkBlockIn       the live morph: ~0.7 KB gz, used only by
+     @fxn/ui/blocks/patch             patchArkBlockIn      the live morph: ~0.7 KB gz, used only by
                                                             routes with a live block, so it is its own
                                                             chunk (js/ark/vendor/ark-kit-live.js)
 

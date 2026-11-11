@@ -1,0 +1,69 @@
+/* ---------- THE MOTION SYSTEM (docs/design/space/p05-upgrade/MOTION.md, "The motion system") ----------
+   Layer: app (the site). One grid for every duration on the site: the 3D runs at 24 frames a second (fxn-3d geometry.mjs LOOP.rate),
+   so each token is a whole number of those frames and the HTML lands on the same frame as the 3D. js/ark/stage.js carries the same
+   table as M (frames); this file is the CSS spelling. No other sheet names a duration for P05 work.
+     tick 4f, step 8f, beat 12f (= --beat .5s in themes.css), fly 15f (SELECT), merge 16f (OPEN), settle 24f, wait 6f (hover release).
+   Three easings by what the thing does: travel (the kernel cubic easeInOut, geometry.mjs), arrive (the UI spring --ease-ui), leave. */
+:root {
+  --m-tick: 167ms; --m-step: 333ms; --m-beat: 500ms; --m-fly: 625ms; --m-merge: 667ms; --m-settle: 1000ms; --m-wait: 250ms;
+  --ease-travel: cubic-bezier(.65, 0, .35, 1);
+  --ease-arrive: var(--ease-ui, cubic-bezier(.22, .7, .18, 1));
+  --ease-leave: cubic-bezier(.4, 0, 1, 1);
+}
+/* reduced motion: every travel is its end state; the tokens become one frame so each transition is a cut */
+@media (prefers-reduced-motion: reduce) {
+  :root { --m-tick: 1ms; --m-step: 1ms; --m-beat: 1ms; --m-fly: 1ms; --m-merge: 1ms; --m-settle: 1ms; }
+}
+
+/* ---------- THE STAGE (js/ark/stage.js ArkUI.stage; MOTION.md "Continuity") ----------
+   One element above the routes, a child of #scene after the persistent layer and before the outlet, so the pages paint over it and it
+   paints over the world canvas. It holds the site-view frames (Portal 101, the topic object) and is never inside a page, so a route change
+   cannot delete the object. The pages that stand on it are transparent while it is on (html[data-stage-on]), and the stage's own colour
+   under the frames moves from the portal's ground to the page canvas as the object glides into its slot. Pointer events pass through
+   it: the site's own SVG menu over the ring is the target, never the 3D. */
+.site-stage { position: absolute; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; display: none;
+  --stage-bg: 180 50% 4.7%; background: hsl(var(--stage-bg)); transition: background-color var(--m-fly) var(--ease-travel); }
+html[data-stage-on] .site-stage { display: block; }
+/* the view is what glides and scales (a CSS transform on the frame, owner 2026-11-09: "it scales down to fit the clicked page design") */
+.site-stage-view { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; }
+.site-stage-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; opacity: 0; visibility: hidden; }
+/* a frame shows only once the studio has drawn it (no white flash); the next frame renders hidden so it is ready at the cut */
+.site-stage-frame.is-shown.is-drawn { opacity: 1; visibility: visible; }
+.site-stage-frame.is-loading { opacity: .001; visibility: visible; }
+/* the pages on the stage give it the screen: their own ground is the stage's now */
+html[data-stage-on] .intro-world, html[data-stage-on] .topic-page { background: transparent; }
+/* a topic page's old own object frame is kept out of sight so one object draws. The slot's refusal (.topic-object.is-empty: no studio, no object)
+   is NOT hidden: the stage is on from the start of every topic page (js/ark/stage.js open), so hiding it here left an empty slot with no reason
+   given when the studio was down (2026-11-11) */
+html[data-stage-on] .topic-page .topic-frame { visibility: hidden; }
+
+/* ---------- THE TOPIC PAGE BUILD (MOTION.md "Choreography A"; the markup is js/pages/topic.js, the art director's) ----------
+   A topic page mounted with data-stage-wait builds its column round the object in order, one token apart, as the stage glides the
+   object into its slot. Items opt in with .m-in and --m-at (frames from the cut). Anything else in the page is untouched. */
+.topic-page .m-in { animation: m-rise var(--m-step) var(--ease-arrive) both; animation-delay: calc(var(--m-at, 0) * var(--m-tick) / 4); }
+@keyframes m-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.topic-page .m-fade { animation: m-fade var(--m-tick) var(--ease-arrive) both; animation-delay: calc(var(--m-at, 0) * var(--m-tick) / 4); }
+@keyframes m-fade { from { opacity: 0; } to { opacity: 1; } }
+/* the words wait while the merged emblem crosses their column: the stage releases the page (data-stage-wait leaves) at 60% of the glide, and the
+   column rises round the arriving object; the jump bar follows a step later. The slot itself never hides */
+.topic-page[data-stage-wait] > :not(.topic-object) { opacity: 0 !important; }
+/* THE INNER PAGES' ENTRANCE IS THE HOME'S (owner, 2026-11-11; the keyframes hero-word-in are the home's, css/world-pages.css "the entrance"): the
+   pill, the headline, the line, the buttons and the feature items come in one after another, each a rise of 18px with a fade, 50 ms apart, then
+   the dock's two rows; the floor's rings fade in with them. It plays once and then everything stands still. The game's column waits for its
+   gate instead (css/world-pages.css "the game's gate"). Reduced motion: no movement, the parts are simply there */
+:is(.topic-page:not([data-stage-wait], .is-gate) .topic-left, .learn-page .learn-left) > * { animation: hero-word-in .35s cubic-bezier(.2, .7, .2, 1) both; }
+:is(.topic-page .topic-left, .learn-page .learn-left) > :nth-child(2) { animation-delay: .05s; }
+:is(.topic-page .topic-left, .learn-page .learn-left) > :nth-child(3) { animation-delay: .1s; }
+:is(.topic-page .topic-left, .learn-page .learn-left) > :nth-child(4) { animation-delay: .15s; }
+:is(.topic-page .topic-left, .learn-page .learn-left) > :nth-child(n + 5) { animation-delay: .2s; }
+:is(.topic-page:not([data-stage-wait]), .learn-page) .topic-dock > * { animation: hero-word-in .35s cubic-bezier(.2, .7, .2, 1) both; animation-delay: .25s; }
+:is(.topic-page:not([data-stage-wait]), .learn-page) .topic-dock > :nth-child(2) { animation-delay: .3s; }
+.topic-page .topic-floor { animation: m-fade var(--m-beat) ease-out both; animation-delay: .25s; }
+/* the panel "How it works" opens, and the tab Learn shows, rise a step */
+.topic-panel:not([hidden]), .learn-panel:not([hidden]) { animation: m-rise-6 var(--m-step) var(--ease-arrive) both; }
+@keyframes m-rise-6 { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .topic-page .m-in, .topic-page .m-fade, .topic-panel:not([hidden]), .learn-panel:not([hidden]), .topic-page .topic-floor,
+  :is(.topic-page .topic-left, .learn-page .learn-left) > *, :is(.topic-page, .learn-page) .topic-dock > * { animation: none !important; }
+  .site-stage { transition: none; }
+}

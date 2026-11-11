@@ -140,41 +140,189 @@
    The page holds no words of its own (SPACE.md "Intro: plan", lane 3): the stage, a visually hidden name and the "Replay intro" chip at the
    dock. The doors, counters, hero words and film chrome left. While the intro plays the nav is at 0 and takes no pointer; it returns at
    shot 5 (the part clears html[data-intro]). Type on the scale: 11 mono chip. */
-.intro-world { display: block; padding: 0; position: absolute; inset: 0; pointer-events: none; }
+/* ---------- THE PORTAL PALETTE (P05 phase 2, docs/design/space/p05-upgrade/ART-DIRECTOR.md, change 1; the owner's target
+   target-p05-emblem-orbit.png). World pages only (the intro, the twelve topic pages, Learn): the header, footer and the rest of the
+   site keep the SDK theme. Three roles (laws 71 to 77): base mint, its own ladder as neighbour, amber as the complement, spent once per
+   view on the one action (PLAY on the ring, .topic-action on a page). The ground is the design's flat dark teal (#061212), one colour
+   on every world page so a cut never changes the colour behind the object. Nothing below this rule names a hue. */
+/* #scene:has(...): the navbar sits in the scene, outside the page, so it takes the same palette while a world page is shown */
+/* #world-loader.plaza (the loading screen, css/loader-plaza.css) takes it too: its button is the intro's own orange */
+/* body:has(.account-page.home-wear) dialog.fxn-idv (2026-11-11): the FXN ID view the open account opens is a dialog on the body, outside the
+   page, so it takes the palette here too; without it the view stood in the SDK theme's coral and teal over a mint and amber page */
+.intro-world, .topic-page, .learn-page, .auth-world, .home-wear, #scene:has(.intro-world, .topic-page, .learn-page, .auth-world, .home-wear), #world-loader.plaza, body:has(.account-page.home-wear) dialog.fxn-idv {
+  --portal-ground: 180 50% 4.7%;
+  --canvas: var(--portal-ground);
+  --primary: 155 100% 62%; --primary-500: 155 100% 62%; --primary-600: 155 100% 74%; --primary-400: 155 40% 42%;
+  --secondary: 34 100% 55%; --secondary-500: 34 100% 55%; --secondary-600: 34 100% 64%; --secondary-ink: 45 22% 9%;
+  --complement: var(--secondary); --accent: var(--secondary); --signal: var(--primary);
+}
+.intro-world { display: block; padding: 0; position: absolute; inset: 0; pointer-events: none;
+  /* P05 round 3: the portal's ground is the design's flat dark teal (#061212); site-view clears its picture to this same colour (intro.js portalView) */
+  background: hsl(var(--portal-ground)); }
 .intro-world .intro-stage { position: absolute; inset: 0; pointer-events: none; }
-.intro-world .intro-title { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.intro-replay { position: absolute; z-index: 2; left: 64px; bottom: 84px; min-height: 44px; padding: 0 var(--sp-4); pointer-events: auto; cursor: pointer;
-  font: 500 var(--fs-tertiary, 11px)/1 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--text-muted));
-  background: hsl(var(--surface) / .6); border: 1px solid hsl(var(--border-default, var(--border))); border-radius: 4px;
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: color .18s ease, opacity .6s var(--glide); }
-.intro-replay:hover { color: hsl(var(--text-strong)); }
+/* (the hidden page name .intro-title and the "Replay intro" chip left on 2026-11-11, audit F26 and F33: the page's h1 is the hero's headline,
+   and the old intro film never plays) */
 /* ---------- intro portal (board 40, owner 2026-11-09; js/pages/intro.js addPortal) ----------
    Network Portal fills the page behind the words and fades in once the studio has drawn it; the words stand in the left 40%,
    which the object's camera keeps quiet. Type on the scale: 11 mono eyebrow, hint and action; 18 mono line; 47 headline.
    One action, on the complement. Fits 1280x720 and 1440x900 with no scroll: the page never scrolls, the wheel plays the beats. */
 .intro-world .intro-portal-stage { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; opacity: 0; visibility: hidden; transition: opacity .6s ease-out, visibility 0s linear .6s; }
 .intro-world.portal-drawn .intro-portal-stage { opacity: 1; visibility: visible; transition: opacity .6s ease-out; }
-.intro-portal-words { position: absolute; z-index: 2; left: 64px; top: 50%; transform: translateY(-50%); width: min(40vw, 560px); display: flex; flex-direction: column; align-items: flex-start; gap: var(--sp-4, 16px); pointer-events: auto; }
-.intro-portal-words p { margin: 0; }
-.intro-portal-eyebrow { display: flex; align-items: center; gap: var(--sp-3, 12px); width: 100%; font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--text)); }
-.intro-portal-eyebrow::before { content: '///'; color: hsl(var(--primary)); letter-spacing: .08em; }
-.intro-portal-eyebrow::after { content: ''; flex: 1; height: 1px; background: hsl(var(--primary) / .7); }
-.intro-portal-headline { font: 900 var(--fs-hero, 47px)/1.05 var(--font-display); letter-spacing: .01em; text-transform: uppercase; color: hsl(var(--text-strong)); }
-.intro-portal-line { font: 400 var(--fs-secondary)/1.5 var(--font-sans); letter-spacing: 0; text-transform: none; color: hsl(var(--text-muted)); max-width: 32em; }
-.intro-portal-enter { margin-top: var(--sp-2, 8px); display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--sp-6, 24px); text-decoration: none;
-  font: 600 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--text-inverse)); background: hsl(var(--secondary));
-  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%); }
-.intro-portal-enter:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
-.intro-replay:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
-/* while it plays: no nav (its filled button would be a second action), no replay chip */
-html[data-intro="playing"] #scene .ark-header { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; transition: opacity .4s var(--glide), visibility 0s linear .4s; }
-html[data-intro="playing"] .intro-replay { opacity: 0; visibility: hidden; pointer-events: none; }
+/* THE HOME HERO (owner 2026-11-11: "a true home landing hero fused with that design"; fxn-3d docs/design/direction/portal-101/NOTES.md "The load board
+   and the home hero"). The words stand on the left (4% to 38% of the width) while the portal holds on the right (js/pages/intro.js heroSet moves the
+   stage's portal frame there: --hero-t). They show only with the portal held (.portal-view) or with no 3D at all (.portal-missing). Type on the laws
+   scale: 11 pill tag and button, 18 line, 47 headline, 76 headline on a wide view. Stacked (.hero-stack, set by intro.js for 4:3 and narrow views): the
+   portal above, the words centred below, nothing cut and no scroll */
+/* the words stand centred in the room between the bar (64 high) and the dock below them (--dock-h: the status bar, the explore row and their gaps) */
+.intro-world { --dock-h: 191px; --dock-b: 40px; --dock-gap: 40px; }
+@media (max-height: 760px) { .intro-world { --dock-h: 136px; --dock-b: 18px; --dock-gap: 18px; } }
+.intro-portal-words { position: absolute; z-index: 2; left: max(40px, 4vw); top: 64px; bottom: calc(var(--dock-h) + 18px); width: clamp(480px, 34vw, 660px); display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 0; pointer-events: none;
+  opacity: 0; visibility: hidden; transition: opacity .25s ease-out, visibility 0s linear .25s; }
+/* a wide view: the column widens so the 76 headline holds its two lines (its longer line is 755px wide at 76) */
+@media (min-width: 1700px) and (min-height: 800px) { .intro-world:not(.hero-stack) .intro-portal-words { width: min(40vw, 780px); } }
+/* the words never wait for the 3D (audit F05): .hero-words is set the moment the page is built (js/pages/intro.js addPortal) */
+.intro-world.hero-words .intro-portal-words { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .2s ease-out; }
+.intro-world.hero-stack .intro-portal-words { left: 50%; top: auto; bottom: 40px; transform: translateX(-50%); justify-content: flex-start; width: min(calc(100vw - 32px), 720px); align-items: center; text-align: center; }
+/* THE ENTRANCE (owner 2026-11-11: "page loads one at a time smoothly"; audit F05: a landing hero reads at once): as soon as the page is built, the
+   tag, the headline, the line, the buttons and the features come in one after another, each a short rise of 18px with a fade, 50 ms apart, then the
+   dock's two rows; the last one has landed 0.65 s after the first began. Nothing loops and nothing waits for the 3D. Reduced motion: no movement,
+   the words are simply there. Transform and opacity only, so the entrance costs no layout */
+@keyframes hero-word-in { from { opacity: 0; transform: translateY(18px); } }
+.intro-world.hero-words .intro-portal-words > * { animation: hero-word-in .35s cubic-bezier(.2, .7, .2, 1) both; }
+.intro-world.hero-words .intro-portal-words > :nth-child(2) { animation-delay: .05s; }
+.intro-world.hero-words .intro-portal-words > :nth-child(3) { animation-delay: .1s; }
+.intro-world.hero-words .intro-portal-words > :nth-child(4) { animation-delay: .15s; }
+.intro-world.hero-words .intro-portal-words > :nth-child(5) { animation-delay: .2s; }
+/* the dock's two rows join the same entrance, after the words: the status bar, then the explore row */
+.intro-world.hero-words .intro-dock > * { animation: hero-word-in .35s cubic-bezier(.2, .7, .2, 1) both; animation-delay: .25s; }
+.intro-world.hero-words .intro-dock > :nth-child(2) { animation-delay: .3s; }
+@media (prefers-reduced-motion: reduce) { .intro-world .intro-portal-words > *, .intro-world .intro-dock > * { animation: none !important; } }
+/* the portal frame's place in the hero: a transform only, so the move costs no layout. Its time is the film's (HEROIN), set by intro.js. During the
+   load the same variable holds the load's place (html[data-hero="load"]: the plaza small, in the portal's place), and the lift into the hero is one
+   eased move from that place to the hero's */
+html[data-hero] .site-stage-frame[data-stage-object="portal101"] { transform: var(--hero-t, none); transition: transform var(--hero-ms, 0ms) cubic-bezier(.65, 0, .35, 1); will-change: transform; }
+html:not([data-hero]) .site-stage-frame[data-stage-object="portal101"] { transition: transform var(--hero-ms, 0ms) cubic-bezier(.65, 0, .35, 1); }
+/* a fresh frame asked to hold the hero's rest stays out of sight (drawn, so it keeps its animation frames) until that frame has really been drawn:
+   the answer to ?hold= comes before the document has loaded, and the frame showed the plaza meanwhile (js/pages/intro.js "THE ?hold= FRAME DOES NOT STICK") */
+html[data-hero-wait] .site-stage-frame[data-stage-object="portal101"].is-shown.is-drawn { opacity: .001; }
+/* THE LOAD'S VEIL (audit F05): during the load the plaza's floor rings reach under the hero's words. The veil lies over the live frame and under
+   the words: the ground's colour as far as the words reach (--veil-solid, set by js/pages/intro.js), then 120px fading to clear. Once the hero
+   holds, the veil fades out and the settled picture is the frame's own. No mask on the frame itself: an effect on a frame that holds a frame has
+   blanked it before (fxn-3d world/site-view notes). Not shown when stacked: the words stand under the picture there */
+.intro-load-veil { position: absolute; z-index: 1; inset: 0; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .6s ease-out, visibility 0s linear .6s;
+  /* and the ground's colour over the dock's band at the foot (--dock-h), fading 40px above it, so no ring crosses the status bar or the chips */
+  background: linear-gradient(90deg, hsl(var(--portal-ground)) 0, hsl(var(--portal-ground)) var(--veil-solid, 38vw), hsl(var(--portal-ground) / 0) calc(var(--veil-solid, 38vw) + 120px)),
+    linear-gradient(0deg, hsl(var(--portal-ground)) 0, hsl(var(--portal-ground)) var(--dock-h), hsl(var(--portal-ground) / 0) calc(var(--dock-h) + 40px)); }
+.intro-world.hero-veil:not(.hero-stack) .intro-load-veil { opacity: 1; visibility: visible; transition: none; }
+/* the ring's outline (.intro-portal-ghost) is for a visit with no load screen; under the load the drawn ground is the picture */
+html.plaza-hold .intro-portal-ghost { display: none; }
+/* the moved frame's cut edges fade into the ground (the page paints over the stage): the left edge when the portal stands right, the lower edge when stacked */
+.intro-hero-edge { position: absolute; z-index: 1; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .25s ease-out, visibility 0s linear .25s; background: linear-gradient(90deg, hsl(var(--portal-ground)) 0, hsl(var(--portal-ground)) calc(100% - 96px), hsl(var(--portal-ground) / 0) 100%); }
+.intro-world.portal-view .intro-hero-edge { opacity: 1; visibility: visible; transition: opacity .4s ease-out; }
+.intro-world.hero-stack .intro-hero-edge { background: linear-gradient(0deg, hsl(var(--portal-ground)) 0, hsl(var(--portal-ground)) calc(100% - 96px), hsl(var(--portal-ground) / 0) 100%); }
+:where(.intro-portal-words) p { margin: 0; }   /* the reset stays weaker than each part's own margin below (the hero's vertical rhythm) */
+/* the pill tag (the hero reference's tag above the headline): 11 mono on a thin mint outline. (The pill, the headline and the line each carry a
+   second selector, as the two buttons do below: the same values with the weight to hold on a page that wears the home, .home-wear) */
+.intro-portal-eyebrow, #scene .home-wear .intro-portal-eyebrow { display: inline-flex; align-items: center; min-height: 29px; padding: 0 18px; margin-bottom: 29px; border: 1px solid hsl(var(--primary) / .5); border-radius: 999px; background: hsl(var(--primary) / .06);
+  font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--primary)); }
+/* the headline: the page's one display line (law 80). 76 on a wide view, 47 below it, 29 on a small one: whole steps only (law 82) */
+.intro-portal-headline, #scene .home-wear .intro-portal-headline { margin: 0 0 18px; font: 900 var(--fs-hero, 47px)/1 var(--font-display); letter-spacing: 0; text-transform: none; color: hsl(var(--text-strong)); text-wrap: balance; }
+@media (min-width: 1700px) and (min-height: 800px) { .intro-world:not(.hero-stack) .intro-portal-headline { margin-bottom: 29px; font-size: var(--fs-display, 76px); line-height: .96; } }
+@media (max-width: 760px), (max-height: 620px) { .intro-portal-headline, #scene .home-wear .intro-portal-headline { font-size: var(--fs-primary, 29px); line-height: 1.05; } }
+.intro-portal-line, #scene .home-wear .intro-portal-line { margin-bottom: 40px; font: 400 var(--fs-secondary)/1.55 var(--font-sans); letter-spacing: 0; text-transform: none; color: hsl(var(--text-muted)); max-width: 27em; text-wrap: pretty; }
+/* Enter FXN: the view's one filled button and its one spend of the complement (law 73). 56 high, the kit's 8px corner, the words at the scale's
+   18 and an arrow drawn in the words' own ink. A hover slides only the arrow, so the button holds under the pointer (law 84).
+   THE TWO BUTTONS ARE SHARED CLASSES (2026-11-11): .intro-portal-enter and .intro-portal-second stand alone, so any page's button wears them
+   (the home, the topic pages, /auth's main button, Account, Download, Not found). The second selector of each pair gives the same values the
+   weight to hold on a page whose own button rules load later: the HUD frame (css/space-frame.css .hud-go, css/auth.css .auth-main) and a page
+   that wears the home (.home-wear, "the remaining pages" below; css/ark-blocks.css .ark-btn) */
+.intro-portal-enter, #scene :is(.hud, .home-wear) .intro-portal-enter { display: inline-flex; align-items: center; gap: 18px; min-height: 56px; padding: 0 29px; text-decoration: none; border: 0; border-radius: var(--dx-radius, 8px); cursor: pointer;
+  font: 700 var(--fs-secondary)/1 var(--font-sans); letter-spacing: .01em; text-transform: none; color: hsl(var(--secondary-ink, var(--text-inverse))); background: hsl(var(--secondary));
+  box-shadow: 0 18px 47px -18px hsl(var(--secondary) / .55); transition: background-color .2s ease-out, box-shadow .2s ease-out; }
+.intro-portal-enter::after { content: ""; flex: 0 0 auto; width: 18px; height: 18px; background: currentColor; transition: transform .2s ease-out;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 9h14M10 3l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 9h14M10 3l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat; }
+.intro-portal-enter:is(:hover, :focus-visible), #scene :is(.hud, .home-wear) .intro-portal-enter:is(:hover, :focus-visible) { background: hsl(var(--secondary-600, var(--secondary))); box-shadow: 0 18px 47px -14px hsl(var(--secondary) / .7); }
+.intro-portal-enter:is(:hover, :focus-visible)::after { transform: translateX(4px); }
+/* the two buttons stand side by side. The second is outlined and spends no colour: the complement stays with Enter FXN (law 73) */
+.intro-portal-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-bottom: 40px; }
+.intro-portal-second, #scene :is(.hud, .home-wear) .intro-portal-second { display: inline-flex; align-items: center; gap: 18px; min-height: 56px; padding: 0 29px; text-decoration: none; border: 1px solid hsl(var(--text-strong) / .55); border-radius: var(--dx-radius, 8px); cursor: pointer;
+  font: 600 var(--fs-secondary)/1 var(--font-sans); letter-spacing: .01em; color: hsl(var(--text-strong)); background: hsl(var(--portal-ground) / .4); transition: border-color .2s ease-out, background-color .2s ease-out; }
+.intro-portal-second::after { content: ""; flex: 0 0 auto; width: 18px; height: 18px; background: currentColor; transition: transform .2s ease-out;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 9h14M10 3l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 18' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 9h14M10 3l6 6-6 6'/%3E%3C/svg%3E") center / contain no-repeat; }
+.intro-portal-second:is(:hover, :focus-visible), #scene :is(.hud, .home-wear) .intro-portal-second:is(:hover, :focus-visible) { border-color: hsl(var(--text-strong)); background: hsl(var(--text-strong) / .08); }
+.intro-portal-second:is(:hover, :focus-visible)::after { transform: translateX(4px); }
+.intro-portal-second:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
+/* the home's line icons (js/pages/intro.js lineIcon): drawn in the ink of their parent */
+.intro-icon { flex: 0 0 auto; width: 29px; height: 29px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; color: hsl(var(--primary)); }
+/* the three feature items: a mint icon, the name at 18, its line at 11 on two lines, a hairline between neighbours */
+.intro-features { display: flex; margin: 0; padding: 0; list-style: none; }
+.intro-feature { display: flex; flex-direction: column; align-items: flex-start; width: 13.5em; padding: 0 18px; font: 400 var(--fs-tertiary)/1.45 var(--font-sans); border-left: 1px solid hsl(var(--text-strong) / .12); }
+.intro-feature:first-child { padding-left: 0; border-left: 0; width: calc(13.5em - 18px); }
+.intro-feature-name { margin: 11px 0 4px; font: 700 var(--fs-secondary)/1.2 var(--font-sans); color: hsl(var(--text-strong)); }
+.intro-feature-line { color: hsl(var(--text-muted)); text-wrap: balance; }
+/* ---------- home dock (owner reference, 2026-11-11; js/pages/intro.js homeDock) ----------
+   The status bar and the explore row at the foot of the hero, on the hero's own side gutters. The bar is one rounded surface with a hairline
+   edge; its top stays below the portal's floor ring (78% of the height or lower). Type on the scale: 18 for the state, the values and the
+   explore line, 11 for the names and the caption. No figure is typed here: every value is ArkUI.homeStatus's or the manifest's TBA */
+.intro-dock { position: absolute; z-index: 2; left: max(40px, 4vw); right: max(40px, 4vw); bottom: var(--dock-b); display: flex; flex-direction: column; gap: var(--dock-gap); pointer-events: none;
+  opacity: 0; visibility: hidden; transition: opacity .25s ease-out, visibility 0s linear .25s; }
+.intro-world.hero-words .intro-dock { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity .2s ease-out; }
+.intro-dock p { margin: 0; }
+.intro-status { display: flex; align-items: stretch; height: 64px; padding: 0 11px; border: 1px solid hsl(var(--text-strong) / .12); border-radius: 18px; background: hsl(var(--surface) / .88); }
+.intro-status > * { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; gap: 11px; padding: 0 18px; white-space: nowrap; position: relative; }
+.intro-status > * + *::before { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 1px; background: hsl(var(--text-strong) / .14); }
+.intro-status-lead { justify-content: flex-start; font: 600 var(--fs-secondary)/1 var(--font-sans); color: hsl(var(--text-strong)); }
+/* the state's dot is not lit: no chain is live. A ring in the faint text, no fill, no glow */
+.intro-status-dot { flex: 0 0 auto; width: 11px; height: 11px; border-radius: 50%; border: 2px solid hsl(var(--text-faint, var(--text-muted))); box-sizing: border-box; }
+.intro-status .intro-icon { width: 18px; height: 18px; stroke-width: 1.6; color: hsl(var(--text-muted)); }
+.intro-status-name { font: 500 var(--fs-tertiary)/1 var(--font-sans); color: hsl(var(--text)); }
+.intro-status-value { font: 600 var(--fs-secondary)/1 var(--font-sans); color: hsl(var(--text-muted)); letter-spacing: .04em; }
+.intro-explore { display: flex; align-items: center; justify-content: space-between; gap: 40px; height: 47px; }
+.intro-explore-words { flex: 0 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.intro-explore-caption { font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .32em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.intro-explore-line { font: 400 var(--fs-secondary)/1.2 var(--font-sans); color: hsl(var(--text)); white-space: nowrap; }
+/* the chips: one row; a chip that does not fit drops out whole (the row wraps and the second line is cut) */
+.intro-chips { flex: 1 1 0; min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0 11px; height: 47px; overflow: hidden; margin: 0; padding: 0; list-style: none; }
+.intro-chip { display: inline-flex; align-items: center; gap: 8px; height: 47px; box-sizing: border-box; padding: 0 18px; border: 1px solid hsl(var(--text-strong) / .12); border-radius: 11px; background: hsl(var(--surface) / .88);
+  font: 500 var(--fs-secondary)/1 var(--font-sans); color: hsl(var(--text-strong)); text-decoration: none; white-space: nowrap; transition: border-color .2s ease-out, background-color .2s ease-out; }
+.intro-chip-mark { flex: 0 0 auto; color: hsl(var(--primary)); }
+a.intro-chip:is(:hover, :focus-visible) { border-color: hsl(var(--primary) / .6); background: hsl(var(--raised, var(--surface))); }
+a.intro-chip:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: -2px; }
+@media (max-height: 760px) { .intro-status { height: 56px; } .intro-explore, .intro-chips, .intro-chip { height: 44px; } .intro-explore-words { gap: 4px; }
+  .intro-portal-actions { margin-bottom: 29px; } .intro-portal-words :is(.intro-portal-second, .intro-portal-enter), #scene :is(.hud, .home-wear) :is(.intro-portal-second, .intro-portal-enter) { min-height: 47px; } .intro-portal-eyebrow { margin-bottom: 18px; } .intro-portal-line { margin-bottom: 29px; } }
+@media (prefers-reduced-motion: reduce) { .intro-portal-second, .intro-portal-second::after, .intro-chip { transition: none; } }
+/* the stone words (js/pages/intro.js stonesPlace): 11 mono capitals, each centred on its stone. They come in once the hero has settled
+   and never move. THE INK IS ON (--stone-ink is the strong text, below). It was off (transparent) on 2026-11-11 while the 3D portal printed
+   its own word on each stone and the two read as a double print at 1440x900, 1280x720 and 1910x861. To turn it off again, set --stone-ink
+   to transparent here: each word stays the stone's link (pointer, keyboard focus, screen reader name). Nothing moves on hover (law 84) */
+.intro-world { --stone-ink: hsl(var(--text-strong)); }
+.intro-stones { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; visibility: hidden; }
+.intro-world.portal-view.stones-on:not(.portal-gone) .intro-stones { opacity: 1; visibility: visible; transition: opacity .6s ease-out .7s; }
+.intro-stone { position: absolute; transform: translate(-50%, -50%); padding: 11px 8px; pointer-events: auto; white-space: nowrap; text-decoration: none;
+  font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--stone-ink); }
+.intro-stone:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 0; }
+@media (prefers-reduced-motion: reduce) { .intro-world .intro-stones { transition: none !important; } }
+/* stacked (4:3 and narrow views): the portal above and the words below keep the whole view, so the feature items, the dock and the stone words step out */
+.intro-world.hero-stack :is(.intro-features, .intro-dock, .intro-stones) { display: none; }
+.intro-world.hero-stack .intro-portal-actions { justify-content: center; margin-bottom: 0; }
+.intro-world.hero-stack .intro-portal-words .intro-portal-second { min-height: 44px; }
+/* the settings gear on the home: it stood at the explore row's left end, so it moves to the view's lower left corner (the footer edge), clear of the caption */
+html[data-portal-ring] #scene .site-settings { left: 6px; bottom: 6px; }
+/* stacked, or a low view: the rhythm tightens and the button takes the 44 target, so the portal above keeps its size */
+.intro-world.hero-stack .intro-portal-eyebrow { margin-bottom: 18px; }
+.intro-world.hero-stack .intro-portal-headline { margin-bottom: 11px; }
+.intro-world.hero-stack .intro-portal-line { margin-bottom: 18px; max-width: 32em; }
+.intro-world.hero-stack .intro-portal-words .intro-portal-enter { min-height: 44px; }
+@media (max-height: 620px) { .intro-portal-eyebrow { margin-bottom: 18px; } .intro-portal-headline { margin-bottom: 11px; } .intro-portal-line { margin-bottom: 18px; } .intro-portal-words .intro-portal-enter { min-height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .intro-portal-enter, .intro-portal-enter::after { transition: none; } }
+.intro-portal-enter:focus-visible, #scene :is(.hud, .home-wear) .intro-portal-enter:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
 #scene .ark-header { transition: opacity .6s var(--glide); }
 /* a phone: the world is the whole screen. No column, no scroll; the world takes the touch (pan, orbit, pinch). The chip sits in the thumb
    zone above the safe-area inset. */
 @media (max-width: 900px) {
   .intro-world { overflow: hidden; touch-action: none; }
-  .intro-replay { left: var(--sp-5, 16px); right: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 84px); }
 }
 @media (max-width: 899px) { .intro-world .intro-stage { touch-action: none; } }
 /* The headline is the page's one display line (76, law 80) where the screen gives it room. Below that, it and the
@@ -212,20 +360,15 @@ body.picking { cursor: pointer; }
 html[data-world-held] .world-layer { visibility: hidden; }
 /* the dive (js/pages/intro.js dive): the ring is the button, placed on the ring by the studio's report; the words flicker at the
    ring's centre in mono at the 76 step, mint with a split amber edge; one mint flash covers the cut to the world */
-.intro-portal-ring { position: absolute; z-index: 1; border: 0; border-radius: 50%; background: none; padding: 0; cursor: pointer; pointer-events: auto; }
-.intro-portal-ring:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 8px; }
-.intro-portal-ring[hidden] { display: none; }
 .intro-portal-glitch { position: absolute; z-index: 3; pointer-events: none; white-space: nowrap; transform: translate(-50%, -50%);
   font: 900 var(--fs-display, 76px)/1 var(--font-display); letter-spacing: .02em; color: hsl(var(--primary));
   text-shadow: 3px 0 hsl(var(--secondary) / .85), -3px 0 hsl(var(--primary) / .6); }
 .intro-portal-flash { position: absolute; inset: 0; z-index: 4; pointer-events: none; background: hsl(var(--primary)); opacity: 0; transition: opacity .3s ease-out; }
 .intro-world.portal-flash .intro-portal-flash { opacity: .85; transition: opacity .12s ease-in; }
 .intro-world.portal-diving .intro-portal-words { opacity: 0; transition: opacity .25s ease-out; }
-.intro-world.portal-gone .intro-portal-words, .intro-world.portal-gone .intro-portal-stage { display: none; }
+.intro-world.portal-gone .intro-portal-stage { display: none; }
 /* while the portal stands, the world film (js/space/intro.mjs, all of it inside .intro) waits and is not shown; the dive starts it */
 html[data-portal-up] .intro { display: none !important; }
-/* the portal intro has no old world, so nothing to replay (owner, 2026-11-09: the old world is deprecated) */
-.intro-world.has-portal .intro-replay { display: none; }
 .intro-world.portal-missing .intro-portal-words { display: flex; }
 /* inside: the same frame now holds the underground DEFXN world (js/pages/intro.js arrive), full screen, words gone */
 .intro-world.portal-gone.in-underground .intro-portal-stage { display: block; opacity: 1; visibility: visible; transition: none; }
@@ -237,6 +380,8 @@ html[data-portal-up] .intro { display: none !important; }
 @keyframes ghost-draw { to { stroke-dashoffset: 0; } }
 @keyframes ghost-breathe { 0%, 100% { stroke-opacity: 1; } 50% { stroke-opacity: .45; } }
 .intro-world.portal-drawn .intro-portal-ghost, .intro-world.portal-gone .intro-portal-ghost { opacity: 0; }
+/* once the portal has drawn the outline is not seen, so it stops breathing (audit F25: two animations ran for ever on an invisible outline) */
+.intro-world:is(.portal-drawn, .portal-gone) .intro-portal-ghost circle { animation: none; stroke-dashoffset: 0; }
 @media (prefers-reduced-motion: reduce) { .intro-portal-ghost circle { animation: none; stroke-dashoffset: 0; } }
 /* the cinema words (js/pages/intro.js cine): the object's name in 11 mono with the /// rule, the line in FXN Basalt at 47 (the headline
    slot), letters springing in on --ease-letter, 14 ms apart, and cut out in 180 ms with the camera */
@@ -270,23 +415,282 @@ html[data-portal-up] .intro { display: none !important; }
 .intro-ask-no { border: 1px solid hsl(var(--border-default, var(--border))); color: hsl(var(--text)); }
 :is(.intro-ask-yes, .intro-ask-no):focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
 .intro-world.asking .intro-cine { display: none; }
-/* the ring menu (js/pages/intro.js showMenu): invisible click areas over the 3D stones. The stone itself answers in 3D (SELECT slides
-   it out and lights it); the page adds only the stone's name, in 11 mono, beside it. */
-.intro-world.ring-view .intro-portal-words { opacity: 0; pointer-events: none; transition: opacity .25s ease-out; }
-.intro-ring-menu { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; pointer-events: none; }
-.intro-ring-menu a { pointer-events: auto; cursor: pointer; outline: none; }
-.intro-ring-menu path, .intro-ring-menu circle { fill: transparent; stroke: none; }
-.intro-ring-tag { position: absolute; z-index: 5; margin: 0; transform: translate(-50%, -50%); font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--text-strong)); opacity: 0; transition: opacity .12s ease-out; pointer-events: none; white-space: nowrap; }
-.intro-world.tag-on .intro-ring-tag { opacity: 1; }
-.intro-ring-soon { position: absolute; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 5; margin: 0; font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; color: hsl(var(--text-muted)); opacity: 0; transition: opacity .2s ease-out; pointer-events: none; }
-.intro-world.topic-soon .intro-ring-soon { opacity: 1; }
+.intro-portal-enter:hover { filter: brightness(1.12); }
 /* the next 3D frame loads behind the current one (js/pages/intro.js swapTo): nearly invisible but rendering, so it is ready the moment it swaps in */
 .intro-world .intro-portal-stage.intro-portal-next { opacity: .001 !important; visibility: visible !important; transition: none !important; }
-/* the ring view owns the screen (audit fix 4): the site's header and footer step out while it shows, and come back on any other page */
-html[data-portal-ring] #scene .ark-header, html[data-portal-ring] .dx-foot { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
-/* each stone's word (audit fix 6): faint at rest, bright on the stone you point at */
-.intro-ring-menu text { font: 500 var(--fs-tertiary, 11px)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; fill: hsl(var(--text-faint)); transition: fill .12s ease-out; pointer-events: none; }
-.intro-ring-menu a:hover text, .intro-ring-menu a:focus-visible text { fill: hsl(var(--text-strong)); }
-.intro-world.menu-on .intro-ring-tag { display: none; }
-/* the centre is the click target of the object that came in (js/pages/intro.js showMenu) */
-.intro-ring-menu circle.centre { pointer-events: auto; cursor: pointer; }
+/* the ring view owns the screen (audit fix 4): the footer steps out while it shows, and comes back on any other page. The navbar
+   stays (owner, 2026-11-09: on every page): it stands in the top 52px, above the ring, bare (css/navigation.css). */
+html[data-portal-ring] .dx-foot { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+
+/* ---------- topic page (/fxn/<slug>, js/pages/topic.js) and learn page (/learn, js/pages/learn.js): design P05, phase 2 ----------
+   docs/design/space/p05-upgrade/ART-DIRECTOR.md. One screen, no scroll, at 1280x720 and 1440x900. THE SLOT is the object's rectangle,
+   the contract shared with the motion and 3D lanes: centre x 70%, y 48% of the viewport, height 52% of the viewport height, as wide as
+   it is tall (js/pages/topic.js slotRect). The words stand left of it in a column that ends 48 px before the slot's left edge:
+   calc(70vw - 26vh - 96px) wide (678 px at 1440x900, 613 px at 1280x720). The object itself is drawn by the stage above the page
+   (js/ark/stage.js, pointer-events none), so .topic-object is only the slot's place and, when no object can stand there, its refusal.
+   The jump bar is the last row on every topic page and on Learn, at the same place. Sizes only from the type scale (--fs-*). The
+   complement is spent once, on .topic-action. Items the motion lane builds in carry these classes, in this order: .topic-chip,
+   .topic-title, .topic-line (three), .topic-tabs, .topic-panel, .topic-action, .topic-jump. */
+/* THE INNER PAGES WEAR THE HOME (owner, 2026-11-11: "follow the same UI as the new home page"). A topic page and Learn are built from the home's
+   own parts and carry the home's own classes, so the rules above ("intro portal", "home dock") draw them and a change to the home reaches them:
+   .intro-portal-words the left column on the home's margin, .intro-portal-eyebrow the pill, .intro-portal-headline, .intro-portal-line,
+   .intro-portal-enter and .intro-portal-second the two buttons, .intro-features, .intro-dock with .intro-status the bar and .intro-chips the
+   chip row. The rules below only say what differs on an inner page: the parts show at once (the home shows them by .hero-words), the page starts
+   under the top bar (.world-page is inset 64), and the dock stands above the site footer strip (the home hides the footer). --dock-b is the
+   dock's foot above the page's foot (the footer strip is 72 high), --dock-h the dock's height: the bar, the gap and the chip row */
+.topic-page, .learn-page { display: block; pointer-events: auto; background: hsl(var(--canvas)); overflow: hidden; --dock-b: 92px; --dock-gap: 18px; --dock-h: 129px; }
+@media (max-height: 760px) { .topic-page, .learn-page { --dock-b: 84px; --dock-gap: 11px; --dock-h: 98px; } }
+/* the reset carries no weight (:where), so each part's own margin (the home's vertical rhythm) holds */
+:where(.topic-page, .learn-page) :is(p, dl, dd, ol) { margin: 0; }
+/* a topic's words column ends 29 px before the slot's left edge (the slot: centre x 70%, 52% of the height wide), and is never wider than the
+   home's widest: 628 at 1280x720, 660 at 1440x900. The two buttons stand on one line in it (the widest pair measures 610) */
+.topic-page .topic-left { width: max(480px, min(calc(70vw - 26vh - 29px - max(40px, 4vw)), 660px)); }
+.topic-page .topic-what { max-width: 32em; }
+.learn-col .learn-label:not(:first-child) { margin-top: 11px; }
+.topic-page .topic-left, .learn-page .learn-left { top: 0; bottom: calc(var(--dock-b) + var(--dock-h) + 18px); opacity: 1; visibility: visible; pointer-events: auto; }
+.topic-page .topic-dock, .learn-page .topic-dock { opacity: 1; visibility: visible; pointer-events: auto; }
+/* said to a screen reader, not printed: the labels the picture carries by place ("What it is") */
+.topic-sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* the pill: mint (the home's) for an open or live state; neutral for every other status, so "Built, not live" never wears the live colour */
+.topic-chip:not(.is-live, .is-open) { border-color: hsl(var(--text-strong) / .28); background: hsl(var(--text-strong) / .04); color: hsl(var(--text-muted)); }
+/* the headline: a topic's name is one or two words, so it takes the display step (76, law 80) on a view that has the room; the home's long
+   sentence waits for 1700. Below that the home's own steps hold (47, then 29). The game's question is a sentence and stays at 47 */
+@media (min-width: 1400px) and (min-height: 860px) { .topic-page .topic-title:not(.gate-ask), .learn-page .learn-title { margin-bottom: 29px; font-size: var(--fs-display, 76px); line-height: .96; } }
+.learn-page .learn-topic-status { display: inline-block; font: 500 var(--fs-tertiary)/1.3 var(--font-mono); letter-spacing: .06em; text-transform: none; color: hsl(var(--text-muted)); }
+.learn-topic-status.is-live, .learn-topic-status.is-open { color: hsl(var(--primary)); }
+.learn-label { font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; color: hsl(var(--text-faint)); margin-bottom: 4px; }
+/* "How it works": a button, filled or outlined by the page's rule (js/pages/topic.js "the two buttons"). Open, its arrow points down. The game's
+   refused button is dimmed and says why in the line under the buttons */
+.topic-page .topic-how[aria-expanded="true"]::after { transform: rotate(90deg); }
+.topic-page .gate-go.is-refused { opacity: .5; cursor: not-allowed; filter: none; box-shadow: none; }
+.gate-why { margin: -18px 0 29px; max-width: 27em; font: 400 var(--fs-secondary)/1.4 var(--font-sans); color: hsl(var(--text-muted)); }
+/* the feature items and the steps share one box, as tall as the taller: opening the steps moves nothing above them (law 84). The one not shown
+   keeps its room and is out of the picture, the tab order and the reading order (visibility) */
+.topic-depth { display: grid; width: 100%; }
+.topic-depth > * { grid-area: 1 / 1; min-width: 0; align-self: start; }
+.topic-depth > .topic-features[hidden], .topic-depth > .topic-panel[hidden] { display: flex; visibility: hidden; }
+.topic-features > .intro-feature, .topic-features > .intro-feature:first-child { flex: 1 1 0; width: auto; }
+.topic-panel { display: flex; flex-direction: column; gap: 11px; }
+.learn-panel[hidden] { display: none; }
+.topic-speed { display: flex; flex-direction: column; gap: 12px; }
+.topic-speed-row { display: flex; flex-direction: column; gap: 4px; }
+.topic-speed-action, .topic-speed-stat, .topic-speed-source { font: 500 var(--fs-tertiary)/1.4 var(--font-mono); letter-spacing: .08em; text-transform: none; color: hsl(var(--text-faint)); }
+.topic-speed-source { color: hsl(var(--text-muted)); text-decoration: none; }
+a[href].topic-speed-source { text-decoration: underline; text-underline-offset: 2px; }
+.topic-speed-big { font: 900 var(--fs-primary)/1 var(--font-display); color: hsl(var(--text-strong)); }
+.topic-speed-unit { font: 400 var(--fs-secondary)/1 var(--font-sans); color: hsl(var(--text-muted)); }
+.topic-speed-none { font: 600 var(--fs-secondary)/1.2 var(--font-sans); color: hsl(var(--text-muted)); }
+.topic-speed-row + .topic-speed-row { display: none; }   /* one measured row on the page; every row is on Learn's Speed tab */
+/* the steps: each with its number at 11 mono in mint, the words at 18 */
+.topic-steps { margin: 0; padding: 0; list-style: none; counter-reset: topic-step; display: flex; flex-direction: column; gap: 8px; font: 400 var(--fs-secondary)/1.3 var(--font-sans); color: hsl(var(--text)); }
+.topic-step { counter-increment: topic-step; display: grid; grid-template-columns: 29px minmax(0, 1fr); align-items: baseline; }
+.topic-step::before { content: counter(topic-step, decimal-leading-zero); font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .08em; color: hsl(var(--primary)); }
+.topic-page .topic-live { padding-left: 29px; font: 500 var(--fs-tertiary)/1.4 var(--font-mono); letter-spacing: .04em; text-transform: none; color: hsl(var(--text-muted)); }
+.topic-speed:empty { display: none; }
+/* the slot: placed in viewport px by topic.js, under the stage's object; it takes no pointer and draws nothing unless it refuses */
+.topic-object { position: fixed; pointer-events: none; display: grid; place-items: center; }
+.topic-object.is-empty { border: 1px dashed hsl(var(--border-subtle)); }
+.topic-object-none { margin: 0; padding: 0 24px; text-align: center; font: 400 var(--fs-secondary)/1.4 var(--font-sans); color: hsl(var(--text-muted)); max-width: 26em; }
+/* THE FLOOR (js/pages/topic.js floorRings): two thin mint ellipses under the slot, placed in viewport px with it. A drawing, no pointer. The
+   front halves are lines in the base colour; the back halves take the gradient that leaves out the slot's width (their stroke is set in the
+   markup, so no rule here may set it). It fades in once, after the words, and never moves */
+.topic-floor { position: fixed; pointer-events: none; overflow: visible; filter: drop-shadow(0 0 6px hsl(var(--primary) / .55)); }
+.topic-floor path { fill: none; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.topic-floor .topic-floor-front { stroke: hsl(var(--primary)); }
+.topic-floor .inner { stroke-width: 1; opacity: .7; }
+.topic-floor stop { stop-color: hsl(var(--primary)); }
+.topic-object.is-empty + .topic-floor { display: none; }
+/* THE DOCK on an inner page: the home's bar and chip row (.intro-dock). The bar's dot is lit only for an open or live status. The chip row holds
+   fourteen chips (the twelve topics, Learn, Home) on one line at 1280, so its chips are the home's chip at the scale's 11 in mono capitals;
+   the current page's chip is marked in the base colour; a hairline parts the topics from Learn and Home */
+.intro-status-dot.is-lit { border-color: hsl(var(--primary)); background: hsl(var(--primary)); }
+.topic-jump.intro-explore { gap: 18px; }
+.topic-jump .intro-chips { gap: 0 6px; }
+.topic-jump .intro-chip { gap: 0; padding: 0 10px; font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .04em; text-transform: uppercase; color: hsl(var(--text)); }
+.topic-jump .intro-chip.is-here { color: hsl(var(--primary)); border-color: hsl(var(--primary) / .6); background: hsl(var(--primary) / .08); }
+.topic-jump .topic-jump-out { margin-left: 6px; padding-left: 12px; border-left: 1px solid hsl(var(--text-strong) / .14); }
+/* a short view (1280x720): the dock is 98 high so its top clears the slot's foot (the bar 47, the chips 40); the steps close up */
+@media (max-height: 760px) {
+  .topic-dock .intro-status { height: 47px; } .topic-jump.intro-explore, .topic-jump .intro-chips, .topic-jump .intro-chip { height: 40px; }
+  .topic-steps { gap: 6px; } .topic-panel { gap: 8px; } .topic-speed-stat { display: none; }
+}
+
+/* ---------- learn page: the home's frame with no object. Left, on the home's margin, a narrow words column (--learn-w): the pill, the
+   headline, the line and the three tabs as the home's chips. Right of it, where a topic's object stands, the open tab's panel. At the foot,
+   the chip row (the same row as on a topic page). No filled button: Learn's way on is the chip row and the top bar (audit F32) ---------- */
+.learn-page { --learn-w: clamp(280px, 24vw, 360px); }
+.learn-page .learn-left { width: var(--learn-w); }
+.learn-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.learn-tab.intro-chip { cursor: pointer; }
+.learn-tab.intro-chip:is(:hover, :focus-visible) { border-color: hsl(var(--primary) / .6); }
+.learn-tab.intro-chip.is-on { color: hsl(var(--primary)); border-color: hsl(var(--primary) / .6); background: hsl(var(--primary) / .08); }
+.learn-panels { position: absolute; left: calc(max(40px, 4vw) + var(--learn-w) + 48px); right: max(40px, 4vw); top: 18px; bottom: calc(var(--dock-b) + var(--dock-h) + 18px); min-height: 0; overflow: hidden; display: grid; }
+.learn-panel { min-height: 0; display: flex; flex-direction: column; justify-content: center; }   /* the words sit at the page's middle, not its top */
+.learn-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.learn-col { display: flex; flex-direction: column; gap: 10px; }
+.learn-parts { padding-left: 1.4em; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.learn-rule { margin-bottom: 6px; }
+.learn-part-name { font: 600 var(--fs-secondary)/1.25 var(--font-display); color: hsl(var(--text-strong)); }
+.learn-part-text { font: 400 var(--fs-secondary)/1.35 var(--font-sans); color: hsl(var(--text-muted)); }
+.learn-words { display: grid; grid-template-columns: max-content 1fr; gap: 10px 20px; align-items: baseline; }
+.learn-words dt { font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; color: hsl(var(--primary)); }
+.learn-words dd { font: 400 var(--fs-secondary)/1.35 var(--font-sans); color: hsl(var(--text)); }
+.learn-none { font: 400 var(--fs-secondary)/1.35 var(--font-sans); color: hsl(var(--text-muted)); }
+/* Speed: one topic at a time (the chips), its rows in two columns: the action at 18, the number at 29, one line of conditions */
+.learn-panel[data-tab="speed"] { justify-content: flex-start; }
+.learn-speed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 48px; margin-top: 18px; max-width: 1100px; }
+.learn-speed-note { font: 400 var(--fs-tertiary)/1.5 var(--font-mono); color: hsl(var(--text-faint)); max-width: 1100px; }
+.learn-speed-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.learn-speed-chip { background: none; cursor: pointer; padding: 7px 10px; border-radius: var(--dx-radius, 8px); border: 1px solid hsl(var(--border-subtle)); font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+.learn-speed-chip.is-on { color: hsl(var(--primary)); border-color: hsl(var(--primary) / .6); }
+.learn-speed-row { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.learn-speed-none { font: 600 var(--fs-secondary)/1.2 var(--font-sans); color: hsl(var(--text-muted)); }
+.learn-speed-action { font: 400 var(--fs-secondary)/1.3 var(--font-sans); color: hsl(var(--text)); }
+.learn-speed-big { font: 900 var(--fs-primary)/1 var(--font-display); color: hsl(var(--text-strong)); }
+.learn-speed-unit { font: 400 var(--fs-secondary)/1 var(--font-sans); color: hsl(var(--text-muted)); }
+.learn-speed-cond, .topic-speed-cond { font: 500 var(--fs-tertiary)/1.4 var(--font-mono); letter-spacing: .04em; text-transform: none; color: hsl(var(--text-faint)); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden; }   /* the full text is the title */
+.learn-speed-row:nth-child(n + 7) { display: none; }   /* six rows fit both screens; the rest wait for a deeper page */
+/* Topics: twelve rows, one rule between them, no cards */
+.learn-topics { display: grid; grid-template-columns: 1fr; }
+.learn-topic { display: grid; grid-template-columns: 9em minmax(0, 1fr) auto; gap: 24px; align-items: baseline; padding: 9px 0; border-top: 1px solid hsl(var(--border-subtle)); text-decoration: none; }
+.learn-topic:last-child { border-bottom: 1px solid hsl(var(--border-subtle)); }
+.learn-topic:hover .learn-topic-name { color: hsl(var(--primary)); }
+.learn-topic-name { font: 700 var(--fs-secondary)/1.1 var(--font-display); color: hsl(var(--text-strong)); }
+.learn-topic-line { font: 400 var(--fs-secondary)/1.3 var(--font-sans); color: hsl(var(--text-muted)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.learn-topic-status { font: 500 var(--fs-tertiary)/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--text-faint)); text-align: right; }
+@media (max-height: 820px) {
+  .learn-page { row-gap: 12px; } .learn-topic { padding: 5px 0; } .learn-speed { gap: 12px 48px; margin-top: 12px; } .learn-speed-row:nth-child(n + 5) { display: none; }
+  .learn-col { gap: 6px; } .learn-parts { gap: 6px; margin-bottom: 8px; } .learn-words { gap: 6px 20px; }
+}
+@media (max-width: 899px) {
+  /* a narrow view: one column that scrolls: the words, the object's place, the panel (Learn), the bar, the chips. The floor steps out */
+  .topic-page, .learn-page { display: flex; flex-direction: column; gap: 29px; padding: 29px 16px 96px; overflow: auto; }
+  .topic-page .topic-left, .learn-page .learn-left, .topic-dock.intro-dock, .learn-panels { position: static; width: auto; flex: 0 0 auto; overflow: visible; }
+  .topic-features { flex-wrap: wrap; row-gap: 18px; }
+  .topic-dock .intro-status { flex-wrap: wrap; height: auto; padding: 11px; } .topic-dock .intro-status > * { flex: 1 1 40%; justify-content: flex-start; padding: 8px 11px; } .topic-dock .intro-status > * + *::before { content: none; }
+  .topic-jump.intro-explore { flex-direction: column; align-items: flex-start; height: auto; }
+  .topic-jump .intro-chips { flex: 0 0 auto; height: auto; overflow: visible; justify-content: flex-start; gap: 6px; }
+  .topic-floor { display: none; }
+  .topic-object { position: relative; flex: 0 0 auto; min-height: 280px; left: auto !important; top: auto !important; width: auto !important; height: 280px !important; }
+  .learn-cols { grid-template-columns: 1fr; } .learn-speed { grid-template-columns: 1fr; } .learn-topic { grid-template-columns: 1fr; gap: 4px; }
+}
+/* the footer strip on a world page (P05 phase 2, ART-DIRECTOR.md change 4): the family line and the year stay; the coin's price changes no
+   decision here, and "Back home" is a third way back beside the Portal link and the jump bar. The ring view hides the whole strip. */
+[data-page^="fxn/"] .site-footer-strip .site-price, [data-page="learn"] .site-footer-strip .site-price { display: none; }
+/* css/navigation.css places the Back control with an id selector, so this one carries the id too (both forms: the page attribute is on the scene or inside it) */
+#scene [data-page^="fxn/"] .site-footer-strip .hero-motion-toggle, #scene [data-page="learn"] .site-footer-strip .hero-motion-toggle,
+#scene[data-page^="fxn/"] .site-footer-strip .hero-motion-toggle, #scene[data-page="learn"] .site-footer-strip .hero-motion-toggle { display: none; }
+
+/* ---------- the portal ring as the main navigation (design P05, js/pages/intro.js) ----------
+   The twelve words sit on the stones' face band (site-view's ring band), engraved: 11 mono uppercase, a dark cut under a faint
+   light edge. PLAY sits exactly on the gate plate the studio reports, amber (live and approval), and opens the game topic. */
+
+/* ---------- the game's gate (/fxn/game, js/pages/topic.js gatePage; owner, 2026-11-10) ----------
+   One question beside the object, in the topic page's word column: the question at 47 (display), one action on the complement, and Back
+   to the portal at 11 mono, faint. No jump bar and no footer. The words wait until the object's GATE_OPEN has held (.gate-open), rise in
+   over one step, and leave in a tick when Back starts the door closing. A refusal under the action is 18 sans, muted. */
+/* 2026-11-11: the game's page is the topic template (the pill, the question as the headline, the line, the two buttons, the feature items, the bar
+   and the chips). Only its words column waits for the gate: the bar and the chips stand at once, and the way back is the Home chip */
+.topic-page.is-gate .topic-left { opacity: 0; transform: translateY(18px); pointer-events: none; transition: opacity var(--m-tick, 167ms) ease-out, transform var(--m-tick, 167ms) ease-out; }
+.topic-page.is-gate.gate-open .topic-left { opacity: 1; transform: none; pointer-events: auto;
+  transition: opacity var(--m-step, 333ms) var(--ease-arrive, ease-out), transform var(--m-step, 333ms) var(--ease-arrive, ease-out); }
+.gate-ask { max-width: 11em; text-wrap: balance; }
+
+/* ---------- THE REMAINING PAGES WEAR THE HOME (2026-11-11; Download, Account while locked, Not found). Layer: app. ----------
+   A page root that carries .home-wear takes the home's palette (the palette rule above) and its parts wear the home's own classes, added
+   where the page builds them: .intro-portal-eyebrow the pill, .intro-portal-headline, .intro-portal-line, .intro-portal-enter the one filled
+   button. Those classes' values are written once, in "intro portal" above. The rules here only place each page's parts in the home's frame:
+   one words column on the home's margin, the page's facts as the home's rounded bar at the foot, cards on the surface with a hairline and
+   8px corners. Restyle and re-lay only: no rule changes what a control does. Wide views (901 and up); a phone keeps each page's own column.
+   The headline stays at 47 on every view: each of the three is a sentence.
+   REDUCTION TEST, the three first screens:
+   Download   1 getting FXN Browser. 2 Get FXN Browser. 3 which apps exist and that none is published yet. 4 nothing. 5 the bar's three links
+              repeat the top bar. 6 the apps count. 7 the single "Apps" tab. 8, 9 nothing to keep. 10 an app with no address says "Not published yet".
+   Account    1 your account, which is locked. 2 Connect. 3 that it is locked and why. 4 everything the account holds. 5 the top bar's Sign in.
+              6 nothing. 7 the lock mark. 8 nothing to keep. 9 the account itself once the FXN ID opens. 10 Connect is a plain link.
+   Not found  1 no page at this address. 2 Home. 3 the address asked for. 4 nothing. 5 the ways onward repeat the top bar. 6 nothing.
+              7 the breadcrumb. 8, 9 nothing to keep. 10 the closest addresses are derived; with none, the ways onward stand alone. */
+#scene .home-wear { --dock-b: 92px; --bar-h: 64px; }
+#scene .home-wear .intro-portal-eyebrow { align-self: flex-start; }
+#scene .home-wear .intro-portal-line :is(p, div) { margin: 0; font: inherit; color: inherit; max-width: none; }
+/* a button that brings its own arrow (the kit's .ark-btn__arrow) gives way to the shared class's drawn one */
+#scene .home-wear .intro-portal-enter :is(.ark-btn__arrow, .ark-btn__icon) { display: none; }
+/* Download's dock stands inside the words column at every width (js/pages/download.js), so it never draws a second glass box in it */
+.hud.home-wear .hud-left > .hud-dock { position: static; transform: none; max-width: none; display: block; margin: 11px 0 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; animation: none; }
+/* a narrow window or a phone (seen at 390 and 768 wide, emulated, on Download): the HUD frame's phone rules (css/space-frame.css, 899 and
+   under) started the page 46% down the screen (the strip the parked 3D world stood in) and held the words in a box 24% of the screen high
+   that scrolled inside itself. A page that wears the home is one column from the top that scrolls as a page, its words with no glass box */
+@media (max-width: 899px) {
+  .hud.home-wear { justify-content: flex-start; padding: 82px 16px 96px; overflow-y: auto; pointer-events: auto; background: hsl(var(--canvas)); }
+  .hud.home-wear :is(.hud-left, .hud-right) { flex: none; max-height: none; overflow: visible; }
+  .hud.home-wear .hud-left { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .hud.home-wear .hud-right { margin-top: 18px; border-radius: var(--dx-radius, 8px); border-bottom-width: 1px; }
+}
+@media (max-height: 760px) { #scene .home-wear { --dock-b: 84px; --bar-h: 47px; } #scene .home-wear .intro-portal-eyebrow { margin-bottom: 18px; } #scene .home-wear .intro-portal-line { margin-bottom: 29px; } }
+@media (min-width: 900px) {   /* 900: the width where the HUD frame's own one-column layout ends (css/space-frame.css, max-width 899) */
+  /* ---- Download (js/pages/download.js, the HUD frame of css/space-frame.css) ---- */
+  /* the ground: the home's one dark canvas, under the top bar. The old 3D world that stood behind this page is parked (js/ark/world-parked.js) */
+  .hud.home-wear::before { content: ""; position: absolute; inset: 64px 0 0 0; pointer-events: none; background: hsl(var(--canvas)); }
+  .hud.home-wear .hud-left { left: max(40px, 4vw); top: 64px; bottom: calc(var(--dock-b) + var(--bar-h) + 18px); width: clamp(480px, 34vw, 660px) !important; max-height: none; justify-content: center; align-items: flex-start; gap: 0; padding: 0; overflow: visible;
+    background: none; border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; animation: none; }
+  /* the dock holds the one button and stands in the column, under the line (the home's order: pill, headline, line, button, then the items) */
+  .hud.home-wear .hud-left > .hud-dock { order: 1; margin: 0 0 29px; }
+  .hud.home-wear .hud-go { margin: 0; }
+  .hud.home-wear .hud-tabs { order: 2; margin: 0 0 11px; }
+  .hud.home-wear .hud-body { order: 3; flex: 0 1 auto; align-self: stretch; padding: 0; border: 0; overflow: visible; }
+  /* a chip in this frame is the home's chip at the scale's 11 in mono capitals (the topic pages' chip row) */
+  .hud.home-wear .hud-chip { display: inline-flex; align-items: center; min-height: 40px; padding: 0 11px; border: 1px solid hsl(var(--text-strong) / .12); border-radius: 11px; background: hsl(var(--surface) / .88); box-shadow: none;
+    font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .04em; text-transform: uppercase; text-decoration: none; color: hsl(var(--text)); transform: none; transition: border-color .2s ease-out, background-color .2s ease-out; }
+  .hud.home-wear .hud-chip:is(:hover, :focus-visible) { border-color: hsl(var(--primary) / .6); background: hsl(var(--raised, var(--surface))); box-shadow: none; }
+  .hud.home-wear .hud-chip:is([aria-selected="true"], [aria-current]:not([aria-current="false"])) { color: hsl(var(--primary)); border-color: hsl(var(--primary) / .6); background: hsl(var(--primary) / .08); box-shadow: none; }
+  /* the apps: the home's feature items, a name at 18 and its lines at 11, a hairline between neighbours */
+  .hud.home-wear .download-apps { display: flex; margin: 0; padding: 0; list-style: none; }
+  .hud.home-wear .download-apps > li { flex: 1 1 0; min-width: 0; padding: 0 18px; border: 0; border-left: 1px solid hsl(var(--text-strong) / .12); border-radius: 0; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+    font: 400 var(--fs-tertiary)/1.45 var(--font-sans); color: hsl(var(--text-muted)); }
+  .hud.home-wear .download-apps > li:first-child { padding-left: 0; border-left: 0; }
+  .hud.home-wear .download-apps > li > b { font: 700 var(--fs-secondary)/1.2 var(--font-sans); color: hsl(var(--text-strong)); }
+  .hud.home-wear .download-apps > li > a { color: hsl(var(--primary)); }
+  .hud.home-wear .download-status { margin: 8px 0 0; font: 500 var(--fs-tertiary)/1.3 var(--font-mono); letter-spacing: .04em; color: hsl(var(--text-muted)); }
+  .hud.home-wear .download-note { margin: 18px 0 0; max-width: 40em; font: 400 var(--fs-tertiary)/1.5 var(--font-sans); color: hsl(var(--text-muted)); }
+  /* the counts and the ways on: the home's rounded bar at the foot of the view, a name at 11 and a value at 18, hairlines between */
+  .hud.home-wear .hud-right { left: max(40px, 4vw) !important; right: max(40px, 4vw); top: auto; bottom: var(--dock-b); width: auto !important; height: var(--bar-h); max-height: none; padding: 0 11px; overflow: hidden;
+    display: flex; flex-direction: row; align-items: stretch; gap: 0; border: 1px solid hsl(var(--text-strong) / .12); border-radius: 18px; background: hsl(var(--surface) / .88); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; animation: none; }
+  .hud.home-wear .hud-stats { flex: 0 0 auto; display: flex; align-items: stretch; gap: 0; }
+  .hud.home-wear .hud-stat { position: relative; display: flex; align-items: center; gap: 11px; padding: 0 18px; white-space: nowrap; }
+  .hud.home-wear .hud-stat + .hud-stat::before { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 1px; background: hsl(var(--text-strong) / .14); }
+  .hud.home-wear .hud-stat::after { content: none; }
+  .hud.home-wear .hud-stat span { order: -1; font: 500 var(--fs-tertiary)/1 var(--font-sans); letter-spacing: 0; text-transform: none; color: hsl(var(--text)); }
+  .hud.home-wear .hud-stat b { font: 600 var(--fs-secondary)/1 var(--font-sans); letter-spacing: .04em; color: hsl(var(--text-muted)); }
+  .hud.home-wear .hud-actions { flex: 1 1 auto; min-width: 0; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 8px; padding-left: 18px; }
+  @media (max-height: 760px) { .hud.home-wear .hud-chip { min-height: 36px; } .hud.home-wear .hud-left > .hud-dock { margin-bottom: 18px; } }
+  /* ---- Account while locked (js/pages/account.js lockedPage): the card's words stand as the home's column, on the ground, with no glass ---- */
+  /* the ground of a block page that wears the home: the page's panel starts 20 px under the top bar and ends above the footer strip, so its
+     host spreads the same canvas around it and no other ground shows at its edges */
+  #scene .continuity-host:has(> .ark-block-page.home-wear) { box-shadow: 0 0 0 200px hsl(var(--portal-ground)); }
+  #scene .ark-page.ark-block-page.account-page--locked.home-wear { place-items: center start; align-content: center; padding: 0 max(40px, 4vw) 90px; background: hsl(var(--canvas)); }
+  #scene .ark-page.ark-block-page.account-page--locked.home-wear > .account-locked { justify-self: start; width: clamp(480px, 34vw, 660px); max-width: none; margin: 0; padding: 0; gap: 0; border: 0; border-radius: 0; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  #scene .home-wear .account-locked-mark { margin-bottom: 18px; border-color: hsl(var(--primary) / .5); border-radius: var(--dx-radius, 8px); background: hsl(var(--primary) / .06); }
+  /* ---- Not found (js/pages/not-found.js, Ark blocks): the refusal is the words column; the closest addresses and the ways onward stand right of it ---- */
+  #scene .ark-page.ark-block-page.notfound-page.home-wear { width: 100%; max-width: none; margin-inline: 0; border-radius: 0; background: hsl(var(--canvas)); padding: 29px max(40px, 4vw) 29px;
+    display: grid; grid-template-columns: clamp(480px, 34vw, 660px) minmax(0, 1fr); column-gap: 48px; row-gap: 11px; align-content: center; }
+  #scene .ark-page.ark-block-page.notfound-page.home-wear > * { grid-column: 2; max-width: none; margin-inline: 0; }
+  #scene .ark-page.ark-block-page.notfound-page.home-wear > .ark-breadcrumb { grid-column: 1 / -1; }
+  #scene .ark-page.ark-block-page.notfound-page.home-wear > .ark-hero { grid-column: 1; grid-row: 2 / span 5; align-self: center; display: flex; flex-direction: column; align-items: flex-start; gap: 0; padding: 0; border: 0; background: none; }
+  #scene .notfound-page.home-wear .ark-hero .ark-actions { margin: 0 0 29px; }
+  #scene .notfound-page.home-wear .ark-hero__meta { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+  #scene .notfound-page.home-wear .ark-hero__meta dt { font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .2em; text-transform: uppercase; color: hsl(var(--text-faint, var(--text-muted))); }
+  #scene .notfound-page.home-wear .ark-hero__meta dd { margin: 4px 0 0; font: 500 var(--fs-secondary)/1.3 var(--font-mono); color: hsl(var(--text-strong)); overflow-wrap: anywhere; }
+  #scene .notfound-page.home-wear .ark-section-header { margin: 11px 0 0; padding: 0; border: 0; }
+  #scene .notfound-page.home-wear .ark-section-header .ark-eyebrow { font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .32em; text-transform: uppercase; color: hsl(var(--text-muted)); }
+  #scene .notfound-page.home-wear .ark-section-header__title { margin: 4px 0 0; font: 700 var(--fs-secondary)/1.2 var(--font-sans); letter-spacing: 0; color: hsl(var(--text-strong)); }
+  #scene .notfound-page.home-wear .ark-card { border: 1px solid hsl(var(--text-strong) / .12); border-radius: var(--dx-radius, 8px); background: hsl(var(--surface) / .88); box-shadow: none; }
+  #scene .notfound-page.home-wear .ark-card:is(:hover, :focus-within) { border-color: hsl(var(--primary) / .6); background: hsl(var(--raised, var(--surface))); }
+  #scene .notfound-page.home-wear .ark-card__title { font: 700 var(--fs-secondary)/1.2 var(--font-sans); letter-spacing: 0; color: hsl(var(--text-strong)); }
+  #scene .notfound-page.home-wear .ark-card__description { font: 400 var(--fs-tertiary)/1.45 var(--font-sans); color: hsl(var(--text-muted)); }
+  /* the entrance is the home's: each part of the words column rises once, 50 ms apart */
+  :is(.hud.home-wear .hud-left, #scene .home-wear .account-locked, #scene .notfound-page.home-wear > .ark-hero) > * { animation: hero-word-in .35s cubic-bezier(.2, .7, .2, 1) both; }
+  :is(.hud.home-wear .hud-left, #scene .home-wear .account-locked, #scene .notfound-page.home-wear > .ark-hero) > :nth-child(2) { animation-delay: .05s; }
+  :is(.hud.home-wear .hud-left, #scene .home-wear .account-locked, #scene .notfound-page.home-wear > .ark-hero) > :nth-child(3) { animation-delay: .1s; }
+  :is(.hud.home-wear .hud-left, #scene .home-wear .account-locked, #scene .notfound-page.home-wear > .ark-hero) > :nth-child(n + 4) { animation-delay: .15s; }
+}
+@media (prefers-reduced-motion: reduce) { :is(.hud.home-wear .hud-left, #scene .home-wear .account-locked, #scene .notfound-page.home-wear > .ark-hero) > * { animation: none !important; } .hud.home-wear .hud-chip { transition: none; } }

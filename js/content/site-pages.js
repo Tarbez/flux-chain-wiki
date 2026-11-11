@@ -35,22 +35,21 @@ var ArkSitePages = (function () {
   ];
   /* The pages that stay after the 2026-11-05 cut. A page that left is a row of RETIRED below, never deleted:
      its address keeps working and opens the page that now holds it. */
+  /* The portal's 12 topics (owner, 2026-11-09, design P05: the ring of 12 stones is the main navigation), clockwise from the
+     top. Each is a page at /fxn/<slug>, drawn by one template (js/pages/topic.js) from one row of js/content/topics.js. The
+     order here is the ring's order; topics.js holds each topic's words and object. No journey: the ring and the jump bar
+     lead to them, never the menu lists. */
+  var TOPICS = ['id', 'records', 'keepers', 'capacity', 'chains', 'names', 'game', 'releases', 'apps', 'rules', 'deposits', 'network'];
+  /* The pages that stay after the 2026-11-09 portal cut (design P05). A page that left is a row of RETIRED below, never deleted:
+     its address keeps working and opens the page that now holds it. */
   var PAGES = [
     { key: 'zero', path: '/', label: 'Home', seoId: 'home', journey: 'understand' },
-    { key: 'intro', path: '/intro', label: 'Enter the grid', seoId: 'home', journey: null, note: 'The first page of a fresh visit: the network from above, and one card that opens home' },
-    { key: 'works', path: '/how-it-works', label: 'How it works', journey: 'understand', lead: true },
-    { key: 'resolutions', path: '/resolutions', label: 'Resolutions', journey: 'build', lead: true, note: 'Every thing you can resolve on the mesh, one section each' },
-    { key: 'learnings', path: '/learnings', label: 'Notes', journey: 'read', lead: true, note: 'Choose an architectural question' },
-    { key: 'explorer', path: '/explore', label: 'Mesh Explorer', journey: 'prove', lead: true },
-    { key: 'stats/now', path: '/stats/now', label: 'Network stats', journey: 'prove' },
-    { key: 'resolvers', path: '/resolvers', label: 'Resolvers and capabilities', journey: 'build' },
-    { key: 'auth', path: '/auth', label: 'Sign in', journey: null, note: 'Sign in with your FXN ID file; the master account opens after' },
+    { key: 'intro', path: '/intro', label: 'Home', seoId: 'home', journey: 'understand', lead: true, note: 'The home: what FXN is, and a link to each of the twelve topics' },
+    { key: 'learn', path: '/learn', label: 'Learn', journey: 'understand', note: 'What a record is, every measured number, and the twelve topics' },
+    { key: 'auth', path: '/auth', label: 'Sign in', journey: null, note: 'Sign in with your FXN ID file. The master account opens after.' },
     { key: 'account', path: '/account', label: 'Your account', journey: 'build' },
-    { key: 'chain', path: '/chain', label: 'Every identity, its own chain', journey: 'understand' },
-    { key: 'identity', path: '/identity', label: 'Your FXN ID', journey: 'understand' },
-    { key: 'ring', path: '/ring', label: 'A chain of the network', journey: 'understand' },
     { key: 'download', path: '/download', label: 'Get FXN Browser', journey: 'run', lead: true }
-  ];
+  ].concat(TOPICS.map(function (slug) { return { key: 'fxn/' + slug, path: '/fxn/' + slug, label: 'FXN ' + slug, journey: null, topic: slug }; }));
   /* The pages the 2026-11-05 cut retired: each old key keeps its old address, and opens `to`, the page that holds it now.
      `query` is what that page reads to open the right section (?s=<section>, ?i=<item>). js/pages/catalog.js turns every row
      into an ArkUI.pageRedirects entry with the old path as its alias, so a saved link still lands. The module files stay
@@ -58,40 +57,51 @@ var ArkSitePages = (function () {
      (js/lattice.js, js/pages/lifecycle.js) is derived from the lifecycle/* rows. Keys that are routes derived from content
      (resolutions/<slug>, concept/<id>) are retired by their family in FAMILIES, not listed here. */
   var RETIRED = [
+    /* the 2026-11-09 portal cut (design P05, docs/design/space/SPACE.md "Portal navigation (P05)"): each page's facts now live on
+       the topic page or on Learn */
+    { key: 'works', path: '/how-it-works', label: 'How it works', to: 'learn' },
+    { key: 'learnings', path: '/learnings', label: 'Notes', to: 'learn' },
+    { key: 'resolutions', path: '/resolutions', label: 'Resolutions', to: 'fxn/apps' },
+    { key: 'resolvers', path: '/resolvers', label: 'Resolvers and capabilities', to: 'fxn/apps' },
+    { key: 'explorer', path: '/explore', label: 'Mesh Explorer', to: 'fxn/network' },
+    { key: 'stats/now', path: '/stats/now', label: 'Network stats', to: 'learn', query: 't=speed' },
+    { key: 'chain', path: '/chain', label: 'Every identity, its own chain', to: 'fxn/chains' },
+    { key: 'identity', path: '/identity', label: 'Your FXN ID', to: 'fxn/id' },
+    { key: 'ring', path: '/ring', label: 'A chain of the network', to: 'fxn/keepers' },
     { key: 'about', path: '/about', label: 'Overview', to: 'zero' },
     { key: 'palette', path: '/palette', label: 'Interface palette', to: 'zero' },
     { key: 'treasury', path: '/treasury', label: 'Treasury preview', to: 'zero' },
     { key: 'deposits', path: '/deposits', label: 'Deposit preview', to: 'zero' },
-    { key: 'reference', path: '/reference', label: 'Canonical reference', to: 'learnings', query: 'open=reference', keep: true },
-    { key: 'how/ask', path: '/how-deployment-works/ask', label: 'State the request', to: 'works' },
-    { key: 'how/work', path: '/how-deployment-works/work', label: 'Agree on the terms', to: 'works' },
-    { key: 'how/check', path: '/how-deployment-works/check', label: 'Verify the result', to: 'works' },
-    { key: 'lifecycle', path: '/lifecycle', label: 'Agreement lifecycle', to: 'works' },
-    { key: 'lifecycle/intent', path: '/lifecycle/intent', label: 'Intent / Agreement lifecycle', short: 'Intent', to: 'works' },
-    { key: 'lifecycle/offer', path: '/lifecycle/offer', label: 'Offer / Agreement lifecycle', short: 'Offer', to: 'works' },
-    { key: 'lifecycle/agreement', path: '/lifecycle/agreement', label: 'Agreement / Agreement lifecycle', short: 'Agreement', to: 'works' },
-    { key: 'lifecycle/fulfillment', path: '/lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle', short: 'Fulfillment', to: 'works' },
-    { key: 'lifecycle/receipt', path: '/lifecycle/receipt', label: 'Receipt / Agreement lifecycle', short: 'Receipt', to: 'works' },
-    { key: 'resolver', path: '/what-is-a-resolver', label: 'What is a resolver?', to: 'resolvers' },
-    { key: 'references', path: '/start-from-something-real', label: 'Reference resolvers', to: 'resolvers' },
-    { key: 'resolver-math', path: '/resolver-math', label: 'Resolver math', to: 'learnings', query: 'open=resolver-math', keep: true },
-    { key: 'concept', path: '/concept', label: 'The operating model', to: 'learnings', query: 'open=concept', keep: true },
-    { key: 'dao', path: '/dao', label: 'How DEFXN is governed', to: 'learnings', query: 'open=dao', keep: true },
+    { key: 'reference', path: '/reference', label: 'Canonical reference', to: 'learn' },
+    { key: 'how/ask', path: '/how-deployment-works/ask', label: 'State the request', to: 'learn' },
+    { key: 'how/work', path: '/how-deployment-works/work', label: 'Agree on the terms', to: 'learn' },
+    { key: 'how/check', path: '/how-deployment-works/check', label: 'Verify the result', to: 'learn' },
+    { key: 'lifecycle', path: '/lifecycle', label: 'Agreement lifecycle', to: 'learn' },
+    { key: 'lifecycle/intent', path: '/lifecycle/intent', label: 'Intent / Agreement lifecycle', short: 'Intent', to: 'learn' },
+    { key: 'lifecycle/offer', path: '/lifecycle/offer', label: 'Offer / Agreement lifecycle', short: 'Offer', to: 'learn' },
+    { key: 'lifecycle/agreement', path: '/lifecycle/agreement', label: 'Agreement / Agreement lifecycle', short: 'Agreement', to: 'learn' },
+    { key: 'lifecycle/fulfillment', path: '/lifecycle/fulfillment', label: 'Fulfillment / Agreement lifecycle', short: 'Fulfillment', to: 'learn' },
+    { key: 'lifecycle/receipt', path: '/lifecycle/receipt', label: 'Receipt / Agreement lifecycle', short: 'Receipt', to: 'learn' },
+    { key: 'resolver', path: '/what-is-a-resolver', label: 'What is a resolver?', to: 'fxn/apps' },
+    { key: 'references', path: '/start-from-something-real', label: 'Reference resolvers', to: 'fxn/apps' },
+    { key: 'resolver-math', path: '/resolver-math', label: 'Resolver math', to: 'learn' },
+    { key: 'concept', path: '/concept', label: 'The operating model', to: 'learn' },
+    { key: 'dao', path: '/dao', label: 'How DEFXN is governed', to: 'learn' },
     { key: 'account/domains', path: '/account/domains', label: 'Your domains', to: 'account' },
     { key: 'bundledeployer', path: '/bundle-deployer', label: 'FXN Bundle Deployer', to: 'account' },
-    { key: 'stats/capabilities', path: '/stats/capabilities', label: 'Operations, measured', to: 'stats/now', query: 's=capabilities' },
-    { key: 'stats/ceiling', path: '/stats/ceiling', label: 'One node, measured', to: 'stats/now', query: 's=ceiling' },
-    { key: 'chain/record', path: '/chain/record', label: 'Revisions', to: 'chain', query: 's=record' },
-    { key: 'chain/open', path: '/chain/open', label: 'Record', to: 'chain', query: 's=open' },
-    { key: 'chain/links', path: '/chain/links', label: 'Connections', to: 'chain', query: 's=links' },
-    { key: 'trace', path: '/trace', label: 'Trace a record', to: 'chain', query: 's=trace' },
-    { key: 'identity/sign', path: '/identity/sign', label: 'Signing in', to: 'identity', query: 's=sign' },
-    { key: 'identity/safe', path: '/identity/safe', label: 'Security', to: 'identity', query: 's=safe' },
-    { key: 'identity/you', path: '/identity/you', label: 'Your identity', to: 'identity', query: 's=you' },
-    { key: 'works/resolve', path: '/how-it-works/resolve', label: 'How a result is made', to: 'works', query: 's=resolve' },
-    { key: 'works/layers', path: '/how-it-works/layers', label: 'Three layers', to: 'works', query: 's=layers' },
-    { key: 'works/life', path: '/how-it-works/life', label: 'Life of a resolver', to: 'works', query: 's=life' },
-    { key: 'fxn', path: '/fxn', label: 'FXN supply', to: 'ring', query: 'i=fxn' },
+    { key: 'stats/capabilities', path: '/stats/capabilities', label: 'Operations, measured', to: 'learn', query: 't=speed' },
+    { key: 'stats/ceiling', path: '/stats/ceiling', label: 'One node, measured', to: 'learn', query: 't=speed' },
+    { key: 'chain/record', path: '/chain/record', label: 'Revisions', to: 'fxn/chains' },
+    { key: 'chain/open', path: '/chain/open', label: 'Record', to: 'fxn/chains' },
+    { key: 'chain/links', path: '/chain/links', label: 'Connections', to: 'fxn/chains' },
+    { key: 'trace', path: '/trace', label: 'Trace a record', to: 'fxn/chains' },
+    { key: 'identity/sign', path: '/identity/sign', label: 'Signing in', to: 'fxn/id' },
+    { key: 'identity/safe', path: '/identity/safe', label: 'Security', to: 'fxn/id' },
+    { key: 'identity/you', path: '/identity/you', label: 'Your identity', to: 'fxn/id' },
+    { key: 'works/resolve', path: '/how-it-works/resolve', label: 'How a result is made', to: 'learn' },
+    { key: 'works/layers', path: '/how-it-works/layers', label: 'Three layers', to: 'learn' },
+    { key: 'works/life', path: '/how-it-works/life', label: 'Life of a resolver', to: 'learn' },
+    { key: 'fxn', path: '/fxn', label: 'FXN supply', to: 'learn', query: 't=topics' },
     { key: 'deploy', path: '/deploy', label: 'Create or join a network', to: 'download' }
   ];
   /* The dated runs the stats section can show with their figures, and the only source of its week pages. A run is listed
@@ -152,9 +162,10 @@ var ArkSitePages = (function () {
      /learnings?open=concept/depth). `keep` (here and in RETIRED): Notes opens that page in place by its own catalog
      entry (ArkUI.loadPage), so the entry keeps its own module and scripts and only its address moves. */
   var FAMILIES = [
-    { prefix: 'resolutions/', journey: null, to: 'resolutions', query: 's' },
-    { prefix: 'article/', journey: 'read' },
-    { prefix: 'concept/', journey: null, to: 'learnings', query: 'open', whole: true, keep: true }
+    { prefix: 'resolutions/', journey: null, to: 'fxn/apps' },
+    /* 2026-11-10 (owner): the articles are history ("nobody wants to know previous data"); each opens Learn. The files stay. */
+    { prefix: 'article/', journey: null, to: 'learn' },
+    { prefix: 'concept/', journey: null, to: 'learn' }
   ];
   function row(key) { for (var i = 0; i < PAGES.length; i++) if (PAGES[i].key === key) return PAGES[i]; return null; }
   /* The journey of any catalog key: its row's, else its family's, else null (in no list). */
@@ -175,6 +186,8 @@ var ArkSitePages = (function () {
     statsWeeks: function (live) { return copy(statsWeeks(live)); },
     statsTimeline: statsTimeline,
     isoWeek: isoWeek,
-    journeyOf: journeyOf
+    journeyOf: journeyOf,
+    /* the portal's 12 topics in the ring's order: [{ slug, key, path }] */
+    topics: function () { return TOPICS.map(function (slug) { return { slug: slug, key: 'fxn/' + slug, path: '/fxn/' + slug }; }); }
   };
 })();

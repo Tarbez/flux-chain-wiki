@@ -1,9 +1,9 @@
 import themeOptions, { legacyThemeIds } from './theme-options.js';
-// Ark UI comes from the synced packages (node_modules/@deadark/*, filled by `npm run sync:ark`);
+// Ark UI comes from the synced packages (node_modules/@fxn/*, filled by `npm run sync:ark`);
 // build: node scripts/build-ark-vendor.cjs -> js/settings/panel.js.
-import { createArkUI } from '@deadark/ark-ui/runtime';
-import { createArkHeadlessComponent, defineArkHeadlessComponent } from '@deadark/ark-ui/headless';
-import { createArkPopover } from '@deadark/ark-primitives/dialog';
+import { createArkUI } from '@fxn/ui/runtime';
+import { createArkHeadlessComponent, defineArkHeadlessComponent } from '@fxn/ui/headless';
+import { createArkPopover } from '@fxn/ui-primitives/dialog';
 const host = document.querySelector('.site-settings');
 const ui = createArkUI();
 // The host forwards document events; ARK owns inside/branch detection and dismissal.

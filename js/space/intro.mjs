@@ -272,7 +272,7 @@ export function mount(space, host) {
     shot = 4; phase = 'call'; clearStage(); light([P.kernel]);
     if (P.lanes.length) light(P.lanes.concat([P.kernel]));   /* the world's own lane places, when they stand */
     steps([{ at: 0, shot: pose(P.kernel, P.lanes.length ? 2.1 : 1.6, P.lanes.length ? 40 : 26, 0, BAR) }]);
-    caption(C('B4.LINE', 'Seven lanes of products on one kernel.'), { mono: C('B4.MONO', LANES), subject: P.kernel });
+    caption(C('B4.LINE', 'Products on one kernel.'), { mono: C('B4.MONO', LANES), subject: P.kernel });
     loadCatalog();
     later(BAR, () => {
       if (!P.lanes.length) buildLanes();   /* the DOM row stays only until the lane places stand */
@@ -324,7 +324,7 @@ export function mount(space, host) {
   function b5() {
     shot = 5; phase = 'call'; clearStage(); light([P.network]);
     steps([{ at: 0, shot: pose(P.network, P.towers.length ? 1.15 : 1.3, 28, 0, BAR) }]);
-    caption(C('B5.LINE', 'Every number names its machine.'), { mono: C('B5.MONO', '26,274 final payments a second. 5 test nodes on one machine. 1,000 in flight.'), subject: P.network });
+    caption(C('B5.LINE', 'Every number names its machine.'), { mono: C('B5.MONO', 'Not measured yet on the devnet release. Measured after devnet starts.'), subject: P.network });
     later(BAR, () => hold(reduced ? C('B5.STEP', 'Show the copies') : phone() ? C('B5.CHIP.TOUCH', 'Pinch out') : C('B5.CHIP', 'Scroll out'), P.network, 0, phone() ? 0 : 130, copies));
   }
   function copies() {
@@ -334,7 +334,7 @@ export function mount(space, host) {
     else steps([{ at: 0, pulse: [P.network] }],
       FAN.map((f, i) => at(P.network, f[0] * 3, f[1] * 3, { type: 'node', s: 0.4, delay: i * 0.1 })).concat(FAN.map((f) => at(P.network, f[0] * 3 + 0.5, f[1] * 3, { delay: 1.1 }))));
     wipe(() => later(1.1, () => {
-      caption(C('B5.NUMBER', 'A copy reached each pinner in about 1.1 s.'), { mono: C('B5.CONDITION', 'Measured on 5 test nodes on one machine. Nothing live.'), subject: P.network });
+      caption(C('B5.NUMBER', 'The receipt is final at once. Copies reach the pinners after it.'), { mono: C('B5.CONDITION', 'Not measured yet on the devnet release. Measured after devnet starts.'), subject: P.network });
       later(BAR, () => hold(C('NEXT', NEXT), () => [innerWidth / 2, innerHeight - 190], 0, 0, () => answer(b6)));
     }));
   }
@@ -349,7 +349,7 @@ export function mount(space, host) {
   function b6() {
     shot = 6; phase = 'call'; clearStage(); light(null);
     steps(P.racks ? [{ at: 0, shot: pose(P.racks, phone() ? 1.5 : 0.9, 58, 0, BAR) }] : [{ at: 0, path: [{ at: BAR, shot: { place: 'hero' } }] }]);   /* high enough that both rows of racks show */
-    caption(C('B6.LINE', 'Devnet genesis is next.'), { mono: C('B6.MONO', 'Up to 16 of our 20 machines. Test money. No date until the gate passes.'), subject: P.kernel });
+    caption(C('B6.LINE', 'Devnet genesis is next.'), { mono: C('B6.MONO', 'Test money. No date until the gate passes.'), subject: P.kernel });
     later(BAR, () => {
       if (!P.racks) { road.hidden = false; road.replaceChildren(); placeBand(road); for (let i = 0; i < 20; i++) road.appendChild(el('i', 'intro-dot')); }
       hold(C('B6.CHIP', 'See the road'), P.racks || rowAnchor(road), 0, P.racks ? 90 : 0, press6);

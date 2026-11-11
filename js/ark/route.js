@@ -55,7 +55,10 @@
       var destination = route.href(build(path, search));
       var now = pathMode ? location.pathname + location.search : location.hash;
       if (now === destination && !route.isLegacyHash()) return;
-      history[mode === 'replace' ? 'replaceState' : 'pushState'](null, '', destination);
+      /* a fragment on a clean address (a section anchor) stays through a replace; an old #/route hash is the
+         route itself and goes */
+      var fragment = pathMode && mode === 'replace' && !route.isLegacyHash() ? location.hash : '';
+      history[mode === 'replace' ? 'replaceState' : 'pushState'](null, '', destination + fragment);
     }
   };
 })();

@@ -120,6 +120,13 @@ ArkManifest.define({
       "section": "Header links",
       "value": "Get FXN Browser"
     },
+    "BAR.PRODUCTS": { "label": "Bar menu (owner reference, 2026-11-11): products. Its panel lists Names, The game, Releases and Apps", "kind": "line", "section": "Bar", "value": "Products" },
+    "BAR.NETWORK": { "label": "Bar menu: the network. Its panel lists Keepers, Capacity, Chains, Deposits and Network", "kind": "line", "section": "Bar", "value": "Network" },
+    "BAR.DEVELOPERS": { "label": "Bar menu: developers. Its panel lists Records and Rules", "kind": "line", "section": "Bar", "value": "Developers" },
+    "BAR.RESOURCES": { "label": "Bar menu: resources. Its panel lists Learn and FXN ID", "kind": "line", "section": "Bar", "value": "Resources" },
+    "BAR.SKIP": { "label": "The skip link, the first thing the Tab key reaches: it moves focus past the bar to the page", "kind": "line", "section": "Bar", "value": "Skip to content" },
+    "BAR.SIGNIN": { "label": "Bar link: sign in", "kind": "line", "section": "Bar", "value": "Sign In" },
+    "BAR.INITIATE": { "label": "Bar action, filled: opens /auth. Word law: never \"create an identity\"", "kind": "line", "section": "Bar", "value": "Initiate FXN ID" },
     "BRAND.NAME": {
       "label": "Wordmark",
       "kind": "line",

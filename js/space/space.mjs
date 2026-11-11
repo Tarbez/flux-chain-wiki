@@ -4,8 +4,11 @@
    is reported in the console and the others carry on. */
 const PARTS = [
   ['routes', false],      /* a page's place; no DOM, no stylesheet */
-  /* hints left on 2026-11-05: the missions (quest) teach the moves by giving the visitor something to do */
-  ['label', true], ['path', true], ['map', true], ['focus-card', true], ['keys', true], ['jump', true], ['quest', true], ['beacons', true], ['shows', true], ['journey', true], ['cinematic', true], ['intro', true]
+  /* hints left on 2026-11-05: the missions (quest) taught the moves by giving the visitor something to do.
+     quest and journey left on 2026-11-09 (design P05, the portal navigation): their missions and paths named the retired pages
+     (works, stats/now, resolutions, explorer, learnings), and their MISSIONS chip and "Pick your path" panel covered the topic
+     pages, Learn and the jump bar. The files stay (js/space/quest.mjs, journey.mjs), out of this list; nothing else imports them. */
+  ['label', true], ['path', true], ['map', true], ['focus-card', true], ['keys', true], ['jump', true], ['beacons', true], ['shows', true], ['cinematic', true], ['intro', true]
 ];
 
 const base = (location.protocol === 'file:' ? '' : '/');

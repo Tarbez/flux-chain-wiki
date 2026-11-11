@@ -1,4 +1,8 @@
-/* The space as a game: missions for who you are (owner, 2026-11-05: "make it feel like a true game. Simple and easy, any person can
+/* RETIRED 2026-11-09 (design P05, the portal navigation): not in js/space/space.mjs PARTS, so this never mounts. Its missions name
+   the retired pages (stats/now, resolutions, works, explorer), and its MISSIONS chip covered the topic pages and Learn. Kept as the
+   reader of localStorage defxn-quest-v1 in case the role is wanted again; a new mission list would name /fxn/<slug> pages.
+
+   The space as a game: missions for who you are (owner, 2026-11-05: "make it feel like a true game. Simple and easy, any person can
    understand, audience based"). Layer: app. A part of the space (docs/design/space/SPACE.md): it talks only through ArkSpace.
 
    After the film a visitor says who they are (three roles, or "just look around"). Each role gets a short mission list in plain words;

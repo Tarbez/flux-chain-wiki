@@ -1,0 +1,139 @@
+ring button: {"x":931,"y":198,"w":408,"h":408,"hidden":false}
+geo: {
+ "nav": {
+  "x": 0,
+  "y": 0,
+  "w": 1440,
+  "h": 64,
+  "tag": "HEADER",
+  "cls": "kmd7380 ark-header dx-bar ark-zero ksv6qvd"
+ },
+ "arcs": [
+  {
+   "label": "FXN ID",
+   "x": 644,
+   "y": 147,
+   "w": 152,
+   "h": 95
+  },
+  {
+   "label": "Records",
+   "x": 777,
+   "y": 158,
+   "w": 155,
+   "h": 139
+  },
+  {
+   "label": "Keepers",
+   "x": 873,
+   "y": 238,
+   "w": 139,
+   "h": 155
+  },
+  {
+   "label": "Capacity",
+   "x": 928,
+   "y": 374,
+   "w": 95,
+   "h": 152
+  },
+  {
+   "label": "Chains",
+   "x": 873,
+   "y": 507,
+   "w": 139,
+   "h": 155
+  },
+  {
+   "label": "Names",
+   "x": 777,
+   "y": 603,
+   "w": 155,
+   "h": 139
+  },
+  {
+   "label": "The game",
+   "x": 644,
+   "y": 658,
+   "w": 152,
+   "h": 95
+  },
+  {
+   "label": "Releases",
+   "x": 508,
+   "y": 603,
+   "w": 155,
+   "h": 139
+  },
+  {
+   "label": "Apps",
+   "x": 428,
+   "y": 507,
+   "w": 139,
+   "h": 155
+  },
+  {
+   "label": "Rules",
+   "x": 417,
+   "y": 374,
+   "w": 95,
+   "h": 152
+  },
+  {
+   "label": "Deposits",
+   "x": 428,
+   "y": 238,
+   "w": 139,
+   "h": 155
+  },
+  {
+   "label": "Network",
+   "x": 508,
+   "y": 158,
+   "w": 155,
+   "h": 139
+  }
+ ],
+ "tag": {
+  "font": "\"IBM Plex Mono\", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+  "size": "11px",
+  "color": "rgb(246, 245, 244)",
+  "transform": "matrix(1, 0, 0, 1, 0, 0)"
+ },
+ "words": {
+  "x": 64,
+  "y": 327.65625,
+  "w": 560,
+  "h": 244.6875,
+  "opacity": "0",
+  "display": "flex",
+  "visibility": "visible"
+ },
+ "frame": {
+  "x": 0,
+  "y": 0,
+  "w": 1440,
+  "h": 900,
+  "src": "http://127.0.0.1:3440/world/site-view/index.html?o=portal101&alone=1&bg=10,9,8"
+ },
+ "bodyBg": "rgb(10, 9, 8)",
+ "cls": "world-page intro-world has-portal portal-drawn ring-view menu-on",
+ "soon": {
+  "text": "This one opens when its object is built.",
+  "vis": "0"
+ }
+}
+arcs: 12
+hover 0 FXN ID tag={"text":"FXN ID","x":692,"y":95,"w":55,"h":11,"on":true}
+hover 1 Records tag={"text":"Records","x":862,"y":142,"w":65,"h":11,"on":true}
+hover 2 Keepers tag={"text":"Keepers","x":990,"y":270,"w":65,"h":11,"on":true}
+hover 3 Capacity tag={"text":"Capacity","x":1033,"y":445,"w":74,"h":11,"on":true}
+hover 4 Chains tag={"text":"Chains","x":995,"y":619,"w":55,"h":11,"on":true}
+hover 5 Names tag={"text":"Names","x":872,"y":747,"w":46,"h":11,"on":true}
+hover 6 The game tag={"text":"The game","x":683,"y":794,"w":74,"h":11,"on":true}
+hover 7 Releases tag={"text":"Releases","x":508,"y":747,"w":74,"h":11,"on":true}
+hover 8 Apps tag={"text":"Apps","x":399,"y":619,"w":37,"h":11,"on":true}
+hover 9 Rules tag={"text":"Rules","x":347,"y":445,"w":46,"h":11,"on":true}
+hover 10 Deposits tag={"text":"Deposits","x":380,"y":270,"w":74,"h":11,"on":true}
+hover 11 Network tag={"text":"Network","x":513,"y":142,"w":65,"h":11,"on":true}
+cine: null

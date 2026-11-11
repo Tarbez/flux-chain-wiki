@@ -141,7 +141,23 @@ var ArkSEO = (function () {
     var own = {};
     (manifests || (typeof ArkManifest !== 'undefined' ? ArkManifest.all() : [])).forEach(function (m) { own[m.id] = true; });
     return sitePages().pages().filter(function (row) { return !own[row.seoId || row.key]; })
-      .map(function (row) { return { id: row.seoId || row.key, path: row.path, label: row.label, journey: row.journey }; });
+      .map(function (row) { return { id: row.seoId || row.key, path: row.path, label: topicLabel(row, manifests) || row.label, journey: row.journey }; });
+  }
+  /* A topic page (js/content/site-pages.js TOPICS, `topic`) is named by its stone's word, HOME.LANDING.RING.S<n> in the home
+     manifest, the same rule js/pages/catalog.js applies to the tab's title; so llms.txt says "FXN ID", not the row's fallback
+     'FXN id'. Null for any other row, or when the home manifest is not at hand. */
+  function topicLabel(row, manifests) {
+    if (!row.topic) return null;
+    var n = sitePages().topics().map(function (t) { return t.key; }).indexOf(row.key) + 1;
+    var list = manifests || (typeof ArkManifest !== 'undefined' ? ArkManifest.all() : []);
+    var home = list.filter(function (m) { return m.id === 'home'; })[0], field = home && home.fields && home.fields['LANDING.RING.S' + n];
+    return n > 0 && field && field.value ? String(field.value) : null;
+  }
+  /* the home hero's headline from the home manifest, or null when no manifest is registered */
+  function homeHeadline() {
+    var list = typeof ArkManifest !== 'undefined' && ArkManifest.all ? ArkManifest.all() : [];
+    var home = list.filter(function (m) { return m.id === 'home'; })[0], field = home && home.fields && home.fields['LANDING.PORTAL.HEADLINE'];
+    return field && field.value ? String(field.value) : null;
   }
 
   /* Every call here takes an optional explicit manifests/articles list, used where the
@@ -209,7 +225,9 @@ var ArkSEO = (function () {
   function pageTitleIn(whole, id, fallbackLabel) {
     var override = (whole.pages[id] || {}).title;
     if (override) return override;
-    if (id === 'home') return whole.site.name;
+    /* the home's title is its headline (HOME.LANDING.PORTAL.HEADLINE in the home manifest), so the tab, the share card and the page's h1 say the
+       same words and a change to the headline changes all three (audit F12). With no manifest at hand (a headless run): the site's name */
+    if (id === 'home') { var headline = homeHeadline(); return headline ? headline + ' — ' + whole.site.name : whole.site.name; }
     return (fallbackLabel || id) + ' — ' + whole.site.name;
   }
   function articleTitleIn(whole, slug, fallbackLabel) {
@@ -278,7 +296,8 @@ var ArkSEO = (function () {
   function routes(manifests, articles) {
     var out = [{ path: '/', id: 'home' }];
     function has(path) { return out.some(function (entry) { return entry.path === path; }); }
-    sitePages().pages().filter(function (row) { return row.journey; }).forEach(function (row) { if (!has(row.path)) out.push({ path: row.path, id: row.seoId || row.key }); });
+    /* a page in a journey, and each of the portal's topic pages (`topic`: in no journey, since the ring leads to them, 2026-11-09) */
+    sitePages().pages().filter(function (row) { return row.journey || row.topic; }).forEach(function (row) { if (!has(row.path)) out.push({ path: row.path, id: row.seoId || row.key }); });
     (manifests || []).filter(function (m) { return m.group !== 'site' && m.route && !pageless(m); }).forEach(function (m) {
       if (!has(m.route)) out.push({ path: m.route, id: m.id });
     });

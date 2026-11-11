@@ -15,8 +15,8 @@ ArkSEO.define({
   },
   "pages": {
     "home": {
-      "title": "Not one chain. A world of them. — DEFXN",
-      "description": "Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network.",
+      "title": "",
+      "description": "Build apps, start chains, run the machines that keep them. Devnet genesis is next.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",
@@ -136,7 +136,7 @@ ArkSEO.define({
     },
     "about": {
       "title": "Overview — DEFXN",
-      "description": "DEFXN is the kernel of the grid. FXN is its first chain and that chain’s coin. It runs on a development network today, and nothing is live.",
+      "description": "DEFXN is the kernel of the grid. FXN is its first chain and that chain’s coin. Devnet genesis is next. Nothing is live.",
       "ogImage": "",
       "canonical": "",
       "schemaType": "",

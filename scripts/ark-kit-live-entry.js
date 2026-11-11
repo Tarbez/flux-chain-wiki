@@ -1,5 +1,5 @@
 /* ArkKitLive: Ark's block morph for public pages -- js/ark/vendor/ark-kit-live.js (global `ArkKitLive`),
-   built by scripts/build-ark-vendor.cjs from @deadark/ark-ui/blocks/patch alone.
+   built by scripts/build-ark-vendor.cjs from @fxn/ui/blocks/patch alone.
 
    Why a second file: only a route with a LIVE block (a reading refreshed on a pulse: /, /stats)
    ever patches a rendered block, and every byte of the public kit is paid by every block route
@@ -10,7 +10,7 @@
 
    The morph takes the registry as an argument (patchArkBlockIn), so this bundle carries no copy of
    the blocks: it reads them from the ArkKit the page already loaded. */
-import { patchArkBlockIn } from '@deadark/ark-ui/blocks/patch';
+import { patchArkBlockIn } from '@fxn/ui/blocks/patch';
 
 export function patchArkBlock(target, next, options) {
   if (typeof ArkKit === 'undefined' || !ArkKit.ARK_BLOCKS) {

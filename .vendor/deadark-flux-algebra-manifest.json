@@ -1,8 +1,8 @@
 {
   "package": "@deadark/flux-algebra",
-  "version": "0.2.1",
-  "tarball": ".vendor/deadark-flux-algebra-0.2.1.tgz",
-  "sha256": "a85f066cc926c715a70047c380e34356cd9dfb0a37d3d833e5931c7a83559728",
-  "sourceRoot": "../../../flx/flux-algebra",
-  "updatedAt": "2026-10-20T08:34:00.881Z"
+  "version": "0.2.2",
+  "tarball": ".vendor/deadark-flux-algebra-0.2.2.tgz",
+  "sha256": "2f82487c67bdb87c349a6b93675e348af823c44ed76b21b2ee54cb5000d25c87",
+  "sourceManifest": "/Volumes/PortableSSD/design/deadark-sdk-wt-release-0259/sdk-releases/manifest.json",
+  "updatedAt": "2026-11-09T17:22:10.704Z"
 }

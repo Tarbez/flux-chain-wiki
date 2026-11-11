@@ -42,7 +42,7 @@ export function createProps({ pieces, KR, K, floor, nets, drum, colour, reduced,
   let [cx, cz] = at(d0.x, d0.z, side, KR * .62);
   add({ kind: 'id-card', id: 'id-card', name: 'Your FXN ID', line: 'Only your key writes to your chain.', x: cx, z: cz, s: KR * .5, yaw: facing(cx, cz), r: .5, h: .9, parent: drum ? 'chain:' + drum.item : 'net:' + node.item });
   [cx, cz] = at(d0.x, d0.z, side + Math.PI, KR * .62);
-  add({ kind: 'book', id: 'book', name: 'Your chain as a book', line: 'Each record is a numbered page. Only your key adds one.', x: cx, z: cz, s: KR * .5, yaw: facing(cx, cz), r: .5, h: .3, parent: drum ? 'chain:' + drum.item : 'net:' + node.item, facts: [{ label: 'Pages', value: String(PAGES) }] });
+  add({ kind: 'book', id: 'book', name: 'Your chain as a book', line: 'Each record is a numbered page. Only your key adds one.', x: cx, z: cz, s: KR * .5, yaw: facing(cx, cz), r: .5, h: .3, parent: drum ? 'chain:' + drum.item : 'net:' + node.item });   /* no typed facts (CLAIMS-AUDIT-2026-11-10) */
   [cx, cz] = at(node.x, node.z, side + Math.PI, KR * 1.35);
   add({ kind: 'keeper-desk', id: 'keeper-desk', name: 'A keeper', line: 'Bonded. Signs your receipt. No vote.', x: cx, z: cz, s: KR * .6, yaw: facing(cx, cz), r: .8, h: 1.2, parent: 'net:' + node.item });
   [-1.25, -.85, .85].forEach((da, i) => {   /* pinners on the network's rim, on the kernel's side of its fan of chains */
@@ -59,13 +59,14 @@ export function createProps({ pieces, KR, K, floor, nets, drum, colour, reduced,
     const ln = lanes[li], ang = a + (b - a) * (j + 1) / (per[gi] + 1), [x, z] = at(K[0], K[2], ang, KR * 2.9);
     const toks = prods.filter((p) => p.lane === ln.id).sort((p, q) => (p.order || 0) - (q.order || 0)).slice(0, 6);
     const lane = add({ kind: 'lane', id: 'lane:' + ln.id, name: ln.name, line: ln.line, x, z, s: KR * .5, yaw: facing(x, z), r: .7, h: .6, parent: 'kernel',
-      facts: [{ label: 'Products', value: String(toks.length) }], tokens: toks.map((p, k) => ({ p, rise: [0, 0], k })) });
+      tokens: toks.map((p, k) => ({ p, rise: [0, 0], k })) });
     lane.tokens.forEach((t) => { t.status = t.p.status || 'ready'; });
   } });
   /* the road of machines: two rows of ten at the hall's edge, in the widest gap */
   const wide = gaps[share.indexOf(Math.max(...share))], roadA = (wide[0] + wide[1]) / 2, [rx, rz] = at(K[0], K[2], roadA, KR * 9.2);
-  const road = add({ kind: 'rack', id: 'racks', name: 'The machines', line: 'Sixteen machines light in turn. Four wait to move from the old chain.', x: rx, z: rz, s: KR * .5, yaw: facing(rx, rz), r: 3.6, h: 1.2, parent: 'kernel',
-    facts: [{ label: 'Machines', value: String(RACKS) }, { label: 'Lit at most', value: String(RACK_LIT_MAX) }], racks: Array.from({ length: RACKS }, () => ({ k: [0, 0], at: 0 })) });
+  const road = add({ kind: 'rack', id: 'racks', name: 'The machines', line: 'The machines that will keep the devnet. A count shows once a node reports it.', x: rx, z: rz, s: KR * .5, yaw: facing(rx, rz), r: 3.6, h: 1.2, parent: 'kernel',
+    /* 2026-11-10 (owner, CLAIMS-AUDIT-2026-11-10): no typed machine count; a count comes back only from PEER_COUNT */
+    racks: Array.from({ length: RACKS }, () => ({ k: [0, 0], at: 0 })) });
 
   /* ---------- rows ---------- */
   let yaw0 = 0, ox = 0, oz = 0, oy = 0, sc = 1;

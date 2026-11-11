@@ -80,20 +80,25 @@
     try { return new Intl.NumberFormat('en', { style: 'currency', currency: p.currency, minimumFractionDigits: 2, maximumFractionDigits: 4 }).format(n); }
     catch (e) { return n.toFixed(2) + ' ' + p.currency; }
   }
+  /* 2026-11-10 (owner, relayed by FXN Genesis; docs/design/space/CLAIMS-AUDIT-2026-11-10.md): a price is painted only from a
+     node on the devnet release, and the release is read from the chain, never typed: js/ark/chain-facts.mjs readRelease
+     (BUILD_INFO's network against the pinned list, the filed FOUNDING record, and PROTOCOL's own protocol against the one
+     in force). Any other node, or no answer, reads "No node answered", with the reason in the title. */
+  ArkUI.loadChainFacts = ArkUI.loadChainFacts || function () {
+    return import(new URL((location.protocol === 'file:' ? '' : '/') + 'js/ark/chain-facts.mjs', document.baseURI).href);
+  };
+  function noNode(node, why) { node.dataset.priceState = 'absent'; node.textContent = 'FXN · No node answered'; node.title = why; }
   function sitePrice(node) {
-    if (!ArkUI.loadWalletModule) return;
-    ArkUI.loadWalletModule().then(function (m) {
-      var wire = new m.WalletWire(m.resolveWireUrl()), got = {};
-      return m.fxnSalePrice(wire, 'USD').then(function (usd) { got.usd = usd; return m.fxnSalePrice(wire, 'EUR'); })
-        .then(function (eur) { got.eur = eur; wire.close(); return got; }, function (error) { wire.close(); throw error; });
-    }).then(function (got) {
+    ArkUI.loadChainFacts().then(function (m) { return m.salePrice(); }).then(function (read) {
+      if (read.absent) return noNode(node, read.absent);
+      var got = read.value;
       var shown = !got.usd.absent ? got.usd : !got.eur.absent ? got.eur : null;
-      if (!shown) { node.title = 'The chain gives no FXN price: ' + got.usd.absent + '.'; return; }
+      if (!shown) return noNode(node, 'The chain gives no FXN price: ' + got.usd.absent + '.');
       node.dataset.priceState = 'live';
       node.textContent = 'FXN ' + money(shown);
       node.title = (got.eur.absent ? '' : 'Launch price ' + money(got.eur) + ' per FXN. ') +
-        (shown === got.usd ? 'In USD through the DAO\u2019s price signers. ' : 'No fresh USD rate: ' + got.usd.absent + '. ') + 'Read from the FXN chain.';
-    }).catch(function (error) { node.title = 'The FXN price could not be read: ' + error.message; });
+        (shown === got.usd ? 'In USD through the DAO\u2019s price signers. ' : 'No fresh USD rate: ' + got.usd.absent + '. ') + 'Read from the FXN chain, protocol ' + read.release.protocol + ' of ' + read.release.network + '.';
+    }).catch(function (error) { noNode(node, 'No node answered: ' + (error && error.message || 'no reply') + '.'); });
   }
   /* the footer's host keeps the strip's name: the aria-current sync below, the drivers and
      css/navigation.css (its place in the scene) read it */
@@ -101,8 +106,9 @@
   scene.appendChild(foot);
   var kit = window.DefxnKit;
   if (kit && typeof kit.renderFooter === 'function' && kit.HOME) {
-    var credit = make('span', 'site-credit'); credit.textContent = 'Powered, deployed and made by FLX';
-    var rights = make('span', 'site-copyright'); rights.textContent = '© ' + new Date().getFullYear() + ' FLX';
+    /* one brand (owner, 2026-11-04: DEFXN and FXN are one brand; FLX is another). P05 phase 2, ART-DIRECTOR.md change 4 */
+    var credit = make('span', 'site-credit'); credit.textContent = 'Made by DEFXN';
+    var rights = make('span', 'site-copyright'); rights.textContent = '© ' + new Date().getFullYear() + ' DEFXN';
     /* The coin's price, on every page (owner, 2026-10-25), as the FXN chain gives it: FXN_SALE on the selected node
        (js/ark/dense-wire-wallet.mjs fxnSalePrice). The launch price is set in euros in the chain's genesis (0.90 EUR);
        the node gives it in USD, the top currency, through the DAO's price signers. With no fresh USD rate it shows the
@@ -110,7 +116,9 @@
     var price = make('span', 'site-price'); price.dataset.priceState = 'absent';
     price.title = 'The FXN price has not been read from the chain yet.';
     price.textContent = 'FXN · No price yet';
-    sitePrice(price);
+    /* lazy (owner 2026-11-11): the chain reader is about 30 modules, and the footer is not part of the first screen (the loader, then the hero,
+       cover it). It is read once the first screen has settled (js/lib/frame.js ArkFrame.afterHero); until then the line says "No price yet" */
+    if (window.ArkFrame && ArkFrame.afterHero) ArkFrame.afterHero(function () { sitePrice(price); }); else sitePrice(price);
     kit.renderFooter(foot, kit.HOME.id, { links: Array.prototype.slice.call(paths.childNodes), note: [credit, price, rights, toggle] });
   } else {
     /* no kit (it failed to load): the links and the Back control still reach the page */
@@ -195,6 +203,10 @@
      The section is read from the redirect target, not listed here. */
   function linkIsCurrent(linked, page) {
     if (linked === page) return true;
+    /* a topic page (/fxn/<slug>) is one page, never a section: without this every topic link in the bar's menus read as current on every topic page,
+       because retired keys redirect to the topics and the rule below treats them all as the "fxn/" section (2026-11-11) */
+    var pageRow = typeof ArkSitePages !== 'undefined' && ArkSitePages.row ? ArkSitePages.row(page) : null;
+    if (pageRow && pageRow.topic) return false;
     var targets = ArkUI.pageRedirects ? Object.keys(ArkUI.pageRedirects).map(function (old) { return ArkUI.pageRedirects[old]; }) : [];
     if (targets.indexOf(linked) < 0 || linked.indexOf('/') < 0) return false;
     return page.indexOf(linked.split('/')[0] + '/') === 0;
@@ -256,7 +268,12 @@
     var resolutionPage = resolutionSlug && ArkUI.pageCatalog['resolutions/' + resolutionSlug] ? 'resolutions/' + resolutionSlug : '';
     var rewrite = ArkUI.route.isLegacyHash() || !!resolutionPage;
     var options = rewrite ? { history: 'replace', query: resolutionPage ? undefined : ArkUI.route.search() || undefined } : { history: 'none' };
-    return router.navigate(resolutionPage || router.resolve(ArkUI.route.raw()), options).then(sync);
+    var first = resolutionPage || router.resolve(ArkUI.route.raw());
+    /* The portal is the front door (owner, P05, 2026-11-09): a fresh load of "/" opens /intro. This used to live only in
+       world2-host.mjs's navigate wrap, which the shell bundle now loads after this first navigate, so "/" showed the old home.
+       A ?preview load keeps Home for the editor. */
+    if (first === 'zero' && ArkUI.pageCatalog.intro && !/[?&](cms-)?preview(=|&|$)/.test(location.search)) { first = 'intro'; options = Object.assign({}, options, { history: 'replace' }); }
+    return router.navigate(first, options).then(sync);
   }
   window.addEventListener('popstate', restoreRoute);
   window.addEventListener('hashchange', restoreRoute);

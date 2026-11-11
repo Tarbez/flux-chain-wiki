@@ -189,6 +189,10 @@
       settings = Object.assign({}, settings || {});
       if (settings.query === undefined && settings.history !== 'none' && continuity) settings.query = continuity.returnQuery(page);
       if (!Object.prototype.hasOwnProperty.call(catalog, page)) throw new Error('Unknown page: ' + page);
+      /* The portal is the front door (owner, P05, 2026-11-09). Every way to Home (the DEFXN mark, a "/" link, Back, Escape)
+         opens the portal. Before this, only a fresh load of "/" did, so the mark opened the old Home with an empty middle.
+         A ?preview load keeps Home for the editor. */
+      if (page === 'zero' && Object.prototype.hasOwnProperty.call(catalog, 'intro') && !(typeof location !== 'undefined' && /[?&](cms-)?preview(=|&|$)/.test(location.search))) page = 'intro';
       /* A retired key (an entry with `redirect`, js/pages/catalog.js ArkUI.pageRedirects) never mounts: the page it names does, and
          writeHistory below puts that page's own path in the address, so the old key is not kept alive by the address. One place for
          every visitor, with or without the 3D world. */
@@ -197,6 +201,19 @@
         /* the section the retired page now is (stats/ceiling -> stats/now?s=ceiling), unless the caller named one */
         if (catalog[page].redirectQuery && !settings.query) settings.query = catalog[page].redirectQuery;
         page = moved;
+      }
+      /* The address is the visitor's own when the history mode is 'none' (a load, Back, Forward: js/hero-motion.js
+         restoreRoute). When it is not this page's own path -- a retired path (/how-it-works), an alias (/stats), a
+         trailing slash (/learn/) -- the entry is REPLACED by the page's path, so the bar never keeps an address nothing
+         is at, and a copied link is the clean one. The query the address carried stays; a retired key's section query
+         (above) applied only when there was none. A replace adds no entry, so Back still goes where it went. Until
+         2026-11-09 the old address stayed in the bar while the new page showed (navigation audit,
+         docs/design/space/SPACE.md "Navigation flow"). Only over http(s): on file: the route is the hash. Not for
+         the not-found page: it answers the address it was asked for and names it, so that address stays (a refresh
+         must still say "You asked for /no-such-page", not /not-found). */
+      if (settings.history === 'none' && page !== 'notfound' && ArkUI.route.pathMode && typeof location !== 'undefined' && location.pathname !== catalog[page].path) {
+        settings.history = 'replace';
+        if (!settings.query) settings.query = ArkUI.route.search() || settings.query;
       }
       var ticket = ++request; requested = page; requestedSettings = settings;
       var run = null;
@@ -336,6 +353,31 @@
         report(active ? 'This page could not load. Your current page is still here.' : 'This page could not load. Please try again.', true);
         return false;
       }
+    }
+    /* Every plain in-site link routes in place (2026-11-09, navigation audit). A link the scene's own handler took
+       (js/hero-motion.js: [data-scene-link], the header's links -- it calls preventDefault) is left alone; so is a
+       click with a modifier key or a middle button (a new tab is the visitor's call), a link with a target or a
+       download, another origin, or an address no page answers (a real file such as /sitemap.xml, or an unknown
+       path: the browser loads it and the shell shows Not found). Without this, an <a href="/fxn/id"> written by a
+       block, the footer, the fallback copy or a later navbar reloaded the whole shell: a black loader, the world
+       built again, the stage lost. Installed once per document; a router made for a test (no document) skips it. */
+    if (typeof document !== 'undefined' && document.addEventListener && !document.arkRouteLinks) {
+      document.arkRouteLinks = true;
+      document.addEventListener('click', function (event) {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        var link = event.target && event.target.closest ? event.target.closest('a[href]') : null;
+        if (!link || link.target || link.hasAttribute('download') || link.getAttribute('rel') === 'external') return;
+        if (!ArkUI.route.pathMode) return;
+        var to;
+        try { to = new URL(link.getAttribute('href'), location.href); } catch (e) { return; }
+        if (to.origin !== location.origin) return;
+        /* a hash on the current page scrolls: the browser's job */
+        if (to.pathname === location.pathname && to.search === location.search && to.hash) return;
+        var page = resolve(to.pathname);
+        if (page === 'notfound' || page === 'zero' && to.pathname !== '/' && !(catalog.zero && (catalog.zero.aliases || []).indexOf(to.pathname) >= 0)) return;
+        event.preventDefault();
+        navigate(page, { source: link, query: to.search.replace(/^\?/, '') || undefined });
+      });
     }
     return {
       pages: mounted, navigate: navigate, url: url, resolve: resolve,

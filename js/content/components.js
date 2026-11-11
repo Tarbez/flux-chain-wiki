@@ -41,7 +41,7 @@ var ArkComponents = (function () {
   var current = { version: 1, masters: {}, routes: {} };
 
   /* ---- what a master can be. Three kinds, and sanitize() keeps a master only when it is one:
-       an ARK BLOCK  -- resolver ARK_BLOCK_<NAME>: one of @deadark/ark-ui/blocks' premade blocks
+       an ARK BLOCK  -- resolver ARK_BLOCK_<NAME>: one of @fxn/ui/blocks' premade blocks
                         (hero, card, stat, table, tabs, ...), registered as an ArkUI resolver by
                         js/ark/blocks.js looping ArkKit.ARK_BLOCK_NAMES. What the Library offers
                         to create from nothing (W2-LIBRARY, docs/ux-audit/components.md §5 line 6).

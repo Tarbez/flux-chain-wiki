@@ -22,7 +22,7 @@
 
    Build: node scripts/build-ark-vendor.cjs  ->  js/ark/local-identity.js (a classic script).
    ===================================================================== */
-import { createLocalIdentitySession } from '@deadark/ark-ui/flux-auth-session';
+import { createLocalIdentitySession } from '@fxn/ui/flux-auth-session';
 
 const session = createLocalIdentitySession({ scope: 'defxn' });
 

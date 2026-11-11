@@ -3,20 +3,22 @@
 <head>
 <meta charset="utf-8" />
 <!-- The CSP below also lets this page call the local FXN ID gate (http://127.0.0.1:4571 to 4575, flux/fxn-auth/scripts/fxn-id-gate-local.mjs), so the sign-in panel can ask it for a v10 Secret Key. Exact origins, no range. The devnet gate committee (https://gate.defxn.com, assets/gate.committee) is allowed too, so /auth can make and open v10 FXN IDs. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; connect-src 'self' https://gate.defxn.com http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com wss://big1.devnet.defxn.com wss://lax24.devnet.defxn.com ws://127.0.0.1:19501 ws://localhost:19501; object-src 'none'; frame-src http://127.0.0.1:3440; base-uri 'none'; form-action 'none'" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; font-src 'self' file:; img-src 'self' file: data:; media-src 'self'; connect-src 'self' https://gate.defxn.com http://127.0.0.1:4571 http://127.0.0.1:4572 http://127.0.0.1:4573 http://127.0.0.1:4574 http://127.0.0.1:4575 http://127.0.0.1:8766 http://localhost:8766 https://public.defxn.com https://st1.defxn.com https://st2.defxn.com https://st3.defxn.com https://st4.defxn.com https://cd1.defxn.com wss://nodes.defxn.com wss://devnet.defxn.com wss://big1.devnet.defxn.com wss://lax24.devnet.defxn.com ws://127.0.0.1:19501 ws://localhost:19501; object-src 'none'; frame-src 'self' http://127.0.0.1:3440; base-uri 'none'; form-action 'none'" />
 <meta name="referrer" content="no-referrer" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <!-- The family tab icon: the DEFXN mark in Ember, built by flux/defxn-product-kit (deriveIcon) and
      synced into assets/kit/. Without it the tab showed a letter "D": /favicon.ico answers with this page. -->
 <link rel="icon" type="image/png" sizes="192x192" href="assets/kit/defxn-icon.png" />
-<title>Not one chain. A world of them. — DEFXN</title>
-<meta name="description" content="Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network." />
-<meta property="og:title" content="Not one chain. A world of them. — DEFXN" />
-<meta property="og:description" content="Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network." />
+<!-- The home's title is its headline and its description is the line under it (HOME.LANDING.PORTAL.HEADLINE and .LINE in js/content/manifests/home.js);
+     the router sets both again from the manifest (js/content/seo.js). Change the words there and here together. -->
+<title>A new internet, built in the open. — DEFXN</title>
+<meta name="description" content="Build apps, start chains, run the machines that keep them. Devnet genesis is next." />
+<meta property="og:title" content="A new internet, built in the open. — DEFXN" />
+<meta property="og:description" content="Build apps, start chains, run the machines that keep them. Devnet genesis is next." />
 <meta property="og:type" content="website" />
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:title" content="Not one chain. A world of them. — DEFXN" />
-<meta name="twitter:description" content="Explore DEFXN: independent signed histories, connected applications and inspectable results. Understand the protocol, build with resolvers, or help run the network." />
+<meta name="twitter:title" content="A new internet, built in the open. — DEFXN" />
+<meta name="twitter:description" content="Build apps, start chains, run the machines that keep them. Devnet genesis is next." />
 
 <!-- Tells the stylesheet JS is available, so the fallback copy does not flash before the scene paints. -->
 <script src="js/bootstrap.js?v=20261020-theme-ids"></script>
@@ -26,6 +28,18 @@
      the server render's <head> carries them. Which sheet is shared and which is a page's own is DERIVED
      (node scripts/page-styles.mjs --write rewrites this list and the lists in js/pages/catalog.js;
      --check fails on drift). Do not add a page's sheet here by hand. -->
+<!-- The two FXN Basalt faces the bar and every headline set (the law "Every DEFXN UI sets FXN Basalt"): fetched with the
+     sheets instead of after the first layout, so the words paint in their own face (font-display: swap in
+     assets/kit/defxn-fonts.css covers the one case the file arrives later). 36 KB together. -->
+<link rel="preload" as="font" type="font/woff2" crossorigin href="assets/kit/fxn-basalt-text.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="assets/kit/fxn-basalt.woff2" />
+<!-- IBM Plex Mono 500: the home hero's pill tag and the explore caption set it, so it is fetched with the sheets too -->
+<link rel="preload" as="font" type="font/woff2" crossorigin href="assets/kit/plex-mono-500.woff2" />
+<!-- THE LIST BELOW IS INSIDE A <template>, SO THE BROWSER FETCHES NONE OF IT (2026-11-11): it is the derived list of shared sheets
+     (scripts/page-styles.mjs writes and checks it), and scripts/build-shell.cjs reads it to write the live region after it:
+     css/bundle/shell-<n>.css, the same sheets in the same order as a few files. Counted on this list: 32 requests became 12.
+     A chunk ends wherever a page's own sheet stands in the cascade (ArkUI.styleOrder), so the loader links it at its exact place. -->
+<template id="shell-styles">
 <link rel="stylesheet" href="css/themes.css?v=20261006-system1" />
 <link rel="stylesheet" href="assets/kit/defxn-fonts.css?v=20261019-kit1" />
 <!-- The DEFXN family kit (flux/defxn-product-kit, synced by its npm run sync): the bar, the product
@@ -36,7 +50,7 @@
 <link rel="stylesheet" href="css/fallback.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/studio.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/hero-motion.css?v=20261006-system1" />
-<link rel="stylesheet" href="css/navigation.css?v=20261028-kitmove" />
+<link rel="stylesheet" href="css/navigation.css?v=20261111-audit1" />
 <link rel="stylesheet" href="css/focus.css?v=20261028-kitmove" />
 <link rel="stylesheet" href="css/settings.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/page-layout.css?v=20261020-w4" />
@@ -45,6 +59,7 @@
 <link rel="stylesheet" href="css/experience.css?v=20261006-system1" />
 <link rel="stylesheet" href="css/home-drafting.css?v=20261020-w4" />
 <link rel="stylesheet" href="css/lifecycle.css?v=20261019-ark027" />
+<link rel="stylesheet" href="css/reference.css?v=20261025-ac1" />
 <link rel="stylesheet" href="css/resolutions.css?v=20261019-ark027" />
 <link rel="stylesheet" href="css/icons.css?v=20261006-system1">
 <link rel="stylesheet" href="css/story-diagrams.css?v=20261006-system1">
@@ -54,18 +69,34 @@
 <link rel="stylesheet" href="css/authorization-dialog.css?v=20261006-system1">
 <link rel="stylesheet" href="css/home-swiss.css?v=20261020-w4" />
 <link rel="stylesheet" href="assets/kit/defxn-marks.data.css?v=20261019-kit1" />
-<!-- Ark UI blocks (@deadark/ark-ui/blocks, copied by scripts/build-ark-vendor.cjs): the only styling
+<!-- Ark UI blocks (@fxn/ui/blocks, copied by scripts/build-ark-vendor.cjs): the only styling
      a block has, static so the server render arrives styled (no injected rules). Shared: every
      route renders blocks, so it is linked here (~9 KB gz) rather than fetched after the page's
      scripts; the blocks' JS is lazy (ArkUI.blockScripts, js/pages/catalog.js). Then the frame a
      page built from blocks sits in (js/ark/blocks.js ArkUI.page). Before components.css, which is
      last. -->
 <link rel="stylesheet" href="css/world.css?v=20261024-tags1" />
-<link rel="stylesheet" href="css/world-pages.css?v=20261025-ac1" />
+<link rel="stylesheet" href="css/world-pages.css?v=20261111-audit1" />
+<link rel="stylesheet" href="css/motion.css?v=20261109-p05m1" />
 <link rel="stylesheet" href="css/space-frame.css?v=20261025-ac1" />
 <link rel="stylesheet" href="css/lattice.css?v=20261025-ac1" />
 <link rel="stylesheet" href="css/ark-blocks.css?v=20261026-ark43" />
 <link rel="stylesheet" href="css/components.css?v=20261020-w4" />
+</template>
+<!-- styles:begin -->
+<link rel="stylesheet" href="css/bundle/shell-1.css?v=9edf0f25" data-ark-sheets="css/themes.css assets/kit/defxn-fonts.css assets/kit/defxn-components.css css/fallback.css css/studio.css css/hero-motion.css css/navigation.css css/focus.css css/settings.css css/page-layout.css css/home.css" />
+<link rel="stylesheet" href="css/bundle/shell-2.css?v=ce0e44d5" data-ark-sheets="css/site-direction.css css/experience.css" />
+<link rel="stylesheet" href="css/bundle/shell-3.css?v=46755383" data-ark-sheets="css/home-drafting.css css/lifecycle.css css/reference.css" />
+<link rel="stylesheet" href="css/bundle/shell-4.css?v=bd550b51" data-ark-sheets="css/resolutions.css" />
+<link rel="stylesheet" href="css/bundle/shell-5.css?v=8fde03fc" data-ark-sheets="css/icons.css css/story-diagrams.css css/color-system.css css/brand-identity.css css/how-overview.css" />
+<link rel="stylesheet" href="css/bundle/shell-6.css?v=cbc7e5cc" data-ark-sheets="css/authorization-dialog.css" />
+<link rel="stylesheet" href="css/bundle/shell-7.css?v=d1ffd9af" data-ark-sheets="css/home-swiss.css assets/kit/defxn-marks.data.css css/world.css css/world-pages.css" />
+<link rel="stylesheet" href="css/bundle/shell-8.css?v=ce07c441" data-ark-sheets="css/motion.css" />
+<link rel="stylesheet" href="css/bundle/shell-9.css?v=7ee7a4a1" data-ark-sheets="css/space-frame.css" />
+<link rel="stylesheet" href="css/bundle/shell-10.css?v=b05a027d" data-ark-sheets="css/lattice.css" />
+<link rel="stylesheet" href="css/bundle/shell-11.css?v=554f6101" data-ark-sheets="css/ark-blocks.css" />
+<link rel="stylesheet" href="css/bundle/shell-12.css?v=31e3950f" data-ark-sheets="css/components.css" />
+<!-- styles:end -->
 <!-- The loading mark (owner, 2026-11-07, for testing: one of the 3D logo renders): centred on black from first paint until the world's
      first paint until the page shell is up, a slow breathe only while loading, then a 300 ms fade and every animation stops. Reduced motion: no breathe, the fade
      alone. js/main.js takes it away as soon as the shell renders (html.shell-ready), so the page shows while the world still loads;
@@ -84,13 +115,68 @@
 @keyframes loader-in{to{opacity:1;transform:none}}
 @keyframes loader-fill{to{transform:scaleX(.88)}}
 html.world-ready #world-loader .bar i,html.shell-ready #world-loader .bar i{transform:scaleX(1);transition:transform .25s ease-out}
-html.world-ready #world-loader,html.shell-ready #world-loader{opacity:0;visibility:hidden;transition:opacity .4s ease-out 1.5s,visibility 0s linear 1.9s}
+html.world-ready #world-loader,html.shell-ready #world-loader{opacity:0;visibility:hidden;transition:opacity .4s ease-out .6s,visibility 0s linear 1s}
 html.world-gone #world-loader{display:none}
 @media (prefers-reduced-motion:reduce){#world-loader .mark,#world-loader .welcome,#world-loader .bar,#world-loader .bar i{animation:none;clip-path:none;filter:none;transform:none;opacity:1}}
 </style>
 </head>
 <body>
-<div id="world-loader" aria-hidden="true"><span class="mark"></span><p class="welcome">Welcome to FXN.</p><span class="bar"><i></i></span></div>
+<!-- PLAZA GATE (owner, 2026-11-10): the loading screen is the approved Intro v2 plaza, and it opens up. The still and its sheet come before the
+     markup, so the loader's first paint is the plaza. It replaces the loader pick (js/loader-pick.js, css/loader-pick.css, kept but no longer loaded). -->
+<!-- THE FIRST PAINT IS THE EMPTY GROUND (owner, 2026-11-11: "Starts empty, page loads one at a time smoothly"; fxn-3d
+     docs/design/direction/portal-101/NOTES.md "The load board and the home hero"). No picture file, no font and no script is needed for it: the
+     floor rings, the floor lines and the low disc are one inline SVG, projected through the studio's own load camera by scripts/loader-ground.mjs,
+     and the empty bar is one span. The style below is all the first frame needs, so it stands inline, before the markup; css/loader-plaza.css
+     (the later states) follows it. The studio's first frame (portal101 LOADSTART) is the same picture, so the hand-off moves nothing. -->
+<style>
+#world-loader.plaza{display:block;background:rgb(6 18 18);animation:none;pointer-events:none}
+#world-loader.plaza>.plaza-ground{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke:none}
+#world-loader.plaza>.plaza-ground path{vector-effect:non-scaling-stroke}
+/* the colours are read off the studio's own LOADSTART frame (portal101r110, FXN Browser, 2026-11-11): ring 108 253 208, plinth top 36 35 31, dais top 23 22 20 */
+#world-loader.plaza>.plaza-ground .r{fill:rgb(107 253 208);fill-rule:evenodd}
+#world-loader.plaza>.plaza-ground .l{stroke:rgb(107 253 208);stroke-width:1px;stroke-opacity:.55}
+#world-loader.plaza>.plaza-ground .l .g{stroke:rgb(12 13 12);stroke-width:3px;stroke-opacity:1}
+#world-loader.plaza>.plaza-ground .d .w{fill:rgb(13 13 11)}
+#world-loader.plaza>.plaza-ground .d .t{fill:rgb(21 21 19)}
+#world-loader.plaza>.plaza-ground .d .t1{fill:rgb(34 34 30)}
+#world-loader.plaza>.bar{--plaza-gh:min(100vh,calc(100vw / var(--plaza-aspect,1.6)));position:absolute;left:calc(50% + var(--plaza-gh) * var(--plaza-x,0) / 100);top:calc(50% + var(--plaza-gh) * var(--plaza-bar-y,40) / 100);width:calc(var(--plaza-gh) * .54);height:6px;box-sizing:border-box;transform:translate(-50%,-50%);border:1px solid rgb(255 255 255 / .24);border-radius:3px;background:none;opacity:1;animation:none}
+#world-loader.plaza>.bar i{border-radius:2px;animation:none!important;transform:scaleX(var(--plaza-fill,0))!important;transition:transform .35s cubic-bezier(.2,0,0,1)}
+</style>
+<div id="world-loader" class="plaza" aria-hidden="true"><!-- loader-ground:begin -->
+<!-- Generated by scripts/loader-ground.mjs from fxn-3d world/portal101/geometry.mjs (LOAD_CAM, LOAD_GROUND). Do not edit: run the script. -->
+<style>#world-loader.plaza{--plaza-x:22.40;--plaza-bar-y:44.00;--plaza-aspect:1.6}#world-loader.plaza>.plaza-ground .r{fill:rgb(104 245 201);filter:drop-shadow(0 0 1.5px rgb(104 245 201 / 0.45))}#world-loader.plaza>.plaza-ground .l{stroke:rgb(104 245 201)}#world-loader.plaza>.plaza-ground .d .t0{fill:rgb(24 23 21)}#world-loader.plaza>.plaza-ground .d .t1{fill:rgb(36 35 31)}#world-loader.plaza>.plaza-ground .d .w0{fill:rgb(20 21 19)}#world-loader.plaza>.plaza-ground .d .w1{fill:rgb(39 37 32)}</style>
+<svg class="plaza-ground" viewBox="-800 -500 1600 1000" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><g class="r"><path d="M633.5 84.9L643.6 96.6L652.1 108.6L659.1 120.9L664.3 133.6L667.6 146.4L669 159.5L668.2 172.6L665.2 185.8L659.9 198.9L652.2 211.8L642.1 224.6L629.4 237L614.2 248.9L596.5 260.4L576.2 271.1L553.5 281.1L528.5 290.2L501.3 298.4L472 305.4L440.8 311.3L408.1 316L374 319.4L338.8 321.5L302.8 322.1L266.4 321.5L229.9 319.4L193.5 316L157.6 311.3L122.6 305.4L88.6 298.4L55.9 290.2L24.8 281.1L-4.5 271.1L-31.9 260.4L-57.2 248.9L-80.4 237L-101.3 224.6L-119.9 211.8L-136.2 198.9L-150.2 185.8L-161.9 172.6L-171.4 159.5L-178.7 146.4L-184 133.6L-187.1 120.9L-188.4 108.6L-187.8 96.6L-185.5 84.9L-181.5 73.6L-176 62.7L-169.1 52.3L-160.7 42.3L-151.1 32.8L-140.4 23.8L-128.5 15.3L-115.6 7.2L-101.8 -0.3L-87.1 -7.3L-71.6 -13.9L-55.4 -19.9L-38.5 -25.5L-21 -30.5L-2.9 -35.1L15.7 -39.1L34.8 -42.7L54.2 -45.8L74.1 -48.4L94.3 -50.6L114.8 -52.2L135.5 -53.4L156.5 -54.1L177.7 -54.4L199.1 -54.1L220.5 -53.4L242.1 -52.2L263.7 -50.6L285.3 -48.4L306.9 -45.8L328.4 -42.7L349.8 -39.1L371.1 -35.1L392.2 -30.5L413.1 -25.5L433.7 -19.9L453.9 -13.9L473.8 -7.3L493.1 -0.3L512 7.2L530.2 15.3L547.7 23.8L564.5 32.8L580.4 42.3L595.4 52.3L609.3 62.7L622 73.6ZM630.8 84.9L640.8 96.5L649.3 108.4L656.1 120.7L661.3 133.2L664.5 146L665.8 158.9L665 172L662 185L656.7 198L649 210.9L638.8 223.5L626.2 235.8L611.1 247.6L593.5 258.9L573.3 269.6L550.8 279.5L526 288.5L498.9 296.6L469.9 303.6L439 309.4L406.5 314L372.7 317.4L337.8 319.4L302.1 320.1L266 319.4L229.8 317.4L193.8 314L158.2 309.4L123.4 303.6L89.7 296.6L57.3 288.5L26.5 279.5L-2.6 269.6L-29.8 258.9L-55 247.6L-78 235.8L-98.8 223.5L-117.3 210.9L-133.5 198L-147.4 185L-159.1 172L-168.6 158.9L-175.9 146L-181.2 133.2L-184.4 120.7L-185.7 108.4L-185.1 96.5L-182.9 84.9L-179 73.7L-173.5 62.9L-166.7 52.5L-158.4 42.6L-148.9 33.1L-138.2 24.2L-126.5 15.7L-113.7 7.7L-100 0.2L-85.4 -6.8L-70 -13.3L-53.9 -19.4L-37.1 -24.9L-19.7 -29.9L-1.7 -34.4L16.8 -38.5L35.7 -42.1L55.1 -45.1L74.9 -47.8L95 -49.9L115.3 -51.5L136 -52.7L156.9 -53.4L177.9 -53.7L199.2 -53.4L220.5 -52.7L242 -51.5L263.5 -49.9L285 -47.8L306.4 -45.1L327.9 -42.1L349.2 -38.5L370.4 -34.4L391.4 -29.9L412.1 -24.9L432.6 -19.4L452.7 -13.3L472.4 -6.8L491.6 0.2L510.3 7.7L528.4 15.7L545.8 24.2L562.5 33.1L578.3 42.6L593.1 52.5L606.9 62.9L619.5 73.7Z"/><path d="M678.3 84.9L690.3 97.9L700.8 111.3L709.5 125.1L716.3 139.3L721.1 153.9L723.7 168.6L723.9 183.6L721.6 198.7L716.7 213.7L709.1 228.7L698.6 243.4L685.1 257.9L668.7 271.9L649.3 285.3L626.9 297.9L601.6 309.7L573.4 320.5L542.6 330.2L509.3 338.6L473.7 345.7L436.2 351.3L396.9 355.4L356.4 357.8L314.9 358.6L272.9 357.8L230.8 355.4L188.9 351.3L147.6 345.7L107.3 338.6L68.4 330.2L31.1 320.5L-4.2 309.7L-37.4 297.9L-68.2 285.3L-96.5 271.9L-122.2 257.9L-145.2 243.4L-165.5 228.7L-183.1 213.7L-198 198.7L-210.3 183.6L-220 168.6L-227.3 153.9L-232.2 139.3L-234.8 125.1L-235.3 111.3L-233.7 97.9L-230.3 84.9L-225.1 72.4L-218.2 60.4L-209.8 48.9L-199.9 38L-188.7 27.6L-176.2 17.8L-162.7 8.5L-148.1 -0.2L-132.5 -8.3L-116 -15.9L-98.8 -23L-80.8 -29.4L-62.1 -35.4L-42.8 -40.8L-22.9 -45.7L-2.5 -50L18.3 -53.8L39.6 -57.1L61.2 -59.9L83.2 -62.2L105.5 -63.9L128 -65.2L150.8 -65.9L173.8 -66.2L196.9 -65.9L220.2 -65.2L243.6 -63.9L267.1 -62.2L290.5 -59.9L314 -57.1L337.5 -53.8L360.9 -50L384.1 -45.7L407.2 -40.8L430.1 -35.4L452.7 -29.4L475.1 -23L497 -15.9L518.5 -8.3L539.5 -0.2L559.9 8.5L579.6 17.8L598.6 27.6L616.7 38L633.8 48.9L649.9 60.4L664.7 72.4ZM675.4 84.9L687.3 97.8L697.6 111.1L706.2 124.9L712.9 139L717.6 153.4L720.1 168L720.2 182.9L717.9 197.8L712.9 212.7L705.3 227.6L694.8 242.2L681.4 256.5L665.1 270.3L645.8 283.6L623.5 296.1L598.4 307.8L570.4 318.5L539.8 328.1L506.8 336.4L471.5 343.4L434.3 348.9L395.4 352.9L355.2 355.4L314.1 356.2L272.5 355.4L230.7 352.9L189.2 348.9L148.3 343.4L108.3 336.4L69.7 328.1L32.8 318.5L-2.3 307.8L-35.2 296.1L-65.8 283.6L-93.9 270.3L-119.4 256.5L-142.3 242.2L-162.5 227.6L-180 212.7L-194.9 197.8L-207.1 182.9L-216.8 168L-224.1 153.4L-229 139L-231.7 124.9L-232.2 111.1L-230.8 97.8L-227.4 84.9L-222.3 72.5L-215.5 60.5L-207.1 49.1L-197.4 38.3L-186.3 28L-173.9 18.2L-160.5 9L-146 0.3L-130.5 -7.8L-114.2 -15.4L-97 -22.4L-79.1 -28.8L-60.6 -34.7L-41.4 -40.1L-21.6 -45L-1.4 -49.3L19.4 -53.1L40.5 -56.4L62 -59.2L83.9 -61.4L106.1 -63.2L128.5 -64.4L151.2 -65.2L174 -65.4L197.1 -65.2L220.2 -64.4L243.5 -63.2L266.8 -61.4L290.2 -59.2L313.6 -56.4L336.9 -53.1L360.2 -49.3L383.3 -45L406.3 -40.1L429 -34.7L451.5 -28.8L473.7 -22.4L495.5 -15.4L516.9 -7.8L537.7 0.3L558 9L577.6 18.2L596.4 28L614.3 38.3L631.3 49.1L647.2 60.5L662 72.5Z"/><path d="M812.6 84.9L831.7 101.8L849.1 119.5L864.4 138L877.6 157.2L888.2 177.1L896.2 197.6L901.1 218.6L902.7 240.1L900.7 261.8L894.9 283.8L884.9 305.7L870.6 327.5L851.8 348.8L828.2 369.5L799.9 389.4L766.8 408.1L729 425.5L686.7 441.1L640 454.9L589.4 466.5L535.3 475.8L478.3 482.6L418.9 486.7L357.9 488L296 486.7L234 482.6L172.4 475.8L112.2 466.5L53.9 454.9L-2 441.1L-54.7 425.5L-104.1 408.1L-149.6 389.4L-191.1 369.5L-228.4 348.8L-261.4 327.5L-290.2 305.7L-314.7 283.8L-335.1 261.8L-351.6 240.1L-364.3 218.6L-373.3 197.6L-379 177.1L-381.6 157.2L-381.2 138L-378.1 119.5L-372.5 101.8L-364.7 84.9L-354.7 68.8L-342.9 53.5L-329.3 39L-314.2 25.4L-297.6 12.5L-279.8 0.4L-260.8 -10.9L-240.8 -21.4L-219.8 -31.2L-197.9 -40.2L-175.3 -48.5L-152 -56.2L-128.1 -63.1L-103.6 -69.4L-78.6 -75.1L-53.1 -80.1L-27.2 -84.5L-1 -88.3L25.7 -91.5L52.6 -94.1L79.8 -96.1L107.3 -97.5L135 -98.4L163 -98.7L191.1 -98.4L219.4 -97.5L247.8 -96.1L276.4 -94.1L305.1 -91.5L333.8 -88.3L362.6 -84.5L391.4 -80.1L420.2 -75.1L449 -69.4L477.7 -63.1L506.2 -56.2L534.6 -48.5L562.8 -40.2L590.6 -31.2L618.1 -21.4L645.1 -10.9L671.6 0.4L697.5 12.5L722.6 25.4L746.8 39L770 53.5L792 68.8ZM808.9 84.9L827.7 101.7L844.9 119.3L860 137.6L872.9 156.7L883.4 176.4L891.1 196.7L895.9 217.6L897.3 238.8L895.2 260.4L889.3 282.1L879.3 303.8L865 325.4L846.2 346.5L822.7 367L794.6 386.6L761.7 405.1L724.2 422.2L682.2 437.7L635.9 451.2L585.7 462.7L532.2 471.9L475.7 478.5L416.9 482.6L356.6 483.9L295.3 482.6L233.9 478.5L173 471.9L113.3 462.7L55.5 451.2L0.2 437.7L-52.1 422.2L-101 405.1L-146.1 386.6L-187.3 367L-224.4 346.5L-257.2 325.4L-285.8 303.8L-310.3 282.1L-330.6 260.4L-347.1 238.8L-359.7 217.6L-368.9 196.7L-374.6 176.4L-377.3 156.7L-377 137.6L-374 119.3L-368.6 101.7L-360.9 84.9L-351.1 68.9L-339.4 53.7L-326 39.3L-311 25.7L-294.6 12.9L-277 0.9L-258.1 -10.3L-238.2 -20.8L-217.4 -30.5L-195.7 -39.5L-173.3 -47.8L-150.1 -55.5L-126.3 -62.4L-102 -68.7L-77.1 -74.3L-51.8 -79.3L-26 -83.7L0.1 -87.5L26.6 -90.7L53.4 -93.3L80.5 -95.3L107.9 -96.7L135.5 -97.6L163.3 -97.8L191.3 -97.6L219.4 -96.7L247.7 -95.3L276.2 -93.3L304.7 -90.7L333.3 -87.5L362 -83.7L390.6 -79.3L419.3 -74.3L447.9 -68.7L476.4 -62.4L504.8 -55.5L533 -47.8L561 -39.5L588.7 -30.5L616 -20.8L642.8 -10.3L669.1 0.9L694.8 12.9L719.7 25.7L743.7 39.3L766.6 53.7L788.4 68.9Z"/><path d="M1017.4 84.9L1050.3 107.9L1081.8 132.4L1111.5 158.5L1139 186.1L1164 215.3L1185.9 246.1L1204.2 278.5L1218.4 312.2L1227.7 347.3L1231.6 383.6L1229.4 420.8L1220.2 458.6L1203.5 496.7L1178.7 534.6L1145 571.8L1102.1 607.8L1049.8 641.8L988.1 673.2L917 701.3L837.3 725.4L749.6 744.9L655.2 759.3L555.5 768L452 771L346.5 768L240.9 759.3L137 744.9L36.3 725.4L-59.4 701.3L-149.1 673.2L-231.8 641.8L-306.7 607.8L-373.4 571.8L-431.8 534.6L-481.9 496.7L-523.9 458.6L-558.2 420.8L-585.1 383.6L-605.3 347.3L-619.3 312.2L-627.6 278.5L-630.8 246.1L-629.4 215.3L-623.8 186.1L-614.7 158.5L-602.3 132.4L-587.1 107.9L-569.4 84.9L-549.6 63.4L-527.9 43.2L-504.5 24.5L-479.7 7L-453.7 -9.2L-426.7 -24.2L-398.7 -38.1L-369.8 -50.9L-340.3 -62.7L-310.2 -73.5L-279.5 -83.4L-248.4 -92.3L-216.9 -100.5L-185 -107.8L-152.7 -114.3L-120.2 -120.1L-87.4 -125.1L-54.3 -129.4L-21 -133L12.5 -136L46.3 -138.2L80.3 -139.8L114.5 -140.8L148.9 -141.1L183.5 -140.8L218.3 -139.8L253.4 -138.2L288.7 -136L324.2 -133L359.9 -129.4L395.8 -125.1L432 -120.1L468.3 -114.3L504.9 -107.8L541.7 -100.5L578.6 -92.3L615.7 -83.4L652.9 -73.5L690.2 -62.7L727.6 -50.9L764.9 -38.1L802.1 -24.2L839.2 -9.2L876 7L912.3 24.5L948.2 43.2L983.2 63.4ZM1012.3 84.9L1044.9 107.7L1075.9 132.1L1105.2 157.9L1132.3 185.4L1156.8 214.3L1178.3 244.8L1196.1 276.9L1209.9 310.3L1218.8 345L1222.3 380.8L1219.7 417.6L1210.3 454.9L1193.5 492.5L1168.5 529.8L1134.9 566.5L1092.2 601.9L1040.2 635.3L978.9 666.2L908.6 693.8L829.7 717.5L743 736.6L649.7 750.7L551.2 759.3L449 762.2L344.9 759.3L240.7 750.7L138.1 736.6L38.7 717.5L-56 693.8L-144.7 666.2L-226.5 635.3L-300.7 601.9L-366.9 566.5L-424.8 529.8L-474.6 492.5L-516.5 454.9L-550.7 417.6L-577.7 380.8L-598 345L-612.1 310.3L-620.6 276.9L-624 244.8L-622.8 214.3L-617.6 185.4L-608.7 157.9L-596.6 132.1L-581.7 107.7L-564.3 84.9L-544.8 63.5L-523.3 43.5L-500.3 24.8L-475.8 7.5L-450 -8.6L-423.2 -23.6L-395.4 -37.4L-366.8 -50.2L-337.5 -61.9L-307.6 -72.7L-277.1 -82.5L-246.2 -91.5L-214.8 -99.6L-183.1 -106.9L-151 -113.4L-118.7 -119.1L-86 -124.2L-53.1 -128.5L-19.9 -132.1L13.4 -135L47.1 -137.3L80.9 -138.9L114.9 -139.9L149.2 -140.2L183.7 -139.9L218.4 -138.9L253.3 -137.3L288.4 -135L323.7 -132.1L359.3 -128.5L395.1 -124.2L431 -119.1L467.2 -113.4L503.6 -106.9L540.2 -99.6L576.9 -91.5L613.8 -82.5L650.8 -72.7L687.9 -61.9L725 -50.2L762.1 -37.4L799 -23.6L835.8 -8.6L872.3 7.5L908.3 24.8L943.8 43.5L978.5 63.5Z"/></g><g class="l"><path d="M723.6 25.2L732.1 24.2L740.7 23.2L749.2 22.2L757.7 21.2L766.2 20.2L774.6 19.1L783 18.1L791.4 17.1L799.7 16.1L808.1 15.1L816.4 14.2L824.6 13.2L832.9 12.2L841.1 11.2L849.3 10.2L857.5 9.3L861.1 6.2L864.6 3.2L868.2 0.3L871.7 -2.6L875.2 -5.6L878.6 -8.4L882 -11.3L885.4 -14.1L888.7 -16.9L892 -19.6L895.3 -22.4L898.5 -25.1L901.7 -27.8L904.9 -30.4L908.1 -33.1L911.2 -35.7L958.6 -41L1005.2 -46.2L1050.9 -51.3L1095.7 -56.3L1139.7 -61.2L1182.9 -66L1225.4 -70.8L1267 -75.4L1308 -80L1348.2 -84.5L1387.7 -88.9L1426.5 -93.2L1464.6 -97.5L1502.1 -101.7L1539 -105.8L1575.2 -109.8"/><path class="g" d="M430.2 -73.6L433.2 -75.8L436.1 -78.1L439 -80.3L441.9 -82.5L444.8 -84.7L447.6 -86.9L450.4 -89.1L453.2 -91.2L456 -93.3L458.7 -95.4L461.4 -97.5L464.1 -99.6L466.8 -101.7L469.4 -103.7L472.1 -105.7L474.7 -107.7L481.7 -108.9L488.7 -110L495.7 -111.2L502.7 -112.4L509.6 -113.5L516.5 -114.7L523.3 -115.8L530.1 -116.9L536.9 -118.1L543.7 -119.2L550.4 -120.3L557.1 -121.4L563.7 -122.5L570.4 -123.6L577 -124.7L583.5 -125.8L596.5 -137.4L608.8 -148.4L620.5 -158.9L631.7 -168.9L642.3 -178.4L652.5 -187.5L662.3 -196.2L671.6 -204.6L680.5 -212.6L689.1 -220.3L697.3 -227.6L705.3 -234.7L712.9 -241.5L720.2 -248.1L727.3 -254.4L734 -260.5"/><path class="g" d="M88.8 -97L86.9 -99.4L85.1 -101.9L83.3 -104.4L81.5 -106.8L79.7 -109.2L77.9 -111.5L76.2 -113.9L74.4 -116.2L72.7 -118.5L71 -120.8L69.4 -123L67.7 -125.3L66 -127.5L64.4 -129.7L62.8 -131.8L61.2 -134L55.4 -135.9L49.7 -137.8L44.1 -139.6L38.5 -141.5L32.9 -143.3L27.4 -145.1L21.9 -146.9L16.5 -148.7L11.1 -150.5L5.8 -152.3L0.5 -154L-4.8 -155.7L-10 -157.5L-15.2 -159.2L-20.3 -160.9L-25.4 -162.5L-32.4 -174.3L-38.9 -185.4L-45.2 -196L-51.1 -206L-56.7 -215.5L-62 -224.6L-67.1 -233.2L-72 -241.4L-76.6 -249.3L-81 -256.8L-85.3 -263.9L-89.3 -270.8L-93.2 -277.4L-97 -283.7L-100.6 -289.8L-104 -295.7"/><path d="M-241.6 -21.6L-249 -23.3L-256.3 -24.9L-263.6 -26.6L-270.8 -28.3L-278 -29.9L-285.2 -31.5L-292.3 -33.2L-299.4 -34.8L-306.4 -36.4L-313.4 -38L-320.3 -39.6L-327.3 -41.2L-334.1 -42.7L-341 -44.3L-347.7 -45.8L-354.5 -47.4L-357.6 -50.4L-360.7 -53.4L-363.7 -56.4L-366.7 -59.3L-369.7 -62.2L-372.6 -65.1L-375.5 -67.9L-378.3 -70.7L-381.2 -73.5L-384 -76.3L-386.8 -79L-389.5 -81.7L-392.2 -84.3L-394.9 -87L-397.6 -89.6L-400.2 -92.1L-438.5 -100.3L-475.6 -108.3L-511.5 -115.9L-546.3 -123.4L-580 -130.6L-612.6 -137.6L-644.3 -144.3L-675.1 -150.9L-704.9 -157.3L-733.9 -163.5L-762.1 -169.5L-789.5 -175.4L-816.1 -181.1L-842 -186.6L-867.2 -192L-891.8 -197.3"/><path d="M-383 157.3L-395.7 158.9L-408.5 160.4L-421.3 161.9L-434.2 163.5L-447.1 165L-460.1 166.5L-473.1 168.1L-486.2 169.7L-499.3 171.2L-512.5 172.8L-525.7 174.4L-539 176L-552.4 177.6L-565.8 179.2L-579.2 180.8L-592.7 182.4L-607 187.5L-621.5 192.6L-636.1 197.8L-650.9 203.1L-666 208.5L-681.2 213.9L-696.7 219.4L-712.3 225L-728.2 230.7L-744.3 236.4L-760.7 242.2L-777.2 248.1L-794 254.1L-811.1 260.2L-828.4 266.3L-845.9 272.6L-948.5 285.8L-1054.3 299.3L-1163.4 313.3L-1276 327.8L-1392.3 342.7L-1512.4 358.1L-1636.6 374L-1765 390.5L-1897.8 407.6L-2035.4 425.2L-2178 443.5L-2325.7 462.5L-2479.1 482.2L-2638.2 502.6L-2803.5 523.8L-2975.4 545.9"/><path class="g" d="M-165.2 383.8L-175.9 392.1L-186.7 400.4L-197.8 408.9L-209 417.5L-220.5 426.3L-232.1 435.3L-244 444.4L-256 453.6L-268.3 463.1L-280.8 472.7L-293.6 482.5L-306.5 492.4L-319.7 502.6L-333.2 512.9L-346.9 523.5L-360.9 534.2L-382.3 540.7L-403.9 547.2L-425.8 553.8L-447.9 560.4L-470.3 567.2L-492.9 574L-515.9 580.9L-539.1 587.8L-562.5 594.9L-586.3 602L-610.3 609.3L-634.7 616.6L-659.3 624L-684.2 631.5L-709.5 639.1L-735 646.8L-869.7 737.4L-1025.6 842.3L-1208.3 965.3L-1425.3 1111.4L-1687.3 1287.7L-2010 1504.9L-2417.1 1778.9L-2946.8 2135.4"/><path class="g" d="M657.5 451.8L670.3 462.6L683.3 473.6L696.6 484.9L710.2 496.4L724.1 508.1L738.2 520.1L752.7 532.4L767.6 544.9L782.7 557.8L798.2 570.9L814.1 584.3L830.3 598.1L846.9 612.1L863.9 626.5L881.3 641.3L899.2 656.4L926.1 668.5L953.5 680.8L981.4 693.3L1010 706.1L1039 719.2L1068.7 732.5L1099 746.1L1129.9 760L1161.5 774.2L1193.7 788.6L1226.7 803.4L1260.3 818.5L1294.7 834L1329.8 849.8L1365.8 865.9L1402.5 882.4L1605.7 1033.8L1855.5 1219.9L2170 1454.3L2578.2 1758.4"/><path d="M901.6 211.9L916.9 214.7L932.2 217.6L947.7 220.5L963.2 223.4L978.9 226.3L994.7 229.3L1010.6 232.3L1026.7 235.3L1042.8 238.3L1059.1 241.4L1075.5 244.4L1092 247.5L1108.6 250.7L1125.4 253.8L1142.2 257L1159.3 260.2L1178.3 267.3L1197.6 274.6L1217.3 282L1237.3 289.5L1257.7 297.1L1278.4 304.9L1299.5 312.8L1320.9 320.9L1342.8 329.1L1365 337.5L1387.7 346L1410.7 354.6L1434.2 363.5L1458.2 372.5L1482.6 381.6L1507.5 391L1647.8 419.2L1796.4 449L1954.1 480.7L2121.7 514.3L2300.1 550.2L2490.6 588.5L2694.3 629.4L2912.7 673.2"/></g><g class="d"><path class="w w0" d="M455.4 84.9L460.4 93.6L463.7 102.6L465.2 111.6L464.8 120.6L462.5 129.6L458.1 138.4L451.7 147L443.2 155.3L432.6 163.1L420.1 170.5L405.6 177.3L389.3 183.3L371.3 188.6L351.8 193L330.9 196.5L308.9 199.1L286.1 200.6L262.6 201.2L238.8 200.6L214.9 199.1L191.3 196.5L168.1 193L145.6 188.6L124.1 183.3L103.8 177.3L84.8 170.5L67.4 163.1L51.6 155.3L37.6 147L25.4 138.4L15.2 129.6L6.9 120.6L0.5 111.6L-4 102.6L-6.6 93.6L-7.4 84.9L-6.5 76.3L-3.8 68.1L0.4 60.2L6.2 52.6L13.4 45.4L22 38.7L31.7 32.4L42.7 26.6L54.7 21.4L67.6 16.6L81.4 12.4L96 8.7L111.3 5.6L127.2 3L143.7 1L160.5 -0.4L177.8 -1.3L195.3 -1.6L212.9 -1.3L230.7 -0.4L248.6 1L266.3 3L283.9 5.6L301.3 8.7L318.3 12.4L335 16.6L351.1 21.4L366.6 26.6L381.4 32.4L395.3 38.7L408.3 45.4L420.3 52.6L431.1 60.2L440.6 68.1L448.8 76.3ZM-7.4 73.3L456.9 73.3L455.4 84.9L-7.4 84.9Z"/><path class="t t0" d="M456.9 73.3L461.9 82L465.3 90.8L466.8 99.6L466.4 108.6L464.1 117.4L459.7 126.1L453.3 134.6L444.8 142.8L434.2 150.5L421.6 157.8L407.1 164.5L390.7 170.4L372.7 175.7L353.1 180L332.2 183.5L310.1 186L287.2 187.5L263.6 188.1L239.7 187.5L215.8 186L192 183.5L168.7 180L146.1 175.7L124.6 170.4L104.1 164.5L85.1 157.8L67.6 150.5L51.8 142.8L37.7 134.6L25.5 126.1L15.3 117.4L6.9 108.6L0.5 99.6L-4 90.8L-6.7 82L-7.4 73.3L-6.5 64.9L-3.8 56.8L0.4 49L6.2 41.5L13.5 34.4L22 27.8L31.8 21.6L42.8 15.9L54.8 10.7L67.8 6L81.7 1.9L96.3 -1.8L111.7 -4.8L127.6 -7.4L144.1 -9.3L161 -10.8L178.3 -11.6L195.8 -11.9L213.5 -11.6L231.4 -10.8L249.3 -9.3L267.1 -7.4L284.7 -4.8L302.2 -1.8L319.3 1.9L336 6L352.1 10.7L367.7 15.9L382.5 21.6L396.5 27.8L409.6 34.4L421.6 41.5L432.4 49L442 56.8L450.2 64.9Z"/><path class="w w1" d="M346 73.3L347.8 77.8L348.8 82.3L348.8 86.8L347.8 91.3L345.9 95.6L342.9 99.9L339 104L334.1 107.9L328.3 111.5L321.6 114.9L314.1 118L305.7 120.7L296.7 123.1L287 125.1L276.7 126.6L266 127.8L254.9 128.4L243.5 128.7L232 128.4L220.4 127.8L208.9 126.6L197.6 125.1L186.5 123.1L175.8 120.7L165.6 118L156 114.9L147 111.5L138.7 107.9L131.2 104L124.5 99.9L118.7 95.6L113.8 91.3L109.8 86.8L106.7 82.3L104.6 77.8L103.5 73.3L103.2 68.9L103.9 64.6L105.5 60.4L107.9 56.3L111.2 52.4L115.3 48.7L120.1 45.3L125.6 42.1L131.8 39.1L138.6 36.4L146 34L153.8 31.9L162.2 30.1L170.9 28.6L179.9 27.4L189.3 26.6L198.9 26.1L208.6 25.9L218.5 26.1L228.4 26.6L238.3 27.4L248.2 28.6L257.9 30.1L267.5 31.9L276.8 34L285.8 36.4L294.4 39.1L302.6 42.1L310.3 45.3L317.5 48.7L324 52.4L329.9 56.3L335.1 60.4L339.6 64.6L343.2 68.9ZM104.4 42.9L348.9 42.9L346 73.3L103.5 73.3Z"/><path class="t t1" d="M348.9 42.9L350.8 47.3L351.8 51.6L351.8 55.9L350.9 60.2L348.9 64.4L346 68.5L342.1 72.4L337.2 76.2L331.3 79.7L324.6 83L317 85.9L308.6 88.6L299.4 90.9L289.6 92.8L279.3 94.3L268.4 95.4L257.2 96L245.8 96.2L234.1 96L222.4 95.4L210.8 94.3L199.4 92.8L188.2 90.9L177.5 88.6L167.2 85.9L157.4 83L148.3 79.7L140 76.2L132.4 72.4L125.6 68.5L119.8 64.4L114.8 60.2L110.8 55.9L107.7 51.6L105.5 47.3L104.4 42.9L104.1 38.7L104.8 34.5L106.4 30.5L108.8 26.6L112.1 22.8L116.2 19.3L121.1 16L126.6 12.9L132.9 10L139.7 7.4L147.1 5.1L155.1 3.1L163.5 1.3L172.2 -0.1L181.4 -1.2L190.8 -2L200.5 -2.5L210.3 -2.7L220.2 -2.5L230.3 -2L240.3 -1.2L250.2 -0.1L260 1.3L269.6 3.1L279 5.1L288.1 7.4L296.8 10L305.1 12.9L312.9 16L320.1 19.3L326.7 22.8L332.7 26.6L338 30.5L342.4 34.5L346.1 38.7Z"/></g></svg>
+<!-- loader-ground:end --><span class="bar"><i></i></span></div>
+<link rel="stylesheet" href="css/loader-plaza.css?v=20261111-speed3">
+<!-- THE HOME HERO'S WORDS, READABLE AT THE FIRST PAINT (2026-11-11, speed lane 1C; audit F05: nothing a visitor reads waits for a script or
+     for the 3D). The section below is the hero's own words as markup, with the page's own classes, so the shared sheets set them exactly as
+     they stand in the page. It is hidden until js/loader-plaza.js (the next script) shows it on the home, or takes it out of the document
+     on any other route; with scripts off the fallback further down is the page. On the home js/pages/intro.js then takes these same nodes
+     into the page it builds (no second copy, no flash).
+     The region is GENERATED from the manifest's words (scripts/build-shell.cjs "THE HOME HERO'S WORDS IN THE SHELL"). -->
+<!-- hero-words:begin generated by scripts/build-shell.cjs from HOME.LANDING.* in js/content/manifests/home.js through ArkTopics.heroFirst (js/content/topics.js). Do not edit: change the words in the manifest and run the build. -->
+<section id="hero-first" class="world-page intro-world hero-words" aria-labelledby="intro-title" hidden><div class="intro-portal-words"><p class="intro-portal-eyebrow mono">FXN network</p><h1 class="intro-portal-headline" id="intro-title">A new internet, built in the open.</h1><p class="intro-portal-line">Build apps, start chains, run the machines that keep them. Devnet genesis is next.</p><div class="intro-portal-actions"><a class="intro-portal-enter" href="/learn" data-scene-link="learn">Enter FXN</a><a class="intro-portal-second" href="/learn" data-scene-link="learn">See how it works</a></div><ul class="intro-features"><li class="intro-feature"><svg viewBox="0 0 24 24" class="intro-icon" aria-hidden="true"><path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7zM3.5 7 12 11.5 20.5 7M12 11.5v10"></path></svg><b class="intro-feature-name">Create</b><span class="intro-feature-line">Build apps and start chains.</span></li><li class="intro-feature"><svg viewBox="0 0 24 24" class="intro-icon" aria-hidden="true"><path d="M12 3 21 7.5 12 12 3 7.5zM3 12l9 4.5 9-4.5M3 16.5 12 21l9-4.5"></path></svg><b class="intro-feature-name">Connect</b><span class="intro-feature-line">Join a network of open systems.</span></li><li class="intro-feature"><svg viewBox="0 0 24 24" class="intro-icon" aria-hidden="true"><path d="M13 2.5 4.5 13.5H11l-1 8 8.5-11H12z"></path></svg><b class="intro-feature-name">Own</b><span class="intro-feature-line">Your FXN ID, data and work stay yours.</span></li></ul></div></section>
+<!-- hero-words:end -->
+<script src="js/loader-plaza.js?v=20261111-speed3"></script>
+<!-- WORDS FIRST, THEN THE SHELL, THEN THE 3D (2026-11-11, speed lane 1C). The lines below ask for every script that follows, at once, so
+     the shell's chunks do not wait for one another (scripts/build-shell.cjs "THE SHELL'S SCRIPTS ARE ASKED FOR TOGETHER"). GENERATED. -->
+<!-- shell-preload:begin generated by scripts/build-shell.cjs: one line for each <script src> that stands after this region. Do not edit: run the build. -->
+<link rel="preload" as="script" href="js/ark/stage.js?v=20261111-speed3" />
+<link rel="preload" as="script" href="js/bundle/shell-1.js?v=afd8c41b" />
+<link rel="preload" as="script" href="js/content/manifests/index.js?v=20261111-audit1&bundled=1" />
+<link rel="preload" as="script" href="js/content/assets/index.js" />
+<link rel="preload" as="script" href="js/content/secrets/index.js" />
+<link rel="preload" as="script" href="js/bundle/shell-2.js?v=f3567df9" />
+<link rel="preload" as="script" href="js/ark/vendor/engines.js" />
+<link rel="preload" as="script" href="js/min/manifest.js?v=6fe737e0" />
+<link rel="preload" as="script" href="js/ark/vendor/backgrounds.js" />
+<link rel="preload" as="script" href="assets/kit/defxn-product.js?v=20261020-w4" />
+<link rel="preload" as="script" href="js/bundle/shell-3.js?v=f11a3d72" />
+<!-- shell-preload:end -->
+<!-- THE STAGE (2026-11-11): the site's one 3D surface, window.ArkStage. The shell's list names it ArkUI.stage (js/ark/stage-attach.js).
+     It asks for nothing by itself: js/main.js tells it when the shell is up (ArkStage.warm), and only then is the home's portal frame
+     made, so the frame's 200 files never go down the line ahead of the shell (js/ark/stage.js "THE WARM START"). -->
+<script src="js/ark/stage.js?v=20261111-speed3"></script>
 
 <!-- The scene host. Empty on purpose: the Ark UI runtime fills it from the
      single F-SCENE-RZERO_V0 pattern in js/scene.flux.js. No scene markup is
@@ -98,6 +184,21 @@ html.world-gone #world-loader{display:none}
 <!-- Skip link: the first thing Tab reaches, past the header's controls to the page itself
      (js/hero-motion.js focuses the routed page; with JavaScript off it jumps to the fallback). -->
 <a class="skip" href="#fallback">Skip to content</a>
+<!-- The navbar (owner, 2026-11-09): static, so it paints with the first paint and works with no script; clean paths,
+     no .html. js/resolvers/header.js adopts this element into the scene when the shell renders, rewrites the hrefs
+     through the router, marks the current route and swaps Sign in for Account. Dress: css/navigation.css. -->
+<header class="fxn-nav ark-header" id="fxn-nav">
+  <a class="fxn-nav-mark header-mark" href="/" data-nav="zero" aria-label="DEFXN home"><i class="dx-mark" aria-hidden="true"></i><span class="fxn-nav-word" aria-hidden="true">DEFXN</span></a>
+  <nav class="fxn-nav-links header-core-links" aria-label="Site">
+    <a href="/fxn/apps" data-nav="fxn/apps" data-header-item="products">Products</a>
+    <a href="/fxn/network" data-nav="fxn/network" data-header-item="network">Network</a>
+    <a href="/fxn/records" data-nav="fxn/records" data-header-item="developers">Developers</a>
+    <a href="/learn" data-nav="learn" data-header-item="resources">Resources</a>
+  </nav>
+  <a class="fxn-nav-you header-account-link" href="/auth" data-nav="auth" data-header-item="auth">Sign In</a>
+  <a class="fxn-nav-action header-run-link" href="/download" data-nav="download" data-header-item="download">Get FXN Browser</a>
+  <a class="fxn-nav-id" href="/auth" data-nav="auth" data-header-item="initiate">Initiate FXN ID</a>
+</header>
 <main id="main">
 <div id="scene"></div>
 
@@ -106,20 +207,19 @@ html.world-gone #world-loader{display:none}
 <section id="fallback" aria-label="Introduction">
   <div class="wrap">
     <p class="brand">DEFXN</p>
-    <p class="eyebrow">Explore. Build. Operate.</p>
-    <h1>Not one chain. A world of them.</h1>
-    <p>
-      Your own history. A network of possibilities. DEFXN connects independent identity chains
-      through applications and signed results you can inspect. Explore the protocol,
-      understand resolvers, or follow the instructions to run from source.
-    </p>
+    <!-- The home hero's own words (js/content/manifests/home.js LANDING.PORTAL.*), for a visit with scripts off: then this h1 is the page's.
+         With scripts on, js/main.js makes this block inert and hidden from assistive tools, and the one h1 a visitor meets is the hero's
+         headline (js/pages/intro.js), the same words. -->
+    <p class="eyebrow">FXN network</p>
+    <h1>A new internet, built in the open.</h1>
+    <p>Build apps, start chains, run the machines that keep them. Devnet genesis is next.</p>
     <!-- The site's own pages, not raw docs/*.md files (docs/ux-audit/pages.md P10). Once the
          scene is up, js/main.js makes this block inert as well as aria-hidden: it is visually
          clipped, so its links must not be Tab stops. -->
-    <p><a href="/download">Run DEFXN from source</a></p>
-    <nav aria-label="Learn about DEFXN">
-      <a href="/what-is-a-resolver">What is a resolver?</a>
-      <a href="/about">Read the overview</a>
+    <p><a href="/download">Get FXN Browser</a></p>
+    <nav aria-label="Learn about FXN">
+      <a href="/learn">Learn</a>
+      <a href="/fxn/id">FXN ID</a>
     </nav>
   </div>
 </section>
@@ -129,13 +229,19 @@ html.world-gone #world-loader{display:none}
 
 <!-- Classic scripts, in dependency order. Deliberately not ES modules: those
      are blocked on file://, and this page should open with a double-click.
-     Every file only defines something; js/main.js is the one that runs. -->
+     Every file only defines something; js/main.js is the one that runs.
 
+     THE LIST BELOW IS INSIDE A <template>, SO THE BROWSER RUNS NONE OF IT: it is the source of truth that
+     scripts/build-shell.cjs reads to write the live region after it (js/bundle/shell-<n>.js chunks, in this
+     order, with the files that must stay their own tag between them). Edit this list; then run
+     `node scripts/build-shell.cjs` (npm run build:ark runs it too; --check fails on drift). A tag with
+     data-shell="live" keeps its own request; a loader that calls document.write and a type="module" script
+     keep theirs without being marked. Measured 2026-11-09: 151 shell requests became 36. -->
+<template id="shell-sources">
 <!-- 1. design tokens -->
 <!-- One frame scheduler for every view (ArkFrame: once, idle, settleLoop): before the header, main and hero-motion use it. -->
 <script src="js/lib/frame.js" defer></script>
 <script src="js/tokens.js" defer></script>
-<script src="js/ark/vendor/backgrounds.js" defer></script>
 <script src="js/content/theme.js?v=20261020-theme-ids" defer></script>
 <script src="js/content/theme-data.js" defer></script>
 <script src="js/content/settings-defaults.js?v=20261020-theme-ids" defer></script>
@@ -158,13 +264,47 @@ html.world-gone #world-loader{display:none}
 
 <!-- 2. runtime: atomizer -> flux parser -> prop readers -> registry/renderer -->
 <script src="js/content/manifest.js" defer></script>
-<script src="js/content/manifests/index.js?v=20261014-landscape1"></script>
-<!-- Refresh the editable navigation manifest after the generated manifest list. -->
-<script src="js/content/manifests/nav.js?v=20261020-w4" defer></script>
 <script src="js/content/assets.js" defer></script>
-<script src="js/content/assets/index.js"></script>
 <script src="js/content/secrets.js" defer></script>
-<script src="js/content/secrets/index.js"></script>
+<!-- The three content loaders, together (2026-11-09, so the chunks around them are two, not four): each writes its items'
+     deferred tags at this point, after the three registries above and before everything that reads an item. Their
+     data-shell attribute stands BEFORE src on purpose: api/lib/render-core.mjs finds a loader by `<script src="js/content/
+     .../index.js` to expand it for jsdom, and must find the live tag below, never this inert copy.
+     THE MANIFESTS RIDE IN THE CHUNK (2026-11-11): the block below is generated from the id list in js/content/manifests/index.js
+     (scripts/build-shell.cjs writes it; its check fails on drift), so the 26 manifests are bundled, not asked for one by one.
+     The manifests loader keeps its tag after the block and carries &bundled=1: on a public page it then writes nothing, and in
+     the editor's canvas (?cms-preview, ?preview) it still loads every manifest fresh, after the bundled copy. -->
+<!-- manifests:begin generated by scripts/build-shell.cjs from ArkManifestIds in js/content/manifests/index.js. Do not edit: change that list and run the build. -->
+<script src="js/content/manifests/nav.js" defer></script>
+<script src="js/content/manifests/home.js" defer></script>
+<script src="js/content/manifests/worldchain.js" defer></script>
+<script src="js/content/manifests/worldidentity.js" defer></script>
+<script src="js/content/manifests/worldmeasure.js" defer></script>
+<script src="js/content/manifests/worldstats.js" defer></script>
+<script src="js/content/manifests/worldworks.js" defer></script>
+<script src="js/content/manifests/worldminute.js" defer></script>
+<script src="js/content/manifests/chain.js" defer></script>
+<script src="js/content/manifests/resolver.js" defer></script>
+<script src="js/content/manifests/resolvermath.js" defer></script>
+<script src="js/content/manifests/references.js" defer></script>
+<script src="js/content/manifests/deployment.js" defer></script>
+<script src="js/content/manifests/concept.js" defer></script>
+<script src="js/content/manifests/about.js" defer></script>
+<script src="js/content/manifests/resolutions.js" defer></script>
+<script src="js/content/manifests/purpose.js" defer></script>
+<script src="js/content/manifests/depth.js" defer></script>
+<script src="js/content/manifests/practice.js" defer></script>
+<script src="js/content/manifests/notes.js" defer></script>
+<script src="js/content/manifests/studio.js" defer></script>
+<script src="js/content/manifests/spec.js" defer></script>
+<script src="js/content/manifests/download.js" defer></script>
+<script src="js/content/manifests/bundledeployer.js" defer></script>
+<script src="js/content/manifests/deploy.js" defer></script>
+<script src="js/content/manifests/dao.js" defer></script>
+<!-- manifests:end -->
+<script data-shell="loader" src="js/content/manifests/index.js?v=20261111-audit1&bundled=1"></script>
+<script data-shell="loader" src="js/content/assets/index.js"></script>
+<script data-shell="loader" src="js/content/secrets/index.js"></script>
 <script src="js/ark/atomizer.js" defer></script>
 <script src="js/ark/flux.js" defer></script>
 <script src="js/ark/props.js" defer></script>
@@ -172,7 +312,13 @@ html.world-gone #world-loader{display:none}
 <script src="js/ark/route.js" defer></script>
 <script src="js/ark/local-identity.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/cms-session.js?v=20261003-alignment98" defer></script>
-<script src="js/ark/vendor/engines.js" defer></script>
+<script src="js/ark/vendor/engines.js" data-shell="live" defer></script>
+<!-- The files that keep their own request, together (scripts/build-shell.cjs): the min manifest (its stamp is written by
+     npm run build:pages), the backgrounds entry (it reads document.currentScript for its folder) and the family kit (synced
+     from flux/defxn-product-kit). Each only defines something read later, so they stand here, after the runtime. -->
+<script src="js/min/manifest.js?v=6fe737e0" defer></script>
+<script src="js/ark/vendor/backgrounds.js" data-shell="live" defer></script>
+<script src="assets/kit/defxn-product.js?v=20261020-w4" data-shell="live" defer></script>
 <script src="js/ark/story-diagrams.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/stage-scenes.js?v=20261003-lifecycle103" defer></script>
 <script src="js/ark/mesh-fabric.js?v=20261019-settle1" defer></script>
@@ -190,11 +336,12 @@ html.world-gone #world-loader{display:none}
 <script src="js/pages/catalog.js?v=20261026-kit" defer></script>
 <script src="js/ark/scene-state.js?v=20261003-alignment98" defer></script>
 <script src="js/ark/mesh-drag.js" defer></script>
-<script src="js/min/manifest.js?v=1f9e7e75" defer></script>
 <script src="js/ark/page-loader.js?v=20261025-ac1" defer></script>
 <script src="js/ark/reference-docs.js?v=20261002" defer></script>
 <script src="js/ark/panel-continuity.js?v=20261024-world1" defer></script>
-<script src="js/ark/page-router.js?v=20261003-lifecycle103" defer></script>
+<script src="js/ark/page-router.js?v=20261109-portal-home" defer></script>
+<!-- js/ark/stage.js itself runs before the shell (its own tag after js/loader-plaza.js); this names it ArkUI.stage once ArkUI exists -->
+<script src="js/ark/stage-attach.js" defer></script>
 
 <!-- 3. the grain painter the halo resolver calls -->
 <script src="js/halo/grain.js" defer></script>
@@ -204,8 +351,7 @@ html.world-gone #world-loader{display:none}
 <script src="js/resolvers/scene.js" defer></script>
 <script src="js/resolvers/halo.js" defer></script>
 <script src="js/resolvers/veil.js" defer></script>
-<script src="assets/kit/defxn-product.js?v=20261020-w4" defer></script>
-<script src="js/resolvers/header.js?v=20261025-price1" defer></script>
+<script src="js/resolvers/header.js?v=20261109-navbar1" defer></script>
 <script src="js/resolvers/nav.js?v=2" defer></script>
 <script src="js/resolvers/body.js" defer></script>
 <script src="js/resolvers/blocks/rblock-text-v1.js" defer></script>
@@ -228,12 +374,27 @@ html.world-gone #world-loader{display:none}
 <script src="js/content/mesh-settings.js" defer></script>
 <script src="js/content/mesh-settings-data.js" defer></script>
 <script src="js/halo/shaders.js" defer></script>
-<!-- The 3D world under every page: the grammar world (docs/design/world-grammar), the only world. ?world=off turns it off (js/world2/world2-host.mjs). -->
-<script type="module" src="js/world2/world2-host.mjs?v=20261030-w6"></script>
+<!-- The old 3D world is parked (owner, 2026-11-11): no page loads js/world2/, js/space/, css/space/ or world/*.flx. This file keeps what the
+     pages still need from its host (the "no world" surface, the words' rise). To bring the world back, see the file's header. -->
+<script src="js/ark/world-parked.js" defer></script>
 <!-- NFT skins (docs/home-redesign/SKIN-CONTRACT.md): the site's part map and its one skin entry. Ark UI's skin chunk and the card recipe load only when a skin is applied. -->
 <script src="js/ark/skin-parts.js?v=20261025-audit1" defer></script>
 <script src="js/ark/skin-site.js?v=20261025-gate1" defer></script>
 <script src="js/hero-motion.js?v=20261025-price2" defer></script>
 <script src="js/settings/panel.js?v=20261020-theme-ids" defer></script>
+</template>
+<!-- The scripts the browser runs: written by scripts/build-shell.cjs from the template above. Do not edit by hand. -->
+<!-- shell:begin -->
+<script src="js/bundle/shell-1.js?v=afd8c41b" defer></script>
+<script src="js/content/manifests/index.js?v=20261111-audit1&bundled=1"></script>
+<script src="js/content/assets/index.js"></script>
+<script src="js/content/secrets/index.js"></script>
+<script src="js/bundle/shell-2.js?v=f3567df9" defer></script>
+<script src="js/ark/vendor/engines.js" data-shell="live" defer></script>
+<script src="js/min/manifest.js?v=6fe737e0" defer></script>
+<script src="js/ark/vendor/backgrounds.js" data-shell="live" defer></script>
+<script src="assets/kit/defxn-product.js?v=20261020-w4" data-shell="live" defer></script>
+<script src="js/bundle/shell-3.js?v=f11a3d72" defer></script>
+<!-- shell:end -->
 </body>
 </html>

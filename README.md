@@ -253,6 +253,8 @@ runtime; live overlay positioning and theme visuals still require browser QA.
 
 Ark UI reaches this site one way, and no file here names a hub path:
 
+Since 2026-11-09 the site takes the packages as FXN UI: `@fxn/ui` and `@fxn/ui-*` replace `@deadark/ark-*` in `package.json` and in every import.
+
 1. `package.json` pins `@deadark/ark-ui` and `@deadark/sdk` as `file:.vendor/<pkg>-<version>.tgz`.
 2. `npm run sync:ark` (`deadark-theme sync-consumer . --no-build`) packs the SDK and the whole
    Ark UI closure (ark-primitives, ark-elements, ark-a11y, ark-syntax, flux-state, flux-dom,

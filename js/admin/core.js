@@ -26,7 +26,7 @@
   if (!gate) { window.location.replace('admin.html'); return; }
 
   /* The real, shared <flux-authorization-dialog> (same element flux-dao-app
-     registers via @deadark/ark-ui/elements) -- an ARIA/focus-trap/busy-state
+     registers via @fxn/ui/elements) -- an ARIA/focus-trap/busy-state
      primitive with no template of its own; authorizePublish() (js/admin/mesh.js) supplies
      the light-DOM content, same shape as ScopedAuthorizationDialog's. */
   if (window.ArkFluxElements) window.ArkFluxElements.defineFluxAuthorizationDialog();

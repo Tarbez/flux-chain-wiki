@@ -1175,3 +1175,248 @@ genesis session and the game session (asked 2026-11-09). Objects are built one a
 | 18 | The door to the game | Release Gate | built (the game link comes later) |
 
 The names of the six missing objects are drafts for the owner.
+
+## Portal navigation (P05)
+
+Layer: app (the site). Owner design, 2026-11-09: `intro-audit/designer/target-p05-emblem-orbit.png`. The intro's portal ring of 12 stones is the site's main navigation. The words come from `intro-audit/designer/BRIEF.md` ("The 12 stones") and the facts files in `intro-story/`.
+
+### Page map
+
+| Address | What it is | Drawn by |
+|---|---|---|
+| `/intro` | The portal. Twelve stones, each with its word on it. PLAY sits on the gate. | `js/pages/intro.js` |
+| `/fxn/<slug>` | One topic: id, records, keepers, capacity, chains, names, game, releases, apps, rules, deposits, network. | `js/pages/topic.js`, one row each in `js/content/topics.js` |
+| `/learn` | The one place to learn. Tabs: Words, Speed, Topics (`?t=words`, `?t=speed`, `?t=topics`). | `js/pages/learn.js` |
+| `/`, `/auth`, `/account`, `/download` | Kept as they were. | unchanged |
+
+The order of the topics and their routes is `js/content/site-pages.js` TOPICS. A topic's name, what you do, what you get back and status are the ring's own words (`HOME.LANDING.RING.S<n>`, `HOME.LANDING.ABILITY.S<n>.*`), so a stone and its page say the same thing. Speed numbers come only from `ArkUI.speedFacts` (`js/content/speed-facts.js`). A topic with no row says "Not measured yet", never 0.
+
+The flow. Hover a stone: its object comes to the centre and the ability panel names it. Click the stone, or the centre while one is held: the stone's OPEN merge plays, then a hard cut to its topic page. The jump bar on a topic page cuts to another topic, to Learn, or back to the portal. Back to the portal shows the ring at rest: site-view opens at `hold=SPAWN`, the last frame of portal101's SPAWN, with no build. PLAY is amber, placed on the gate plate site-view reports (`ring.gate`), and opens `/fxn/game`. The words sit in the middle of the stone face band (`ring.band`). Until site-view sends the band, they sit at .8 of the radius.
+
+The header shows Portal, Learn, Sign in and Get FXN Browser (`js/resolvers/header.js` HEADER_LINKS).
+
+### Retired into this navigation
+
+| Old page | Opens now |
+|---|---|
+| `/how-it-works`, `/learnings` and the pages that led to them | `/learn` |
+| `/stats/now` and every older stats address | `/learn?t=speed` |
+| `/resolutions`, `/resolvers` | `/fxn/apps` |
+| `/explore` | `/fxn/network` |
+| `/chain` | `/fxn/chains` |
+| `/identity` | `/fxn/id` |
+| `/ring` | `/fxn/keepers` |
+
+Each row is in `site-pages.js` RETIRED. `js/pages/catalog.js` turns it into a redirect, so a saved link still lands. The module files stay on disk.
+
+### Reduction test: the ring
+
+1. About: the twelve things your FXN ID does on the network, one per stone.
+2. Dominant action: click a stone. PLAY is the one amber thing on it.
+3. Know now: the twelve topic names and which one you point at.
+4. Hidden until asked: what you do and get back (on hover), and every topic page.
+5. Repeated elsewhere: nothing. The words are the HOME.LANDING keys the topic pages read too.
+6. Only because the data has it: the stones, from portal101's SEGMENTS.
+7. Removable: the ability panel's status line, on a short screen.
+8. Leaving keeps state: nothing to keep. The ring comes back at rest.
+9. Returning: Back to the portal shows the ring held at the end of SPAWN, with no build.
+10. If the studio is missing: the outline ring stays and, after 20 seconds, the portal steps aside and the words stay.
+
+### Reduction test: a topic page
+
+1. About: one topic: what it is, what you do, what you get back, its status.
+2. Dominant action: Initiate FXN ID on the FXN ID page. On every other page, the honest next step on Learn.
+3. Know now: the name, the status chip and the three lines.
+4. Hidden until asked: the Speed and How it works tabs.
+5. Repeated elsewhere: the three lines are the ring's own words, read from one place.
+6. Only because the data has it: the speed strip, from the speed table only.
+7. Removable: the stone number above the name.
+8. Leaving keeps state: none needed. The tab opens at Overview.
+9. Returning: the jump bar marks the current stone.
+10. If the studio is missing: the object box says the 3D object is drawn only on the studio machine.
+
+### Reduction test: Learn
+
+1. About: what a record is, every measured number, and the twelve topics.
+2. Dominant action: Back to the portal.
+3. Know now: the three parts of a record, the two rules and the seven words.
+4. Hidden until asked: the Speed and Topics tabs.
+5. Repeated elsewhere: the topic lines are the topic pages' own rows.
+6. Only because the data has it: the Speed tab, from the speed table only. With no table it says so.
+7. Removable: the word list's second column, on a phone.
+8. Leaving keeps state: the tab is in the address (`?t=`).
+9. Returning: the address opens the same tab.
+10. If the speed table is missing: the tab says it has not loaded, and no number shows.
+
+## Navigation flow
+
+Layer: app (the site's router). Audit and fixes of 2026-11-09 (owner: "audit and fix the entire navigation flow ... make sure no .html is shown"). Measured in headless Chrome at 1440x900 on the owner's Mac (serve-site on 127.0.0.1:3438, the fxn-3d studio on :3440 not running), one visit per row, machine otherwise idle. Shots: `p05-upgrade/shots-nav/`.
+
+### How an address becomes a page
+
+1. The host answers every extension-less path with `index.html` (`scripts/serve-site.mjs`; `vercel.json` sends it to `api/render`). A `.html` form or a trailing slash answers with one 301 to the clean form (`serve-site.mjs` `cleanPath`; `vercel.json` `redirects` and `trailingSlash: false`). `/index.html` is `/`. The private files (`admin.html`) 404 first.
+2. `js/ark/route.js` reads the path (or an old `#/route` hash). `js/ark/page-router.js` `resolve()` finds the catalog key: the path, then an alias (an old address), else `notfound`.
+3. `navigate()` follows a retired key's `redirect` to the page that holds it now, with that key's section query when the visitor brought none (`/stats/gpu` opens `/learn?t=speed`).
+4. When the address is not the page's own path (old address, alias, trailing slash), the history entry is replaced by the page's path; the query stays. The not-found page keeps the address it was asked for. Back and Forward re-run the same resolve (`js/hero-motion.js` `restoreRoute`, history mode `none`).
+5. Every plain in-site `<a href>` routes in place (`page-router.js`, one document listener). A link the scene's own handler took (`[data-scene-link]`, the header), a modifier click, another origin, a target, a download or a real file goes to the browser.
+
+### Route table
+
+Times in ms from navigation start: FP = first paint, Ready = the router's `ark:route-ready` (title set, page mounted and shown). One `ark:route-ready` per load on every row: no double load. Refresh on every row gave the same address, title and page.
+
+| Address | Title | FP | Ready | Works | Notes |
+|---|---|---|---|---|---|
+| `/` | Not one chain. A world of them. — DEFXN | 256 | 849 | y | a fresh load of `/` opens `/intro` (replace), by `js/world2/world2-host.mjs`; the loader covers the page past Ready, see below |
+| `/intro` | Not one chain. A world of them. — DEFXN | 284 | 976 | y | shares home's SEO entry by design; the header is hidden while `html[data-intro="playing"]` |
+| `/learn` | Learn — DEFXN | 436 | 804 | y | |
+| `/learn?t=speed` | Learn — DEFXN | 200 | 460 | y | tab from the address |
+| `/learn?t=topics` | Learn — DEFXN | 184 | 599 | y | |
+| `/fxn/id` | FXN ID — DEFXN | 208 | 743 | y | titles are the ring's words since this audit (were `FXN id — DEFXN`) |
+| `/fxn/records` | Records — DEFXN | 364 | 827 | y | |
+| `/fxn/keepers` | Keepers — DEFXN | 284 | 591 | y | |
+| `/fxn/capacity` | Capacity — DEFXN | 324 | 854 | y | |
+| `/fxn/chains` | Chains — DEFXN | 584 | 1488 | y | slowest topic page |
+| `/fxn/names` | Names — DEFXN | 116 | 459 | y | |
+| `/fxn/game` | The game — DEFXN | 304 | 1291 | y | |
+| `/fxn/releases` | Releases — DEFXN | 156 | 361 | y | |
+| `/fxn/apps` | Apps — DEFXN | 212 | 522 | y | |
+| `/fxn/rules` | Rules — DEFXN | 116 | 290 | y | |
+| `/fxn/deposits` | Deposits — DEFXN | 124 | 395 | y | |
+| `/fxn/network` | Network — DEFXN | 164 | 339 | y | |
+| `/auth` | Sign in — DEFXN | 136 | 855 | y | |
+| `/account` | Your account — DEFXN | 116 | 607 | y | |
+| `/download` | Run from source — DEFXN | 76 | 359 | y | the SEO title override; the header says Get FXN Browser |
+| `/no-such-page` | Page not found — DEFXN | 188 | 370 | y | the address stays; refresh says "You asked for /no-such-page" |
+
+Per load: 46 to 52 scripts, 630 to 880 KB of JS transferred (compressed), 150 to 230 requests, DOMContentLoaded 185 to 371 ms. The page is ready at 0.3 to 1.5 s; the loader in `index.html` hides it until about 1.9 s after `shell-ready` (CSS delay 1.5 s plus 0.4 s fade), so what the visitor can use arrives about 1 s after it is ready.
+
+### Old addresses (each lands on its page, with the clean address in the bar)
+
+| Asked | Lands at | Asked | Lands at |
+|---|---|---|---|
+| `/how-it-works`, `/how-it-works/layers`, `/learnings`, `/reference`, `/how-deployment-works/ask`, `/lifecycle`, `/lifecycle/offer`, `/resolver-math`, `/concept`, `/concept/depth`, `/dao` | `/learn` | `/stats/now`, `/stats`, `/stats/gpu`, `/measured`, `/monitor`, `/stats/capabilities`, `/stats/ceiling`, `/stats/week-41`, `#/stats/gpu` | `/learn?t=speed` |
+| `/resolutions`, `/resolutions/files`, `/resolvers`, `/what-is-a-resolver`, `/start-from-something-real` | `/fxn/apps` | `/explore`, `/explorer`, `#/explore` | `/fxn/network` |
+| `/chain`, `/chain/record`, `/trace` | `/fxn/chains` | `/identity`, `/identity/sign` | `/fxn/id` |
+| `/ring` | `/fxn/keepers` | `/about`, `/palette`, `/treasury`, `/deposits` | `/` (home; a fresh load of `/about` shows home, a fresh load of `/` shows the portal) |
+| `/account/domains`, `/bundle-deployer` | `/account` | `/fxn` | `/learn?t=topics` |
+| `/deploy` | `/download` | `/learn/`, `/fxn/id/` | `/learn`, `/fxn/id` |
+
+`.html` forms, with the fixed server: `/index.html` 301 `/`; `/intro.html`, `/learn.html`, `/fxn/id.html`, `/download.html`, `/about.html` 301 to the clean form and open the page; `/broker.html` 301 `/broker` (the standalone page answers there); `/admin.html` stays 404. No served page writes a `.html` href (checked on every route).
+
+### Clicks and history
+
+Jump bar stone, jump bar Learn, Back to the portal, header Portal, Learn, Sign in, Get FXN Browser, the not-found page's Home, and a plain `<a href="/fxn/rules">` with no `data-scene-link`: each routed in place (no reload, the marker set before the click survived). Back three times then Forward twice walked `/fxn/id`, `/learn`, `/fxn/chains` and back, each with its own title and page. The footer carries no route links (Made by DEFXN, the price, the year, Back home).
+
+### Found and fixed
+
+| Defect | Where | Fix |
+|---|---|---|
+| An old address stayed in the bar while the new page showed (`/how-it-works` showed Learn at `/how-it-works`) | `js/ark/page-router.js` | history `none` becomes `replace` when the address is not the page's path |
+| `/stats/gpu`, `/stats`, `/measured`, `/monitor` opened Learn at Words, not Speed: Learn's own aliases won over the redirect that carries `t=speed` | `js/pages/catalog.js` | the stats aliases belong to the `stats/now` redirect entry; a redirect entry keeps its retired module's aliases |
+| `/explorer` was Not found (only the retired path `/explore` came along) | `js/pages/catalog.js` | same fix |
+| Topic titles read `FXN id — DEFXN` | `js/pages/catalog.js` | the stone's word (`HOME.LANDING.RING.S<n>`) names the page |
+| `/learn/` kept its slash; `/fxn/id.html` was 404; `/index.html` and `/broker.html` showed `.html` | `scripts/serve-site.mjs`, `vercel.json` | one 301 to the clean form; folder index at the folder's address; `.xml` content type |
+| A plain route link reloaded the shell | `js/ark/page-router.js` | one document listener routes in place |
+| A replace dropped a section fragment | `js/ark/route.js` | the fragment stays on a replace |
+| The not-found page never offered a topic page | `js/pages/not-found.js` | the closest list includes the twelve topics; never a retired key |
+| `sitemap.xml` and `llms.txt` listed 50 retired pages and no topic page | `js/content/seo.js`, the two files | topic rows are routes; both files regenerated (83 and 34 lines) |
+| A MISSIONS chip and a "New here? Pick your path" panel covered the topic pages, Learn and the jump bar | `js/space/space.mjs` | `quest.mjs` and `journey.mjs` left the parts list; the files stay, marked retired |
+
+### Not verified here, and patch requests
+
+- The portal ring, a stone's OPEN and PLAY: the fxn-3d studio (:3440) was not running, so `/intro` showed the outline ring, no stones and PLAY stayed `display: none`. To verify: start the studio and click a stone, then PLAY (`/fxn/game`).
+- Production (`vercel.json` redirects and `trailingSlash`): not deployable from here. The `/broker` rewrite serves `broker.html` at its clean address.
+- The owner's server on :3438 runs the old `serve-site.mjs`: restart it to get the 301s. The check used a second server on :3439 for the `.html` rows.
+- Patch request, `index.html` (the page frame): `js/loader-pick.js` and `css/loader-pick.css` keep `#world-loader` on top with `pointer-events: auto` after `world-gone`, on every route; nothing on the site can be clicked until it is removed. The picker also asks for 17 `assets/marks/pick/*.png` that 404 and 17 `.webm` the CSP blocks (`media-src` is not set), on every load, and again under `/fxn/` and `/stats/` because its paths are relative. Take the picker out of `index.html`, or gate it behind a query the owner opens.
+- Patch request, `index.html` loader: the page is ready at 0.3 to 1.5 s and the loader hides it until `shell-ready` + 1.9 s. If the welcome must play out, let it take the pointer away at once (`pointer-events: none` is set, keep it) and shorten the delay to the reveal's own 1.0 s.
+- Patch request, `js/pages/intro.js` line 99 and `css/world-pages.css` line 184: `html[data-intro="playing"]` hides the header on `/intro` after Back to the portal (header Portal from `/download` left it visible). The owner's order is a navbar on every route: keep the header while the ring plays, or dim it without `visibility: hidden`.
+- The page loader serves `js/min/pages/not-found.js`, so a change to `js/pages/not-found.js` reaches the site only after `npm run build:pages`. Run on 2026-11-09: it rewrote `not-found.js`, `manifest.js` and (through `scripts/build-shell.cjs`) the derived shell region of `index.html`; the 42 `js/min` files already deleted in the working tree stayed as they were, and nothing else was deleted. Checked after: `/fxn/idd` offers `/fxn/id`, `/fxn/game`, `/fxn/apps`.
+- `scripts/lib/site-bundle.mjs` `readProject()` cannot run headless: `readSingle` loads `js/ark/vendor/backgrounds.js`, which reads `document` at load. The sitemap was regenerated with the same `ArkSEO.searchFiles` call in a vm (`scratchpad/nav/search-files-vm.mjs`); an admin Save writes the same bytes.
+
+## Navbar and page frame
+
+Layer: app (the site's shell). Owner's order, 2026-11-09: "audit and fix the entire navigation flow and update the navbar as well and make sure it shows in every page and make sure no .html is shown and build an insanely fast rendering frame". This section holds the navbar's design and the frame's measured speed. Files: `index.html`, `js/resolvers/header.js`, `css/navigation.css`, `scripts/build-shell.cjs`, `scripts/build-ark-vendor.cjs` (its last step), `package.json` (three scripts). Shots: `p05-upgrade/shots-frame/<route>-<width>.png`, every route at 1440x900 and 1280x720.
+
+### The navbar
+
+What it is: one bar, 52px tall, at the top of every route. Static markup in `index.html` (`#fxn-nav`), so it paints with the page's first paint and works with no script; `js/resolvers/header.js` (RHEADER_V1) adopts the same element into the scene when the shell renders.
+
+Items, left to right: the DEFXN mark (home), Portal (`/intro`), Learn (`/learn`). At the right, Sign in (`/auth`) and Get FXN Browser (`/download`). Sign in reads Account and opens `/account` once you are signed in, through `ArkUI.accountOpen`. No Products switcher: the ring is the navigation (ART-DIRECTOR.md "Navbar wishes"). No "you" panel: the network choice it held is on the account page's Wallet tab, the one place it was written to.
+
+Every link is a clean path. No link in the bar, the footer or any page ends in `.html` (checked on all 18 routes at both widths: 0 such links).
+
+Current route: `aria-current="page"` on the link, set by `header.js` at mount and by `js/hero-motion.js` on every navigation. Drawn as the base colour and a 2px line under the word. On a topic page no bar link is current: Portal is the way back (one of three, with the jump bar's Back to the portal and the mark).
+
+Type: the nav role, 11 (`--fs-tertiary`), FXN Basalt Text through `var(--font-sans)`, uppercase, letter-spacing .14em. Measured on every route: every bar link is 11px / "FXN Basalt Text".
+
+Colour: base and neighbour only. The current link and the soft Get FXN Browser border take `--primary`. The complement (`--secondary`) never appears in the bar, because the page spends it once (PLAY on the ring, `.topic-action` on a topic page, the amber Back on Learn). The bar reads the tokens of its ancestor: today the world pages set the mint palette on `.intro-world, .topic-page, .learn-page` (art director, world-pages.css), so on those pages the page is mint and the bar is the SDK theme's base. One line moves the bar with them (patch request below).
+
+The portal: the bar stays on the ring view (`html[data-portal-ring]` no longer hides `.ark-header`. The footer still steps out). It stands in the top 52px. The ring's top edge is at 11% of the height (99px at 900, 79px at 720) and the hover panel is vertically centred at x 48 to 240, so neither is covered. On the ring view the bar's canvas fade is off, so the ring's glow is not banded. Only the bar's controls take the pointer (`pointer-events: none` on the bar, `auto` on its children). While the intro film plays the art director's rule dims the bar to .4 and keeps it usable.
+
+Keyboard and screen reader: real links in a `<header>` with a `<nav aria-label="Site">`. The mark is `aria-label="DEFXN home"`. The Sign in / Account link carries who you are and your state in its `aria-label` and `title`. Focus-visible is a 2px `--primary` outline. The skip link in `index.html` comes before the bar in the Tab order.
+
+Prefetch on hover: a pointer resting on a bar link (or focus) loads that route's scripts and sheets through the page loader's own caches (`ArkUI.loadPage`), once per route, so the click mounts from memory.
+
+Reduction test (the bar): 1 About: moving between the site's five places. 2 Dominant action: none of its own. The page keeps the complement. 3 Know now: where you are, whether you are signed in. 4 Hidden until asked: nothing. The bar opens no panel. 5 Repeated elsewhere: the twelve topics are the ring's and the jump bar's, never the bar's. 6 Only because the data has it: the Account word. 7 Removable: nothing. Each item is one of the owner's five. 8 Leaving keeps state: the same element on every route. 9 Returning: the marked link moves. 10 If the scripts fail: the static bar's plain links still open every page.
+
+### The page frame: measured
+
+Device: the owner's Mac (8 GB), headless Chrome (Playwright, `channel: chrome`), 1440x900, the local server `scripts/serve-site.mjs` on 127.0.0.1:3438 (brotli, `cache-control: no-cache`, HTTP/1.1), the fxn-3d studio on :3440 running. Two links: loopback as is, and a throttled link through CDP (10 Mbit/s down, 40 ms RTT. "4g" below). Cold: a new browser context, empty cache. Warm: a second load in the same context (every file revalidated, since the server says no-cache). Times in ms from navigation start. "header" is the first frame after the bar has words. "words" the first frame after the page's own headline is in the DOM. "shell" the `shell-ready` class. Loopback numbers move by 100 to 300 ms between runs on this machine while other agents work. The throttled runs are steadier. The "after" runs were taken with `?marks=off`, which skips the loader agent's logo picker that now stands in front of every route (it was not there for the "before" runs).
+
+What blocked render before, read from `index.html` and the network log:
+- 151 script files on every route (592 KB compressed), 61 of them `js/content/*` written by three `document.write` loaders. The shell renders the header only when `js/main.js`, the 100th deferred script, runs.
+- 45 stylesheet links (133 KB compressed) in `<head>`, all render-blocking (the shared list is derived by `scripts/page-styles.mjs`).
+- The fonts fetched only once the first styled text was laid out.
+- `js/world2/world2-host.mjs` (a module with a 61-file graph: 21 `js/world2`, 40 `/fxn-3d`) stands between `js/main.js` and `js/hero-motion.js` in the deferred order, so the first route mount waits for the whole 3D graph to arrive.
+- The footer's price import (`js/ark/dense-wire-wallet.mjs`, 21 files, 131 KB) started at boot on every route.
+- Page scripts load one after another (`for ... await loadScript(url)` in `js/ark/page-loader.js`): `/intro` is five round trips.
+
+What changed:
+- The navbar is static HTML (paints at first contentful paint, before any script).
+- The shell scripts are four chunks (`js/bundle/shell-1..4.js`, built by `scripts/build-shell.cjs` from the ordered list that `index.html` keeps in `<template id="shell-sources">`. Each file minified by esbuild, the same pass the page scripts get; `?v=` is the bytes' hash). Seven files keep their own tag: the three content loaders (their `document.write` must run in the parse), `js/ark/vendor/engines.js` (its own strict mode), `js/min/manifest.js` (stamped by `build:pages`), `js/ark/vendor/backgrounds.js` (reads `document.currentScript`), `assets/kit/defxn-product.js` (synced by the kit). 151 requests became 36. `npm run build:ark` and `build:pages` run it last; `--check` fails on drift; `npm run watch:shell` rebuilds within a second of an edit while people work on the sources.
+- The two FXN Basalt faces are preloaded (`<link rel="preload" as="font">`, 36 KB), with `font-display: swap` already in the kit's sheet, so the bar and the headline paint in their face with no late swap.
+- The wallet module import waits for `load` and an idle period (`js/resolvers/header.js` `loadHeaderWalletModule`). The footer's price reads through it as before.
+- Prefetch on hover (above).
+
+Before and after, ms from navigation start (requests and KB are the whole page, the fxn-3d studio frames on `/intro` and the topic pages included. "header" = the bar has words. "words" = the page's own headline. "shell" = `shell-ready`. "page scripts" = the last `js/min/pages/*` byte arrived. "world" = the last `/fxn-3d` or `js/world2` byte arrived):
+
+| Link | Route | Cache | Requests | KB | FCP | header | words | shell | page scripts | world |
+|---|---|---|---|---|---|---|---|---|---|---|
+| loopback | /intro | cold | 497 -> 424 | 10541 -> 10391 | 204 -> 92 | 562 -> 108 | 939 -> 312 | 556 -> 230 | - / 295 | - / 205 |
+| loopback | /intro | warm | 497 -> 424 | 5462 -> 5312 | 120 -> 96 | 246 -> 65 | 467 -> 242 | 243 -> 132 | - / 222 | - / 157 |
+| loopback | /fxn/records | cold | 586 -> 365 | 7415 -> 5671 | 152 -> 80 | 487 -> 63 | 688 -> 233 | 483 -> 110 | - / 204 | - / 680 |
+| loopback | /fxn/records | warm | 586 -> 365 | 4576 -> 2829 | 216 -> 80 | 699 -> 59 | 1182 -> 224 | 697 -> 97 | - / 175 | - / 659 |
+| loopback | /learn | cold | 291 -> 214 | 1603 -> 1430 | 520 -> 72 | 1237 -> 69 | 1980 -> 312 | 1235 -> 214 | - / 273 | - / 437 |
+| loopback | /learn | warm | 291 -> 214 | 1382 -> 1209 | 180 -> 60 | 607 -> 40 | 1213 -> 194 | 605 -> 87 | - / 163 | - / 328 |
+| 4g | /intro | cold | 490 -> 423 | 7266 -> 8717 | 524 -> 508 | 1906 -> 488 | 2303 -> 1756 | 1905 -> 1447 | - / 1723 | - / 1219 |
+| 4g | /intro | warm | 497 -> 424 | 5462 -> 5312 | 476 -> 544 | 1808 -> 523 | 2162 -> 1737 | 1807 -> 1455 | - / 1718 | - / 1301 |
+| 4g | /fxn/records | cold | 605 -> 365 | 7423 -> 5671 | 464 -> 496 | 1954 -> 482 | 2174 -> 1555 | 1953 -> 1428 | - / 1539 | - / 2555 |
+| 4g | /fxn/records | warm | 605 -> 365 | 4585 -> 2829 | 432 -> 528 | 1991 -> 519 | 2266 -> 1605 | 1991 -> 1448 | - / 1588 | - / 2701 |
+| 4g | /learn | cold | 310 -> 214 | 1611 -> 1430 | 480 -> 496 | 1955 -> 478 | 2197 -> 1605 | 1955 -> 1421 | - / 1587 | - / 2115 |
+| 4g | /learn | warm | 310 -> 214 | 1390 -> 1209 | 608 -> 516 | 2115 -> 504 | 2570 -> 1645 | 2112 -> 1449 | - / 1626 | - / 2113 |
+
+Reading it. The header now paints with the first contentful paint on every run (it is HTML): 3.5 to 4x earlier on the throttled link, 5 to 18x on loopback. The page's words come 0.4 to 0.9 s earlier on the throttled link and 2 to 6x earlier on loopback. Shell-ready moved from 1.9 s to 1.45 s on the throttled link. What remains there is bytes, plus the 3D graph that stands in the deferred order. The shell's own 280 KB chunk is 84 KB compressed, and the content manifests, the kit, the engine and the live loaders are the other 32 requests. The "world" column shows the graph: its last byte lands at 1.2 to 2.7 s and the four scripts after it wait. The words then wait for the page scripts, fetched one after another (`/intro` has five), which is the page-loader patch below: "page scripts" lands 20 to 40 ms before "words" on every row. The `/intro` cold KB rose on the throttled run because the studio frame on :3440 fetched more that time. The frame does not include it, and its requests dominate `/intro` and the topic pages (258 of 424). FCP is unchanged within noise: it is the loader's first paint, in `<head>` CSS, and was never the bottleneck. Every number is one run. The loopback rows moved by up to 300 ms between my own repeat runs while other agents' builds ran on this machine, the throttled rows by under 100 ms.
+
+Regression check (never regress speed): no column is slower after, except FCP within its noise (+/- 60 ms) and the `/intro` cold bytes from the studio frame.
+
+Not changed, with the exact patch (each in another lane's file):
+- `js/ark/page-loader.js` (nav-flow lane) `loadPage`: replace `for (var url of urls) await loadScript(url);` with `await Promise.all(urls.map(loadScript));` and in `loadScript` set `script.async = false;` (a dynamically inserted script with `async = false` executes in insertion order, HTML spec), so a route's scripts fetch together and still run in order. Measured cost today: `/intro` loads five page scripts in sequence.
+- `js/world2/world2-host.mjs` (the world's lane): keep in the module only the router wrap ("a fresh load of / opens the intro") and the `ark:route-ready` listeners, and start the renderer graph with one `import()` after the first `ark:route-ready`. Today the four deferred scripts after it (`skin-parts`, `skin-site`, `hero-motion`, `settings/panel`) wait for the 61-file graph. See the `worldEnd` column.
+- `index.html` loader (loader lane): the loader hides a ready page until `shell-ready` + 1.9 s (`transition: opacity .4s ease-out 1.5s`). The frame is ready well before that on every run below.
+- `css/world-pages.css` (art director): to put the bar in the mint palette with the world pages, move the palette block's selector from `.intro-world, .topic-page, .learn-page` to `#scene:has(.intro-world, .topic-page, .learn-page)` (or, if the owner picks palette option A, the SDK `defxn` style does it for the whole site and no line is needed). And `.topic-page, .learn-page { padding: 32px 48px 76px }`: the first row starts 20px under the 52px bar; `64px 48px 76px` clears it.
+- `assets/kit/defxn-components.css` (kit lane): the kit bar's one 16px node is off the scale (law 82). This site no longer renders the kit bar, so the bar on defxn.com is on the scale, but the kit's own bar still carries it.
+- `js/pages/catalog.js` (nav-flow lane): `css/loader-pick.css` (loader lane) is not in `ArkUI.styleOrder`, so `node scripts/page-styles.mjs --check` fails today; `--write` places it before `css/ark-blocks.css`.
+
+Tests this design change breaks (not rewritten: the design is not confirmed, "Tests lock a confirmed design"): `tests/header-row-fit.cjs` (the row fit left with the kit bar), `tests/navigation-index.cjs` (the "you" panel's layers), `tests/home-mobile-layout.cjs` (`.header-you-words` at 440px), `tests/header-ark-parts.cjs` (asserts the popover stub's position in `header.js` relative to the network switcher), `tests/states-anchor-clickable.cjs` (reads `#scene .ark-header {` from `css/navigation.css`). `tests/skin-site.cjs` and `tests/skin-parts.cjs` build their own header markup and should pass. Not run here.
+
+Verified (headless Chrome on :3438, the studio on :3440, `?marks=off`):
+- The bar is present, inside the scene, visible, at the top, on all 18 routes (`/intro`, `/learn`, `/auth`, `/account`, `/download`, an unknown address, the twelve `/fxn/<slug>`) at 1440x900 and 1280x720: 36 loads, 0 page errors from the frame, 0 links ending in `.html`, every bar link 11px FXN Basalt Text, the current link marked on `/intro`, `/learn`, `/auth`, `/download`, none on a topic page or the not-found page. Shots: `shots-frame/<route>-<width>.png`.
+- The portal ring view (`html[data-portal-ring]`, after the studio drew and the ring was clicked): bar bottom at 64px. The topmost stone link at 118px (1440) and 93px (1280). The hover panel at x 48 to 240, top 408 / 318. The bar bare (no band); Portal marked current. Shots: `shots-frame/portal-ring-1440.png`, `-1280.png`. No scroll on any route.
+- The server render (jsdom, `api/lib/render-core.mjs`) of `/learn` with the new `index.html`: OK in 1.2 s, the bar adopted with `id="fxn-nav"` and Learn current. With the committed `index.html` it took 15.3 s. `node scripts/build-shell.cjs --check` clean; `npm run check:seam` clean.
+- The bundle's drift check and watcher: an edit to a shell file by another lane was rebuilt within a second (`scratchpad/frame/watch-shell.log`).
+
+Not verified:
+- A real mouse and a real screen (headless only). The Sign in to Account swap on a live session (the code path is the old one's, `ArkUI.accountOpen`). a phone width. File:// opening of the chunks.
+- Production hosting (Vercel, HTTP/2): the request-count gain is measured on the local HTTP/1.1 server. On HTTP/2 it is smaller in time and the same in bytes.
+- `/auth` at 1280x720: the page's left panel ("No identity loaded") starts at y 24 and runs under the bar (`shots-frame/auth-1280.png`). It did so under the kit bar before. Patch request, `css/auth.css`: start that panel at `calc(var(--dx-bar-h) + 16px)`.
+- `js/ark/skin-parts.js` names `.header-you`, which no source uses now: `tests/skin-parts.cjs` fails until that row is removed (one line, the skin lane).

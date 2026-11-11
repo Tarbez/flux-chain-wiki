@@ -1,8 +1,10 @@
 {
   "package": "@deadark/sdk",
-  "version": "0.2.57",
-  "tarball": ".vendor/deadark-sdk-0.2.57.tgz",
-  "sha256": "f75fdb4caaf8eb149666f86906395d53ea70490bc8c1830213ceda4732e45cc5",
-  "sdkRoot": "../../design/deadark-sdk",
-  "updatedAt": "2026-11-09T00:12:18.359Z"
+  "version": "0.2.59",
+  "tarball": ".vendor/deadark-sdk-0.2.59.tgz",
+  "sha256": "135d32b3d6666828df7b82d2ed2c6c348fd0826ff49efb6e60dba587e58dae80",
+  "sourceManifest": "/Volumes/PortableSSD/design/deadark-sdk-wt-release-0259/sdk-releases/manifest.json",
+  "cid": "",
+  "gatewayUrl": null,
+  "updatedAt": "2026-11-09T17:22:10.642Z"
 }

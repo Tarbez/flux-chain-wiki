@@ -117,7 +117,7 @@
   var MAP_SVG = '<svg viewBox="0 0 560 168" role="presentation"><path class="account-map-route account-map-route-main" d="M78 84H213C252 84 253 35 294 35H380"/><path class="account-map-route" d="M213 84C252 84 253 133 294 133H468"/><path class="account-map-route" d="M380 35C418 35 420 84 458 84H514"/><circle class="account-map-origin" cx="50" cy="84" r="27"/><circle class="account-map-node" cx="213" cy="84" r="6"/><circle class="account-map-node" cx="380" cy="35" r="6"/><circle class="account-map-node" cx="294" cy="133" r="6"/><circle class="account-map-node" cx="458" cy="84" r="6"/><text class="account-map-you" data-ark-label x="50" y="88" text-anchor="middle">YOU</text><text data-ark-label x="200" y="68" text-anchor="end">FXN ID</text><text data-ark-label x="393" y="20">IDENTITY</text><text data-ark-label x="307" y="151">WALLET</text><text data-ark-label x="514" y="68" text-anchor="end">PUBLISH</text></svg>';
 
   /* The views of the account card, by value. `signin` and `create` exist only while signed out. */
-  var TAB_LABEL = { signin: 'Sign in', create: 'Create identity', session: 'Session', defi: 'Wallet', keys: 'Signing keys', contacts: 'Contacts', mesh: 'Network' };
+  var TAB_LABEL = { signin: 'Sign in', create: 'Initiate FXN ID', session: 'Session', defi: 'Wallet', keys: 'Signing keys', contacts: 'Contacts', mesh: 'Network' };
   function tabValues(sessionState) {
     if (sessionState === 'signed-out') return ['signin', 'create'];
     if (sessionState === 'remembered') return ['session', 'defi', 'mesh'];
@@ -172,11 +172,12 @@
     'account-keys-action-result': { ':root': { key: KEYS + '/form:2/p:1', self: true } },
     'account-rail-stats': {
       stat: RAIL + '/button:1', 'stat-label': RAIL + '/button:1/small:1', 'stat-value': RAIL + '/button:1/strong:1',
-      'stat#2': RAIL + '/button:2', 'stat-label#2': RAIL + '/button:2/small:1', 'stat-value#2': RAIL + '/button:2/strong:1',
-      'stat#3': RAIL + '/button:3', 'stat-label#3': RAIL + '/button:3/small:1', 'stat-value#3': RAIL + '/button:3/strong:1',
-      'stat#4': RAIL + '/button:4', 'stat-label#4': RAIL + '/button:4/small:1', 'stat-value#4': RAIL + '/button:4/strong:1',
-      'stat#5': RAIL + '/a:1', 'stat-label#5': RAIL + '/a:1/small:1', 'stat-value#5': RAIL + '/a:1/strong:1',
-      'stat#6': RAIL + '/button:5', 'stat-label#6': RAIL + '/button:5/small:1', 'stat-value#6': RAIL + '/button:5/strong:1' },
+      /* 2026-11-11 (found in the real browser with an FXN ID open): the rail went from six tiles to three on 2026-11-05 (railProps: FXN,
+         Domains, Status) and this table still pinned six, so ArkUI.page refused the pin "stat#4" and the OPEN ACCOUNT DID NOT MOUNT at all.
+         The three tiles that stayed keep the keys they had: FXN was tile 1, Domains was tile 5 (the link), Status was tile 6. The keys of
+         the three tiles that left (button:2, button:3, button:4) are retired with them. */
+      'stat#2': RAIL + '/a:1', 'stat-label#2': RAIL + '/a:1/small:1', 'stat-value#2': RAIL + '/a:1/strong:1',
+      'stat#3': RAIL + '/button:5', 'stat-label#3': RAIL + '/button:5/small:1', 'stat-value#3': RAIL + '/button:5/strong:1' },
     'account-rail-link': { button: RAIL + '/a:2' }
   };
   /* An element the page builds by hand carries its old key the same way a block's `was` does: the mark
@@ -214,17 +215,21 @@
         var card = el('section', 'account-locked');
         card.setAttribute('aria-labelledby', 'account-title');
         card.appendChild(el('span', 'account-locked-mark', LOCK_SVG));
-        var eyebrow = el('p', 'account-locked-eyebrow'); eyebrow.textContent = 'FXN ID · Account';
-        var title = el('h1', 'account-locked-title'); title.id = 'account-title'; title.textContent = 'Your account is locked.';
-        var lede = el('p', 'account-locked-lede'); lede.textContent = 'Connect your FXN ID file to open your identity, your wallet and your names on this device.';
+        /* 2026-11-11: the locked page wears the home (.home-wear, css/world-pages.css "the remaining pages"): the pill, the headline, the
+           line and the one filled button carry the home's own classes beside this page's */
+        var eyebrow = el('p', 'account-locked-eyebrow intro-portal-eyebrow'); eyebrow.textContent = 'FXN ID · Account';
+        var title = el('h1', 'account-locked-title intro-portal-headline'); title.id = 'account-title'; title.textContent = 'Your account is locked.';
+        var lede = el('p', 'account-locked-lede intro-portal-line'); lede.textContent = 'Connect your FXN ID file to open your identity, your wallet and your names on this device.';
         card.appendChild(eyebrow); card.appendChild(title); card.appendChild(lede);
-        card.appendChild(ArkUI.blocks.render({ block: 'actions', id: 'account-connect', props: { items: [{ label: 'Connect', href: authHref, tone: 'primary' }] } }, { from: '/account', onInvalid: 'throw' }));
+        var connect = ArkUI.blocks.render({ block: 'actions', id: 'account-connect', props: { items: [{ label: 'Connect', href: authHref, tone: 'primary' }] } }, { from: '/account', onInvalid: 'throw' });
+        var connectLink = connect.querySelector ? connect.querySelector('a') : null; if (connectLink) connectLink.classList.add('intro-portal-enter');
+        card.appendChild(connect);
         return card;
       } },
       /* The CMS's insertion point for reusable blocks (js/content/components.js), as on the open account: the same key,
          so a block placed there shows locked and open alike (and the anchor never takes the old shell's page:/div:1). */
       { insert: 'main', was: 'page:/div:1/div:1' }
-    ], host, { page: 'account', className: 'account-page account-page--locked', titleId: 'account-title' });
+    ], host, { page: 'account', className: 'account-page account-page--locked home-wear', titleId: 'account-title' });
     var unsubscribe = ArkUI.localIdentity.subscribe(function () { if (ArkUI.accountOpen()) ArkUI.pageRouter.navigate('account', { history: 'none' }); });
     page.arkDispose = function () { unsubscribe(); };
     return page;
@@ -414,7 +419,7 @@
             return item;
           }) };
       }
-      var PATH_STATUS = { council: { label: 'Multisig spends', tone: 'trust' }, sale: { label: 'Sale only', tone: 'reference' }, vote: { label: 'Holder vote', tone: 'drift' }, budget: { label: 'Budgets only', tone: 'drift' }, unknown: { label: 'Unknown kind', tone: 'warning' } };
+      var PATH_STATUS = { council: { label: 'Multisig spends', tone: 'trust' }, sale: { label: 'Sale not open', tone: 'reference' }, vote: { label: 'Waits for launch', tone: 'drift' }, budget: { label: 'Waits for launch', tone: 'drift' }, unknown: { label: 'Unknown kind', tone: 'warning' } };
       function safesViewProps() {
         var got = holdings.safes;
         if (!got || got.kind !== 'ok') return { label: 'Safes you sign for', items: [], empty: { reason: got ? (got.why || 'The node did not answer the safes read.') : 'Reading the safes\u2026', remedy: 'Press Refresh, or pick another network below.' } };
@@ -655,7 +660,7 @@
       function buildCreate() {
         var node = pin(el('div', 'account-create'), SESSION + '/div:2', true);
         node.setAttribute('data-account-create-view', '');
-        node.appendChild(make({ block: 'callout', id: 'account-create-head', props: { tone: 'info', title: 'Create your FXN ID.', body: 'You get a key file and recovery words. The file stays on this device. The words bring your identity back if you lose the file.' }, was: WAS['account-create-head'] }));
+        node.appendChild(make({ block: 'callout', id: 'account-create-head', props: { tone: 'info', title: (typeof ArkCopy !== 'undefined' ? ArkCopy.text('NAV.BAR.INITIATE') : 'Initiate FXN ID') + '.', body: 'You get a key file and recovery words. The file stays on this device. The words bring your identity back if you lose the file.' }, was: WAS['account-create-head'] }));
         var holder = pin(el('div'), SESSION + '/div:2/div:1'); holder.setAttribute('data-account-create', '');
         node.appendChild(holder);
         return node;
@@ -695,7 +700,7 @@
         keysView.appendChild(make({ block: 'actions', id: 'account-fxn-keys-back', props: { items: [back] } }));
         node.appendChild(keysView);
         var safesView = el('div', 'account-wallet-form'); safesView.setAttribute('data-account-wallet-view', 'safes'); safesView.hidden = true;
-        refs.safesHint = safesView.appendChild(el('p', 'account-hint', 'The genesis mint paid the allocation into these safes. FXN reaches your keys only when the multisig approves a spend of an unlocked part.'));
+        refs.safesHint = safesView.appendChild(el('p', 'account-hint', 'At genesis the mint will pay the allocation into these safes. FXN reaches your keys only when the multisig approves a spend of an unlocked part.'));
         refs.safes = make({ block: 'list', id: 'account-safes', props: safesViewProps() }); remember('safes', safesViewProps());
         safesView.appendChild(refs.safes);
         refs.held = make({ block: 'facts', id: 'account-safes-held', props: heldFactsProps() }); remember('held', heldFactsProps());
@@ -913,8 +918,9 @@
       /* ---- the game layout (docs/design/space/SPACE.md "The page layout") ---------- */
       /* the hero block's own parts wear the HUD's type: eyebrow, heading, lede (Ark keeps the classes across its updates) */
       function heroHud() {
-        [['[data-ark-part="eyebrow"], .ark-eyebrow', 'hud-kicker'], ['#account-title', 'hud-title'], ['[data-ark-part="hero-lede"]', 'hud-answer']].forEach(function (x) {
-          var n = refs.hero.querySelector(x[0]); if (n) n.classList.add(x[1]);
+        /* 2026-11-11: beside the HUD's classes, the home's own: the pill, the headline and the line (css/world-pages.css "intro portal") */
+        [['[data-ark-part="eyebrow"], .ark-eyebrow', 'hud-kicker', 'intro-portal-eyebrow'], ['#account-title', 'hud-title', 'intro-portal-headline'], ['[data-ark-part="hero-lede"]', 'hud-answer', 'intro-portal-line']].forEach(function (x) {
+          var n = refs.hero.querySelector(x[0]); if (n) n.classList.add(x[1], x[2]);
         });
       }
       /* the dock's one dominant action, in the complement: signed out or locked, open the FXN ID file on /auth; unlocked, send FXN */
@@ -922,11 +928,11 @@
         if (!dockEl) return;
         var unlocked = !!(identity && session.isUnlocked()), go;
         if (unlocked) {
-          go = el('button', 'hud-go', 'Send FXN'); go.type = 'button';
+          go = el('button', 'hud-go intro-portal-enter', 'Send FXN'); go.type = 'button';   /* .intro-portal-enter: the home's one filled button */
           go.addEventListener('click', function () { openTab('defi'); showWallet('send'); });
         } else {
           var entry = ArkUI.pageCatalog && ArkUI.pageCatalog.auth;
-          go = el('a', 'hud-go', identity ? 'Choose your FXN ID file' : 'Sign in with your FXN ID');
+          go = el('a', 'hud-go intro-portal-enter', identity ? 'Choose your FXN ID file' : 'Sign in with your FXN ID');
           go.href = entry ? ArkUI.route.href(entry.path) : '/auth'; go.dataset.sceneLink = 'auth';
         }
         dockEl.replaceChildren(go);
@@ -1646,7 +1652,7 @@
       function paintHoldings() {
         var got = holdings.safes;
         /* the plan's own start and multisig, said once above the rows */
-        if (refs.safesHint) refs.safesHint.textContent = 'The genesis mint paid the allocation into these safes. FXN reaches your keys only when the multisig approves a spend of an unlocked part.'
+        if (refs.safesHint) refs.safesHint.textContent = 'At genesis the mint will pay the allocation into these safes. FXN reaches your keys only when the multisig approves a spend of an unlocked part.'
           + (got && got.kind === 'ok' ? ' Schedules run from ' + holdingsApi.dateOf(got.plan.head.start) + '. ' + got.plan.head.threshold + ' of ' + got.plan.head.signers.length + ' multisig signers approve each spend.' : '');
         paint('balances', walletStats());
         paint('fxnKeys', keysViewProps());
@@ -2185,7 +2191,9 @@
         paint('meshActions', meshActionProps());
         resetMesh(identity ? undefined : 'Sign in to verify your identity on DEFXN.');
       }
-      page.classList.add('hud', 'hud-account');
+      /* 2026-11-11: the open account wears the home (.home-wear takes the home's palette; css/account.css "the open account in the home's
+         language"). Classes only: no part is built or wired differently */
+      page.classList.add('hud', 'hud-account', 'home-wear');
       var unsubscribeDomains = ArkUI.localDomains ? ArkUI.localDomains.subscribe(function (names) {
         rail.domains = names.length;
         syncRail();

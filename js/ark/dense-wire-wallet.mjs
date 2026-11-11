@@ -90,6 +90,27 @@ export function rememberWireUrl(url) {
   try { window.localStorage.setItem(NETWORK_STORAGE_KEY, url); } catch (_error) { /* convenience only */ }
 }
 
+/* A NODE THAT DID NOT ANSWER, KEPT FOR THE TAB (2026-11-11). A page reads from the chain by itself: the footer's price on every
+   page, a topic page's own fact, a signed-in visitor's cards. Each read dialled the node afresh, so a network that is not up
+   (wss://devnet.defxn.com/ws before the devnet exists) was dialled once per read on every page load. `wireFailed(url)` keeps a
+   failed dial in sessionStorage (the time, a space, the address). `wireQuiet(url)` then answers the reason for 5 minutes, and a
+   read a page starts by itself does not dial that address while it does (js/ark/chain-facts.mjs onRelease, js/ark/skin-site.js
+   chainCards). It answers "" when the address may be dialled. A read the person asks for (a send, a mint, the Account wallet)
+   never asks this and always dials. */
+const WIRE_DOWN_KEY = "defxn.wire-unreachable", WIRE_QUIET_MS = 5 * 60 * 1000;
+export function wireQuiet(url) {
+  try {
+    const kept = String(window.sessionStorage.getItem(WIRE_DOWN_KEY) || ""), cut = kept.indexOf(" ");
+    if (cut > 0 && kept.slice(cut + 1) === url && Date.now() - Number(kept.slice(0, cut)) < WIRE_QUIET_MS) {
+      return `${url} did not answer earlier in this tab. This page asks it again ${WIRE_QUIET_MS / 60000} minutes after that.`;
+    }
+  } catch (_error) { /* storage blocked: the address is dialled */ }
+  return "";
+}
+export function wireFailed(url) {
+  try { window.sessionStorage.setItem(WIRE_DOWN_KEY, `${Date.now()} ${url}`); } catch (_error) { /* a private window: the next page dials once more */ }
+}
+
 const NETWORK_CHANGE_EVENT = "defxn-network-changed";
 
 /** Populates `listEl` (a plain container -- `<div>`/`<ul>`, caller's
@@ -191,6 +212,9 @@ export class WalletWire {
       clearTimeout(timer);
     }
   }
+  /** Whether the node takes the dial: true once the socket is open; false when it was refused, closed, or silent for the
+   *  wire's timeout. A failed dial drops its client, as every failed call does. */
+  opened() { return this._call((c) => c.ready).then(() => true, () => false); }
   /** -> BigInt | null (null = this chain-server has no FXN ledger to
    *  answer from, told apart from a real, held zero). */
   balance(pubHex) { return this._call((c) => nativeBalance(c, BASE_CHAIN_ID, pubHex)); }

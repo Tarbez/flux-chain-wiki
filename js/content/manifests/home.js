@@ -472,7 +472,7 @@ ArkManifest.define({
       "label": "Portal intro: the line under the headline",
       "kind": "line",
       "section": "Intro portal (board 40, 2026-11-09)",
-      "value": "Build apps, start chains, run the machines that keep them. Today it runs as our development network. Genesis is next."
+      "value": "Build apps, start chains, run the machines that keep them. Devnet genesis is next."
     },
     "LANDING.PORTAL.ENTER": {
       "label": "Portal intro: the one action",
@@ -480,6 +480,24 @@ ArkManifest.define({
       "section": "Intro portal (board 40, 2026-11-09)",
       "value": "Enter FXN"
     },
+    "LANDING.HERO.SECOND": { "label": "Home hero: the second, outlined button: opens Learn", "kind": "line", "section": "Home hero (owner reference, 2026-11-11)", "value": "See how it works" },
+    "LANDING.HERO.F1.NAME": { "label": "Home hero, feature 1: name", "kind": "line", "section": "Home hero (owner reference, 2026-11-11)", "value": "Create" },
+    "LANDING.HERO.F1.LINE": { "label": "Home hero, feature 1: line", "kind": "line", "section": "Home hero (owner reference, 2026-11-11)", "value": "Build apps and start chains." },
+    "LANDING.HERO.F2.NAME": { "label": "Home hero, feature 2: name", "kind": "line", "section": "Home hero (owner reference, 2026-11-11)", "value": "Connect" },
+    "LANDING.HERO.F2.LINE": { "label": "Home hero, feature 2: line", "kind": "line", "section": "Home hero (owner reference, 2026-11-11)", "value": "Join a network of open systems." },
+    "LANDING.HERO.F3.NAME": { "label": "Home hero, feature 3: name", "kind": "line", "section": "Home hero (owner reference, 2026-11-11)", "value": "Own" },
+    "LANDING.HERO.F3.LINE": { "label": "Home hero, feature 3: line", "kind": "line", "section": "Home hero (owner reference, 2026-11-11)", "value": "Your FXN ID, data and work stay yours." },
+    "LANDING.STATUS.LABEL": { "label": "Home status bar: its name for screen readers", "kind": "line", "section": "Home status bar (owner reference, 2026-11-11)", "value": "Network figures" },
+    "LANDING.STATUS.STATE": { "label": "Home status bar: the leading state. It must not say the chain is live before genesis", "kind": "line", "section": "Home status bar (owner reference, 2026-11-11)", "value": "Devnet genesis" },
+    "LANDING.STATUS.PRICE": { "label": "Home status bar: the price figure's name", "kind": "line", "section": "Home status bar (owner reference, 2026-11-11)", "value": "FXN" },
+    "LANDING.STATUS.GENESIS": { "label": "Home status bar: the genesis block figure's name", "kind": "line", "section": "Home status bar (owner reference, 2026-11-11)", "value": "Genesis block" },
+    "LANDING.STATUS.CHAINS": { "label": "Home status bar: the chains count's name", "kind": "line", "section": "Home status bar (owner reference, 2026-11-11)", "value": "Chains" },
+    "LANDING.STATUS.NETWORKS": { "label": "Home status bar: the networks count's name", "kind": "line", "section": "Home status bar (owner reference, 2026-11-11)", "value": "Networks" },
+    "LANDING.STATUS.IDENTITIES": { "label": "Home status bar: the identities count's name", "kind": "line", "section": "Home status bar (owner reference, 2026-11-11)", "value": "Identities" },
+    "LANDING.STATUS.TBA": { "label": "Home status bar: shown for every figure that has no source yet (owner 2026-11-11)", "kind": "line", "section": "Home status bar (owner reference, 2026-11-11)", "value": "TBA" },
+    "LANDING.EXPLORE.CAPTION": { "label": "Home explore row: the caption", "kind": "line", "section": "Home explore row (owner reference, 2026-11-11)", "value": "Explore FXN" },
+    "LANDING.EXPLORE.LINE": { "label": "Home explore row: the line under the caption", "kind": "line", "section": "Home explore row (owner reference, 2026-11-11)", "value": "The products built on FXN." },
+    "LANDING.EXPLORE.LABEL": { "label": "Home explore row: the chip list's name for screen readers", "kind": "line", "section": "Home explore row (owner reference, 2026-11-11)", "value": "Products" },
     "LANDING.CINE.FXNID.NAME": {
       "label": "Intro cinema, FXN ID card: object name",
       "kind": "line",
@@ -550,7 +568,7 @@ ArkManifest.define({
       "label": "Intro cinema, keepertower: the line that names what the object just did",
       "kind": "line",
       "section": "Intro cinema (2026-11-09)",
-      "value": "Machines like yours will keep it running. Ours run it today."
+      "value": "Machines like yours will keep it running. Ours will run it first, at genesis."
     },
     "LANDING.CINE.RULEBOOK.NAME": {
       "label": "Intro cinema, rulebook: object name",
@@ -622,7 +640,7 @@ ArkManifest.define({
       "label": "Intro cinema, multisiglock: the line that names what the object just did",
       "kind": "line",
       "section": "Intro cinema (2026-11-09)",
-      "value": "A rule changes only when 4 of 5 keys sign."
+      "value": "A rule changes only when the multisig signs."
     },
     "LANDING.CINE.BRIDGESPAN.NAME": {
       "label": "Intro cinema, bridgespan: object name",
@@ -750,17 +768,242 @@ ArkManifest.define({
       "section": "Intro ring menu (2026-11-09)",
       "value": "Network"
     },
-    "LANDING.RING.SOON": {
-      "label": "Ring menu: shown when a segment has no film yet",
+    "LANDING.TOPIC.HOME": {
+      "label": "Topic pages and Learn: the link to the home page",
       "kind": "line",
-      "section": "Intro ring menu (2026-11-09)",
-      "value": "This one opens when its object is built."
+      "section": "Topic pages (2026-11-11)",
+      "value": "Home"
     },
-    "LANDING.PORTAL.DIVE": {
-      "label": "Portal intro: the ring's name for screen readers (pressing it dives into the network)",
+    "LANDING.TOPIC.LABEL.IS": { "label": "Topic pages: the label of the first line", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "What it is" },
+    "LANDING.TOPIC.LABEL.DO": { "label": "Topic pages: the label of the second line", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "What you do" },
+    "LANDING.TOPIC.LABEL.GET": { "label": "Topic pages: the label of the third line", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "What you get back" },
+    "LANDING.TOPIC.TAB.HOW": { "label": "Topic pages: the tab with the steps", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "How it works" },
+    "LANDING.TOPIC.TAB.SPEED": { "label": "Topic pages: the tab with measured speed. Shown only when the devnet release has a measurement for the topic", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "Speed" },
+    "LANDING.TOPIC.SPEED.ROW.NONE": { "label": "Topic pages, speed table: a row with no measurement", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "Not measured yet" },
+    "LANDING.TOPIC.SPEED.MEASURE": { "label": "Topic pages, speed table: the words before what must be done to measure a row", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "To measure:" },
+    "LANDING.TOPIC.OBJECT.ABSENT": { "label": "Topic pages: shown in the object's place on a host with no 3D view. Says what failed, what is missing and what to do", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "No 3D object here. This site has no 3D view. The object shows once the view ships with the site." },
+    "LANDING.TOPIC.OBJECT.SILENT": { "label": "Topic pages: shown in the object's place when the site's 3D view did not answer in 20 s", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "No 3D object yet. The 3D view did not answer in 20 s. Reload this page." },
+    "LANDING.TOPIC.OBJECT.STUDIO": { "label": "Topic pages, local development only: shown in the object's place when the studio did not answer in 20 s", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "No 3D object yet. The studio at 127.0.0.1:3440 did not answer in 20 s. Start it and reload this page." },
+    "LANDING.TOPIC.GAME.ABSENT": { "label": "The game page: why Start playing is off on a host where the game does not run", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "The game cannot open here yet. It is not part of this site. Start playing opens it once the game ships with the site." },
+    "LANDING.TOPIC.GAME.SILENT": { "label": "The game page, local development only: why Start playing is off when the studio does not answer", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "The game did not answer. The studio on this Mac is not running. Start it, then reload this page." },
+    "LANDING.TOPIC.BAR.LABEL": { "label": "Topic pages, the bar at the foot: its name for screen readers", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "Topic status and network figures" },
+    "LANDING.TOPIC.JUMP.CAPTION": { "label": "Topic pages and Learn, the chip row at the foot: its caption", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "Topics" },
+    "LANDING.TOPIC.JUMP.LEARN": { "label": "Topic pages and Learn, the chip row at the foot: the chip that opens Learn", "kind": "line", "section": "Topic pages (2026-11-11)", "value": "Learn" },
+    "LANDING.ABILITY.S1.DO": {
+      "label": "Ring stone 1 (FXN ID): what your ID does here",
       "kind": "line",
-      "section": "Intro portal (board 40, 2026-11-09)",
-      "value": "Go through the portal"
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Initiate it on your device."
+    },
+    "LANDING.ABILITY.S1.GET": {
+      "label": "Ring stone 1 (FXN ID): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "A key file that only you hold."
+    },
+    "LANDING.ABILITY.S1.STATUS": {
+      "label": "Ring stone 1 (FXN ID): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "On the Sign In page. Your device makes the key."
+    },
+    "LANDING.ABILITY.S2.DO": {
+      "label": "Ring stone 2 (Records): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Sign a record."
+    },
+    "LANDING.ABILITY.S2.GET": {
+      "label": "Ring stone 2 (Records): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "A receipt that makes it final."
+    },
+    "LANDING.ABILITY.S2.STATUS": {
+      "label": "Ring stone 2 (Records): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live."
+    },
+    "LANDING.ABILITY.S3.DO": {
+      "label": "Ring stone 3 (Keepers): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Send your record to the keepers."
+    },
+    "LANDING.ABILITY.S3.GET": {
+      "label": "Ring stone 3 (Keepers): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Copies that our own nodes will keep."
+    },
+    "LANDING.ABILITY.S3.STATUS": {
+      "label": "Ring stone 3 (Keepers): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live."
+    },
+    "LANDING.ABILITY.S4.DO": {
+      "label": "Ring stone 4 (Capacity): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Run a machine that keeps records."
+    },
+    "LANDING.ABILITY.S4.GET": {
+      "label": "Ring stone 4 (Capacity): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "A share of the fees. Nothing has paid out yet."
+    },
+    "LANDING.ABILITY.S4.STATUS": {
+      "label": "Ring stone 4 (Capacity): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live. Not open to the public yet."
+    },
+    "LANDING.ABILITY.S5.DO": {
+      "label": "Ring stone 5 (Chains): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Start a chain with one signed record."
+    },
+    "LANDING.ABILITY.S5.GET": {
+      "label": "Ring stone 5 (Chains): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "A chain with its own rules."
+    },
+    "LANDING.ABILITY.S5.STATUS": {
+      "label": "Ring stone 5 (Chains): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live."
+    },
+    "LANDING.ABILITY.S6.DO": {
+      "label": "Ring stone 6 (Names): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Claim a .fxn name."
+    },
+    "LANDING.ABILITY.S6.GET": {
+      "label": "Ring stone 6 (Names): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "A name that points to your key."
+    },
+    "LANDING.ABILITY.S6.STATUS": {
+      "label": "Ring stone 6 (Names): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Opens after genesis."
+    },
+    "LANDING.ABILITY.S7.DO": {
+      "label": "Ring stone 7 (The game): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Enter the game with your ID."
+    },
+    "LANDING.ABILITY.S7.GET": {
+      "label": "Ring stone 7 (The game): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Your ID, carried into a world."
+    },
+    "LANDING.ABILITY.S7.STATUS": {
+      "label": "Ring stone 7 (The game): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Runs on one Mac today."
+    },
+    "LANDING.ABILITY.S8.DO": {
+      "label": "Ring stone 8 (Releases): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Sign a release."
+    },
+    "LANDING.ABILITY.S8.GET": {
+      "label": "Ring stone 8 (Releases): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "A version anyone can check."
+    },
+    "LANDING.ABILITY.S8.STATUS": {
+      "label": "Ring stone 8 (Releases): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live."
+    },
+    "LANDING.ABILITY.S9.DO": {
+      "label": "Ring stone 9 (Apps): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Ship an app as one bundle."
+    },
+    "LANDING.ABILITY.S9.GET": {
+      "label": "Ring stone 9 (Apps): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "An app with its rules inside."
+    },
+    "LANDING.ABILITY.S9.STATUS": {
+      "label": "Ring stone 9 (Apps): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live."
+    },
+    "LANDING.ABILITY.S10.DO": {
+      "label": "Ring stone 10 (Rules): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Sign as a key of the multisig."
+    },
+    "LANDING.ABILITY.S10.GET": {
+      "label": "Ring stone 10 (Rules): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "A rule changes only when enough keys sign."
+    },
+    "LANDING.ABILITY.S10.STATUS": {
+      "label": "Ring stone 10 (Rules): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live."
+    },
+    "LANDING.ABILITY.S11.DO": {
+      "label": "Ring stone 11 (Deposits): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Bring a deposit in."
+    },
+    "LANDING.ABILITY.S11.GET": {
+      "label": "Ring stone 11 (Deposits): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Funds that arrive with their own proof."
+    },
+    "LANDING.ABILITY.S11.STATUS": {
+      "label": "Ring stone 11 (Deposits): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live."
+    },
+    "LANDING.ABILITY.S12.DO": {
+      "label": "Ring stone 12 (Network): what your ID does here",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Sign in on a site of the network."
+    },
+    "LANDING.ABILITY.S12.GET": {
+      "label": "Ring stone 12 (Network): what you get back",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "One ID for every site that asks."
+    },
+    "LANDING.ABILITY.S12.STATUS": {
+      "label": "Ring stone 12 (Network): its true status today",
+      "kind": "line",
+      "section": "Intro FXN ID abilities (2026-11-09)",
+      "value": "Built, not live."
     },
     "LANDING.PORTAL.SCROLL": {
       "label": "Portal intro: the scroll hint",
@@ -862,13 +1105,13 @@ ArkManifest.define({
       "label": "Shot 4: the one number, after the copies land",
       "kind": "line",
       "section": "Intro (in-world, 2026-11-07)",
-      "value": "Copies reach the pinners in about 1.4 to 1.7 s."
+      "value": "The receipt is final at once. Copies reach the pinners after it."
     },
     "LANDING.S4.CONDITION": {
       "label": "Shot 4: the number's condition, on the same screen",
       "kind": "line",
       "section": "Intro (in-world, 2026-11-07)",
-      "value": "The receipt is final at once. Measured across three regions. Not live."
+      "value": "Not measured yet on the devnet release. Measured after devnet starts."
     },
     "LANDING.S5.LINE": {
       "label": "Shot 5: the picker's heading",
@@ -1018,7 +1261,7 @@ ArkManifest.define({
       "label": "Beat 4 What is built: 29 line",
       "kind": "line",
       "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
-      "value": "Seven lanes of products on one kernel."
+      "value": "Products on one kernel."
     },
     "LANDING.B4.MONO": {
       "label": "Beat 4: mono line",
@@ -1042,7 +1285,7 @@ ArkManifest.define({
       "label": "Beat 5: mono line, the number with its condition",
       "kind": "line",
       "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
-      "value": "80,269 final payments a second on one keeper. 32 vCPU, 7,000 in flight, every signature checked."
+      "value": "Not measured yet on the devnet release. Measured after devnet starts."
     },
     "LANDING.B5.CHIP": {
       "label": "Beat 5: chip, desktop",
@@ -1066,13 +1309,13 @@ ArkManifest.define({
       "label": "Beat 5: after the copies land",
       "kind": "line",
       "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
-      "value": "Copies reach the pinners in about 1.4 to 1.7 s."
+      "value": "The receipt is final at once. Copies reach the pinners after it."
     },
     "LANDING.B5.CONDITION": {
       "label": "Beat 5: the number's condition, same screen",
       "kind": "line",
       "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
-      "value": "The receipt is final at once. Measured across three regions. Not live."
+      "value": "Not measured yet on the devnet release. Measured after devnet starts."
     },
     "LANDING.B6.LINE": {
       "label": "Beat 6 What comes next: 29 line",
@@ -1084,7 +1327,7 @@ ArkManifest.define({
       "label": "Beat 6: mono line",
       "kind": "line",
       "section": "Intro (in-world, direction of 2026-11-07, docs/brand/DEFXN.md section 5)",
-      "value": "Up to 16 of our 20 machines. Test money. No date until the gate passes."
+      "value": "Test money. No date until the gate passes."
     },
     "LANDING.B6.CHIP": {
       "label": "Beat 6: chip on the road marker",

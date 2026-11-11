@@ -39,9 +39,22 @@ const PRIVATE = /^\/(admin\.html|admin-app\.html|scripts|tests|\.git|\.vercel|no
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.cjs': 'text/javascript; charset=utf-8', '.fxn': 'text/plain; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
-  '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.txt': 'text/plain; charset=utf-8',
-  '.md': 'text/markdown; charset=utf-8', '.ico': 'image/x-icon',
+  '.webp': 'image/webp', '.webm': 'video/webm', '.mp4': 'video/mp4', '.woff2': 'font/woff2', '.woff': 'font/woff', '.txt': 'text/plain; charset=utf-8',
+  '.md': 'text/markdown; charset=utf-8', '.ico': 'image/x-icon', '.xml': 'application/xml; charset=utf-8',
 };
+
+/* Clean addresses (owner, 2026-11-09: "make sure no .html is shown"). The one clean form of an address, or null when the
+   address is clean already: a .html form loses its extension (/fxn/id.html -> /fxn/id, /index.html -> /, /x/index.html -> /x),
+   a trailing slash goes (/learn/ -> /learn). The server answers these with one 301, so the bar and a copied link never carry
+   either; the clean path then serves the standalone page (/broker -> broker.html), the folder's index (/gateway ->
+   gateway/index.html) or the shell. vercel.json carries the same two rules for production (redirects, trailingSlash). */
+export function cleanPath(pathname) {
+  let clean = pathname;
+  if (/\.html$/i.test(clean)) clean = clean.replace(/(^|\/)index\.html$/i, '$1').replace(/\.html$/i, '');
+  if (clean.length > 1) clean = clean.replace(/\/+$/, '');
+  if (clean === '') clean = '/';
+  return clean === pathname ? null : clean;
+}
 
 /* Compression, so local load numbers match a host that compresses (Vercel serves static text as br/gzip).
    Only types that shrink: text, markup and the world blobs (.flx, .bin). PNG, JPG, WEBP, GLB, WOFF/WOFF2 are already
@@ -142,8 +155,13 @@ createServer(async (req, res) => {
       await proxyFleetStats(res, FLEET_STATS_ROUTES[pathname], url.searchParams); return;
     }
     if (PRIVATE.test(pathname)) { res.writeHead(404).end('Not found'); return; }
+    /* the private files 404 first, so /admin.html never becomes a working /admin */
+    const clean = (req.method === 'GET' || req.method === 'HEAD') ? cleanPath(pathname) : null;
+    if (clean !== null) { res.writeHead(301, { location: clean + url.search, 'cache-control': 'no-store' }).end(); return; }
     let file = pathname === '/' ? join(ROOT, 'index.html') : await fileFor(pathname);
     if (!file) file = await fileFor(assetPath(pathname));
+    /* a folder's own page at the folder's clean address (/gateway -> gateway/index.html) */
+    if (!file && !extname(pathname) && !PRIVATE.test(pathname + '/index.html')) file = await fileFor(pathname + '/index.html');
     /* A standalone page (resolver-math.html, broker.html) must answer on its
        clean path too, BEFORE the index.html fallback — otherwise /resolver-math
        silently serves the app shell, which looks like a page that does not load.

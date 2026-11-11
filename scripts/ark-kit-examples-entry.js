@@ -4,6 +4,6 @@
 
    Why its own file: the public kit drops these examples (scripts/ark-blocks-no-examples.js, the R2 budget), because they
    are demo data every block route would otherwise download. Only the Parts tab needs them, so only it loads this.
-   The path is the module itself: @deadark/ark-ui exports the examples only inside blocks/core, which carries the whole
+   The path is the module itself: @fxn/ui exports the examples only inside blocks/core, which carries the whole
    registry the public kit already has. */
-export { ARK_BLOCK_EXAMPLES } from '../node_modules/@deadark/ark-ui/dist/blocks/examples.js';
+export { ARK_BLOCK_EXAMPLES } from '../node_modules/@fxn/ui/dist/blocks/examples.js';

@@ -24,6 +24,10 @@
    (js/ark/fxn-id-card/fxn-id-card.css, HOST). */
 .auth-idcard { position: absolute; right: 0; top: 50%; width: min(100%, 700px); aspect-ratio: 16 / 9; transform: translateY(-50%); }
 .auth-idcard[hidden] { display: none; }
+/* 2026-11-11: the blank card (a grey slab with nothing on it) stood mid-screen in every state that has no FXN ID to show. It is hidden until
+   there is one: while Initiate FXN ID builds it (create, words, saved) and with an FXN ID open (connected, offline). By the page's own
+   data-state (js/pages/auth.js paint), so no logic changed; the card keeps its box, so it is the right size the moment it shows. */
+.auth-world:not([data-state="create"], [data-state="words"], [data-state="saved"], [data-state="connected"], [data-state="offline"]) .auth-idcard { visibility: hidden; }
 
 /* ---- the words ---- */
 .auth-words { position: absolute; left: var(--aw-pad); top: max(18px, 3.4vh); bottom: 64px; width: min(660px, 45vw); display: flex; flex-direction: column; min-height: 0; }
@@ -338,3 +342,202 @@
   .auth-file-name { font-size: var(--fs-secondary); } .auth-main.is-big { font-size: var(--fs-secondary); }
   .auth-id-head { flex-wrap: wrap; } .auth-id-name { font-size: var(--fs-primary); max-width: 100%; } .auth-badge { margin-left: 0; }
 }
+
+/* ---------- THE HOME'S LANGUAGE (owner, 2026-11-11: "also make sure we upgrade the auth"; the home is css/world-pages.css "intro portal" and
+   "home dock"). Layer: app. Restyle and re-lay only: no rule here changes what a control does. Wide views only (901 and up); a phone keeps the
+   column above. Every state of the page (sign in, file chosen, checking, signed in, file missing, each refusal, each step of Initiate FXN ID,
+   the Emergency Kit, saved) is the same frame, so it is dressed once:
+     the ground   the home's dark green-black canvas and its mint and amber (the palette rule in css/world-pages.css names .auth-world)
+     the words    one column on the home's margin (4% of the width), no glass card: the tag as the home's pill, the headline in sentence case at
+                  47 (76 on a tall wide view), the line at 18 in soft grey
+     the action   the state's one filled button, amber, 56 high, 8px corners, an arrow at its end. It stands under the line in a state that only
+                  asks for a press, and under the fields in a state that asks for typing (the dock is laid out as part of the column)
+     the steps    the four sign-in steps as a row of the home's chips at the column's foot, the current one in mint
+     the facts    the three facts (step, network, file) as the home's rounded bar at the foot of the view
+     the parts    cards, fields, notices and panels: 8px corners, a hairline edge, the surface token; 11 and 18 only
+   The button is the home's shared class (.intro-portal-enter, css/world-pages.css). The rules for the pill and the headline still repeat the
+   home's values, because the HUD frame's own rules (css/space-frame.css, loaded later) outrank the home's classes. ---------- */
+@media (min-width: 901px) {
+  .auth-world.hud-auth { position: absolute; inset: 64px 0 0 0; display: block; overflow: hidden; --dock-b: 92px; --bar-h: 64px; }
+  /* THE GROUND (owner, 2026-11-11: the old 3D world is parked, js/ark/world-parked.js). Nothing is drawn behind this page any more (the coral
+     cubes and glass panels left with that world), so the page stands on the home's one dark canvas. The veil that dimmed the world under the
+     words has nothing to dim and steps out. The FXN ID card (.auth-idcard, fxn-3d) still builds in its place during Initiate FXN ID */
+  .auth-world.hud-auth { background: hsl(var(--canvas)); }
+  .auth-world.hud-auth::before { content: none; }
+  /* the words column */
+  .auth-world.hud-auth .hud-left { position: absolute; left: max(40px, 4vw); right: auto !important; top: 0; bottom: calc(var(--dock-b) + var(--bar-h) + 18px); width: clamp(480px, 34vw, 660px) !important; max-height: none;
+    display: flex; flex-direction: column; justify-content: center; align-items: stretch; gap: 0; padding: 0; background: none; border: 0; border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; animation: none; }
+  .auth-world.hud-auth .auth-eyebrow { align-self: flex-start; display: inline-flex; align-items: center; min-height: 29px; padding: 0 18px; margin: 0 0 29px; border: 1px solid hsl(var(--primary) / .5); border-radius: 999px; background: hsl(var(--primary) / .06);
+    font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .24em; text-transform: uppercase; color: hsl(var(--primary)); }
+  .auth-world.hud-auth .auth-eyebrow :is(i, .dash) { display: none; }
+  .auth-world.hud-auth h1.hud-title { margin: 0 0 18px; width: auto; font: 900 var(--fs-hero, 47px)/1 var(--font-display); letter-spacing: 0; text-shadow: none; color: hsl(var(--text-strong)); }
+  .auth-world.hud-auth h1.hud-title :is(b, span) { display: inline; white-space: normal; color: inherit; }
+  .auth-world.hud-auth h1.hud-title b::after { content: " "; }
+  .auth-world.hud-auth .auth-lede { margin: 0 0 29px; max-width: 30em; font: 400 var(--fs-secondary)/1.55 var(--font-sans); color: hsl(var(--text-muted)); text-shadow: none; text-wrap: pretty; }
+  .auth-world.hud-auth .hud-body { order: 2; flex: 0 1 auto; margin: 0; gap: 18px; padding: 0; }
+  /* the dock is laid out as part of the column: its button and its steps are the column's own rows */
+  .auth-world.hud-auth .hud-dock { display: contents; }
+  .auth-world.hud-auth .hud-go { order: 3; align-self: flex-start; margin: 29px 0 0; }
+  .auth-world.hud-auth:is([data-state="none"], [data-state="missing"], [data-state="connected"], [data-state="offline"], [data-state="fail"], [data-state="restore"], [data-state="cleared"], [data-state="ended"], [data-state="saved"]) .hud-go { order: 1; margin: 0 0 29px; }
+  /* the one filled button is the home's Enter FXN: it wears the shared class .intro-portal-enter (js/pages/auth.js), whose values are in
+     css/world-pages.css, once. Here only what the older .auth-main and .hud-go rules set and the home's button does not */
+  .auth-world.hud-auth .auth-main { width: auto; height: auto; text-transform: none; filter: none; transform: none; }
+  .auth-world.hud-auth .auth-main:is(:hover, :focus-visible) { filter: none; }
+  .auth-world.hud-auth .auth-main:active { transform: none; }
+  .auth-world.hud-auth .auth-main .auth-ico { width: 18px; height: 18px; transition: transform .2s ease-out; }
+  /* the arrow stands at the button's end and is the only thing a hover moves (law 84); a button that carries two icons keeps its first in front */
+  .auth-world.hud-auth .auth-main:not(.is-big) > .auth-ico:first-child, .auth-world.hud-auth .auth-main > .auth-main-go { order: 2; margin-left: 0; }
+  .auth-world.hud-auth .auth-main:is(:hover, :focus-visible) > :is(.auth-ico:last-child, .auth-main-go), .auth-world.hud-auth .auth-main:not(.is-big):is(:hover, :focus-visible) > .auth-ico:first-child { transform: translateX(4px); }
+  .auth-world.hud-auth .auth-big-wrap { padding: 0; } .auth-world.hud-auth .auth-big-wrap::before { content: none; } .auth-world.hud-auth .auth-big-wrap:empty { display: none; }
+  /* the steps: the home's chips, the current one in mint, a passed one with its mark */
+  .auth-world.hud-auth .auth-rail { order: 4; position: static; width: auto; display: flex; flex-direction: row; justify-content: flex-start; flex-wrap: wrap; gap: 8px; margin: 29px 0 0; padding: 0; border: 0; }
+  .auth-world.hud-auth .auth-step { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 11px; border: 1px solid hsl(var(--text-strong) / .12); border-radius: 11px; background: hsl(var(--surface) / .88); box-shadow: none; cursor: default;
+    font: 500 var(--fs-tertiary)/1 var(--font-mono); letter-spacing: .04em; text-transform: uppercase; color: hsl(var(--text-muted)); transform: none; }
+  .auth-world.hud-auth .auth-step::after { content: none; }
+  .auth-world.hud-auth .auth-step-dot { width: 11px; height: 11px; border-width: 2px; background: none; box-shadow: none; }
+  .auth-world.hud-auth .auth-step-dot svg { display: none; } .auth-world.hud-auth .auth-step-dot::after { content: none; }
+  .auth-world.hud-auth .auth-step-words { display: inline-flex; align-items: center; gap: 8px; }
+  .auth-world.hud-auth .auth-step-words :is(small, b) { font: inherit; letter-spacing: inherit; color: inherit; }
+  .auth-world.hud-auth .auth-step-line { display: none; }
+  .auth-world.hud-auth .auth-step:is(.is-here, .is-done) { color: hsl(var(--text-strong)); }
+  .auth-world.hud-auth .auth-step.is-here { border-color: hsl(var(--primary) / .6); background: hsl(var(--primary) / .08); color: hsl(var(--primary)); }
+  .auth-world.hud-auth .auth-step:is(.is-here, .is-done) .auth-step-dot { border-color: hsl(var(--primary)); }
+  .auth-world.hud-auth .auth-step.is-done .auth-step-dot { background: hsl(var(--primary)); }
+  .auth-world.hud-auth .auth-step.is-warn { border-color: hsl(var(--danger) / .7); color: hsl(var(--danger)); } .auth-world.hud-auth .auth-step.is-warn .auth-step-dot { border-color: hsl(var(--danger)); background: none; }
+  /* the three facts: the home's rounded bar at the foot of the view, a name at 11 and a value at 18, hairlines between */
+  .auth-world.hud-auth .hud-right { position: absolute; left: max(40px, 4vw) !important; right: max(40px, 4vw); top: auto; bottom: var(--dock-b); width: auto !important; height: var(--bar-h); max-height: none; padding: 0 11px; overflow: hidden; display: block;
+    border: 1px solid hsl(var(--text-strong) / .12); border-radius: 18px; background: hsl(var(--surface) / .88); box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; animation: none; }
+  .auth-world.hud-auth .hud-stats { display: flex; align-items: stretch; height: 100%; gap: 0; }
+  .auth-world.hud-auth .hud-stat { position: relative; flex: 1 1 0; display: flex; align-items: center; justify-content: center; gap: 11px; padding: 0 18px; white-space: nowrap; }
+  .auth-world.hud-auth .hud-stat + .hud-stat::before { content: ""; position: absolute; left: 0; top: 18px; bottom: 18px; width: 1px; background: hsl(var(--text-strong) / .14); }
+  .auth-world.hud-auth .hud-stat::after { content: none; }
+  .auth-world.hud-auth .hud-stat span { order: -1; font: 500 var(--fs-tertiary)/1 var(--font-sans); letter-spacing: 0; text-transform: none; color: hsl(var(--text)); }
+  .auth-world.hud-auth .hud-stat b { font: 600 var(--fs-secondary)/1 var(--font-sans); letter-spacing: .04em; color: hsl(var(--text-muted)); }
+  /* the parts in the body: one radius, one hairline, the surface */
+  .auth-world.hud-auth :is(.auth-card, .auth-explain, .auth-file, .auth-fail, .auth-kit, .auth-checks, .auth-id, .auth-wpane, .auth-wopt, .auth-tile) { border-radius: var(--dx-radius, 8px); border-color: hsl(var(--text-strong) / .14); box-shadow: none; }
+  .auth-world.hud-auth :is(.auth-card, .auth-wopt) { background: hsl(var(--surface) / .88); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .auth-world.hud-auth .auth-card:is(:hover, :focus-visible) { border-color: hsl(var(--primary) / .6); background: hsl(var(--raised, var(--surface))); }
+  .auth-world.hud-auth .auth-card > .auth-ico:first-child { color: hsl(var(--primary)); }
+  .auth-world.hud-auth .auth-card-words b { font: 600 var(--fs-secondary)/1.2 var(--font-sans); }
+  .auth-world.hud-auth .auth-fail { border-color: hsl(var(--danger) / .7); }
+  .auth-world.hud-auth .auth-copy { border-radius: var(--dx-radius, 8px); }   /* the copy button beside a fact (connected, missing, offline): the one corner the list above did not reach */
+  .auth-world.hud-auth .auth-wopt[aria-checked="true"] { border-color: hsl(var(--primary)); box-shadow: inset 0 0 0 1px hsl(var(--primary)); }
+  .auth-world.hud-auth :is(.auth-wfield input, .auth-panel-slot input) { height: 56px; padding: 0 18px; border-radius: var(--dx-radius, 8px); border: 1px solid hsl(var(--text-strong) / .28); background: hsl(var(--surface) / .88); font: 500 var(--fs-secondary)/1 var(--font-sans); }
+  .auth-world.hud-auth :is(.auth-wfield input, .auth-panel-slot input):focus-visible { border-color: hsl(var(--primary)); outline: 2px solid hsl(var(--primary)); outline-offset: 1px; }
+  .auth-world.hud-auth .auth-panel-slot :is([data-ark-auth="actions"] button, [data-ark-auth="icons"] button, [data-ark-auth="notice"]) { border-radius: var(--dx-radius, 8px); }
+  .auth-world.hud-auth .auth-panel-slot [data-ark-auth="actions"] button[data-kind="primary"] { min-height: 56px; padding: 0 29px; font: 700 var(--fs-secondary)/1 var(--font-sans); color: hsl(var(--secondary-ink, var(--text-inverse))); }
+  .auth-world.hud-auth .auth-wback { border-radius: var(--dx-radius, 8px); min-height: 56px; padding: 0 18px; }
+  /* the 3D show's caption (css/space/shows.css: fixed at the foot's middle, 150 up) stood on the bar: on this page it stands above the bar, over
+     the 3D, right of the words column */
+  html:has(.auth-world.hud-auth:not([hidden])) .show-caption { left: 70%; bottom: 192px; }
+  /* the entrance is the home's: the pill, the headline, the line and the body rise one after another, once */
+  .auth-world.hud-auth .hud-left > :is(.auth-eyebrow, .hud-title, .auth-lede, .hud-body) { animation: hero-word-in .35s cubic-bezier(.2, .7, .2, 1) both; }
+  .auth-world.hud-auth .hud-left > .hud-title { animation-delay: .05s; } .auth-world.hud-auth .hud-left > .auth-lede { animation-delay: .1s; } .auth-world.hud-auth .hud-left > .hud-body { animation-delay: .15s; }
+  .auth-world.hud-auth .hud-right { animation: hero-word-in .35s cubic-bezier(.2, .7, .2, 1) .25s both; }
+}
+/* at exactly 900 wide this page is already one column (above) while the HUD frame still floats its dock (css/space-frame.css changes at 899):
+   the dock, which stands inside the words column, stays in the column's flow there */
+@media (max-width: 900px) { .auth-world.hud-auth .hud-dock { position: static; transform: none; max-width: none; } }
+/* every width: the main button carries its own arrow (an icon in its markup), so the shared class's drawn arrow steps out; and the older
+   hover (a brighter fill) and press (a 1px drop) give way to the home's, where only the arrow moves (law 84) */
+.auth-world .auth-main.intro-portal-enter::after { content: none; }
+.auth-world .auth-main.intro-portal-enter:is(:hover, :active) { filter: none; transform: none; }
+/* a state with fields to fill (each step of Initiate FXN ID, the Emergency Kit) keeps the headline at 47 on every view, so the field, its
+   button and the steps stand in the column with no scroll inside it */
+/* 2026-11-11 (third pass, each state seen): 76 only where the body under the headline is short (the first state, the saved file, cleared,
+   ended, the deleted kept sign-in). The checks, a refusal, the open FXN ID and the missing file carry a tall body: at 76 their last rows were cut */
+@media (min-width: 1400px) and (min-height: 860px) { .auth-world.hud-auth:is([data-state="none"], [data-state="saved"], [data-state="cleared"], [data-state="ended"], [data-state="restore"]) h1.hud-title { margin-bottom: 29px; font-size: var(--fs-display, 76px); line-height: .96; } }
+/* 2026-11-11 (seen at 1440x900): the first state's column stood 70 px taller than its room, so the pill touched the bar and the "What is an
+   FXN ID file?" answer opened below the fold. Its headline keeps 76 and stands on one line (the card's place beside it is empty in this
+   state), and the open answer takes the place of the one-line note that says the same thing (design law: said once). */
+@media (min-width: 1400px) and (min-height: 860px) { .auth-world.hud-auth[data-state="none"] h1.hud-title { white-space: nowrap; } .auth-world.hud-auth[data-state="none"] h1.hud-title :is(b, span) { white-space: nowrap; } }
+.auth-world.hud-auth[data-state="none"] .auth-body:has(> .auth-explain:not([hidden])) > .auth-note { display: none; }
+@media (min-width: 901px) and (max-height: 760px) {
+  .auth-world.hud-auth { --dock-b: 84px; --bar-h: 47px; }
+  /* a short view: while Initiate FXN ID shows its own six steps, the four sign-in steps step out, and the body closes up */
+  .auth-world.hud-auth:is([data-state="create"], [data-state="words"]) .auth-rail { display: none; }
+  .auth-world.hud-auth .hud-body { gap: 8px; }
+  .auth-world.hud-auth .auth-eyebrow { margin-bottom: 18px; } .auth-world.hud-auth .auth-lede { margin-bottom: 18px; }
+  .auth-world.hud-auth .auth-rail { margin-top: 18px; } .auth-world.hud-auth .hud-go { margin-top: 18px; }
+  .auth-world.hud-auth:is([data-state="none"], [data-state="missing"], [data-state="connected"], [data-state="offline"], [data-state="fail"], [data-state="restore"], [data-state="cleared"], [data-state="ended"], [data-state="saved"]) .hud-go { margin: 0 0 18px; }
+}
+/* ---------- THE STATES, SEEN (2026-11-11, third pass). Layer: app. Every state below was walked in the real browser with a throwaway FXN ID
+   and looked at, at 1440x900 and 1280x720. Each rule names what was seen. Restyle only: no rule changes what a control does. ---------- */
+/* the avatar's mark came from the parked 3D world (--auth-mark). With no mark to mask, the avatar showed a mint square: it shows the ring alone */
+.auth-world:not([style*="--auth-mark"]) .auth-avatar::after { display: none; }
+/* the kit's word numbers were 9.17 px (a <small> inside an 11 px line): on the scale now */
+.auth-kit-words li small { font-size: inherit; }
+@media (min-width: 901px) {
+  /* the states that ask for typing (each step of Initiate FXN ID, the kit, the file's PIN form, the checks) stood taller than the column:
+     the pill touched the bar and the last line was cut. Their rows close up from 29 to 18 */
+  .auth-world.hud-auth:is([data-state="create"], [data-state="words"], [data-state="file"], [data-state="verify"]) .auth-eyebrow { margin-bottom: 18px; }
+  .auth-world.hud-auth:is([data-state="create"], [data-state="words"], [data-state="file"], [data-state="verify"]) .auth-lede { margin-bottom: 18px; }
+  .auth-world.hud-auth:is([data-state="create"], [data-state="words"], [data-state="file"], [data-state="verify"]) :is(.hud-go, .auth-rail) { margin-top: 18px; }
+  /* the Emergency Kit: the confirm line and the warning under it were cut off at 1440x900. The four sign-in steps step out on this one screen
+     (the bar below still says the step), and the kit's rows close up */
+  .auth-world.hud-auth[data-state="words"] .auth-rail { display: none; }
+  .auth-world.hud-auth[data-state="words"] .hud-body { gap: 11px; }
+  .auth-world.hud-auth[data-state="words"] .auth-kit { padding: 11px 18px; gap: 4px; }
+  /* a 24-word phrase is six rows, not three: its words stand at 11 so the kit still fits with no scroll (NOT SEEN: the throwaway chose 12) */
+  .auth-world.hud-auth .auth-kit-words:has(> li:nth-child(13)) li strong { font-size: var(--fs-tertiary); }
+  /* the saved file, a cleared device and a signed-out tab are not refusals: they wore the refusal's red edge. Mint, as the older rule meant */
+  .auth-world.hud-auth:is([data-state="restore"], [data-state="cleared"], [data-state="ended"], [data-state="saved"]) .auth-fail { border-color: hsl(var(--primary) / .5); box-shadow: none; }
+  .auth-world.hud-auth:is([data-state="restore"], [data-state="cleared"], [data-state="ended"], [data-state="saved"]) .auth-fail-head > .auth-ico { color: hsl(var(--primary)); }
+  /* the icon step: nine icons stand on one row, and their names ("Hexagon", "Mountain") ran out of their boxes. The row shows the icons, and
+     the chosen one's name stands under the row */
+  .auth-world.hud-auth .auth-wchoice.is-icons { position: relative; padding-bottom: 29px; }
+  .auth-world.hud-auth .auth-wchoice.is-icons .auth-wopt { padding: 11px 0; }
+  .auth-world.hud-auth .auth-wchoice.is-icons .auth-wopt small { display: none; }
+  .auth-world.hud-auth .auth-wchoice.is-icons .auth-wopt[aria-checked="true"] small { display: block; position: absolute; left: 0; bottom: 0; font: 500 var(--fs-tertiary)/18px var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: hsl(var(--primary)); }
+  /* the checks (five rows for a version 10 file): the fifth row and everything under it were cut. The four sign-in steps step out while the
+     checks stand (the checks are the step), and each row closes up */
+  .auth-world.hud-auth[data-state="verify"] .auth-rail { display: none; }
+  .auth-world.hud-auth[data-state="verify"] .auth-check { padding: 8px 0; }
+  .auth-world.hud-auth[data-state="verify"] .hud-body { gap: 11px; }
+  /* the open FXN ID and the missing file: the box's last row and the cards under it were cut (77 px and 104 px at 1440x900), so "Forget
+     saved identity details" could not be seen at all. The rows close up, the four steps step out (the bar says the step), the box is tighter */
+  .auth-world.hud-auth:is([data-state="connected"], [data-state="missing"], [data-state="offline"], [data-state="cleared"], [data-state="ended"], [data-state="restore"], [data-state="saved"]) .auth-eyebrow { margin-bottom: 18px; }
+  .auth-world.hud-auth:is([data-state="connected"], [data-state="missing"], [data-state="offline"]) .auth-lede { margin-bottom: 18px; }
+  .auth-world.hud-auth:is([data-state="connected"], [data-state="missing"], [data-state="offline"]) .hud-go { margin: 0 0 18px; }
+  .auth-world.hud-auth:is([data-state="connected"], [data-state="missing"]) .hud-body { gap: 11px; }
+  .auth-world.hud-auth:is([data-state="connected"], [data-state="missing"]) .auth-rail { display: none; }
+  .auth-world.hud-auth .auth-id { padding: 11px 18px; }
+  /* the name was cut at its foot (a line height of 1 on a clipped line) and the badge ran past the box's edge */
+  .auth-world.hud-auth .auth-id-head > div { flex: 1 1 auto; min-width: 0; }
+  .auth-world.hud-auth .auth-id-name { max-width: 100%; line-height: 1.2; }
+  .auth-world.hud-auth .auth-badge { flex: none; }
+  /* the file's own form (PIN, password, key word, icon, one per step): its second buttons take the outlined button's shape beside the filled one */
+  .auth-world.hud-auth .auth-panel-slot [data-ark-auth="actions"] button { height: 56px; }
+  .auth-world.hud-auth .auth-panel-slot [data-ark-auth="actions"] button:not([data-kind="primary"]) { padding: 0 18px; border: 1px solid hsl(var(--text-strong) / .28); background: none; font: 600 var(--fs-secondary)/1 var(--font-sans); color: hsl(var(--text-strong)); }
+  .auth-world.hud-auth .auth-panel-slot [data-ark-auth="actions"] button:not([data-kind="primary"]):is(:hover, :focus-visible) { border-color: hsl(var(--text-strong)); }
+}
+@media (min-width: 901px) and (max-height: 760px) {
+  /* a short view. The kit: its headline steps down to 29 and stands on one line, so the phrase, the key, the confirm line and Save fit */
+  .auth-world.hud-auth[data-state="words"] h1.hud-title { font-size: var(--fs-primary); }
+  /* the file's form: the two cards under it were cut in half by the steps. The four steps step out here (the form shows its own five), and
+     the cards keep their names only */
+  .auth-world.hud-auth:is([data-state="file"], [data-state="fail"]) .auth-rail { display: none; }
+  .auth-world.hud-auth:is([data-state="file"], [data-state="verify"]) .auth-cards .auth-card { min-height: 47px; }
+  .auth-world.hud-auth:is([data-state="file"], [data-state="verify"]) .auth-cards .auth-card-words small { display: none; }
+  /* the open FXN ID and the missing file on a short view: the line under the headline steps out (the box says it), and the missing file's
+     three tiles step out (its name, the network and the level stand in the box's head, the bar and the open account) */
+  .auth-world.hud-auth:is([data-state="connected"], [data-state="missing"]) .auth-lede { display: none; }
+  .auth-world.hud-auth[data-state="missing"] .auth-tiles { display: none; }
+  /* a refusal: its box and the way out were cut by 59 px. The quiet line under them steps out with the steps */
+  .auth-world.hud-auth[data-state="fail"] .auth-note.is-quiet { display: none; }
+  /* the checks: the line above them and the two quiet lines under them step out, so the five rows and the way out fit */
+  .auth-world.hud-auth[data-state="verify"] :is(.auth-lede, .auth-note) { display: none; }
+  .auth-world.hud-auth .auth-panel-slot [data-ark-auth="actions"] button { height: 47px; min-height: 47px; }
+}
+/* a narrow window or a phone (seen at 390 and 768 wide, emulated): the HUD frame's own phone rules (css/space-frame.css, 899 and under) held
+   the words in a box 24% of the screen high that scrolled 1113 px inside itself, under an empty strip where the blank card stood. The words
+   are one column that scrolls with the page, with no glass box, and the card's strip steps out while there is no card to show */
+@media (max-width: 899px) {
+  .auth-world.hud-auth { padding-top: 18px; background: hsl(var(--canvas)); }
+  .auth-world.hud-auth :is(.hud-left, .hud-right) { max-height: none; overflow: visible; }
+  .auth-world.hud-auth .hud-left { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .auth-world.hud-auth .hud-right { margin-top: 18px; border-radius: var(--dx-radius, 8px); border-bottom-width: 1px; }
+  .auth-world.hud-auth:not([data-state="create"], [data-state="words"], [data-state="saved"], [data-state="connected"], [data-state="offline"]) .auth-stage { display: none; }
+  .auth-world.hud-auth h1.hud-title :is(b, span) { color: inherit; }
+}
+@media (prefers-reduced-motion: reduce) { .auth-world.hud-auth .hud-left > *, .auth-world.hud-auth .hud-right { animation: none !important; } .auth-world.hud-auth .auth-main, .auth-world.hud-auth .auth-main .auth-ico { transition: none; } }

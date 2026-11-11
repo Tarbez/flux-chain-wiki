@@ -5,7 +5,7 @@
    Auth Kit (.auth.flx) chat.deadark.com signs in with. This file composes
    shared parts and adds no cryptography of its own:
 
-     the panel and the kit envelope   @deadark/ark-ui/flux-auth(-ui)
+     the panel and the kit envelope   @fxn/ui/flux-auth(-ui)
      root derivation `flux-bip39-v1`  fxn-auth/root-from-mnemonic
      root derivation `deadark-profile-v1`
                                       deadark-identity-core/root-signing-handle
@@ -94,8 +94,8 @@
 
    Build: node scripts/build-auth.cjs  ->  js/admin/auth.js (a classic script).
    ===================================================================== */
-import { createAuthKitSession, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit, encodeAuthKitEnvelope } from '@deadark/ark-ui/flux-auth';
-import { createArkAuthKitPanel } from '@deadark/ark-ui/flux-auth-ui';
+import { createAuthKitSession, addWalletDelegationToAuthKit, revokeWalletDelegationInAuthKit, rotateWalletInAuthKit, revokeWalletInAuthKit, describeAuthKit, encodeAuthKitEnvelope } from '@fxn/ui/flux-auth';
+import { createArkAuthKitPanel } from '@fxn/ui/flux-auth-ui';
 import { createFluxRootHandle, fluxRootFromMnemonic, FLUX_ROOT_DERIVATION } from 'fxn-auth/root-from-mnemonic';
 import { createRootIdentitySigningHandleNative } from 'deadark-identity-core/root-signing-handle';
 import { createWalletSigningHandle } from 'fxn-auth/wallet-signing-handle';
@@ -594,4 +594,4 @@ export async function createFxnId({ displayName, pin, password = '', word = '', 
 }
 
 /* The nine FXN ID icons, from ark-ui itself (never a copy): a page draws its own icon picker from this list. */
-export { FXN_ID_ICONS } from '@deadark/ark-ui/flux-auth';
+export { FXN_ID_ICONS } from '@fxn/ui/flux-auth';

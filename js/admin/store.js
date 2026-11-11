@@ -79,12 +79,16 @@ var ArkAdminStore = (function () {
   function indexText(ids) {
     return '/* The page manifests, in display order. The admin editor (admin-app.html) rewrites this list; edit it by hand only to reorder.\n' +
       '   It loads each manifest while the page is still being read, so every manifest is defined before any script runs.\n' +
-      '   An id is written into a script tag, so only a plain id (lowercase letters and digits, starting with a letter) is loaded. */\n' +
+      '   An id is written into a script tag, so only a plain id (lowercase letters and digits, starting with a letter) is loaded.\n' +
+      '   On a public page the manifests ride in the shell chunk (scripts/build-shell.cjs bundles the files this list names) and the page\'s\n' +
+      '   tag says so with &bundled=1: then nothing is written. The editor, and its canvas (?cms-preview or ?preview), load each file fresh. */\n' +
       'var ArkManifestIds = ' + JSON.stringify(ids) + ';\n' +
       'var ArkManifestVersion = document.currentScript && document.currentScript.src.match(/[?&]v=([a-z0-9_-]+)/i);\n' +
       'var ArkManifestSearch = ArkManifestVersion ? \'?v=\' + ArkManifestVersion[1] : \'\';\n' +
+      'var ArkManifestsBundled = !!document.currentScript && /[?&]bundled=1(?:&|$)/.test(document.currentScript.src || \'\') &&\n' +
+      '  !(typeof location !== \'undefined\' && /[?&](?:cms-)?preview(?:[=&]|$)/.test(location.search || \'\'));\n' +
       'ArkManifestIds.forEach(function (id) {\n' +
-      '  if (!/^[a-z][a-z0-9]*$/.test(id)) return;\n' +
+      '  if (ArkManifestsBundled || !/^[a-z][a-z0-9]*$/.test(id)) return;\n' +
       '  document.write(\'<script src="js/content/manifests/\' + id + \'.js\' + ArkManifestSearch + \'" defer><\\/script>\');\n' +
       '});\n';
   }

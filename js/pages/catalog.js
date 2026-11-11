@@ -5,6 +5,12 @@
    uses; 'zero' has none of its own -- its copy is the 'home' manifest, so
    its SEO entry is too. */
 ArkUI.pageModules = Object.create(null);
+/* THE NETWORK'S FIGURES: ONE SOURCE (owner, 2026-11-11: "when it comes to numbers add N/A or TBA"). Layer: app. Every figure a status bar shows
+   (the home's, a topic page's, Learn's) is asked from ArkUI.homeStatus.read(id), with id one of price, genesis, chains, networks, identities.
+   Today no chain is live and nothing measures these, so read() answers nothing and the bar shows the manifest's TBA word. Absent is never shown
+   as zero. The day a real source exists, it replaces read() here, in this one place, and returns the text to show. It stands in this file because
+   every page loads it, so a topic page opened by its own address reads the same source as the home (it was in js/pages/intro.js until 2026-11-11). */
+ArkUI.homeStatus = ArkUI.homeStatus || { read: function () { return undefined; } };
 function arkSeoTitle(id, fallbackLabel) { return typeof ArkSEO !== 'undefined' ? ArkSEO.pageTitle(id, fallbackLabel) : fallbackLabel; }
 /* What a route needs before an Ark block can render (js/ark/blocks.js): the link resolver, the
    public Ark kit (what no block uses left out -- scripts/ark-kit-entry.js), and the adapter that
@@ -52,7 +58,7 @@ ArkUI.styleOrder = [
   'css/story-diagrams.css', 'css/color-system.css', 'css/brand-identity.css',
   'css/how-overview.css', 'css/explorer-observatory.css', 'css/explore-story.css', 'css/authorization-dialog.css',
   'css/download.css', 'css/home-swiss.css',
-  'assets/kit/defxn-marks.data.css', 'css/world.css', 'css/world-pages.css', 'css/space-frame.css', 'css/world-chain.css', 'css/world-identity.css', 'css/world-measure.css', 'css/world-stats.css', 'css/world-works.css', 'css/world-minute.css', 'css/nft-card.css', 'css/skin-site.css', 'css/resolutions-one.css', 'css/notes-one.css', 'css/stats-one.css', 'css/cutouts.css', 'css/world-minute.css', 'css/auth.css', 'css/chain-one.css', 'css/lattice.css', 'css/space-home.css', 'css/works-one.css', 'css/ark-blocks.css', 'css/block-page.css', 'css/components.css',
+  'assets/kit/defxn-marks.data.css', 'css/world.css', 'css/world-pages.css', 'css/space-frame.css', 'css/world-chain.css', 'css/world-identity.css', 'css/world-measure.css', 'css/world-stats.css', 'css/world-works.css', 'css/world-minute.css', 'css/nft-card.css', 'css/skin-site.css', 'css/resolutions-one.css', 'css/notes-one.css', 'css/stats-one.css', 'css/cutouts.css', 'css/world-minute.css', 'css/auth.css', 'css/chain-one.css', 'css/lattice.css', 'css/space-home.css', 'css/works-one.css', 'css/motion.css', 'css/ark-blocks.css', 'css/block-page.css', 'css/components.css',
   /* the editor's Kit (cms-preview only): last, over the blocks it shows */
   'css/ark-blocks-groups.css', 'css/kit.css', 'css/kit-boards-a.css', 'css/kit-boards-b.css'
 ];
@@ -61,30 +67,18 @@ ArkUI.styleOrder = [
    change a page's scripts or a stylesheet's selectors and regenerate. shared = linked in index.html (every route
    needs it); modules = what a page module adds, in cascade order (ArkUI.styleOrder). The header of that script says how. */
 ArkUI.pageStyles = {
-  shared: ['css/themes.css', 'assets/kit/defxn-fonts.css', 'assets/kit/defxn-components.css', 'css/fallback.css', 'css/studio.css', 'css/hero-motion.css', 'css/navigation.css', 'css/focus.css', 'css/settings.css', 'css/page-layout.css', 'css/home.css', 'css/site-direction.css', 'css/experience.css', 'css/home-drafting.css', 'css/lifecycle.css', 'css/resolutions.css', 'css/icons.css', 'css/story-diagrams.css', 'css/color-system.css', 'css/brand-identity.css', 'css/how-overview.css', 'css/authorization-dialog.css', 'css/home-swiss.css', 'assets/kit/defxn-marks.data.css', 'css/world.css', 'css/world-pages.css', 'css/space-frame.css', 'css/lattice.css', 'css/ark-blocks.css', 'css/components.css'],
+  shared: ['css/themes.css', 'assets/kit/defxn-fonts.css', 'assets/kit/defxn-components.css', 'css/fallback.css', 'css/studio.css', 'css/hero-motion.css', 'css/navigation.css', 'css/focus.css', 'css/settings.css', 'css/page-layout.css', 'css/home.css', 'css/site-direction.css', 'css/experience.css', 'css/home-drafting.css', 'css/lifecycle.css', 'css/reference.css', 'css/resolutions.css', 'css/icons.css', 'css/story-diagrams.css', 'css/color-system.css', 'css/brand-identity.css', 'css/how-overview.css', 'css/authorization-dialog.css', 'css/home-swiss.css', 'assets/kit/defxn-marks.data.css', 'css/world.css', 'css/world-pages.css', 'css/space-frame.css', 'css/lattice.css', 'css/motion.css', 'css/ark-blocks.css', 'css/components.css'],
   modules: {
     zero: ['css/space-home.css'],
     intro: [],
-    worldMinuteMovie: ['css/world-measure.css', 'css/world-works.css', 'css/world-minute.css', 'css/world-minute.css', 'css/works-one.css'],
-    resolutions: ['css/resolutions-one.css'],
-    learnings: ['css/notes-one.css'],
-    explorer: ['css/explorer.css', 'css/explorer-observatory.css', 'css/explore-story.css', 'css/block-page.css'],
-    worldStatsNow: ['css/world-measure.css', 'css/world-stats.css', 'css/world-works.css', 'css/stats-one.css'],
-    worldResolvers: ['css/world-measure.css', 'css/world-works.css'],
+    learn: [],
     auth: ['css/cutouts.css', 'css/auth.css'],
     account: ['css/account.css', 'css/auth.css', 'css/block-page.css'],
-    worldChain: ['css/world-chain.css', 'css/chain-one.css'],
-    worldIdentity: ['css/world-chain.css', 'css/world-identity.css'],
-    worldRing: ['css/world-measure.css', 'css/world-works.css'],
     download: ['css/download.css'],
-    reference: ['css/reference.css', 'css/guided-page.css', 'css/notes-one.css'],
-    resolverMath: ['css/resolver-math.css', 'css/notes-one.css'],
-    concept: ['css/notes-one.css'],
-    dao: ['css/resolver-guide.css', 'css/notes-one.css'],
+    topic: [],
     notFound: ['css/block-page.css'],
     kit: ['css/kit.css', 'css/kit-boards-a.css', 'css/kit-boards-b.css'],
-    article: ['css/block-page.css'],
-    theory: ['css/notes-one.css']
+    article: ['css/block-page.css']
   }
 };
 /* END derived page styles */
@@ -103,7 +97,7 @@ var arkPageModules = {
   /* home and the intro stand on the 3D world (js/world2/world2-host.mjs), not on Ark blocks: they load the data files
      their numbers come from (the world loads the same files for its own use, once) and the rail */
   zero: { module: 'zero', scripts: ['js/pages/home.js'] },   /* the home stands on the space (docs/design/space/SPACE.md); the Measured rail left it 2026-11-05 */
-  intro: { module: 'intro', scripts: ['js/content/network-data.js', 'js/content/capabilities-data.js', 'js/content/resolvers-data.js', 'js/pages/intro.js'] },
+  intro: { module: 'intro', scripts: ['js/content/network-data.js', 'js/content/capabilities-data.js', 'js/content/resolvers-data.js', 'js/content/topics.js', 'js/pages/intro.js'] },
   /* the redesign's views, each on its own 3D view (js/world2/world2-host.mjs VIEW_OF). /chain and /resolvers move to theirs
      when their page files land (Pages A and B swap those two entries); every other old page stays. */
   identity: { module: 'worldIdentity', scripts: ['js/pages/world-chain.js', 'js/pages/world-identity.js'] },
@@ -146,13 +140,31 @@ var arkPageModules = {
   dao: { module: 'dao', scripts: ArkUI.storyScripts.concat(['js/pages/sheet.js', 'js/ark/vendor/ark-kit-figures.js', 'js/pages/resolver-page-parts.js', 'js/pages/dao.js', 'js/ark/page-kit.js']) },
   reference: { module: 'reference', scripts: ArkUI.blockScripts.concat(['js/content/reference-index.js', 'js/pages/reference.js']) }
 };
+/* The portal navigation (2026-11-09, design P05; docs/design/space/SPACE.md "Portal navigation (P05)"). Learn is the one place to
+   learn: the record's words, every measured number, the twelve topics. It answers the old stats addresses the stats page used to. */
+arkPageModules.learn = { module: 'learn', scripts: ['js/content/topics.js', 'js/pages/learn.js'] };
+/* The old stats addresses (/stats, /monitor, /stats/gpu, the week pages) are the aliases of the retired `stats/now` module above;
+   its redirect entry carries them (arkRedirectEntry keeps a retired module's aliases) and its section query, so each opens
+   /learn?t=speed. Until 2026-11-09 they were Learn's own aliases as well, listed before the redirect, so resolve() answered
+   them with Learn at its Words tab and the Speed tab was never reached (navigation audit). */
+/* the twelve topic pages: one template (js/pages/topic.js), one row each in js/content/topics.js; the keys come from site-pages.js TOPICS */
+ArkSitePages.topics().forEach(function (t) { arkPageModules[t.key] = { module: 'topic', scripts: ['js/content/topics.js', 'js/pages/topic.js'] }; });
 ArkUI.pageCatalog = {};
 /* journey: which visitor path the page serves (ArkSitePages.journeys()); null keeps it out of
    every list. hiddenFromNavigation is the same fact for older readers: no journey, no menu. */
+/* A topic page is named by its stone: the ring's own word (HOME.LANDING.RING.S<n>, js/content/manifests/home.js), so the tab's
+   title, the ring and the page say one name. Its row's label ('FXN id') is the fallback where the copy is not loaded (a headless
+   route list). The stone number is the topic's place in TOPICS (js/content/site-pages.js), clockwise from the top. */
+var arkTopicStone = {};
+ArkSitePages.topics().forEach(function (t, i) { arkTopicStone[t.key] = 'HOME.LANDING.RING.S' + (i + 1); });
+function arkPageLabel(row) {
+  var stone = row.topic && arkTopicStone[row.key];
+  return stone && typeof ArkCopy !== 'undefined' && ArkCopy.has && ArkCopy.has(stone) ? ArkCopy.text(stone) : row.label;
+}
 ArkSitePages.pages().forEach(function (row) {
   var loader = arkPageModules[row.key];
   if (!loader) throw new Error('js/content/site-pages.js lists the page "' + row.key + '", but js/pages/catalog.js has no module for it: add one to arkPageModules, or remove the row.');
-  var entry = { path: row.path, title: arkSeoTitle(row.seoId || row.key, row.label), seoId: row.seoId || row.key, journey: row.journey, module: loader.module, scripts: loader.scripts, styles: arkModuleStyles(loader.module) };
+  var entry = { path: row.path, title: arkSeoTitle(row.seoId || row.key, arkPageLabel(row)), seoId: row.seoId || row.key, journey: row.journey, module: loader.module, scripts: loader.scripts, styles: arkModuleStyles(loader.module) };
   if (row.short) entry.short = row.short;
   if (loader.aliases) entry.aliases = loader.aliases;
   if (!row.journey) entry.hiddenFromNavigation = true;
@@ -161,10 +173,9 @@ ArkSitePages.pages().forEach(function (row) {
 /* Retired routes keep their key, so a saved link (route:stats, route:measured) still resolves: the entry carries the new path and `redirect`, the key
    the world host's navigate sends the visitor to before anything mounts (js/world2/world2-host.mjs). They come after the new entries so an address that
    several keys name resolves to the new key first (js/ark/page-router.js resolve). Never listed, never indexed. */
-ArkUI.pageRedirects = { stats: 'stats/now', 'stats/gpu': 'stats/now', 'stats/ledger': 'stats/now', measured: 'stats/now',
-  /* 2026-10-25, the stats section reduced to three steps: the batch is a fact of One node, the fleet is the network, and the week pages' runs are named on every card */
-  'stats/resolver': 'stats/now', 'stats/fleet': 'stats/now' };
-ArkSitePages.statsWeeks().forEach(function (week) { ArkUI.pageRedirects[week.key] = 'stats/now'; });
+/* 2026-11-09 (design P05): the stats section is Learn's Speed tab, so every older stats key opens /learn?t=speed */
+ArkUI.pageRedirects = { stats: 'learn', 'stats/gpu': 'learn', 'stats/ledger': 'learn', measured: 'learn', 'stats/resolver': 'learn', 'stats/fleet': 'learn' };
+ArkSitePages.statsWeeks().forEach(function (week) { ArkUI.pageRedirects[week.key] = 'learn'; });
 /* The 2026-11-05 cut (about 85 pages to 22): every retired page (js/content/site-pages.js RETIRED) redirects to the page
    that holds it now. Its old path is the redirect entry's alias, so js/ark/page-router.js resolve() still answers the old
    address with the old key, and navigate() follows `redirect`. `redirectQuery` is the section the new page opens
@@ -172,7 +183,7 @@ ArkSitePages.statsWeeks().forEach(function (week) { ArkUI.pageRedirects[week.key
    the new page opens at its top. */
 /* stats/ceiling and stats/capabilities are retired too, so the older keys that led to them open stats/now at their section */
 var arkRedirectKeep = {};
-var arkRedirectQuery = { 'stats/gpu': 's=ceiling', 'stats/resolver': 's=ceiling', 'stats/ledger': 's=capabilities', measured: 's=capabilities' }, arkRedirectPath = {};
+var arkRedirectQuery = { stats: 't=speed', 'stats/gpu': 't=speed', 'stats/resolver': 't=speed', 'stats/ledger': 't=speed', measured: 't=speed', 'stats/fleet': 't=speed' }, arkRedirectPath = {};
 ArkSitePages.retired().forEach(function (row) {
   ArkUI.pageRedirects[row.key] = row.to;
   arkRedirectPath[row.key] = row.path;
@@ -184,7 +195,10 @@ function arkRedirectEntry(old, to, oldPath, query, own) {
   var target = ArkUI.pageCatalog[to];
   if (!target) throw new Error('The retired key "' + old + '" redirects to "' + to + '", which is not a page in js/content/site-pages.js PAGES: point it at a page that exists.');
   var entry = { path: target.path, title: target.title, seoId: old, journey: null, hiddenFromNavigation: true, noindex: true, redirect: to, module: target.module, scripts: target.scripts, styles: target.styles };
-  if (oldPath && oldPath !== target.path) entry.aliases = [oldPath];
+  /* the old path, and the old addresses the retired module answered (explorer: /explorer; stats/now: /stats, /monitor, the week
+     pages), so a saved link to any of them lands; until 2026-11-09 only the path came along and /explorer was Not found */
+  var aliases = (oldPath && oldPath !== target.path ? [oldPath] : []).concat((arkPageModules[old] && arkPageModules[old].aliases || []).filter(function (a) { return a !== target.path; }));
+  if (aliases.length) entry.aliases = aliases;
   if (query) entry.redirectQuery = query;
   if (own) { entry.module = own.module; entry.scripts = own.scripts; entry.styles = arkModuleStyles(own.module); }
   return entry;
@@ -256,6 +270,10 @@ ArkUI.catalogContentRoutes = function (articles, theoryManifests) {
   (articles || []).forEach(function (article) {
     var key = 'article/' + article.slug, body = article.sections ? [] : ['js/content/articles/' + article.slug + '.js'];
     if (!ArkUI.pageCatalog[key]) added.push(key);
+    /* 2026-11-10 (owner, CLAIMS-AUDIT-2026-11-10): the articles are history and left the site; their family's `to` opens Learn.
+       The article files stay on disk. */
+    var gone = arkFamilyRedirect(key);
+    if (gone) { ArkUI.pageCatalog[key] = arkRedirectEntry(key, gone.to, '/learnings/' + article.slug, gone.query, null); return; }
     ArkUI.pageCatalog[key] = { path: '/learnings/' + article.slug, title: typeof ArkSEO !== 'undefined' ? ArkSEO.articleTitle(article.slug, article.title) : article.title, seoArticle: article.slug, journey: ArkSitePages.journeyOf(key), module: 'article', scripts: ArkUI.storyScripts.concat(body, ['js/pages/article.js']), styles: arkModuleStyles('article') };
     var aliases = arkReadableAliases('/learnings/', article.title, ArkUI.pageCatalog[key].path);
     if (aliases) ArkUI.pageCatalog[key].aliases = aliases;

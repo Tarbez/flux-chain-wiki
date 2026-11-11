@@ -84,7 +84,7 @@ ArkManifest.define({
       "label": "What it does, 3: one line",
       "kind": "line",
       "section": "Page",
-      "value": "It connects to the DEFXN devnet. Nothing on it is live money yet."
+      "value": "It will connect to the DEFXN devnet once devnet starts. Nothing on it will be live money."
     },
     "MOMENTS.LABEL": {
       "label": "What it does: the list name",
@@ -96,7 +96,7 @@ ArkManifest.define({
       "label": "Intro",
       "kind": "text",
       "section": "Page",
-      "value": "The first build is for macOS. Until it is published, you can do two things today. Create your FXN ID on this site, or run a miner from source with the five steps in the terminal."
+      "value": "The first build is for macOS. Until it is published, you can do two things today. Initiate FXN ID on this site, or run a miner from source with the five steps in the terminal."
     },
     "POINT1.TITLE": {
       "label": "Heading",
@@ -276,7 +276,7 @@ ArkManifest.define({
       "label": "FXN Browser for phones: what it is",
       "kind": "text",
       "section": "Apps",
-      "value": "Opens DEFXN sites and runs a node on your phone. Built and run on one iPhone and one Android phone. It is in no store yet."
+      "value": "Opens DEFXN sites and runs a node on your phone. It is in no store yet."
     },
     "APP.MOBILE.URL": {
       "label": "FXN Browser for phones: download address (https://..., empty until published)",

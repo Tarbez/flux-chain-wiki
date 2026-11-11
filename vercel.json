@@ -1,5 +1,15 @@
 {
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/:dir(.*)/index.html", "destination": "/:dir", "permanent": true },
+    { "source": "/:path(.*)\\.html", "destination": "/:path", "permanent": true }
+  ],
   "rewrites": [
+    {
+      "source": "/broker",
+      "destination": "/broker.html"
+    },
     {
       "source": "/(?:[^/]+/)+(js|css|assets|docs|legacy)/(.*)",
       "destination": "/$1/$2"

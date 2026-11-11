@@ -25,11 +25,14 @@
     return prev[b.length];
   }
 
-  /* The listed pages (those with a journey) closest to `path`, best first: within an edit
-     distance of a third of the address, or sharing its first segment. At most three. */
+  /* The listed pages (those with a journey) and the portal's topic pages (js/content/site-pages.js TOPICS: in no
+     journey, since the ring leads to them, but a page /fxn/idd was meant to reach) closest to `path`, best first:
+     within an edit distance of a third of the address, or sharing its first segment. At most three. A retired
+     key is never offered: its address is the old one. */
   function closest(path, catalog) {
     var lower = String(path).toLowerCase(), first = lower.split('/')[1] || '';
-    return Object.keys(catalog).filter(function (key) { return catalog[key].journey && catalog[key].path !== '/'; })
+    var topics = typeof ArkSitePages !== 'undefined' ? ArkSitePages.topics().map(function (t) { return t.key; }) : [];
+    return Object.keys(catalog).filter(function (key) { return (catalog[key].journey || topics.indexOf(key) >= 0) && !catalog[key].redirect && catalog[key].path !== '/'; })
       .map(function (key) { var p = catalog[key].path; return { key: key, d: distance(lower, p.toLowerCase()), same: first && p.split('/')[1] === first }; })
       .filter(function (c) { return c.same || c.d <= Math.max(2, Math.floor(lower.length / 3)); })
       .sort(function (a, b) { return a.d - b.d; })
@@ -103,9 +106,14 @@
     spec: spec,
     mount: function (host) {
       var asked = ArkUI.route.path() + (ArkUI.route.search() ? '?' + ArkUI.route.search() : '');
-      var page = ArkUI.page(spec(asked), host, { page: 'notfound', titleId: 'not-found-title' });
+      /* 2026-11-11: the page wears the home (.home-wear, css/world-pages.css "the remaining pages"). The hero block's parts take the home's
+         own classes beside the kit's: the eyebrow is the pill, the title the headline, the lede the line, Home the one filled button */
+      var page = ArkUI.page(spec(asked), host, { page: 'notfound', className: 'notfound-page home-wear', titleId: 'not-found-title' });
       var code = page.querySelector('#not-found-hero [data-ark-part="hero-meta"] dd');
       if (code) code.setAttribute('data-not-found-address', '');
+      [['.ark-eyebrow', 'intro-portal-eyebrow'], ['.ark-hero__title', 'intro-portal-headline'], ['.ark-hero__lede', 'intro-portal-line'], ['.ark-actions a', 'intro-portal-enter']].forEach(function (w) {
+        var part = page.querySelector('#not-found-hero ' + w[0]); if (part) part.classList.add(w[1]);
+      });
       return page;
     }
   };

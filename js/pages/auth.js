@@ -77,7 +77,7 @@
 
   /* The rail: four steps, in the design's words. Each state lights them (done / here / waiting) and may say what the
      step is doing now (the line under a step's name). */
-  var STEPS = [['Identity', 'Choose your FXN ID file'], ['Verify', 'Check the file opens and signs'], ['Connect', 'Sign in to the DEFXN network'], ['Ready', 'Your identity opens the grid']];
+  var STEPS = [['Identity', 'Choose your FXN ID file'], ['Verify', 'Check the file opens and signs'], ['Connect', 'Sign in with your FXN ID'], ['Ready', 'Your identity opens the grid']];
   var RAIL = {
     none: { at: 0, lines: {} },
     file: { at: 1, lines: { 1: 'Reading the file on this device' } },
@@ -91,9 +91,9 @@
   /* a failure lights its step as stopped (the steps before it done) */
   function failRail(step, line) { var lines = {}; lines[step] = line; return { at: step, done: step, warn: 1, lines: lines }; }
   var TITLES = {
-    none: ['No identity', 'loaded.'], file: ['FXN ID file', 'selected.'], verify: ['Verifying', 'identity.'],
+    none: ['No FXN ID', 'loaded.'], file: ['FXN ID file', 'selected.'], verify: ['Verifying', 'identity.'],
     connected: ['Identity', 'connected.'], missing: ['FXN ID file', 'missing.'],
-    create: ['Create your', 'identity.'], words: ['Save your', 'Emergency Kit.'], saved: ['FXN ID file', 'saved.']
+    create: ['Initiate', 'FXN ID.'], words: ['Save your', 'Emergency Kit.'], saved: ['FXN ID file', 'saved.']
   };
   var LEDES = {
     none: 'No FXN ID file is open on this device. Choose your FXN ID file to sign in to the DEFXN network.',
@@ -138,7 +138,7 @@
   var EVENTS = {
     offline: { title: ['Identity verified.', 'Network offline.'], step: 2, lede: 'Your FXN ID is open on this tab, but this device is offline. The network cannot be reached now.' },
     restore: { title: ['Saved sign-in', 'not available.'], step: 0, lede: 'This browser kept your sign-in, but it could not be opened, so the browser deleted it. Choose your FXN ID file to sign in again.' },
-    cleared: { title: ['Saved identity', 'cleared.'], step: 0, lede: 'Your saved identity details are gone from this device. Your FXN ID file is not changed.' },
+    cleared: { title: ['Saved FXN ID', 'cleared.'], step: 0, lede: 'Your saved identity details are gone from this device. Your FXN ID file is not changed.' },
     ended: { title: ['Connection', 'ended.'], step: 0, lede: 'You signed out. Your FXN ID file is closed on this tab.' }
   };
   var EXPLAIN = 'An FXN ID file (.auth.fxn) holds the keys that sign for you. It stays on this device and is never uploaded. Your PIN and password open it. Your recovery words bring it back if you lose the file.';
@@ -180,7 +180,10 @@
         stat(s === 'connected' || s === 'offline' ? 'Open' : 'Closed', 'FXN ID file');
       }
       /* ---- the dock: the four steps as chips, lit as you move, and the state's one dominant action ---- */
-      var dock = el('div', 'hud-dock'); page.appendChild(dock);
+      /* 2026-11-11 (owner: "upgrade the auth", in the home's language): the dock stands inside the words column, after the body, so the one
+         filled button stands under the words as on the home and the steps close the column (css/auth.css "the home's language"). Placement only:
+         the dock, its chips and the button moved into it are the same nodes with the same listeners */
+      var dock = el('div', 'hud-dock'); words.appendChild(dock);
       var rail = el('ol', 'auth-rail hud-chips'); rail.setAttribute('aria-label', 'Sign-in steps');
       var railItems = STEPS.map(function (s, i) {
         var li = el('li', 'auth-step hud-chip'); var dot = el('span', 'auth-step-dot'); dot.innerHTML = ICON.check;
@@ -214,7 +217,7 @@
          flux/devnet-deploy-2026-10-23/gate/gate.committee in fxn-auth's own grammar. In assets/, so every host serves it. */
       var COMMITTEE_URL = '/assets/gate.committee';
       var CSTEPS = [
-        { key: 'name', title: ['Name your', 'identity.'], lede: 'This name is for you. Sites see your Public ID, which this file makes next.', label: 'Name', input: { type: 'text', name: 'displayName', max: 80, auto: 'nickname' } },
+        { key: 'name', title: ['Name your', 'FXN ID.'], lede: 'This name is for you. Sites see your Public ID, which this file makes next.', label: 'Name', input: { type: 'text', name: 'displayName', max: 80, auto: 'nickname' } },
         { key: 'pin', title: ['Pick a', 'PIN.'], lede: 'You type this PIN each time you open the file. Use 8 to 12 digits, or 6 or 7 digits with a password.', label: 'PIN', input: { type: 'password', name: 'pin', mode: 'numeric', auto: 'new-password', hint: '8–12 digits' } },
         { key: 'password', title: ['Add a', 'password.'], lede: 'A password adds a second lock to the file. It is optional with a PIN of 8 digits or more.', label: 'Password', input: { type: 'password', name: 'password', auto: 'new-password' }, optional: true },
         { key: 'word', title: ['Choose a', 'key word.'], lede: 'A key word is one more thing only you know. The gate asks for it before it releases your Secret Key.', label: 'Key word', input: { type: 'password', name: 'word', max: 128, auto: 'off' }, optional: true },
@@ -382,7 +385,7 @@
       var explainOpen = false;
       function toggleExplain() { explainOpen = !explainOpen; paint(true); }
       var CARDS = {
-        create: { icon: 'plus', name: 'Create a new identity', line: 'Make a new FXN ID file', run: function () { startCreate(); } },
+        create: { icon: 'plus', name: 'Initiate FXN ID', line: 'Make a new FXN ID file', run: function () { startCreate(); } },
         back: { icon: 'back', name: 'Back to sign in', line: 'Choose a file you already have', run: function () { creating = false; paint(true); } },
         what: { icon: 'book', name: 'What is an FXN ID file?', line: 'What it holds and where it stays', run: function () { toggleExplain(); } },
         deploy: { icon: 'box', name: 'Deploy a bundle', line: 'Run a network bundle', route: 'bundledeployer' },
@@ -393,7 +396,8 @@
       function explain() { var p = el('p', 'auth-explain tp-panel', EXPLAIN); p.id = 'auth-explain'; p.hidden = !explainOpen; return p; }
       function wireExplain(node) { node.querySelectorAll('.auth-card[data-card="what"]').forEach(function (c) { c.setAttribute('aria-expanded', String(explainOpen)); c.setAttribute('aria-controls', 'auth-explain'); }); }
       function main(label, run, cls) {
-        var b = el('button', 'auth-main ' + (cls || '')); b.type = 'button';
+        /* .intro-portal-enter: the home's filled button, one shared class (css/world-pages.css); .auth-main keeps what is this page's own */
+        var b = el('button', 'auth-main intro-portal-enter ' + (cls || '')); b.type = 'button';
         b.appendChild(icon(cls === 'is-big' ? 'file' : 'arrow')); b.appendChild(el('span', null, label)); if (cls === 'is-big') b.appendChild(icon('arrow', 'auth-main-go'));
         b.addEventListener('click', run); return b;
       }
@@ -508,7 +512,7 @@
         box.appendChild(foot);
         f.appendChild(box);
         var acts = el('div', 'auth-actions');
-        var enter = link('account', 'auth-main'); enter.appendChild(icon('arrow')); enter.appendChild(el('span', null, 'Enter your master account'));
+        var enter = link('account', 'auth-main intro-portal-enter'); enter.appendChild(icon('arrow')); enter.appendChild(el('span', null, 'Enter your master account'));
         acts.appendChild(enter); acts.appendChild(card('deploy', 'is-slim')); acts.appendChild(card('domains', 'is-slim'));
         f.appendChild(acts);
         return f;
@@ -543,7 +547,7 @@
           b.addEventListener('click', function () { cgo(i); }); li.appendChild(b); dots.appendChild(li);
         });
         f.appendChild(dots);
-        var pane = el('form', 'auth-wpane tp-panel'); pane.noValidate = true;
+        var pane = el('form', 'auth-wpane tp-panel'); pane.noValidate = true; pane.id = 'auth-wform';
         if (making) {
           var m = el('div', 'auth-wmaking'); m.appendChild(el('i', 'auth-spin')); m.appendChild(el('span', null, 'Making your FXN ID on this device…'));
           pane.appendChild(m);
@@ -574,7 +578,11 @@
         var nav = el('div', 'auth-wnav');
         if (!making) {
           var last = cstep === CSTEPS.length - 1, skip = st.optional && !cvals[st.input.name];
-          var go = el('button', 'auth-main'); go.type = 'submit'; go.appendChild(el('span', null, last ? 'Create my FXN ID' : skip ? 'Skip' : 'Next')); go.appendChild(icon('arrow'));
+          var go = el('button', 'auth-main intro-portal-enter'); go.type = 'submit'; go.appendChild(el('span', null, last ? 'Initiate FXN ID' : skip ? 'Skip' : 'Next')); go.appendChild(icon('arrow'));
+          /* 2026-11-11 (found in the real browser): paint() moves this button into the dock, outside its form, where a press submitted nothing
+             and the steps with no field (Icon, Recovery words) could not be passed at all. The form attribute keeps it this form's own button
+             wherever it stands. Markup only: the same submit listener runs. */
+          go.setAttribute('form', pane.id);
           var back = el('button', 'auth-wback'); back.type = 'button'; back.appendChild(icon('back')); back.appendChild(el('span', null, cstep ? 'Back' : 'Back to sign in'));
           back.addEventListener('click', function () { if (cstep) cgo(cstep - 1); else { creating = false; paint(true); } });
           nav.appendChild(back); nav.appendChild(go);

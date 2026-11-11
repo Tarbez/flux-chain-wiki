@@ -146,10 +146,12 @@ export async function readKeyBalances(wire, keys) {
 const PATH = {
   [KIND_VESTED_SAFE_CREATE]: { path: "council", how: "The multisig approves each spend of what has unlocked." },
   [KIND_SAFE_CREATE]: { path: "council", how: "The multisig approves each spend." },
-  [KIND_SALE_SAFE_CREATE]: { path: "sale", how: "Sells FXN in the public sale. No signer moves it." },
-  [KIND_VOTE_SAFE_CREATE]: { path: "vote", how: "Each spend needs a holder vote." },
-  [KIND_FUND_SAFE_CREATE]: { path: "vote", how: "Each spend needs a holder vote, with a cap per receiving key." },
-  [KIND_OPS_SAFE_CREATE]: { path: "budget", how: "Spends only inside budgets that holders approved." },
+  // Owner rule, 2026-11-10: person attesters are filed after launch, as an upgrade the multisig votes in. Until then no
+  // page says holders vote or that a sale is open, so these say what the safe waits for (CLAIMS-AUDIT-2026-11-10).
+  [KIND_SALE_SAFE_CREATE]: { path: "sale", how: "Holds FXN for a sale. No sale is open. No signer moves it." },
+  [KIND_VOTE_SAFE_CREATE]: { path: "vote", how: "Nothing leaves it yet. Spends wait for holder votes, planned after launch." },
+  [KIND_FUND_SAFE_CREATE]: { path: "vote", how: "Nothing leaves it yet. Spends wait for holder votes, planned after launch, with a cap per receiving key." },
+  [KIND_OPS_SAFE_CREATE]: { path: "budget", how: "Nothing leaves it yet. Spends wait for budgets, planned after launch." },
 };
 
 /** The unix second tranche `k` (1-based) unlocks: start + cliff + interval x (k - 1) (dense-wire

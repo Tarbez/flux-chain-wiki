@@ -1,4 +1,9 @@
-/* Journeys: a path through the site for who you are, and the 2-3 core actions on every screen (owner, 2026-11-05: "I see no 2-3 core CTA
+/* RETIRED 2026-11-09 (design P05, the portal navigation): not in js/space/space.mjs PARTS, so this never mounts. Every page its
+   paths name is retired (works, chain, stats/now, resolutions, resolvers, explorer, learnings), and its "New here? Pick your path"
+   panel covered the jump bar's Learn and portal links at the foot of every topic page. The jump bar (js/content/topics.js) is the
+   path now.
+
+   Journeys: a path through the site for who you are, and the 2-3 core actions on every screen (owner, 2026-11-05: "I see no 2-3 core CTA
    per screen and the audience journeys"). Layer: app. A part of the space (docs/design/space/SPACE.md).
 
    The visitor's role is the one the missions keep (js/space/quest.mjs, localStorage defxn-quest-v1). Each role has a journey: an ordered

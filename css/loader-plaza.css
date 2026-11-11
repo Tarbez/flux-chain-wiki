@@ -1,0 +1,68 @@
+/* THE LOAD SCREEN (owner, 2026-11-11: "Starts empty, page loads one at a time smoothly"; the approved nine-frame load board; fxn-3d
+   docs/design/direction/portal-101/NOTES.md "The load board and the home hero"). js/loader-plaza.js drives it.
+   The first paint is the empty ground, and its rules stand inline in index.html (the SVG there is made by scripts/loader-ground.mjs from the
+   studio's load camera). This sheet holds the later states only:
+   .is-live   the studio's frame shows the same empty ground under the loader, so the drawn ground fades and the loader keeps its bar;
+   .opening   every load has landed and every stop has held (or, with no live scene, the site is up): the bar fades and the loader's parts leave.
+   Before 2026-11-11 the loader showed two stills of the plaza (assets/loader/plaza-gate*.jpg) and its own headline and line; the hero's words are
+   the intro page's now (css/world-pages.css .intro-portal-words). The loader sets no type. */
+#world-loader.plaza > .mark, #world-loader.plaza > .welcome { display: none; }
+#world-loader.plaza > .plaza-ground { transition: opacity .3s ease-out; }
+/* ONE OBJECT: the stage's portal frame under the loader is the ground, the stones and the mark. The loader goes see-through onto it */
+#world-loader.plaza.is-live { background: none; }
+#world-loader.plaza.is-live > .plaza-ground { opacity: 0; }
+/* the page's own chrome (nav, the intro's words, the footer) waits until the loader is done (html.plaza-done), so the screen shows one object.
+   By name, never by "every child of #scene but the stage": the stage sits inside one of those children, so the chrome's fade-in faded the stage's
+   own picture from black on the hand-off (one-object flow, 1440 x 900, one near-black frame at 6.75 s) */
+html.plaza-hold:not(.plaza-cross) .world-page:not(.hero-words), html.plaza-hold:not(.plaza-cross) .dx-foot, html.plaza-hold:not(.plaza-cross) body > .skip, html.plaza-hold:not(.hero-up, .plaza-cross) #fxn-nav, html.plaza-hold:not(.plaza-cross) #scene .site-settings { visibility: hidden !important; }
+/* html.plaza-cross (a route that is not the home, js/loader-plaza.js open()): the page is mounted, so it fades in WHILE the loader fades out, one
+   cross-fade. The same animation name stands through plaza-done, so it plays once. Before 2026-11-11 the page stayed hidden until the loader had
+   gone and then faded in: two fades, one after the other, and the words waited for both */
+html:is(.plaza-done, .plaza-cross):not(.hero-up) .world-page, html:is(.plaza-done, .plaza-cross) .dx-foot, html:is(.plaza-done, .plaza-cross):not(.hero-up) #fxn-nav { animation: plaza-chrome-in .4s ease-out both; }
+@keyframes plaza-chrome-in { from { opacity: 0; } }
+/* THE HOME READS AT ONCE (audit F05, 2026-11-11: every word stayed hidden 10 to 15 s). On the home the bar and the hero's words do not wait for the
+   load: js/pages/intro.js says html.hero-up the moment the page is built, the loader goes see-through, and the bar and the words come in over the
+   drawn ground while the 3D loads behind them. The ground stands where the live frame will (.hero-load, placed by js/loader-plaza.js before the
+   first paint: --load-t), and the load bar is small, under the plaza (--load-bar-x, --load-bar-y, --load-bar-w). The ground's left part, as far
+   as the hero's words reach (--load-solid), is not drawn and the next --load-fade fades in, so no floor ring runs under a word; the live frame
+   under it gets the same fade from the page (css/world-pages.css .intro-load-veil) */
+html.hero-up #world-loader.plaza { background: none; }
+/* THE WORDS AT THE FIRST PAINT (2026-11-11, speed lane 1C): #hero-first is the hero's words as markup in index.html (its hero-words region), in
+   the page's own classes, so css/world-pages.css sets them. It stands over the load screen, on the same box the page will have (the whole view),
+   with no ground of its own: the load screen's drawn ground is the picture, and it is not drawn under the words (--load-solid). js/loader-plaza.js
+   shows it on the home only (.is-on); js/pages/intro.js moves its words into the page and takes the section away. .is-taken: the words were
+   moved by a plain insert (a browser without Element.moveBefore), which would start their entrance again, so they stand as they are */
+#hero-first { position: fixed; inset: 0; z-index: 2147483001; background: none; }
+#hero-first:not(.is-on) { display: none; }
+.intro-world.hero-words .intro-portal-words.is-taken > * { animation: none; }
+html.plaza-hold.hero-up #fxn-nav { animation: plaza-chrome-in .3s ease-out both; }
+#world-loader.plaza.hero-load > .plaza-ground { transform: var(--load-t, none);
+  /* two masks, both must pass: the left part under the words, and everything below the dock's top edge (--load-floor), so no ring crosses the
+     status bar or the chips */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, transparent var(--load-solid, 0px), #000 calc(var(--load-solid, 0px) + var(--load-fade, 0px))), linear-gradient(180deg, #000 0, #000 calc(var(--load-floor, 100vh) - 40px), transparent var(--load-floor, 100vh));
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(90deg, transparent 0, transparent var(--load-solid, 0px), #000 calc(var(--load-solid, 0px) + var(--load-fade, 0px))), linear-gradient(180deg, #000 0, #000 calc(var(--load-floor, 100vh) - 40px), transparent var(--load-floor, 100vh));
+  mask-composite: intersect; }
+#world-loader.plaza.hero-load > .bar { left: var(--load-bar-x, 50%); top: var(--load-bar-y, 80%); width: var(--load-bar-w, 160px); height: 4px; }
+/* the live frame stays out of sight until the loader goes live onto it: the drawn ground is the one picture until then */
+html.plaza-hold:not(.plaza-live) .site-stage-frame[data-stage-hold^="LOADSTART"].is-shown.is-drawn { opacity: .001; }
+@media (prefers-reduced-motion: reduce) { html.plaza-hold.hero-up #fxn-nav { animation: none; } }
+/* the bar: its place and its empty look are the first paint's (index.html). It shows what has really finished (--plaza-fill, set by the script) */
+#world-loader.plaza > .bar { z-index: 1; transition: opacity .3s ease-out; }
+#world-loader.plaza > .bar i { background: hsl(var(--primary, 160 80% 65%)); }
+/* the load is done: the bar fades out and the load goes on into the hero. The loader has no button (owner ruling 2026-11-11: the one "Enter FXN"
+   is the hero's own, css/world-pages.css .intro-portal-enter) */
+#world-loader.plaza.opening > .bar { opacity: 0 !important; transition: opacity .5s ease-out; }
+/* held: neither the shell's nor the world's ready hides the loader, and its 8 s fade waits, until the load is done */
+html.plaza-hold #world-loader.plaza { display: block !important; visibility: visible !important; transition: none !important; }
+/* opacity is held only before the open: an !important opacity would beat the open's own fade (animations lose to !important) */
+html.plaza-hold #world-loader.plaza:not(.opening) { opacity: 1 !important; animation: none !important; }
+/* opening with no live scene under it (another route, no studio, reduced motion): the loader cross-fades onto the page */
+html.plaza-hold #world-loader.plaza.opening:not(.is-live) { pointer-events: none; animation: plaza-fade .4s ease-out forwards !important; }
+/* live: the scene is the stage frame's, so the loader only lets its own parts go */
+html.plaza-hold #world-loader.plaza.is-live.opening { animation: none !important; opacity: 1 !important; }
+@keyframes plaza-fade { to { opacity: 0; } }
+html.plaza-done #world-loader { display: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  #world-loader.plaza > .plaza-ground, #world-loader.plaza > .bar, #world-loader.plaza > .bar i { transition: none; }
+}

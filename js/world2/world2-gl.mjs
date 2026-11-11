@@ -20,7 +20,9 @@ export const engine = (path) => import('/fxn-3d/' + path);
 /* FXN Motion (fxn-3d apps/motion, merged 2026-11-09): the player and the films the site plays. Named here so the server's derived
    closure serves them (scripts/lib/fxn-3d-closure.mjs reads this file); loaded on demand only. */
 export const motionPlayer = () => import('/fxn-3d/apps/motion/player.mjs');
-export const FILMS = { portalGlitch: '/fxn-3d/world/site-films/portal-glitch.motion.fxn' };
+export const FILMS = { portalGlitch: '/fxn-3d/world/site-films/portal-glitch.motion.fxn', flightStreak: '/fxn-3d/world/site-films/flight-streak.motion.fxn' };
+/* the film sampler alone (no player, no GL): js/ark/stage.js reads flightStreak's curves through it to time the glide's streak */
+export const filmSampler = () => import('/fxn-3d/engine/sim/motion-sample.mjs');
 
 /* the alpha masks of a mark, built as home-descent.js builds them: the image as a white mask on a w x h canvas (inset by
    pad), the mask worn away by `wear` pixels, their difference (the lit edge), and, when asked, the edge blurred wide (the

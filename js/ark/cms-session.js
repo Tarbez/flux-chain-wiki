@@ -5,15 +5,26 @@
   var ui = window.ArkUI = window.ArkUI || {};
   var generation = 0, authenticatedKey = null, localDevelopment = false;
   var status = 'Open the CMS to check access.';
-  function hosted() { return location.protocol === 'https:' || /^(127\.0\.0\.1|localhost)$/.test(location.hostname); }
+  /* A HOST WITH NO SESSION SERVICE (2026-11-11: every page of the packed site asked /api/session and got 404, once per load).
+     Only the publishing host answers it (scripts/publish-host.mjs). Two rules keep the ask off a host that cannot answer:
+     1. A packed static site says so in its shell (scripts/pack-fxn-site.mjs writes <meta name="defxn-host" content="static">),
+        and this file then asks nothing: no request, so no 404 line in the console.
+     2. Any other host that answers 404 is asked once per tab: the answer is kept in sessionStorage and the next pages do not ask.
+     The session itself is unchanged on a host that has the service. */
+  var NONE = 'defxn.no-session-service', NO_SERVICE = 'This host has no CMS session service. Open the CMS on the host that publishes this site.';
+  var staticHost = !!document.querySelector('meta[name="defxn-host"][content="static"]');
+  function none() { try { return sessionStorage.getItem(NONE) === '1'; } catch (e) { return false; } }
+  function hosted() { return !staticHost && !none() && (location.protocol === 'https:' || /^(127\.0\.0\.1|localhost)$/.test(location.hostname)); }
   async function request(path, body) {
     var response = await fetch(path, body === undefined ? {} : { method: 'POST', headers: {'content-type':'application/json'}, body:JSON.stringify(body) });
+    if (response.status === 404) { try { sessionStorage.setItem(NONE, '1'); } catch (e) { /* a private window: the next page asks once more */ } throw new Error(NO_SERVICE); }
     var data = await response.json();
     if (!response.ok || !data.ok) throw new Error(data.error || 'CMS access could not be checked.');
     return data;
   }
   async function connect(who) {
     var attempt = ++generation;
+    if (staticHost || none()) status = NO_SERVICE;
     if (!hosted() || !who || who.rootVerified !== true || typeof who.sign !== 'function') return;
     status = 'Checking CMS access…';
     try {
